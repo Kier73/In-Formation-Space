@@ -116,6 +116,68 @@ class ActiveDistinctionSelectionTests(unittest.TestCase):
                 candidates=[ObservationCandidate("bad-output", 1.0, lambda state: [])],
             )
 
+    def test_exact_solver_prefers_strictly_lower_cost_below_epsilon(self):
+        states = ("target", "a", "b")
+        plan = select_attention_packet(
+            states,
+            target="target",
+            candidates=[
+                candidate("slightly-cheaper", 2.0, {"target": 0, "a": 1, "b": 1}),
+                candidate("slightly-more-expensive", 2.0 + 1e-13, {"target": 0, "a": 1, "b": 1}),
+            ],
+        )
+        self.assertEqual(plan.selected_names, ("slightly-cheaper",))
+        self.assertEqual(plan.total_cost, 2.0)
+
+    def test_exact_solver_matches_brute_force_on_small_random_instances(self):
+        import random
+        import itertools
+
+        rng = random.Random(20261111)
+        for sample in range(40):
+            with self.subTest(sample=sample):
+                states = ("target",) + tuple(f"s{i}" for i in range(5))
+                candidates = []
+                for candidate_index in range(6):
+                    values = {state: rng.randrange(3) for state in states}
+                    candidates.append(candidate(f"c{candidate_index}", rng.randint(1, 9), values))
+                plan = select_attention_packet(states, "target", candidates)
+                target_value_maps = []
+                for item in candidates:
+                    target_value_maps.append({state: item.observe(state) for state in states})
+                best = None
+                for mask in range(1 << len(candidates)):
+                    cost = 0.0
+                    separated = set()
+                    for index, item in enumerate(candidates):
+                        if mask & (1 << index):
+                            cost += float(item.cost)
+                            target_value = target_value_maps[index]["target"]
+                            separated.update(
+                                state for state in states[1:]
+                                if target_value_maps[index][state] != target_value
+                            )
+                    if len(separated) == len(states) - 1:
+                        if best is None or cost < best:
+                            best = cost
+                self.assertTrue(plan.exact)
+                if best is None:
+                    self.assertFalse(plan.complete)
+                else:
+                    self.assertTrue(plan.complete)
+                    self.assertEqual(plan.total_cost, best)
+
+    def test_invalid_solver_threshold_and_cost_values_are_rejected(self):
+        states = ("target", "a")
+        values = {"target": 0, "a": 1}
+        for threshold in (0, -1, 1.5, True):
+            with self.subTest(threshold=threshold):
+                with self.assertRaises(ValueError):
+                    select_attention_packet(states, "target", (), max_exact_alternatives=threshold)
+        for cost in (float("nan"), float("inf"), -1.0, 0.0, True, None, "not-a-cost"):
+            with self.subTest(cost=cost):
+                with self.assertRaises(ValueError):
+                    select_attention_packet(states, "target", [candidate("x", cost, values)])
 
 if __name__ == "__main__":
     unittest.main()
