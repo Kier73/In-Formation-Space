@@ -275,6 +275,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(self.sender_a.pending_sequences(), ())
         self.assertEqual(self.sender_b.pending_sequences(), ())
+        validate_path_record(path.to_dict(), schema)
 
     def test_real_ecpu_consensus_conflict_is_refusal_not_negative_measurement(self):
         logical_time = 31
