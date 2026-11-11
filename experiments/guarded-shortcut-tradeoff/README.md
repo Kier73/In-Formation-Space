@@ -85,7 +85,8 @@ Assuming nominal operation ($p_{\text{exit}} = 0$):
 - [run_tradeoff_v2.py](run_tradeoff_v2.py) — corrected quotient-aware check, median-based measurements, and explicit no-fault baseline.
 - [test_tradeoff_v2.py](test_tradeoff_v2.py) — deterministic tests for projection, fault checks, and collision limits.
 - [review-note.md](review-note.md) — mathematical review of the original residue guard and timing claims.
-- [results/tradeoff-encounter.json](results/tradeoff-encounter.json) — Captured encounter envelope containing complete benchmark output and SHA-256 integrity receipt.
+- [results/tradeoff-encounter.json](results/tradeoff-encounter.json) — original run, retained as historical evidence.
+- [results/tradeoff-v2-ci-run-11.json](results/tradeoff-v2-ci-run-11.json) — corrected CI benchmark output with run provenance and SHA-256 integrity receipt.
 - [results/analysis.md](results/analysis.md) — Detailed analysis and empirical verification report.
 
 ---
@@ -106,4 +107,4 @@ python -m unittest discover -s experiments/guarded-shortcut-tradeoff -p 'test_*.
 python experiments/guarded-shortcut-tradeoff/run_tradeoff_v2.py --json
 ```
 
-The original run is retained as historical evidence. Its raw-versus-shortcut recurrence results remain useful, but its secondary-modulus fault-detection claim must not be relied upon.
+The original run is retained as historical evidence. Its raw-versus-shortcut recurrence results remain useful, but its secondary-modulus fault-detection claim must not be relied upon. The corrected CI run found the first tested guarded-navigation win at 100 steps; at 50 steps it still lost. Thus the measured crossover is bracketed by 50 and 100 steps on the recorded Ubuntu/Python runner, not established as a universal threshold.
