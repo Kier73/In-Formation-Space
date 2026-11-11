@@ -32,6 +32,25 @@ def validate_path_record(document: Mapping[str, Any], schema: Mapping[str, Any])
         if following not in _ALLOWED_NEXT.get(current, set()):
             raise ValueError(f"invalid lifecycle transition: {current} -> {following}")
 
+    intent = document.get("intent", {})
+    authority_required = intent.get("authority_required", False)
+    application_required = intent.get("application_required", False)
+    if authority_required and "returned" in stages:
+        returned_index = stages.index("returned")
+        authority_indices = [
+            index for index, stage in enumerate(stages)
+            if stage in {"evidence_authorized", "evidence_refused"}
+        ]
+        if not authority_indices or authority_indices[0] <= returned_index:
+            raise ValueError("authority_required path must record evidence_authorized or evidence_refused after returned")
+        if "interpreted" in stages and stages.index("interpreted") <= authority_indices[0]:
+            raise ValueError("interpretation must follow evidence authorization")
+    if application_required and "interpreted" in stages:
+        if "applied" not in stages or stages.index("applied") <= stages.index("evidence_authorized"):
+            raise ValueError("application_required path must record applied after evidence_authorized and before interpretation")
+        if stages.index("interpreted") <= stages.index("applied"):
+            raise ValueError("interpretation must follow receiver application")
+
     final_stage = stages[-1]
     if document["status"] != final_stage:
         raise ValueError("record status must match the final event stage")
