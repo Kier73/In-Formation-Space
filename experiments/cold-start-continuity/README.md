@@ -51,7 +51,14 @@ Do not edit the original packet to make it agree with a recipient's response. If
 - [Run 2026-11-11-run-01](runs/2026-11-11-run-01/response.md) — Independent recipient cold-start handoff report (Gemini 3.8 Flash subagent).
   - [Evaluation](runs/2026-11-11-run-01/evaluation.md) — Review against the rubric in `reviewer-guide.md`.
   - [Independent review note](runs/2026-11-11-run-01/review-note.md) — Clarifies the open-context condition, the limits of the 35-ordering count, and follow-up test design.
+- [Run 2026-11-11-run-02-packet-only](runs/2026-11-11-run-02-packet-only/response.md) — Closed-book handoff report from a fresh general subagent with only the packet and template supplied inline; the parent session ran DeepSeek V4.1 Flash Free.
+  - [Run conditions](runs/2026-11-11-run-02-packet-only/conditions.md) — Exact prompt, material hashes, and the isolation boundary: material-limited, not sandbox-isolated.
+  - [Evaluation](runs/2026-11-11-run-02-packet-only/evaluation.md) — Review against the rubric; 12/12 within this run, with the fallback-design gap and residual exposure noted.
 
 ## Current status
 
-The first recorded handoff run has been executed and reviewed. It demonstrates useful recovery and analysis under open repository context. Because the recipient could inspect repository guidance, it does not yet establish packet-only cold-start continuity. The 35 valid linear extensions describe possible interleavings under the two-chain model; they are not equally likely outcomes. A packet-only isolated run remains the next clean test.
+Two handoff runs have been executed and reviewed. Run 01 demonstrates useful recovery and analysis under open repository context. Because its recipient could inspect repository guidance, it does not establish packet-only cold-start continuity.
+
+Run 02 supplies only the packet and template and instructs a closed-book analysis. Its recipient self-reports no tool use, and the response contains no reviewer-guide content, but the run was not sandboxed or instrumented. It strengthens the packet-only result without completing it.
+
+The 35 valid linear extensions in run 01 describe possible interleavings under the two-chain model; they are not equally likely outcomes. A fully isolated sandbox run — only the packet and template mounted, with tool access disabled or instrumented — remains the next clean test. An adversarial packet revision is a complementary test of whether a recipient catches an invitation to overclaim.
