@@ -70,6 +70,16 @@ For an inline value, integrity must include algorithm, canonicalization, and dig
 
 For payload.reference, the validator does not fetch the referenced artifact. An integrity declaration for a reference is reported as **not checked**, and the command exits non-zero when verification was requested. payload.digest is informational only in this implementation; it is never verified by this tool, even when integrity metadata is also present.
 
+## Safe use of the capture utility
+
+The cmd mode executes the supplied command string through a shell. Only run commands you trust; never pass an untrusted string into this mode. The utility records the command text, working directory, exit code, duration, platform metadata, stdout, and stderr.
+
+Captured output and context may contain credentials, access tokens, personal information, private file paths, environment details, proprietary data, or other material that should not be published. Review and redact the envelope before committing it to a public repository. Hashes detect changes to the captured bytes; they do not make sensitive content safe to disclose.
+
+The capture utility refuses extra context keys that would overwrite observed fields such as command, exit code, duration, platform, and working directory. Additional context is supplemental metadata and must not rewrite what the process actually reported.
+
+The command runner currently has no built-in timeout. Use it only for commands expected to finish under the time and resource limits of the environment in which it is run.
+
 ## One record, not one interpretation
 
 Do not put an unmarked conclusion inside the captured payload. Keep interpretations in separate notes or records that refer to the encounter ID.
