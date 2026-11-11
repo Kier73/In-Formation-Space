@@ -1,0 +1,84 @@
+{
+  "attempt_id": "example-attempt-01",
+  "intent": {
+    "candidate_name": "sensor.mode",
+    "query": "Did the mode become warm?",
+    "hypothesis_set_digest": "sha256:example-hypothesis-set",
+    "estimated_cost": 1.25,
+    "plan_ref": "plans/example-policy.json"
+  },
+  "status": "query_determined",
+  "terminal": true,
+  "events": [
+    {
+      "stage": "planned",
+      "actor": "planner",
+      "clock_value": null,
+      "clock_domain": null,
+      "evidence_ref": "plans/example-policy.json",
+      "details": {
+        "attempt_id": "example-attempt-01",
+        "candidate_name": "sensor.mode",
+        "query": "Did the mode become warm?",
+        "hypothesis_set_digest": "sha256:example-hypothesis-set",
+        "estimated_cost": 1.25,
+        "plan_ref": "plans/example-policy.json"
+      }
+    },
+    {
+      "stage": "dispatched",
+      "actor": "host-adapter",
+      "clock_value": "100",
+      "clock_domain": "host-clock",
+      "evidence_ref": "transport/send-01.json",
+      "details": {
+        "transport": "example"
+      }
+    },
+    {
+      "stage": "admitted",
+      "actor": "receiver-adapter",
+      "clock_value": "12",
+      "clock_domain": "receiver-clock",
+      "evidence_ref": "receiver/admission-01.json",
+      "details": {
+        "decision": "accepted"
+      }
+    },
+    {
+      "stage": "returned",
+      "actor": "sensor-adapter",
+      "clock_value": "14",
+      "clock_domain": "sensor-clock",
+      "evidence_ref": "encounters/reading-01.json",
+      "details": {
+        "encounter_id": "reading-01",
+        "payload_digest": "sha256:raw-reading",
+        "canonicalization": "utf8-raw-v1"
+      }
+    },
+    {
+      "stage": "interpreted",
+      "actor": "interpreter",
+      "clock_value": null,
+      "clock_domain": null,
+      "evidence_ref": "interpretations/reading-01.json",
+      "details": {
+        "method": "mode-parser-v1",
+        "interpreted_value": "warm"
+      }
+    },
+    {
+      "stage": "query_determined",
+      "actor": "verifier",
+      "clock_value": null,
+      "clock_domain": null,
+      "evidence_ref": "proofs/query-01.json",
+      "details": {
+        "query_result": true,
+        "hypothesis_set_digest": "sha256:remaining-hypotheses",
+        "basis": "interpretations/reading-01.json"
+      }
+    }
+  ]
+}
