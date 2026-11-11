@@ -24,7 +24,7 @@ The policy contains predicted outcome branches. If a real interpreted outcome ma
 
 ## Provenance and clocks
 
-Each request attempt receives its own ObservationPath. The policy execution result holds all completed and current attempt records. Encounter Envelope references and digests are retained, but this coordinator does not fetch or validate the referenced envelope. The integrated CI workflow validates the path ledger and tests the lifecycle transitions.
+Each request attempt receives its own ObservationPath. The policy execution result holds all completed and current attempt records. Encounter Envelope references and digests are retained, but this coordinator does not fetch or validate the referenced envelope. The companion observation-path schema and CLI validate the record structure and lifecycle consistency; the CI workflow runs those checks and the coordinator tests.
 
 Clock values remain labeled with their original clock domains; the coordinator performs no cross-clock alignment.
 
