@@ -37,9 +37,9 @@ Trial 04 and Trial 05 assume a static additive cost for selecting a packet. Tria
 
 Most importantly, the planners select **proposed** observations. They do not execute them. A plan becomes evidence only after the observations are performed and recorded with provenance, results, and relevant environmental context.
 
-## A useful next bridge
+## The next integration boundary
 
-The next integration opportunity is to connect these planners to an actual observer/transport path. That would require separating:
+The [Evidence-gated Observation Path](../../bridges/observation-path/README.md) now supplies an append-only lifecycle model that separates:
 
 1. predicted observation under a hypothesis;
 2. selected observation request and its cost model;
@@ -48,4 +48,4 @@ The next integration opportunity is to connect these planners to an actual obser
 5. interpretation and partition update;
 6. verification of whether the intended query is now resolved.
 
-That bridge should reuse real transport and evidence-receipt mechanisms where available rather than inventing a second execution or provenance system.
+The remaining work is to bind this experimental ledger to real observer/transport adapters, reusing their actual dispatch, admission, and Encounter Envelope receipts rather than inventing a second execution or provenance system.
