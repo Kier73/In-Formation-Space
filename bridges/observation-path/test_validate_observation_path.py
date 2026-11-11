@@ -305,6 +305,7 @@ class ObservationPathSchemaTests(unittest.TestCase):
                 "acknowledged_sequences": [
                     {"source": "source-a", "channel": "channel-a", "sequence": 3},
                 ],
+                "missing_event_sequences": [],
                 "ack_digest": "a" * 64,
             },
         })
