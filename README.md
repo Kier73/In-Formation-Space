@@ -55,8 +55,9 @@ Create a directory when there is real material for it. Do not create structure m
 
 These are optional investigations and living maps, not required workflows or settled standards:
 
-- [Encounter Envelope](formats/encounter-envelope/README.md) — preserve an observed event separately from later interpretations when work passes between independent contributors, with [validate_envelope.py](formats/encounter-envelope/validate_envelope.py) for local verification.
+- [Encounter Envelope](formats/encounter-envelope/README.md) — preserve an observed event separately from later interpretations when work passes between independent contributors, with [validate_envelope.py](formats/encounter-envelope/validate_envelope.py) for local validation and [capture_encounter.py](formats/encounter-envelope/capture_encounter.py) for subprocess/observation packaging.
 - [Cold-start continuity](experiments/cold-start-continuity/README.md) — investigate whether a new contributor can recover evidence, uncertainty, and useful next steps from a retained handoff packet without access to the original conversation. First empirical run recorded in [runs/2026-11-11-run-01](experiments/cold-start-continuity/runs/2026-11-11-run-01/).
+- [Guarded shortcut trade-off](experiments/guarded-shortcut-tradeoff/README.md) — empirical test of grounded navigation cost equations: measures the crossover horizon ($t^* \approx 28$) where descriptive shortcuts beat raw execution, with logarithmic guard scaling and redundant-residue fault detection.
 - [Conceptual Landscape](maps/conceptual-landscape.md) — orienting map and coordinate system connecting adjacent paradigms (E-CPU, Grounded Navigation, Invariants) with mathematical formulations of problem shapes.
 - [Open Research Directions](questions/open-research-directions.md) — unresolved questions on representation horizons, multi-observer causal reconstruction, coverage bounds, and evidence tiers.
 

@@ -16,17 +16,18 @@ from typing import Any, List, Optional, Tuple
 
 
 SCHEMA_FORMAT = "in-formation.encounter/0.1"
+SUPPORTED_DIGEST_ALGORITHMS = {"sha256"}
 
 
-def parse_iso8601(timestamp_str: str) -> bool:
-    """Check if string is a valid ISO 8601 / RFC 3339 date-time."""
-    if not isinstance(timestamp_str, str):
+def parse_rfc3339(timestamp_str: str) -> bool:
+    """Check if string is a valid RFC 3339 date-time with an explicit timezone."""
+    if not isinstance(timestamp_str, str) or not timestamp_str.strip():
         return False
-    # Replace trailing 'Z' with '+00:00' for datetime.fromisoformat compatibility
     normalized = timestamp_str.replace("Z", "+00:00") if timestamp_str.endswith("Z") else timestamp_str
     try:
-        datetime.datetime.fromisoformat(normalized)
-        return True
+        dt = datetime.datetime.fromisoformat(normalized)
+        # RFC 3339 requires an explicit timezone offset
+        return dt.tzinfo is not None
     except (ValueError, TypeError):
         return False
 
@@ -58,13 +59,17 @@ def validate_encounter(doc: Any) -> Tuple[bool, List[str]]:
 
     # observed_at check
     if "observed_at" in doc and doc["observed_at"] is not None:
-        if not parse_iso8601(doc["observed_at"]):
-            errors.append(f"Field 'observed_at' must be a valid ISO 8601 timestamp or null, got '{doc['observed_at']}'.")
+        if not parse_rfc3339(doc["observed_at"]):
+            errors.append(
+                f"Field 'observed_at' must be a valid RFC 3339 date-time with timezone or null, got '{doc['observed_at']}'."
+            )
 
     # recorded_at check
     if "recorded_at" in doc and doc["recorded_at"] is not None:
-        if not parse_iso8601(doc["recorded_at"]):
-            errors.append(f"Field 'recorded_at' must be a valid ISO 8601 timestamp or null, got '{doc['recorded_at']}'.")
+        if not parse_rfc3339(doc["recorded_at"]):
+            errors.append(
+                f"Field 'recorded_at' must be a valid RFC 3339 date-time with timezone or null, got '{doc['recorded_at']}'."
+            )
 
     # source check
     if "source" in doc:
@@ -117,22 +122,59 @@ def validate_encounter(doc: Any) -> Tuple[bool, List[str]]:
     return len(errors) == 0, errors
 
 
-def compute_payload_digest(doc: dict, algorithm: str = "sha256") -> Optional[str]:
-    """Compute digest of the payload value using canonical JSON serialization."""
-    if "payload" not in doc or not isinstance(doc["payload"], dict):
-        return None
-    payload = doc["payload"]
-    if "value" not in payload:
-        return None
-    val = payload["value"]
-    if isinstance(val, str):
-        payload_bytes = val.encode("utf-8")
-    else:
-        payload_bytes = json.dumps(val, sort_keys=True, separators=(",", ":")).encode("utf-8")
+def verify_digest(doc: dict, base_dir: Optional[Path] = None) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """Verify the digest of an encounter record.
 
-    if algorithm.lower() == "sha256":
-        return hashlib.sha256(payload_bytes).hexdigest()
-    return None
+    Returns:
+        (status_code, expected_digest, computed_digest)
+        status_code in: 'verified', 'mismatch', 'unsupported_algorithm', 'reference_missing', 'no_integrity'
+    """
+    if "integrity" not in doc or not isinstance(doc["integrity"], dict):
+        return "no_integrity", None, None
+
+    algo = doc["integrity"].get("algorithm")
+    expected = doc["integrity"].get("digest")
+    if not algo or not expected:
+        return "no_integrity", None, None
+
+    algo_norm = algo.lower()
+    if algo_norm not in SUPPORTED_DIGEST_ALGORITHMS:
+        return "unsupported_algorithm", expected, None
+
+    # Get target bytes: either from inline payload.value or external reference
+    payload = doc.get("payload", {})
+    payload_bytes: Optional[bytes] = None
+
+    if "value" in payload:
+        val = payload["value"]
+        if isinstance(val, str):
+            payload_bytes = val.encode("utf-8")
+        else:
+            payload_bytes = json.dumps(val, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    elif "reference" in payload:
+        ref_path_str = payload["reference"]
+        ref_path = Path(ref_path_str)
+        if not ref_path.is_absolute() and base_dir is not None:
+            ref_path = base_dir / ref_path
+
+        if ref_path.is_file():
+            try:
+                payload_bytes = ref_path.read_bytes()
+            except Exception:
+                return "reference_missing", expected, None
+        else:
+            return "reference_missing", expected, None
+
+    if payload_bytes is None:
+        return "reference_missing", expected, None
+
+    if algo_norm == "sha256":
+        computed = hashlib.sha256(payload_bytes).hexdigest()
+        if computed == expected:
+            return "verified", expected, computed
+        return "mismatch", expected, computed
+
+    return "unsupported_algorithm", expected, None
 
 
 def main() -> int:
@@ -159,16 +201,18 @@ def main() -> int:
         valid, errors = validate_encounter(data)
         if valid:
             status_msg = f"[PASS] {path_str} (id: {data.get('id')})"
-            # If integrity metadata is present, check digest
-            if "integrity" in data and isinstance(data["integrity"], dict):
-                algo = data["integrity"].get("algorithm")
-                expected = data["integrity"].get("digest")
-                if algo and expected:
-                    computed = compute_payload_digest(data, algo)
-                    if computed and computed == expected:
-                        status_msg += f" [Digest verified: {algo}:{computed[:8]}...]"
-                    elif computed and computed != expected:
-                        status_msg += f" [Digest MISMATCH: expected {expected[:8]}..., got {computed[:8]}...]"
+            digest_status, expected, computed = verify_digest(data, base_dir=p.parent)
+            if digest_status == "verified":
+                status_msg += f" [Digest verified: sha256:{computed[:8]}...]"
+            elif digest_status == "mismatch":
+                status_msg += f" [Digest MISMATCH: expected {expected[:8]}..., got {computed[:8]}...]"
+                overall_pass = False
+            elif digest_status == "unsupported_algorithm":
+                algo = data.get("integrity", {}).get("algorithm")
+                status_msg += f" [Digest unchecked: unsupported algorithm '{algo}']"
+            elif digest_status == "reference_missing":
+                ref = data.get("payload", {}).get("reference")
+                status_msg += f" [Digest unchecked: referenced payload '{ref}' not found locally]"
             print(status_msg)
         else:
             print(f"[FAIL] {path_str}:")
