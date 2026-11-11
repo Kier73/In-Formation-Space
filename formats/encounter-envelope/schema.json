@@ -8,8 +8,8 @@
   "properties": {
     "format": {"const": "in-formation.encounter/0.1"},
     "id": {"type": "string", "minLength": 1, "pattern": "\\S"},
-    "observed_at": {"type": ["string", "null"], "format": "date-time"},
-    "recorded_at": {"type": ["string", "null"], "format": "date-time"},
+    "observed_at": {"type": ["string", "null"], "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}[Tt]\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:[Zz]|[+-]\\d{2}:\\d{2})$"},
+    "recorded_at": {"type": ["string", "null"], "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}[Tt]\\d{2}:\\d{2}:[0-5]\\d(?:\\.\\d+)?(?:[Zz]|[+-]\\d{2}:\\d{2})$"},
     "source": {
       "type": "object",
       "required": ["kind"],
