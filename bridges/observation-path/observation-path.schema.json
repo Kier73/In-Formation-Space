@@ -105,28 +105,6 @@
               "application_required"
             ]
           }
-        },
-        {
-          "if": {
-            "properties": {
-              "sender_ack_required": {
-                "const": true
-              }
-            },
-            "required": [
-              "sender_ack_required"
-            ]
-          },
-          "then": {
-            "properties": {
-              "application_required": {
-                "const": true
-              }
-            },
-            "required": [
-              "application_required"
-            ]
-          }
         }
       ]
     },
