@@ -4,6 +4,8 @@
 **Date:** 2026-11-11  
 **Lineage:** Synthesized from repository foundations, adjacent project architectures (E-CPU, Virtual-Ground-Interpreter), and grounded navigation theory.
 
+**Interpretation note:** The equations and diagrams are exploratory models. Read them alongside [Mathematical Cautions](mathematical-cautions.md), which records conditional-independence, entropy, verification, and probability assumptions without discarding the original formulations.
+
 ---
 
 ## 1. The Shape of In-Formation-Space
