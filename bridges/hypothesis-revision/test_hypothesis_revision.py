@@ -214,6 +214,7 @@ class HypothesisRevisionLedgerTests(unittest.TestCase):
         )
         self.assertEqual(candidate.source_attempt_id, "query-01:0001")
         self.assertEqual(candidate.encounter_ref, "encounters/unexpected.json")
+        self.assertEqual(candidate.source_encounter_id, "unexpected-01")
         self.assertEqual(candidate.interpretation_ref, "interpretations/unexpected.json")
         self.assertEqual(candidate.source_payload_digest, "sha256:unexpected-payload")
         self.assertEqual(candidate.source_canonicalization, "utf8-raw-v1")
