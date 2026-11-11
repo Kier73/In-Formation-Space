@@ -117,3 +117,4 @@ A provisional model is developed in [From Description to Realization](../experim
 3. **How should underspecification be exposed when many different artifacts satisfy the same request?**
 4. **Can independent constructions reveal a shared invariant or a new representation that neither contributor specified in advance?**
 5. **What witness separates a generated candidate from a result that is actually operational or externally realized?**
+6. **Can an observation packet resolve a requested property without reconstructing the entire hidden state?** Trials 04 and 05 explore target-state isolation and query-directed hypothesis separation as different weighted set-cover problems. When is question-directed attention cheaper, and which ambiguities remain unresolvable under the available observation family?
