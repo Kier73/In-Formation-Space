@@ -101,6 +101,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             plan_ref=f"plans/timing-{logical_time}.json",
             authority_required=True,
             application_required=True,
+            sender_ack_required=True,
         ))
         return path
 
@@ -259,14 +260,21 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             restored.vm.scheduler.tasks[self.pid].backend.read_register("gated_symbol"),
             3,
         )
+        acknowledgement = self.adapter.record_sender_acknowledgements(
+            path,
+            "timing",
+            logical_time,
+            {"A": self.sender_a, "B": self.sender_b},
+            acknowledgement_ref=str(self.root / "sender-acks-30.json"),
+        )
+        self.assertEqual(path.status, "sender_acknowledged")
+        self.assertEqual(acknowledgement.acknowledged_sources, ("A", "B"))
         self.assertEqual(
-            self.coordinator.process_acks({"A": self.sender_a, "B": self.sender_b}),
-            {"A": (1,), "B": (1,)},
+            set(acknowledgement.expected_event_sequences),
+            {("A", "gate-A", 1), ("B", "gate-B", 1)},
         )
         self.assertEqual(self.sender_a.pending_sequences(), ())
         self.assertEqual(self.sender_b.pending_sequences(), ())
-        # The path stops at receiver application: sender-side ACK processing is separate.
-        self.assertEqual(path.status, "applied")
 
     def test_real_ecpu_consensus_conflict_is_refusal_not_negative_measurement(self):
         logical_time = 31
