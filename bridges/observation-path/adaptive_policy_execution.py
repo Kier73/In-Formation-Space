@@ -379,7 +379,8 @@ class AdaptivePolicyExecution:
         path = self._current_path()
         required_stage = (
             "applied" if self._receiver_application_required
-            else "evidence_authorized" if self._evidence_authority_required
+            else "evidence_authorized"
+            if self._evidence_authority_required or self._status == "evidence_authorized"
             else "returned"
         )
         if self._status != required_stage:
@@ -484,7 +485,8 @@ class AdaptivePolicyExecution:
         path = self._current_path()
         required_stage = (
             "applied" if self._receiver_application_required
-            else "evidence_authorized" if self._evidence_authority_required
+            else "evidence_authorized"
+            if self._evidence_authority_required or self._status == "evidence_authorized"
             else "returned"
         )
         if self._status != required_stage:
