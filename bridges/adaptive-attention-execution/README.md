@@ -14,13 +14,13 @@ Trial 06 constructs a decision tree from predicted observation outcomes. The obs
 3. The receiver adapter calls mark_admitted() only after admission occurs.
 4. The sensor or transport adapter calls record_return() with an Encounter Envelope reference, payload digest, and canonicalization.
 5. The interpreter calls interpret() with the interpreted branch value and an interpretation artifact reference.
-6. The coordinator either resolves the query, records continued and exposes the next planned observation, or stops as unresolved model mismatch.
+6. The coordinator either resolves the query, records continued and exposes the next planned observation, or stops as unresolved model mismatch. When sender ACK confirmation is required, the path must first reach `sender_acknowledged`; partial ACK rounds remain `sender_ack_progress` and can be retried.
 
 No transport or sensor operation is executed by this package. It only records claims after an external adapter reports them.
 
 ## E-CPU adapter boundary
 
-The [E-CPU adapter map](ecpu-adapter-map.md) maps this coordinator and the evidence-path stages to existing E-CPU interfaces. The [dependency-injected adapter](../observation-path/ecpu_gated_adapter.py) verifies quorum finalization and the receiver's durable VM commit from E-CPU snapshots and register readback. It does not mark sender-side ACK processing complete. No E-CPU runtime code is imported or modified by this bridge.
+The [E-CPU adapter map](ecpu-adapter-map.md) maps this coordinator and the evidence-path stages to existing E-CPU interfaces. The [dependency-injected adapter](../observation-path/ecpu_gated_adapter.py) verifies quorum finalization, receiver's durable VM commit, and sender-side ACK processing from E-CPU snapshots, pending sequences, and register readback. Partial sender ACK results remain explicit progress until all event sequences are cleared. No E-CPU runtime code is imported or modified by this bridge.
 
 ## Model-mismatch rule
 
