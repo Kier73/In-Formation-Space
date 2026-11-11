@@ -161,6 +161,66 @@ class AdaptivePolicyExecutionTests(unittest.TestCase):
                 hypothesis_digest=digest,
             )
 
+    def test_dispatch_failure_is_terminal_and_not_a_sensor_value(self):
+        self.execution.begin_attempt()
+        self.execution.stop_dispatch_failed("host", "connection unavailable")
+        result = self.execution.result()
+        self.assertEqual(result.status, "dispatch_failed")
+        self.assertIsNone(result.query_result)
+        self.assertEqual(result.attempts[0]["events"][-1]["details"]["reason"], "connection unavailable")
+
+    def test_unadmitted_return_is_preserved_but_never_interpreted(self):
+        self.execution.begin_attempt()
+        self.execution.mark_dispatched("host", "transport/send.json")
+        result = self.execution.record_unadmitted_return(
+            "transport",
+            evidence_ref="encounters/unadmitted.json",
+            encounter_id="unadmitted-01",
+            payload_digest="sha256:unadmitted",
+            canonicalization="utf8-raw-v1",
+        )
+        self.assertEqual(result.status, "returned_unadmitted")
+        self.assertEqual(result.attempts[0]["events"][-1]["stage"], "returned_unadmitted")
+        with self.assertRaises(ValueError):
+            self.execution.interpret("same", actor="interpreter", method="v1", evidence_ref="interpretation.json")
+
+    def test_interpreter_failure_keeps_raw_return_reference(self):
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.execution.record_return(
+            "sensor", evidence_ref="encounters/raw.json", encounter_id="raw-01",
+            payload_digest="sha256:raw", canonicalization="utf8-raw-v1",
+        )
+        result = self.execution.stop_interpretation_failed("interpreter", "invalid encoding")
+        self.assertEqual(result.status, "interpretation_failed")
+        stages = [event["stage"] for event in result.attempts[0]["events"]]
+        self.assertIn("returned", stages)
+        self.assertEqual(stages[-1], "interpretation_failed")
+
+    def test_policy_reference_to_missing_next_observation_stops_unresolved(self):
+        terminal = Node(("A",), True, None, ())
+        missing = Node(("B", "C"), None, "not-installed", (("yes", terminal),))
+        root = Node(("A", "B", "C"), None, "left-refinement", (("continue", missing),))
+        self.execution = AdaptivePolicyExecution(
+            Plan(True, root), candidate_set(), attempt_id_prefix="query-missing",
+            query_label="q", hypothesis_digest=digest,
+        )
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        result = self.return_value("continue", "missing-next")
+        self.assertEqual(result.status, "unresolved_missing_candidate")
+        self.assertEqual(result.attempts[0]["status"], "unresolved")
+
+    def test_pre_resolved_root_needs_no_transport_attempt(self):
+        self.execution = AdaptivePolicyExecution(
+            Plan(True, Node(("A", "B"), False, None, ())),
+            candidate_set(), attempt_id_prefix="query-trivial",
+            query_label="q", hypothesis_digest=digest,
+        )
+        result = self.execution.result()
+        self.assertEqual(result.status, "resolved")
+        self.assertFalse(result.query_result)
+        self.assertEqual(result.attempts, ())
 
 if __name__ == "__main__":
     unittest.main()
