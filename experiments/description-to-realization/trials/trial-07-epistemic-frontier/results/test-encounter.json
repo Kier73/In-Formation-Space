@@ -1,0 +1,229 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:d2r-epistemic-frontier:trial-07",
+  "observed_at": "2026-11-11T22:11:10.905594+00:00",
+  "recorded_at": "2026-11-11T22:11:10.905602+00:00",
+  "source": {
+    "kind": "script",
+    "name": "epistemic_frontier.py",
+    "reference": "experiments/description-to-realization/trials/trial-07-epistemic-frontier/epistemic_frontier.py",
+    "capture_method": "direct-output",
+    "author": "Antigravity VI (Claude Sonnet)"
+  },
+  "context": {
+    "test_count": 22,
+    "test_status": "pass",
+    "python_version": "3.x",
+    "repo_commit": "HEAD"
+  },
+  "payload": {
+    "value": {
+      "root": ".",
+      "generated_at": "2026-11-11T22:11:10+00:00",
+      "envelope_count": 14,
+      "causal_edge_count": 0,
+      "frontier_size": 14,
+      "has_cycle": false,
+      "cycle_witness": null,
+      "external_target_count": 0,
+      "external_targets": [],
+      "frontier_ids": [
+        "bridge:adaptive-attention-execution:integrated-ci-run-112",
+        "example:tool-observation:0001",
+        "exp:bridge-obs-equiv:2026-11-11",
+        "exp:d2r-active-distinction-selection:trial-04:ci-run-44",
+        "exp:d2r-adaptive-attention:trial-06",
+        "exp:d2r-distinction-refinement:trial-03:ci-run-25",
+        "exp:d2r-finite-description:trial-02:ci-run-18",
+        "exp:d2r-poset:trial-01",
+        "exp:d2r-query-directed-attention:trial-05:ci-run-54",
+        "exp:guarded-shortcut-v2:github-actions-run-43101725235",
+        "exp:guarded-shortcut:2026-11-11",
+        "exp:logistic-coverage:2026-11-11",
+        "exp:logistic-map-coverage-v2:ci-run-31",
+        "test:cmd:002"
+      ],
+      "verification_ratio": 0.7857142857142857,
+      "verified_count": 11,
+      "unverified_count": 1,
+      "not_checkable_count": 2,
+      "nodes": [
+        {
+          "id": "bridge:adaptive-attention-execution:integrated-ci-run-112",
+          "path": "bridges/observation-path/results/ci-run-112.json",
+          "observed_at": "2026-11-11T22:05:31.608087Z",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": false,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "example:tool-observation:0001",
+          "path": "formats/encounter-envelope/examples/tool-observation.json",
+          "observed_at": null,
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": null,
+          "integrity_canon": null,
+          "digest_verified": null,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:bridge-obs-equiv:2026-11-11",
+          "path": "bridges/observation-equivalence/results/bridge-encounter.json",
+          "observed_at": "2026-11-11T21:25:47.410106+00:00",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:d2r-active-distinction-selection:trial-04:ci-run-44",
+          "path": "experiments/description-to-realization/trials/trial-04-active-distinction-selection/results/test-encounter.json",
+          "observed_at": "2026-11-11T21:35:14.615653Z",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:d2r-adaptive-attention:trial-06",
+          "path": "experiments/description-to-realization/trials/trial-06-adaptive-attention-policy/results/test-encounter.json",
+          "observed_at": "2026-11-11T21:47:17.262355+00:00",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:d2r-distinction-refinement:trial-03:ci-run-25",
+          "path": "experiments/description-to-realization/trials/trial-03-distinction-refinement/results/test-encounter.json",
+          "observed_at": "2026-11-11T21:27:19.3146398Z",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:d2r-finite-description:trial-02:ci-run-18",
+          "path": "experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/results/test-encounter.json",
+          "observed_at": "2026-11-11T21:22:53.317965Z",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": null,
+          "integrity_canon": null,
+          "digest_verified": null,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:d2r-poset:trial-01",
+          "path": "experiments/description-to-realization/trials/trial-01-poset-interleaver/results/test-encounter.json",
+          "observed_at": "2026-11-11T21:02:42.552283+00:00",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:d2r-query-directed-attention:trial-05:ci-run-54",
+          "path": "experiments/description-to-realization/trials/trial-05-query-directed-attention/results/test-encounter.json",
+          "observed_at": "2026-11-11T21:40:30.252159Z",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:guarded-shortcut-v2:github-actions-run-43101725235",
+          "path": "experiments/guarded-shortcut-tradeoff/results/tradeoff-v2-ci-run-11.json",
+          "observed_at": "2026-11-11T21:17:23.943893Z",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:guarded-shortcut:2026-11-11",
+          "path": "experiments/guarded-shortcut-tradeoff/results/tradeoff-encounter.json",
+          "observed_at": "2026-11-11T21:02:48.648797+00:00",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:logistic-coverage:2026-11-11",
+          "path": "experiments/logistic-map-coverage/results/coverage-encounter.json",
+          "observed_at": "2026-11-11T21:17:51.212034+00:00",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "exp:logistic-map-coverage-v2:ci-run-31",
+          "path": "experiments/logistic-map-coverage/results/coverage-v2-ci-run-31.json",
+          "observed_at": "2026-11-11T21:28:39.393794Z",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        },
+        {
+          "id": "test:cmd:002",
+          "path": "formats/encounter-envelope/examples/captured-cmd.json",
+          "observed_at": "2026-11-11T21:02:50.936784+00:00",
+          "has_inline_value": true,
+          "has_reference": false,
+          "integrity_algo": "sha256",
+          "integrity_canon": "json-sort-keys-utf8-v1",
+          "digest_verified": true,
+          "relation_count": 0,
+          "on_frontier": true
+        }
+      ],
+      "finding": "All 14 envelopes are on the epistemic frontier (causal_edge_count=0). No contributor has yet declared causal relations between envelopes. One envelope (bridge:adaptive-attention-execution:integrated-ci-run-112) has a digest mismatch (stated digest does not match recomputed digest from payload). 11 envelopes are verified, 1 mismatched, 2 not checkable."
+    }
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "canonicalization": "json-sort-keys-utf8-v1",
+    "digest": "dd46650a149730048d98095cce4693d8d2081cad12e119a212ec9d622dace9e7"
+  },
+  "relations": []
+}

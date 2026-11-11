@@ -11,6 +11,7 @@ on:
       - "experiments/description-to-realization/trials/trial-04-active-distinction-selection/**"
       - "experiments/description-to-realization/trials/trial-05-query-directed-attention/**"
       - "experiments/description-to-realization/trials/trial-06-adaptive-attention-policy/**"
+      - "experiments/description-to-realization/trials/trial-07-epistemic-frontier/**"
       - "experiments/guarded-shortcut-tradeoff/**"
       - "experiments/logistic-map-coverage/**"
       - ".github/workflows/encounter-envelope-tests.yml"
@@ -24,6 +25,7 @@ on:
       - "experiments/description-to-realization/trials/trial-04-active-distinction-selection/**"
       - "experiments/description-to-realization/trials/trial-05-query-directed-attention/**"
       - "experiments/description-to-realization/trials/trial-06-adaptive-attention-policy/**"
+      - "experiments/description-to-realization/trials/trial-07-epistemic-frontier/**"
       - "experiments/guarded-shortcut-tradeoff/**"
       - "experiments/logistic-map-coverage/**"
       - ".github/workflows/encounter-envelope-tests.yml"
@@ -94,6 +96,10 @@ jobs:
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-05-query-directed-attention -p "test_*.py" -v
       - name: Run adaptive attention policy tests
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-06-adaptive-attention-policy -p "test_*.py" -v
+      - name: Run epistemic frontier tests
+        run: python -m unittest discover -s experiments/description-to-realization/trials/trial-07-epistemic-frontier -p "test_*.py" -v
+      - name: Validate epistemic frontier encounter
+        run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-07-epistemic-frontier/results/test-encounter.json
       - name: Run corrected guarded-shortcut tests
         run: python -m unittest discover -s experiments/guarded-shortcut-tradeoff -p "test_*.py" -v
       - name: Execute corrected guarded-shortcut benchmark

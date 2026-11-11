@@ -205,6 +205,17 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 
 [Attention and Distinction Landscape](attention-landscape.md) compares Trials 03–06 and explains when partition refinement, target isolation, query resolution, or adaptive policies are appropriate.
 
+### Trial 07: Epistemic frontier mapping
+
+[Trial 07](trials/trial-07-epistemic-frontier/construction-report.md) scans all encounter envelopes in the repository and reports the epistemic frontier — the antichain $\mathcal{F}(G) = \{ v \in V : \nexists\, w \in V,\, v \prec w \}$ of nodes with no declared causal successors. It also computes a verification ratio $\rho$ over frontier payloads, distinguishing verified, mismatched, and uncheckable nodes.
+
+**Finding:** At the time of construction, all 14 envelopes occupy the frontier (`causal_edge_count=0`). No contributor has yet declared causal relations between envelopes. One envelope carries a digest that does not match its recomputed payload value; this is recorded without silent correction. $\rho = 0.786$ (11 verified of 14 frontier nodes).
+
+- [Construction report](trials/trial-07-epistemic-frontier/construction-report.md)
+- [Implementation](trials/trial-07-epistemic-frontier/epistemic_frontier.py)
+- [Tests](trials/trial-07-epistemic-frontier/test_epistemic_frontier.py)
+- [Encounter receipt](trials/trial-07-epistemic-frontier/results/test-encounter.json)
+
 ## 7. Open questions
 
 1. Which parts of a description are sufficient to make a construction reproducible across different model families and tool environments?
