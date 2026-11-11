@@ -137,8 +137,8 @@ def analyze_temporal_binding(binding_document: Mapping[str, Any]) -> dict[str, A
     for index, event in enumerate(events):
         if not isinstance(event, Mapping):
             raise ValueError("temporal event binding must be a mapping")
-        if isinstance(event.get("index"), bool) or event.get("index") != index:
-            raise ValueError("temporal event binding indices must be contiguous and ordered")
+        if isinstance(event.get("index"), bool) or not isinstance(event.get("index"), int) or event.get("index") != index:
+            raise ValueError("temporal event binding indices must be strict integers, contiguous, and ordered")
         stage = _nonempty(event.get("stage"), f"event_bindings[{index}].stage")
         actor_id = _nonempty(
             event.get("temporal_frame_actor_id"),
@@ -262,12 +262,17 @@ def analyze_temporal_binding(binding_document: Mapping[str, Any]) -> dict[str, A
     }
 
 
-def validate_temporal_analysis(report: Mapping[str, Any]) -> dict[str, Any]:
-    """Recompute and verify a temporal report without trusting its stored digest."""
+def validate_temporal_analysis(
+    report: Mapping[str, Any],
+    binding_document: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Rebuild a report from its source binding and require exact equality.
+
+    The report's own digest is checked, but digest equality alone is not
+    treated as evidence that the report was correctly derived.
+    """
     if not isinstance(report, Mapping):
         raise TypeError("temporal analysis report must be a mapping")
-    # Reconstructing from the source binding is required for semantic validation.
-    # This helper performs only an envelope/digest check for an already-created report.
     supplied = dict(report)
     digest = supplied.pop("analysis_digest", None)
     if not isinstance(digest, str) or not _SHA256.fullmatch(digest):
@@ -276,4 +281,7 @@ def validate_temporal_analysis(report: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("temporal analysis digest does not match its contents")
     if supplied.get("schema") != _ANALYSIS_SCHEMA:
         raise ValueError("unsupported temporal analysis schema")
+    rebuilt = analyze_temporal_binding(binding_document)
+    if rebuilt != dict(report):
+        raise ValueError("temporal analysis differs from independent reconstruction from its binding")
     return dict(report)
