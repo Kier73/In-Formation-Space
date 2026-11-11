@@ -156,6 +156,14 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Implementation](trials/trial-02-finite-description-unbounded-space/finite_description.py)
 - [Tests](trials/trial-02-finite-description-unbounded-space/test_finite_description.py)
 
+### Trial 03: Distinction refinement
+
+[Trial 03](trials/trial-03-distinction-refinement/README.md) turns the phrase “new information adds a dimension” into a finite partition-refinement test. It distinguishes genuinely new observations from features determined by the current representation, and reports both newly separated state pairs and conditional entropy under explicit weights.
+
+- [Construction brief](trials/trial-03-distinction-refinement/brief.md)
+- [Implementation](trials/trial-03-distinction-refinement/distinction_space.py)
+- [Tests](trials/trial-03-distinction-refinement/test_distinction_space.py)
+
 ## 7. Open questions
 
 1. Which parts of a description are sufficient to make a construction reproducible across different model families and tool environments?
