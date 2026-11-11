@@ -64,7 +64,7 @@ The validator currently implements:
 - canonicalization: utf8-raw-v1 — for a string payload, hash its UTF-8 bytes exactly, without JSON quotes.
 - canonicalization: json-sort-keys-utf8-v1 — serialize the inline JSON value with sorted object keys, compact separators, UTF-8 characters preserved, and non-finite numbers rejected; then hash those bytes.
 
-The second mode is a small, explicitly named local contract. It is **not** a claim of RFC 8785/JCS compatibility or universal cross-language canonical JSON. Future implementations should reproduce these exact rules or introduce a new canonicalization identifier.
+The second mode is a small, explicitly named Python serialization contract. It uses Python's `json.dumps` with `sort_keys=True`, `separators=(',', ':')`, `ensure_ascii=False`, and `allow_nan=False`, then UTF-8 encodes the resulting text. JSON numeric representations remain type-sensitive: for example, a payload number written as `4` hashes differently from `4.0`. Floating-point formatting and exponent notation are those emitted by the Python JSON encoder; another language must not assume its default JSON serializer will produce identical bytes. This is **not** a claim of RFC 8785/JCS compatibility or universal cross-language canonical JSON. For cross-language interoperability, use the same Python encoder or define a new canonicalization identifier with a formally specified algorithm such as JCS.
 
 For an inline value, integrity must include algorithm, canonicalization, and digest for the validator to verify the claim. Unsupported or missing settings are reported as unverified, not silently accepted. A mismatch is reported explicitly.
 
