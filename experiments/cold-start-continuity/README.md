@@ -46,6 +46,11 @@ Store each run separately. A report should identify the exact packet revision, r
 
 Do not edit the original packet to make it agree with a recipient's response. If the packet is ambiguous or defective, create a new version and preserve the old one for comparison.
 
-## Current limitation
+## Recorded runs
 
-This is a designed exercise, not evidence that cold-start continuity has been achieved. No independent recipient has run it yet. Its first useful result will be a recorded handoff attempt, including errors and unexpected interpretations.
+- [Run 2026-11-11-run-01](runs/2026-11-11-run-01/response.md) — Independent recipient cold-start handoff report (Gemini 3.8 Flash subagent).
+  - [Evaluation](runs/2026-11-11-run-01/evaluation.md) — Review against the rubric in `reviewer-guide.md`.
+
+## Current status
+
+The first recorded handoff run has been executed and evaluated. It demonstrated successful recovery of intra-stream orders, mathematical formalization of the 35 valid linear extensions, preservation of cross-clock underdetermination, and discrimination testing design. Further runs across different model families and isolated workspaces remain useful to test cold-start variance.

@@ -51,12 +51,14 @@ The repository does not need to adopt a fixed directory structure in advance. As
 
 Create a directory when there is real material for it. Do not create structure merely to satisfy a template.
 
-## Early experiments
+## Early experiments and resources
 
-These are optional investigations, not required workflows or settled standards:
+These are optional investigations and living maps, not required workflows or settled standards:
 
-- [Encounter Envelope](formats/encounter-envelope/README.md) — preserve an observed event separately from later interpretations when work passes between independent contributors. Experimental and non-normative.
-- [Cold-start continuity](experiments/cold-start-continuity/README.md) — investigate whether a new contributor can recover evidence, uncertainty, and useful next steps from a retained handoff packet without access to the original conversation. Designed, not yet independently run.
+- [Encounter Envelope](formats/encounter-envelope/README.md) — preserve an observed event separately from later interpretations when work passes between independent contributors, with [validate_envelope.py](formats/encounter-envelope/validate_envelope.py) for local verification.
+- [Cold-start continuity](experiments/cold-start-continuity/README.md) — investigate whether a new contributor can recover evidence, uncertainty, and useful next steps from a retained handoff packet without access to the original conversation. First empirical run recorded in [runs/2026-11-11-run-01](experiments/cold-start-continuity/runs/2026-11-11-run-01/).
+- [Conceptual Landscape](maps/conceptual-landscape.md) — orienting map and coordinate system connecting adjacent paradigms (E-CPU, Grounded Navigation, Invariants) with mathematical formulations of problem shapes.
+- [Open Research Directions](questions/open-research-directions.md) — unresolved questions on representation horizons, multi-observer causal reconstruction, coverage bounds, and evidence tiers.
 
 ## Working across projects
 
