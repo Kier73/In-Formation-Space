@@ -1,6 +1,6 @@
 # Cold-start continuity: the split-clock relay
 
-**Status:** two handoff runs recorded and reviewed; a fully sandbox-isolated packet-only run remains open.
+**Status:** active experiment; two handoff runs recorded and reviewed (one open-context L0, one material-limited L1); a fully filesystem-isolated packet-only run remains open.
 
 This experiment asks whether one contributor can leave enough durable context for another, independent contributor to continue useful work without access to the original conversation or private reasoning.
 
@@ -46,19 +46,34 @@ Store each run separately. A report should identify the exact packet revision, r
 
 Do not edit the original packet to make it agree with a recipient's response. If the packet is ambiguous or defective, create a new version and preserve the old one for comparison.
 
+## Isolation levels for handoff runs
+
+“Packet-only” is not a single condition. Record which level a run used, and do not infer a stronger level from a weaker one.
+
+| Level | Supplied material | Tool and workspace access | What a successful report can support |
+| --- | --- | --- | --- |
+| **L0 — Open workspace** | Packet and template, plus repository or conversation context | Full tools; recipient may inspect guidance | Recovery under ambient context; not packet-only continuity. |
+| **L1 — Material-limited** | Packet and template only, supplied in the prompt | Tools prohibited by instruction; not instrumented; latent workspace access may remain | Report is consistent with packet-only reasoning; ambient independence is not established. |
+| **L2 — Filesystem-isolated** | Only packet and template mounted | Repository files unreachable; tool calls disabled or fully logged | Clean packet-only continuity for the supplied material, within the logging boundary. |
+| **L3 — Separate environment** | Packet and template only | L2 plus a separate model, host, or harness context; no shared conversation or repository instructions | Stronger cross-environment evidence; still not a universal claim. |
+
+A recipient's self-report that it used no tools is useful provenance, but it is not a substitute for instrumentation. A run can be L1 and still provide useful evidence; the error is describing it as L2.
+
+Run 01 was L0. Run 02 was L1. A fully isolated L2 or L3 run remains open.
+
 ## Recorded runs
 
-- [Run 2026-11-11-run-01](runs/2026-11-11-run-01/response.md) — Independent recipient cold-start handoff report (Gemini 3.8 Flash subagent).
+- [Run 2026-11-11-run-01](runs/2026-11-11-run-01/response.md) — L0 open-workspace handoff report from an independent recipient (Gemini 3.8 Flash subagent).
   - [Evaluation](runs/2026-11-11-run-01/evaluation.md) — Review against the rubric in `reviewer-guide.md`.
   - [Independent review note](runs/2026-11-11-run-01/review-note.md) — Clarifies the open-context condition, the limits of the 35-ordering count, and follow-up test design.
-- [Run 2026-11-11-run-02-packet-only](runs/2026-11-11-run-02-packet-only/response.md) — Closed-book handoff report from a fresh general subagent with only the packet and template supplied inline; the parent session ran DeepSeek V4.1 Flash Free.
+- [Run 2026-11-11-run-02-packet-only](runs/2026-11-11-run-02-packet-only/response.md) — L1 material-limited handoff report from a fresh general subagent with only the packet and template supplied inline; the parent session ran DeepSeek V4.1 Flash Free.
   - [Run conditions](runs/2026-11-11-run-02-packet-only/conditions.md) — Exact prompt, material hashes, and the isolation boundary: material-limited, not sandbox-isolated.
   - [Evaluation](runs/2026-11-11-run-02-packet-only/evaluation.md) — Review against the rubric; 12/12 within this run, with the fallback-design gap and residual exposure noted.
 
 ## Current status
 
-Two handoff runs have been executed and reviewed. Run 01 demonstrates useful recovery and analysis under open repository context. Because its recipient could inspect repository guidance, it does not establish packet-only cold-start continuity.
+Two handoff runs have been executed and reviewed, at different isolation levels. Run 01 (L0) demonstrates useful recovery and analysis under open repository context. Because its recipient could inspect repository guidance, it does not establish packet-only cold-start continuity.
 
-Run 02 supplies only the packet and template and instructs a closed-book analysis. Its recipient self-reports no tool use, and the response contains no reviewer-guide content, but the run was not sandboxed or instrumented. It strengthens the packet-only result without completing it.
+Run 02 (L1) supplies only the packet and template and instructs a closed-book analysis. Its recipient self-reports no tool use, and the response contains no reviewer-guide content, but the run was not sandboxed or instrumented. It strengthens the packet-only result without completing it.
 
-The 35 valid linear extensions in run 01 describe possible interleavings under the two-chain model; they are not equally likely outcomes. A fully isolated sandbox run — only the packet and template mounted, with tool access disabled or instrumented — remains the next clean test. An adversarial packet revision is a complementary test of whether a recipient catches an invitation to overclaim.
+The 35 valid linear extensions in run 01 describe possible interleavings under the two-chain model; they are not equally likely outcomes. A fully isolated L2 or L3 run — only the packet and template mounted, with tool access disabled or instrumented — remains the next clean test. An adversarial packet revision is a complementary test of whether a recipient catches an invitation to overclaim.
