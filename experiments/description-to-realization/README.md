@@ -172,6 +172,14 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Implementation](trials/trial-04-active-distinction-selection/attention_selection.py)
 - [Tests](trials/trial-04-active-distinction-selection/test_attention_selection.py)
 
+### Trial 05: Query-directed attention
+
+[Trial 05](trials/trial-05-query-directed-attention/README.md) generalizes active observation selection from identifying one target state to resolving a Boolean question over a set of remaining hypotheses. It chooses observations that separate every hypothesis pair on opposite sides of the query, without paying to distinguish hypotheses that agree on the question. A Poset example shows when other pairwise event-order measurements cannot resolve a queried cross-stream relation without a direct shared-clock comparison.
+
+- [Construction brief](trials/trial-05-query-directed-attention/brief.md)
+- [Implementation](trials/trial-05-query-directed-attention/query_attention.py)
+- [Tests](trials/trial-05-query-directed-attention/test_query_attention.py)
+
 ## 7. Open questions
 
 1. Which parts of a description are sufficient to make a construction reproducible across different model families and tool environments?
