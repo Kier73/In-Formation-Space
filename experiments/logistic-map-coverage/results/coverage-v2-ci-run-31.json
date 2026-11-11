@@ -1,0 +1,115 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:logistic-map-coverage-v2:ci-run-31",
+  "observed_at": "2026-11-11T21:28:39.393794Z",
+  "recorded_at": "2026-11-11T21:28:41Z",
+  "source": {
+    "kind": "github-actions-job-log",
+    "name": "Encounter envelope tests",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43103330173",
+    "capture_method": "scanner summary transcribed from successful CI job log"
+  },
+  "context": {
+    "workflow_run_id": 43103330173,
+    "job_id": 130800140798,
+    "commit": "a526f03925077fd450196016e80cd94e87e93f7e",
+    "command": "python experiments/logistic-map-coverage/scan_coverage_v2.py --samples 20000",
+    "exit_code": 0,
+    "runner": "ubuntu-latest",
+    "python": "3.11.18",
+    "elapsed_seconds": 6.37
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "experiment": "logistic-map-coverage-v2",
+      "domain": {
+        "r_min": 3.5,
+        "r_max": 4,
+        "measure": "normalized-lebesgue"
+      },
+      "grid_samples": 20000,
+      "max_period": 64,
+      "warmup_steps": 2000,
+      "initial_conditions": [
+        0.5,
+        0.123456789
+      ],
+      "tolerance": 1e-9,
+      "repeated_returns": 2,
+      "stability_margin": 0.000001,
+      "runtime_seconds": 6.37,
+      "candidate_window_count": 149,
+      "coverage_matrix": {
+        "delta=0.0002": {
+          "P<=2": 0,
+          "P<=4": 0.1123,
+          "P<=8": 0.1794,
+          "P<=16": 0.2002,
+          "P<=32": 0.2049,
+          "P<=64": 0.2049
+        },
+        "delta=0.0005": {
+          "P<=2": 0,
+          "P<=4": 0.1123,
+          "P<=8": 0.1765,
+          "P<=16": 0.1959,
+          "P<=32": 0.1974,
+          "P<=64": 0.1974
+        },
+        "delta=0.0010": {
+          "P<=2": 0,
+          "P<=4": 0.1109,
+          "P<=8": 0.1741,
+          "P<=16": 0.1908,
+          "P<=32": 0.1908,
+          "P<=64": 0.1908
+        },
+        "delta=0.0020": {
+          "P<=2": 0,
+          "P<=4": 0.1109,
+          "P<=8": 0.1741,
+          "P<=16": 0.182,
+          "P<=32": 0.182,
+          "P<=64": 0.182
+        },
+        "delta=0.0050": {
+          "P<=2": 0,
+          "P<=4": 0.1109,
+          "P<=8": 0.1611,
+          "P<=16": 0.1611,
+          "P<=32": 0.1611,
+          "P<=64": 0.1611
+        },
+        "delta=0.0100": {
+          "P<=2": 0,
+          "P<=4": 0.1109,
+          "P<=8": 0.1494,
+          "P<=16": 0.1494,
+          "P<=32": 0.1494,
+          "P<=64": 0.1494
+        }
+      },
+      "summary": {
+        "first_observed_plateau_period_budget_by_delta": {
+          "0.0002": 32,
+          "0.0005": 32,
+          "0.0010": 16,
+          "0.0020": 16,
+          "0.0050": 8,
+          "0.0100": 8
+        },
+        "interpretation": "finite-grid numerical candidate coverage; not certified parameter intervals"
+      }
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "c0dbf89b05e86baf034d613987e77ab66440397ceaddda1512002aae9f21b8cb",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  },
+  "extensions": {
+    "note": "The result records a finite numerical scan. It does not certify the existence or boundaries of stable periodic windows over continuous parameter intervals."
+  }
+}
