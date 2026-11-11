@@ -59,6 +59,31 @@ def validate_path_record(document: Mapping[str, Any], schema: Mapping[str, Any])
         if stages.index("interpreted") <= stages.index("sender_acknowledged"):
             raise ValueError("interpretation must follow sender acknowledgement")
 
+    if sender_ack_required and "interpreted" in stages:
+        if "sender_acknowledged" not in stages:
+            raise ValueError("sender_ack_required path must record sender_acknowledged before interpretation")
+        if "applied" not in stages or stages.index("sender_acknowledged") <= stages.index("applied"):
+            raise ValueError("sender_acknowledged must follow applied")
+        if stages.index("interpreted") <= stages.index("sender_acknowledged"):
+            raise ValueError("interpretation must follow sender acknowledgement")
+
+    for event in events:
+        if event["stage"] != "sender_acknowledged":
+            continue
+        details = event["details"]
+        acknowledged = {
+            (item["source"], item["channel"], item["sequence"])
+            for item in details["acknowledged_sequences"]
+        }
+        expected = {
+            (item["source"], item["channel"], item["sequence"])
+            for item in details["expected_event_sequences"]
+        }
+        if not expected.issubset(acknowledged):
+            raise ValueError("sender acknowledgement record omits an expected event sequence")
+        if {item[0] for item in acknowledged} != set(details["sources"]):
+            raise ValueError("sender acknowledgement sources do not match acknowledged sequence sources")
+
     final_stage = stages[-1]
     if document["status"] != final_stage:
         raise ValueError("record status must match the final event stage")
