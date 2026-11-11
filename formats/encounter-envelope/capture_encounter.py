@@ -120,7 +120,16 @@ def capture_command(
     source_name: Optional[str] = None,
     extra_context: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Execute a shell command, capture stdout/stderr/status, and wrap in an encounter envelope."""
+    """Execute a trusted shell command and capture its output as an encounter."""
+    reserved_context = {"command", "exit_code", "duration_ms", "platform", "cwd"}
+    if extra_context is not None:
+        if not isinstance(extra_context, dict):
+            raise TypeError("extra_context must be a dictionary")
+        collisions = reserved_context.intersection(extra_context)
+        if collisions:
+            names = ", ".join(sorted(collisions))
+            raise ValueError(f"extra_context cannot override reserved capture fields: {names}")
+
     obs_start = get_utc_iso8601()
     t0 = time.perf_counter()
 
