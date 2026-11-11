@@ -1,0 +1,24 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "example:tool-observation:0001",
+  "observed_at": null,
+  "recorded_at": "2026-11-11T20:30:00Z",
+  "source": {
+    "kind": "tool",
+    "name": "example-clock",
+    "reference": "local-demonstration",
+    "capture_method": "read"
+  },
+  "context": {
+    "purpose": "Illustrate the envelope shape only",
+    "clock_domain": "example-clock"
+  },
+  "payload": {
+    "media_type": "text/plain",
+    "value": "tick=42"
+  },
+  "relations": [],
+  "extensions": {
+    "note": "The values in this example are invented demonstration data, not a real observation."
+  }
+}
