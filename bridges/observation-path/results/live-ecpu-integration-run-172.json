@@ -1,0 +1,76 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "integration:ecpu-gated-observation:ifs-ci-run-172",
+  "observed_at": "2026-11-11T22:55:03Z",
+  "recorded_at": "2026-11-11T22:55:03Z",
+  "source": {
+    "kind": "github-actions-job",
+    "name": "In-Formation-Space integrated test workflow",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43115649399",
+    "capture_method": "live integration test output from a pinned public E-CPU checkout"
+  },
+  "context": {
+    "in_formation_space_commit": "71e48bc0b9584dd7bfa5aa64d99ce40803b30604",
+    "in_formation_space_workflow_run": 43115649399,
+    "in_formation_space_job": 130842816727,
+    "ecpu_repository": "Kier73/E-CPU",
+    "ecpu_commit": "800f94f83ffd6f527ed093c8d1c1e93e153c34f6",
+    "runner": "ubuntu-latest",
+    "python": "3.11",
+    "exit_code": 0
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "suite": "bridges/observation-path/ecpu_live_integration.py",
+      "tests": 2,
+      "result": "passed",
+      "cases": [
+        {
+          "name": "test_real_ecpu_quorum_commit_and_sender_ack_are_separate",
+          "result": "passed",
+          "checks": [
+            "two real ReliableChannel sender frames",
+            "GatedObservationCoordinator receiver intake",
+            "strict two-source AUTHORIZED decision",
+            "representative VM application",
+            "applied marker and all receiver consume markers",
+            "VM idempotence receipt and register readback",
+            "reloadable E-CPU gated checkpoint",
+            "separate sender-side process_acks for both sources",
+            "sender pending sequence sets empty"
+          ]
+        },
+        {
+          "name": "test_real_ecpu_consensus_conflict_is_refusal_not_negative_measurement",
+          "result": "passed",
+          "checks": [
+            "conflicting typed source payloads",
+            "finalized CONFLICT decision",
+            "evidence_refused path event",
+            "VM register unchanged",
+            "receiver frames remain queued and unacknowledged"
+          ]
+        }
+      ],
+      "adapter_scope": {
+        "transport_implementation": "E-CPU ReliableChannel",
+        "receiver_intake": "E-CPU GatedObservationCoordinator.ingest_available",
+        "authority": "E-CPU ObservationConsensus.finalize via finalize_event",
+        "application": "E-CPU GatedObservationCoordinator.commit_event",
+        "sender_ack": "E-CPU GatedObservationCoordinator.process_acks",
+        "observation_path_terminal_stage": "applied",
+        "sender_ack_recorded_in_observation_path": false
+      }
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "67845219f79f18f8be5675eb1a505e296406812c34856a7291872140851918f6",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  },
+  "extensions": {
+    "note": "This receipt records an actual integration test with the pinned E-CPU runtime; it does not claim a production network deployment or cross-process authentication."
+  }
+}
