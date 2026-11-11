@@ -594,6 +594,21 @@
                     "register_prefix": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "receiver_consumed_sources": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "receiver_ack_emitted": {
+                      "type": "boolean"
+                    },
+                    "checkpoint_digest": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
                     }
                   }
                 }
