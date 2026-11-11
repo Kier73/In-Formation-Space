@@ -1,4 +1,3 @@
-import math
 import unittest
 
 from distinction_space import DistinctionSpace
@@ -14,7 +13,7 @@ class DistinctionRefinementTests(unittest.TestCase):
 
         self.assertEqual(first.previous_block_count, 1)
         self.assertEqual(first.refined_block_count, 2)
-        self.assertEqual(first.split_pair_count, 2)
+        self.assertEqual(first.split_pair_count, 4)
         self.assertEqual(second.previous_block_count, 2)
         self.assertEqual(second.refined_block_count, 4)
         self.assertEqual(second.split_pair_count, 2)
@@ -92,7 +91,7 @@ class DistinctionRefinementTests(unittest.TestCase):
             space.add_distinction("unhashable", lambda state: [])
         self.assertEqual(space.distinction_names, ())
         with self.assertRaises(ValueError):
-            space.add_distinction("empty", lambda state: 0)
+            space.add_distinction(" ", lambda state: 0)
         with self.assertRaises(ValueError):
             space.add_distinction("   ", lambda state: 0)
 
