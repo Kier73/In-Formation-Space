@@ -7,6 +7,7 @@ on:
       - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
       - "experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/**"
       - "experiments/guarded-shortcut-tradeoff/**"
+      - "experiments/logistic-map-coverage/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   pull_request:
     paths:
@@ -14,6 +15,7 @@ on:
       - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
       - "experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/**"
       - "experiments/guarded-shortcut-tradeoff/**"
+      - "experiments/logistic-map-coverage/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   workflow_dispatch:
 
@@ -48,3 +50,5 @@ jobs:
         run: python -m unittest discover -s experiments/guarded-shortcut-tradeoff -p "test_*.py" -v
       - name: Execute corrected guarded-shortcut benchmark
         run: python experiments/guarded-shortcut-tradeoff/run_tradeoff_v2.py
+      - name: Run logistic-map coverage tests
+        run: python -m unittest discover -s experiments/logistic-map-coverage -p "test_*.py" -v
