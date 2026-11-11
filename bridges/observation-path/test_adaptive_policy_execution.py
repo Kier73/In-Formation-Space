@@ -221,6 +221,107 @@ class AdaptivePolicyExecutionTests(unittest.TestCase):
         self.assertEqual(result.status, "resolved")
         self.assertFalse(result.query_result)
         self.assertEqual(result.attempts, ())
+    def test_quorum_authority_gate_precedes_policy_interpretation(self):
+        self.execution = AdaptivePolicyExecution(
+            adaptive_plan(), candidate_set(), attempt_id_prefix="query-authority",
+            query_label="q", hypothesis_digest=digest, evidence_authority_required=True,
+        )
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.execution.record_return(
+            "sensor", evidence_ref="encounters/first.json", encounter_id="first",
+            payload_digest="sha256:first", canonicalization="utf8-raw-v1",
+        )
+        with self.assertRaises(ValueError):
+            self.execution.interpret("same", actor="interpreter", method="v1", evidence_ref="interpretation.json")
+        self.execution.mark_evidence_authorized(
+            "consensus", "consensus/authorized.json",
+            policy_digest="sha256:policy", decision_digest="sha256:decision",
+            quorum=2, strict=True, observed_sources=("A", "B"),
+            representative_source="A",
+        )
+        result = self.execution.interpret(
+            "same", actor="interpreter", method="v1", evidence_ref="interpretations/first.json"
+        )
+        self.assertEqual(result.status, "ready")
+        self.assertEqual(result.attempts[0]["status"], "continued")
+        stages = [event["stage"] for event in result.attempts[0]["events"]]
+        self.assertLess(stages.index("evidence_authorized"), stages.index("interpreted"))
+
+    def test_evidence_refusal_ends_without_interpreting_return(self):
+        self.execution = AdaptivePolicyExecution(
+            adaptive_plan(), candidate_set(), attempt_id_prefix="query-refused",
+            query_label="q", hypothesis_digest=digest, evidence_authority_required=True,
+        )
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.execution.record_return(
+            "sensor", evidence_ref="encounters/conflict.json", encounter_id="conflict",
+            payload_digest="sha256:conflict", canonicalization="utf8-raw-v1",
+        )
+        result = self.execution.mark_evidence_refused(
+            "consensus", "consensus/conflict.json", decision_status="CONFLICT",
+            policy_digest="sha256:policy", decision_digest="sha256:decision",
+            quorum=2, strict=True, observed_sources=("A", "B"),
+            dissenting_sources=("B",), missing_sources=(), reason="sources disagreed",
+        )
+        self.assertEqual(result.status, "evidence_refused")
+        self.assertIsNone(result.query_result)
+        self.assertFalse(any(event["stage"] == "interpreted" for event in result.attempts[0]["events"]))
+
+    def test_receiver_application_gate_precedes_interpretation(self):
+        self.execution = AdaptivePolicyExecution(
+            adaptive_plan(), candidate_set(), attempt_id_prefix="query-applied",
+            query_label="q", hypothesis_digest=digest, evidence_authority_required=True,
+            receiver_application_required=True,
+        )
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.execution.record_return(
+            "sensor", evidence_ref="encounters/application.json", encounter_id="application",
+            payload_digest="sha256:application", canonicalization="utf8-raw-v1",
+        )
+        self.execution.mark_evidence_authorized(
+            "consensus", "consensus/authorized.json", policy_digest="sha256:policy",
+            decision_digest="sha256:decision", quorum=2, strict=True,
+            observed_sources=("A", "B"), representative_source="A",
+        )
+        with self.assertRaises(ValueError):
+            self.execution.interpret("yes", actor="interpreter", method="v1", evidence_ref="interpretation.json")
+        self.execution.mark_applied(
+            "receiver-vm", "vm/application-receipt.json", application_id="event-01",
+            target_id="vm-task-7", projection_digest="sha256:projection",
+            register_prefix="gated",
+        )
+        result = self.execution.interpret(
+            "yes", actor="interpreter", method="v1", evidence_ref="interpretations/application.json"
+        )
+        self.assertEqual(result.status, "resolved")
+        self.assertTrue(result.query_result)
+        stages = [event["stage"] for event in result.attempts[0]["events"]]
+        self.assertLess(stages.index("evidence_authorized"), stages.index("applied"))
+        self.assertLess(stages.index("applied"), stages.index("interpreted"))
+
+    def test_receiver_application_failure_is_terminal(self):
+        self.execution = AdaptivePolicyExecution(
+            adaptive_plan(), candidate_set(), attempt_id_prefix="query-apply-failed",
+            query_label="q", hypothesis_digest=digest, evidence_authority_required=True,
+            receiver_application_required=True,
+        )
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.execution.record_return(
+            "sensor", evidence_ref="encounters/application.json", encounter_id="application",
+            payload_digest="sha256:application", canonicalization="utf8-raw-v1",
+        )
+        self.execution.mark_evidence_authorized(
+            "consensus", "consensus/authorized.json", policy_digest="sha256:policy",
+            decision_digest="sha256:decision", quorum=2, strict=True,
+            observed_sources=("A", "B"), representative_source="A",
+        )
+        result = self.execution.stop_application_failed("receiver-vm", "commit checkpoint unavailable")
+        self.assertEqual(result.status, "application_failed")
+        self.assertIsNone(result.query_result)
 
 if __name__ == "__main__":
     unittest.main()
