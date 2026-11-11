@@ -41,10 +41,10 @@ class AdaptiveAttentionTests(unittest.TestCase):
         ]
         plan = select_adaptive_policy(hypotheses, query, obs)
         self.assertTrue(plan.complete)
-        self.assertEqual(plan.policy.observation_name, "coarse")
-        self.assertAlmostEqual(plan.expected_cost, 2.0)
+        self.assertEqual(plan.policy.observation_name, "left-refinement")
+        self.assertAlmostEqual(plan.expected_cost, 1.5)
         self.assertAlmostEqual(plan.worst_case_cost, 2.0)
-        self.assertEqual(set(plan.selected_observations), {"coarse", "left-refinement", "right-refinement"})
+        self.assertEqual(set(plan.selected_observations), {"left-refinement", "right-refinement"})
 
         observation_values = {
             "coarse": {"A": "left", "B": "right", "C": "left", "D": "right"},
