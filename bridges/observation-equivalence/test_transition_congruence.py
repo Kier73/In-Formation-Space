@@ -1,7 +1,10 @@
 import unittest
 from itertools import product
 
-from transition_congruence import check_transition_congruence
+from transition_congruence import (
+    check_transition_congruence,
+    refine_to_transition_congruence,
+)
 
 
 def state_space():
@@ -107,6 +110,61 @@ class TransitionCongruenceTests(unittest.TestCase):
         self.assertEqual(len(report.partition), 1)
         self.assertEqual(report.scope, "finite-supplied-states-actions-tests")
 
+    def test_refinement_splits_only_when_future_actions_require_it(self):
+        result = refine_to_transition_congruence(
+            states=state_space(),
+            actions=("tick",),
+            tests=("rax_mod_4",),
+            observation_fn=observe,
+            transition_fn=transition,
+        )
+        self.assertEqual(result.initial_block_count, 4)
+        self.assertEqual(result.stable_block_count, 8)
+        self.assertEqual(result.refinement_rounds, 1)
+        self.assertTrue(result.is_transition_stable)
+        # The irrelevant noise coordinate remains merged within each stable block.
+        self.assertTrue(all(len(block) == 2 for block in result.stable_partition))
+
+    def test_refinement_propagates_backward_over_multiple_steps(self):
+        states = ("a", "b", "x", "y", "c", "d")
+        outputs = {"a": "mid", "b": "mid", "x": "mid", "y": "mid", "c": "C", "d": "D"}
+        next_state = {"a": "x", "b": "y", "x": "c", "y": "d", "c": "c", "d": "d"}
+        result = refine_to_transition_congruence(
+            states=states,
+            actions=("step",),
+            tests=("output",),
+            observation_fn=lambda state, test: outputs[state],
+            transition_fn=lambda state, action: next_state[state],
+        )
+        self.assertEqual(result.initial_block_count, 3)
+        self.assertEqual(result.refinement_rounds, 2)
+        self.assertEqual(result.stable_block_count, 6)
+
+    def test_refinement_never_merges_initially_distinct_states(self):
+        states = ("a", "b", "c")
+        outputs = {"a": 0, "b": 0, "c": 1}
+        result = refine_to_transition_congruence(
+            states=states,
+            actions=("stay",),
+            tests=("output",),
+            observation_fn=lambda state, test: outputs[state],
+            transition_fn=lambda state, action: state,
+        )
+        self.assertEqual(result.initial_partition, result.stable_partition)
+        self.assertEqual(result.stable_block_count, 2)
+
+    def test_refinement_with_no_actions_preserves_observation_partition(self):
+        states = ("a", "b", "c")
+        outputs = {"a": 0, "b": 0, "c": 1}
+        result = refine_to_transition_congruence(
+            states=states,
+            actions=(),
+            tests=("output",),
+            observation_fn=lambda state, test: outputs[state],
+            transition_fn=lambda state, action: state,
+        )
+        self.assertEqual(result.refinement_rounds, 0)
+        self.assertEqual(result.initial_partition, result.stable_partition)
 
 if __name__ == "__main__":
     unittest.main()
