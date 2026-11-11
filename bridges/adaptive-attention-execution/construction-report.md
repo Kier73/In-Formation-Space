@@ -25,12 +25,12 @@ Clock values are stored together with their clock-domain labels. The coordinator
 
 ## Live E-CPU integration
 
-The adapter has been run against E-CPU commit `800f94f83ffd6f527ed093c8d1c1e93e153c34f6` in In-Formation-Space GitHub Actions run 172. The live integration suite passed 2 tests:
+The adapter has been run against E-CPU commit `800f94f83ffd6f527ed093c8d1c1e93e153c34f6` in In-Formation-Space GitHub Actions run 217. The expanded path now records sender-side ACK completion as a distinct final stage, while partial ACK results remain retryable progress. The live integration suite passed 2 tests:
 
 - strict two-source quorum authorization, representative VM application, durable checkpoint restoration, and separate sender ACK processing;
 - strict consensus conflict, terminal evidence refusal, unchanged VM state, and unconsumed/unacknowledged receiver frames.
 
-The machine-readable [live integration receipt](../observation-path/results/live-ecpu-integration-run-172.json) preserves both repository SHAs and the exact tested operations.
+The machine-readable [run 217 live integration receipt](../observation-path/results/live-ecpu-integration-run-217.json) preserves both repository SHAs and the exact tested operations. The full workflow passed 237 unit tests. It includes 15 observation-path lifecycle tests, 19 portable schema/lifecycle tests, 22 adaptive execution tests, 14 adapter tests, and 2 live E-CPU tests.
 
 ## Verification
 
