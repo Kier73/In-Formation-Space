@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Validation utility for In-Formation Encounter Envelope (experimental 0.1).
+"""Validate an experimental In-Formation Encounter Envelope (0.1).
 
-Validates encounter records against the structural constraints of schema.json
-using only Python's standard library.
+Structural validation uses only the Python standard library. Optional digest
+verification is deliberately narrower: only SHA-256 and the named
+canonicalization modes below are implemented. A reference is never fetched.
 """
 
 from __future__ import annotations
@@ -10,68 +11,78 @@ from __future__ import annotations
 import datetime
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
 
 SCHEMA_FORMAT = "in-formation.encounter/0.1"
-SUPPORTED_DIGEST_ALGORITHMS = {"sha256"}
+_RFC3339 = re.compile(
+    r"^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$"
+)
+SUPPORTED_ALGORITHMS = {"sha256"}
+SUPPORTED_CANONICALIZATIONS = {"utf8-raw-v1", "json-sort-keys-utf8-v1"}
 
 
-def parse_rfc3339(timestamp_str: str) -> bool:
-    """Check if string is a valid RFC 3339 date-time with an explicit timezone."""
-    if not isinstance(timestamp_str, str) or not timestamp_str.strip():
+def _nonempty_string(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def parse_iso8601(timestamp_str: str) -> bool:
+    """Return whether a string is a timezone-qualified RFC 3339 date-time.
+
+    Python's fromisoformat accepts naive timestamps and non-RFC3339 forms,
+    so a syntax check is performed before parsing. Leap-second notation (:60)
+    is not accepted because Python's datetime implementation cannot validate it.
+    """
+    if not isinstance(timestamp_str, str) or not _RFC3339.fullmatch(timestamp_str):
         return False
-    normalized = timestamp_str.replace("Z", "+00:00") if timestamp_str.endswith("Z") else timestamp_str
+    normalized = timestamp_str.replace("t", "T", 1)
+    if normalized.endswith(("Z", "z")):
+        normalized = normalized[:-1] + "+00:00"
     try:
-        dt = datetime.datetime.fromisoformat(normalized)
-        # RFC 3339 requires an explicit timezone offset
-        return dt.tzinfo is not None
+        parsed = datetime.datetime.fromisoformat(normalized)
     except (ValueError, TypeError):
         return False
+    return parsed.tzinfo is not None and parsed.utcoffset() is not None
+
+
+def _check_optional_string(
+    obj: dict, key: str, path: str, errors: List[str], *, nullable: bool = False
+) -> None:
+    if key not in obj:
+        return
+    value = obj[key]
+    if nullable and value is None:
+        return
+    if not isinstance(value, str):
+        expected = "a string or null" if nullable else "a string"
+        errors.append(f"Field '{path}' must be {expected}.")
 
 
 def validate_encounter(doc: Any) -> Tuple[bool, List[str]]:
-    """Validate a Python dict against the encounter-envelope 0.1 schema rules.
-
-    Returns:
-        (is_valid, error_list)
-    """
+    """Validate an envelope against the structural constraints of schema.json."""
     errors: List[str] = []
-
     if not isinstance(doc, dict):
         return False, ["Envelope root must be a JSON object."]
 
-    # Required top-level fields: format, id, source, payload
     for req in ("format", "id", "source", "payload"):
         if req not in doc:
             errors.append(f"Missing required root field: '{req}'.")
 
-    # format check
     if "format" in doc and doc["format"] != SCHEMA_FORMAT:
         errors.append(f"Field 'format' must be '{SCHEMA_FORMAT}', got '{doc.get('format')}'.")
 
-    # id check
-    if "id" in doc:
-        if not isinstance(doc["id"], str) or len(doc["id"].strip()) == 0:
-            errors.append("Field 'id' must be a non-empty string.")
+    if "id" in doc and not _nonempty_string(doc["id"]):
+        errors.append("Field 'id' must be a non-empty string.")
 
-    # observed_at check
-    if "observed_at" in doc and doc["observed_at"] is not None:
-        if not parse_rfc3339(doc["observed_at"]):
+    for key in ("observed_at", "recorded_at"):
+        if key in doc and doc[key] is not None and not parse_iso8601(doc[key]):
             errors.append(
-                f"Field 'observed_at' must be a valid RFC 3339 date-time with timezone or null, got '{doc['observed_at']}'."
+                f"Field '{key}' must be a timezone-qualified RFC 3339 date-time or null, got '{doc[key]}'."
             )
 
-    # recorded_at check
-    if "recorded_at" in doc and doc["recorded_at"] is not None:
-        if not parse_rfc3339(doc["recorded_at"]):
-            errors.append(
-                f"Field 'recorded_at' must be a valid RFC 3339 date-time with timezone or null, got '{doc['recorded_at']}'."
-            )
-
-    # source check
     if "source" in doc:
         src = doc["source"]
         if not isinstance(src, dict):
@@ -79,10 +90,14 @@ def validate_encounter(doc: Any) -> Tuple[bool, List[str]]:
         else:
             if "kind" not in src:
                 errors.append("Field 'source' missing required property 'kind'.")
-            elif not isinstance(src["kind"], str) or len(src["kind"].strip()) == 0:
+            elif not _nonempty_string(src["kind"]):
                 errors.append("Field 'source.kind' must be a non-empty string.")
+            for key in ("name", "reference", "capture_method"):
+                _check_optional_string(src, key, f"source.{key}", errors, nullable=True)
 
-    # payload check
+    if "context" in doc and not isinstance(doc["context"], dict):
+        errors.append("Field 'context' must be an object.")
+
     if "payload" in doc:
         payload = doc["payload"]
         if not isinstance(payload, dict):
@@ -90,135 +105,161 @@ def validate_encounter(doc: Any) -> Tuple[bool, List[str]]:
         else:
             has_val = "value" in payload
             has_ref = "reference" in payload
-            if has_val and has_ref:
-                errors.append("Field 'payload' must have either 'value' or 'reference', but not both (oneOf).")
-            elif not has_val and not has_ref:
-                errors.append("Field 'payload' must contain either 'value' or 'reference'.")
-            elif has_ref:
-                if not isinstance(payload["reference"], str) or len(payload["reference"].strip()) == 0:
-                    errors.append("Field 'payload.reference' must be a non-empty string.")
+            if has_val == has_ref:
+                if has_val:
+                    errors.append("Field 'payload' must have either 'value' or 'reference', but not both (oneOf).")
+                else:
+                    errors.append("Field 'payload' must contain either 'value' or 'reference'.")
+            elif has_ref and not _nonempty_string(payload["reference"]):
+                errors.append("Field 'payload.reference' must be a non-empty string.")
+            for key in ("media_type", "encoding", "digest"):
+                _check_optional_string(payload, key, f"payload.{key}", errors)
 
-    # relations check
-    if "relations" in doc and doc["relations"] is not None:
+    if "relations" in doc:
         rel = doc["relations"]
         if not isinstance(rel, list):
             errors.append("Field 'relations' must be an array.")
         else:
-            for idx, r in enumerate(rel):
-                if not isinstance(r, dict):
+            for idx, item in enumerate(rel):
+                if not isinstance(item, dict):
                     errors.append(f"relations[{idx}] must be an object.")
                     continue
-                if "kind" not in r or not isinstance(r["kind"], str) or not r["kind"].strip():
-                    errors.append(f"relations[{idx}] missing non-empty 'kind' string.")
-                if "target" not in r or not isinstance(r["target"], str) or not r["target"].strip():
-                    errors.append(f"relations[{idx}] missing non-empty 'target' string.")
+                for key in ("kind", "target"):
+                    if key not in item or not _nonempty_string(item[key]):
+                        errors.append(f"relations[{idx}] missing non-empty '{key}' string.")
+                _check_optional_string(item, "note", f"relations[{idx}].note", errors)
 
-    # integrity check
-    if "integrity" in doc and doc["integrity"] is not None:
+    if "integrity" in doc:
         integ = doc["integrity"]
         if not isinstance(integ, dict):
             errors.append("Field 'integrity' must be an object.")
+        else:
+            for key in ("algorithm", "digest", "canonicalization"):
+                _check_optional_string(integ, key, f"integrity.{key}", errors)
+
+    if "extensions" in doc and not isinstance(doc["extensions"], dict):
+        errors.append("Field 'extensions' must be an object.")
 
     return len(errors) == 0, errors
 
 
-def verify_digest(doc: dict, base_dir: Optional[Path] = None) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-    """Verify the digest of an encounter record.
+def compute_payload_digest(
+    doc: dict, algorithm: str = "sha256", canonicalization: Optional[str] = None
+) -> Optional[str]:
+    """Compute the digest of inline payload.value under a named byte contract.
 
-    Returns:
-        (status_code, expected_digest, computed_digest)
-        status_code in: 'verified', 'mismatch', 'unsupported_algorithm', 'reference_missing', 'no_integrity'
+    utf8-raw-v1 hashes a string's UTF-8 bytes without JSON quoting.
+    json-sort-keys-utf8-v1 hashes compact JSON with sorted keys, UTF-8
+    characters preserved, and non-finite numbers rejected. This is a local
+    interchange contract, not a claim of RFC 8785/JCS compatibility.
     """
-    if "integrity" not in doc or not isinstance(doc["integrity"], dict):
-        return "no_integrity", None, None
+    if not isinstance(doc, dict) or not isinstance(doc.get("payload"), dict):
+        raise ValueError("Envelope has no payload object.")
+    payload = doc["payload"]
+    if "value" not in payload:
+        return None
 
-    algo = doc["integrity"].get("algorithm")
-    expected = doc["integrity"].get("digest")
-    if not algo or not expected:
-        return "no_integrity", None, None
+    normalized_algorithm = algorithm.lower() if isinstance(algorithm, str) else ""
+    if normalized_algorithm not in SUPPORTED_ALGORITHMS:
+        raise ValueError(f"Unsupported digest algorithm: {algorithm!r}.")
+    if canonicalization not in SUPPORTED_CANONICALIZATIONS:
+        raise ValueError(f"Unsupported or missing canonicalization: {canonicalization!r}.")
 
-    algo_norm = algo.lower()
-    if algo_norm not in SUPPORTED_DIGEST_ALGORITHMS:
-        return "unsupported_algorithm", expected, None
+    value = payload["value"]
+    if canonicalization == "utf8-raw-v1":
+        if not isinstance(value, str):
+            raise ValueError("utf8-raw-v1 requires payload.value to be a string.")
+        payload_bytes = value.encode("utf-8")
+    else:
+        try:
+            payload_bytes = json.dumps(
+                value,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            ).encode("utf-8")
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"payload.value cannot be serialized under json-sort-keys-utf8-v1: {exc}") from exc
 
-    # Get target bytes: either from inline payload.value or external reference
-    payload = doc.get("payload", {})
-    payload_bytes: Optional[bytes] = None
-
-    if "value" in payload:
-        val = payload["value"]
-        if isinstance(val, str):
-            payload_bytes = val.encode("utf-8")
-        else:
-            payload_bytes = json.dumps(val, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    elif "reference" in payload:
-        ref_path_str = payload["reference"]
-        ref_path = Path(ref_path_str)
-        if not ref_path.is_absolute() and base_dir is not None:
-            ref_path = base_dir / ref_path
-
-        if ref_path.is_file():
-            try:
-                payload_bytes = ref_path.read_bytes()
-            except Exception:
-                return "reference_missing", expected, None
-        else:
-            return "reference_missing", expected, None
-
-    if payload_bytes is None:
-        return "reference_missing", expected, None
-
-    if algo_norm == "sha256":
-        computed = hashlib.sha256(payload_bytes).hexdigest()
-        if computed == expected:
-            return "verified", expected, computed
-        return "mismatch", expected, computed
-
-    return "unsupported_algorithm", expected, None
+    return hashlib.sha256(payload_bytes).hexdigest()
 
 
-def main() -> int:
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <envelope-file.json> [envelope-file-2.json ...]")
+def verify_integrity(doc: dict) -> Tuple[str, str]:
+    """Return (status, detail) for the optional integrity declaration."""
+    integ = doc.get("integrity")
+    if not isinstance(integ, dict):
+        return "NOT_REQUESTED", "no integrity object"
+    if "digest" not in integ and "algorithm" not in integ:
+        return "NOT_REQUESTED", "integrity object contains no digest claim"
+    if not _nonempty_string(integ.get("algorithm")) or not _nonempty_string(integ.get("digest")):
+        return "UNVERIFIED", "integrity claim requires non-empty algorithm and digest"
+
+    algorithm = integ["algorithm"]
+    canonicalization = integ.get("canonicalization")
+    if algorithm.lower() not in SUPPORTED_ALGORITHMS:
+        return "UNVERIFIED", f"unsupported digest algorithm {algorithm!r}"
+    if canonicalization not in SUPPORTED_CANONICALIZATIONS:
+        return "UNVERIFIED", f"unsupported or missing canonicalization {canonicalization!r}"
+
+    payload = doc.get("payload")
+    if not isinstance(payload, dict):
+        return "UNVERIFIED", "payload object is unavailable"
+    if "reference" in payload:
+        return "NOT_CHECKED", "payload is a reference; referenced bytes were not retrieved"
+    if "value" not in payload:
+        return "UNVERIFIED", "payload has no inline value to verify"
+
+    try:
+        actual = compute_payload_digest(doc, algorithm, canonicalization)
+    except ValueError as exc:
+        return "UNVERIFIED", str(exc)
+    if actual != integ["digest"].lower():
+        return "MISMATCH", f"expected {integ['digest']}, computed {actual}"
+    return "VERIFIED", f"{algorithm}:{actual}"
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    args = sys.argv[1:] if argv is None else argv
+    if not args:
+        print(f"Usage: {Path(sys.argv[0]).name} <envelope-file.json> [envelope-file-2.json ...]")
         return 2
 
     overall_pass = True
-    for path_str in sys.argv[1:]:
-        p = Path(path_str)
-        if not p.is_file():
+    for path_str in args:
+        path = Path(path_str)
+        if not path.is_file():
             print(f"[FAIL] {path_str}: File not found.")
             overall_pass = False
             continue
-
         try:
-            with open(p, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception as exc:
-            print(f"[FAIL] {path_str}: JSON parse error: {exc}")
+            with path.open("r", encoding="utf-8") as handle:
+                data = json.load(handle)
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            print(f"[FAIL] {path_str}: JSON read/parse error: {exc}")
             overall_pass = False
             continue
 
         valid, errors = validate_encounter(data)
-        if valid:
-            status_msg = f"[PASS] {path_str} (id: {data.get('id')})"
-            digest_status, expected, computed = verify_digest(data, base_dir=p.parent)
-            if digest_status == "verified":
-                status_msg += f" [Digest verified: sha256:{computed[:8]}...]"
-            elif digest_status == "mismatch":
-                status_msg += f" [Digest MISMATCH: expected {expected[:8]}..., got {computed[:8]}...]"
-                overall_pass = False
-            elif digest_status == "unsupported_algorithm":
-                algo = data.get("integrity", {}).get("algorithm")
-                status_msg += f" [Digest unchecked: unsupported algorithm '{algo}']"
-            elif digest_status == "reference_missing":
-                ref = data.get("payload", {}).get("reference")
-                status_msg += f" [Digest unchecked: referenced payload '{ref}' not found locally]"
-            print(status_msg)
-        else:
+        if not valid:
             print(f"[FAIL] {path_str}:")
-            for err in errors:
-                print(f"  - {err}")
+            for error in errors:
+                print(f"  - {error}")
             overall_pass = False
+            continue
+
+        print(f"[PASS] {path_str} (id: {data.get('id')})")
+        status, detail = verify_integrity(data)
+        if status == "VERIFIED":
+            print(f"  [Digest verified] {detail}")
+        elif status == "MISMATCH":
+            print(f"  [Digest MISMATCH] {detail}")
+            overall_pass = False
+        elif status in {"UNVERIFIED", "NOT_CHECKED"}:
+            print(f"  [Digest {status.lower()}] {detail}")
+            overall_pass = False
+        elif isinstance(data.get("payload"), dict) and "digest" in data["payload"]:
+            print("  [Payload digest declared] not checked; no corresponding integrity verification contract was supplied")
 
     return 0 if overall_pass else 1
 
