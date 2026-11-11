@@ -5,12 +5,14 @@ on:
     paths:
       - "formats/encounter-envelope/**"
       - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
+      - "experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/**"
       - "experiments/guarded-shortcut-tradeoff/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   pull_request:
     paths:
       - "formats/encounter-envelope/**"
       - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
+      - "experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/**"
       - "experiments/guarded-shortcut-tradeoff/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   workflow_dispatch:
@@ -38,6 +40,8 @@ jobs:
         run: python formats/encounter-envelope/validate_envelope.py experiments/guarded-shortcut-tradeoff/results/tradeoff-v2-ci-run-11.json
       - name: Run Poset Interleaver property tests
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-01-poset-interleaver -p "test_*.py" -v
+      - name: Run finite-description unbounded-space tests
+        run: python -m unittest discover -s experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space -p "test_*.py" -v
       - name: Run corrected guarded-shortcut tests
         run: python -m unittest discover -s experiments/guarded-shortcut-tradeoff -p "test_*.py" -v
       - name: Execute corrected guarded-shortcut benchmark
