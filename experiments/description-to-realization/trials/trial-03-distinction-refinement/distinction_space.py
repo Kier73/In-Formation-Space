@@ -57,6 +57,7 @@ class DistinctionSpace:
         self._states: Tuple[Hashable, ...] = tuple(state_list)
         self._weights: Dict[Hashable, float] = normalized_weights
         self._observations: Dict[str, Dict[Hashable, Hashable]] = {}
+        self._incremental_entropies: Dict[str, float] = {}
 
     @property
     def states(self) -> Tuple[Hashable, ...]:
@@ -113,11 +114,6 @@ class DistinctionSpace:
                 value = observed[state]
                 child_weights[value] = child_weights.get(value, 0.0) + self._weights[state]
 
-            child_pair_count = 0
-            for child_weight in child_weights.values():
-                # Pair counts depend on state cardinalities, not probability weights.
-                child_pair_count += 0  # populated in the cardinality pass below
-
             child_counts: Dict[Hashable, int] = {}
             for state in block:
                 value = observed[state]
@@ -137,6 +133,7 @@ class DistinctionSpace:
 
         # Store only after every observation and metric has been computed successfully.
         self._observations[name] = observed
+        self._incremental_entropies[name] = conditional_entropy
         refined_count = len(self.partition())
         redundant = split_pair_count == 0
 
@@ -157,11 +154,9 @@ class DistinctionSpace:
     def conditional_entropy_bits(self, name: str) -> float:
         """Measure a stored distinction's entropy conditioned on all earlier ones.
 
-        This is the incremental conditional entropy at insertion time. It is
-        therefore recorded in the RefinementResult returned by add_distinction.
+        This is the incremental conditional entropy at insertion time.
+        It depends on the state weights supplied to the constructor.
         """
-        if name not in self._observations:
+        if name not in self._incremental_entropies:
             raise KeyError(name)
-        raise NotImplementedError(
-            "Use the RefinementResult returned when the distinction was added."
-        )
+        return self._incremental_entropies[name]
