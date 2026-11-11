@@ -50,8 +50,38 @@
             "null"
           ],
           "minLength": 1
+        },
+        "authority_required": {
+          "type": "boolean"
+        },
+        "application_required": {
+          "type": "boolean"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "application_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "application_required"
+            ]
+          },
+          "then": {
+            "properties": {
+              "authority_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "authority_required"
+            ]
+          }
+        }
+      ]
     },
     "status": {
       "type": "string",
@@ -68,7 +98,11 @@
         "dispatch_failed",
         "rejected",
         "no_result",
-        "interpretation_failed"
+        "interpretation_failed",
+        "evidence_authorized",
+        "evidence_refused",
+        "applied",
+        "application_failed"
       ]
     },
     "terminal": {
@@ -104,7 +138,11 @@
               "dispatch_failed",
               "rejected",
               "no_result",
-              "interpretation_failed"
+              "interpretation_failed",
+              "evidence_authorized",
+              "evidence_refused",
+              "applied",
+              "application_failed"
             ]
           },
           "actor": {
@@ -316,6 +354,257 @@
                     "interpretation_failed",
                     "unresolved"
                   ]
+                }
+              },
+              "required": [
+                "stage"
+              ]
+            },
+            "then": {
+              "properties": {
+                "details": {
+                  "required": [
+                    "reason"
+                  ],
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "stage": {
+                  "const": "evidence_authorized"
+                }
+              },
+              "required": [
+                "stage"
+              ]
+            },
+            "then": {
+              "required": [
+                "evidence_ref"
+              ],
+              "properties": {
+                "evidence_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "details": {
+                  "type": "object",
+                  "required": [
+                    "decision_status",
+                    "policy_digest",
+                    "decision_digest",
+                    "quorum",
+                    "strict",
+                    "observed_sources",
+                    "dissenting_sources",
+                    "missing_sources",
+                    "representative_source"
+                  ],
+                  "properties": {
+                    "decision_status": {
+                      "const": "AUTHORIZED"
+                    },
+                    "policy_digest": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "decision_digest": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "quorum": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "strict": {
+                      "type": "boolean"
+                    },
+                    "observed_sources": {
+                      "type": "array",
+                      "minItems": 1,
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "dissenting_sources": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "missing_sources": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "representative_source": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "stage": {
+                  "const": "evidence_refused"
+                }
+              },
+              "required": [
+                "stage"
+              ]
+            },
+            "then": {
+              "required": [
+                "evidence_ref"
+              ],
+              "properties": {
+                "evidence_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "details": {
+                  "type": "object",
+                  "required": [
+                    "decision_status",
+                    "policy_digest",
+                    "decision_digest",
+                    "quorum",
+                    "strict",
+                    "observed_sources",
+                    "dissenting_sources",
+                    "missing_sources",
+                    "reason"
+                  ],
+                  "properties": {
+                    "decision_status": {
+                      "enum": [
+                        "CONFLICT",
+                        "REFUSED"
+                      ]
+                    },
+                    "policy_digest": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "decision_digest": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "quorum": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "strict": {
+                      "type": "boolean"
+                    },
+                    "observed_sources": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "dissenting_sources": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "missing_sources": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "stage": {
+                  "const": "applied"
+                }
+              },
+              "required": [
+                "stage"
+              ]
+            },
+            "then": {
+              "required": [
+                "evidence_ref"
+              ],
+              "properties": {
+                "evidence_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "details": {
+                  "type": "object",
+                  "required": [
+                    "application_id",
+                    "target_id",
+                    "projection_digest",
+                    "register_prefix"
+                  ],
+                  "properties": {
+                    "application_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "target_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "projection_digest": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "register_prefix": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "stage": {
+                  "const": "application_failed"
                 }
               },
               "required": [
