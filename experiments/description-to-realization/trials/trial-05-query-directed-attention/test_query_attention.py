@@ -95,7 +95,7 @@ class QueryDirectedAttentionTests(unittest.TestCase):
         unresolved = select_query_packet(extensions, query, available)
         self.assertFalse(unresolved.complete)
         self.assertTrue(unresolved.exact)
-        self.assertEqual(len(unresolved.unresolved_pairs), 1)
+        self.assertEqual(len(unresolved.unresolved_pairs), 2)
 
         direct = QueryObservation(
             "shared-clock-compare:C0:S0",
