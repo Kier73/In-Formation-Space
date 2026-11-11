@@ -418,11 +418,13 @@ class AdaptivePolicyExecutionTests(unittest.TestCase):
                 {"source": "source-a", "channel": "phase-A", "sequence": 3},
                 {"source": "source-b", "channel": "phase-B", "sequence": 5},
             ),
+            missing_event_sequences=(),
             acknowledged_sequences=(
                 {"source": "source-a", "channel": "phase-A", "sequence": 3},
                 {"source": "source-b", "channel": "phase-B", "sequence": 5},
             ),
             ack_digest="a" * 64,
+            complete=True,
         )
         result = self.execution.interpret(
             "yes", actor="interpreter", method="v1", evidence_ref="interpretation.json"
@@ -441,6 +443,57 @@ class AdaptivePolicyExecutionTests(unittest.TestCase):
                 receiver_application_required=False,
                 sender_acknowledgement_required=True,
             )
+
+
+    def test_partial_sender_ack_progress_can_be_followed_by_completion(self):
+        self.execution = self.authority_execution(application_required=True, sender_ack_required=True)
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.record_current_return()
+        self.authorize_current_return()
+        self.execution.mark_applied(
+            "receiver-vm", "vm/checkpoint.json", application_id="event-01",
+            target_id="vm-task-7", projection_digest="sha256:projection", register_prefix="gated",
+        )
+        expected = (
+            {"source": "source-a", "channel": "phase-A", "sequence": 3},
+            {"source": "source-b", "channel": "phase-B", "sequence": 5},
+        )
+        first_ack = (
+            {"source": "source-b", "channel": "phase-B", "sequence": 5},
+        )
+        self.execution.mark_sender_acknowledged(
+            "sender", "acks/partial.json", event_kind="phase", logical_time=7,
+            sources=("source-b",),
+            expected_event_sequences=expected,
+            acknowledged_sequences=first_ack,
+            missing_event_sequences=(
+                {"source": "source-a", "channel": "phase-A", "sequence": 3},
+            ),
+            ack_digest="b" * 64,
+            complete=False,
+        )
+        self.assertEqual(self.execution.status, "sender_ack_progress")
+        with self.assertRaises(ValueError):
+            self.execution.interpret("yes", actor="interpreter", method="v1", evidence_ref="interpretation.json")
+        all_acks = (
+            {"source": "source-a", "channel": "phase-A", "sequence": 3},
+            {"source": "source-b", "channel": "phase-B", "sequence": 5},
+        )
+        self.execution.mark_sender_acknowledged(
+            "sender", "acks/complete.json", event_kind="phase", logical_time=7,
+            sources=("source-a", "source-b"),
+            expected_event_sequences=expected,
+            acknowledged_sequences=all_acks,
+            missing_event_sequences=(),
+            ack_digest="c" * 64,
+            complete=True,
+        )
+        result = self.execution.interpret("yes", actor="interpreter", method="v1", evidence_ref="interpretation.json")
+        self.assertEqual(result.status, "resolved")
+        stages = [event["stage"] for event in result.attempts[0]["events"]]
+        self.assertEqual(stages.count("sender_ack_progress"), 1)
+        self.assertEqual(stages.count("sender_acknowledged"), 1)
 
 if __name__ == "__main__":
     unittest.main()
