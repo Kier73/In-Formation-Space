@@ -1,6 +1,6 @@
 # Guarded Shortcut Trade-off: Execution vs Description
 
-**Status:** Completed empirical experiment with verified measurements.  
+**Status:** Initial benchmark recorded; the original guard interpretation is under correction. See [independent review](review-note.md) and the [quotient-aware v2 experiment](run_tradeoff_v2.py).  
 **Date:** 2026-11-11  
 **Lineage:** Derived from `grounded_navigation_theory.md` (Sections 2, 5, 9) and E-CPU Structural Memory affine recurrence specifications.
 
@@ -81,7 +81,10 @@ Assuming nominal operation ($p_{\text{exit}} = 0$):
 
 ## 3. Files
 
-- [run_tradeoff.py](run_tradeoff.py) — Standalone benchmark suite and fault-injection test.
+- [run_tradeoff.py](run_tradeoff.py) — original benchmark; its secondary-modulus guard claim is invalid as reviewed below.
+- [run_tradeoff_v2.py](run_tradeoff_v2.py) — corrected quotient-aware check, median-based measurements, and explicit no-fault baseline.
+- [test_tradeoff_v2.py](test_tradeoff_v2.py) — deterministic tests for projection, fault checks, and collision limits.
+- [review-note.md](review-note.md) — mathematical review of the original residue guard and timing claims.
 - [results/tradeoff-encounter.json](results/tradeoff-encounter.json) — Captured encounter envelope containing complete benchmark output and SHA-256 integrity receipt.
 - [results/analysis.md](results/analysis.md) — Detailed analysis and empirical verification report.
 
@@ -95,3 +98,12 @@ Run the benchmark and capture an encounter envelope:
 python formats/encounter-envelope/capture_encounter.py cmd "python experiments/guarded-shortcut-tradeoff/run_tradeoff.py" --id "exp:guarded-shortcut:manual-run" --out my-result.json
 python formats/encounter-envelope/validate_envelope.py my-result.json
 ```
+
+For the corrected benchmark, run:
+
+```bash
+python -m unittest discover -s experiments/guarded-shortcut-tradeoff -p 'test_*.py' -v
+python experiments/guarded-shortcut-tradeoff/run_tradeoff_v2.py --json
+```
+
+The original run is retained as historical evidence. Its raw-versus-shortcut recurrence results remain useful, but its secondary-modulus fault-detection claim must not be relied upon.
