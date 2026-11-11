@@ -16,6 +16,8 @@ An observation that is useful in one branch may be unnecessary in another. The a
 
 This is not a universal claim that adaptive policies are cheaper. The result depends on the prior, observation costs, possible outcomes, and deterministic model.
 
+The [Adaptive Attention Execution bridge](../../../../bridges/adaptive-attention-execution/README.md) connects a planned policy node to an evidence-gated request attempt. The planner still does not execute observations; the coordinator only advances when an external adapter supplies the actual dispatch, admission, return, and interpretation records.
+
 ## Limits
 
 The exact solver has worst-case exponential behavior in the number of hypotheses and rejects inputs above its configured limit. The objective is expected cost under the supplied prior. Costs are additive along a path, and observations are assumed deterministic and non-intervening. Stochastic sensors, actions that alter the system, or order-dependent costs require a different model.
