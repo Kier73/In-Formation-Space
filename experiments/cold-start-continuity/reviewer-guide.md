@@ -36,7 +36,9 @@ A strong proposal should improve both temporal alignment and causal attribution.
 - all relevant commands, resets, policy decisions, and external inputs;
 - a baseline or control run with no command.
 
-The exact design depends on what the system actually exposes. Do not assume these interfaces exist. The experiment should say what to do if a correlation channel cannot be instrumented.
+The exact design depends on what the system actually exposes. Do not assume these interfaces exist.
+
+If command-ID propagation into sensor records is unavailable, use a randomized sequence of active-command and sham/no-command periods. Record the schedule, dispatch events, sensor samples, and an independent physical or actuator indicator through one external monotonic logger or a shared hardware timing pulse. Pre-register the response window and compare the rate and latency of warm observations across active and sham periods. Randomization and repetition can support a causal comparison without a propagated ID, but a synchronized timebase and complete intervention logging are still needed. If neither shared timing nor a common event recorder is available, cross-stream event ordering remains unresolved; do not infer it from the separate tick values.
 
 A repeated warm/idle sequence alone would not prove causality. A controlled intervention with synchronized, correlated records is more discriminating.
 
