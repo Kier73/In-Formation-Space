@@ -110,6 +110,48 @@ An absent timestamp is not zero. A missing source identity is not proof of anony
 
 For large or non-JSON artifacts, store the artifact separately and use payload.reference; retain media type, digest, and any decoding details needed to retrieve and check it. Avoid copying private or access-controlled material into a public repository.
 
+## Causal graph analysis
+
+Encounter envelopes may carry a `relations` array linking them to other envelopes by named relation kinds. The causal graph tool interprets those links as a partial order and analyzes the resulting structure.
+
+**Files:**
+
+- [causal_graph.py](causal_graph.py) — builds and analyzes a causal poset from a collection of envelopes.
+- [test_causal_graph.py](test_causal_graph.py) — 10 unit tests for cycle detection, transitive reduction, anachronism flagging, and linear extension counting.
+
+**Relation kinds and induced edge directions:**
+
+| Kind | Direction | Meaning |
+| --- | --- | --- |
+| `precedes`, `causes`, `triggers`, `initiates` | source → target | source event causally precedes target |
+| `caused_by`, `depends_on`, `derived_from`, `response_to`, `verifies` | target → source | target causally precedes source |
+| `references`, `annotates`, `correlates_with`, `see_also`, `replaces` | — (non-causal) | informative links; no temporal ordering imposed |
+
+**Analyses produced:**
+
+- **Cycle detection:** 3-color DFS identifies causal contradictions and returns an exact witness path.
+- **Hasse reduction:** transitive reduction extracts the minimal dependency diagram — the edges you would draw by hand.
+- **Anachronism audit:** flags pairs $(u \prec v)$ where the physical clock has $\text{observed\_at}(u) > \text{observed\_at}(v)$. Unknown clocks are left unknown rather than treated as zero.
+- **Linear extension count:** $|\Omega|$ measures temporal underdetermination — how many total orderings are consistent with the partial causal order. Computed exactly via down-set DP for $\le 16$ internal nodes.
+- **External target identification:** relations pointing outside the supplied envelope set mark an epistemic boundary — the graph is known to be incomplete at those edges.
+
+**Reproduce:**
+
+```bash
+python -m unittest discover -s formats/encounter-envelope -p 'test_causal_graph.py' -v
+```
+
+**CLI — analyze a set of envelope files:**
+
+```bash
+python formats/encounter-envelope/causal_graph.py \
+    path/to/envelope-a.json \
+    path/to/envelope-b.json \
+    path/to/envelope-c.json
+```
+
+Exits 0 on success, 1 on a detected causal cycle or analysis error, 2 on usage error.
+
 ## Why this is a proposal
 
 The [Virtual Ground Interpreter](https://github.com/Kier73/Virtual-Ground-Interpreter) has explored encounter records, transport receipts, and a separate association ledger for hypotheses and assessments. E-CPU also distinguishes observation, Ground construction, navigation, and verification. This envelope is a small attempt to make one narrow boundary portable across projects; it does not import either project's implementation or claim that their models are interchangeable.
