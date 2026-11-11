@@ -105,6 +105,70 @@ class ObservationPathSchemaTests(unittest.TestCase):
         record["status"] = "evidence_refused"
         record["terminal"] = True
         validate_path_record(record, SCHEMA)
+    def test_authority_required_record_validates_distinct_consensus_stage(self):
+        record = json.loads((HERE / "examples" / "happy-path.json").read_text(encoding="utf-8"))
+        record["intent"]["authority_required"] = True
+        returned_index = next(i for i, event in enumerate(record["events"]) if event["stage"] == "returned")
+        record["events"].insert(returned_index + 1, {
+            "stage": "evidence_authorized", "actor": "consensus",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "consensus/decision.json",
+            "details": {
+                "decision_status": "AUTHORIZED", "policy_digest": "sha256:policy",
+                "decision_digest": "sha256:decision", "quorum": 2, "strict": True,
+                "observed_sources": ["A", "B"], "dissenting_sources": [],
+                "missing_sources": [], "representative_source": "A",
+            },
+        })
+        validate_path_record(record, SCHEMA)
+
+    def test_application_required_record_validates_application_event(self):
+        record = json.loads((HERE / "examples" / "happy-path.json").read_text(encoding="utf-8"))
+        record["intent"]["authority_required"] = True
+        record["intent"]["application_required"] = True
+        returned_index = next(i for i, event in enumerate(record["events"]) if event["stage"] == "returned")
+        record["events"].insert(returned_index + 1, {
+            "stage": "evidence_authorized", "actor": "consensus",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "consensus/decision.json",
+            "details": {
+                "decision_status": "AUTHORIZED", "policy_digest": "sha256:policy",
+                "decision_digest": "sha256:decision", "quorum": 2, "strict": True,
+                "observed_sources": ["A", "B"], "dissenting_sources": [],
+                "missing_sources": [], "representative_source": "A",
+            },
+        })
+        interpreted_index = next(i for i, event in enumerate(record["events"]) if event["stage"] == "interpreted")
+        record["events"].insert(interpreted_index, {
+            "stage": "applied", "actor": "receiver-vm",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "vm/apply-receipt.json",
+            "details": {
+                "application_id": "event-01", "target_id": "vm-task-7",
+                "projection_digest": "sha256:projection", "register_prefix": "gated",
+            },
+        })
+        validate_path_record(record, SCHEMA)
+
+    def test_application_required_without_authority_is_rejected(self):
+        record = json.loads((HERE / "examples" / "happy-path.json").read_text(encoding="utf-8"))
+        record["intent"]["application_required"] = True
+        with self.assertRaises(Exception):
+            validate_path_record(record, SCHEMA)
+
+    def test_evidence_refusal_validates_as_terminal_outcome(self):
+        record = json.loads((HERE / "examples" / "happy-path.json").read_text(encoding="utf-8"))
+        record["events"] = record["events"][:4]
+        record["events"].append({
+            "stage": "evidence_refused", "actor": "consensus",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "consensus/refusal.json",
+            "details": {
+                "decision_status": "CONFLICT", "policy_digest": "sha256:policy",
+                "decision_digest": "sha256:decision", "quorum": 2, "strict": True,
+                "observed_sources": ["A", "B"], "dissenting_sources": ["B"],
+                "missing_sources": [], "reason": "source disagreement",
+            },
+        })
+        record["status"] = "evidence_refused"
+        record["terminal"] = True
+        validate_path_record(record, SCHEMA)
 
 if __name__ == "__main__":
     unittest.main()
