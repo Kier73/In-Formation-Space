@@ -39,7 +39,7 @@ Most importantly, the planners select **proposed** observations. They do not exe
 
 ## The next integration boundary
 
-The [Evidence-gated Observation Path](../../bridges/observation-path/README.md) now supplies an append-only lifecycle model that separates:
+The [Evidence-gated Observation Path](../../bridges/observation-path/README.md) now supplies an append-only lifecycle model, and the [Adaptive Attention Execution bridge](../../bridges/adaptive-attention-execution/README.md) connects Trial 06 to it. Together they separate:
 
 1. predicted observation under a hypothesis;
 2. selected observation request and its cost model;
@@ -48,4 +48,4 @@ The [Evidence-gated Observation Path](../../bridges/observation-path/README.md) 
 5. interpretation and partition update;
 6. verification of whether the intended query is now resolved.
 
-The remaining work is to bind this experimental ledger to real observer/transport adapters, reusing their actual dispatch, admission, and Encounter Envelope receipts rather than inventing a second execution or provenance system.
+The remaining work is to bind this experimental coordinator to real observer/transport adapters, reusing their actual dispatch, admission, and Encounter Envelope receipts rather than inventing a second execution or provenance system.
