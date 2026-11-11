@@ -61,6 +61,12 @@ A recipient's self-report that it used no tools is useful provenance, but it is 
 
 Run 01 was L0. Run 02 was L1. A fully isolated L2 or L3 run remains open.
 
+## Auditing run claims
+
+The [handoff kit](handoff_kit/README.md) turns the level distinction into a record. A completed run can include `manifest.json` with packet and template hashes, the declared level, and whether tool use was instrumented or the workspace isolated. `handoff_kit.py audit` checks the record for hash mismatches, missing artifacts, reviewer-guide leakage, and level claims that exceed the recorded controls. It is a consistency check, not proof of isolation.
+
+Run 02 includes the first [manifest](runs/2026-11-11-run-02-packet-only/manifest.json); its audit passes at L1 with no errors.
+
 ## Recorded runs
 
 - [Run 2026-11-11-run-01](runs/2026-11-11-run-01/response.md) — L0 open-workspace handoff report from an independent recipient (Gemini 3.8 Flash subagent).
@@ -68,6 +74,7 @@ Run 01 was L0. Run 02 was L1. A fully isolated L2 or L3 run remains open.
   - [Independent review note](runs/2026-11-11-run-01/review-note.md) — Clarifies the open-context condition, the limits of the 35-ordering count, and follow-up test design.
 - [Run 2026-11-11-run-02-packet-only](runs/2026-11-11-run-02-packet-only/response.md) — L1 material-limited handoff report from a fresh general subagent with only the packet and template supplied inline; the parent session ran DeepSeek V4.1 Flash Free.
   - [Run conditions](runs/2026-11-11-run-02-packet-only/conditions.md) — Exact prompt, material hashes, and the isolation boundary: material-limited, not sandbox-isolated.
+  - [Run manifest](runs/2026-11-11-run-02-packet-only/manifest.json) — Machine-readable L1 record; audited by the handoff kit.
   - [Evaluation](runs/2026-11-11-run-02-packet-only/evaluation.md) — Review against the rubric; 12/12 within this run, with the fallback-design gap and residual exposure noted.
   - [Supplementary review](runs/2026-11-11-run-02-packet-only/supplementary-review.md) — Review of evidence limits, prompt constraints, and residual ambient exposure.
   - [Independent review note](runs/2026-11-11-run-02-packet-only/review-note.md) — Comparative analysis of open-context (L0) vs material-limited (L1) handoff conditions and invariant preservation.
@@ -76,6 +83,6 @@ Run 01 was L0. Run 02 was L1. A fully isolated L2 or L3 run remains open.
 
 Two handoff runs have been executed and reviewed, at different isolation levels. Run 01 (L0) demonstrates useful recovery and analysis under open repository context. Because its recipient could inspect repository guidance, it does not establish packet-only cold-start continuity.
 
-Run 02 (L1) supplies only the packet and template and instructs a closed-book analysis. Its recipient self-reports no tool use, and the response contains no reviewer-guide content, but the run was not sandboxed or instrumented. It strengthens the packet-only result without completing it.
+Run 02 (L1) supplies only the packet and template and instructs a closed-book analysis. Its recipient self-reports no tool use, and the response contains no reviewer-guide content, but the run was not sandboxed or instrumented. It strengthens the packet-only result without completing it. Its [manifest](runs/2026-11-11-run-02-packet-only/manifest.json) records the L1 claim and passes the handoff-kit audit.
 
 The 35 valid linear extensions in run 01 describe possible interleavings under the two-chain model; they are not equally likely outcomes. A fully isolated L2 or L3 run — only the packet and template mounted, with tool access disabled or instrumented — remains the next clean test. An adversarial packet revision is a complementary test of whether a recipient catches an invitation to overclaim.

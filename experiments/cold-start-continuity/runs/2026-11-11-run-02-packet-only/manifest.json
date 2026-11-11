@@ -1,0 +1,44 @@
+{
+  "format": "in-formation.cold-start-run/0.1",
+  "run_id": "2026-11-11-run-02-packet-only",
+  "created_at": "2026-11-11T21:53:18+00:00",
+  "isolation_level": "L1",
+  "packet": {
+    "path": "../../packet.md",
+    "sha256_lf": "f0d61d6396763030bf67fa34fa3808923b0f5e0ed3382573e9918230a5bf2595"
+  },
+  "template": {
+    "path": "../../report-template.md",
+    "sha256_lf": "de50f73ce741cfd64bb4497ad328df1dcb458c98f3d7f03ae8a71b527f8904b2"
+  },
+  "supplied_material": [
+    "packet.md",
+    "report-template.md"
+  ],
+  "tool_policy": "prohibited-by-instruction",
+  "tool_instrumentation": false,
+  "workspace_isolation": false,
+  "artifacts": {
+    "prompt": {
+      "path": "prompt.md",
+      "sha256_lf": "826309c690777604d2580f320abbe797e2542aaa9c15fd98c9137b84e5ce01e2"
+    },
+    "response": {
+      "path": "response.md",
+      "sha256_lf": "5e4d78ac7e2bd7ba2e42550bc26a05f04f99df71a604c67f869db2516bcb4c55"
+    },
+    "conditions": {
+      "path": "conditions.md",
+      "sha256_lf": "958fbe5275b10ac1ac4d0d5b570caa073c055b6a3841f768a7c350c4b2ce4863"
+    },
+    "evaluation": {
+      "path": "evaluation.md",
+      "sha256_lf": "889710cf2422a500c1758cfee149827b9125ed3029bd6829dc9236560d060594"
+    }
+  },
+  "recipient": {
+    "context": "fresh OpenCode general subagent; parent session DeepSeek V4.1 Flash Free; exact child model identifier not independently exposed",
+    "identity_verified": false
+  },
+  "notes": "Self-report only; not sandboxed or instrumented. See conditions.md."
+}

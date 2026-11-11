@@ -1,0 +1,30 @@
+name: Cold-start handoff tests
+
+on:
+  push:
+    paths:
+      - "experiments/cold-start-continuity/**"
+      - ".github/workflows/cold-start-handoff-tests.yml"
+  pull_request:
+    paths:
+      - "experiments/cold-start-continuity/**"
+      - ".github/workflows/cold-start-handoff-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run handoff kit tests
+        run: python -m unittest discover -s experiments/cold-start-continuity/handoff_kit -p "test_*.py" -v
+      - name: Audit packet-only run 02
+        run: python experiments/cold-start-continuity/handoff_kit/handoff_kit.py audit --run-dir experiments/cold-start-continuity/runs/2026-11-11-run-02-packet-only
