@@ -181,6 +181,10 @@ def analyze_temporal_binding(binding_document: Mapping[str, Any]) -> dict[str, A
             raise ValueError(f"interval[{index}].monotonic_regressed must be boolean")
         if regressed and mono is not None:
             raise ValueError("a regressed monotonic interval cannot also have an elapsed value")
+        if start_actor != normalized_events[index]["temporal_frame_actor_id"]:
+            raise ValueError(f"temporal interval {index} start actor does not match its bound frame")
+        if end_actor != normalized_events[index + 1]["temporal_frame_actor_id"]:
+            raise ValueError(f"temporal interval {index} end actor does not match its bound frame")
         if mono is not None and start_actor != end_actor:
             raise ValueError("monotonic elapsed time cannot compare different temporal frame actors")
 
