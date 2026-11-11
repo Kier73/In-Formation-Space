@@ -1,0 +1,49 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:d2r-active-distinction-selection:trial-04:ci-run-44",
+  "observed_at": "2026-11-11T21:35:14.615653Z",
+  "recorded_at": "2026-11-11T21:35:14.624892Z",
+  "source": {
+    "kind": "github-actions-job-log",
+    "name": "Encounter envelope tests",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43104335225",
+    "capture_method": "test output transcribed from successful CI job log"
+  },
+  "context": {
+    "workflow_run_id": 43104335225,
+    "job_id": 130803584073,
+    "commit": "d7d19046267bfebb5b1fe2c7bc831ed327b303eb",
+    "command": "python -m unittest discover -s experiments/description-to-realization/trials/trial-04-active-distinction-selection -p test_*.py -v",
+    "exit_code": 0,
+    "runner": "ubuntu-latest",
+    "python": "3.11.18"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "exit_code": 0,
+      "tests": [
+        "test_already_unique_target_needs_no_observation",
+        "test_bad_candidates_and_signatures_are_rejected",
+        "test_exact_solver_finds_minimum_cost_observation_packet",
+        "test_exact_solver_matches_brute_force_on_small_random_instances",
+        "test_exact_solver_prefers_strictly_lower_cost_below_epsilon",
+        "test_invalid_solver_threshold_and_cost_values_are_rejected",
+        "test_large_ambiguity_uses_greedy_fallback",
+        "test_one_candidate_can_isolate_target",
+        "test_unseparable_state_is_reported_as_incomplete",
+        "test_uses_only_target_equivalence_class"
+      ],
+      "stdout": "Ran 10 tests in 0.009s\nOK\n"
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "4cadacda5e88ca02cd4cc741cb798ea96de402b56fcde8fe87f775305444024d",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  },
+  "extensions": {
+    "note": "The test receipt records finite examples and randomized exhaustive comparisons for small instances. It does not assert that a proposed observation packet has been executed."
+  }
+}
