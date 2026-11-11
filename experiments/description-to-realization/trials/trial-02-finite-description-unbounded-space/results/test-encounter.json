@@ -1,0 +1,41 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:d2r-finite-description:trial-02:ci-run-18",
+  "observed_at": "2026-11-11T21:22:53.317965Z",
+  "recorded_at": "2026-11-11T21:22:53.320907Z",
+  "source": {
+    "kind": "github-actions-job-log",
+    "name": "Encounter envelope tests",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43102506632",
+    "capture_method": "test output transcribed from successful CI job log"
+  },
+  "context": {
+    "workflow_run_id": 43102506632,
+    "job_id": 130797303653,
+    "commit": "61a29c2eea511d98fc2a267ac8fc0ebeb57ce8c5",
+    "command": "python -m unittest discover -s experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space -p test_*.py -v",
+    "exit_code": 0,
+    "runner": "GitHub Actions ubuntu-latest",
+    "python": "3.11.18"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "exit_code": 0,
+      "tests": [
+        "test_balanced_language_generator_matches_recursive_description",
+        "test_balanced_language_recognizer_accepts_and_rejects",
+        "test_binary_generator_enumerates_exact_finite_levels",
+        "test_distinct_prefix_lengths_have_distinguishing_suffixes",
+        "test_even_parity_dfa_matches_direct_count",
+        "test_finite_description_constructs_large_finite_instance",
+        "test_parity_and_length_modulo_have_all_two_k_states"
+      ],
+      "stdout": "Ran 7 tests in 0.003s\nOK\n"
+    }
+  },
+  "relations": [],
+  "extensions": {
+    "note": "This receipt records the CI test run, not an exhaustive enumeration of either infinite language."
+  }
+}
