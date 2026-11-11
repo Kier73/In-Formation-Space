@@ -4,108 +4,36 @@
   "title": "In-Formation Encounter Envelope experimental 0.1",
   "description": "Optional, non-normative envelope for preserving an encountered artifact separately from interpretations.",
   "type": "object",
-  "required": [
-    "format",
-    "id",
-    "source",
-    "payload"
-  ],
+  "required": ["format", "id", "source", "payload"],
   "properties": {
-    "format": {
-      "const": "in-formation.encounter/0.1"
-    },
-    "id": {
-      "type": "string",
-      "minLength": 1
-    },
-    "observed_at": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "format": "date-time"
-    },
-    "recorded_at": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "format": "date-time"
-    },
+    "format": {"const": "in-formation.encounter/0.1"},
+    "id": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "observed_at": {"type": ["string", "null"], "format": "date-time"},
+    "recorded_at": {"type": ["string", "null"], "format": "date-time"},
     "source": {
       "type": "object",
-      "required": [
-        "kind"
-      ],
+      "required": ["kind"],
       "properties": {
-        "kind": {
-          "type": "string",
-          "minLength": 1
-        },
-        "name": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "reference": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "capture_method": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
+        "kind": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "name": {"type": ["string", "null"]},
+        "reference": {"type": ["string", "null"]},
+        "capture_method": {"type": ["string", "null"]}
       },
       "additionalProperties": true
     },
-    "context": {
-      "type": "object",
-      "additionalProperties": true
-    },
+    "context": {"type": "object", "additionalProperties": true},
     "payload": {
       "type": "object",
       "oneOf": [
-        {
-          "required": [
-            "value"
-          ],
-          "not": {
-            "required": [
-              "reference"
-            ]
-          }
-        },
-        {
-          "required": [
-            "reference"
-          ],
-          "not": {
-            "required": [
-              "value"
-            ]
-          }
-        }
+        {"required": ["value"], "not": {"required": ["reference"]}},
+        {"required": ["reference"], "not": {"required": ["value"]}}
       ],
       "properties": {
-        "media_type": {
-          "type": "string"
-        },
+        "media_type": {"type": "string"},
         "value": {},
-        "reference": {
-          "type": "string",
-          "minLength": 1
-        },
-        "encoding": {
-          "type": "string"
-        },
-        "digest": {
-          "type": "string"
-        }
+        "reference": {"type": "string", "minLength": 1, "pattern": "\\S"},
+        "encoding": {"type": "string"},
+        "digest": {"type": "string"}
       },
       "additionalProperties": true
     },
@@ -113,22 +41,11 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "kind",
-          "target"
-        ],
+        "required": ["kind", "target"],
         "properties": {
-          "kind": {
-            "type": "string",
-            "minLength": 1
-          },
-          "target": {
-            "type": "string",
-            "minLength": 1
-          },
-          "note": {
-            "type": "string"
-          }
+          "kind": {"type": "string", "minLength": 1, "pattern": "\\S"},
+          "target": {"type": "string", "minLength": 1, "pattern": "\\S"},
+          "note": {"type": "string"}
         },
         "additionalProperties": true
       }
@@ -136,22 +53,13 @@
     "integrity": {
       "type": "object",
       "properties": {
-        "algorithm": {
-          "type": "string"
-        },
-        "digest": {
-          "type": "string"
-        },
-        "canonicalization": {
-          "type": "string"
-        }
+        "algorithm": {"type": "string"},
+        "digest": {"type": "string"},
+        "canonicalization": {"type": "string"}
       },
       "additionalProperties": true
     },
-    "extensions": {
-      "type": "object",
-      "additionalProperties": true
-    }
+    "extensions": {"type": "object", "additionalProperties": true}
   },
   "additionalProperties": true
 }
