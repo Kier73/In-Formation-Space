@@ -19,7 +19,10 @@ Trials 04–06 choose which observations would be useful. They do not execute th
 
     planned -> dispatched -> admitted -> returned -> interpreted -> query_determined
                                     |            |
-                                    |            +-> evidence_authorized -> applied (optional) -> interpreted
+                                    |            +-> evidence_authorized -> applied
+                                                           |                   |
+                                                           v                   v
+                                                   sender_ack_progress -> sender_acknowledged (optional)
                                     |                         |
                                     +-> no_result             +-> evidence_refused
          |          |           |           |              | 
@@ -27,7 +30,7 @@ Trials 04–06 choose which observations would be useful. They do not execute th
     dispatch_failed  rejected  no_result  returned_unadmitted  unresolved
                            (unadmitted return and other failures are terminal)
 
-Each request attempt is append-only. `admitted` records receiver-side intake; `evidence_authorized` records a separate consensus/authority decision; `applied` records verified receiver-side state mutation; and optional `sender_acknowledged` records that the sending channels actually processed their ACKs and cleared the event's pending sequences. An intent can require the authority gate, then an `applied` receipt, and optionally sender-side ACK processing after that. `sender_ack_required` implies `application_required`, which itself implies authority. Interpretation cannot proceed until every declared gate has been recorded. A direct one-receiver path can leave all three requirements false. An interpreted observation can end in `query_determined`, `unresolved`, or `continued`; `continued` records which next observation the adaptive policy selected and closes the current request attempt before a new attempt begins. Failure paths are terminal and do not silently become observations. A payload that returns without an admission receipt is preserved as `returned_unadmitted` and cannot advance to interpretation within that attempt.
+Each request attempt is append-only. `admitted` records receiver-side intake; `evidence_authorized` records a separate consensus/authority decision; `applied` records verified receiver-side state mutation; and optional `sender_ack_progress` / `sender_acknowledged` records partial and complete sender-side ACK processing. A progress event is cumulative and names the exact sequences still pending; later calls can complete the same path without erasing the earlier partial receipt. An intent can require the authority gate, then an `applied` receipt, and optionally sender-side ACK processing after that. `sender_ack_required` implies `application_required`, which itself implies authority. Interpretation cannot proceed until every declared gate has been recorded. A direct one-receiver path can leave all three requirements false. An interpreted observation can end in `query_determined`, `unresolved`, or `continued`; `continued` records which next observation the adaptive policy selected and closes the current request attempt before a new attempt begins. Failure paths are terminal and do not silently become observations. A payload that returns without an admission receipt is preserved as `returned_unadmitted` and cannot advance to interpretation within that attempt.
 
 ## Live E-CPU integration
 
@@ -37,7 +40,7 @@ The pinned E-CPU runtime integration passed in [GitHub Actions run 172](https://
 
 The [E-CPU gated adapter](ecpu_gated_adapter.py) is a dependency-injected bridge over the existing `GatedObservationCoordinator`. It does not import or reimplement E-CPU. It records a finalized decision only after checking the coordinator's policy, finalized status, evidence-link source set, and representative. After `commit_event()`, it checks the durable applied marker, complete receiver consumption, absence of outstanding commit intents, the VM's exact idempotence receipt, and actual register readback before recording `applied`. It then saves a final E-CPU checkpoint and records its digest.
 
-The adapter verifies receiver-side ACK emission through the completed consume path. The separate `record_sender_acknowledgements()` operation calls E-CPU's sender-side `process_acks()`, verifies that every event sequence was returned as removed and is absent from pending state, then appends `sender_acknowledged`. When an intent does not require sender ACK confirmation, a path may intentionally stop at `applied`. Nor does it create transport or Encounter Envelope evidence on its own: dispatch, receiver-intake, and raw-return artifacts must be supplied by the surrounding host adapter.
+The adapter verifies receiver-side ACK emission through the completed consume path. The separate `record_sender_acknowledgements()` operation calls E-CPU's sender-side `process_acks()`. If only some event sequences have been cleared, it appends `sender_ack_progress` with the cumulative acknowledged set and exact missing set. A later call merges new removals and appends `sender_acknowledged` only when every event sequence is absent from sender pending state. A path may intentionally stop at `applied` when sender confirmation is not required. Nor does it create transport or Encounter Envelope evidence on its own: dispatch, receiver-intake, and raw-return artifacts must be supplied by the surrounding host adapter.
 
 ## Explicit authority and application gates
 
