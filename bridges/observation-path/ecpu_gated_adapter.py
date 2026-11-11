@@ -321,6 +321,8 @@ class ECPUGatedObservationAdapter:
         consumed_sources = consumed_event.get("sources")
         if not isinstance(consumed_sources, (list, tuple)):
             raise ValueError("E-CPU consumed marker sources are malformed")
+        if len(set(consumed_sources)) != len(consumed_sources):
+            raise ValueError("E-CPU consumed marker contains duplicate sources")
         if set(consumed_sources) != set(links_by_source):
             raise ValueError("E-CPU receiver has not consumed/ACKed every event source")
 
@@ -342,6 +344,34 @@ class ECPUGatedObservationAdapter:
         finalized = _event_entry(consensus.get("finalized"), kind, logical_time, "finalized consensus")
         if finalized.get("status") != "AUTHORIZED":
             raise ValueError("E-CPU commit snapshot does not preserve AUTHORIZED finalization")
+        policy = consensus.get("policy")
+        if not isinstance(policy, Mapping):
+            raise ValueError("E-CPU commit snapshot lacks authority policy")
+        policy_digest = _digest(dict(policy))
+        if policy_digest != authorization_details.get("policy_digest"):
+            raise ValueError("E-CPU commit policy differs from the path authorization receipt")
+        representative_source = _nonempty(representative_link.get("source"), "representative source")
+        if representative_source != authorization_details.get("representative_source"):
+            raise ValueError("E-CPU commit representative differs from the path authorization receipt")
+        decision_payload = {
+            "kind": kind,
+            "logical_time": logical_time,
+            "status": getattr(decision, "status", None),
+            "quorum": getattr(decision, "quorum", None),
+            "strict": getattr(decision, "strict", None),
+            "observed_sources": sorted(getattr(decision, "observed_sources", ())),
+            "dissenting_sources": sorted(getattr(decision, "dissenting_sources", ())),
+            "missing_sources": sorted(getattr(decision, "missing_sources", ())),
+            "canonical_payload": (
+                None
+                if getattr(decision, "canonical_payload", None) is None
+                else list(decision.canonical_payload)
+            ),
+            "representative_source": representative_source,
+            "policy_digest": policy_digest,
+        }
+        if _digest(decision_payload) != authorization_details.get("decision_digest"):
+            raise ValueError("E-CPU commit decision differs from the path authorization receipt")
 
         target_pid = coordinator_snapshot.get("target_pid")
         register_prefix = _nonempty(coordinator_snapshot.get("register_prefix"), "register_prefix")
@@ -409,6 +439,9 @@ class ECPUGatedObservationAdapter:
                 "target_id": str(target_pid),
                 "projection_digest": projection_digest,
                 "register_prefix": register_prefix,
+                "receiver_consumed_sources": sorted(links_by_source),
+                "receiver_ack_emitted": True,
+                "checkpoint_digest": checkpoint_digest,
             },
         )
         return ECPUApplicationRecord(
