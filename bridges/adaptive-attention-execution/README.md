@@ -34,7 +34,7 @@ Clock values remain labeled with their original clock domains; the coordinator p
 
 ## Live runtime verification
 
-The adapter has now been exercised against a pinned E-CPU checkout, not only stubs. The [live integration tests](../observation-path/ecpu_live_integration.py) and [run 172 receipt](../observation-path/results/live-ecpu-integration-run-172.json) document the actual transport, quorum, checkpoint, VM readback, and sender-ACK sequence.
+The adapter has now been exercised against a pinned E-CPU checkout, not only stubs. The [live integration tests](../observation-path/ecpu_live_integration.py) and [run 217 receipt](../observation-path/results/live-ecpu-integration-run-217.json) document the actual transport, quorum, checkpoint, VM readback, sender-ACK processing, and final portable path validation. Partial ACK progress is separately covered by adapter and policy tests.
 
 ## Construction and verification
 
