@@ -64,6 +64,8 @@ jobs:
         run: python formats/encounter-envelope/validate_envelope.py bridges/observation-equivalence/results/bridge-encounter.json
       - name: Validate repeated-return logistic scan encounter
         run: python formats/encounter-envelope/validate_envelope.py experiments/logistic-map-coverage/results/coverage-v2-ci-run-31.json
+      - name: Run observation-equivalence demonstration
+        run: python bridges/observation-equivalence/demonstration.py
       - name: Run observation-equivalence bridge tests
         run: python -m unittest discover -s bridges/observation-equivalence -p "test_*.py" -v
       - name: Run Poset Interleaver property tests
