@@ -1,8 +1,8 @@
 {
   "format": "in-formation.encounter/0.1",
   "id": "test:cmd:002",
-  "observed_at": "2026-11-11T20:52:47.239578+00:00",
-  "recorded_at": "2026-11-11T20:52:47.272925+00:00",
+  "observed_at": "2026-11-11T21:02:50.936784+00:00",
+  "recorded_at": "2026-11-11T21:02:50.960569+00:00",
   "source": {
     "kind": "subprocess",
     "name": "shell-command-runner",
@@ -12,7 +12,7 @@
   "context": {
     "command": "echo validation test",
     "exit_code": 0,
-    "duration_ms": 33.326,
+    "duration_ms": 23.766,
     "platform": {
       "system": "Windows",
       "release": "11",
@@ -33,6 +33,6 @@
   "integrity": {
     "algorithm": "sha256",
     "digest": "44521fb1718b146a9ae84063b180565a3f386b44b74098800496dbfa49d81511",
-    "canonicalization": "canonical-json-utf8"
+    "canonicalization": "json-sort-keys-utf8-v1"
   }
 }

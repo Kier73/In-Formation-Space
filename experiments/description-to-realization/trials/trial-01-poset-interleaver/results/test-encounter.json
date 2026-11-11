@@ -1,0 +1,38 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:d2r-poset:trial-01",
+  "observed_at": "2026-11-11T21:02:42.552283+00:00",
+  "recorded_at": "2026-11-11T21:02:42.764683+00:00",
+  "source": {
+    "kind": "subprocess",
+    "name": "shell-command-runner",
+    "reference": null,
+    "capture_method": "subprocess.run"
+  },
+  "context": {
+    "command": "python experiments/description-to-realization/trials/trial-01-poset-interleaver/test_poset_interleaver.py -v",
+    "exit_code": 0,
+    "duration_ms": 212.38,
+    "platform": {
+      "system": "Windows",
+      "release": "11",
+      "python_version": "3.14.0"
+    },
+    "cwd": "C:\\Users\\kross\\Downloads\\In-Formation-Space"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "test_cold_start_split_clock_relay_combinatorics (__main__.TestPosetInterleaver.test_cold_start_split_clock_relay_combinatorics)\nHard constraint 3: Verify the 4-event controller and 3-event sensor chains yield exactly 35 extensions. ... ok\ntest_constrained_cross_stream_reduction (__main__.TestPosetInterleaver.test_constrained_cross_stream_reduction)\nAdding a cross-stream causal edge strictly reduces the extension count. ... ok\ntest_cycle_detection_and_witness_extraction (__main__.TestPosetInterleaver.test_cycle_detection_and_witness_extraction)\nHard constraint 2: Cycle detection extracts exact cycle path. ... ok\ntest_query_immutability (__main__.TestPosetInterleaver.test_query_immutability)\nHard constraint 5: Querying properties does not alter poset state. ... ok\ntest_trace_verification_and_edge_blame (__main__.TestPosetInterleaver.test_trace_verification_and_edge_blame)\nHard constraint 4: Trace verification detects violations and identifies violated edge. ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.001s\n\nOK\n"
+    },
+    "digest": "sha256:b8fb951a52d1a113d4f684c52d5cdd1e1ee06d7867adbf17ead5707580d4932e"
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "b8fb951a52d1a113d4f684c52d5cdd1e1ee06d7867adbf17ead5707580d4932e",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  }
+}

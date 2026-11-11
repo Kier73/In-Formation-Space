@@ -1,8 +1,8 @@
 {
   "format": "in-formation.encounter/0.1",
   "id": "exp:guarded-shortcut:2026-11-11",
-  "observed_at": "2026-11-11T20:53:32.593269+00:00",
-  "recorded_at": "2026-11-11T20:53:34.578919+00:00",
+  "observed_at": "2026-11-11T21:02:48.648797+00:00",
+  "recorded_at": "2026-11-11T21:02:50.760847+00:00",
   "source": {
     "kind": "subprocess",
     "name": "shell-command-runner",
@@ -12,7 +12,7 @@
   "context": {
     "command": "python experiments/guarded-shortcut-tradeoff/run_tradeoff.py",
     "exit_code": 0,
-    "duration_ms": 1985.63,
+    "duration_ms": 2112.031,
     "platform": {
       "system": "Windows",
       "release": "11",
@@ -24,15 +24,15 @@
     "media_type": "application/json",
     "value": {
       "exit_code": 0,
-      "stdout": "=== RUNNING GROUNDED NAVIGATION BENCHMARK ===\nPrimary Modulus: 2^61 - 1, Check Modulus: 2^31 - 1\nSweeping t across 12 coordinates: 10 to 5,000,000...\n\nBenchmark Results:\n   t (steps) |   c_exec (raw) |   c_sigma (sc) |        c_guard |   N = c_sc+c_g |   Speedup | Match\n-----------------------------------------------------------------------------------------------\n          10 |        1.70 us |        2.40 us |        2.20 us |        4.60 us |      0.4x | True\n          50 |        9.60 us |        3.60 us |        3.20 us |        6.80 us |      1.4x | True\n         100 |       16.20 us |        3.70 us |        3.40 us |        7.10 us |      2.3x | True\n         500 |       83.20 us |        5.60 us |        4.90 us |       10.50 us |      7.9x | True\n       1,000 |      161.50 us |        6.00 us |        7.70 us |       13.70 us |     11.8x | True\n       5,000 |      902.30 us |        7.60 us |        6.90 us |       14.50 us |     62.2x | True\n      10,000 |     1799.30 us |        8.20 us |        7.30 us |       15.50 us |    116.1x | True\n      50,000 |     8649.10 us |        8.60 us |        7.80 us |       16.40 us |    527.4x | True\n     100,000 |    16520.30 us |        9.00 us |        8.10 us |       17.10 us |    966.1x | True\n     500,000 |    85907.60 us |       10.20 us |        8.60 us |       18.80 us |   4569.6x | True\n   1,000,000 |   170863.70 us |        9.60 us |        8.90 us |       18.50 us |   9235.9x | True\n   5,000,000 |   861203.60 us |       10.80 us |        9.50 us |       20.30 us |  42423.8x | True\n\nFault Injection Test:\n  Nominal orbit matches faulty: False\n  Guard divergence detected:   True\n",
+      "stdout": "=== RUNNING GROUNDED NAVIGATION BENCHMARK ===\nPrimary Modulus: 2^61 - 1, Check Modulus: 2^31 - 1\nSweeping t across 12 coordinates: 10 to 5,000,000...\n\nBenchmark Results:\n   t (steps) |   c_exec (raw) |   c_sigma (sc) |        c_guard |   N = c_sc+c_g |   Speedup | Match\n-----------------------------------------------------------------------------------------------\n          10 |        1.70 us |        2.30 us |        2.20 us |        4.50 us |      0.4x | True\n          50 |        7.10 us |        3.40 us |        3.20 us |        6.60 us |      1.1x | True\n         100 |       17.30 us |        3.90 us |        3.60 us |        7.50 us |      2.3x | True\n         500 |       90.40 us |        5.80 us |        5.20 us |       11.00 us |      8.2x | True\n       1,000 |      170.00 us |        6.00 us |        5.50 us |       11.50 us |     14.8x | True\n       5,000 |      995.80 us |        8.60 us |        7.80 us |       16.40 us |     60.7x | True\n      10,000 |     2025.40 us |        9.70 us |        8.40 us |       18.10 us |    111.9x | True\n      50,000 |    10405.20 us |       10.50 us |        9.70 us |       20.20 us |    515.1x | True\n     100,000 |    18178.40 us |        8.90 us |        8.30 us |       17.20 us |   1056.9x | True\n     500,000 |    89862.40 us |       10.20 us |        9.00 us |       19.20 us |   4680.3x | True\n   1,000,000 |   182699.30 us |       10.20 us |        9.70 us |       19.90 us |   9180.9x | True\n   5,000,000 |   923968.20 us |       12.00 us |       10.30 us |       22.30 us |  41433.6x | True\n\nFault Injection Test:\n  Nominal orbit matches faulty: False\n  Guard divergence detected:   True\n",
       "stderr": ""
     },
-    "digest": "sha256:fe589da43ee1655f60fbefef7e850f43da03637c9c77a1f7a2f8a73699430ea4"
+    "digest": "sha256:79453187cbe84a36d8219d9fad7273fba6a6193c3f9ed741800a77d0b8f355ea"
   },
   "relations": [],
   "integrity": {
     "algorithm": "sha256",
-    "digest": "fe589da43ee1655f60fbefef7e850f43da03637c9c77a1f7a2f8a73699430ea4",
-    "canonicalization": "canonical-json-utf8"
+    "digest": "79453187cbe84a36d8219d9fad7273fba6a6193c3f9ed741800a77d0b8f355ea",
+    "canonicalization": "json-sort-keys-utf8-v1"
   }
 }

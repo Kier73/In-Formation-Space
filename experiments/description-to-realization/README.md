@@ -141,6 +141,12 @@ A useful result is not necessarily identical artifacts. It may be:
 
 Textual similarity alone is not a success metric. Functional correspondence, constraint satisfaction, provenance quality, and ability to continue the work matter more.
 
+## Active trials
+
+- [Trial 01: Poset Causal Interleaver](trials/trial-01-poset-interleaver/brief.md) — construction of a lightweight, zero-dependency causal interleaver that verifies acyclicity with cycle witness extraction, counts linear extensions via down-set dynamic programming, and verifies trace validity.
+  - [Construction report](trials/trial-01-poset-interleaver/construction-report.md) — implementation trace and constraint satisfaction evidence.
+  - [Code: poset_interleaver.py](trials/trial-01-poset-interleaver/poset_interleaver.py) | [Tests: test_poset_interleaver.py](trials/trial-01-poset-interleaver/test_poset_interleaver.py) | [Encounter receipt](trials/trial-01-poset-interleaver/results/test-encounter.json)
+
 ## 7. Open questions
 
 1. Which parts of a description are sufficient to make a construction reproducible across different model families and tool environments?

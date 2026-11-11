@@ -13,7 +13,9 @@ An encounter can be a tool response, a measurement, a received message, a file, 
 - [schema.json](schema.json) — JSON Schema 2020-12 description of the experimental envelope.
 - [validate_envelope.py](validate_envelope.py) — zero-dependency Python structural validator and limited inline-payload digest checker.
 - [test_validate_envelope.py](test_validate_envelope.py) — standard-library tests; schema-parity checks run too when the optional jsonschema package is installed.
+- [capture_encounter.py](capture_encounter.py) — command runner and observation packaging utility that emits compliant envelopes.
 - [examples/tool-observation.json](examples/tool-observation.json) — a minimal illustrative record.
+- [examples/captured-cmd.json](examples/captured-cmd.json) — an automatically captured subprocess execution record with SHA-256 integrity verification.
 
 ## Verification
 

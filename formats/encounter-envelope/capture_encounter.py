@@ -95,10 +95,11 @@ def build_encounter_envelope(
     envelope["relations"] = relations or []
 
     if "digest" in payload:
+        canon_mode = "utf8-raw-v1" if isinstance(payload_value, str) else "json-sort-keys-utf8-v1"
         envelope["integrity"] = {
             "algorithm": "sha256",
             "digest": payload["digest"].replace("sha256:", ""),
-            "canonicalization": "canonical-json-utf8",
+            "canonicalization": canon_mode,
         }
 
     if extensions:
