@@ -322,6 +322,80 @@ class AdaptivePolicyExecutionTests(unittest.TestCase):
         result = self.execution.stop_application_failed("receiver-vm", "commit checkpoint unavailable")
         self.assertEqual(result.status, "application_failed")
         self.assertIsNone(result.query_result)
+    def authority_execution(self, application_required=False):
+        return AdaptivePolicyExecution(
+            adaptive_plan(), candidate_set(), attempt_id_prefix="query-ecpu",
+            query_label="q", hypothesis_digest=digest, evidence_authority_required=True,
+            receiver_application_required=application_required,
+        )
+
+    def authorize_current_return(self):
+        self.execution.mark_evidence_authorized(
+            "consensus", "consensus/authorized.json",
+            policy_digest="sha256:policy", decision_digest="sha256:decision",
+            quorum=2, strict=True, observed_sources=("source-a", "source-b"),
+            representative_source="source-a",
+        )
+
+    def record_current_return(self):
+        self.execution.record_return(
+            "sensor", evidence_ref="encounters/raw.json", encounter_id="raw-01",
+            payload_digest="sha256:raw", canonicalization="utf8-raw-v1",
+        )
+
+    def test_quorum_authorization_required_before_interpretation(self):
+        self.execution = self.authority_execution()
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.record_current_return()
+        with self.assertRaises(ValueError):
+            self.execution.interpret("same", actor="interpreter", method="v1", evidence_ref="interpretation.json")
+        self.authorize_current_return()
+        result = self.execution.interpret("same", actor="interpreter", method="v1", evidence_ref="interpretation.json")
+        self.assertEqual(result.status, "ready")
+        stages = [event["stage"] for event in result.attempts[0]["events"]]
+        self.assertLess(stages.index("returned"), stages.index("evidence_authorized"))
+        self.assertLess(stages.index("evidence_authorized"), stages.index("interpreted"))
+
+    def test_evidence_refusal_is_terminal_after_raw_return(self):
+        self.execution = self.authority_execution()
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.record_current_return()
+        result = self.execution.mark_evidence_refused(
+            "consensus", "consensus/refused.json", decision_status="CONFLICT",
+            policy_digest="sha256:policy", decision_digest="sha256:decision",
+            quorum=2, strict=True, observed_sources=("A", "B"),
+            dissenting_sources=("B",), missing_sources=(), reason="source disagreement",
+        )
+        self.assertEqual(result.status, "evidence_refused")
+        self.assertIsNone(result.query_result)
+
+    def test_receiver_application_must_follow_authority_and_precede_interpretation(self):
+        self.execution = self.authority_execution(application_required=True)
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.record_current_return()
+        self.authorize_current_return()
+        with self.assertRaises(ValueError):
+            self.execution.interpret("yes", actor="interpreter", method="v1", evidence_ref="interpretation.json")
+        self.execution.mark_applied(
+            "receiver-vm", "vm/application-receipt.json", application_id="event-01",
+            target_id="vm-task-7", projection_digest="sha256:projection", register_prefix="gated",
+        )
+        result = self.execution.interpret("yes", actor="interpreter", method="v1", evidence_ref="interpretation.json")
+        self.assertEqual(result.status, "resolved")
+        self.assertTrue(result.query_result)
+
+    def test_application_failure_prevents_query_interpretation(self):
+        self.execution = self.authority_execution(application_required=True)
+        self.execution.begin_attempt()
+        self.dispatch_and_admit()
+        self.record_current_return()
+        self.authorize_current_return()
+        result = self.execution.stop_application_failed("receiver-vm", "commit receipt unavailable")
+        self.assertEqual(result.status, "application_failed")
+        self.assertIsNone(result.query_result)
 
 if __name__ == "__main__":
     unittest.main()
