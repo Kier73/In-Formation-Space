@@ -292,5 +292,43 @@ class ECPUGatedObservationAdapterTests(unittest.TestCase):
             adapter.record_finalized_decision(path, "phase", 7, decision_ref="consensus/phase-7.json")
 
 
+    def test_commit_must_match_the_exact_policy_decision_already_recorded(self):
+        coordinator = FakeCoordinator()
+        adapter = ECPUGatedObservationAdapter(coordinator, decode_observation)
+        path = make_path()
+        adapter.record_finalized_decision(path, "phase", 7, decision_ref="consensus/phase-7.json")
+        details = path.events[-1].details
+        details["decision_digest"] = "0" * 64
+        path._events[-1] = path.events[-1].__class__(
+            stage="evidence_authorized",
+            actor="ecpu-consensus",
+            clock_value=None,
+            clock_domain=None,
+            evidence_ref="consensus/phase-7.json",
+            details_json=__import__("json").dumps(details, sort_keys=True, separators=(",", ":")),
+        )
+        with self.assertRaises(ValueError):
+            adapter.record_application_commit(
+                path, "phase", 7, "/tmp/phase-7.json", checkpoint_ref="checkpoints/phase-7.json"
+            )
+        self.assertEqual(path.status, "evidence_authorized")
+
+    def test_adapter_application_path_is_portable_schema_valid(self):
+        import json
+        from pathlib import Path
+        from validate_observation_path import validate_path_record
+
+        coordinator = FakeCoordinator()
+        adapter = ECPUGatedObservationAdapter(coordinator, decode_observation)
+        path = make_path()
+        adapter.record_finalized_decision(path, "phase", 7, decision_ref="consensus/phase-7.json")
+        adapter.record_application_commit(
+            path, "phase", 7, "/tmp/phase-7.json", checkpoint_ref="checkpoints/phase-7.json"
+        )
+        schema_path = Path(__file__).with_name("observation-path.schema.json")
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        validate_path_record(path.to_dict(), schema)
+
+
 if __name__ == "__main__":
     unittest.main()
