@@ -24,7 +24,8 @@ _ALLOWED_NEXT = {
     "admitted": {"returned", "no_result"},
     "returned": {"evidence_authorized", "evidence_refused", "interpreted", "interpretation_failed"},
     "evidence_authorized": {"applied", "interpreted", "application_failed", "interpretation_failed"},
-    "applied": {"sender_acknowledged", "interpreted", "application_failed", "interpretation_failed"},
+    "applied": {"sender_ack_progress", "sender_acknowledged", "interpreted", "application_failed", "interpretation_failed"},
+    "sender_ack_progress": {"sender_ack_progress", "sender_acknowledged", "interpretation_failed"},
     "sender_acknowledged": {"interpreted", "interpretation_failed"},
     "interpreted": {"continued", "query_determined", "unresolved"},
 }
@@ -48,6 +49,7 @@ _EVIDENCE_REQUIRED = {
     "evidence_authorized",
     "evidence_refused",
     "applied",
+    "sender_ack_progress",
     "sender_acknowledged",
     "interpreted",
     "query_determined",
@@ -215,21 +217,23 @@ class ObservationPath:
             _nonempty(detail_values.get("target_id"), "details.target_id")
             _nonempty(detail_values.get("projection_digest"), "details.projection_digest")
             _nonempty(detail_values.get("register_prefix"), "details.register_prefix")
-        elif stage == "sender_acknowledged":
+        elif stage in {"sender_ack_progress", "sender_acknowledged"}:
             _nonempty(detail_values.get("event_kind"), "details.event_kind")
             logical_time = detail_values.get("logical_time")
             if isinstance(logical_time, bool) or not isinstance(logical_time, int) or logical_time < 0:
                 raise ValueError("sender_acknowledged requires non-negative integer details.logical_time")
             sources = detail_values.get("sources")
             acknowledgements = detail_values.get("acknowledged_sequences")
-            if not isinstance(sources, (list, tuple)) or not sources:
-                raise ValueError("sender_acknowledged requires a non-empty sources sequence")
+            if not isinstance(sources, (list, tuple)):
+                raise ValueError("sender acknowledgement sources must be a sequence")
             if any(not isinstance(source, str) or not source.strip() for source in sources):
-                raise ValueError("sender_acknowledged sources must be non-empty strings")
+                raise ValueError("sender acknowledgement sources must be non-empty strings")
             if len(set(sources)) != len(sources):
-                raise ValueError("sender_acknowledged sources must be unique")
-            if not isinstance(acknowledgements, (list, tuple)) or not acknowledgements:
-                raise ValueError("sender_acknowledged requires acknowledged_sequences")
+                raise ValueError("sender acknowledgement sources must be unique")
+            if not isinstance(acknowledgements, (list, tuple)):
+                raise ValueError("sender acknowledgement requires acknowledged_sequences")
+            if stage == "sender_acknowledged" and not acknowledgements:
+                raise ValueError("sender_acknowledged requires non-empty acknowledged_sequences")
             seen_acknowledgements = set()
             for item in acknowledgements:
                 if not isinstance(item, Mapping):
@@ -245,6 +249,44 @@ class ObservationPath:
                 seen_acknowledgements.add(identity)
             if {item["source"] for item in acknowledgements} != set(sources):
                 raise ValueError("acknowledged sequence sources must equal declared sources")
+            expected = detail_values.get("expected_event_sequences")
+            missing = detail_values.get("missing_event_sequences")
+            if not isinstance(expected, (list, tuple)) or not expected:
+                raise ValueError("sender acknowledgement requires expected_event_sequences")
+            expected_ids = set()
+            for item in expected:
+                if not isinstance(item, Mapping):
+                    raise ValueError("expected event sequence entries must be mappings")
+                source = _nonempty(item.get("source"), "expected sequence source")
+                channel = _nonempty(item.get("channel"), "expected sequence channel")
+                sequence = item.get("sequence")
+                if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence <= 0:
+                    raise ValueError("expected event sequence must be a positive integer")
+                expected_ids.add((source, channel, sequence))
+            if len(expected_ids) != len(expected):
+                raise ValueError("expected event sequence entries must be unique")
+            acknowledged_ids = {
+                (item["source"], item["channel"], item["sequence"])
+                for item in acknowledgements
+            }
+            if not isinstance(missing, (list, tuple)):
+                raise ValueError("sender acknowledgement requires missing_event_sequences")
+            missing_ids = set()
+            for item in missing:
+                if not isinstance(item, Mapping):
+                    raise ValueError("missing event sequence entries must be mappings")
+                source = _nonempty(item.get("source"), "missing sequence source")
+                channel = _nonempty(item.get("channel"), "missing sequence channel")
+                sequence = item.get("sequence")
+                if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence <= 0:
+                    raise ValueError("missing event sequence must be a positive integer")
+                missing_ids.add((source, channel, sequence))
+            if len(missing_ids) != len(missing) or missing_ids != expected_ids - acknowledged_ids:
+                raise ValueError("missing_event_sequences must equal expected minus acknowledged")
+            if stage == "sender_ack_progress" and not missing_ids:
+                raise ValueError("sender_ack_progress must retain at least one missing event sequence")
+            if stage == "sender_acknowledged" and missing_ids:
+                raise ValueError("sender_acknowledged cannot retain missing event sequences")
             _nonempty(detail_values.get("ack_digest"), "details.ack_digest")
         elif stage == "application_failed":
             _nonempty(detail_values.get("reason"), "details.reason")
