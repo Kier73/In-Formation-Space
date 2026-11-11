@@ -1,6 +1,6 @@
 # Cold-start continuity: the split-clock relay
 
-**Status:** designed experiment; not yet independently run.
+**Status:** two handoff runs recorded and reviewed; a fully sandbox-isolated packet-only run remains open.
 
 This experiment asks whether one contributor can leave enough durable context for another, independent contributor to continue useful work without access to the original conversation or private reasoning.
 
@@ -21,7 +21,7 @@ For a meaningful first run:
 1. Choose a separate model instance or a fresh conversation with no access to the authoring discussion.
 2. Give it **only** `packet.md` and, optionally, `report-template.md`. Do not provide this README or the reviewer guide.
 3. Ask it to complete the report from the packet alone. Do not correct it or reveal the intended uncertainty boundaries during the attempt.
-4. Save its response as a new, dated artifact. Record the model/tool context if known, but do not assume that this identifies a persistent intelligence.
+4. Save its response as a new, dated artifact. Record the exact prompt and material hashes, model/tool context when exposed, whether tool use was instrumented, and whether the workspace was isolated. A self-report of no tool use is not equivalent to an enforced access boundary.
 5. Compare the report against `reviewer-guide.md`. Record both strengths and useful disagreements. Do not reward agreement with an unstated answer.
 
 For a second run, change the recipient or the available context deliberately and record the difference. Avoid silently changing several conditions at once.
