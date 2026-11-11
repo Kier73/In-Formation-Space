@@ -40,6 +40,12 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+      - name: Check out pinned E-CPU runtime for live adapter integration
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 53569e138aca51954335729cdd31b87faf73896f
+          path: external/E-CPU
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -84,6 +90,11 @@ jobs:
         run: python -m unittest discover -s bridges/observation-path -p "test_adaptive_policy_execution.py" -v
       - name: Run E-CPU gated adapter contract tests
         run: python -m unittest discover -s bridges/observation-path -p "test_ecpu_gated_adapter.py" -v
+      - name: Run live E-CPU gated observation integration
+        env:
+          PYTHONPATH: external/E-CPU
+          ECPU_ROOT: external/E-CPU
+        run: python bridges/observation-path/ecpu_live_integration.py
       - name: Run append-only hypothesis revision tests
         run: python -m unittest discover -s bridges/hypothesis-revision -p "test_*.py" -v
       - name: Run Poset Interleaver property tests
