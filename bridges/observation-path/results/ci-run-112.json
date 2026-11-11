@@ -1,0 +1,114 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "bridge:adaptive-attention-execution:integrated-ci-run-112",
+  "observed_at": "2026-11-11T22:05:31.608087Z",
+  "recorded_at": "2026-11-11T22:05:31.608087Z",
+  "source": {
+    "kind": "github-actions-job-log",
+    "name": "Encounter envelope tests",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43108746664",
+    "capture_method": "successful test and validation output transcribed from CI job log"
+  },
+  "context": {
+    "workflow_run_id": 43108746664,
+    "job_id": 130818852599,
+    "commit": "3c8d2ecdcd0bdedf746dcff4fd1813a73f4a6155",
+    "runner": "ubuntu-latest",
+    "python": "3.11",
+    "exit_code": 0
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "workflow_run_id": 43108746664,
+      "job_id": 130818852599,
+      "commit": "3c8d2ecdcd0bdedf746dcff4fd1813a73f4a6155",
+      "runner": "ubuntu-latest",
+      "python": "3.11",
+      "exit_code": 0,
+      "suites": [
+        {
+          "suite": "formats/encounter-envelope",
+          "tests": 25,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-equivalence",
+          "tests": 25,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_observation_path.py",
+          "tests": 10,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_validate_observation_path.py",
+          "tests": 4,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_adaptive_policy_execution.py",
+          "tests": 11,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-01-poset-interleaver",
+          "tests": 11,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-02-finite-description-unbounded-space",
+          "tests": 7,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-03-distinction-refinement",
+          "tests": 8,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-04-active-distinction-selection",
+          "tests": 10,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-05-query-directed-attention",
+          "tests": 8,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-06-adaptive-attention-policy",
+          "tests": 7,
+          "result": "passed"
+        },
+        {
+          "suite": "guarded-shortcut-tradeoff",
+          "tests": 6,
+          "result": "passed"
+        },
+        {
+          "suite": "logistic-map-coverage-original",
+          "tests": 5,
+          "result": "passed"
+        },
+        {
+          "suite": "logistic-map-coverage-v2",
+          "tests": 6,
+          "result": "passed"
+        }
+      ],
+      "path_example_validation": "passed",
+      "total_tests": 143
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "f043f5e0e2b9ce1b9c170ae1907a4a3020a97703a4f532cf09159b61b13f776f",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  },
+  "extensions": {
+    "note": "This receipt attests to the recorded CI run and tests, not to a live transport or sensor execution."
+  }
+}
