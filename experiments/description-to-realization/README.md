@@ -180,6 +180,14 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Implementation](trials/trial-05-query-directed-attention/query_attention.py)
 - [Tests](trials/trial-05-query-directed-attention/test_query_attention.py)
 
+### Trial 06: Adaptive attention policies
+
+[Trial 06](trials/trial-06-adaptive-attention-policy/README.md) extends static observation packets into outcome-dependent decision trees. It chooses the next observation after seeing the previous result, minimizing expected additive cost under a supplied prior and reporting worst-case path cost. The exact subset solver is bounded to a modest finite hypothesis set and reports pairs that no available observation can distinguish.
+
+- [Construction brief](trials/trial-06-adaptive-attention-policy/brief.md)
+- [Implementation](trials/trial-06-adaptive-attention-policy/adaptive_attention.py)
+- [Tests](trials/trial-06-adaptive-attention-policy/test_adaptive_attention.py)
+
 ## 7. Open questions
 
 1. Which parts of a description are sufficient to make a construction reproducible across different model families and tool environments?
