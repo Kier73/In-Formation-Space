@@ -63,3 +63,75 @@ The table below records the empirical timing (in microseconds) across 12 coordin
    The existence of $t^* \approx 28$ provides concrete empirical refutation of the idea that symbolic description is "free". For small problems, interpretation and guard evaluation are more expensive than direct execution.
 3. **Decoupled Verification:**  
    The redundant residue check demonstrates that a guard does not need to re-run $T$ steps to certify an orbit: redundant algebraic invariants provide $O(\log t)$ certification.
+
+
+---
+
+## 4. Independent mathematical review (follow-up)
+
+The original benchmark's raw recurrence and affine matrix shortcut use the same primary modulus and their result comparison is meaningful. The original H3 guard result is not valid, however.
+
+### The projection assumption fails
+
+The original code computes a second recurrence modulo \(M_c=2^{31}-1\) and treats that output as the primary state modulo \(M_c\). The primary recurrence is modulo \(M_p=2^{61}-1\).
+
+For the proposed comparison to hold in general, reducing a canonical state in \(\mathbb{Z}/M_p\mathbb{Z}\) modulo \(M_c\) would need to be a well-defined projection compatible with the recurrence. That is not true here because \(M_c\) does not divide \(M_p\). In fact:
+
+\[
+M_p \bmod M_c = 1{,}073{,}741{,}823 \ne 0.
+\]
+
+Therefore, in general:
+
+\[
+\big((a x+b)\bmod M_p\big)\bmod M_c
+\ne
+\big(a(x\bmod M_c)+b\big)\bmod M_c.
+\]
+
+A reproducible coordinate from the original parameters at \(t=10\) gives:
+
+- Primary shortcut result reduced modulo \(M_c\): **366,246,460**
+- Independently computed recurrence modulo \(M_c\): **510,455,710**
+
+These disagree with no injected fault. At \(t=10{,}000\), the original nominal check is **1,392,226,910**, while the actual primary result reduced modulo \(M_c\) is **849,091,804**. The original H3 test only asks whether the faulty output differs from the independently computed smaller-modulus trajectory; it never establishes that the nominal primary state passes that same check. Consequently, the guard_detected_divergence result does not establish fault detection.
+
+### Corrected quotient-aware projection
+
+The v2 implementation computes the affine transform under the product modulus \(M_p M_c\). If \(U\) is the unbounded affine result, then:
+
+\[
+\tilde U = U \bmod (M_p M_c)
+\]
+
+preserves the result modulo \(M_p\), because \(M_p\) divides the product. Thus:
+
+\[
+x_p = \tilde U \bmod M_p
+\]
+
+is the canonical primary state, and:
+
+\[
+r_c = x_p \bmod M_c
+\]
+
+is its correct secondary residue. The secondary path uses a separate pair-based affine composition implementation, while the primary path uses matrix operations. The test suite checks that the no-fault primary result agrees with this quotient-aware residue before injecting a fault.
+
+This check remains a finite residue check: a difference divisible by \(M_c\) can escape it. A single successful bit-flip fixture is not a universal fault-tolerance guarantee.
+
+### Timing interpretation
+
+The original table supports a limited observation: for the tested Python/Windows run, raw execution was slower than shortcut plus the measured guard at the larger sampled coordinates. It does not by itself establish a platform-independent crossover or universal asymptotic timings.
+
+The original analysis says linear interpolation gives \(t^*\approx28\). Interpolating the tabulated cost difference between \(t=10\) and \(t=50\) gives approximately \(30.4\), and the sparse grid only establishes that the crossover lies between those tested points. V2 adds finer coordinates around the crossover and uses medians rather than minimum timings.
+
+The original equation includes interpreter cost \(c_I\) and fallback term \(p_{\mathrm{exit}}c_{\mathrm{exec}}\), but the original measured \(N(t)\) is only \(c_\sigma+c_g\). Accordingly, the benchmark measures a simplified nominal comparison, not the complete cost equation.
+
+### Disposition
+
+- Keep the original encounter and timing table as historical observations.
+- Treat H1 as a measured crossover bracket, not an exact law.
+- Treat H2 as evidence from one environment and finite sample set, not a proof of universal scaling.
+- Withdraw the original H3 fault-detection conclusion.
+- Use run_tradeoff_v2.py and test_tradeoff_v2.py for future guarded-residue experiments.
