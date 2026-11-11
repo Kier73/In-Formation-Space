@@ -51,7 +51,11 @@ Following the discipline in [`maps/mathematical-cautions.md`](../../maps/mathema
 
 ## 2. Files
 
-- [scan_coverage.py](scan_coverage.py) — 50,000-point deterministic parameter scanner and coverage matrix calculator.
+- [scan_coverage.py](scan_coverage.py) — original 50,000-point deterministic parameter scanner and coverage matrix calculator.
+- [v2-README.md](v2-README.md) — second pass using repeated returns, multiple initial conditions, cell-centered sampling, and an explicit stability margin.
+- [scan_coverage_v2.py](scan_coverage_v2.py) — more conservative numerical candidate-window scanner.
+- [test_scan_coverage.py](test_scan_coverage.py) and [test_scan_coverage_v2.py](test_scan_coverage_v2.py) — coverage invariants and classifier tests.
+- [review-note.md](review-note.md) — methodological review of the original scan.
 - [results/coverage-encounter.json](results/coverage-encounter.json) — Captured encounter envelope containing complete benchmark output and SHA-256 integrity receipt.
 - [results/analysis.md](results/analysis.md) — Original findings and tables, retained with corrected interpretation in the review note.
 - [review-note.md](review-note.md) — distinguishes finite-grid evidence from exact window and measure claims.
@@ -61,7 +65,7 @@ Following the discipline in [`maps/mathematical-cautions.md`](../../maps/mathema
 
 ## 3. Reproduction
 
-Run the scanner and validate its encounter envelope:
+Run the original scanner and validate its encounter envelope:
 
 ```bash
 python formats/encounter-envelope/capture_encounter.py cmd "python experiments/logistic-map-coverage/scan_coverage.py" --id "exp:logistic-coverage:manual" --out my-coverage.json
