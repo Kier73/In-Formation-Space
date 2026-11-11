@@ -29,6 +29,8 @@ The model assumes candidate observations are deterministic, non-intervening, and
 - brief.md — construction requirements
 - query_attention.py — exact/greedy query-resolution planner
 - test_query_attention.py — poset example and brute-force checks
+- construction-report.md — formulation, complexity, and CI results
+- results/test-encounter.json — successful test receipt (added after CI)
 
 ## Reproduce
 
