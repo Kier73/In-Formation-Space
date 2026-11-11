@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Kier73/E-CPU
-          ref: 53569e138aca51954335729cdd31b87faf73896f
+          ref: 800f94f83ffd6f527ed093c8d1c1e93e153c34f6
           path: external/E-CPU
       - name: Set up Python
         uses: actions/setup-python@v5
