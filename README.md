@@ -53,7 +53,10 @@ Create a directory when there is real material for it. Do not create structure m
 
 ## Early experiments
 
-The first optional interchange experiment is the [Encounter Envelope](formats/encounter-envelope/README.md). It explores how to preserve an observed event separately from later interpretations when work passes between independent contributors. It is experimental, non-normative, and deliberately narrow.
+These are optional investigations, not required workflows or settled standards:
+
+- [Encounter Envelope](formats/encounter-envelope/README.md) — preserve an observed event separately from later interpretations when work passes between independent contributors. Experimental and non-normative.
+- [Cold-start continuity](experiments/cold-start-continuity/README.md) — investigate whether a new contributor can recover evidence, uncertainty, and useful next steps from a retained handoff packet without access to the original conversation. Designed, not yet independently run.
 
 ## Working across projects
 
