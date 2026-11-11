@@ -1,7 +1,10 @@
 import hashlib
 import json
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
+import tempfile
 
 try:
     from jsonschema import Draft202012Validator, FormatChecker
@@ -14,6 +17,7 @@ from validate_envelope import (
     parse_iso8601,
     validate_encounter,
     verify_integrity,
+    main,
 )
 
 
@@ -150,6 +154,52 @@ class IntegrityTests(unittest.TestCase):
         self.assertIn("canonicalization", detail)
 
 
+class CliTests(unittest.TestCase):
+    def _run_cli(self, doc):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "envelope.json"
+            path.write_text(json.dumps(doc), encoding="utf-8")
+            output = StringIO()
+            with redirect_stdout(output):
+                code = main([str(path)])
+            return code, output.getvalue()
+
+    def test_cli_verifies_supported_digest(self):
+        doc = envelope()
+        doc["integrity"] = {
+            "algorithm": "sha256",
+            "canonicalization": "utf8-raw-v1",
+            "digest": hashlib.sha256(b"hello").hexdigest(),
+        }
+        code, output = self._run_cli(doc)
+        self.assertEqual(code, 0)
+        self.assertIn("Digest verified", output)
+
+    def test_cli_fails_explicitly_for_unsupported_algorithm(self):
+        doc = envelope()
+        doc["integrity"] = {
+            "algorithm": "sha512",
+            "canonicalization": "utf8-raw-v1",
+            "digest": "abc",
+        }
+        code, output = self._run_cli(doc)
+        self.assertEqual(code, 1)
+        self.assertIn("unsupported digest algorithm", output)
+
+    def test_cli_reports_payload_digest_as_unchecked(self):
+        doc = envelope()
+        doc["payload"]["digest"] = hashlib.sha256(b"hello").hexdigest()
+        doc["integrity"] = {
+            "algorithm": "sha256",
+            "canonicalization": "utf8-raw-v1",
+            "digest": hashlib.sha256(b"hello").hexdigest(),
+        }
+        code, output = self._run_cli(doc)
+        self.assertEqual(code, 0)
+        self.assertIn("Payload digest declared", output)
+        self.assertIn("not checked", output)
+
+
 class SchemaAgreementTests(unittest.TestCase):
     def test_shared_cases_agree_with_json_schema_when_available(self):
         if Draft202012Validator is None:
@@ -162,6 +212,7 @@ class SchemaAgreementTests(unittest.TestCase):
             ("minimal", envelope(), True),
             ("nullable timestamps", {**envelope(), "observed_at": None, "recorded_at": None}, True),
             ("naive timestamp", {**envelope(), "observed_at": "2026-11-11T20:30:00"}, False),
+            ("leap second subset", {**envelope(), "observed_at": "2026-11-11T20:30:60Z"}, False),
             ("whitespace id", {**envelope(), "id": "   "}, False),
             ("null relations", {**envelope(), "relations": None}, False),
             ("both payload forms", envelope({"value": "x", "reference": "r"}), False),
