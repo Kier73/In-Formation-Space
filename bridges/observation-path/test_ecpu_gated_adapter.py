@@ -105,7 +105,8 @@ def coordinator_snapshot(status="AUTHORIZED"):
             [{"kind": "phase", "logical_time": 7, "sources": ["A", "B"]}]
             if status == "AUTHORIZED" else []
         ),
-        "consume_intents": [],
+        # E-CPU retains an empty per-event consume-intent bucket after commit.
+        "consume_intents": [{"kind": "phase", "logical_time": 7, "links": []}],
         "apply_intents": [],
     }
 
