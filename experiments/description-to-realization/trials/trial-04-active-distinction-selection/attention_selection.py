@@ -56,8 +56,8 @@ def select_attention_packet(
     """
     if not states:
         raise ValueError("states must contain at least one state")
-    if max_exact_alternatives < 1:
-        raise ValueError("max_exact_alternatives must be positive")
+    if isinstance(max_exact_alternatives, bool) or not isinstance(max_exact_alternatives, int) or max_exact_alternatives < 1:
+        raise ValueError("max_exact_alternatives must be a positive integer")
 
     state_list = list(states)
     try:
@@ -109,7 +109,13 @@ def select_attention_packet(
         if candidate.name in seen_names:
             raise ValueError(f"duplicate candidate name: {candidate.name}")
         seen_names.add(candidate.name)
-        if not math.isfinite(float(candidate.cost)) or float(candidate.cost) <= 0.0:
+        if isinstance(candidate.cost, bool):
+            raise ValueError(f"candidate cost must be a finite positive number: {candidate.name}")
+        try:
+            cost = float(candidate.cost)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValueError(f"candidate cost must be a finite positive number: {candidate.name}") from exc
+        if not math.isfinite(cost) or cost <= 0.0:
             raise ValueError(f"candidate cost must be finite and positive: {candidate.name}")
         if not callable(candidate.observe):
             raise TypeError(f"candidate observation must be callable: {candidate.name}")
@@ -129,13 +135,12 @@ def select_attention_packet(
                 raise TypeError(f"candidate {candidate.name} returned an unhashable value") from exc
             if observed != target_value:
                 mask |= 1 << index
-        validated.append((candidate.name, float(candidate.cost), mask))
+        validated.append((candidate.name, cost, mask))
 
     union_mask = 0
     for _, _, mask in validated:
         union_mask |= mask
 
-    full_mask = (1 << ambiguity_before) - 1
     unseparable = tuple(
         state for index, state in enumerate(alternatives)
         if not (union_mask & (1 << index))
@@ -144,7 +149,6 @@ def select_attention_packet(
         index for index in range(ambiguity_before)
         if union_mask & (1 << index)
     ]
-    coverable_states = tuple(alternatives[index] for index in coverable_indices)
 
     # Compress to only alternatives that at least one candidate can separate.
     compressed_candidates = []
@@ -169,19 +173,20 @@ def select_attention_packet(
             for old_mask, (old_cost, chosen) in dp.items():
                 new_mask = old_mask | mask
                 new_cost = old_cost + cost
+                if not math.isfinite(new_cost):
+                    raise ValueError("combined candidate cost overflowed finite float range")
                 new_chosen = chosen + (candidate_index,)
                 existing = next_dp.get(new_mask)
                 if existing is None:
                     next_dp[new_mask] = (new_cost, new_chosen)
                 else:
                     old_best_cost, old_best_chosen = existing
-                    cheaper = new_cost < old_best_cost and not math.isclose(
-                        new_cost, old_best_cost, rel_tol=1e-12, abs_tol=1e-12
-                    )
-                    tied_but_earlier = math.isclose(
-                        new_cost, old_best_cost, rel_tol=1e-12, abs_tol=1e-12
-                    ) and new_chosen < old_best_chosen
-                    if cheaper or tied_but_earlier:
+                    # Costs are compared as the actual finite float values
+                    # supplied to the solver. An epsilon-based tie can silently
+                    # choose a strictly more expensive packet.
+                    if new_cost < old_best_cost or (
+                        new_cost == old_best_cost and new_chosen < old_best_chosen
+                    ):
                         next_dp[new_mask] = (new_cost, new_chosen)
             dp = next_dp
 
@@ -210,6 +215,8 @@ def select_attention_packet(
             index, name, cost, gain_mask = best_choice
             selected.append(name)
             best_cost += cost
+            if not math.isfinite(best_cost):
+                raise ValueError("combined greedy cost overflowed finite float range")
             uncovered &= ~gain_mask
             remaining.pop(index)
         solver_name = "greedy-set-cover"
