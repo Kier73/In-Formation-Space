@@ -130,6 +130,8 @@ These runs compare finite lists of prefixes, register tests, and coordinates. Th
 The accompanying test suite [`test_demonstration.py`](test_demonstration.py) verifies finite-test partition properties and includes a counterexample showing that a bounded suffix suite can miss a longer Myhill-Nerode distinguishing continuation. It does not infer universal equivalence from a finite sample.
 
 The [transition congruence checker](transition_congruence.py) tests whether current observational classes remain valid after every supplied transition, while its partition refiner computes the coarsest stable refinement without merging initially distinct blocks. Tests include a one-step state-phase example and a two-step example where a distinction propagates backward from future behavior. The separate [affine orbit checker](affine_orbit_equivalence.py) uses product-state cycle detection to prove all-future equality for two deterministic affine generators over a shared finite modulus, or returns `unknown` when a configured budget expires.
+
+For the later stages of an actual observation request, see the sibling [Evidence-gated Observation Path](../observation-path/README.md). It deliberately separates the request and receiver lifecycle from the equivalence and interpretation rules described here.
 The initial [execution receipt](results/bridge-encounter.json) records the original demonstration run. Subsequent code changes are checked by the current CI test suite; the initial receipt is not a receipt for every later revision.
 
 See also [Trial 03: Distinction Refinement](../../experiments/description-to-realization/trials/trial-03-distinction-refinement/README.md), which implements finite partition refinement and conditional entropy $H(D \mid O)$.
