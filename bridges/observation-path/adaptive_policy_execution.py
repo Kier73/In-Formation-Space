@@ -214,6 +214,36 @@ class AdaptivePolicyExecution:
         )
         self._status = "returned"
 
+    def record_unadmitted_return(
+        self,
+        actor: str,
+        *,
+        evidence_ref: str,
+        encounter_id: str,
+        payload_digest: str,
+        canonicalization: str,
+        clock_value: Optional[str] = None,
+        clock_domain: Optional[str] = None,
+    ) -> PolicyExecutionResult:
+        """Preserve a return that arrived without receiver admission."""
+        path = self._current_path()
+        if self._status != "dispatched":
+            raise ValueError(f"cannot record an unadmitted return while execution is {self._status}")
+        path.append(
+            "returned_unadmitted",
+            actor,
+            evidence_ref=evidence_ref,
+            clock_value=clock_value,
+            clock_domain=clock_domain,
+            details={
+                "encounter_id": encounter_id,
+                "payload_digest": payload_digest,
+                "canonicalization": canonicalization,
+            },
+        )
+        self._status = "returned_unadmitted"
+        return self.result()
+
     def interpret(
         self,
         interpreted_value: Hashable,
@@ -306,12 +336,28 @@ class AdaptivePolicyExecution:
         self._status = "ready"
         return self.result()
 
+    def stop_dispatch_failed(self, actor: str, reason: str) -> PolicyExecutionResult:
+        path = self._current_path()
+        if self._status != "planned":
+            raise ValueError(f"cannot record dispatch failure while execution is {self._status}")
+        path.append("dispatch_failed", actor, details={"reason": reason})
+        self._status = "dispatch_failed"
+        return self.result()
+
     def stop_no_result(self, actor: str, reason: str) -> PolicyExecutionResult:
         path = self._current_path()
         if self._status != "admitted":
             raise ValueError(f"cannot record no-result while execution is {self._status}")
         path.append("no_result", actor, details={"reason": reason})
         self._status = "no_result"
+        return self.result()
+
+    def stop_interpretation_failed(self, actor: str, reason: str) -> PolicyExecutionResult:
+        path = self._current_path()
+        if self._status != "returned":
+            raise ValueError(f"cannot record interpretation failure while execution is {self._status}")
+        path.append("interpretation_failed", actor, details={"reason": reason})
+        self._status = "interpretation_failed"
         return self.result()
 
     def stop_rejected(self, actor: str, reason: str) -> PolicyExecutionResult:
