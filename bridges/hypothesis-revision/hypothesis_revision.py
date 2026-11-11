@@ -64,6 +64,7 @@ class HypothesisCandidate:
     encounter_ref: str
     interpretation_ref: str
     proposal_method: str
+    source_encounter_id: Optional[str] = None
     source_payload_digest: Optional[str] = None
     source_canonicalization: Optional[str] = None
     validation_result: Optional[str] = None
@@ -173,6 +174,7 @@ class HypothesisRevisionLedger:
         interpretation_ref: str,
         proposal_method: str,
         proposer: str,
+        source_encounter_id: Optional[str] = None,
         source_payload_digest: Optional[str] = None,
         source_canonicalization: Optional[str] = None,
     ) -> HypothesisCandidate:
@@ -184,6 +186,8 @@ class HypothesisRevisionLedger:
         interpretation_ref = _nonempty(interpretation_ref, "interpretation_ref")
         proposal_method = _nonempty(proposal_method, "proposal_method")
         proposer = _nonempty(proposer, "proposer")
+        if source_encounter_id is not None:
+            source_encounter_id = _nonempty(source_encounter_id, "source_encounter_id")
         if source_payload_digest is not None:
             source_payload_digest = _nonempty(source_payload_digest, "source_payload_digest")
         if source_canonicalization is not None:
@@ -200,6 +204,7 @@ class HypothesisRevisionLedger:
             encounter_ref=encounter_ref,
             interpretation_ref=interpretation_ref,
             proposal_method=proposal_method,
+            source_encounter_id=source_encounter_id,
             source_payload_digest=source_payload_digest,
             source_canonicalization=source_canonicalization,
         )
@@ -214,6 +219,7 @@ class HypothesisRevisionLedger:
                 "encounter_ref": encounter_ref,
                 "interpretation_ref": interpretation_ref,
                 "proposal_method": proposal_method,
+                "source_encounter_id": source_encounter_id,
                 "source_payload_digest": source_payload_digest,
                 "source_canonicalization": source_canonicalization,
                 "status": "proposed",
@@ -271,6 +277,7 @@ class HypothesisRevisionLedger:
             raise ValueError("source attempt is unresolved for a reason other than policy model mismatch")
 
         encounter_ref = _nonempty(returned.get("evidence_ref"), "returned.evidence_ref")
+        encounter_id = _nonempty(returned_details.get("encounter_id"), "returned.encounter_id")
         interpretation_ref = _nonempty(interpreted.get("evidence_ref"), "interpreted.evidence_ref")
         payload_digest = _nonempty(returned_details.get("payload_digest"), "returned.payload_digest")
         canonicalization = _nonempty(returned_details.get("canonicalization"), "returned.canonicalization")
@@ -283,6 +290,7 @@ class HypothesisRevisionLedger:
             interpretation_ref=interpretation_ref,
             proposal_method=proposal_method,
             proposer=proposer,
+            source_encounter_id=encounter_id,
             source_payload_digest=payload_digest,
             source_canonicalization=canonicalization,
         )
@@ -314,6 +322,7 @@ class HypothesisRevisionLedger:
             encounter_ref=candidate.encounter_ref,
             interpretation_ref=candidate.interpretation_ref,
             proposal_method=candidate.proposal_method,
+            source_encounter_id=candidate.source_encounter_id,
             source_payload_digest=candidate.source_payload_digest,
             source_canonicalization=candidate.source_canonicalization,
             validation_result=result,
@@ -408,6 +417,7 @@ class HypothesisRevisionLedger:
                     "encounter_ref": candidate.encounter_ref,
                     "interpretation_ref": candidate.interpretation_ref,
                     "proposal_method": candidate.proposal_method,
+                    "source_encounter_id": candidate.source_encounter_id,
                     "source_payload_digest": candidate.source_payload_digest,
                     "source_canonicalization": candidate.source_canonicalization,
                     "validation_result": candidate.validation_result,
