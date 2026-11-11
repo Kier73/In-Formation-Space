@@ -149,11 +149,21 @@ class TemporalBindingAnalysisTests(unittest.TestCase):
         report = analyze_temporal_binding(binding_with_deltas([
             {"monotonic_elapsed_ns": 12, "causal_relation": "before"},
         ]))
-        self.assertEqual(validate_temporal_analysis(report), report)
+        binding = binding_with_deltas([
+            {"monotonic_elapsed_ns": 12, "causal_relation": "before"},
+        ])
+        self.assertEqual(validate_temporal_analysis(report, binding), report)
         altered = dict(report)
         altered["monotonic_total_elapsed_ns"] = 999
         with self.assertRaises(ValueError):
-            validate_temporal_analysis(altered)
+            validate_temporal_analysis(altered, binding)
+
+        # A freshly recomputed digest must not legitimize an incorrect derivation.
+        altered["analysis_digest"] = digest({
+            key: value for key, value in altered.items() if key != "analysis_digest"
+        })
+        with self.assertRaises(ValueError):
+            validate_temporal_analysis(altered, binding)
 
         schema = json.loads(
             (Path(__file__).with_name("temporal-path-analysis.schema.json"))
