@@ -184,6 +184,23 @@ class ObservationPathTests(unittest.TestCase):
                 "basis": "proof.json",
             })
 
+    def test_interpreted_observation_can_close_as_a_policy_continuation(self):
+        path = ObservationPath(intent())
+        path.append("dispatched", "host", evidence_ref="transport/send.json")
+        path.append("admitted", "receiver", evidence_ref="receiver/admission.json")
+        path.append("returned", "sensor", evidence_ref="encounters/reading.json", details={
+            "encounter_id": "reading",
+            "payload_digest": "sha256:raw",
+            "canonicalization": "utf8-raw-v1",
+        })
+        path.append("interpreted", "interpreter", evidence_ref="interpretations/reading.json", details={"method": "mode-parser-v1"})
+        path.append("continued", "policy-controller", evidence_ref="interpretations/reading.json", details={
+            "next_attempt_id": "attempt-02",
+            "next_candidate_name": "sensor.temperature",
+            "hypothesis_set_digest": "sha256:remaining-hypotheses",
+        })
+        self.assertEqual(path.status, "continued")
+        self.assertTrue(path.terminal)
 
 if __name__ == "__main__":
     unittest.main()
