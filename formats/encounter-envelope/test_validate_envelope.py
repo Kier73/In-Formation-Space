@@ -107,6 +107,17 @@ class IntegrityTests(unittest.TestCase):
         b = compute_payload_digest(second, "sha256", "json-sort-keys-utf8-v1")
         self.assertEqual(a, b)
 
+    def test_json_digest_preserves_integer_and_float_representation(self):
+        integer_doc = envelope({"value": 4})
+        float_doc = envelope({"value": 4.0})
+        integer_digest = compute_payload_digest(
+            integer_doc, "sha256", "json-sort-keys-utf8-v1"
+        )
+        float_digest = compute_payload_digest(
+            float_doc, "sha256", "json-sort-keys-utf8-v1"
+        )
+        self.assertNotEqual(integer_digest, float_digest)
+
     def test_verified_integrity(self):
         doc = envelope()
         doc["integrity"] = {
