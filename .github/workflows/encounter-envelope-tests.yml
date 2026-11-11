@@ -54,5 +54,9 @@ jobs:
         run: python -m unittest discover -s experiments/guarded-shortcut-tradeoff -p "test_*.py" -v
       - name: Execute corrected guarded-shortcut benchmark
         run: python experiments/guarded-shortcut-tradeoff/run_tradeoff_v2.py
-      - name: Run logistic-map coverage tests
-        run: python -m unittest discover -s experiments/logistic-map-coverage -p "test_*.py" -v
+      - name: Run original logistic-map coverage invariants
+        run: python -m unittest discover -s experiments/logistic-map-coverage -p "test_scan_coverage.py" -v
+      - name: Run repeated-return logistic-map tests
+        run: python -m unittest discover -s experiments/logistic-map-coverage -p "test_scan_coverage_v2.py" -v
+      - name: Execute repeated-return logistic-map scan
+        run: python experiments/logistic-map-coverage/scan_coverage_v2.py --samples 20000
