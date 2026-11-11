@@ -38,8 +38,18 @@ class FakeBackend:
         return self.registers[name]
 
 
+class FakeSenderChannel:
+    def __init__(self, source, channel, pending):
+        self.source = source
+        self.channel = channel
+        self._pending = set(pending)
+
+    def pending_sequences(self):
+        return tuple(sorted(self._pending))
+
+
 class FakeCoordinator:
-    def __init__(self, *, decision=None, snapshot=None, registers=None, checkpoint_digest=None):
+    def __init__(self, *, decision=None, snapshot=None, registers=None, checkpoint_digest=None, ack_results=None):
         self.decision = decision or FakeDecision()
         self.state = snapshot or coordinator_snapshot()
         self.vm = SimpleNamespace(
@@ -50,6 +60,17 @@ class FakeCoordinator:
         )
         self.commit_calls = 0
         self.checkpoint_digest = checkpoint_digest or ("b" * 64)
+        self.ack_results = ack_results or {"A": (3,), "B": (5,)}
+        self.ack_calls = 0
+
+    def process_acks(self, sender_channels):
+        self.ack_calls += 1
+        removed = {}
+        for source, channel in sender_channels.items():
+            sequences = tuple(self.ack_results.get(source, ()))
+            channel._pending.difference_update(sequences)
+            removed[source] = sequences
+        return removed
 
     def finalize_event(self, kind, logical_time):
         return self.decision
@@ -139,6 +160,7 @@ def make_path():
         estimated_cost=1.0,
         authority_required=True,
         application_required=True,
+        sender_ack_required=True,
     ))
     path.append("dispatched", "host", evidence_ref="transport/dispatch.json")
     path.append("admitted", "ecpu-receiver", evidence_ref="receiver/intake.json")
@@ -182,6 +204,27 @@ class ECPUGatedObservationAdapterTests(unittest.TestCase):
             path.events[-1].details["projection_digest"],
             application.projection_digest,
         )
+        sender_channels = {
+            "A": FakeSenderChannel("A", "phase-A", (3, 8)),
+            "B": FakeSenderChannel("B", "phase-B", (5,)),
+        }
+        ack = adapter.record_sender_acknowledgements(
+            path,
+            "phase",
+            7,
+            sender_channels,
+            acknowledgement_ref="sender-acks/phase-7.json",
+        )
+        self.assertEqual(coordinator.ack_calls, 1)
+        self.assertEqual(path.status, "sender_acknowledged")
+        self.assertEqual(ack.acknowledged_sources, ("A", "B"))
+        self.assertEqual(
+            set(ack.expected_event_sequences),
+            {("A", "phase-A", 3), ("B", "phase-B", 5)},
+        )
+        self.assertIn(("A", "phase-A", 8), ack.acknowledged_sequences)
+        self.assertEqual(sender_channels["A"].pending_sequences(), ())
+        self.assertEqual(sender_channels["B"].pending_sequences(), ())
 
     def test_consensus_refusal_is_recorded_without_application(self):
         decision = FakeDecision(
@@ -321,6 +364,53 @@ class ECPUGatedObservationAdapterTests(unittest.TestCase):
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
         validate_path_record(path.to_dict(), schema)
 
+
+    def test_sender_acknowledgement_requires_every_event_sequence_to_be_removed(self):
+        coordinator = FakeCoordinator(ack_results={"A": (), "B": (5,)})
+        adapter = ECPUGatedObservationAdapter(coordinator, decode_observation)
+        path = make_path()
+        adapter.record_finalized_decision(path, "phase", 7, decision_ref="consensus/phase-7.json")
+        adapter.record_application_commit(
+            path, "phase", 7, "/tmp/phase-7.json", checkpoint_ref="checkpoints/phase-7.json"
+        )
+        sender_channels = {
+            "A": FakeSenderChannel("A", "phase-A", (3,)),
+            "B": FakeSenderChannel("B", "phase-B", (5,)),
+        }
+        with self.assertRaises(ValueError):
+            adapter.record_sender_acknowledgements(
+                path, "phase", 7, sender_channels,
+                acknowledgement_ref="sender-acks/incomplete.json",
+            )
+        self.assertEqual(path.status, "applied")
+
+    def test_sender_acknowledgement_requires_declared_intent(self):
+        coordinator = FakeCoordinator()
+        adapter = ECPUGatedObservationAdapter(coordinator, decode_observation)
+        path = make_path()
+        adapter.record_finalized_decision(path, "phase", 7, decision_ref="consensus/phase-7.json")
+        adapter.record_application_commit(
+            path, "phase", 7, "/tmp/phase-7.json", checkpoint_ref="checkpoints/phase-7.json"
+        )
+        path.intent = ObservationIntent(
+            attempt_id="attempt-ecpu-01",
+            candidate_name="phase-stream",
+            query="What is the authorized phase quadrant?",
+            hypothesis_set_digest="sha256:prior-hypotheses",
+            estimated_cost=1.0,
+            authority_required=True,
+            application_required=True,
+            sender_ack_required=False,
+        )
+        with self.assertRaises(ValueError):
+            adapter.record_sender_acknowledgements(
+                path, "phase", 7,
+                {
+                    "A": FakeSenderChannel("A", "phase-A", (3,)),
+                    "B": FakeSenderChannel("B", "phase-B", (5,)),
+                },
+                acknowledgement_ref="sender-acks/not-required.json",
+            )
 
 if __name__ == "__main__":
     unittest.main()
