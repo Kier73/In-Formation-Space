@@ -149,6 +149,7 @@ class ObservationPathTests(unittest.TestCase):
     def test_event_details_are_snapshotted(self):
         path = ObservationPath(intent())
         path.append("dispatched", "host", evidence_ref="transport/send.json")
+        path.append("admitted", "receiver", evidence_ref="receiver/admission.json")
         details = {
             "encounter_id": "reading",
             "payload_digest": "sha256:x",
