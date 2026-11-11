@@ -77,6 +77,7 @@ The distinction between constructor and evaluator matters. The system that creat
 One useful interpretation is not that physical storage or any one observer is literally infinite. Rather:
 
 - Every new distinction can make previously indistinguishable states representably different.
+- A distinction adds an effective information dimension only when it separates possibilities that the earlier representation treated as equivalent; a redundant label expands vocabulary without necessarily expanding the state-space.
 - A new variable or relation can create directions of exploration that were not present in the earlier model.
 - Descriptions can be composed, refined, translated, and used to create new representational primitives.
 - No finite contributor needs to enumerate the entire possibility space in order to construct a useful path through it.
