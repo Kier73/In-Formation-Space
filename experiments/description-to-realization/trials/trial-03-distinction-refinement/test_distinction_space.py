@@ -19,6 +19,7 @@ class DistinctionRefinementTests(unittest.TestCase):
         self.assertEqual(second.refined_block_count, 4)
         self.assertEqual(second.split_pair_count, 2)
         self.assertAlmostEqual(second.conditional_entropy_bits, 1.0)
+        self.assertAlmostEqual(space.conditional_entropy_bits("y"), 1.0)
         self.assertFalse(second.redundant)
 
     def test_derived_distinction_is_redundant(self):
@@ -31,6 +32,7 @@ class DistinctionRefinementTests(unittest.TestCase):
         self.assertEqual(result.split_pair_count, 0)
         self.assertEqual(result.previous_block_count, result.refined_block_count)
         self.assertEqual(result.conditional_entropy_bits, 0.0)
+        self.assertEqual(space.conditional_entropy_bits("same_parity_again"), 0.0)
 
     def test_partial_refinement_counts_only_pairs_that_are_newly_separated(self):
         states = ("a", "b", "c", "d")
