@@ -1,0 +1,47 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:d2r-distinction-refinement:trial-03:ci-run-25",
+  "observed_at": "2026-11-11T21:27:19.3146398Z",
+  "recorded_at": "2026-11-11T21:27:19.3153264Z",
+  "source": {
+    "kind": "github-actions-job-log",
+    "name": "Encounter envelope tests",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43103148566",
+    "capture_method": "test output transcribed from successful CI job log"
+  },
+  "context": {
+    "workflow_run_id": 43103148566,
+    "job_id": 130799506756,
+    "commit": "bb7790eeb13b19c79e129fd971269febbc2c4f27",
+    "command": "python -m unittest discover -s experiments/description-to-realization/trials/trial-03-distinction-refinement -p test_*.py -v",
+    "exit_code": 0,
+    "runner": "ubuntu-latest",
+    "python": "3.11.18"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "exit_code": 0,
+      "tests": [
+        "test_bad_states_weights_and_observations_are_rejected",
+        "test_conditional_entropy_uses_supplied_state_weights",
+        "test_derived_distinction_is_redundant",
+        "test_duplicate_names_and_non_callable_observations_are_rejected",
+        "test_independent_binary_distinction_refines_every_existing_block",
+        "test_partial_refinement_counts_only_pairs_that_are_newly_separated",
+        "test_partition_refinement_never_merges_previous_blocks",
+        "test_signatures_and_partitions_are_stable"
+      ],
+      "stdout": "Ran 8 tests in 0.001s\nOK\n"
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "f7373acfce01410ac7a991f8a87e5ec33028a8c9027e8f838adea1587c6f14fc",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  },
+  "extensions": {
+    "note": "Tests validate finite partition examples and algebraic properties; the result is not a universal ontology or geometric-dimension claim."
+  }
+}
