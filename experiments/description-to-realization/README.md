@@ -188,6 +188,8 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Implementation](trials/trial-06-adaptive-attention-policy/adaptive_attention.py)
 - [Tests](trials/trial-06-adaptive-attention-policy/test_adaptive_attention.py)
 
+[Attention and Distinction Landscape](attention-landscape.md) compares Trials 03–06 and explains when partition refinement, target isolation, query resolution, or adaptive policies are appropriate.
+
 ## 7. Open questions
 
 1. Which parts of a description are sufficient to make a construction reproducible across different model families and tool environments?
