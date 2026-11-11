@@ -78,6 +78,8 @@ jobs:
         run: python -m unittest discover -s bridges/observation-path -p "test_validate_observation_path.py" -v
       - name: Run adaptive policy execution bridge tests
         run: python -m unittest discover -s bridges/observation-path -p "test_adaptive_policy_execution.py" -v
+      - name: Run append-only hypothesis revision tests
+        run: python -m unittest discover -s bridges/hypothesis-revision -p "test_*.py" -v
       - name: Run Poset Interleaver property tests
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-01-poset-interleaver -p "test_*.py" -v
       - name: Run finite-description unbounded-space tests
