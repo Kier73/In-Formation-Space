@@ -11,25 +11,27 @@ An encounter can be a tool response, a measurement, a received message, a file, 
 ## Files
 
 - [schema.json](schema.json) — JSON Schema 2020-12 description of the experimental envelope.
-- [validate_envelope.py](validate_envelope.py) — zero-dependency Python validator for envelope structure and payload digests.
-- [test_validator.py](test_validator.py) — positive and negative unit test fixtures covering schema rules, RFC 3339 timezones, and digest checking.
-- [capture_encounter.py](capture_encounter.py) — command runner and observation packaging utility that emits compliant envelopes.
+- [validate_envelope.py](validate_envelope.py) — zero-dependency Python structural validator and limited inline-payload digest checker.
+- [test_validate_envelope.py](test_validate_envelope.py) — standard-library tests; schema-parity checks run too when the optional jsonschema package is installed.
 - [examples/tool-observation.json](examples/tool-observation.json) — a minimal illustrative record.
-- [examples/captured-cmd.json](examples/captured-cmd.json) — an automatically captured subprocess execution record with SHA-256 integrity verification.
 
-## Verification and capture
+## Verification
 
-To validate an encounter record against the specification:
+Validate an encounter record:
 
-```bash
+\`\`\`bash
 python formats/encounter-envelope/validate_envelope.py formats/encounter-envelope/examples/tool-observation.json
-```
+\`\`\`
 
-To run a command and capture its execution output as an encounter envelope:
+Run the standard-library test suite:
 
-```bash
-python formats/encounter-envelope/capture_encounter.py cmd "python -V" --id "env:python:check" --out my-envelope.json
-```
+\`\`\`bash
+python -m unittest discover -s formats/encounter-envelope -p 'test_*.py' -v
+\`\`\`
+
+The validator checks the documented structural constraints without third-party dependencies. Its optional schema-agreement test uses jsonschema with a format checker when that development dependency is present; otherwise that one test is skipped. The runtime validator does not import jsonschema.
+
+An exit code of 0 means structural validation passed and any requested inline digest check was completed successfully. An exit code of 1 means a structural check failed, a digest mismatched, or a requested digest could not be verified. Exit code 2 is command usage error.
 
 ## Shape
 
@@ -37,18 +39,34 @@ An envelope has a format identifier, a local record identifier, a source declara
 
 | Field | Purpose |
 | --- | --- |
-| `format` | Identifies this exact envelope version. |
-| `id` | Identifier chosen by the recording contributor. It is not globally unique by itself. |
-| `observed_at` | Time of the event, if known, in an ISO 8601 date-time representation. |
-| `recorded_at` | Time the envelope was written, if known. |
-| `source` | Declared origin and capture method. A declaration is provenance information, not authentication. |
-| `context` | Optional surrounding conditions needed to interpret the encounter. |
-| `payload` | The captured value or a reference to the retained artifact. |
-| `relations` | Optional links to related encounters or artifacts. |
-| `integrity` | Optional digest metadata. The digest algorithm and canonicalization must be stated when used. |
-| `extensions` | Optional namespaced additions for domain-specific needs. |
+| format | Identifies this exact envelope version. |
+| id | Identifier chosen by the recording contributor. It is not globally unique by itself. |
+| observed_at | Time of the event, if known, as a timezone-qualified RFC 3339 date-time or null. |
+| recorded_at | Time the envelope was written, if known. |
+| source | Declared origin and capture method. A declaration is provenance information, not authentication. |
+| context | Optional surrounding conditions needed to interpret the encounter. |
+| payload | The captured value or a reference to the retained artifact. |
+| relations | Optional links to related encounters or artifacts. |
+| integrity | Optional digest metadata. |
+| extensions | Optional namespaced additions for domain-specific needs. |
 
 The schema permits extra fields so experiments can evolve without waiting for this proposal to anticipate every domain. Producers should still prefer namespaced extension keys and document their meaning.
+
+## Digest contract implemented by the validator
+
+Digest declarations are not authentication or proof of origin. They only let a reader check whether bytes match a stated digest under a stated byte-conversion rule.
+
+The validator currently implements:
+
+- algorithm: sha256
+- canonicalization: utf8-raw-v1 — for a string payload, hash its UTF-8 bytes exactly, without JSON quotes.
+- canonicalization: json-sort-keys-utf8-v1 — serialize the inline JSON value with sorted object keys, compact separators, UTF-8 characters preserved, and non-finite numbers rejected; then hash those bytes.
+
+The second mode is a small, explicitly named local contract. It is **not** a claim of RFC 8785/JCS compatibility or universal cross-language canonical JSON. Future implementations should reproduce these exact rules or introduce a new canonicalization identifier.
+
+For an inline value, integrity must include algorithm, canonicalization, and digest for the validator to verify the claim. Unsupported or missing settings are reported as unverified, not silently accepted. A mismatch is reported explicitly.
+
+For payload.reference, the validator does not fetch the referenced artifact. An integrity declaration for a reference is reported as **not checked**, and the command exits non-zero when verification was requested. payload.digest by itself is only a declaration; without an algorithm, canonicalization, and accessible bytes, it is not verified by this tool.
 
 ## One record, not one interpretation
 
@@ -78,7 +96,7 @@ This proposal deliberately does **not** define:
 
 An absent timestamp is not zero. A missing source identity is not proof of anonymity. A reference is not proof that its target remains available. A digest is useful only when its algorithm, input bytes, and canonicalization are known.
 
-For large or non-JSON artifacts, store the artifact separately and use `payload.reference`; retain media type, digest, and any decoding details needed to retrieve and check it. Avoid copying private or access-controlled material into a public repository.
+For large or non-JSON artifacts, store the artifact separately and use payload.reference; retain media type, digest, and any decoding details needed to retrieve and check it. Avoid copying private or access-controlled material into a public repository.
 
 ## Why this is a proposal
 
