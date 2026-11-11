@@ -7,6 +7,7 @@ on:
       - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
       - "experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/**"
       - "experiments/description-to-realization/trials/trial-03-distinction-refinement/**"
+      - "experiments/description-to-realization/trials/trial-04-active-distinction-selection/**"
       - "experiments/guarded-shortcut-tradeoff/**"
       - "experiments/logistic-map-coverage/**"
       - ".github/workflows/encounter-envelope-tests.yml"
@@ -16,6 +17,7 @@ on:
       - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
       - "experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/**"
       - "experiments/description-to-realization/trials/trial-03-distinction-refinement/**"
+      - "experiments/description-to-realization/trials/trial-04-active-distinction-selection/**"
       - "experiments/guarded-shortcut-tradeoff/**"
       - "experiments/logistic-map-coverage/**"
       - ".github/workflows/encounter-envelope-tests.yml"
@@ -54,6 +56,8 @@ jobs:
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space -p "test_*.py" -v
       - name: Run distinction refinement tests
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-03-distinction-refinement -p "test_*.py" -v
+      - name: Run active distinction selection tests
+        run: python -m unittest discover -s experiments/description-to-realization/trials/trial-04-active-distinction-selection -p "test_*.py" -v
       - name: Run corrected guarded-shortcut tests
         run: python -m unittest discover -s experiments/guarded-shortcut-tradeoff -p "test_*.py" -v
       - name: Execute corrected guarded-shortcut benchmark
