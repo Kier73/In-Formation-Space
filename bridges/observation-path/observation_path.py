@@ -24,7 +24,8 @@ _ALLOWED_NEXT = {
     "admitted": {"returned", "no_result"},
     "returned": {"evidence_authorized", "evidence_refused", "interpreted", "interpretation_failed"},
     "evidence_authorized": {"applied", "interpreted", "application_failed", "interpretation_failed"},
-    "applied": {"interpreted", "application_failed", "interpretation_failed"},
+    "applied": {"sender_acknowledged", "interpreted", "application_failed", "interpretation_failed"},
+    "sender_acknowledged": {"interpreted", "interpretation_failed"},
     "interpreted": {"continued", "query_determined", "unresolved"},
 }
 _TERMINAL = {
@@ -47,6 +48,7 @@ _EVIDENCE_REQUIRED = {
     "evidence_authorized",
     "evidence_refused",
     "applied",
+    "sender_acknowledged",
     "interpreted",
     "query_determined",
 }
@@ -83,6 +85,7 @@ class ObservationIntent:
     plan_ref: Optional[str] = None
     authority_required: bool = False
     application_required: bool = False
+    sender_ack_required: bool = False
 
     def __post_init__(self) -> None:
         _nonempty(self.attempt_id, "attempt_id")
@@ -105,6 +108,10 @@ class ObservationIntent:
             raise ValueError("application_required must be boolean")
         if self.application_required and not self.authority_required:
             raise ValueError("application_required implies authority_required")
+        if not isinstance(self.sender_ack_required, bool):
+            raise ValueError("sender_ack_required must be boolean")
+        if self.sender_ack_required and not self.application_required:
+            raise ValueError("sender_ack_required implies application_required")
 
 
 @dataclass(frozen=True)
@@ -191,6 +198,8 @@ class ObservationPath:
         detail_values = dict(details or {})
         if stage == "applied" and not self.intent.application_required:
             raise ValueError("applied stage requires intent.application_required")
+        if stage == "sender_acknowledged" and not self.intent.sender_ack_required:
+            raise ValueError("sender_acknowledged stage requires intent.sender_ack_required")
         if stage == "application_failed" and not self.intent.application_required:
             raise ValueError("application_failed requires intent.application_required")
         if stage == "evidence_authorized":
@@ -206,6 +215,37 @@ class ObservationPath:
             _nonempty(detail_values.get("target_id"), "details.target_id")
             _nonempty(detail_values.get("projection_digest"), "details.projection_digest")
             _nonempty(detail_values.get("register_prefix"), "details.register_prefix")
+        elif stage == "sender_acknowledged":
+            _nonempty(detail_values.get("event_kind"), "details.event_kind")
+            logical_time = detail_values.get("logical_time")
+            if isinstance(logical_time, bool) or not isinstance(logical_time, int) or logical_time < 0:
+                raise ValueError("sender_acknowledged requires non-negative integer details.logical_time")
+            sources = detail_values.get("sources")
+            acknowledgements = detail_values.get("acknowledged_sequences")
+            if not isinstance(sources, (list, tuple)) or not sources:
+                raise ValueError("sender_acknowledged requires a non-empty sources sequence")
+            if any(not isinstance(source, str) or not source.strip() for source in sources):
+                raise ValueError("sender_acknowledged sources must be non-empty strings")
+            if len(set(sources)) != len(sources):
+                raise ValueError("sender_acknowledged sources must be unique")
+            if not isinstance(acknowledgements, (list, tuple)) or not acknowledgements:
+                raise ValueError("sender_acknowledged requires acknowledged_sequences")
+            seen_acknowledgements = set()
+            for item in acknowledgements:
+                if not isinstance(item, Mapping):
+                    raise ValueError("acknowledged sequence entries must be mappings")
+                source = _nonempty(item.get("source"), "acknowledged sequence source")
+                channel = _nonempty(item.get("channel"), "acknowledged sequence channel")
+                sequence = item.get("sequence")
+                if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence <= 0:
+                    raise ValueError("acknowledged sequence must be a positive integer")
+                identity = (source, channel, sequence)
+                if identity in seen_acknowledgements:
+                    raise ValueError("acknowledged sequence entries must be unique")
+                seen_acknowledgements.add(identity)
+            if {item["source"] for item in acknowledgements} != set(sources):
+                raise ValueError("acknowledged sequence sources must equal declared sources")
+            _nonempty(detail_values.get("ack_digest"), "details.ack_digest")
         elif stage == "application_failed":
             _nonempty(detail_values.get("reason"), "details.reason")
         elif stage in {"returned", "returned_unadmitted"}:
@@ -220,12 +260,18 @@ class ObservationPath:
         elif stage in {"dispatch_failed", "rejected", "no_result", "interpretation_failed", "unresolved"}:
             _nonempty(detail_values.get("reason"), "details.reason")
         elif stage == "interpreted":
-            if self.intent.authority_required:
-                required_stage = "applied" if self.intent.application_required else "evidence_authorized"
-                if current != required_stage:
-                    raise ValueError(
-                        f"intent requires {required_stage} before interpretation; current stage is {current}"
-                    )
+            if self.intent.sender_ack_required:
+                required_stage = "sender_acknowledged"
+            elif self.intent.application_required:
+                required_stage = "applied"
+            elif self.intent.authority_required:
+                required_stage = "evidence_authorized"
+            else:
+                required_stage = None
+            if required_stage is not None and current != required_stage:
+                raise ValueError(
+                    f"intent requires {required_stage} before interpretation; current stage is {current}"
+                )
             _nonempty(detail_values.get("method"), "details.method")
         elif stage == "continued":
             _nonempty(detail_values.get("next_attempt_id"), "details.next_attempt_id")
@@ -283,6 +329,7 @@ class ObservationPath:
                 "plan_ref": self.intent.plan_ref,
                 "authority_required": self.intent.authority_required,
                 "application_required": self.intent.application_required,
+                "sender_ack_required": self.intent.sender_ack_required,
             },
             "status": self.status,
             "terminal": self.terminal,
