@@ -268,6 +268,8 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             acknowledgement_ref=str(self.root / "sender-acks-30.json"),
         )
         self.assertEqual(path.status, "sender_acknowledged")
+        self.assertTrue(acknowledgement.complete)
+        self.assertEqual(acknowledgement.status, "sender_acknowledged")
         self.assertEqual(acknowledgement.acknowledged_sources, ("A", "B"))
         self.assertEqual(
             set(acknowledgement.expected_event_sequences),
