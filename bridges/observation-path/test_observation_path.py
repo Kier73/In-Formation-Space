@@ -279,5 +279,81 @@ class ObservationPathTests(unittest.TestCase):
         path.append("interpreted", "interpreter", evidence_ref="interpretation.json", details={"method": "v1"})
         self.assertEqual(path.status, "interpreted")
 
+    def test_sender_acknowledgement_is_a_distinct_optional_gate(self):
+        path = ObservationPath(ObservationIntent(
+            attempt_id="attempt-ack",
+            candidate_name="sensor.mode",
+            query="q",
+            hypothesis_set_digest="sha256:hypotheses",
+            estimated_cost=1.0,
+            authority_required=True,
+            application_required=True,
+            sender_ack_required=True,
+        ))
+        path.append("dispatched", "host", evidence_ref="transport/send.json")
+        path.append("admitted", "receiver", evidence_ref="receiver/admission.json")
+        path.append("returned", "sensor", evidence_ref="encounters/raw.json", details={
+            "encounter_id": "raw-ack-01",
+            "payload_digest": "sha256:raw",
+            "canonicalization": "utf8-raw-v1",
+        })
+        path.append("evidence_authorized", "consensus", evidence_ref="consensus/decision.json", details={
+            "decision_status": "AUTHORIZED",
+            "policy_digest": "sha256:policy",
+            "decision_digest": "sha256:decision",
+            "quorum": 2,
+            "strict": True,
+            "observed_sources": ["A", "B"],
+            "dissenting_sources": [],
+            "missing_sources": [],
+            "representative_source": "A",
+        })
+        path.append("applied", "receiver-vm", evidence_ref="vm/checkpoint.json", details={
+            "application_id": "phase:7",
+            "target_id": "42",
+            "projection_digest": "sha256:projection",
+            "register_prefix": "phase",
+        })
+        with self.assertRaises(ValueError):
+            path.append("interpreted", "interpreter", evidence_ref="interpretation.json", details={"method": "v1"})
+        path.append("sender_acknowledged", "sender", evidence_ref="acks/phase-7.json", details={
+            "event_kind": "phase",
+            "logical_time": 7,
+            "sources": ["A", "B"],
+            "expected_event_sequences": [
+                {"source": "A", "channel": "phase-A", "sequence": 3},
+                {"source": "B", "channel": "phase-B", "sequence": 5},
+            ],
+            "acknowledged_sequences": [
+                {"source": "A", "channel": "phase-A", "sequence": 3},
+                {"source": "B", "channel": "phase-B", "sequence": 5},
+                {"source": "A", "channel": "phase-A", "sequence": 2},
+            ],
+            "ack_digest": "a" * 64,
+        })
+        path.append("interpreted", "interpreter", evidence_ref="interpretations/phase-7.json", details={"method": "phase-parser-v1"})
+        self.assertEqual(path.status, "interpreted")
+        self.assertFalse(path.terminal)
+
+    def test_sender_acknowledged_requires_declared_ack_gate(self):
+        path = ObservationPath(intent())
+        path.append("dispatched", "host", evidence_ref="transport/send.json")
+        path.append("admitted", "receiver", evidence_ref="receiver/admission.json")
+        path.append("returned", "sensor", evidence_ref="encounters/raw.json", details={
+            "encounter_id": "raw",
+            "payload_digest": "sha256:raw",
+            "canonicalization": "utf8-raw-v1",
+        })
+        with self.assertRaises(ValueError):
+            path.append("sender_acknowledged", "sender", evidence_ref="acks.json", details={
+                "event_kind": "sensor",
+                "logical_time": 1,
+                "sources": ["A"],
+                "expected_event_sequences": [{"source": "A", "channel": "sensor", "sequence": 1}],
+                "acknowledged_sequences": [{"source": "A", "channel": "sensor", "sequence": 1}],
+                "ack_digest": "a" * 64,
+            })
+
+
 if __name__ == "__main__":
     unittest.main()
