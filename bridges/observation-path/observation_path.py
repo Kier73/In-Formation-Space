@@ -22,9 +22,9 @@ _ALLOWED_NEXT = {
     "planned": {"dispatched", "dispatch_failed"},
     "dispatched": {"admitted", "rejected", "dispatch_failed", "returned_unadmitted"},
     "admitted": {"returned", "no_result"},
-    "returned": {"evidence_authorized", "evidence_refused", "interpreted"},
-    "evidence_authorized": {"applied", "interpreted", "application_failed"},
-    "applied": {"interpreted", "application_failed"},
+    "returned": {"evidence_authorized", "evidence_refused", "interpreted", "interpretation_failed"},
+    "evidence_authorized": {"applied", "interpreted", "application_failed", "interpretation_failed"},
+    "applied": {"interpreted", "application_failed", "interpretation_failed"},
     "interpreted": {"continued", "query_determined", "unresolved"},
 }
 _TERMINAL = {
