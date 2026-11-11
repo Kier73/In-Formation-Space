@@ -51,6 +51,8 @@ class AdaptivePolicyExecution:
         query_label: str,
         hypothesis_digest: Callable[[Sequence[Hashable]], str],
         plan_ref: Optional[str] = None,
+        evidence_authority_required: bool = False,
+        receiver_application_required: bool = False,
     ) -> None:
         _nonempty(attempt_id_prefix, "attempt_id_prefix")
         _nonempty(query_label, "query_label")
@@ -58,6 +60,12 @@ class AdaptivePolicyExecution:
             _nonempty(plan_ref, "plan_ref")
         if not callable(hypothesis_digest):
             raise TypeError("hypothesis_digest must be callable")
+        if not isinstance(evidence_authority_required, bool):
+            raise ValueError("evidence_authority_required must be boolean")
+        if not isinstance(receiver_application_required, bool):
+            raise ValueError("receiver_application_required must be boolean")
+        if receiver_application_required and not evidence_authority_required:
+            raise ValueError("receiver_application_required implies evidence_authority_required")
         if not getattr(plan, "complete", False):
             raise ValueError("cannot execute an incomplete adaptive policy plan")
         root = getattr(plan, "policy", None)
@@ -87,6 +95,8 @@ class AdaptivePolicyExecution:
         self._query_label = query_label
         self._hypothesis_digest = hypothesis_digest
         self._plan_ref = plan_ref
+        self._evidence_authority_required = evidence_authority_required
+        self._receiver_application_required = receiver_application_required
         self._attempt_index = 0
         self._path: Optional[ObservationPath] = None
         self._attempts: List[ObservationPath] = []
@@ -143,6 +153,8 @@ class AdaptivePolicyExecution:
             hypothesis_set_digest=self._digest(getattr(self._node, "hypotheses")),
             estimated_cost=float(candidate.cost),
             plan_ref=self._plan_ref,
+            authority_required=self._evidence_authority_required,
+            application_required=self._receiver_application_required,
         )
         self._path = ObservationPath(intent)
         self._attempts.append(self._path)
@@ -244,6 +256,117 @@ class AdaptivePolicyExecution:
         self._status = "returned_unadmitted"
         return self.result()
 
+
+
+    def mark_evidence_authorized(
+        self,
+        actor: str,
+        evidence_ref: str,
+        *,
+        policy_digest: str,
+        decision_digest: str,
+        quorum: int,
+        strict: bool,
+        observed_sources: Sequence[str],
+        representative_source: str,
+        dissenting_sources: Sequence[str] = (),
+        missing_sources: Sequence[str] = (),
+    ) -> None:
+        """Record explicit consensus/authority after a raw return is preserved."""
+        path = self._current_path()
+        if self._status != "returned":
+            raise ValueError(f"cannot authorize evidence while execution is {self._status}")
+        path.append(
+            "evidence_authorized",
+            actor,
+            evidence_ref=evidence_ref,
+            details={
+                "decision_status": "AUTHORIZED",
+                "policy_digest": policy_digest,
+                "decision_digest": decision_digest,
+                "quorum": quorum,
+                "strict": strict,
+                "observed_sources": list(observed_sources),
+                "dissenting_sources": list(dissenting_sources),
+                "missing_sources": list(missing_sources),
+                "representative_source": representative_source,
+            },
+        )
+        self._status = "evidence_authorized"
+
+    def mark_evidence_refused(
+        self,
+        actor: str,
+        evidence_ref: str,
+        *,
+        decision_status: str,
+        policy_digest: str,
+        decision_digest: str,
+        quorum: int,
+        strict: bool,
+        observed_sources: Sequence[str],
+        dissenting_sources: Sequence[str] = (),
+        missing_sources: Sequence[str] = (),
+        reason: str,
+    ) -> PolicyExecutionResult:
+        """Record a finalized conflict/refusal without interpreting the payload."""
+        path = self._current_path()
+        if self._status != "returned":
+            raise ValueError(f"cannot refuse evidence while execution is {self._status}")
+        path.append(
+            "evidence_refused",
+            actor,
+            evidence_ref=evidence_ref,
+            details={
+                "decision_status": decision_status,
+                "policy_digest": policy_digest,
+                "decision_digest": decision_digest,
+                "quorum": quorum,
+                "strict": strict,
+                "observed_sources": list(observed_sources),
+                "dissenting_sources": list(dissenting_sources),
+                "missing_sources": list(missing_sources),
+                "reason": reason,
+            },
+        )
+        self._status = "evidence_refused"
+        return self.result()
+
+    def mark_applied(
+        self,
+        actor: str,
+        evidence_ref: str,
+        *,
+        application_id: str,
+        target_id: str,
+        projection_digest: str,
+        register_prefix: str,
+    ) -> None:
+        """Record an externally completed receiver-side application receipt."""
+        path = self._current_path()
+        if self._status != "evidence_authorized":
+            raise ValueError(f"cannot record receiver application while execution is {self._status}")
+        path.append(
+            "applied",
+            actor,
+            evidence_ref=evidence_ref,
+            details={
+                "application_id": application_id,
+                "target_id": target_id,
+                "projection_digest": projection_digest,
+                "register_prefix": register_prefix,
+            },
+        )
+        self._status = "applied"
+
+    def stop_application_failed(self, actor: str, reason: str) -> PolicyExecutionResult:
+        path = self._current_path()
+        if self._status not in {"evidence_authorized", "applied"}:
+            raise ValueError(f"cannot record application failure while execution is {self._status}")
+        path.append("application_failed", actor, details={"reason": reason})
+        self._status = "application_failed"
+        return self.result()
+
     def interpret(
         self,
         interpreted_value: Hashable,
@@ -254,8 +377,13 @@ class AdaptivePolicyExecution:
     ) -> PolicyExecutionResult:
         """Interpret the return and advance, resolve, or stop on model mismatch."""
         path = self._current_path()
-        if self._status != "returned":
-            raise ValueError(f"cannot interpret while execution is {self._status}")
+        required_stage = (
+            "applied" if self._receiver_application_required
+            else "evidence_authorized" if self._evidence_authority_required
+            else "returned"
+        )
+        if self._status != required_stage:
+            raise ValueError(f"cannot interpret before required stage {required_stage}; current status is {self._status}")
         try:
             hash(interpreted_value)
         except TypeError as exc:
@@ -354,8 +482,13 @@ class AdaptivePolicyExecution:
 
     def stop_interpretation_failed(self, actor: str, reason: str) -> PolicyExecutionResult:
         path = self._current_path()
-        if self._status != "returned":
-            raise ValueError(f"cannot record interpretation failure while execution is {self._status}")
+        required_stage = (
+            "applied" if self._receiver_application_required
+            else "evidence_authorized" if self._evidence_authority_required
+            else "returned"
+        )
+        if self._status != required_stage:
+            raise ValueError(f"cannot record interpretation failure before required stage {required_stage}; current status is {self._status}")
         path.append("interpretation_failed", actor, details={"reason": reason})
         self._status = "interpretation_failed"
         return self.result()
