@@ -18,6 +18,10 @@ Trial 06 constructs a decision tree from predicted observation outcomes. The obs
 
 No transport or sensor operation is executed by this package. It only records claims after an external adapter reports them.
 
+## E-CPU adapter boundary
+
+The [E-CPU adapter map](ecpu-adapter-map.md) maps this coordinator and the evidence-path stages to existing E-CPU interfaces. In particular, sender enqueue, receiver frame intake, quorum authorization, and VM application are distinct receipts. No E-CPU runtime code is imported or modified by this bridge.
+
 ## Model-mismatch rule
 
 The policy contains predicted outcome branches. If a real interpreted outcome matches none of them, the attempt ends as unresolved_model_mismatch. The raw return and interpretation references remain in the append-only path. The coordinator does not map the result to the nearest branch, discard it, or invent a query answer. This is where the observed system can teach us that the policy's hypothesis or observation model was incomplete. The [Append-only Hypothesis Revision bridge](../hypothesis-revision/README.md) records proposals motivated by these mismatches, preserves prior revisions, and requires explicit validation before an expanded model becomes active.
