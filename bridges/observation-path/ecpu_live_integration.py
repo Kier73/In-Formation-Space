@@ -182,7 +182,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             .read_text(encoding="utf-8")
         )
         jsonschema.validate(analysis_document, analysis_schema)
-        restored_analysis = validate_temporal_analysis(analysis_document)
+        restored_analysis = validate_temporal_analysis(analysis_document, binding_document)
         self.assertEqual(restored_analysis["analysis_digest"], analysis_document["analysis_digest"])
         analysis_ref = self.root / f"temporal-analysis-{logical_time}.json"
         analysis_ref.write_text(
