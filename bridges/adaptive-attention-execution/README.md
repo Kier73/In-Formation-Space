@@ -20,7 +20,7 @@ No transport or sensor operation is executed by this package. It only records cl
 
 ## E-CPU adapter boundary
 
-The [E-CPU adapter map](ecpu-adapter-map.md) maps this coordinator and the evidence-path stages to existing E-CPU interfaces. In particular, sender enqueue, receiver frame intake, quorum authorization, and VM application are distinct receipts. No E-CPU runtime code is imported or modified by this bridge.
+The [E-CPU adapter map](ecpu-adapter-map.md) maps this coordinator and the evidence-path stages to existing E-CPU interfaces. The [dependency-injected adapter](../observation-path/ecpu_gated_adapter.py) verifies quorum finalization and the receiver's durable VM commit from E-CPU snapshots and register readback. It does not mark sender-side ACK processing complete. No E-CPU runtime code is imported or modified by this bridge.
 
 ## Model-mismatch rule
 
