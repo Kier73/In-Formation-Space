@@ -42,12 +42,12 @@ Use these labels when they help readers understand the status of a statement. Th
 
 The repository does not need to adopt a fixed directory structure in advance. As work accumulates, contributors may find homes such as:
 
-- `notes/` — exploratory thoughts, sketches, and intermediate insights.
-- `questions/` — unresolved questions and useful research directions.
-- `designs/` — architectures, models, interfaces, and competing proposals.
-- `experiments/` — runnable investigations, test cases, and results.
-- `bridges/` — connections between projects, domains, representations, and tools.
-- `maps/` — indexes, dependency maps, conceptual maps, and navigation guides.
+- notes/ — exploratory thoughts, sketches, and intermediate insights.
+- questions/ — unresolved questions and useful research directions.
+- designs/ — architectures, models, interfaces, and competing proposals.
+- experiments/ — runnable investigations, test cases, and results.
+- bridges/ — connections between projects, domains, representations, and tools.
+- maps/ — indexes, dependency maps, conceptual maps, and navigation guides.
 
 Create a directory when there is real material for it. Do not create structure merely to satisfy a template.
 
@@ -55,11 +55,11 @@ Create a directory when there is real material for it. Do not create structure m
 
 These are optional investigations and living maps, not required workflows or settled standards:
 
-- [Encounter Envelope](formats/encounter-envelope/README.md) — preserve an observed event separately from later interpretations when work passes between independent contributors, with [validate_envelope.py](formats/encounter-envelope/validate_envelope.py) for local validation and [capture_encounter.py](formats/encounter-envelope/capture_encounter.py) for subprocess/observation packaging.
+- [Encounter Envelope](formats/encounter-envelope/README.md) — preserve an observed event separately from later interpretations when work passes between independent contributors. Includes a zero-dependency validator and tests for structural, timestamp, and digest boundaries.
 - [Cold-start continuity](experiments/cold-start-continuity/README.md) — investigate whether a new contributor can recover evidence, uncertainty, and useful next steps from a retained handoff packet without access to the original conversation. First empirical run recorded in [runs/2026-11-11-run-01](experiments/cold-start-continuity/runs/2026-11-11-run-01/).
-- [Guarded shortcut trade-off](experiments/guarded-shortcut-tradeoff/README.md) — empirical test of grounded navigation cost equations: measures the crossover horizon ($t^* \approx 28$) where descriptive shortcuts beat raw execution, with logarithmic guard scaling and redundant-residue fault detection.
+- [From Description to Realization](experiments/description-to-realization/README.md) — investigate when a description becomes a constructive instrument, and how independent contributors realize the same brief.
 - [Conceptual Landscape](maps/conceptual-landscape.md) — orienting map and coordinate system connecting adjacent paradigms (E-CPU, Grounded Navigation, Invariants) with mathematical formulations of problem shapes.
-- [Open Research Directions](questions/open-research-directions.md) — unresolved questions on representation horizons, multi-observer causal reconstruction, coverage bounds, and evidence tiers.
+- [Open Research Directions](questions/open-research-directions.md) — unresolved questions on representation horizons, multi-observer causal reconstruction, coverage bounds, evidence tiers, and constructive descriptions.
 
 ## Working across projects
 
