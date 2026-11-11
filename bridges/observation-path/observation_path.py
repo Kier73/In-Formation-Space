@@ -189,6 +189,10 @@ class ObservationPath:
             _nonempty(evidence_ref, "evidence_ref")
 
         detail_values = dict(details or {})
+        if stage == "applied" and not self.intent.application_required:
+            raise ValueError("applied stage requires intent.application_required")
+        if stage == "application_failed" and not self.intent.application_required:
+            raise ValueError("application_failed requires intent.application_required")
         if stage == "evidence_authorized":
             self._validate_authority_details(detail_values, "AUTHORIZED", require_representative=True)
         elif stage == "evidence_refused":
