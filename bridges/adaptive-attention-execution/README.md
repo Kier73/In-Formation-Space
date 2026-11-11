@@ -32,6 +32,10 @@ Each request attempt receives its own ObservationPath. The policy execution resu
 
 Clock values remain labeled with their original clock domains; the coordinator performs no cross-clock alignment.
 
+## Live runtime verification
+
+The adapter has now been exercised against a pinned E-CPU checkout, not only stubs. The [live integration tests](../observation-path/ecpu_live_integration.py) and [run 172 receipt](../observation-path/results/live-ecpu-integration-run-172.json) document the actual transport, quorum, checkpoint, VM readback, and sender-ACK sequence.
+
 ## Construction and verification
 
 - [Construction report](construction-report.md) records the lifecycle, evidence limits, and integrated CI result.
