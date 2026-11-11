@@ -12,7 +12,7 @@ except ImportError:  # Optional development dependency; runtime validator stays 
     Draft202012Validator = None
     FormatChecker = None
 
-from capture_encounter import build_encounter_envelope
+from capture_encounter import build_encounter_envelope, capture_command
 from validate_envelope import (
     compute_payload_digest,
     parse_iso8601,
@@ -219,6 +219,18 @@ class CaptureUtilityTests(unittest.TestCase):
         )
         self.assertEqual(doc["integrity"]["canonicalization"], "utf8-raw-v1")
         self.assertEqual(verify_integrity(doc)[0], "VERIFIED")
+
+class CaptureCommandContractTests(unittest.TestCase):
+    def test_extra_context_cannot_override_observed_fields(self):
+        reserved = ("command", "exit_code", "duration_ms", "platform", "cwd")
+        for key in reserved:
+            with self.subTest(key=key):
+                with self.assertRaises(ValueError):
+                    capture_command("this command must not execute", extra_context={key: "forged"})
+
+    def test_extra_context_must_be_a_mapping(self):
+        with self.assertRaises(TypeError):
+            capture_command("this command must not execute", extra_context=[("tag", "value")])
 
 
 class SchemaAgreementTests(unittest.TestCase):
