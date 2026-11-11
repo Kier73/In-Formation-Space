@@ -1,6 +1,6 @@
 # Logistic Map Coverage Function Experiment
 
-**Status:** Completed empirical experiment confirming Conjecture 1 of `grounded_navigation_theory.md`.  
+**Status:** Exploratory finite-grid scan with an independent methodological review. The original analysis overstates what the numerical procedure certifies; see [review-note.md](review-note.md).  
 **Date:** 2026-11-11  
 **Lineage:** Derived from `grounded_navigation_theory.md` (Sections 3 & 10) and parameterized under `maps/mathematical-cautions.md` (Section 5).
 
@@ -53,7 +53,9 @@ Following the discipline in [`maps/mathematical-cautions.md`](../../maps/mathema
 
 - [scan_coverage.py](scan_coverage.py) — 50,000-point deterministic parameter scanner and coverage matrix calculator.
 - [results/coverage-encounter.json](results/coverage-encounter.json) — Captured encounter envelope containing complete benchmark output and SHA-256 integrity receipt.
-- [results/analysis.md](results/analysis.md) — Detailed empirical findings, data tables, and theoretical verification.
+- [results/analysis.md](results/analysis.md) — Original findings and tables, retained with corrected interpretation in the review note.
+- [review-note.md](review-note.md) — distinguishes finite-grid evidence from exact window and measure claims.
+- [test_scan_coverage.py](test_scan_coverage.py) — tests known attractors and mathematical monotonicity/bounds of the coverage matrix.
 
 ---
 
@@ -64,4 +66,5 @@ Run the scanner and validate its encounter envelope:
 ```bash
 python formats/encounter-envelope/capture_encounter.py cmd "python experiments/logistic-map-coverage/scan_coverage.py" --id "exp:logistic-coverage:manual" --out my-coverage.json
 python formats/encounter-envelope/validate_envelope.py my-coverage.json
+python -m unittest discover -s experiments/logistic-map-coverage -p 'test_*.py' -v
 ```
