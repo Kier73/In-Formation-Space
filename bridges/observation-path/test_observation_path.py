@@ -329,6 +329,7 @@ class ObservationPathTests(unittest.TestCase):
                 {"source": "B", "channel": "phase-B", "sequence": 5},
                 {"source": "A", "channel": "phase-A", "sequence": 2},
             ],
+            "missing_event_sequences": [],
             "ack_digest": "a" * 64,
         })
         path.append("interpreted", "interpreter", evidence_ref="interpretations/phase-7.json", details={"method": "phase-parser-v1"})
