@@ -36,11 +36,15 @@ The terminal `query_determined` stage requires a Boolean result, the hypothesis-
 
 An adaptive coordinator now uses this ledger for one-request-at-a-time policy execution: [Adaptive Attention Execution](../adaptive-attention-execution/README.md). It records a continuation between attempts, while an outcome outside the predicted policy branches is retained as an unresolved model mismatch.
 
-## Files
+## Portable record format
 
-- `observation_path.py` — append-only state machine and JSON export.
-- `test_observation_path.py` — tests for legal transitions, provenance, rejection/no-result distinctions, clock domains, and immutable detail snapshots.
+- [observation-path.schema.json](observation-path.schema.json) defines the JSON structure independently of Python.
+- [validate_observation_path.py](validate_observation_path.py) checks schema shape, first and final stages, legal adjacent transitions, and terminal-flag consistency.
+- [examples/happy-path.json](examples/happy-path.json) is illustrative only; its referenced evidence artifacts are not present and it is not an executed observation.
+
+The schema validates structure. The Python state machine and tests validate legal construction. The CLI combines the schema with the lifecycle transition rules. A schema-valid record is not proof that its referenced transport or sensor artifacts are authentic.
 
 ## Reproduce
 
+    python bridges/observation-path/validate_observation_path.py bridges/observation-path/examples/happy-path.json
     python -m unittest discover -s bridges/observation-path -p 'test_*.py' -v
