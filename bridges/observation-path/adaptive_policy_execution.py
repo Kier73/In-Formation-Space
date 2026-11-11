@@ -53,6 +53,7 @@ class AdaptivePolicyExecution:
         plan_ref: Optional[str] = None,
         evidence_authority_required: bool = False,
         receiver_application_required: bool = False,
+        sender_acknowledgement_required: bool = False,
     ) -> None:
         _nonempty(attempt_id_prefix, "attempt_id_prefix")
         _nonempty(query_label, "query_label")
@@ -64,8 +65,12 @@ class AdaptivePolicyExecution:
             raise ValueError("evidence_authority_required must be boolean")
         if not isinstance(receiver_application_required, bool):
             raise ValueError("receiver_application_required must be boolean")
+        if not isinstance(sender_acknowledgement_required, bool):
+            raise ValueError("sender_acknowledgement_required must be boolean")
         if receiver_application_required and not evidence_authority_required:
             raise ValueError("receiver_application_required implies evidence_authority_required")
+        if sender_acknowledgement_required and not receiver_application_required:
+            raise ValueError("sender_acknowledgement_required implies receiver_application_required")
         if not getattr(plan, "complete", False):
             raise ValueError("cannot execute an incomplete adaptive policy plan")
         root = getattr(plan, "policy", None)
@@ -97,6 +102,7 @@ class AdaptivePolicyExecution:
         self._plan_ref = plan_ref
         self._evidence_authority_required = evidence_authority_required
         self._receiver_application_required = receiver_application_required
+        self._sender_acknowledgement_required = sender_acknowledgement_required
         self._attempt_index = 0
         self._path: Optional[ObservationPath] = None
         self._attempts: List[ObservationPath] = []
@@ -155,6 +161,7 @@ class AdaptivePolicyExecution:
             plan_ref=self._plan_ref,
             authority_required=self._evidence_authority_required,
             application_required=self._receiver_application_required,
+            sender_ack_required=self._sender_acknowledgement_required,
         )
         self._path = ObservationPath(intent)
         self._attempts.append(self._path)
@@ -367,6 +374,39 @@ class AdaptivePolicyExecution:
         self._status = "application_failed"
         return self.result()
 
+    def mark_sender_acknowledged(
+        self,
+        actor: str,
+        evidence_ref: str,
+        *,
+        event_kind: str,
+        logical_time: int,
+        sources: Sequence[str],
+        acknowledged_sequences: Sequence[Mapping[str, Any]],
+        expected_event_sequences: Sequence[Mapping[str, Any]],
+        ack_digest: str,
+    ) -> None:
+        """Record sender-side processing only after the adapter verifies removed pending sequences."""
+        path = self._current_path()
+        if not self._sender_acknowledgement_required:
+            raise ValueError("sender acknowledgement is not required by this policy execution")
+        if self._status != "applied":
+            raise ValueError(f"cannot acknowledge sender delivery while execution is {self._status}")
+        path.append(
+            "sender_acknowledged",
+            actor,
+            evidence_ref=evidence_ref,
+            details={
+                "event_kind": event_kind,
+                "logical_time": logical_time,
+                "sources": list(sources),
+                "acknowledged_sequences": [dict(item) for item in acknowledged_sequences],
+                "expected_event_sequences": [dict(item) for item in expected_event_sequences],
+                "ack_digest": ack_digest,
+            },
+        )
+        self._status = "sender_acknowledged"
+
     def interpret(
         self,
         interpreted_value: Hashable,
@@ -378,7 +418,8 @@ class AdaptivePolicyExecution:
         """Interpret the return and advance, resolve, or stop on model mismatch."""
         path = self._current_path()
         required_stage = (
-            "applied" if self._receiver_application_required
+            "sender_acknowledged" if self._sender_acknowledgement_required
+            else "applied" if self._receiver_application_required
             else "evidence_authorized"
             if self._evidence_authority_required or self._status == "evidence_authorized"
             else "returned"
