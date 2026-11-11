@@ -48,6 +48,8 @@ jobs:
         run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/results/test-encounter.json
       - name: Validate distinction refinement CI encounter
         run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-03-distinction-refinement/results/test-encounter.json
+      - name: Validate active distinction selection CI encounter
+        run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-04-active-distinction-selection/results/test-encounter.json
       - name: Validate repeated-return logistic scan encounter
         run: python formats/encounter-envelope/validate_envelope.py experiments/logistic-map-coverage/results/coverage-v2-ci-run-31.json
       - name: Run Poset Interleaver property tests
