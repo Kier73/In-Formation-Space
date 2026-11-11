@@ -193,5 +193,124 @@ class ObservationPathSchemaTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_path_record(record, SCHEMA)
 
+    def test_sender_ack_required_record_cannot_skip_sender_confirmation(self):
+        record = json.loads((HERE / "examples" / "happy-path.json").read_text(encoding="utf-8"))
+        record["intent"]["authority_required"] = True
+        record["intent"]["application_required"] = True
+        record["intent"]["sender_ack_required"] = True
+        returned_index = next(i for i, event in enumerate(record["events"]) if event["stage"] == "returned")
+        record["events"].insert(returned_index + 1, {
+            "stage": "evidence_authorized", "actor": "consensus",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "consensus/decision.json",
+            "details": {
+                "decision_status": "AUTHORIZED", "policy_digest": "sha256:policy",
+                "decision_digest": "sha256:decision", "quorum": 2, "strict": True,
+                "observed_sources": ["A", "B"], "dissenting_sources": [],
+                "missing_sources": [], "representative_source": "A",
+            },
+        })
+        interpreted_index = next(i for i, event in enumerate(record["events"]) if event["stage"] == "interpreted")
+        record["events"].insert(interpreted_index, {
+            "stage": "applied", "actor": "receiver-vm",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "vm/apply.json",
+            "details": {
+                "application_id": "event-01", "target_id": "42",
+                "projection_digest": "sha256:projection", "register_prefix": "gated",
+            },
+        })
+        with self.assertRaises(ValueError):
+            validate_path_record(record, SCHEMA)
+
+    def test_sender_ack_record_validates_expected_sequences_and_event_order(self):
+        record = json.loads((HERE / "examples" / "happy-path.json").read_text(encoding="utf-8"))
+        record["intent"]["authority_required"] = True
+        record["intent"]["application_required"] = True
+        record["intent"]["sender_ack_required"] = True
+        returned_index = next(i for i, event in enumerate(record["events"]) if event["stage"] == "returned")
+        record["events"].insert(returned_index + 1, {
+            "stage": "evidence_authorized", "actor": "consensus",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "consensus/decision.json",
+            "details": {
+                "decision_status": "AUTHORIZED", "policy_digest": "sha256:policy",
+                "decision_digest": "sha256:decision", "quorum": 2, "strict": True,
+                "observed_sources": ["A", "B"], "dissenting_sources": [],
+                "missing_sources": [], "representative_source": "A",
+            },
+        })
+        interpreted_index = next(i for i, event in enumerate(record["events"]) if event["stage"] == "interpreted")
+        record["events"].insert(interpreted_index, {
+            "stage": "applied", "actor": "receiver-vm",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "vm/apply.json",
+            "details": {
+                "application_id": "event-01", "target_id": "42",
+                "projection_digest": "sha256:projection", "register_prefix": "gated",
+            },
+        })
+        record["events"].insert(interpreted_index + 1, {
+            "stage": "sender_acknowledged", "actor": "sender",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "acks/sender.json",
+            "details": {
+                "event_kind": "sensor",
+                "logical_time": 1,
+                "sources": ["source-a", "source-b"],
+                "expected_event_sequences": [
+                    {"source": "source-a", "channel": "channel-a", "sequence": 3},
+                    {"source": "source-b", "channel": "channel-b", "sequence": 4},
+                ],
+                "acknowledged_sequences": [
+                    {"source": "source-a", "channel": "channel-a", "sequence": 3},
+                    {"source": "source-b", "channel": "channel-b", "sequence": 4},
+                    {"source": "source-a", "channel": "channel-a", "sequence": 2},
+                ],
+                "ack_digest": "a" * 64,
+            },
+        })
+        validate_path_record(record, SCHEMA)
+
+    def test_sender_ack_record_missing_event_sequence_is_rejected(self):
+        record = json.loads((HERE / "examples" / "happy-path.json").read_text(encoding="utf-8"))
+        record["intent"]["authority_required"] = True
+        record["intent"]["application_required"] = True
+        record["intent"]["sender_ack_required"] = True
+        returned_index = next(i for i, event in enumerate(record["events"]) if event["stage"] == "returned")
+        record["events"].insert(returned_index + 1, {
+            "stage": "evidence_authorized", "actor": "consensus",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "consensus/decision.json",
+            "details": {
+                "decision_status": "AUTHORIZED", "policy_digest": "sha256:policy",
+                "decision_digest": "sha256:decision", "quorum": 2, "strict": True,
+                "observed_sources": ["A", "B"], "dissenting_sources": [],
+                "missing_sources": [], "representative_source": "A",
+            },
+        })
+        interpreted_index = next(i for i, event in enumerate(record["events"]) if event["stage"] == "interpreted")
+        record["events"].insert(interpreted_index, {
+            "stage": "applied", "actor": "receiver-vm",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "vm/apply.json",
+            "details": {
+                "application_id": "event-01", "target_id": "42",
+                "projection_digest": "sha256:projection", "register_prefix": "gated",
+            },
+        })
+        record["events"].insert(interpreted_index + 1, {
+            "stage": "sender_acknowledged", "actor": "sender",
+            "clock_value": None, "clock_domain": None, "evidence_ref": "acks/sender.json",
+            "details": {
+                "event_kind": "sensor", "logical_time": 1,
+                "sources": ["source-a", "source-b"],
+                "expected_event_sequences": [
+                    {"source": "source-a", "channel": "channel-a", "sequence": 3},
+                    {"source": "source-b", "channel": "channel-b", "sequence": 4},
+                ],
+                "acknowledged_sequences": [
+                    {"source": "source-a", "channel": "channel-a", "sequence": 3},
+                ],
+                "ack_digest": "a" * 64,
+            },
+        })
+        with self.assertRaises(ValueError):
+            validate_path_record(record, SCHEMA)
+
+
 if __name__ == "__main__":
     unittest.main()
