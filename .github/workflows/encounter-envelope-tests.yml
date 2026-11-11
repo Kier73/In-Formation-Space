@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "formats/encounter-envelope/**"
+      - "bridges/**"
       - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
       - "experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/**"
       - "experiments/description-to-realization/trials/trial-03-distinction-refinement/**"
@@ -16,6 +17,7 @@ on:
   pull_request:
     paths:
       - "formats/encounter-envelope/**"
+      - "bridges/**"
       - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
       - "experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/**"
       - "experiments/description-to-realization/trials/trial-03-distinction-refinement/**"
@@ -56,8 +58,12 @@ jobs:
         run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-04-active-distinction-selection/results/test-encounter.json
       - name: Validate query-directed attention CI encounter
         run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-05-query-directed-attention/results/test-encounter.json
+      - name: Validate bridge encounter
+        run: python formats/encounter-envelope/validate_envelope.py bridges/observation-equivalence/results/bridge-encounter.json
       - name: Validate repeated-return logistic scan encounter
         run: python formats/encounter-envelope/validate_envelope.py experiments/logistic-map-coverage/results/coverage-v2-ci-run-31.json
+      - name: Run observation-equivalence bridge tests
+        run: python -m unittest discover -s bridges/observation-equivalence -p "test_*.py" -v
       - name: Run Poset Interleaver property tests
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-01-poset-interleaver -p "test_*.py" -v
       - name: Run finite-description unbounded-space tests

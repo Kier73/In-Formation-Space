@@ -155,6 +155,9 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Construction brief](trials/trial-02-finite-description-unbounded-space/brief.md)
 - [Implementation](trials/trial-02-finite-description-unbounded-space/finite_description.py)
 - [Tests](trials/trial-02-finite-description-unbounded-space/test_finite_description.py)
+- [Construction report](trials/trial-02-finite-description-unbounded-space/construction-report.md)
+- [Independent evaluation](trials/trial-02-finite-description-unbounded-space/evaluation.md)
+- [Encounter receipt](trials/trial-02-finite-description-unbounded-space/results/test-encounter.json)
 
 ### Trial 03: Distinction refinement
 
@@ -163,6 +166,9 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Construction brief](trials/trial-03-distinction-refinement/brief.md)
 - [Implementation](trials/trial-03-distinction-refinement/distinction_space.py)
 - [Tests](trials/trial-03-distinction-refinement/test_distinction_space.py)
+- [Construction report](trials/trial-03-distinction-refinement/construction-report.md)
+- [Independent evaluation](trials/trial-03-distinction-refinement/evaluation.md)
+- [Encounter receipt](trials/trial-03-distinction-refinement/results/test-encounter.json)
 
 ### Trial 04: Active distinction selection
 
@@ -171,6 +177,9 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Construction brief](trials/trial-04-active-distinction-selection/brief.md)
 - [Implementation](trials/trial-04-active-distinction-selection/attention_selection.py)
 - [Tests](trials/trial-04-active-distinction-selection/test_attention_selection.py)
+- [Construction report](trials/trial-04-active-distinction-selection/construction-report.md)
+- [Independent evaluation](trials/trial-04-active-distinction-selection/evaluation.md)
+- [Encounter receipt](trials/trial-04-active-distinction-selection/results/test-encounter.json)
 
 ### Trial 05: Query-directed attention
 
@@ -179,6 +188,9 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Construction brief](trials/trial-05-query-directed-attention/brief.md)
 - [Implementation](trials/trial-05-query-directed-attention/query_attention.py)
 - [Tests](trials/trial-05-query-directed-attention/test_query_attention.py)
+- [Construction report](trials/trial-05-query-directed-attention/construction-report.md)
+- [Independent evaluation](trials/trial-05-query-directed-attention/evaluation.md)
+- [Encounter receipt](trials/trial-05-query-directed-attention/results/test-encounter.json)
 
 ### Trial 06: Adaptive attention policies
 

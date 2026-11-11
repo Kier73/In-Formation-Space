@@ -30,6 +30,7 @@ The model assumes candidate observations are deterministic, non-intervening, and
 - query_attention.py — exact/greedy query-resolution planner
 - test_query_attention.py — poset example and brute-force checks
 - construction-report.md — formulation, complexity, Poset example, and CI results
+- evaluation.md — independent constraint audit, complexity bounds, and epistemic synthesis
 - results/test-encounter.json — provenance record for the successful eight-test CI run
 
 ## Reproduce

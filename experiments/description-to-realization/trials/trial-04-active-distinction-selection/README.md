@@ -37,6 +37,7 @@ The model assumes observations are non-intervening and additive-cost. If observi
 - attention_selection.py — exact/greedy observation selector
 - test_attention_selection.py — deterministic and brute-force cross-check tests
 - construction-report.md — implementation argument, complexity, and CI result
+- evaluation.md — independent constraint audit and complexity bounds analysis
 - results/test-encounter.json — provenance record for the successful ten-test CI run
 
 ## Reproduce

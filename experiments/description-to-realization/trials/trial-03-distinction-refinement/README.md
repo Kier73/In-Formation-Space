@@ -42,8 +42,8 @@ The terms “dimension” and “independence” should be used carefully. This 
 - Implementation: distinction_space.py
 - Tests: test_distinction_space.py
 - Construction report: construction-report.md
+- Independent evaluation: evaluation.md
 - CI execution receipt: results/test-encounter.json
-- Construction report: construction-report.md
 
 ## Reproduce
 

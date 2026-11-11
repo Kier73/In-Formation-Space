@@ -1,0 +1,37 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:bridge-obs-equiv:2026-11-11",
+  "observed_at": "2026-11-11T21:25:47.410106+00:00",
+  "recorded_at": "2026-11-11T21:25:47.522634+00:00",
+  "source": {
+    "kind": "subprocess",
+    "name": "shell-command-runner",
+    "reference": null,
+    "capture_method": "subprocess.run"
+  },
+  "context": {
+    "command": "python bridges/observation-equivalence/demonstration.py",
+    "exit_code": 0,
+    "duration_ms": 112.507,
+    "platform": {
+      "system": "Windows",
+      "release": "11",
+      "python_version": "3.14.0"
+    },
+    "cwd": "C:\\Users\\kross\\Downloads\\In-Formation-Space"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "exit_code": 0,
+      "stdout": "=== OBSERVATION EQUIVALENCE BRIDGE DEMONSTRATION ===\n\n1. Myhill-Nerode Prefix Partition on L = {0^n 1^n}:\n   Tested prefixes: ['', '0', '00', '000', '1', '01']\n   Equivalence classes found (6 classes):\n     Class 1: ['']\n     Class 2: ['0']\n     Class 3: ['00']\n     Class 4: ['000']\n     Class 5: ['1']\n     Class 6: ['01']\n   Are '0' and '00' equivalent? False (Distinguished by suffix: '1')\n\n2. IBV Machine State Abstraction (Property: rax mod 4):\n   Total concrete states: 5\n   Abstract quotient classes (2 classes):\n     Abstract State 1: rax values [0, 4, 8] (irrelevant rbx/rcx discarded)\n     Abstract State 2: rax values [1, 5] (irrelevant rbx/rcx discarded)\n\n3. E-CPU Structural Memory Generators:\n   Candidate generators: [(1, 2, 10), (1, 12, 10), (2, 1, 10)]\n   Admitted distinct generator classes (2 classes):\n     Structural Generator Class 1: [(1, 2, 10), (1, 12, 10)]\n     Structural Generator Class 2: [(2, 1, 10)]\n\n[OK] Demonstration completed. All three domains unify under QuotientSpace(Obs).\n",
+      "stderr": ""
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "e75546823dcf51ab9d9c74b8f434edeac91f0c45fae42babd56b42cceee6643e",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  }
+}

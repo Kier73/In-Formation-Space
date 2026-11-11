@@ -72,6 +72,7 @@ This also sharpens the idea of a new information dimension. A new label does not
 - finite_description.py
 - test_finite_description.py
 - construction-report.md — proof argument, implementation summary, and CI result.
+- evaluation.md — independent Myhill-Nerode quotient evaluation and constraint audit.
 - results/test-encounter.json — provenance record for the successful seven-test CI run.
 
 ## Reproduce

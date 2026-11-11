@@ -69,6 +69,8 @@ Run 01 was L0. Run 02 was L1. A fully isolated L2 or L3 run remains open.
 - [Run 2026-11-11-run-02-packet-only](runs/2026-11-11-run-02-packet-only/response.md) — L1 material-limited handoff report from a fresh general subagent with only the packet and template supplied inline; the parent session ran DeepSeek V4.1 Flash Free.
   - [Run conditions](runs/2026-11-11-run-02-packet-only/conditions.md) — Exact prompt, material hashes, and the isolation boundary: material-limited, not sandbox-isolated.
   - [Evaluation](runs/2026-11-11-run-02-packet-only/evaluation.md) — Review against the rubric; 12/12 within this run, with the fallback-design gap and residual exposure noted.
+  - [Supplementary review](runs/2026-11-11-run-02-packet-only/supplementary-review.md) — Review of evidence limits, prompt constraints, and residual ambient exposure.
+  - [Independent review note](runs/2026-11-11-run-02-packet-only/review-note.md) — Comparative analysis of open-context (L0) vs material-limited (L1) handoff conditions and invariant preservation.
 
 ## Current status
 
