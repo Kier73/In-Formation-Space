@@ -29,6 +29,10 @@ Trials 04–06 choose which observations would be useful. They do not execute th
 
 Each request attempt is append-only. `admitted` records receiver-side intake; `evidence_authorized` records a separate consensus/authority decision. An intent can require that gate, and can additionally require an `applied` receipt for a receiver-side state mutation before interpretation. A direct one-receiver path can leave both requirements false. An interpreted observation can end in `query_determined`, `unresolved`, or `continued`; `continued` records which next observation the adaptive policy selected and closes the current request attempt before a new attempt begins. Failure paths are terminal and do not silently become observations. A payload that returns without an admission receipt is preserved as `returned_unadmitted` and cannot advance to interpretation within that attempt.
 
+## Live E-CPU integration
+
+The pinned E-CPU runtime integration passed in [GitHub Actions run 172](https://github.com/Kier73/In-Formation-Space/actions/runs/43115649399): two tests exercised real durable channels, quorum finalization, VM commit/checkpoint recovery, sender ACK processing, and conflict refusal. The [integration receipt](results/live-ecpu-integration-run-172.json) records the exact E-CPU and In-Formation-Space commits and test cases.
+
 ## E-CPU coordinator adapter
 
 The [E-CPU gated adapter](ecpu_gated_adapter.py) is a dependency-injected bridge over the existing `GatedObservationCoordinator`. It does not import or reimplement E-CPU. It records a finalized decision only after checking the coordinator's policy, finalized status, evidence-link source set, and representative. After `commit_event()`, it checks the durable applied marker, complete receiver consumption, absence of outstanding commit intents, the VM's exact idempotence receipt, and actual register readback before recording `applied`. It then saves a final E-CPU checkpoint and records its digest.
