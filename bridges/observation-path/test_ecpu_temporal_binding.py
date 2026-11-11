@@ -1,6 +1,9 @@
 import hashlib
 import json
 import unittest
+from pathlib import Path
+
+import jsonschema
 from dataclasses import dataclass
 
 from ecpu_temporal_binding import (
@@ -188,6 +191,12 @@ class ECPUTemporalBindingTests(unittest.TestCase):
         )
         self.assertEqual(document["intervals"], trace.to_dict()["intervals"])
         self.assertEqual(len(document["intervals"]), len(path.events) - 1)
+        schema = json.loads(
+            (Path(__file__).with_name("temporal-path-binding.schema.json"))
+            .read_text(encoding="utf-8")
+        )
+        jsonschema.Draft202012Validator.check_schema(schema)
+        jsonschema.validate(document, schema)
 
     def test_pending_event_append_is_idempotent(self):
         path = make_path()
@@ -264,18 +273,15 @@ class ECPUTemporalBindingTests(unittest.TestCase):
                 restore_trace=FakeTemporalTrace.from_dict,
             )
 
-    def test_temporal_trace_restore_verifier_is_mandatory(self):
+    def test_temporal_trace_restore_verifier_must_reconstruct_same_trace(self):
         path = make_path()
         trace = append_missing_temporal_events(path, FakeTemporalTrace(path.intent.attempt_id), make_frame)
-        document = trace.to_dict()
-        document["digest"] = "0" * 64
-        bad = FakeTemporalTrace.from_dict
         with self.assertRaises(ValueError):
             create_temporal_binding(
                 path,
-                FakeTemporalTrace.from_dict(document),
-                temporal_trace_ref="temporal/bad.json",
-                restore_trace=bad,
+                trace,
+                temporal_trace_ref="temporal/bad-restore.json",
+                restore_trace=lambda _document: FakeTemporalTrace("different-trace"),
             )
 
 
