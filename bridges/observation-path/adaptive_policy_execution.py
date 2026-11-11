@@ -525,7 +525,8 @@ class AdaptivePolicyExecution:
     def stop_interpretation_failed(self, actor: str, reason: str) -> PolicyExecutionResult:
         path = self._current_path()
         required_stage = (
-            "applied" if self._receiver_application_required
+            "sender_acknowledged" if self._sender_acknowledgement_required
+            else "applied" if self._receiver_application_required
             else "evidence_authorized"
             if self._evidence_authority_required or self._status == "evidence_authorized"
             else "returned"
