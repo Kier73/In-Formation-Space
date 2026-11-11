@@ -94,6 +94,8 @@ jobs:
         run: python -m unittest discover -s bridges/observation-path -p "test_ecpu_gated_adapter.py" -v
       - name: Run typed E-CPU temporal binding tests
         run: python -m unittest discover -s bridges/observation-path -p "test_ecpu_temporal_binding.py" -v
+      - name: Run conservative temporal analysis tests
+        run: python -m unittest discover -s bridges/observation-path -p "test_temporal_binding_analysis.py" -v
       - name: Run live E-CPU gated observation integration
         env:
           PYTHONPATH: external/E-CPU
