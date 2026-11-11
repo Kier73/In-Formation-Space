@@ -23,6 +23,15 @@ The coordinator does not execute a transport or sensor action. It records stage 
 
 Clock values are stored together with their clock-domain labels. The coordinator performs no cross-clock arithmetic.
 
+## Live E-CPU integration
+
+The adapter has been run against E-CPU commit `800f94f83ffd6f527ed093c8d1c1e93e153c34f6` in In-Formation-Space GitHub Actions run 172. The live integration suite passed 2 tests:
+
+- strict two-source quorum authorization, representative VM application, durable checkpoint restoration, and separate sender ACK processing;
+- strict consensus conflict, terminal evidence refusal, unchanged VM state, and unconsumed/unacknowledged receiver frames.
+
+The machine-readable [live integration receipt](../observation-path/results/live-ecpu-integration-run-172.json) preserves both repository SHAs and the exact tested operations.
+
 ## Verification
 
 GitHub Actions run 112, commit 3c8d2ecdcd0bdedf746dcff4fd1813a73f4a6155, completed successfully on ubuntu-latest with Python 3.11.
