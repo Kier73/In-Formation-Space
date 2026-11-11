@@ -19,6 +19,7 @@ import unittest
 from pathlib import Path
 
 from mailcpu import (
+    ClockDomain,
     DurableMailboxTransport,
     GatedObservationCoordinator,
     MailCPUVirtualMachine,
@@ -27,12 +28,20 @@ from mailcpu import (
     Instruction,
     Op,
     ReliableChannel,
+    TemporalContext,
+    TemporalPathTrace,
+    TemporalProfile,
     TimingObservationProducer,
     decode_substrate_observation,
     load_gated_checkpoint,
 )
 
 from ecpu_gated_adapter import ECPUGatedObservationAdapter
+from ecpu_temporal_binding import (
+    append_missing_temporal_events,
+    create_temporal_binding,
+    validate_temporal_binding,
+)
 from observation_path import ObservationIntent, ObservationPath
 from validate_observation_path import validate_path_record
 
@@ -103,7 +112,66 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             application_required=True,
             sender_ack_required=True,
         ))
+        self.temporal_context = TemporalContext(
+            "ifs-adapter-live",
+            TemporalProfile(frozenset({
+                ClockDomain.MONOTONIC,
+                ClockDomain.WALL,
+                ClockDomain.CAUSAL,
+            })),
+        )
+        self.temporal_trace = TemporalPathTrace(path.intent.attempt_id)
+        self._capture_temporal_events(path)
         return path
+
+    def _capture_temporal_events(self, path: ObservationPath):
+        """Timestamp newly recorded stages with the adapter's own typed clock profile."""
+        def frame_factory(_path_event):
+            # A fresh causal event marks the adapter's capture order. Monotonic
+            # and wall coordinates remain local to this adapter process.
+            self.temporal_context.emit_causal_stamp()
+            return self.temporal_context.observe()
+
+        self.temporal_trace = append_missing_temporal_events(
+            path,
+            self.temporal_trace,
+            frame_factory,
+        )
+        return self.temporal_trace
+
+    def _write_temporal_binding(self, path: ObservationPath, logical_time: int):
+        trace_document = self.temporal_trace.to_dict()
+        trace_ref = self.root / f"temporal-trace-{logical_time}.json"
+        trace_ref.write_text(
+            json.dumps(trace_document, sort_keys=True, indent=2),
+            encoding="utf-8",
+        )
+        binding = create_temporal_binding(
+            path,
+            self.temporal_trace,
+            temporal_trace_ref=str(trace_ref),
+            restore_trace=TemporalPathTrace.from_dict,
+        )
+        binding_document = binding.to_dict()
+        binding_ref = self.root / f"temporal-binding-{logical_time}.json"
+        binding_ref.write_text(
+            json.dumps(binding_document, sort_keys=True, indent=2),
+            encoding="utf-8",
+        )
+        binding_schema = json.loads(
+            (Path(__file__).with_name("temporal-path-binding.schema.json"))
+            .read_text(encoding="utf-8")
+        )
+        import jsonschema
+        jsonschema.validate(binding_document, binding_schema)
+        restored_binding = validate_temporal_binding(
+            binding_document,
+            path,
+            self.temporal_trace,
+            restore_trace=TemporalPathTrace.from_dict,
+        )
+        self.assertEqual(restored_binding.binding_digest, binding.binding_digest)
+        return trace_ref, binding_ref, binding
 
     def _send_and_record_raw(
         self,
@@ -128,6 +196,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             "ecpu-sender-adapter",
             evidence_ref=str(dispatch_ref),
         )
+        self._capture_temporal_events(path)
 
         links = self.coordinator.ingest_available()
         matching_links = [
@@ -157,6 +226,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
                 "frames_consumed": False,
             },
         )
+        self._capture_temporal_events(path)
 
         raw_payload = {
             "event": {"kind": "timing", "logical_time": logical_time},
@@ -208,6 +278,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
                 "canonicalization": "json-sort-keys-utf8-v1",
             },
         )
+        self._capture_temporal_events(path)
         return encounter_ref
 
     def test_real_ecpu_quorum_commit_and_sender_ack_are_separate(self):
@@ -229,6 +300,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(decision.status, "AUTHORIZED")
         self.assertEqual(path.status, "evidence_authorized")
+        self._capture_temporal_events(path)
         self.assertEqual(self.vm.scheduler.tasks[self.pid].backend.read_register("gated_symbol"), 0)
 
         checkpoint = self.root / "gated-30.checkpoint"
@@ -240,6 +312,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             checkpoint_ref=str(checkpoint),
         )
         self.assertEqual(path.status, "applied")
+        self._capture_temporal_events(path)
         self.assertTrue(checkpoint.exists())
         self.assertEqual(application.target_pid, self.pid)
         self.assertEqual(
@@ -277,7 +350,22 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(self.sender_a.pending_sequences(), ())
         self.assertEqual(self.sender_b.pending_sequences(), ())
+        self._capture_temporal_events(path)
         validate_path_record(path.to_dict(), schema)
+        trace_ref, binding_ref, binding = self._write_temporal_binding(path, logical_time)
+        self.assertTrue(trace_ref.exists())
+        self.assertTrue(binding_ref.exists())
+        self.assertEqual(len(binding.event_bindings), len(path.events))
+        self.assertEqual(len(binding.intervals), len(path.events) - 1)
+        self.assertTrue(all(
+            interval["delta"]["causal_relation"] == "before"
+            for interval in binding.intervals
+        ))
+        self.assertTrue(all(
+            interval["delta"]["monotonic_elapsed_ns"] is not None
+            and interval["delta"]["monotonic_elapsed_ns"] >= 0
+            for interval in binding.intervals
+        ))
 
     def test_real_ecpu_consensus_conflict_is_refusal_not_negative_measurement(self):
         logical_time = 31
@@ -302,6 +390,14 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(len(self.transport.list("R-A")), 1)
         self.assertEqual(len(self.transport.list("R-B")), 1)
+        self._capture_temporal_events(path)
+        trace_ref, binding_ref, binding = self._write_temporal_binding(path, logical_time)
+        self.assertTrue(trace_ref.exists())
+        self.assertTrue(binding_ref.exists())
+        self.assertEqual(
+            [event["stage"] for event in binding.event_bindings],
+            [event.stage for event in path.events],
+        )
 
 
 if __name__ == "__main__":
