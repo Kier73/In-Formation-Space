@@ -33,9 +33,19 @@ C^*(M) = \begin{cases}
 \min\limits_{k : |\mathcal{V}_k(M)| > 1} \left[ c_k + \sum\limits_{v \in \mathcal{V}_k(M)} P(M_v \mid M) C^*(M_v) \right] & \text{otherwise}
 \end{cases}
 \]
-The recurrence satisfies the contraction mapping property of finite-horizon dynamic programming, guaranteeing that the memoized solution is the global minimum expected cost policy.
+Every non-terminal observation used by the recurrence creates at least two non-empty, strict subsets of the current hypothesis set. The subset recursion is therefore acyclic and terminates on a finite state space. No contraction-mapping argument is needed; exactness follows from evaluating the Bellman recurrence over every available observation at each reachable subset.
 
-### 2.2 Complexity Bounds
+### 2.2 Expected-cost optimality versus worst-case reporting
+
+The implementation selects each observation by minimizing the expected-cost Bellman recurrence. `worst_case_additional_cost` is then computed for the resulting expected-cost-optimal policy. It is **not** a separately optimized minimax value. The minimax recurrence would require a distinct policy-selection objective:
+
+\[
+W^*(M)=\min_k\left[c_k+\max_v W^*(M_v)\right].
+\]
+
+The current solver does not use that recurrence to select its policy. Its returned worst-case field is the maximum path cost of the policy selected under expected cost.
+
+### 2.3 Complexity Bounds
 - **State Space:** At most $2^{|H|}$ reachable belief subsets.
 - **Branching Factor:** At most $m$ candidate observations per subset.
 - **Worst-Case Time:** $O(m \cdot |H| \cdot 2^{|H|})$.
@@ -60,14 +70,23 @@ The transition from Trial 05 to Trial 06 formalizes the distinction between **op
    \]
 3. **The Information Value of Pruning:**  
    In the canonical fixture of Trial 06, four hypotheses $H = \{A, B, C, D\}$ require distinguishing $Q(h)$. A static observation packet costs $3.0$, and a direct monolithic sensor costs $2.5$. The adaptive policy measures an initial feature at cost $1.0$; with probability $0.5$, this terminates immediately (total cost $1.0$); with probability $0.5$, it takes a second feature at cost $1.0$ (total cost $2.0$).  
-   The resulting expected cost is:
+   The minimum static packet uses `left-refinement` and `right-refinement`, costing 2.0. The direct sensor costs 2.5, and collecting every inexpensive observation costs 3.0. The adaptive policy has expected cost:
    \[
-   0.5 \times 1.0 + 0.5 \times 2.0 = 1.5 < 2.5 < 3.0
+   0.25\times1.0+0.25\times1.0+0.5\times2.0=1.5<2.0.
    \]
-   This proves constructively that adaptive branching can achieve strictly lower expected cost than any static batch observation.
+   A new test enumerates every static candidate subset, verifies that 2.0 is the minimum static cost, and checks that the adaptive policy costs 1.5 in expectation.
 
 ---
 
 ## 4. Evaluator Conclusion
 
 **Status:** Accepted. Trial 06 successfully completes the progression of attention models in `description-to-realization`, providing a mathematically rigorous, verified, and optimal adaptive observation policy engine.
+
+
+## 5. Follow-up mathematical review
+
+The original evaluation's use of a contraction-mapping justification was unnecessary and not appropriate for this finite subset recursion. Termination follows because each selected observation splits the current set into strict subsets. The exact expected-cost result follows by induction over subset size and the Bellman recurrence.
+
+The evaluation also displayed a minimax recurrence for worst-case cost. The implementation does not optimize that recurrence: it optimizes expected cost and reports the worst-case path cost of that expected-optimal policy. A separate minimax policy solver would be needed to claim the minimum possible worst-case cost.
+
+Finally, the original static comparison used the full three-observation packet at cost 3.0, not the cheapest static packet. The cheapest static packet is the two branch-specific refinements at cost 2.0. The adaptive policy's 1.5 expected cost still beats that baseline. This correction is independently cross-checked by brute-force subset enumeration in the new seventh test.
