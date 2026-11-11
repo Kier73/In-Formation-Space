@@ -29,6 +29,12 @@ Trials 04–06 choose which observations would be useful. They do not execute th
 
 Each request attempt is append-only. `admitted` records receiver-side intake; `evidence_authorized` records a separate consensus/authority decision. An intent can require that gate, and can additionally require an `applied` receipt for a receiver-side state mutation before interpretation. A direct one-receiver path can leave both requirements false. An interpreted observation can end in `query_determined`, `unresolved`, or `continued`; `continued` records which next observation the adaptive policy selected and closes the current request attempt before a new attempt begins. Failure paths are terminal and do not silently become observations. A payload that returns without an admission receipt is preserved as `returned_unadmitted` and cannot advance to interpretation within that attempt.
 
+## E-CPU coordinator adapter
+
+The [E-CPU gated adapter](ecpu_gated_adapter.py) is a dependency-injected bridge over the existing `GatedObservationCoordinator`. It does not import or reimplement E-CPU. It records a finalized decision only after checking the coordinator's policy, finalized status, evidence-link source set, and representative. After `commit_event()`, it checks the durable applied marker, complete receiver consumption, absence of outstanding commit intents, the VM's exact idempotence receipt, and actual register readback before recording `applied`. It then saves a final E-CPU checkpoint and records its digest.
+
+The adapter verifies receiver-side ACK emission through the completed consume path. It does **not** claim that the remote sender has processed its ACK and cleared its pending frame; E-CPU's sender-side `process_acks()` is a separate operation. Nor does it create transport or Encounter Envelope evidence on its own: dispatch, receiver-intake, and raw-return artifacts must be supplied by the surrounding host adapter.
+
 ## Explicit authority and application gates
 
 An intent may set `authority_required=true` when a source quorum, consensus policy, or other evidence-authorization decision must occur after the raw return. The path must then record `evidence_authorized` or `evidence_refused` before interpretation. An intent may additionally set `application_required=true` when the authorized representative must be applied to receiver state; this implies authority is required, and an `applied` receipt must precede interpretation. An application or authorization failure is terminal and cannot be interpreted as a negative measurement.
