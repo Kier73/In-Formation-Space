@@ -20,7 +20,7 @@ Construct a lightweight, deterministic Python library that represents multi-stre
 1. **Zero external dependencies:** Must run using only Python standard library (Python 3.10+).
 2. **Deterministic acyclicity checking:**
    - Detects whether a set of event ordering constraints contains a directed cycle.
-   - If cyclic, refuses to compute orderings and extracts a minimal witness cycle:
+   - If cyclic, refuses to compute orderings and extracts a concrete simple witness cycle (not necessarily the shortest cycle):
      \[
      (e_1 \to e_2 \to \dots \to e_k \to e_1)
      \]
@@ -31,7 +31,7 @@ Construct a lightweight, deterministic Python library that represents multi-stre
      \]
    - For the 4-event controller stream and 3-event sensor stream from `experiments/cold-start-continuity`, $|\Omega|$ must evaluate to exactly 35.
 4. **Trace verification:**
-   - Given a proposed total sequence $(s_1, s_2, \dots, s_N)$, verify in $O(N + |E|)$ whether the sequence is a valid linear extension of the poset.
+   - Given a proposed total sequence $(s_1, s_2, \dots, s_N)$, verify in $O(N + |E|)$ whether the sequence is a valid linear extension of the poset, with deterministic edge blame for a fixed edge-insertion order.
    - If invalid, identify the exact edge $(u \prec v)$ violated in the trace.
 5. **Immutable / pure query interface:** Querying properties (e.g. extension count, trace validity) must not mutate the underlying poset state.
 
