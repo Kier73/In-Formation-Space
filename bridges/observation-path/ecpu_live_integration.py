@@ -1,7 +1,7 @@
 """Live integration check against the pinned E-CPU GatedObservationCoordinator.
 
 Run with E-CPU checked out at commit
-53569e138aca51954335729cdd31b87faf73896f and its repository root on PYTHONPATH:
+800f94f83ffd6f527ed093c8d1c1e93e153c34f6 and its repository root on PYTHONPATH:
 
     PYTHONPATH=external/E-CPU python bridges/observation-path/ecpu_live_integration.py -v
 
@@ -37,7 +37,7 @@ from observation_path import ObservationIntent, ObservationPath
 from validate_observation_path import validate_path_record
 
 
-ECPU_REFERENCE_COMMIT = "53569e138aca51954335729cdd31b87faf73896f"
+ECPU_REFERENCE_COMMIT = "800f94f83ffd6f527ed093c8d1c1e93e153c34f6"
 
 
 def verify_ecpu_checkout() -> None:
