@@ -145,6 +145,7 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 
 - [Trial 01: Poset Causal Interleaver](trials/trial-01-poset-interleaver/brief.md) — construction of a lightweight, zero-dependency causal interleaver that verifies acyclicity with cycle witness extraction, counts linear extensions via down-set dynamic programming, and verifies trace validity. A follow-up review added query-purity and randomized brute-force cross-checks.
   - [Construction report](trials/trial-01-poset-interleaver/construction-report.md) — implementation trace and constraint satisfaction evidence.
+  - [Independent evaluation](trials/trial-01-poset-interleaver/evaluation.md) — verification against hard constraints and soft preferences.
   - [Code: poset_interleaver.py](trials/trial-01-poset-interleaver/poset_interleaver.py) | [Tests: test_poset_interleaver.py](trials/trial-01-poset-interleaver/test_poset_interleaver.py) | [Encounter receipt](trials/trial-01-poset-interleaver/results/test-encounter.json)
 
 ## 7. Open questions

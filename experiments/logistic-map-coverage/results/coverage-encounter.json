@@ -1,0 +1,37 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:logistic-coverage:2026-11-11",
+  "observed_at": "2026-11-11T21:17:51.212034+00:00",
+  "recorded_at": "2026-11-11T21:17:54.066468+00:00",
+  "source": {
+    "kind": "subprocess",
+    "name": "shell-command-runner",
+    "reference": null,
+    "capture_method": "subprocess.run"
+  },
+  "context": {
+    "command": "python experiments/logistic-map-coverage/scan_coverage.py",
+    "exit_code": 0,
+    "duration_ms": 2854.417,
+    "platform": {
+      "system": "Windows",
+      "release": "11",
+      "python_version": "3.14.0"
+    },
+    "cwd": "C:\\Users\\kross\\Downloads\\In-Formation-Space"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "exit_code": 0,
+      "stdout": "=== LOGISTIC MAP COVERAGE FUNCTION SCANNER ===\nDomain: r in [3.5, 4.0], Grid points: 50,000\nMax Period Budget: 64, Resolving windows...\nDiscovered 303 contiguous periodic windows in 2.73 seconds.\n\nTop 8 Largest Periodic Windows:\n  Period |    r_start |      r_end |   Width (\u0394r) |  Samples\n----------------------------------------------------------\n       4 |   3.500000 |   3.541340 |     0.041340 |     4134\n       8 |   3.544830 |   3.563360 |     0.018530 |     1853\n       3 |   3.828430 |   3.840960 |     0.012530 |     1253\n       6 |   3.841620 |   3.847370 |     0.005750 |      575\n      16 |   3.564690 |   3.568420 |     0.003730 |      373\n       6 |   3.626560 |   3.630100 |     0.003540 |      354\n       5 |   3.738180 |   3.740930 |     0.002750 |      275\n      12 |   3.630470 |   3.632060 |     0.001590 |      159\n\nCoverage Function Matrix C(\u03b4, P) [Fraction of [3.5, 4.0]]:\n  Resolution \u03b4 |     P<=2 |     P<=4 |     P<=8 |    P<=16 |    P<=32 |    P<=64\n--------------------------------------------------------------------------------\n  delta=0.0002 |   0.0000 |   0.1090 |   0.1762 |   0.1966 |   0.2010 |   0.2010\n  delta=0.0005 |   0.0000 |   0.1090 |   0.1730 |   0.1914 |   0.1929 |   0.1929\n  delta=0.0010 |   0.0000 |   0.1077 |   0.1689 |   0.1847 |   0.1847 |   0.1847\n  delta=0.0020 |   0.0000 |   0.1077 |   0.1689 |   0.1763 |   0.1763 |   0.1763\n  delta=0.0050 |   0.0000 |   0.1077 |   0.1563 |   0.1563 |   0.1563 |   0.1563\n  delta=0.0100 |   0.0000 |   0.1077 |   0.1448 |   0.1448 |   0.1448 |   0.1448\n",
+      "stderr": ""
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "f09d335a7cdfcc81522fa0ba849e16b74de3596409a48b03283a84722c9a694b",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  }
+}
