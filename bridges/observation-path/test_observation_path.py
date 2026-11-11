@@ -201,6 +201,83 @@ class ObservationPathTests(unittest.TestCase):
         })
         self.assertEqual(path.status, "continued")
         self.assertTrue(path.terminal)
+    def test_quorum_authorization_is_distinct_from_receiver_admission(self):
+        required_intent = ObservationIntent(
+            attempt_id="attempt-auth", candidate_name="sensor.mode", query="q",
+            hypothesis_set_digest="sha256:hypotheses", estimated_cost=1.0,
+            authority_required=True,
+        )
+        path = ObservationPath(required_intent)
+        path.append("dispatched", "host", evidence_ref="transport/send.json")
+        path.append("admitted", "receiver", evidence_ref="receiver/admission.json")
+        path.append("returned", "sensor", evidence_ref="encounters/raw.json", details={
+            "encounter_id": "raw-01", "payload_digest": "sha256:raw",
+            "canonicalization": "utf8-raw-v1",
+        })
+        with self.assertRaises(ValueError):
+            path.append("interpreted", "interpreter", evidence_ref="interpretation.json", details={"method": "v1"})
+        path.append("evidence_authorized", "consensus", evidence_ref="consensus/decision.json", details={
+            "decision_status": "AUTHORIZED",
+            "policy_digest": "sha256:policy",
+            "decision_digest": "sha256:decision",
+            "quorum": 2,
+            "strict": True,
+            "observed_sources": ["source-a", "source-b"],
+            "dissenting_sources": [],
+            "missing_sources": [],
+            "representative_source": "source-a",
+        })
+        path.append("interpreted", "interpreter", evidence_ref="interpretations/mode.json", details={"method": "v1"})
+        self.assertEqual(path.status, "interpreted")
+
+    def test_quorum_refusal_is_not_a_negative_sensor_reading(self):
+        required_intent = ObservationIntent(
+            attempt_id="attempt-refused", candidate_name="sensor.mode", query="q",
+            hypothesis_set_digest="sha256:hypotheses", estimated_cost=1.0, authority_required=True,
+        )
+        path = ObservationPath(required_intent)
+        path.append("dispatched", "host", evidence_ref="transport/send.json")
+        path.append("admitted", "receiver", evidence_ref="receiver/admission.json")
+        path.append("returned", "sensor", evidence_ref="encounters/raw.json", details={
+            "encounter_id": "raw-01", "payload_digest": "sha256:raw", "canonicalization": "utf8-raw-v1",
+        })
+        path.append("evidence_refused", "consensus", evidence_ref="consensus/refusal.json", details={
+            "decision_status": "CONFLICT", "policy_digest": "sha256:policy",
+            "decision_digest": "sha256:decision", "quorum": 2, "strict": True,
+            "observed_sources": ["source-a", "source-b"],
+            "dissenting_sources": ["source-b"], "missing_sources": [],
+            "reason": "sources disagreed",
+        })
+        self.assertTrue(path.terminal)
+        self.assertEqual(path.status, "evidence_refused")
+        self.assertFalse(any(event.stage == "interpreted" for event in path.events))
+
+    def test_application_required_intent_needs_application_receipt_before_interpretation(self):
+        required_intent = ObservationIntent(
+            attempt_id="attempt-applied", candidate_name="sensor.mode", query="q",
+            hypothesis_set_digest="sha256:hypotheses", estimated_cost=1.0,
+            authority_required=True, application_required=True,
+        )
+        path = ObservationPath(required_intent)
+        path.append("dispatched", "host", evidence_ref="transport/send.json")
+        path.append("admitted", "receiver", evidence_ref="receiver/admission.json")
+        path.append("returned", "sensor", evidence_ref="encounters/raw.json", details={
+            "encounter_id": "raw-01", "payload_digest": "sha256:raw", "canonicalization": "utf8-raw-v1",
+        })
+        path.append("evidence_authorized", "consensus", evidence_ref="consensus/decision.json", details={
+            "decision_status": "AUTHORIZED", "policy_digest": "sha256:policy",
+            "decision_digest": "sha256:decision", "quorum": 2, "strict": True,
+            "observed_sources": ["source-a", "source-b"], "dissenting_sources": [],
+            "missing_sources": [], "representative_source": "source-a",
+        })
+        with self.assertRaises(ValueError):
+            path.append("interpreted", "interpreter", evidence_ref="interpretation.json", details={"method": "v1"})
+        path.append("applied", "receiver-vm", evidence_ref="vm/apply-receipt.json", details={
+            "application_id": "event-01", "target_id": "vm-task-7",
+            "projection_digest": "sha256:projection", "register_prefix": "gated",
+        })
+        path.append("interpreted", "interpreter", evidence_ref="interpretation.json", details={"method": "v1"})
+        self.assertEqual(path.status, "interpreted")
 
 if __name__ == "__main__":
     unittest.main()
