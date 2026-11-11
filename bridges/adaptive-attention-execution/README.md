@@ -28,10 +28,15 @@ Each request attempt receives its own ObservationPath. The policy execution resu
 
 Clock values remain labeled with their original clock domains; the coordinator performs no cross-clock alignment.
 
-## Files
+## Implementation and tests
 
-- adaptive_policy_execution.py — policy-tree coordinator over the evidence path ledger.
-- test_adaptive_policy_execution.py — adaptive branching, unexpected outcomes, rejection, timeout, and no-execution tests.
+The coordinator deliberately lives beside its append-only path primitive so it can reuse the same request-attempt implementation:
+
+- [adaptive_policy_execution.py](../observation-path/adaptive_policy_execution.py) — policy-tree coordinator over the evidence path ledger.
+- [test_adaptive_policy_execution.py](../observation-path/test_adaptive_policy_execution.py) — adaptive branching, unexpected outcomes, rejection, timeout, and no-execution tests.
+- [observation_path.py](../observation-path/observation_path.py) — lifecycle state machine used by each request attempt.
+
+The CI workflow runs the observation-path and adaptive-coordinator test files as two separate suites. This directory is the conceptual entry point and index for the bridge, not the Python package directory.
 
 ## Reproduce
 
