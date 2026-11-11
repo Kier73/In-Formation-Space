@@ -69,7 +69,7 @@ W^*(M) = \min_{k : |\mathcal{V}_k| > 1} \left[ c(O_k) + \max_{v \in \mathcal{V}_
 ## 3. Test Evidence
 
 The test suite in [`test_adaptive_attention.py`](test_adaptive_attention.py) passes 6 unit tests covering:
-- **Static vs Adaptive Cost Advantage:** Demonstrates a 4-hypothesis fixture where static collection costs 3.0 and direct sensing costs 2.5, whereas the optimal adaptive policy achieves an expected cost of 1.5 (worst-case 2.0).
+- **Static vs Adaptive Cost Advantage:** Demonstrates a 4-hypothesis fixture where the cheapest static packet costs 2.0, direct sensing costs 2.5, and collecting all three inexpensive observations costs 3.0. The adaptive policy achieves expected cost 1.5 and worst-case path cost 2.0.
 - **Prior Sensitivity:** Verifies that changing prior weights changes expected path cost and observation ordering without affecting query correctness.
 - **Reference Recurrence Cross-Check:** Verifies exact policy costs against an independent reference recurrence on random small instances.
 - **Trivial Resolution:** Pre-resolved queries return zero-cost terminal leaf immediately.
@@ -77,3 +77,8 @@ The test suite in [`test_adaptive_attention.py`](test_adaptive_attention.py) pas
 - **Validation:** Rejects unhashable outputs, negative costs, duplicate names, and non-callable queries.
 
 Encounter receipt is captured in [`results/test-encounter.json`](results/test-encounter.json).
+
+
+## 4. Static-packet comparison correction
+
+A follow-up brute-force enumeration over all subsets of the four candidate observations found that the minimum static packet is the pair of branch-specific refinements (`left-refinement` and `right-refinement`), costing 2.0. The earlier comparison against the three-observation packet at cost 3.0 was not the strongest static baseline. The adaptive policy still wins: expected cost 1.5, worst-case path cost 2.0. A new unit test enumerates every static subset and verifies this comparison.
