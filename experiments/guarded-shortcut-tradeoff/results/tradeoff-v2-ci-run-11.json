@@ -255,7 +255,7 @@
   "relations": [],
   "integrity": {
     "algorithm": "sha256",
-    "digest": "ad1797b7a28af9ad0ddb06973aa6c63e4172825f57bfbc7faca5851075f1d02f",
+    "digest": "d2044ad13669177113dc41f298da7a7127b3d7ed0ec07eb0e3468e068f60294b",
     "canonicalization": "json-sort-keys-utf8-v1"
   }
 }
