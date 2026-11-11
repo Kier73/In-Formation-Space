@@ -297,16 +297,7 @@ class ECPUGatedObservationAdapterTests(unittest.TestCase):
         adapter = ECPUGatedObservationAdapter(coordinator, decode_observation)
         path = make_path()
         adapter.record_finalized_decision(path, "phase", 7, decision_ref="consensus/phase-7.json")
-        details = path.events[-1].details
-        details["decision_digest"] = "0" * 64
-        path._events[-1] = path.events[-1].__class__(
-            stage="evidence_authorized",
-            actor="ecpu-consensus",
-            clock_value=None,
-            clock_domain=None,
-            evidence_ref="consensus/phase-7.json",
-            details_json=__import__("json").dumps(details, sort_keys=True, separators=(",", ":")),
-        )
+        coordinator.decision = FakeDecision(canonical_payload=("phase", 7, 2))
         with self.assertRaises(ValueError):
             adapter.record_application_commit(
                 path, "phase", 7, "/tmp/phase-7.json", checkpoint_ref="checkpoints/phase-7.json"
