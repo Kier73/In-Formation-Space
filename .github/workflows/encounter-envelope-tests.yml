@@ -68,8 +68,12 @@ jobs:
         run: python bridges/observation-equivalence/demonstration.py
       - name: Run observation-equivalence bridge tests
         run: python -m unittest discover -s bridges/observation-equivalence -p "test_*.py" -v
+      - name: Validate illustrative observation-path record
+        run: python bridges/observation-path/validate_observation_path.py bridges/observation-path/examples/happy-path.json
       - name: Run evidence-gated observation path tests
         run: python -m unittest discover -s bridges/observation-path -p "test_observation_path.py" -v
+      - name: Run observation-path schema and lifecycle tests
+        run: python -m unittest discover -s bridges/observation-path -p "test_validate_observation_path.py" -v
       - name: Run adaptive policy execution bridge tests
         run: python -m unittest discover -s bridges/observation-path -p "test_adaptive_policy_execution.py" -v
       - name: Run Poset Interleaver property tests
