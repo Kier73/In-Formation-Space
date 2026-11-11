@@ -135,3 +135,27 @@ The original equation includes interpreter cost \(c_I\) and fallback term \(p_{\
 - Treat H2 as evidence from one environment and finite sample set, not a proof of universal scaling.
 - Withdraw the original H3 fault-detection conclusion.
 - Use run_tradeoff_v2.py and test_tradeoff_v2.py for future guarded-residue experiments.
+
+
+---
+
+## 5. Corrected v2 execution result
+
+The corrected script was executed by GitHub Actions on **Ubuntu 26.04.1 / Python 3.11.18**. The run and full measurements are preserved in [tradeoff-v2-ci-run-11.json](tradeoff-v2-ci-run-11.json), linked to workflow run [43101725235](https://github.com/Kier73/In-Formation-Space/actions/runs/43101725235), job 130794631719, at commit 18efda0e05ab2a5f4bddd7a2d082f24ee2a884da.
+
+Selected median measurements:
+
+| Steps | Raw execution | Shortcut | Quotient-aware guard | Combined navigation | Speedup |
+|---:|---:|---:|---:|---:|---:|
+| 10 | 2.09 µs | 4.33 µs | 4.04 µs | 8.37 µs | 0.25× |
+| 50 | 8.55 µs | 4.71 µs | 4.58 µs | 9.29 µs | 0.92× |
+| 100 | 16.79 µs | 4.67 µs | 4.97 µs | 9.64 µs | 1.74× |
+| 1,000 | 176.65 µs | 7.15 µs | 7.69 µs | 14.84 µs | 11.90× |
+| 100,000 | 18,111.55 µs | 10.26 µs | 11.34 µs | 21.60 µs | 838.46× |
+| 5,000,000 | 902,471.40 µs | 16.38 µs | 16.23 µs | 32.61 µs | 27,673.83× |
+
+Every tested primary shortcut result matched raw execution, and every nominal quotient-aware guard accepted. The first tested coordinate where guarded navigation won was 100; the last tested coordinate where raw execution won was 50. This is a measured bracket for this runtime and implementation, not a universal crossover constant.
+
+The fault fixture also passed its no-fault baseline: nominal primary state 555069307499060140 matched expected check residue 849091804; after the bit-0 injection at step 5,000, the final primary state was 592373372152816230 and the check rejected it.
+
+The run does not include interpreter setup cost or a fallback term for \(p_{\mathrm{exit}}>0\). It is a finite benchmark, and the residue check can miss a difference divisible by the check modulus.
