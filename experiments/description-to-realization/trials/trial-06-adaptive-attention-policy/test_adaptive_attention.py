@@ -68,10 +68,10 @@ class AdaptiveAttentionTests(unittest.TestCase):
             hypotheses,
             query,
             observations,
-            weights={"A": 1.0, "B": 1.0, "C": 20.0, "D": 1.0},
+            weights={"A": 100.0, "B": 1.0, "C": 1.0, "D": 1.0},
         )
         self.assertTrue(uniform.complete and skewed.complete)
-        self.assertNotEqual(uniform.expected_cost, skewed.expected_cost)
+        self.assertLess(skewed.expected_cost, uniform.expected_cost)
 
     def test_unresolvable_cross_query_pair_is_reported(self):
         plan = select_adaptive_policy(
