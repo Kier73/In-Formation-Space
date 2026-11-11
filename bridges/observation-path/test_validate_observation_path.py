@@ -418,7 +418,10 @@ class ObservationPathSchemaTests(unittest.TestCase):
                 "ack_digest": "b" * 64,
             },
         })
-        record["events"].pop() if record["events"][-1]["stage"] == "query_determined" else None
+        record["events"] = [
+            event for event in record["events"]
+            if event["stage"] not in {"interpreted", "query_determined"}
+        ]
         record["status"] = "sender_ack_progress"
         record["terminal"] = False
         with self.assertRaises(ValueError):
