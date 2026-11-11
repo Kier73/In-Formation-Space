@@ -12,6 +12,7 @@ except ImportError:  # Optional development dependency; runtime validator stays 
     Draft202012Validator = None
     FormatChecker = None
 
+from capture_encounter import build_encounter_envelope
 from validate_envelope import (
     compute_payload_digest,
     parse_iso8601,
@@ -198,6 +199,26 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("Payload digest declared", output)
         self.assertIn("not checked", output)
+
+class CaptureUtilityTests(unittest.TestCase):
+    def test_unicode_capture_digest_matches_verifier(self):
+        doc = build_encounter_envelope(
+            encounter_id="test:unicode",
+            source_kind="test",
+            payload_value={"greeting": "café 😀", "nested": [1, 2, 3]},
+        )
+        self.assertNotIn("digest", doc["payload"])
+        self.assertEqual(verify_integrity(doc)[0], "VERIFIED")
+
+    def test_text_capture_uses_raw_utf8_digest(self):
+        doc = build_encounter_envelope(
+            encounter_id="test:text",
+            source_kind="test",
+            payload_value="café 😀",
+            media_type="text/plain",
+        )
+        self.assertEqual(doc["integrity"]["canonicalization"], "utf8-raw-v1")
+        self.assertEqual(verify_integrity(doc)[0], "VERIFIED")
 
 
 class SchemaAgreementTests(unittest.TestCase):
