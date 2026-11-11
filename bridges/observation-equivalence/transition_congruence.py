@@ -18,6 +18,31 @@ Action = TypeVar("Action", bound=Hashable)
 Test = TypeVar("Test")
 
 
+def _validated_transition_table(state_list, action_list, state_set, transition_fn):
+    """Evaluate every declared state/action transition and enforce closure."""
+    table = {}
+    for state in state_list:
+        for action in action_list:
+            try:
+                successor = transition_fn(state, action)
+            except Exception as exc:
+                raise ValueError(
+                    f"action {action!r} is not defined for state {state!r}"
+                ) from exc
+            try:
+                in_domain = successor in state_set
+            except TypeError as exc:
+                raise TypeError("transition successors must be hashable states") from exc
+            if not in_domain:
+                raise ValueError(
+                    "transition left the supplied finite state universe; "
+                    "include all reachable successors or use a larger model"
+                )
+            table[(state, action)] = successor
+    return table
+
+
+
 @dataclass(frozen=True)
 class CongruenceViolation:
     left_state: Hashable
@@ -82,6 +107,10 @@ def check_transition_congruence(
     if not callable(observation_fn) or not callable(transition_fn):
         raise TypeError("observation_fn and transition_fn must be callable")
 
+    transition_table = _validated_transition_table(
+        state_list, action_list, state_set, transition_fn
+    )
+
     def equivalent(left: State, right: State) -> Tuple[bool, object]:
         for test in test_list:
             if observation_fn(left, test) != observation_fn(right, test):
@@ -108,14 +137,9 @@ def check_transition_congruence(
         for member in block[1:]:
             checked_pairs += 1
             for action in action_list:
-                left_successor = transition_fn(representative, action)
-                right_successor = transition_fn(member, action)
+                left_successor = transition_table[(representative, action)]
+                right_successor = transition_table[(member, action)]
                 checked_transitions += 1
-                if left_successor not in state_set or right_successor not in state_set:
-                    raise ValueError(
-                        "transition left the supplied finite state universe; "
-                        "include all reachable successors or use a larger model"
-                    )
                 same_class, witness = equivalent(left_successor, right_successor)
                 if not same_class:
                     violations.append(
@@ -199,6 +223,10 @@ def refine_to_transition_congruence(
     if not callable(observation_fn) or not callable(transition_fn):
         raise TypeError("observation_fn and transition_fn must be callable")
 
+    transition_table = _validated_transition_table(
+        state_list, action_list, state_set, transition_fn
+    )
+
     def same_observations(left: State, right: State) -> bool:
         return all(
             observation_fn(left, test) == observation_fn(right, test)
@@ -230,13 +258,8 @@ def refine_to_transition_congruence(
             for state in block:
                 successor_signature = []
                 for action in action_list:
-                    successor = transition_fn(state, action)
+                    successor = transition_table[(state, action)]
                     evaluations += 1
-                    if successor not in state_set:
-                        raise ValueError(
-                            "transition left the supplied finite state universe; "
-                            "include all reachable successors or use a larger model"
-                        )
                     successor_signature.append(block_of[successor])
                 signature = tuple(successor_signature)
                 buckets.setdefault(signature, []).append(state)
