@@ -1,0 +1,42 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "bridge:hypothesis-revision:ci-run-131",
+  "observed_at": "2026-11-11T22:11:30.330649Z",
+  "recorded_at": "2026-11-11T22:11:30.330649Z",
+  "source": {
+    "kind": "github-actions-job-log",
+    "name": "Encounter envelope tests",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43109616670",
+    "capture_method": "test summary transcribed from successful CI job log"
+  },
+  "context": {
+    "workflow_run_id": 43109616670,
+    "job_id": 130821865442,
+    "commit": "74f5c9e9061ecd2bd346085bf9c7adc63f84cc53",
+    "runner": "ubuntu-latest",
+    "python": "3.11",
+    "exit_code": 0,
+    "command": "python -m unittest discover -s bridges/hypothesis-revision -p test_*.py -v"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "workflow_run_id": 43109616670,
+      "job_id": 130821865442,
+      "commit": "74f5c9e9061ecd2bd346085bf9c7adc63f84cc53",
+      "suite": "bridges/hypothesis-revision",
+      "tests": 15,
+      "result": "passed",
+      "stdout": "Ran 15 tests in 0.002s\nOK\n"
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "b2a4f56e7a266ece494d60b944dc62c1b39983f5319930ef6ddffbb6a376a255",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  },
+  "extensions": {
+    "note": "This receipt records test execution only; it does not certify the truth of any proposed hypothesis or validation result."
+  }
+}
