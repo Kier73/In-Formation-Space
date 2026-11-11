@@ -28,6 +28,11 @@ Each request attempt receives its own ObservationPath. The policy execution resu
 
 Clock values remain labeled with their original clock domains; the coordinator performs no cross-clock alignment.
 
+## Construction and verification
+
+- [Construction report](construction-report.md) records the lifecycle, evidence limits, and integrated CI result.
+- [CI execution receipt](../observation-path/results/ci-run-112.json) records the run and test-suite counts.
+
 ## Implementation and tests
 
 The coordinator deliberately lives beside its append-only path primitive so it can reuse the same request-attempt implementation:
