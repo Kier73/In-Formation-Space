@@ -29,6 +29,12 @@ Trials 04–06 choose which observations would be useful. They do not execute th
 
 Each request attempt is append-only. `admitted` records receiver-side intake; `evidence_authorized` records a separate consensus/authority decision. An intent can require that gate, and can additionally require an `applied` receipt for a receiver-side state mutation before interpretation. A direct one-receiver path can leave both requirements false. An interpreted observation can end in `query_determined`, `unresolved`, or `continued`; `continued` records which next observation the adaptive policy selected and closes the current request attempt before a new attempt begins. Failure paths are terminal and do not silently become observations. A payload that returns without an admission receipt is preserved as `returned_unadmitted` and cannot advance to interpretation within that attempt.
 
+## Explicit authority and application gates
+
+An intent may set `authority_required=true` when a source quorum, consensus policy, or other evidence-authorization decision must occur after the raw return. The path must then record `evidence_authorized` or `evidence_refused` before interpretation. An intent may additionally set `application_required=true` when the authorized representative must be applied to receiver state; this implies authority is required, and an `applied` receipt must precede interpretation. An application or authorization failure is terminal and cannot be interpreted as a negative measurement.
+
+For the E-CPU-specific mapping of transport enqueue, receiver evidence intake, quorum finalization, VM commit/ACK, and later Ground realization, see the [E-CPU adapter map](../adaptive-attention-execution/ecpu-adapter-map.md).
+
 ## Evidence and clocks
 
 Dispatch, receiver admission, raw return, evidence authorization/refusal, optional receiver-state application, interpretation, and query-resolution events can each reference their own receipt or artifact. A returned payload must reference an Encounter Envelope and include its encounter ID, payload digest, and declared canonicalization. The path ledger records those declarations; it does not fetch or authenticate the referenced artifact. The Encounter Envelope validator remains responsible for validating the referenced envelope when it is available.
