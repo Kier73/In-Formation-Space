@@ -45,9 +45,13 @@ The matrix below reports the fraction of the $[3.5, 4.0]$ parameter interval cer
 
 ## 2. Evaluation of Theoretical Conjectures
 
-### 2.1 Confirmation of Conjecture 1
+### 2.1 Original interpretation (subsequently qualified)
 
-All four sub-claims of Conjecture 1 (`grounded_navigation_theory.md`) are empirically confirmed:
+The following was the initial analysis of the observed matrix. It should now be read as a set of hypotheses suggested by the finite scan, not as confirmation of the full conjecture. The methodological limits are detailed in [review-note.md](../review-note.md).
+
+### 2.2 Finite-grid observations
+
+On the recorded 50,000-point grid and the six tested period budgets, the following patterns were observed:
 
 1. **Existence of Plateau in $P$:**  
    For every resolution $\delta$, increasing the period budget $P$ beyond a threshold yields zero additional coverage:
@@ -59,8 +63,8 @@ All four sub-claims of Conjecture 1 (`grounded_navigation_theory.md`) are empiri
    As resolution coarsens from $\delta = 0.0002$ to $\delta = 0.0100$, the plateau height monotonically decreases from **20.10%** down to **14.48%**. Finer distinctions allow an observer to navigate narrower pockets.
 3. **Plateau Position Shifts with $\delta$:**  
    At coarse resolution ($\delta = 0.0100$), the plateau is reached early at $P^* = 8$. At fine resolution ($\delta = 0.0002$), the plateau shifts deeper to $P^* = 32$.
-4. **Coverage Remains Strictly Bounded Below the Regular Set:**  
-   Although periodic windows are topologically dense in the regular parameter set (Lyubich), the effective coverage for a finite observer never approaches 1.0 or the full regular set measure. At $\delta = 0.0002$, certifiable coverage caps at **20.10%**. Nearly 80% of the parameter domain remains in dead zones where no stable periodic shortcut can be certified at this resolution.
+4. **Observed coverage remains below the full parameter interval:**  
+   The estimated candidate-window coverage at $\delta = 0.0002$ is **20.10% of the sampled parameter interval**. The remaining 79.90% is not classified by this scan as chaotic or as a mathematically established dead zone; it is simply outside the candidate intervals detected under this grid, warmup, tolerance, and period ceiling.
 
 ---
 
@@ -69,4 +73,4 @@ All four sub-claims of Conjecture 1 (`grounded_navigation_theory.md`) are empiri
 As emphasized in [`maps/mathematical-cautions.md`](../../maps/mathematical-cautions.md):
 - **Sampling limitation:** The 50,000-point grid has resolution step $\Delta r = 10^{-5}$. Windows narrower than $10^{-5}$ were not detected. This does not affect the reported matrix, as the finest analyzed resolution was $\delta = 2 \times 10^{-4}$ (20 grid steps).
 - **Tolerance boundary:** The cycle detection tolerance was set to $10^{-6}$ after 600 transient warmup iterations.
-- **Scope of verification:** The verification holds for the real 1D quadratic map under normalized Lebesgue measure on $[3.5, 4.0]$. It confirms the formal existence of the coverage plateau in a prototype nonlinear dynamical system.
+- **Scope of observation:** The matrix describes the output of this real 1D quadratic-map scanner under the selected finite numerical settings on $[3.5, 4.0]$. The equality at P<=32 and P<=64 is an observed plateau over those tested budgets only; it does not prove a plateau for all P beyond 32.
