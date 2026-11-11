@@ -132,6 +132,29 @@ class ObservationEquivalenceTests(unittest.TestCase):
         self.assertEqual(len(classes[0]), 2)
         self.assertEqual(len(classes[1]), 1)
 
+    def test_bounded_suffix_suite_does_not_prove_universal_language_equivalence(self) -> None:
+        qs = QuotientSpace[str, str, bool](language_obs)
+        left = "0" * 20
+        right = "0" * 21
+        bounded_suffixes = ["1" * n for n in range(10)]
+        finite_equal, witness = qs.are_equivalent(left, right, bounded_suffixes)
+        self.assertTrue(finite_equal)
+        self.assertIsNone(witness)
+        complete_witness = "1" * 20
+        self.assertNotEqual(
+            language_obs(left, complete_witness),
+            language_obs(right, complete_witness),
+        )
+
+    def test_unknown_register_mask_is_not_silently_mapped_to_zero(self) -> None:
+        with self.assertRaises(ValueError):
+            ibv_register_obs({"rax": 3}, "unknown-test")
+
+    def test_affine_generator_rejects_invalid_step_and_modulus(self) -> None:
+        with self.assertRaises(ValueError):
+            structural_gen_obs((1, 2, 10), -1)
+        with self.assertRaises(ValueError):
+            structural_gen_obs((1, 2, 0), 2)
 
 if __name__ == "__main__":
     unittest.main()
