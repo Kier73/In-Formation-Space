@@ -164,6 +164,28 @@ class HypothesisRevisionLedgerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.ledger.activate_supported(revision_id="revision-0002", actor="curator")
 
+    def test_later_revision_does_not_duplicate_prior_supported_candidates(self):
+        self.propose("H3")
+        self.ledger.validate_candidate(
+            "H3", "supported", validation_ref="reviews/H3.json", validator="reviewer"
+        )
+        second = self.ledger.activate_supported(revision_id="revision-0002", actor="curator")
+        self.assertEqual(tuple(h.hypothesis_id for h in second.hypotheses), ("H1", "H2", "H3"))
+
+        self.propose("H4")
+        self.ledger.validate_candidate(
+            "H4", "supported", validation_ref="reviews/H4.json", validator="reviewer"
+        )
+        third = self.ledger.activate_supported(revision_id="revision-0003", actor="curator")
+        self.assertEqual(tuple(h.hypothesis_id for h in third.hypotheses), ("H1", "H2", "H3", "H4"))
+        self.assertEqual(len({h.hypothesis_id for h in third.hypotheses}), 4)
+
+    def test_unknown_validation_result_is_rejected(self):
+        self.propose()
+        with self.assertRaises(ValueError):
+            self.ledger.validate_candidate(
+                "H3", "maybe", validation_ref="reviews/H3.json", validator="reviewer"
+            )
 
 if __name__ == "__main__":
     unittest.main()
