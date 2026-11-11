@@ -51,6 +51,10 @@ The repository does not need to adopt a fixed directory structure in advance. As
 
 Create a directory when there is real material for it. Do not create structure merely to satisfy a template.
 
+## Early experiments
+
+The first optional interchange experiment is the [Encounter Envelope](formats/encounter-envelope/README.md). It explores how to preserve an observed event separately from later interpretations when work passes between independent contributors. It is experimental, non-normative, and deliberately narrow.
+
 ## Working across projects
 
 This space may draw inspiration, code, methods, and test material from other repositories, including projects on the same account. It should not silently absorb their identity or duplicate their contents.
