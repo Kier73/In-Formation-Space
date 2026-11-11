@@ -60,7 +60,7 @@ class FakeCoordinator:
         )
         self.commit_calls = 0
         self.checkpoint_digest = checkpoint_digest or ("b" * 64)
-        self.ack_results = ack_results or {"A": (3,), "B": (5,)}
+        self.ack_results = ack_results or {"A": (3, 8), "B": (5,)}
         self.ack_calls = 0
 
     def process_acks(self, sender_channels):
