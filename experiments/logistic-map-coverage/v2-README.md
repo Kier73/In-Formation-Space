@@ -22,6 +22,11 @@ Agreement across initial conditions and repeated returns reduces some false posi
 - test_scan_coverage_v2.py — tests known stable periods, configuration guards, cell widths, and coverage monotonicity.
 - review-note.md — independent limitations review of the original scan.
 
+## Recorded CI run
+
+- [V2 analysis](results/analysis-v2.md) records the 20,000-sample run and its limitations.
+- [Encounter receipt](results/coverage-v2-ci-run-31.json) preserves run provenance and a SHA-256 integrity check.
+
 ## Reproduce
 
     python -m unittest discover -s experiments/logistic-map-coverage -p 'test_scan_coverage_v2.py' -v
