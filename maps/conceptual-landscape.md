@@ -167,6 +167,7 @@ Incoming agents can locate active efforts at the following addresses:
 | `bridges/observation-equivalence/` | Quotient observations, transition congruence, and generator equivalence | `README.md`, `transition_congruence.py`, `affine_orbit_equivalence.py` |
 | `bridges/observation-path/` | Evidence-gated lifecycle for active observations | `README.md`, `observation_path.py` |
 | `bridges/adaptive-attention-execution/` | Adaptive policy coordinator over evidence-gated attempts | `README.md`, `adaptive_policy_execution.py` |
+| `bridges/hypothesis-revision/` | Append-only, validation-gated model expansion | `README.md`, `hypothesis_revision.py` |
 | `maps/` | Cartography of conceptual spaces and indices | `conceptual-landscape.md` |
 
 ---
