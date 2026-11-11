@@ -139,11 +139,11 @@ class PosetInterleaver:
             u_pos = pos[u]
             v_pos = pos[v]
             if u_pos >= v_pos:
-                    return (
-                        False,
-                        f"Precedence violation: '{u}' (pos {u_pos}) must precede '{v}' (pos {v_pos}).",
-                        (u, v),
-                    )
+                return (
+                    False,
+                    f"Precedence violation: '{u}' (pos {u_pos}) must precede '{v}' (pos {v_pos}).",
+                    (u, v),
+                )
 
         return True, None, None
 
