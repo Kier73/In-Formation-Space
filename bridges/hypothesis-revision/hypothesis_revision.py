@@ -64,6 +64,8 @@ class HypothesisCandidate:
     encounter_ref: str
     interpretation_ref: str
     proposal_method: str
+    source_payload_digest: Optional[str] = None
+    source_canonicalization: Optional[str] = None
     validation_result: Optional[str] = None
     validation_ref: Optional[str] = None
     validator: Optional[str] = None
@@ -171,6 +173,8 @@ class HypothesisRevisionLedger:
         interpretation_ref: str,
         proposal_method: str,
         proposer: str,
+        source_payload_digest: Optional[str] = None,
+        source_canonicalization: Optional[str] = None,
     ) -> HypothesisCandidate:
         """Record a candidate; it remains proposed and does not enter the active set."""
         hypothesis_id = _nonempty(hypothesis_id, "hypothesis_id")
@@ -180,6 +184,10 @@ class HypothesisRevisionLedger:
         interpretation_ref = _nonempty(interpretation_ref, "interpretation_ref")
         proposal_method = _nonempty(proposal_method, "proposal_method")
         proposer = _nonempty(proposer, "proposer")
+        if source_payload_digest is not None:
+            source_payload_digest = _nonempty(source_payload_digest, "source_payload_digest")
+        if source_canonicalization is not None:
+            source_canonicalization = _nonempty(source_canonicalization, "source_canonicalization")
 
         active_ids = {item.hypothesis_id for item in self._current.hypotheses}
         if hypothesis_id in active_ids or hypothesis_id in self._candidates:
@@ -192,6 +200,8 @@ class HypothesisRevisionLedger:
             encounter_ref=encounter_ref,
             interpretation_ref=interpretation_ref,
             proposal_method=proposal_method,
+            source_payload_digest=source_payload_digest,
+            source_canonicalization=source_canonicalization,
         )
         self._candidates[hypothesis_id] = candidate
         self._append_event(
@@ -204,12 +214,67 @@ class HypothesisRevisionLedger:
                 "encounter_ref": encounter_ref,
                 "interpretation_ref": interpretation_ref,
                 "proposal_method": proposal_method,
+                "source_payload_digest": source_payload_digest,
+                "source_canonicalization": source_canonicalization,
                 "status": "proposed",
                 "based_on_revision": self._current.revision_id,
                 "based_on_hypothesis_set_digest": self._current.hypothesis_set_digest,
             },
         )
         return candidate
+
+    def propose_from_unresolved_attempt(
+        self,
+        attempt: Mapping[str, Any],
+        hypothesis_id: str,
+        description: str,
+        *,
+        proposal_method: str,
+        proposer: str,
+    ) -> HypothesisCandidate:
+        """Create a proposal directly from an unresolved model-mismatch attempt.
+
+        The attempt must contain returned, interpreted, and unresolved events;
+        its terminal reason must be the coordinator's unpredicted-branch reason.
+        Ordinary rejection, timeout, dispatch failure, and interpreter failure
+        are not accepted as model-mismatch evidence.
+        """
+        if not isinstance(attempt, Mapping):
+            raise TypeError("attempt must be an observation-path mapping")
+        attempt_id = _nonempty(attempt.get("attempt_id"), "attempt.attempt_id")
+        if attempt.get("status") != "unresolved":
+            raise ValueError("source attempt must terminate as unresolved")
+
+        events = attempt.get("events")
+        if not isinstance(events, (list, tuple)):
+            raise ValueError("source attempt must contain an events sequence")
+        returned = next((event for event in events if event.get("stage") == "returned"), None)
+        interpreted = next((event for event in events if event.get("stage") == "interpreted"), None)
+        unresolved = next((event for event in reversed(events) if event.get("stage") == "unresolved"), None)
+        if returned is None or interpreted is None or unresolved is None:
+            raise ValueError("model-mismatch source requires returned, interpreted, and unresolved events")
+
+        reason = unresolved.get("details", {}).get("reason")
+        if reason != "interpreted observation value was not predicted by the policy":
+            raise ValueError("source attempt is unresolved for a reason other than policy model mismatch")
+
+        returned_details = returned.get("details", {})
+        encounter_ref = _nonempty(returned.get("evidence_ref"), "returned.evidence_ref")
+        interpretation_ref = _nonempty(interpreted.get("evidence_ref"), "interpreted.evidence_ref")
+        payload_digest = _nonempty(returned_details.get("payload_digest"), "returned.payload_digest")
+        canonicalization = _nonempty(returned_details.get("canonicalization"), "returned.canonicalization")
+
+        return self.propose(
+            hypothesis_id,
+            description,
+            source_attempt_id=attempt_id,
+            encounter_ref=encounter_ref,
+            interpretation_ref=interpretation_ref,
+            proposal_method=proposal_method,
+            proposer=proposer,
+            source_payload_digest=payload_digest,
+            source_canonicalization=canonicalization,
+        )
 
     def validate_candidate(
         self,
@@ -238,6 +303,8 @@ class HypothesisRevisionLedger:
             encounter_ref=candidate.encounter_ref,
             interpretation_ref=candidate.interpretation_ref,
             proposal_method=candidate.proposal_method,
+            source_payload_digest=candidate.source_payload_digest,
+            source_canonicalization=candidate.source_canonicalization,
             validation_result=result,
             validation_ref=validation_ref,
             validator=validator,
@@ -330,6 +397,8 @@ class HypothesisRevisionLedger:
                     "encounter_ref": candidate.encounter_ref,
                     "interpretation_ref": candidate.interpretation_ref,
                     "proposal_method": candidate.proposal_method,
+                    "source_payload_digest": candidate.source_payload_digest,
+                    "source_canonicalization": candidate.source_canonicalization,
                     "validation_result": candidate.validation_result,
                     "validation_ref": candidate.validation_ref,
                     "validator": candidate.validator,
