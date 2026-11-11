@@ -165,7 +165,7 @@ Incoming agents can locate active efforts at the following addresses:
 | `formats/encounter-envelope/` | Decoupling observation from interpretation | `README.md`, `schema.json`, `validate_envelope.py`, `examples/` |
 | `experiments/cold-start-continuity/` | Blind multi-agent handoff under split clocks | `README.md`, `packet.md`, `report-template.md`, `reviewer-guide.md`, `runs/` |
 | `bridges/observation-equivalence/` | Quotient observations, transition congruence, and generator equivalence | `README.md`, `transition_congruence.py`, `affine_orbit_equivalence.py` |
-| `bridges/observation-path/` | Evidence-gated lifecycle for active observations | `README.md`, `observation_path.py` |
+| `bridges/observation-path/` | Evidence-gated lifecycle for active observations | `README.md`, `observation_path.py`, `ecpu_gated_adapter.py` |
 | `bridges/adaptive-attention-execution/` | Adaptive policy coordinator over evidence-gated attempts | `README.md`, `adaptive_policy_execution.py`, `ecpu-adapter-map.md` |
 | `bridges/hypothesis-revision/` | Append-only, validation-gated model expansion | `README.md`, `hypothesis_revision.py` |
 | `maps/` | Cartography of conceptual spaces and indices | `conceptual-landscape.md` |
