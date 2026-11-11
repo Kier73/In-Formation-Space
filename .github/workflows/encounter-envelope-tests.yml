@@ -58,6 +58,8 @@ jobs:
         run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-04-active-distinction-selection/results/test-encounter.json
       - name: Validate query-directed attention CI encounter
         run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-05-query-directed-attention/results/test-encounter.json
+      - name: Validate adaptive attention policy CI encounter
+        run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-06-adaptive-attention-policy/results/test-encounter.json
       - name: Validate bridge encounter
         run: python formats/encounter-envelope/validate_envelope.py bridges/observation-equivalence/results/bridge-encounter.json
       - name: Validate repeated-return logistic scan encounter

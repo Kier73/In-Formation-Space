@@ -1,0 +1,37 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:d2r-adaptive-attention:trial-06",
+  "observed_at": "2026-11-11T21:47:17.262355+00:00",
+  "recorded_at": "2026-11-11T21:47:17.499995+00:00",
+  "source": {
+    "kind": "subprocess",
+    "name": "shell-command-runner",
+    "reference": null,
+    "capture_method": "subprocess.run"
+  },
+  "context": {
+    "command": "python -m unittest discover -s experiments/description-to-realization/trials/trial-06-adaptive-attention-policy -p test_*.py -v",
+    "exit_code": 0,
+    "duration_ms": 237.618,
+    "platform": {
+      "system": "Windows",
+      "release": "11",
+      "python_version": "3.14.0"
+    },
+    "cwd": "C:\\Users\\kross\\Downloads\\In-Formation-Space"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "test_adaptive_policy_avoids_static_collect_everything_cost (test_adaptive_attention.AdaptiveAttentionTests.test_adaptive_policy_avoids_static_collect_everything_cost) ... ok\ntest_already_resolved_query_needs_no_observations (test_adaptive_attention.AdaptiveAttentionTests.test_already_resolved_query_needs_no_observations) ... ok\ntest_bad_inputs_are_rejected (test_adaptive_attention.AdaptiveAttentionTests.test_bad_inputs_are_rejected) ... ok\ntest_prior_weights_change_expected_cost_but_not_query_correctness (test_adaptive_attention.AdaptiveAttentionTests.test_prior_weights_change_expected_cost_but_not_query_correctness) ... ok\ntest_random_small_policies_match_independent_reference_recurrence (test_adaptive_attention.AdaptiveAttentionTests.test_random_small_policies_match_independent_reference_recurrence) ... ok\ntest_unresolvable_cross_query_pair_is_reported (test_adaptive_attention.AdaptiveAttentionTests.test_unresolvable_cross_query_pair_is_reported) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.008s\n\nOK\n"
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "772724fb50cc9d31c3b6b729ba03644e0a52b71ec46deff18cd45141572bac76",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  }
+}

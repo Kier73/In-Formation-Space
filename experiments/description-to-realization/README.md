@@ -199,6 +199,9 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Construction brief](trials/trial-06-adaptive-attention-policy/brief.md)
 - [Implementation](trials/trial-06-adaptive-attention-policy/adaptive_attention.py)
 - [Tests](trials/trial-06-adaptive-attention-policy/test_adaptive_attention.py)
+- [Construction report](trials/trial-06-adaptive-attention-policy/construction-report.md)
+- [Independent evaluation](trials/trial-06-adaptive-attention-policy/evaluation.md)
+- [Encounter receipt](trials/trial-06-adaptive-attention-policy/results/test-encounter.json)
 
 [Attention and Distinction Landscape](attention-landscape.md) compares Trials 03–06 and explains when partition refinement, target isolation, query resolution, or adaptive policies are appropriate.
 
