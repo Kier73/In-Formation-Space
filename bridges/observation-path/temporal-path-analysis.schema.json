@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/temporal-path-analysis.schema.json",
+  "title": "In-Formation-Space Conservative Temporal Path Analysis",
+  "description": "A derived report of E-CPU clock deltas between adjacent temporal frames bound to observation-path events. It does not isolate operation runtime.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "attempt_id",
+    "observation_path_digest",
+    "temporal_trace_ref",
+    "temporal_trace_digest",
+    "binding_digest",
+    "event_count",
+    "interval_count",
+    "monotonic_total_status",
+    "monotonic_total_elapsed_ns",
+    "intervals",
+    "measurement_scope",
+    "interpretation_limits",
+    "analysis_digest"
+  ],
+  "properties": {
+    "schema": {
+      "const": "in-formation.observation-temporal-analysis/0.1"
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observation_path_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "temporal_trace_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "temporal_trace_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "binding_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "event_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "interval_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "monotonic_total_status": {
+      "enum": [
+        "complete",
+        "no_intervals",
+        "incomplete_or_incomparable"
+      ]
+    },
+    "monotonic_total_elapsed_ns": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "intervals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "from_stage",
+          "to_stage",
+          "start_actor_id",
+          "end_actor_id",
+          "monotonic_status",
+          "monotonic_elapsed_ns",
+          "monotonic_regressed",
+          "wall_elapsed_ns",
+          "causal_relation",
+          "scheduler_ticks",
+          "event_steps",
+          "chemical_tau_delta",
+          "chronon_phase_from",
+          "chronon_phase_to"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "from_stage": {
+            "type": "string",
+            "minLength": 1
+          },
+          "to_stage": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_actor_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "end_actor_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "monotonic_status": {
+            "enum": [
+              "measured",
+              "regressed",
+              "not_comparable_or_unobserved"
+            ]
+          },
+          "monotonic_elapsed_ns": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "monotonic_regressed": {
+            "type": "boolean"
+          },
+          "wall_elapsed_ns": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "causal_relation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scheduler_ticks": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "event_steps": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "chemical_tau_delta": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "chronon_phase_from": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "minItems": 2,
+                "maxItems": 2
+              }
+            ]
+          },
+          "chronon_phase_to": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "minItems": 2,
+                "maxItems": 2
+              }
+            ]
+          }
+        }
+      }
+    },
+    "measurement_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "analysis_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
