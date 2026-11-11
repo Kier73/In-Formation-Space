@@ -1,0 +1,181 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "integration:ecpu-gated-observation:ifs-ci-run-217",
+  "observed_at": "2026-11-11T23:15:11.534158Z",
+  "recorded_at": "2026-11-11T23:15:26Z",
+  "source": {
+    "kind": "github-actions-job",
+    "name": "In-Formation-Space integrated test workflow",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43118348220",
+    "capture_method": "successful test summaries and live E-CPU integration output from pinned checkout"
+  },
+  "context": {
+    "in_formation_space_commit": "566bdb04af79a6701d4318c5299daf6c3c96601a",
+    "in_formation_space_workflow_run": 43118348220,
+    "in_formation_space_job": 130852080615,
+    "ecpu_repository": "Kier73/E-CPU",
+    "ecpu_commit": "800f94f83ffd6f527ed093c8d1c1e93e153c34f6",
+    "runner": "ubuntu-latest",
+    "python": "3.11",
+    "exit_code": 0
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "workflow_run_id": 43118348220,
+      "job_id": 130852080615,
+      "commit": "566bdb04af79a6701d4318c5299daf6c3c96601a",
+      "runner": "ubuntu-latest",
+      "python": "3.11",
+      "exit_code": 0,
+      "total_unit_tests": 237,
+      "suites": [
+        {
+          "suite": "formats/encounter-envelope",
+          "tests": 35,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-equivalence",
+          "tests": 25,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_observation_path.py",
+          "tests": 15,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_validate_observation_path.py",
+          "tests": 19,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_adaptive_policy_execution.py",
+          "tests": 22,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_ecpu_gated_adapter.py",
+          "tests": 14,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/ecpu_live_integration.py",
+          "tests": 2,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/hypothesis-revision",
+          "tests": 15,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-01-poset-interleaver",
+          "tests": 11,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-02-finite-description-unbounded-space",
+          "tests": 7,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-03-distinction-refinement",
+          "tests": 8,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-04-active-distinction-selection",
+          "tests": 10,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-05-query-directed-attention",
+          "tests": 8,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-06-adaptive-attention-policy",
+          "tests": 7,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-07-epistemic-frontier",
+          "tests": 22,
+          "result": "passed"
+        },
+        {
+          "suite": "guarded-shortcut-tradeoff",
+          "tests": 6,
+          "result": "passed"
+        },
+        {
+          "suite": "logistic-map-coverage-original",
+          "tests": 5,
+          "result": "passed"
+        },
+        {
+          "suite": "logistic-map-coverage-v2",
+          "tests": 6,
+          "result": "passed"
+        }
+      ],
+      "validation_and_execution": {
+        "illustrative_observation_path_record": "passed",
+        "encounter_envelope_records": "passed",
+        "guarded_shortcut_benchmark": "completed",
+        "logistic_map_scan_samples": 20000
+      },
+      "live_ecpu_integration": {
+        "repository": "Kier73/E-CPU",
+        "commit": "800f94f83ffd6f527ed093c8d1c1e93e153c34f6",
+        "runner": "ubuntu-latest",
+        "tests": 2,
+        "result": "passed",
+        "successful_event_path": [
+          "planned",
+          "dispatched",
+          "admitted",
+          "returned",
+          "evidence_authorized",
+          "applied",
+          "sender_acknowledged"
+        ],
+        "successful_event_assertions": [
+          "two durable ReliableChannel sender frames",
+          "GatedObservationCoordinator receiver intake",
+          "strict two-source AUTHORIZED decision",
+          "representative VM application",
+          "receiver consumption and RACK emission",
+          "VM idempotence receipt and register readback",
+          "reloadable receiver checkpoint",
+          "sender ACK processing",
+          "sender pending sequence sets empty",
+          "portable observation-path schema and lifecycle validation after sender acknowledgement"
+        ],
+        "conflict_event_path": [
+          "planned",
+          "dispatched",
+          "admitted",
+          "returned",
+          "evidence_refused"
+        ],
+        "conflict_assertions": [
+          "strict source conflict detected",
+          "no VM state change",
+          "receiver frames remain queued and unacknowledged"
+        ]
+      }
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "1d148f3375346fdb733a0e992629cafabf49e6c9221f22d2ea4cbdacb17449d2",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  },
+  "extensions": {
+    "note": "This receipt records 237 passing unit tests, repository validations, and two live integration tests against the pinned E-CPU runtime. It records test execution, not a production network deployment."
+  }
+}
