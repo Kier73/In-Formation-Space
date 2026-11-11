@@ -1,5 +1,6 @@
 import random
 import unittest
+from itertools import combinations
 
 from adaptive_attention import (
     AdaptiveObservation,
@@ -165,6 +166,31 @@ class AdaptiveAttentionTests(unittest.TestCase):
                 max_hypotheses=3,
             )
 
+    def test_adaptive_expected_cost_beats_minimum_static_packet(self):
+        hypotheses = ("A", "B", "C", "D")
+        query = lambda state: state in ("A", "B")
+        observations = [
+            observation("coarse", 1.0, {"A": "left", "B": "right", "C": "left", "D": "right"}),
+            observation("left-refinement", 1.0, {"A": "yes", "B": "same", "C": "no", "D": "same"}),
+            observation("right-refinement", 1.0, {"A": "same", "B": "yes", "C": "same", "D": "no"}),
+            observation("direct", 2.5, {"A": True, "B": True, "C": False, "D": False}),
+        ]
+        cross_pairs = [(a, b) for a in hypotheses if query(a) for b in hypotheses if not query(b)]
+        minimum_static_cost = float("inf")
+        for size in range(len(observations) + 1):
+            for packet in combinations(observations, size):
+                resolves_query = all(
+                    any(candidate.observe(true_state) != candidate.observe(false_state) for candidate in packet)
+                    for true_state, false_state in cross_pairs
+                )
+                if resolves_query:
+                    minimum_static_cost = min(minimum_static_cost, sum(candidate.cost for candidate in packet))
+
+        adaptive = select_adaptive_policy(hypotheses, query, observations)
+        self.assertEqual(minimum_static_cost, 2.0)
+        self.assertEqual(adaptive.expected_cost, 1.5)
+        self.assertLess(adaptive.expected_cost, minimum_static_cost)
+        self.assertEqual(adaptive.worst_case_cost, 2.0)
 
 if __name__ == "__main__":
     unittest.main()
