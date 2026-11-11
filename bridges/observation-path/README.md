@@ -48,6 +48,12 @@ An intent may set `authority_required=true` when a source quorum, consensus poli
 
 For the E-CPU-specific mapping of transport enqueue, receiver evidence intake, quorum finalization, VM commit/ACK, and later Ground realization, see the [E-CPU adapter map](../adaptive-attention-execution/ecpu-adapter-map.md).
 
+## Temporal checkpoint analysis
+
+[`ecpu_temporal_binding.py`](ecpu_temporal_binding.py) binds each observation-path event to one typed E-CPU `TemporalFrame` and preserves E-CPU's interval deltas. [`analyze_temporal_binding.py`](analyze_temporal_binding.py) provides a conservative reader over that verified binding. It names each value as elapsed time between adjacent local frame captures, reports a total only when every adjacent monotonic interval is comparable and measured, and preserves wall-clock, causal, scheduler, event, chemical, and phase fields separately. A missing monotonic interval is not treated as zero. The [analysis schema](temporal-path-analysis.schema.json) defines the portable report shape.
+
+These are checkpoint-to-checkpoint measurements, not isolated operation runtimes. For example, `dispatched → admitted` includes the interval between the adapter's local capture points after those stages; it is not a CPU-time profile of `ingest_available()` alone.
+
 ## Evidence and clocks
 
 Dispatch, receiver admission, raw return, evidence authorization/refusal, optional receiver-state application, interpretation, and query-resolution events can each reference their own receipt or artifact. A returned payload must reference an Encounter Envelope and include its encounter ID, payload digest, and declared canonicalization. The path ledger records those declarations; it does not fetch or authenticate the referenced artifact. The Encounter Envelope validator remains responsible for validating the referenced envelope when it is available.
