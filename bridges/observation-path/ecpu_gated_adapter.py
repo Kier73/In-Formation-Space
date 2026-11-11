@@ -563,9 +563,30 @@ class ECPUGatedObservationAdapter:
         for event in path.events:
             if event.stage != "sender_ack_progress":
                 continue
-            for item in event.details.get("acknowledged_sequences", ()):
+            details = event.details
+            if details.get("event_kind") != kind or details.get("logical_time") != logical_time:
+                raise ValueError("prior sender acknowledgement progress belongs to another event")
+            prior_expected = {
+                (item["source"], item["channel"], item["sequence"])
+                for item in details.get("expected_event_sequences", ())
+            }
+            if prior_expected != expected_ids:
+                raise ValueError("prior sender acknowledgement progress has a different event sequence set")
+            event_acknowledged = {}
+            for item in details.get("acknowledged_sequences", ()):
                 identity = (item["source"], item["channel"], item["sequence"])
-                prior_acknowledged[identity] = item
+                if item["source"] not in expected_by_source or item["channel"] != expected_by_source[item["source"]][0]:
+                    raise ValueError("prior sender acknowledgement progress refers to an unknown source channel")
+                if identity in event_acknowledged:
+                    raise ValueError("prior sender acknowledgement progress duplicates a sequence")
+                event_acknowledged[identity] = item
+            event_missing = {
+                (item["source"], item["channel"], item["sequence"])
+                for item in details.get("missing_event_sequences", ())
+            }
+            if event_missing != expected_ids - set(event_acknowledged):
+                raise ValueError("prior sender acknowledgement progress has an inconsistent missing set")
+            prior_acknowledged.update(event_acknowledged)
         prior_ids = set(prior_acknowledged)
 
         for source in sorted(expected_by_source):
