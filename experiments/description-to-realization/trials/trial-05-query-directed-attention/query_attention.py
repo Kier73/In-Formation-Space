@@ -131,7 +131,6 @@ def select_query_packet(
         if mask:
             validated.append((candidate.name, cost, mask))
 
-    full_mask = (1 << len(pairs)) - 1
     union_mask = 0
     for _, _, mask in validated:
         union_mask |= mask
