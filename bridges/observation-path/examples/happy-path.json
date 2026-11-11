@@ -5,7 +5,9 @@
     "query": "Did the mode become warm?",
     "hypothesis_set_digest": "sha256:example-hypothesis-set",
     "estimated_cost": 1.25,
-    "plan_ref": "plans/example-policy.json"
+    "plan_ref": "plans/example-policy.json",
+    "authority_required": false,
+    "application_required": false
   },
   "status": "query_determined",
   "terminal": true,
