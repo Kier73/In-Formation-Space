@@ -186,6 +186,70 @@ class HypothesisRevisionLedgerTests(unittest.TestCase):
             self.ledger.validate_candidate(
                 "H3", "maybe", validation_ref="reviews/H3.json", validator="reviewer"
             )
+    def unresolved_attempt(self, reason="interpreted observation value was not predicted by the policy"):
+        return {
+            "attempt_id": "query-01:0001",
+            "status": "unresolved",
+            "events": [
+                {"stage": "planned", "evidence_ref": "plans/policy.json", "details": {}},
+                {"stage": "dispatched", "evidence_ref": "transport/send.json", "details": {}},
+                {"stage": "admitted", "evidence_ref": "receiver/admission.json", "details": {}},
+                {"stage": "returned", "evidence_ref": "encounters/unexpected.json", "details": {
+                    "encounter_id": "unexpected-01",
+                    "payload_digest": "sha256:unexpected-payload",
+                    "canonicalization": "utf8-raw-v1",
+                }},
+                {"stage": "interpreted", "evidence_ref": "interpretations/unexpected.json", "details": {"method": "parser-v1"}},
+                {"stage": "unresolved", "evidence_ref": "interpretations/unexpected.json", "details": {"reason": reason}},
+            ],
+        }
+
+    def test_model_mismatch_attempt_supplies_candidate_provenance(self):
+        candidate = self.ledger.propose_from_unresolved_attempt(
+            self.unresolved_attempt(),
+            "H3",
+            "A previously unmodelled reset caused the transient.",
+            proposal_method="counterexample-guided-generation-v1",
+            proposer="model-reviser",
+        )
+        self.assertEqual(candidate.source_attempt_id, "query-01:0001")
+        self.assertEqual(candidate.encounter_ref, "encounters/unexpected.json")
+        self.assertEqual(candidate.interpretation_ref, "interpretations/unexpected.json")
+        self.assertEqual(candidate.source_payload_digest, "sha256:unexpected-payload")
+        self.assertEqual(candidate.source_canonicalization, "utf8-raw-v1")
+        self.assertIsNone(candidate.validation_result)
+        self.assertEqual(tuple(h.hypothesis_id for h in self.ledger.current_revision.hypotheses), ("H1", "H2"))
+
+    def test_timeout_rejection_and_unadmitted_return_cannot_create_hypothesis(self):
+        for status, stages in (
+            ("no_result", ["planned", "dispatched", "admitted", "no_result"]),
+            ("rejected", ["planned", "dispatched", "rejected"]),
+            ("returned_unadmitted", ["planned", "dispatched", "returned_unadmitted"]),
+        ):
+            with self.subTest(status=status):
+                attempt = {"attempt_id": "attempt", "status": status, "events": [{"stage": stage, "details": {}} for stage in stages]}
+                with self.assertRaises(ValueError):
+                    self.ledger.propose_from_unresolved_attempt(
+                        attempt, "H3", "candidate",
+                        proposal_method="method", proposer="agent",
+                    )
+
+    def test_unresolved_attempt_with_other_reason_is_not_model_mismatch(self):
+        with self.assertRaises(ValueError):
+            self.ledger.propose_from_unresolved_attempt(
+                self.unresolved_attempt("operator cancelled the run"),
+                "H3", "candidate",
+                proposal_method="method", proposer="agent",
+            )
+
+    def test_reordered_or_malformed_event_history_is_rejected(self):
+        attempt = self.unresolved_attempt()
+        attempt["events"][2], attempt["events"][3] = attempt["events"][3], attempt["events"][2]
+        with self.assertRaises(ValueError):
+            self.ledger.propose_from_unresolved_attempt(
+                attempt, "H3", "candidate",
+                proposal_method="method", proposer="agent",
+            )
 
 if __name__ == "__main__":
     unittest.main()
