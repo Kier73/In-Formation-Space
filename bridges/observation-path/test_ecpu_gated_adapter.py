@@ -377,12 +377,28 @@ class ECPUGatedObservationAdapterTests(unittest.TestCase):
             "A": FakeSenderChannel("A", "phase-A", (3,)),
             "B": FakeSenderChannel("B", "phase-B", (5,)),
         }
-        with self.assertRaises(ValueError):
-            adapter.record_sender_acknowledgements(
-                path, "phase", 7, sender_channels,
-                acknowledgement_ref="sender-acks/incomplete.json",
-            )
-        self.assertEqual(path.status, "applied")
+        partial = adapter.record_sender_acknowledgements(
+            path, "phase", 7, sender_channels,
+            acknowledgement_ref="sender-acks/partial.json",
+        )
+        self.assertFalse(partial.complete)
+        self.assertEqual(partial.status, "sender_ack_progress")
+        self.assertEqual(partial.missing_event_sequences, (("A", "phase-A", 3),))
+        self.assertEqual(path.status, "sender_ack_progress")
+        self.assertEqual(sender_channels["A"].pending_sequences(), (3,))
+        self.assertEqual(sender_channels["B"].pending_sequences(), ())
+
+        coordinator.ack_results = {"A": (3,), "B": ()}
+        complete = adapter.record_sender_acknowledgements(
+            path, "phase", 7, sender_channels,
+            acknowledgement_ref="sender-acks/complete.json",
+        )
+        self.assertTrue(complete.complete)
+        self.assertEqual(complete.status, "sender_acknowledged")
+        self.assertEqual(complete.missing_event_sequences, ())
+        self.assertEqual(path.status, "sender_acknowledged")
+        self.assertEqual(sender_channels["A"].pending_sequences(), ())
+        self.assertEqual(sender_channels["B"].pending_sequences(), ())
 
     def test_sender_acknowledgement_requires_declared_intent(self):
         coordinator = FakeCoordinator()
