@@ -246,19 +246,30 @@ class HypothesisRevisionLedger:
             raise ValueError("source attempt must terminate as unresolved")
 
         events = attempt.get("events")
-        if not isinstance(events, (list, tuple)):
-            raise ValueError("source attempt must contain an events sequence")
-        returned = next((event for event in events if event.get("stage") == "returned"), None)
-        interpreted = next((event for event in events if event.get("stage") == "interpreted"), None)
-        unresolved = next((event for event in reversed(events) if event.get("stage") == "unresolved"), None)
-        if returned is None or interpreted is None or unresolved is None:
-            raise ValueError("model-mismatch source requires returned, interpreted, and unresolved events")
+        if not isinstance(events, (list, tuple)) or any(not isinstance(event, Mapping) for event in events):
+            raise ValueError("source attempt must contain a sequence of event mappings")
+        stages = [event.get("stage") for event in events]
+        required_stages = ("dispatched", "admitted", "returned", "interpreted", "unresolved")
+        positions = []
+        for stage in required_stages:
+            try:
+                positions.append(stages.index(stage))
+            except ValueError as exc:
+                raise ValueError(f"model-mismatch source is missing required stage: {stage}") from exc
+        if positions != sorted(positions):
+            raise ValueError("model-mismatch evidence stages must appear in lifecycle order")
 
-        reason = unresolved.get("details", {}).get("reason")
+        returned = events[positions[2]]
+        interpreted = events[positions[3]]
+        unresolved = events[positions[4]]
+        returned_details = returned.get("details")
+        unresolved_details = unresolved.get("details")
+        if not isinstance(returned_details, Mapping) or not isinstance(unresolved_details, Mapping):
+            raise ValueError("returned and unresolved events must contain details objects")
+        reason = unresolved_details.get("reason")
         if reason != "interpreted observation value was not predicted by the policy":
             raise ValueError("source attempt is unresolved for a reason other than policy model mismatch")
 
-        returned_details = returned.get("details", {})
         encounter_ref = _nonempty(returned.get("evidence_ref"), "returned.evidence_ref")
         interpretation_ref = _nonempty(interpreted.get("evidence_ref"), "interpreted.evidence_ref")
         payload_digest = _nonempty(returned_details.get("payload_digest"), "returned.payload_digest")
