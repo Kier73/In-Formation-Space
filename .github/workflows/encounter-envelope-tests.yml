@@ -80,6 +80,8 @@ jobs:
         run: python bridges/observation-path/validate_observation_path.py bridges/observation-path/examples/happy-path.json
       - name: Validate observation-path CI receipt
         run: python formats/encounter-envelope/validate_envelope.py bridges/observation-path/results/ci-run-112.json
+      - name: Validate live E-CPU integration receipt
+        run: python formats/encounter-envelope/validate_envelope.py bridges/observation-path/results/live-ecpu-integration-run-217.json
       - name: Validate hypothesis-revision CI receipt
         run: python formats/encounter-envelope/validate_envelope.py bridges/hypothesis-revision/results/ci-run-131.json
       - name: Run evidence-gated observation path tests
