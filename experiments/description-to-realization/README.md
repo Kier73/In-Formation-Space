@@ -164,6 +164,14 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Implementation](trials/trial-03-distinction-refinement/distinction_space.py)
 - [Tests](trials/trial-03-distinction-refinement/test_distinction_space.py)
 
+### Trial 04: Active distinction selection
+
+[Trial 04](trials/trial-04-active-distinction-selection/README.md) turns active attention into a cost-aware observation-selection problem. It chooses a minimum-cost packet of observations that separates a target from its remaining alternatives, using exact weighted set-cover dynamic programming for modest ambiguity sets and a labelled greedy approximation for larger ones.
+
+- [Construction brief](trials/trial-04-active-distinction-selection/brief.md)
+- [Implementation](trials/trial-04-active-distinction-selection/attention_selection.py)
+- [Tests](trials/trial-04-active-distinction-selection/test_attention_selection.py)
+
 ## 7. Open questions
 
 1. Which parts of a description are sufficient to make a construction reproducible across different model families and tool environments?
