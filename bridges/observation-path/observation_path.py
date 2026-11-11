@@ -23,7 +23,7 @@ _ALLOWED_NEXT = {
     "dispatched": {"admitted", "rejected", "dispatch_failed", "returned_unadmitted"},
     "admitted": {"returned", "no_result"},
     "returned": {"interpreted", "interpretation_failed"},
-    "interpreted": {"query_determined", "unresolved"},
+    "interpreted": {"continued", "query_determined", "unresolved"},
 }
 _TERMINAL = {
     "dispatch_failed",
@@ -31,6 +31,7 @@ _TERMINAL = {
     "returned_unadmitted",
     "no_result",
     "interpretation_failed",
+    "continued",
     "query_determined",
     "unresolved",
 }
@@ -186,6 +187,10 @@ class ObservationPath:
             _nonempty(detail_values.get("reason"), "details.reason")
         elif stage == "interpreted":
             _nonempty(detail_values.get("method"), "details.method")
+        elif stage == "continued":
+            _nonempty(detail_values.get("next_attempt_id"), "details.next_attempt_id")
+            _nonempty(detail_values.get("next_candidate_name"), "details.next_candidate_name")
+            _nonempty(detail_values.get("hypothesis_set_digest"), "details.hypothesis_set_digest")
 
         event = PathEvent(
             stage=stage,
