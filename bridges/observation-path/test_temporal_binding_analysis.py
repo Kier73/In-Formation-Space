@@ -92,7 +92,7 @@ class TemporalBindingAnalysisTests(unittest.TestCase):
         binding = binding_with_deltas([
             {"monotonic_elapsed_ns": 12},
             {"monotonic_elapsed_ns": None},
-        ], actors=["clock-a", "clock-b", "clock-c"])
+        ], actors=["clock-a", "clock-a", "clock-b"])
         report = analyze_temporal_binding(binding)
         self.assertEqual(report["monotonic_total_status"], "incomplete_or_incomparable")
         self.assertIsNone(report["monotonic_total_elapsed_ns"])
