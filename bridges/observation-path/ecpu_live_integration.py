@@ -42,6 +42,10 @@ from ecpu_temporal_binding import (
     create_temporal_binding,
     validate_temporal_binding,
 )
+from analyze_temporal_binding import (
+    analyze_temporal_binding,
+    validate_temporal_analysis,
+)
 from observation_path import ObservationIntent, ObservationPath
 from validate_observation_path import validate_path_record
 
@@ -171,7 +175,21 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             restore_trace=TemporalPathTrace.from_dict,
         )
         self.assertEqual(restored_binding.binding_digest, binding.binding_digest)
-        return trace_ref, binding_ref, binding
+
+        analysis_document = analyze_temporal_binding(binding_document)
+        analysis_schema = json.loads(
+            (Path(__file__).with_name("temporal-path-analysis.schema.json"))
+            .read_text(encoding="utf-8")
+        )
+        jsonschema.validate(analysis_document, analysis_schema)
+        restored_analysis = validate_temporal_analysis(analysis_document)
+        self.assertEqual(restored_analysis["analysis_digest"], analysis_document["analysis_digest"])
+        analysis_ref = self.root / f"temporal-analysis-{logical_time}.json"
+        analysis_ref.write_text(
+            json.dumps(analysis_document, sort_keys=True, indent=2),
+            encoding="utf-8",
+        )
+        return trace_ref, binding_ref, analysis_ref, binding, analysis_document
 
     def _send_and_record_raw(
         self,
@@ -352,9 +370,12 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         self.assertEqual(self.sender_b.pending_sequences(), ())
         self._capture_temporal_events(path)
         validate_path_record(path.to_dict(), schema)
-        trace_ref, binding_ref, binding = self._write_temporal_binding(path, logical_time)
+        trace_ref, binding_ref, analysis_ref, binding, analysis = self._write_temporal_binding(path, logical_time)
         self.assertTrue(trace_ref.exists())
         self.assertTrue(binding_ref.exists())
+        self.assertTrue(analysis_ref.exists())
+        self.assertEqual(analysis["monotonic_total_status"], "complete")
+        self.assertIsNotNone(analysis["monotonic_total_elapsed_ns"])
         self.assertEqual(len(binding.event_bindings), len(path.events))
         self.assertEqual(len(binding.intervals), len(path.events) - 1)
         self.assertTrue(all(
@@ -391,9 +412,11 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         self.assertEqual(len(self.transport.list("R-A")), 1)
         self.assertEqual(len(self.transport.list("R-B")), 1)
         self._capture_temporal_events(path)
-        trace_ref, binding_ref, binding = self._write_temporal_binding(path, logical_time)
+        trace_ref, binding_ref, analysis_ref, binding, analysis = self._write_temporal_binding(path, logical_time)
         self.assertTrue(trace_ref.exists())
         self.assertTrue(binding_ref.exists())
+        self.assertTrue(analysis_ref.exists())
+        self.assertEqual(analysis["event_count"], len(path.events))
         self.assertEqual(
             [event["stage"] for event in binding.event_bindings],
             [event.stage for event in path.events],
