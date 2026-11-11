@@ -51,11 +51,14 @@ def validate_path_record(document: Mapping[str, Any], schema: Mapping[str, Any])
             raise ValueError("application_required path must record applied after evidence_authorized and before interpretation")
         if stages.index("interpreted") <= stages.index("applied"):
             raise ValueError("interpretation must follow receiver application")
+    if "sender_acknowledged" in stages:
+        if not sender_ack_required:
+            raise ValueError("sender_acknowledged event requires intent.sender_ack_required")
+        if "applied" not in stages or stages.index("sender_acknowledged") <= stages.index("applied"):
+            raise ValueError("sender acknowledgement must follow receiver application")
     if sender_ack_required and "interpreted" in stages:
         if "sender_acknowledged" not in stages:
             raise ValueError("sender_ack_required path must record sender_acknowledged before interpretation")
-        if "applied" not in stages or stages.index("sender_acknowledged") <= stages.index("applied"):
-            raise ValueError("sender acknowledgement must follow receiver application")
         if stages.index("interpreted") <= stages.index("sender_acknowledged"):
             raise ValueError("interpretation must follow sender acknowledgement")
 
