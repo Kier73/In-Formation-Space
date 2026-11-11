@@ -1,0 +1,261 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:guarded-shortcut-v2:github-actions-run-43101725235",
+  "observed_at": "2026-11-11T21:17:23.943893Z",
+  "recorded_at": "2026-11-11T21:17:29.743447Z",
+  "source": {
+    "kind": "github-actions-job-log",
+    "name": "Encounter envelope tests",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43101725235",
+    "capture_method": "workflow output transcribed into an encounter record with run and commit provenance"
+  },
+  "context": {
+    "workflow_run_id": 43101725235,
+    "job_id": 130794631719,
+    "commit": "18efda0e05ab2a5f4bddd7a2d082f24ee2a884da",
+    "command": "python experiments/guarded-shortcut-tradeoff/run_tradeoff_v2.py",
+    "exit_code": 0,
+    "runner_os": "Ubuntu 26.04.1",
+    "python": "3.11.18",
+    "timing_statistic": "median"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "experiment": "guarded-shortcut-tradeoff-v2",
+      "run": {
+        "workflow": "Encounter envelope tests",
+        "workflow_run_id": 43101725235,
+        "job_id": 130794631719,
+        "commit": "18efda0e05ab2a5f4bddd7a2d082f24ee2a884da",
+        "runner_os": "Ubuntu 26.04.1",
+        "python": "3.11.18",
+        "source_url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43101725235"
+      },
+      "parameters": {
+        "primary_modulus": 2305843009213694000,
+        "check_modulus": 2147483647,
+        "a": 6364136223846793000,
+        "b": 1442695040888963300,
+        "timing_statistic": "median",
+        "time_unit": "microseconds",
+        "guard_method": "affine transform modulo primary_modulus*check_modulus, then reduce modulo primary_modulus, then modulo check_modulus"
+      },
+      "points": [
+        {
+          "steps": 10,
+          "raw_median_us": 2.09,
+          "shortcut_median_us": 4.33,
+          "guard_median_us": 4.04,
+          "navigation_median_us": 8.37,
+          "speedup": 0.25,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 15,
+          "raw_median_us": 2.71,
+          "shortcut_median_us": 3.86,
+          "guard_median_us": 4.17,
+          "navigation_median_us": 8.02,
+          "speedup": 0.34,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 20,
+          "raw_median_us": 3.48,
+          "shortcut_median_us": 3.31,
+          "guard_median_us": 3.89,
+          "navigation_median_us": 7.19,
+          "speedup": 0.48,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 25,
+          "raw_median_us": 4.31,
+          "shortcut_median_us": 3.72,
+          "guard_median_us": 4.22,
+          "navigation_median_us": 7.93,
+          "speedup": 0.54,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 30,
+          "raw_median_us": 5.14,
+          "shortcut_median_us": 4.46,
+          "guard_median_us": 4.78,
+          "navigation_median_us": 9.24,
+          "speedup": 0.56,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 35,
+          "raw_median_us": 6.07,
+          "shortcut_median_us": 4.51,
+          "guard_median_us": 4.71,
+          "navigation_median_us": 9.22,
+          "speedup": 0.66,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 40,
+          "raw_median_us": 6.93,
+          "shortcut_median_us": 4.12,
+          "guard_median_us": 4.22,
+          "navigation_median_us": 8.34,
+          "speedup": 0.83,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 50,
+          "raw_median_us": 8.55,
+          "shortcut_median_us": 4.71,
+          "guard_median_us": 4.58,
+          "navigation_median_us": 9.29,
+          "speedup": 0.92,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 100,
+          "raw_median_us": 16.79,
+          "shortcut_median_us": 4.67,
+          "guard_median_us": 4.97,
+          "navigation_median_us": 9.64,
+          "speedup": 1.74,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 500,
+          "raw_median_us": 87.13,
+          "shortcut_median_us": 6.92,
+          "guard_median_us": 7.42,
+          "navigation_median_us": 14.35,
+          "speedup": 6.07,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 1000,
+          "raw_median_us": 176.65,
+          "shortcut_median_us": 7.15,
+          "guard_median_us": 7.69,
+          "navigation_median_us": 14.84,
+          "speedup": 11.9,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 5000,
+          "raw_median_us": 904.21,
+          "shortcut_median_us": 7.92,
+          "guard_median_us": 8.62,
+          "navigation_median_us": 16.53,
+          "speedup": 54.7,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 10000,
+          "raw_median_us": 1807.93,
+          "shortcut_median_us": 8.47,
+          "guard_median_us": 9.16,
+          "navigation_median_us": 17.62,
+          "speedup": 102.6,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 50000,
+          "raw_median_us": 8887.18,
+          "shortcut_median_us": 9.81,
+          "guard_median_us": 10.51,
+          "navigation_median_us": 20.32,
+          "speedup": 437.4,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 100000,
+          "raw_median_us": 18111.55,
+          "shortcut_median_us": 10.26,
+          "guard_median_us": 11.34,
+          "navigation_median_us": 21.6,
+          "speedup": 838.46,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 500000,
+          "raw_median_us": 88231.58,
+          "shortcut_median_us": 11.33,
+          "guard_median_us": 12.23,
+          "navigation_median_us": 23.56,
+          "speedup": 3744.18,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 1000000,
+          "raw_median_us": 182345.54,
+          "shortcut_median_us": 14.62,
+          "guard_median_us": 13.91,
+          "navigation_median_us": 28.52,
+          "speedup": 6392.93,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        },
+        {
+          "steps": 5000000,
+          "raw_median_us": 902471.4,
+          "shortcut_median_us": 16.38,
+          "guard_median_us": 16.23,
+          "navigation_median_us": 32.61,
+          "speedup": 27673.83,
+          "raw_shortcut_match": true,
+          "guard_accepts_nominal": true
+        }
+      ],
+      "fault_test": {
+        "steps": 10000,
+        "fault_step": 5000,
+        "fault": "flip bit 0 of the primary state after fault_step transitions",
+        "nominal_primary": 555069307499060160,
+        "expected_check_residue": 849091804,
+        "nominal_guard_accepts": true,
+        "faulty_primary": 592373372152816300,
+        "faulty_guard_accepts": false,
+        "fault_detected": true,
+        "scope": "This checks one injected state fault against an independently computed expected residue. A residue check can miss differences divisible by the check modulus; it is not a proof against all faults."
+      },
+      "summary": {
+        "first_tested_coordinate_where_guarded_navigation_wins": 100,
+        "last_tested_coordinate_where_raw_execution_wins": 50,
+        "crossover_bracket_steps": [
+          50,
+          100
+        ],
+        "all_primary_outputs_match_raw": true,
+        "all_nominal_guards_accept": true
+      },
+      "limitations": [
+        "Interpreter setup cost and p_exit fallback cost are not included in navigation_median_us.",
+        "A finite benchmark does not establish asymptotic performance on all platforms.",
+        "The residue check can miss differences that are multiples of the check modulus."
+      ]
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "ad1797b7a28af9ad0ddb06973aa6c63e4172825f57bf7cafa5851075f1d02f",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  }
+}
