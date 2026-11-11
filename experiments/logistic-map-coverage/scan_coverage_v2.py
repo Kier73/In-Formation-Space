@@ -78,7 +78,8 @@ def _classify_one_initial(
     for point in orbit[:candidate_period]:
         derivative = abs(r * (1.0 - 2.0 * point))
         if derivative == 0.0:
-            continue
+            log_multiplier = float("-inf")
+            break
         log_multiplier += math.log(derivative)
 
     # A margin avoids classifying nearly neutral numerical returns as stable.
@@ -103,8 +104,8 @@ def classify_parameter(
     A return period of zero means no stable candidate was established under
     these finite numerical settings. It does not mean the orbit is chaotic.
     """
-    if not R_MIN <= r <= R_MAX:
-        raise ValueError(f"r must be within [{R_MIN}, {R_MAX}]")
+    if not 0.0 < r <= 4.0:
+        raise ValueError("r must be within (0, 4] for the logistic-map family")
     if max_period < 1:
         raise ValueError("max_period must be positive")
     if warmup_steps < 0:
