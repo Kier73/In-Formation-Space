@@ -326,17 +326,28 @@ class ECPUGatedObservationAdapter:
         if set(consumed_sources) != set(links_by_source):
             raise ValueError("E-CPU receiver has not consumed/ACKed every event source")
 
-        for label in ("consume_intents", "apply_intents"):
-            items = coordinator_snapshot.get(label)
-            if not isinstance(items, (list, tuple)):
-                raise ValueError(f"E-CPU {label} snapshot must be a sequence")
-            if any(
-                isinstance(item, Mapping)
-                and item.get("kind") == kind
-                and item.get("logical_time") == logical_time
-                for item in items
-            ):
-                raise ValueError(f"E-CPU event retains an unresolved {label} entry")
+        consume_intents = coordinator_snapshot.get("consume_intents")
+        if not isinstance(consume_intents, (list, tuple)):
+            raise ValueError("E-CPU consume_intents snapshot must be a sequence")
+        for item in consume_intents:
+            if not isinstance(item, Mapping) or item.get("kind") != kind or item.get("logical_time") != logical_time:
+                continue
+            pending_links = item.get("links")
+            if not isinstance(pending_links, (list, tuple)):
+                raise ValueError("E-CPU event consume-intent links are malformed")
+            if pending_links:
+                raise ValueError("E-CPU event retains unresolved consume intents")
+
+        apply_intents = coordinator_snapshot.get("apply_intents")
+        if not isinstance(apply_intents, (list, tuple)):
+            raise ValueError("E-CPU apply_intents snapshot must be a sequence")
+        if any(
+            isinstance(item, Mapping)
+            and item.get("kind") == kind
+            and item.get("logical_time") == logical_time
+            for item in apply_intents
+        ):
+            raise ValueError("E-CPU event retains an unresolved apply intent")
 
         consensus = coordinator_snapshot.get("policy_consensus")
         if not isinstance(consensus, Mapping):
