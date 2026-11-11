@@ -148,6 +148,14 @@ Textual similarity alone is not a success metric. Functional correspondence, con
   - [Independent evaluation](trials/trial-01-poset-interleaver/evaluation.md) — verification against hard constraints and soft preferences.
   - [Code: poset_interleaver.py](trials/trial-01-poset-interleaver/poset_interleaver.py) | [Tests: test_poset_interleaver.py](trials/trial-01-poset-interleaver/test_poset_interleaver.py) | [Encounter receipt](trials/trial-01-poset-interleaver/results/test-encounter.json)
 
+### Trial 02: Finite description, unbounded space
+
+[Trial 02](trials/trial-02-finite-description-unbounded-space/README.md) contrasts an infinite language recognized by a finite-state machine with an infinite language whose distinct prefixes require unbounded distinguishability. The implementation supplies lazy generators, constructive product-state witnesses, distinguishing suffixes, and finite tests.
+
+- [Construction brief](trials/trial-02-finite-description-unbounded-space/brief.md)
+- [Implementation](trials/trial-02-finite-description-unbounded-space/finite_description.py)
+- [Tests](trials/trial-02-finite-description-unbounded-space/test_finite_description.py)
+
 ## 7. Open questions
 
 1. Which parts of a description are sufficient to make a construction reproducible across different model families and tool environments?
