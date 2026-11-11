@@ -1,0 +1,47 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "exp:d2r-query-directed-attention:trial-05:ci-run-54",
+  "observed_at": "2026-11-11T21:40:30.252159Z",
+  "recorded_at": "2026-11-11T21:40:30.252159Z",
+  "source": {
+    "kind": "github-actions-job-log",
+    "name": "Encounter envelope tests",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43105093144",
+    "capture_method": "test output transcribed from successful CI job log"
+  },
+  "context": {
+    "workflow_run_id": 43105093144,
+    "job_id": 130806230374,
+    "commit": "94a331765be18609436dc55d0982eda0ea9e7982",
+    "command": "python -m unittest discover -s experiments/description-to-realization/trials/trial-05-query-directed-attention -p test_*.py -v",
+    "exit_code": 0,
+    "runner": "ubuntu-latest",
+    "python": "3.11.18"
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "exit_code": 0,
+      "tests": [
+        "test_bad_inputs_are_rejected",
+        "test_does_not_pay_to_distinguish_hypotheses_on_same_query_side",
+        "test_exact_solver_matches_brute_force_random_small_instances",
+        "test_greedy_fallback_is_labelled_and_complete",
+        "test_poset_linear_extensions_can_leave_target_relation_unresolvable",
+        "test_query_already_determined_requires_no_observation",
+        "test_selects_minimum_cost_packet_without_identifying_each_side",
+        "test_unresolvable_cross_query_pair_is_reported"
+      ],
+      "stdout": "Ran 8 tests in 0.012s\nOK\n"
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "efc0d29ead7de5e57b5a50f818ddf7aa56f7a9f85ce4a900668742ee41238d77",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  },
+  "extensions": {
+    "note": "The test receipt records finite examples, one constructed poset hypothesis set, and randomized brute-force comparisons. The planner selects candidate observations; it does not execute them."
+  }
+}
