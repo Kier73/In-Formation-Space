@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -36,6 +38,20 @@ from validate_observation_path import validate_path_record
 
 
 ECPU_REFERENCE_COMMIT = "53569e138aca51954335729cdd31b87faf73896f"
+
+
+def verify_ecpu_checkout() -> None:
+    root = os.environ.get("ECPU_ROOT")
+    if not root:
+        raise RuntimeError("ECPU_ROOT must identify the pinned E-CPU checkout")
+    actual = subprocess.check_output(
+        ["git", "-C", root, "rev-parse", "HEAD"],
+        text=True,
+    ).strip()
+    if actual != ECPU_REFERENCE_COMMIT:
+        raise RuntimeError(
+            f"E-CPU checkout mismatch: expected {ECPU_REFERENCE_COMMIT}, got {actual}"
+        )
 
 
 class ECPULiveAdapterIntegrationTests(unittest.TestCase):
@@ -278,4 +294,5 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    verify_ecpu_checkout()
     unittest.main(verbosity=2)
