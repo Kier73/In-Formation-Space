@@ -17,12 +17,12 @@ Trials 04–06 choose which observations would be useful. They do not execute th
 ## Lifecycle
 
     planned -> dispatched -> admitted -> returned -> interpreted -> query_determined
-         |          |           |           |              |
-         v          v           v           v              v
+         |          |           |           |              | 
+         v          v           v           v              +-> continued -> next attempt
     dispatch_failed  rejected  no_result  returned_unadmitted  unresolved
                            (unadmitted return and other failures are terminal)
 
-Each attempt is append-only. Failure paths are terminal and do not silently become observations. A payload that returns without an admission receipt is preserved as `returned_unadmitted` and cannot advance to interpretation within that attempt.
+Each request attempt is append-only. An interpreted observation can end in `query_determined`, `unresolved`, or `continued`; `continued` records which next observation the adaptive policy selected and closes the current request attempt before a new attempt begins. Failure paths are terminal and do not silently become observations. A payload that returns without an admission receipt is preserved as `returned_unadmitted` and cannot advance to interpretation within that attempt.
 
 ## Evidence and clocks
 
