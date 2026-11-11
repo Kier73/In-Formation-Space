@@ -69,9 +69,9 @@ jobs:
       - name: Run observation-equivalence bridge tests
         run: python -m unittest discover -s bridges/observation-equivalence -p "test_*.py" -v
       - name: Run evidence-gated observation path tests
-        run: python -m unittest discover -s bridges/observation-path -p "test_*.py" -v
+        run: python -m unittest discover -s bridges/observation-path -p "test_observation_path.py" -v
       - name: Run adaptive policy execution bridge tests
-        run: python -m unittest discover -s bridges/adaptive-attention-execution -p "test_*.py" -v
+        run: python -m unittest discover -s bridges/observation-path -p "test_adaptive_policy_execution.py" -v
       - name: Run Poset Interleaver property tests
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-01-poset-interleaver -p "test_*.py" -v
       - name: Run finite-description unbounded-space tests
