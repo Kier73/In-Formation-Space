@@ -53,7 +53,7 @@ class ObservationPathTests(unittest.TestCase):
         )
         self.assertEqual(path.status, "query_determined")
         self.assertTrue(path.terminal)
-        self.assertTrue(path.events[3].details["encounter_id"], "sensor-reading-01")
+        self.assertEqual(path.events[3].details["encounter_id"], "sensor-reading-01")
 
     def test_planning_does_not_mean_dispatch_or_observation(self):
         path = ObservationPath(intent())
