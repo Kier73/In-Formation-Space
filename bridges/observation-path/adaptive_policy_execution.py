@@ -384,16 +384,21 @@ class AdaptivePolicyExecution:
         sources: Sequence[str],
         acknowledged_sequences: Sequence[Mapping[str, Any]],
         expected_event_sequences: Sequence[Mapping[str, Any]],
+        missing_event_sequences: Sequence[Mapping[str, Any]],
         ack_digest: str,
+        complete: bool,
     ) -> None:
         """Record sender-side processing only after the adapter verifies removed pending sequences."""
         path = self._current_path()
         if not self._sender_acknowledgement_required:
             raise ValueError("sender acknowledgement is not required by this policy execution")
-        if self._status != "applied":
+        if self._status not in {"applied", "sender_ack_progress"}:
             raise ValueError(f"cannot acknowledge sender delivery while execution is {self._status}")
+        if not isinstance(complete, bool):
+            raise ValueError("complete must be boolean")
+        stage = "sender_acknowledged" if complete else "sender_ack_progress"
         path.append(
-            "sender_acknowledged",
+            stage,
             actor,
             evidence_ref=evidence_ref,
             details={
@@ -402,10 +407,11 @@ class AdaptivePolicyExecution:
                 "sources": list(sources),
                 "acknowledged_sequences": [dict(item) for item in acknowledged_sequences],
                 "expected_event_sequences": [dict(item) for item in expected_event_sequences],
+                "missing_event_sequences": [dict(item) for item in missing_event_sequences],
                 "ack_digest": ack_digest,
             },
         )
-        self._status = "sender_acknowledged"
+        self._status = stage
 
     def interpret(
         self,
