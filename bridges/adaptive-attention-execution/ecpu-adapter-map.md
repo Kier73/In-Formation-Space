@@ -34,6 +34,12 @@ These are not interchangeable events. In particular, transport send, receiver in
 
 The path intent flags `authority_required`, `application_required`, and `sender_ack_required` make the required gates explicit. `sender_ack_progress` can repeat before `sender_acknowledged`; incomplete acknowledgement does not permit interpretation. Sender ACK confirmation implies receiver application, which implies authority. A quorum-gated E-CPU intake should set `authority_required=true`; a flow that commits to receiver VM state should also set `application_required=true`; a flow that requires sender confirmation should set all three flags true.
 
+## Temporal evidence and latency interpretation
+
+The live integration captures one `TemporalFrame` from the local adapter clock after each observation-path event is appended. `TemporalPathTrace` computes adjacent `TemporalDelta` values using E-CPU's typed comparability rules. `analyze_temporal_binding.py` then derives checkpoint-interval summaries without making the interval equal to an isolated function's execution time.
+
+The analysis reports a total monotonic span only if every adjacent interval contains a non-regressed monotonic elapsed value. If an actor or monotonic segment changes, or a coordinate is unobserved, the total is withheld instead of summing incomparable pieces. Wall-clock differences, causal relation, scheduler ticks, event steps, and chemical-time deltas remain separate. The adapter's causal stamps establish local capture order, not remote causation. See the [analysis schema](../observation-path/temporal-path-analysis.schema.json) and [analysis implementation](../observation-path/analyze_temporal_binding.py).
+
 ## E-CPU flow in more detail
 
 ### 1. Reliable transport
