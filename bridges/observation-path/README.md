@@ -34,6 +34,8 @@ Clock values are retained only alongside their clock-domain labels. The path mod
 
 The terminal `query_determined` stage requires a Boolean result, the hypothesis-set digest against which it was derived, and a basis reference. This means the query was resolved relative to that stated hypothesis set and evidence basis. It does not claim that the hypothesis set is exhaustive or that the result is a universal property of the external system.
 
+An adaptive coordinator now uses this ledger for one-request-at-a-time policy execution: [Adaptive Attention Execution](../adaptive-attention-execution/README.md). It records a continuation between attempts, while an outcome outside the predicted policy branches is retained as an unresolved model mismatch.
+
 ## Files
 
 - `observation_path.py` — append-only state machine and JSON export.
