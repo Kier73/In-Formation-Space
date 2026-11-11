@@ -22,14 +22,18 @@ _ALLOWED_NEXT = {
     "planned": {"dispatched", "dispatch_failed"},
     "dispatched": {"admitted", "rejected", "dispatch_failed", "returned_unadmitted"},
     "admitted": {"returned", "no_result"},
-    "returned": {"interpreted", "interpretation_failed"},
+    "returned": {"evidence_authorized", "evidence_refused", "interpreted"},
+    "evidence_authorized": {"applied", "interpreted", "application_failed"},
+    "applied": {"interpreted", "application_failed"},
     "interpreted": {"continued", "query_determined", "unresolved"},
 }
 _TERMINAL = {
     "dispatch_failed",
     "rejected",
     "returned_unadmitted",
+    "evidence_refused",
     "no_result",
+    "application_failed",
     "interpretation_failed",
     "continued",
     "query_determined",
@@ -40,6 +44,9 @@ _EVIDENCE_REQUIRED = {
     "admitted",
     "returned",
     "returned_unadmitted",
+    "evidence_authorized",
+    "evidence_refused",
+    "applied",
     "interpreted",
     "query_determined",
 }
@@ -74,6 +81,8 @@ class ObservationIntent:
     hypothesis_set_digest: str
     estimated_cost: float
     plan_ref: Optional[str] = None
+    authority_required: bool = False
+    application_required: bool = False
 
     def __post_init__(self) -> None:
         _nonempty(self.attempt_id, "attempt_id")
@@ -90,6 +99,12 @@ class ObservationIntent:
             raise ValueError("estimated_cost must be finite and positive")
         if self.plan_ref is not None:
             _nonempty(self.plan_ref, "plan_ref")
+        if not isinstance(self.authority_required, bool):
+            raise ValueError("authority_required must be boolean")
+        if not isinstance(self.application_required, bool):
+            raise ValueError("application_required must be boolean")
+        if self.application_required and not self.authority_required:
+            raise ValueError("application_required implies authority_required")
 
 
 @dataclass(frozen=True)
@@ -174,7 +189,22 @@ class ObservationPath:
             _nonempty(evidence_ref, "evidence_ref")
 
         detail_values = dict(details or {})
-        if stage in {"returned", "returned_unadmitted"}:
+        if stage == "evidence_authorized":
+            self._validate_authority_details(detail_values, "AUTHORIZED", require_representative=True)
+        elif stage == "evidence_refused":
+            decision_status = detail_values.get("decision_status")
+            if decision_status not in {"CONFLICT", "REFUSED"}:
+                raise ValueError("evidence_refused requires decision_status CONFLICT or REFUSED")
+            self._validate_authority_details(detail_values, decision_status, require_representative=False)
+            _nonempty(detail_values.get("reason"), "details.reason")
+        elif stage == "applied":
+            _nonempty(detail_values.get("application_id"), "details.application_id")
+            _nonempty(detail_values.get("target_id"), "details.target_id")
+            _nonempty(detail_values.get("projection_digest"), "details.projection_digest")
+            _nonempty(detail_values.get("register_prefix"), "details.register_prefix")
+        elif stage == "application_failed":
+            _nonempty(detail_values.get("reason"), "details.reason")
+        elif stage in {"returned", "returned_unadmitted"}:
             _nonempty(detail_values.get("encounter_id"), "details.encounter_id")
             _nonempty(detail_values.get("payload_digest"), "details.payload_digest")
             _nonempty(detail_values.get("canonicalization"), "details.canonicalization")
@@ -186,6 +216,12 @@ class ObservationPath:
         elif stage in {"dispatch_failed", "rejected", "no_result", "interpretation_failed", "unresolved"}:
             _nonempty(detail_values.get("reason"), "details.reason")
         elif stage == "interpreted":
+            if self.intent.authority_required:
+                required_stage = "applied" if self.intent.application_required else "evidence_authorized"
+                if current != required_stage:
+                    raise ValueError(
+                        f"intent requires {required_stage} before interpretation; current stage is {current}"
+                    )
             _nonempty(detail_values.get("method"), "details.method")
         elif stage == "continued":
             _nonempty(detail_values.get("next_attempt_id"), "details.next_attempt_id")
@@ -203,6 +239,35 @@ class ObservationPath:
         self._events.append(event)
         return event
 
+    @staticmethod
+    def _validate_authority_details(
+        details: Mapping[str, Any],
+        expected_status: str,
+        *,
+        require_representative: bool,
+    ) -> None:
+        if details.get("decision_status") != expected_status:
+            raise ValueError(f"authority event requires decision_status {expected_status}")
+        _nonempty(details.get("policy_digest"), "details.policy_digest")
+        _nonempty(details.get("decision_digest"), "details.decision_digest")
+        quorum = details.get("quorum")
+        if isinstance(quorum, bool) or not isinstance(quorum, int) or quorum < 1:
+            raise ValueError("authority event requires a positive integer quorum")
+        if not isinstance(details.get("strict"), bool):
+            raise ValueError("authority event requires boolean details.strict")
+        for field_name in ("observed_sources", "dissenting_sources", "missing_sources"):
+            values = details.get(field_name)
+            if not isinstance(values, (list, tuple)):
+                raise ValueError(f"authority event requires {field_name} as a sequence")
+            if any(not isinstance(value, str) or not value.strip() for value in values):
+                raise ValueError(f"authority event {field_name} must contain non-empty source IDs")
+            if len(set(values)) != len(values):
+                raise ValueError(f"authority event {field_name} must not contain duplicates")
+        if require_representative:
+            representative = _nonempty(details.get("representative_source"), "details.representative_source")
+            if representative not in details["observed_sources"]:
+                raise ValueError("representative_source must be one of observed_sources")
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "attempt_id": self.intent.attempt_id,
@@ -212,6 +277,8 @@ class ObservationPath:
                 "hypothesis_set_digest": self.intent.hypothesis_set_digest,
                 "estimated_cost": float(self.intent.estimated_cost),
                 "plan_ref": self.intent.plan_ref,
+                "authority_required": self.intent.authority_required,
+                "application_required": self.intent.application_required,
             },
             "status": self.status,
             "terminal": self.terminal,
