@@ -74,7 +74,7 @@ A production adapter should:
 
 ## Live integration evidence
 
-The In-Formation-Space CI workflow checks out E-CPU at the exact commit above and runs [`ecpu_live_integration.py`](../observation-path/ecpu_live_integration.py). The passing [run 172 receipt](../observation-path/results/live-ecpu-integration-run-172.json) exercises both an authorized commit and a strict consensus conflict using E-CPU's actual durable mailbox transport and VM.
+The In-Formation-Space CI workflow checks out E-CPU at the exact commit above and runs [`ecpu_live_integration.py`](../observation-path/ecpu_live_integration.py). The passing [run 217 receipt](../observation-path/results/live-ecpu-integration-run-217.json) exercises a full sender-confirmed sequence through receiver application and sender ACK processing, plus a strict consensus conflict using E-CPU's actual durable mailbox transport and VM. The earlier [run 172 receipt](../observation-path/results/live-ecpu-integration-run-172.json) records the intermediate receiver-application boundary before sender ACK completion became a separate path stage.
 
 The E-CPU repository's separate multi-platform specification matrix is tracked independently. The passing In-Formation-Space integration job does not imply that the whole E-CPU test matrix has passed.
 
