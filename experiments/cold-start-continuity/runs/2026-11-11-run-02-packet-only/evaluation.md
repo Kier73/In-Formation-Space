@@ -72,4 +72,4 @@ The useful convergence is narrow: under two different material conditions, the s
 - Packet revision 1 and template were not modified.
 - The raw response is preserved unchanged in [response.md](response.md); this evaluation is separate.
 - Run conditions, supplied material, and residual isolation limits are recorded in [conditions.md](conditions.md).
-- The reviewer had access to the repository and reviewer guide. The recipient did not receive them. The reviewer is a separate session but the same parent model/harness as the recipient, so this is not an independent-model evaluation.
+- The reviewer had access to the repository and reviewer guide. The recipient did not receive them. The review was conducted by the parent session/harness that spawned the child recipient; the child model identifier was not exposed. It is a separate review activity, but not an external or blinded evaluation, and no model-family comparison can be inferred.
