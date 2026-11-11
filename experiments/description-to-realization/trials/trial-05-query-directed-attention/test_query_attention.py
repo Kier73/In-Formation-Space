@@ -174,13 +174,13 @@ class QueryDirectedAttentionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             select_query_packet(
                 ("a", "b"),
-                lambda _: True,
+                lambda state: state == "a",
                 [observation("bad-cost", 0.0, {"a": 0, "b": 1})],
             )
         with self.assertRaises(ValueError):
             select_query_packet(
                 ("a", "b"),
-                lambda _: True,
+                lambda state: state == "a",
                 [
                     observation("duplicate", 1.0, {"a": 0, "b": 1}),
                     observation("duplicate", 1.0, {"a": 0, "b": 1}),
