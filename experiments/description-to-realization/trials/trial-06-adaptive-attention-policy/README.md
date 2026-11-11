@@ -12,7 +12,7 @@ Exact memoized subset dynamic programming is used for a bounded finite hypothesi
 
 ## Static packet versus adaptive policy
 
-An observation that is useful in one branch may be unnecessary in another. The adaptive policy can therefore avoid collecting every possible test. One fixture uses four hypotheses and three inexpensive observations. The optimal policy first uses a refinement that already resolves two of the four hypotheses; only the remaining two-hypothesis branch needs a second observation. Its expected cost is 1.5 and its worst-case cost is 2, while collecting the whole three-observation packet costs 3 and a direct query sensor costs 2.5.
+An observation that is useful in one branch may be unnecessary in another. The adaptive policy can therefore avoid collecting every possible test. One fixture uses four hypotheses and three inexpensive observations. The optimal policy first uses a refinement that already resolves two of the four hypotheses; only the remaining two-hypothesis branch needs a second observation. Its expected cost is 1.5 and its worst-case cost is 2. The cheapest static packet in this fixture is the two branch-specific refinements at cost 2; the direct query sensor costs 2.5, while collecting all three inexpensive observations costs 3. The adaptive policy therefore beats the minimum static packet by 0.5 expected-cost units.
 
 This is not a universal claim that adaptive policies are cheaper. The result depends on the prior, observation costs, possible outcomes, and deterministic model.
 
