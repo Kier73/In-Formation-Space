@@ -262,6 +262,7 @@ class ObservationPathSchemaTests(unittest.TestCase):
                     {"source": "source-b", "channel": "channel-b", "sequence": 4},
                     {"source": "source-a", "channel": "channel-a", "sequence": 2},
                 ],
+                "missing_event_sequences": [],
                 "ack_digest": "a" * 64,
             },
         })
@@ -305,7 +306,9 @@ class ObservationPathSchemaTests(unittest.TestCase):
                 "acknowledged_sequences": [
                     {"source": "source-a", "channel": "channel-a", "sequence": 3},
                 ],
-                "missing_event_sequences": [],
+                "missing_event_sequences": [
+                    {"source": "source-b", "channel": "channel-b", "sequence": 4},
+                ],
                 "ack_digest": "a" * 64,
             },
         })
