@@ -35,6 +35,7 @@ def validate_path_record(document: Mapping[str, Any], schema: Mapping[str, Any])
     intent = document.get("intent", {})
     authority_required = intent.get("authority_required", False)
     application_required = intent.get("application_required", False)
+    sender_ack_required = intent.get("sender_ack_required", False)
     if authority_required and "returned" in stages:
         returned_index = stages.index("returned")
         authority_indices = [
@@ -50,6 +51,13 @@ def validate_path_record(document: Mapping[str, Any], schema: Mapping[str, Any])
             raise ValueError("application_required path must record applied after evidence_authorized and before interpretation")
         if stages.index("interpreted") <= stages.index("applied"):
             raise ValueError("interpretation must follow receiver application")
+    if sender_ack_required and "interpreted" in stages:
+        if "sender_acknowledged" not in stages:
+            raise ValueError("sender_ack_required path must record sender_acknowledged before interpretation")
+        if "applied" not in stages or stages.index("sender_acknowledged") <= stages.index("applied"):
+            raise ValueError("sender acknowledgement must follow receiver application")
+        if stages.index("interpreted") <= stages.index("sender_acknowledged"):
+            raise ValueError("interpretation must follow sender acknowledgement")
 
     final_stage = stages[-1]
     if document["status"] != final_stage:
