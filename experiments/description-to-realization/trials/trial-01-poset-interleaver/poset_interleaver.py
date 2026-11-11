@@ -26,10 +26,12 @@ class PosetInterleaver:
         self._events: Set[str] = set()
         self._successors: Dict[str, Set[str]] = defaultdict(set)
         self._predecessors: Dict[str, Set[str]] = defaultdict(set)
+        # Preserve edge insertion order for deterministic O(V + E) trace blame.
+        self._edge_order: List[Tuple[str, str]] = []
 
     @property
     def events(self) -> Set[str]:
-        """Return an immutable copy of all registered events."""
+        """Return a defensive copy of all registered events."""
         return set(self._events)
 
     @property
@@ -57,8 +59,10 @@ class PosetInterleaver:
         self.add_event(v)
         if u == v:
             raise PosetCycleError(f"Self-loop cycle on event '{u}'.", [u, u])
-        self._successors[u].add(v)
-        self._predecessors[v].add(u)
+        if v not in self._successors.get(u, set()):
+            self._successors[u].add(v)
+            self._predecessors[v].add(u)
+            self._edge_order.append((u, v))
 
     def find_cycle(self) -> Optional[List[str]]:
         """Detect if the constraint graph has a cycle.
@@ -75,7 +79,7 @@ class PosetInterleaver:
                 continue
 
             # Iterative DFS using explicit call stack to extract clean cycles
-            stack: List[Tuple[str, Iterator[str]]] = [(start_node, iter(sorted(self._successors[start_node])))]
+            stack: List[Tuple[str, Iterator[str]]] = [(start_node, iter(sorted(self._successors.get(start_node, ()))))]
             visited[start_node] = 1
 
             while stack:
@@ -95,7 +99,7 @@ class PosetInterleaver:
                     elif visited[nxt] == 0:
                         visited[nxt] = 1
                         parent[nxt] = curr
-                        stack.append((nxt, iter(sorted(self._successors[nxt]))))
+                        stack.append((nxt, iter(sorted(self._successors.get(nxt, ())))))
                 except StopIteration:
                     visited[curr] = 2
                     stack.pop()
@@ -129,11 +133,12 @@ class PosetInterleaver:
         pos = {e: idx for idx, e in enumerate(seq)}
 
         # Check all edges in O(E)
-        for u in self._events:
+        # Edge insertion order is stable for a given construction trace.
+        # This keeps verification O(V + E) without sorting at query time.
+        for u, v in self._edge_order:
             u_pos = pos[u]
-            for v in self._successors[u]:
-                v_pos = pos[v]
-                if u_pos >= v_pos:
+            v_pos = pos[v]
+            if u_pos >= v_pos:
                     return (
                         False,
                         f"Precedence violation: '{u}' (pos {u_pos}) must precede '{v}' (pos {v_pos}).",
@@ -146,14 +151,16 @@ class PosetInterleaver:
         """Compute the exact number of linear extensions (topological sorts).
 
         Uses dynamic programming over down-sets (subposet ideals).
-        Complexity: O(E_downsets), highly efficient for small posets (<= 16 elements).
+        The DP scans up to n events per reachable down-set: O(n * |J(P)| + |E|)
+        time and O(|J(P)|) auxiliary memory. In an antichain, |J(P)| = 2**n.
         """
         cycle = self.find_cycle()
         if cycle is not None:
             raise PosetCycleError("Cannot count linear extensions of a cyclic graph.", cycle)
 
         if not self._events:
-            return 0
+            # There is exactly one linear extension of the empty poset: [].
+            return 1
 
         event_list = sorted(self._events)
         n = len(event_list)
@@ -164,7 +171,7 @@ class PosetInterleaver:
         for v in event_list:
             v_idx = idx_map[v]
             mask = 0
-            for u in self._predecessors[v]:
+            for u in self._predecessors.get(v, ()):
                 mask |= 1 << idx_map[u]
             pred_masks[v_idx] = mask
 
@@ -204,7 +211,10 @@ class PosetInterleaver:
         if cycle is not None:
             raise PosetCycleError("Cannot generate linear extensions of a cyclic graph.", cycle)
 
-        in_deg = {e: len(self._predecessors[e]) for e in self._events}
+        if limit is not None and limit < 0:
+            raise ValueError("limit must be non-negative or None.")
+
+        in_deg = {e: len(self._predecessors.get(e, ())) for e in self._events}
         current_path: List[str] = []
         count = 0
 
@@ -228,7 +238,7 @@ class PosetInterleaver:
 
                 # Decrement in-degree of successors
                 unlocked: List[str] = []
-                for v in self._successors[u]:
+                for v in sorted(self._successors.get(u, ())):
                     in_deg[v] -= 1
                     if in_deg[v] == 0:
                         unlocked.append(v)
@@ -237,7 +247,7 @@ class PosetInterleaver:
                 yield from backtrack(next_avail)
 
                 # Revert
-                for v in self._successors[u]:
+                for v in sorted(self._successors.get(u, ())):
                     in_deg[v] += 1
                 current_path.pop()
 
