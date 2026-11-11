@@ -19,15 +19,15 @@ An encounter can be a tool response, a measurement, a received message, a file, 
 
 Validate an encounter record:
 
-\`\`\`bash
+```bash
 python formats/encounter-envelope/validate_envelope.py formats/encounter-envelope/examples/tool-observation.json
-\`\`\`
+```
 
 Run the standard-library test suite:
 
-\`\`\`bash
+```bash
 python -m unittest discover -s formats/encounter-envelope -p 'test_*.py' -v
-\`\`\`
+```
 
 The validator checks the documented structural constraints without third-party dependencies. Its optional schema-agreement test uses jsonschema with a format checker when that development dependency is present; otherwise that one test is skipped. The runtime validator does not import jsonschema.
 
@@ -66,7 +66,7 @@ The second mode is a small, explicitly named local contract. It is **not** a cla
 
 For an inline value, integrity must include algorithm, canonicalization, and digest for the validator to verify the claim. Unsupported or missing settings are reported as unverified, not silently accepted. A mismatch is reported explicitly.
 
-For payload.reference, the validator does not fetch the referenced artifact. An integrity declaration for a reference is reported as **not checked**, and the command exits non-zero when verification was requested. payload.digest by itself is only a declaration; without an algorithm, canonicalization, and accessible bytes, it is not verified by this tool.
+For payload.reference, the validator does not fetch the referenced artifact. An integrity declaration for a reference is reported as **not checked**, and the command exits non-zero when verification was requested. payload.digest is informational only in this implementation; it is never verified by this tool, even when integrity metadata is also present.
 
 ## One record, not one interpretation
 
