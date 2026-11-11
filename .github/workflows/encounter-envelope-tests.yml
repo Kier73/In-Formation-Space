@@ -10,6 +10,8 @@ on:
   pull_request:
     paths:
       - "formats/encounter-envelope/**"
+      - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
+      - "experiments/guarded-shortcut-tradeoff/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   workflow_dispatch:
 
