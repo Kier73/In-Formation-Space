@@ -81,7 +81,7 @@ def ibv_register_obs(reg_state: Dict[str, int], test_mask: str) -> int:
         return rax % 4
     elif test_mask == "is_zero":
         return 1 if rax == 0 else 0
-    return 0
+    raise ValueError(f"Unknown register observation test: {test_mask}")
 
 
 # --- Application 3: Structural Memory Generators (E-CPU) ---
