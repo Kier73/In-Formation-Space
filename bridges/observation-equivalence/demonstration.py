@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Executable demonstration of Universal Observation Equivalence.
+"""Executable demonstration of finite-test observational quotienting.
 
-Demonstrates that Myhill-Nerode language quotienting, IBV state abstraction,
-and E-CPU structural memory equivalence are three applications of one principle:
-    x ~ y <===> For all tests z, Obs(x, z) == Obs(y, z)
+The mathematical contracts may quantify over all valid continuations. This
+module only compares the finite tests explicitly supplied by the caller. A
+finite suite can find a counterexample, but cannot generally prove universal
+equivalence without a completeness argument.
 """
 
 from __future__ import annotations
@@ -23,10 +24,12 @@ class QuotientSpace(Generic[T, Z, O]):
         self._obs_fn = observation_fn
 
     def are_equivalent(self, x: T, y: T, tests: Sequence[Z]) -> Tuple[bool, Optional[Z]]:
-        """Check if x ~ y over the provided test set.
+        """Check equality over this finite supplied test set.
 
-        Returns:
-            (is_equivalent, first_distinguishing_test)
+        True means no supplied test distinguishes x and y; it does not prove
+        agreement on every possible future test unless the suite is complete.
+
+        Returns (equivalent_on_supplied_tests, first_distinguishing_test).
         """
         for z in tests:
             if self._obs_fn(x, z) != self._obs_fn(y, z):
@@ -34,7 +37,7 @@ class QuotientSpace(Generic[T, Z, O]):
         return True, None
 
     def partition(self, objects: Sequence[T], tests: Sequence[Z]) -> List[List[T]]:
-        """Partition objects into empirical equivalence classes."""
+        """Partition objects by their signatures over the supplied finite tests."""
         classes: List[List[T]] = []
         for obj in objects:
             matched = False
@@ -85,6 +88,10 @@ def ibv_register_obs(reg_state: Dict[str, int], test_mask: str) -> int:
 def structural_gen_obs(generator_params: Tuple[int, int, int], step: int) -> int:
     """Evaluate generator x_{k+1} = (a * x_k + b) mod M at step k."""
     a, b, m = generator_params
+    if isinstance(step, bool) or not isinstance(step, int) or step < 0:
+        raise ValueError("step must be a non-negative integer")
+    if isinstance(m, bool) or not isinstance(m, int) or m <= 0:
+        raise ValueError("modulus must be a positive integer")
     # Closed form orbit: x_k = a^k * x_0 + b * (a^k - 1) / (a - 1) mod m
     # For small demonstration: evaluate directly
     x = 1
@@ -147,7 +154,7 @@ def main() -> None:
     for i, c in enumerate(gen_classes, 1):
         print(f"     Structural Generator Class {i}: {c}")
 
-    print("\n[OK] Demonstration completed. All three domains unify under QuotientSpace(Obs).")
+    print("\n[OK] Demonstration completed. These are finite-test quotients; universal equivalence requires a complete contract or proof.")
 
 
 if __name__ == "__main__":
