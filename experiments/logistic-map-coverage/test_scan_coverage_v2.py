@@ -17,6 +17,11 @@ class LogisticCoverageV2Tests(unittest.TestCase):
                 self.assertEqual(period, expected_period)
                 self.assertLess(multiplier, 1.0)
 
+    def test_zero_derivative_cycle_has_zero_multiplier(self):
+        period, multiplier = classify_parameter(2.0)
+        self.assertEqual(period, 1)
+        self.assertEqual(multiplier, 0.0)
+
     def test_parameter_with_no_confirmed_candidate_is_not_called_chaotic(self):
         period, multiplier = classify_parameter(3.9)
         self.assertEqual(period, 0)
