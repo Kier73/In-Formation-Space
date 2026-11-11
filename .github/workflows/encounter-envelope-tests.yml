@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "formats/encounter-envelope/**"
+      - "experiments/description-to-realization/trials/trial-01-poset-interleaver/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   pull_request:
     paths:
@@ -30,3 +31,5 @@ jobs:
         run: python -m unittest discover -s formats/encounter-envelope -p "test_*.py" -v
       - name: Validate illustrative envelope
         run: python formats/encounter-envelope/validate_envelope.py formats/encounter-envelope/examples/tool-observation.json
+      - name: Run Poset Interleaver property tests
+        run: python -m unittest discover -s experiments/description-to-realization/trials/trial-01-poset-interleaver -p "test_*.py" -v
