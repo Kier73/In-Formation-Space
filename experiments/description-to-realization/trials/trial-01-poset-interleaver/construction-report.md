@@ -3,6 +3,7 @@
 **Brief ID:** `brief:d2r-poset-01` rev `1`  
 **Constructor:** Antigravity VI (Gemini 3.8 Flash)  
 **Date:** 2026-11-11  
+**Review status:** original construction preserved; follow-up review and property tests are linked below.  
 **Artifact:** [`poset_interleaver.py`](poset_interleaver.py)  
 **Test Suite:** [`test_poset_interleaver.py`](test_poset_interleaver.py)  
 **Encounter Receipt:** [`results/test-encounter.json`](results/test-encounter.json)  
@@ -28,13 +29,13 @@ u \prec v \implies \text{index}(u) < \text{index}(v)
 ### 1.2 Algorithm Selections
 
 1. **Acyclicity & Cycle Witness Extraction:**
-   Implemented via depth-first search (DFS) with 3-color node tracking (unvisited, in-stack, completed). When a back-edge $u \to v$ is discovered, the ancestor chain is traversed to extract the minimal closed witness cycle $(v \to \dots \to u \to v)$.
+   Implemented via depth-first search (DFS) with 3-color node tracking (unvisited, in-stack, completed). When a back-edge $u \to v$ is discovered, the ancestor chain is traversed to extract a concrete simple witness cycle (not necessarily a shortest cycle) $(v \to \dots \to u \to v)$.
 2. **Linear Extension Counting ($|\Omega|$):**
    Counting linear extensions of an arbitrary poset is known to be **#P-complete** (Brightwell & Winkler, 1991). For small posets ($|V| \le 16$), the exact count can be computed via dynamic programming over the distributive lattice of down-sets (ideals) $J(P)$:
    \[
    N(S \cup \{v\}) = \sum_{\{v \in V \setminus S : \text{Pred}(v) \subseteq S\}} N(S)
    \]
-   By representing subsets as bitmasks and traversing reachable down-sets via BFS, the algorithm computes $|\Omega|$ in $O(|J(P)|)$ steps. For the 2-chain split clock ($|A|=4, |B|=3$), $|J(P)| = (4+1)(3+1) = 20$ states, computing $|\Omega| = 35$ in under $0.5\,\text{ms}$.
+   By representing subsets as bitmasks and traversing reachable down-sets via BFS, the algorithm computes $|\Omega|$ in $O(|V|\,|J(P)| + |E|)$ time because each reachable down-set scans up to $|V|$ candidate events. For the 2-chain split clock ($|A|=4, |B|=3$), $|J(P)| = (4+1)(3+1) = 20$ states, computing $|\Omega| = 35$ in under $0.5\,\text{ms}$.
 3. **Trace Verification:**
    Evaluates a proposed sequence $S$ in $O(|V| + |E|)$ by building a hash map of event positions in $O(|V|)$ and performing a single pass over all directed edges in $O(|E|)$. If $pos[u] \ge pos[v]$, the verification immediately halts and returns $(u, v)$ as the violated edge blame.
 
@@ -72,3 +73,18 @@ test_trace_verification_and_edge_blame ... ok
 Ran 5 tests in 0.001s: OK
 ```
 Captured in Encounter Envelope [`results/test-encounter.json`](results/test-encounter.json) with verified SHA-256 digest `b8fb951a...`.
+
+
+## 5. Follow-up review
+
+A subsequent review found several implementation details worth tightening without changing the original construction:
+
+- Read-only queries previously indexed defaultdict adjacency maps directly, which could insert empty entries. Queries now use non-mutating `.get(...)` access.
+- The empty poset now returns one linear extension, the empty sequence.
+- Trace verification reports the first violated edge in edge-insertion order, making blame deterministic for a fixed construction trace while retaining (O(|V|+|E|)) checking.
+- The down-set dynamic program's time bound is stated as (O(|V|,|J(P)|+|E|)), not (O(|J(P)|)), because it scans candidate events at each reachable down-set.
+- The cycle report promises a concrete simple cycle witness, not necessarily a shortest or globally minimal cycle.
+
+The expanded tests cross-check dynamic-programming counts against brute-force permutation enumeration for deterministic randomly generated DAGs with up to six events. They also test empty-poset semantics, adjacency-map purity, deterministic blame, duplicate edges, and negative generation limits.
+
+The original five tests and original construction record remain intact as historical evidence. Current implementation and expanded test artifacts are the reviewed versions.
