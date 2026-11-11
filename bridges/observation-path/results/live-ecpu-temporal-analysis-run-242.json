@@ -1,0 +1,207 @@
+{
+  "format": "in-formation.encounter/0.1",
+  "id": "integration:ecpu-gated-observation:ifs-ci-run-242-temporal-analysis",
+  "observed_at": "2026-11-11T23:40:56Z",
+  "recorded_at": "2026-11-11T23:40:56Z",
+  "source": {
+    "kind": "github-actions-job",
+    "name": "In-Formation-Space integrated test workflow",
+    "reference": "https://github.com/Kier73/In-Formation-Space/actions/runs/43121611521",
+    "capture_method": "successful test summaries and live E-CPU integration output from pinned checkout"
+  },
+  "context": {
+    "in_formation_space_commit": "36a531e53afc06ec6c9def5811107221734d248a",
+    "in_formation_space_workflow_run": 43121611521,
+    "in_formation_space_job": 130863217804,
+    "ecpu_repository": "Kier73/E-CPU",
+    "ecpu_commit": "800f94f83ffd6f527ed093c8d1c1e93e153c34f6",
+    "runner": "ubuntu-latest",
+    "python": "3.11",
+    "exit_code": 0
+  },
+  "payload": {
+    "media_type": "application/json",
+    "value": {
+      "workflow_run_id": 43121611521,
+      "job_id": 130863217804,
+      "commit": "36a531e53afc06ec6c9def5811107221734d248a",
+      "runner": "ubuntu-latest",
+      "python": "3.11",
+      "exit_code": 0,
+      "total_unit_tests": 251,
+      "suites": [
+        {
+          "suite": "formats/encounter-envelope",
+          "tests": 35,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-equivalence",
+          "tests": 25,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_observation_path.py",
+          "tests": 15,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_validate_observation_path.py",
+          "tests": 19,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_adaptive_policy_execution.py",
+          "tests": 22,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_ecpu_gated_adapter.py",
+          "tests": 14,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_ecpu_temporal_binding.py",
+          "tests": 6,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/test_temporal_binding_analysis.py",
+          "tests": 8,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/observation-path/ecpu_live_integration.py",
+          "tests": 2,
+          "result": "passed"
+        },
+        {
+          "suite": "bridges/hypothesis-revision",
+          "tests": 15,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-01-poset-interleaver",
+          "tests": 11,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-02-finite-description-unbounded-space",
+          "tests": 7,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-03-distinction-refinement",
+          "tests": 8,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-04-active-distinction-selection",
+          "tests": 10,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-05-query-directed-attention",
+          "tests": 8,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-06-adaptive-attention-policy",
+          "tests": 7,
+          "result": "passed"
+        },
+        {
+          "suite": "trial-07-epistemic-frontier",
+          "tests": 22,
+          "result": "passed"
+        },
+        {
+          "suite": "guarded-shortcut-tradeoff",
+          "tests": 6,
+          "result": "passed"
+        },
+        {
+          "suite": "logistic-map-coverage-original",
+          "tests": 5,
+          "result": "passed"
+        },
+        {
+          "suite": "logistic-map-coverage-v2",
+          "tests": 6,
+          "result": "passed"
+        }
+      ],
+      "validation_and_execution": {
+        "observation_path_structure": "passed",
+        "temporal_binding_schema": "passed",
+        "temporal_analysis_schema": "passed",
+        "temporal_analysis_reconstruction_from_binding": "passed",
+        "live_ecpu_integration": "passed"
+      },
+      "live_ecpu_integration": {
+        "repository": "Kier73/E-CPU",
+        "commit": "800f94f83ffd6f527ed093c8d1c1e93e153c34f6",
+        "runner": "ubuntu-latest",
+        "tests": 2,
+        "result": "passed",
+        "successful_event_path": [
+          "planned",
+          "dispatched",
+          "admitted",
+          "returned",
+          "evidence_authorized",
+          "applied",
+          "sender_acknowledged"
+        ],
+        "successful_event_assertions": [
+          "two durable ReliableChannel sender frames",
+          "GatedObservationCoordinator receiver intake",
+          "strict two-source AUTHORIZED decision",
+          "representative VM application",
+          "receiver consume and RACK emission",
+          "VM idempotence receipt and register readback",
+          "reloadable receiver checkpoint",
+          "sender-side process_acks",
+          "all event sequences absent from sender pending sets",
+          "portable observation path validates after sender acknowledgement",
+          "one typed TemporalFrame bound to every observation-path event",
+          "E-CPU TemporalPathTrace restored and digest-verified",
+          "temporal analysis reconstructed from its source binding",
+          "monotonic total withheld unless every adjacent interval is measured"
+        ],
+        "conflict_event_path": [
+          "planned",
+          "dispatched",
+          "admitted",
+          "returned",
+          "evidence_refused"
+        ],
+        "conflict_assertions": [
+          "strict source conflict detected",
+          "no VM state change",
+          "receiver frames remain queued and unacknowledged",
+          "temporal trace and binding generated for refusal path"
+        ]
+      },
+      "temporal_analysis_scope": {
+        "measures": "elapsed time between adjacent local temporal-frame captures",
+        "does_not_measure": "isolated execution time of the operation associated with a lifecycle transition",
+        "clock_handling": [
+          "monotonic time is summed only across a fully comparable continuous chain",
+          "wall-clock differences remain independent and may be negative",
+          "causal relations refer to the adapter's typed stamps and do not establish remote causation",
+          "missing or incomparable monotonic intervals do not become zero"
+        ]
+      }
+    }
+  },
+  "relations": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "digest": "56b3cc52db8e9bdba1b93467475b2bc3922a1ee1f61ae861c94c868ffdc3e8a1",
+    "canonicalization": "json-sort-keys-utf8-v1"
+  },
+  "extensions": {
+    "note": "This receipt records 251 passing unit tests, repository validations, and two live integration tests against the pinned E-CPU runtime. It documents measured checkpoint intervals and their interpretation limits; it does not claim a production network deployment."
+  }
+}
