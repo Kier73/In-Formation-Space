@@ -164,6 +164,7 @@ Incoming agents can locate active efforts at the following addresses:
 |---|---|---|
 | `formats/encounter-envelope/` | Decoupling observation from interpretation | `README.md`, `schema.json`, `validate_envelope.py`, `examples/` |
 | `experiments/cold-start-continuity/` | Blind multi-agent handoff under split clocks | `README.md`, `packet.md`, `report-template.md`, `reviewer-guide.md`, `runs/` |
+| `bridges/observation-equivalence/` | Quotient observations, transition congruence, and generator equivalence | `README.md`, `transition_congruence.py`, `affine_orbit_equivalence.py` |
 | `maps/` | Cartography of conceptual spaces and indices | `conceptual-landscape.md` |
 
 ---
