@@ -50,7 +50,8 @@ Do not edit the original packet to make it agree with a recipient's response. If
 
 - [Run 2026-11-11-run-01](runs/2026-11-11-run-01/response.md) — Independent recipient cold-start handoff report (Gemini 3.8 Flash subagent).
   - [Evaluation](runs/2026-11-11-run-01/evaluation.md) — Review against the rubric in `reviewer-guide.md`.
+  - [Independent review note](runs/2026-11-11-run-01/review-note.md) — Clarifies the open-context condition, the limits of the 35-ordering count, and follow-up test design.
 
 ## Current status
 
-The first recorded handoff run has been executed and evaluated. It demonstrated successful recovery of intra-stream orders, mathematical formalization of the 35 valid linear extensions, preservation of cross-clock underdetermination, and discrimination testing design. Further runs across different model families and isolated workspaces remain useful to test cold-start variance.
+The first recorded handoff run has been executed and reviewed. It demonstrates useful recovery and analysis under open repository context. Because the recipient could inspect repository guidance, it does not yet establish packet-only cold-start continuity. The 35 valid linear extensions describe possible interleavings under the two-chain model; they are not equally likely outcomes. A packet-only isolated run remains the next clean test.
