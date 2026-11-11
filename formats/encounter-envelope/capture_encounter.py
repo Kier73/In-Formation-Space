@@ -21,11 +21,11 @@ from typing import Any, Dict, List, Optional
 
 # Import local validator if available
 try:
-    from validate_envelope import validate_encounter
+    from validate_envelope import compute_payload_digest, validate_encounter
 except ImportError:
     # Handle import if executed from parent or different directory
     sys.path.insert(0, str(Path(__file__).parent))
-    from validate_envelope import validate_encounter
+    from validate_envelope import compute_payload_digest, validate_encounter
 
 
 SCHEMA_FORMAT = "in-formation.encounter/0.1"
@@ -84,21 +84,22 @@ def build_encounter_envelope(
         payload["reference"] = payload_ref
     else:
         payload["value"] = payload_value
-        # Canonical digest of value
-        if isinstance(payload_value, str):
-            val_bytes = payload_value.encode("utf-8")
-        else:
-            val_bytes = json.dumps(payload_value, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        payload["digest"] = f"sha256:{compute_sha256(val_bytes)}"
+        # Keep the digest contract identical to the verifier. The envelope-level
+        # integrity object below is the single authoritative digest declaration.
+        canon_mode = "utf8-raw-v1" if isinstance(payload_value, str) else "json-sort-keys-utf8-v1"
+        payload_digest = compute_payload_digest(
+            {"payload": {"value": payload_value}},
+            algorithm="sha256",
+            canonicalization=canon_mode,
+        )
 
     envelope["payload"] = payload
     envelope["relations"] = relations or []
 
-    if "digest" in payload:
-        canon_mode = "utf8-raw-v1" if isinstance(payload_value, str) else "json-sort-keys-utf8-v1"
+    if payload_ref is None:
         envelope["integrity"] = {
             "algorithm": "sha256",
-            "digest": payload["digest"].replace("sha256:", ""),
+            "digest": payload_digest,
             "canonicalization": canon_mode,
         }
 
