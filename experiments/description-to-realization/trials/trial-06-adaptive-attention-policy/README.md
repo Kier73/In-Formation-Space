@@ -25,6 +25,8 @@ The exact solver has worst-case exponential behavior in the number of hypotheses
 - brief.md — construction requirements
 - adaptive_attention.py — expected-cost decision-tree planner
 - test_adaptive_attention.py — branching, prior, impossibility and reference-recursion tests
+- construction-report.md — optimality recurrence, complexity, and CI result
+- results/test-encounter.json — provenance record for the successful CI test run
 
 ## Reproduce
 
