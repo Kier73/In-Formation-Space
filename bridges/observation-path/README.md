@@ -36,6 +36,10 @@ The terminal `query_determined` stage requires a Boolean result, the hypothesis-
 
 An adaptive coordinator now uses this ledger for one-request-at-a-time policy execution: [Adaptive Attention Execution](../adaptive-attention-execution/README.md). It records a continuation between attempts, while an outcome outside the predicted policy branches is retained as an unresolved model mismatch.
 
+## Recorded verification
+
+The integrated lifecycle, schema, and adaptive-coordinator suites passed in [GitHub Actions run 112](https://github.com/Kier73/In-Formation-Space/actions/runs/43108746664). The machine-readable [CI encounter receipt](results/ci-run-112.json) records the tested commit, job, suite counts, and integrity digest.
+
 ## Portable record format
 
 - [observation-path.schema.json](observation-path.schema.json) defines the JSON structure independently of Python.
