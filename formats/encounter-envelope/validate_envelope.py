@@ -258,7 +258,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         elif status in {"UNVERIFIED", "NOT_CHECKED"}:
             print(f"  [Digest {status.lower()}] {detail}")
             overall_pass = False
-        elif isinstance(data.get("payload"), dict) and "digest" in data["payload"]:
+        if isinstance(data.get("payload"), dict) and "digest" in data["payload"]:
             print("  [Payload digest declared] not checked; no corresponding integrity verification contract was supplied")
 
     return 0 if overall_pass else 1
