@@ -34,7 +34,7 @@ Each request attempt is append-only. `admitted` records receiver-side intake; `e
 
 ## Live E-CPU integration
 
-The pinned E-CPU runtime integration passed in [GitHub Actions run 172](https://github.com/Kier73/In-Formation-Space/actions/runs/43115649399): two tests exercised real durable channels, quorum finalization, VM commit/checkpoint recovery, sender ACK processing, and conflict refusal. The [integration receipt](results/live-ecpu-integration-run-172.json) records the exact E-CPU and In-Formation-Space commits and test cases.
+The pinned E-CPU runtime integration passed in [GitHub Actions run 217](https://github.com/Kier73/In-Formation-Space/actions/runs/43118348220). The successful path now exercises `planned → dispatched → admitted → returned → evidence_authorized → applied → sender_acknowledged`, including real durable channels, quorum finalization, VM commit/checkpoint recovery, sender pending-set clearance, and portable path validation after the final ACK. The conflicting-source case ends in `evidence_refused` without VM mutation. The [run 217 receipt](results/live-ecpu-integration-run-217.json) records the exact E-CPU and In-Formation-Space commits and the full suite summary; the earlier [run 172 receipt](results/live-ecpu-integration-run-172.json) preserves the predecessor integration boundary.
 
 ## E-CPU coordinator adapter
 
