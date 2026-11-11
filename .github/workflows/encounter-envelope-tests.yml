@@ -68,6 +68,8 @@ jobs:
         run: python bridges/observation-equivalence/demonstration.py
       - name: Run observation-equivalence bridge tests
         run: python -m unittest discover -s bridges/observation-equivalence -p "test_*.py" -v
+      - name: Run evidence-gated observation path tests
+        run: python -m unittest discover -s bridges/observation-path -p "test_*.py" -v
       - name: Run Poset Interleaver property tests
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-01-poset-interleaver -p "test_*.py" -v
       - name: Run finite-description unbounded-space tests
