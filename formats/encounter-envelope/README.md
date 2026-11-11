@@ -41,7 +41,7 @@ An envelope has a format identifier, a local record identifier, a source declara
 | --- | --- |
 | format | Identifies this exact envelope version. |
 | id | Identifier chosen by the recording contributor. It is not globally unique by itself. |
-| observed_at | Time of the event, if known, as a timezone-qualified RFC 3339 date-time or null. |
+| observed_at | Time of the event, if known, as a timezone-qualified RFC 3339-compatible date-time or null; leap-second notation (:60) is not supported by the standard-library validator. |
 | recorded_at | Time the envelope was written, if known. |
 | source | Declared origin and capture method. A declaration is provenance information, not authentication. |
 | context | Optional surrounding conditions needed to interpret the encounter. |
