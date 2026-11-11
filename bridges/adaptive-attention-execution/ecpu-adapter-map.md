@@ -1,6 +1,6 @@
 # E-CPU adapter map: observation and realization boundaries
 
-**Status:** read-only interface mapping against the E-CPU `main` source inspected on 2026-11-11. No E-CPU source was modified by this bridge.  
+**Status:** interface mapping against E-CPU commit `800f94f83ffd6f527ed093c8d1c1e93e153c34f6` (2026-11-11). The adapter remains dependency-injected; it does not import or duplicate E-CPU runtime code.  
 **Purpose:** show where the generic In-Formation-Space observation path can reuse existing E-CPU interfaces without duplicating transport, consensus, VM application, Structural Memory, or Hypervisor authority.
 
 ## The most important distinction
@@ -80,4 +80,6 @@ A production adapter should:
 - `mailcpu/observer_orbit.py`.
 - `docs/OBSERVED_ORBIT_PIPELINE.md`.
 
-**No E-CPU files were modified.** This map describes an adapter seam; it is not a claim that the two repositories are already connected.
+**E-CPU source note:** the predecessor revision `53569e138aca51954335729cdd31b87faf73896f` contained literal escaped newlines inside one parenthesized import in `mailcpu/observed_orbit_pipeline.py`, making package import fail with `SyntaxError`. The defect was corrected in E-CPU commit `800f94f83ffd6f527ed093c8d1c1e93e153c34f6` by restoring the intended multiline import. No architectural logic was changed by that correction.
+
+The adapter is tested against the exact pinned runtime in the In-Formation-Space CI workflow. This is a live integration test, not yet a production transport deployment.
