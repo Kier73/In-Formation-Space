@@ -223,7 +223,7 @@ class HypothesisRevisionLedger:
         hypothesis_id = _nonempty(hypothesis_id, "hypothesis_id")
         validation_ref = _nonempty(validation_ref, "validation_ref")
         validator = _nonempty(validator, "validator")
-        if result not in _VALIDATION_RESULTS:
+        if not isinstance(result, str) or result not in _VALIDATION_RESULTS:
             raise ValueError(f"result must be one of {sorted(_VALIDATION_RESULTS)}")
         candidate = self._candidates.get(hypothesis_id)
         if candidate is None:
@@ -268,10 +268,12 @@ class HypothesisRevisionLedger:
         if any(item.revision_id == revision_id for item in self._revisions):
             raise ValueError(f"revision ID already exists: {revision_id}")
 
+        active_ids = {item.hypothesis_id for item in self._current.hypotheses}
         supported = [
             candidate
             for candidate in self._candidates.values()
             if candidate.validation_result == "supported"
+            and candidate.hypothesis_id not in active_ids
         ]
         if not supported:
             raise ValueError("no validated supported hypotheses are available to activate")
