@@ -44,6 +44,10 @@ jobs:
         run: python formats/encounter-envelope/validate_envelope.py experiments/guarded-shortcut-tradeoff/results/tradeoff-v2-ci-run-11.json
       - name: Validate finite-description CI encounter
         run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/results/test-encounter.json
+      - name: Validate distinction refinement CI encounter
+        run: python formats/encounter-envelope/validate_envelope.py experiments/description-to-realization/trials/trial-03-distinction-refinement/results/test-encounter.json
+      - name: Validate repeated-return logistic scan encounter
+        run: python formats/encounter-envelope/validate_envelope.py experiments/logistic-map-coverage/results/coverage-v2-ci-run-31.json
       - name: Run Poset Interleaver property tests
         run: python -m unittest discover -s experiments/description-to-realization/trials/trial-01-poset-interleaver -p "test_*.py" -v
       - name: Run finite-description unbounded-space tests
