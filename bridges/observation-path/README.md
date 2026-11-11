@@ -9,7 +9,8 @@ Trials 04–06 choose which observations would be useful. They do not execute th
 
 - A plan is not a dispatch.
 - A successful dispatch is not receiver admission.
-- Receiver admission is not a returned measurement.
+- Receiver admission is not evidence authorization when a source quorum or authority policy is required.
+- Quorum authorization is not application of the representative value to receiver state.
 - A timeout or rejection is not a negative sensor reading.
 - A raw return is not yet an interpretation.
 - A query determined over a supplied hypothesis set is not automatically a universal fact about the external world.
@@ -17,16 +18,20 @@ Trials 04–06 choose which observations would be useful. They do not execute th
 ## Lifecycle
 
     planned -> dispatched -> admitted -> returned -> interpreted -> query_determined
+                                    |            |
+                                    |            +-> evidence_authorized -> applied (optional) -> interpreted
+                                    |                         |
+                                    +-> no_result             +-> evidence_refused
          |          |           |           |              | 
          v          v           v           v              +-> continued -> next attempt
     dispatch_failed  rejected  no_result  returned_unadmitted  unresolved
                            (unadmitted return and other failures are terminal)
 
-Each request attempt is append-only. An interpreted observation can end in `query_determined`, `unresolved`, or `continued`; `continued` records which next observation the adaptive policy selected and closes the current request attempt before a new attempt begins. Failure paths are terminal and do not silently become observations. A payload that returns without an admission receipt is preserved as `returned_unadmitted` and cannot advance to interpretation within that attempt.
+Each request attempt is append-only. `admitted` records receiver-side intake; `evidence_authorized` records a separate consensus/authority decision. An intent can require that gate, and can additionally require an `applied` receipt for a receiver-side state mutation before interpretation. A direct one-receiver path can leave both requirements false. An interpreted observation can end in `query_determined`, `unresolved`, or `continued`; `continued` records which next observation the adaptive policy selected and closes the current request attempt before a new attempt begins. Failure paths are terminal and do not silently become observations. A payload that returns without an admission receipt is preserved as `returned_unadmitted` and cannot advance to interpretation within that attempt.
 
 ## Evidence and clocks
 
-Dispatch, admission, return, interpretation, and query-resolution events can each reference their own receipt or artifact. A returned payload must reference an Encounter Envelope and include its encounter ID, payload digest, and declared canonicalization. The path ledger records those declarations; it does not fetch or authenticate the referenced artifact. The Encounter Envelope validator remains responsible for validating the referenced envelope when it is available.
+Dispatch, receiver admission, raw return, evidence authorization/refusal, optional receiver-state application, interpretation, and query-resolution events can each reference their own receipt or artifact. A returned payload must reference an Encounter Envelope and include its encounter ID, payload digest, and declared canonicalization. The path ledger records those declarations; it does not fetch or authenticate the referenced artifact. The Encounter Envelope validator remains responsible for validating the referenced envelope when it is available.
 
 Clock values are retained only alongside their clock-domain labels. The path model does not subtract or align values from different domains. Unknown timing remains unknown.
 
