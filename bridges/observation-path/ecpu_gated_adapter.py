@@ -84,6 +84,17 @@ class ECPUApplicationRecord:
     checkpoint_digest: str
 
 
+@dataclass(frozen=True)
+class ECPUSenderAcknowledgementRecord:
+    event_kind: str
+    logical_time: int
+    acknowledged_sources: tuple[str, ...]
+    expected_event_sequences: tuple[tuple[str, str, int], ...]
+    acknowledged_sequences: tuple[tuple[str, str, int], ...]
+    ack_digest: str
+    acknowledgement_ref: str
+
+
 class ECPUGatedObservationAdapter:
     """Record E-CPU quorum and VM-commit evidence into an ObservationPath."""
 
@@ -464,4 +475,165 @@ class ECPUGatedObservationAdapter:
             projection_digest=projection_digest,
             checkpoint_ref=checkpoint_ref,
             checkpoint_digest=checkpoint_digest,
+        )
+
+
+    def record_sender_acknowledgements(
+        self,
+        path: ObservationPath,
+        kind: str,
+        logical_time: int,
+        sender_channels: Mapping[str, object],
+        *,
+        acknowledgement_ref: str,
+        actor: str = "ecpu-sender-ack",
+    ) -> ECPUSenderAcknowledgementRecord:
+        """Process sender ACKs and record only sequences actually removed as pending.
+
+        E-CPU commit emits receiver-side RACK messages. This method is a later,
+        separate operation: it calls process_acks(), checks that every sequence
+        belonging to this event was returned by the sender channels, and verifies
+        those sequences no longer appear in each sender's pending set.
+        Additional earlier ACKs drained by the same call are recorded too.
+        """
+        if not isinstance(path, ObservationPath):
+            raise TypeError("path must be an ObservationPath")
+        if path.status != "applied":
+            raise ValueError("sender acknowledgement requires a completed receiver application")
+        if not path.intent.sender_ack_required:
+            raise ValueError("sender acknowledgement is not required by this observation intent")
+        _nonempty(kind, "kind")
+        _nonempty(acknowledgement_ref, "acknowledgement_ref")
+        if isinstance(logical_time, bool) or not isinstance(logical_time, int) or logical_time < 0:
+            raise ValueError("logical_time must be a non-negative integer")
+        if not isinstance(sender_channels, Mapping) or not sender_channels:
+            raise ValueError("sender_channels must be a non-empty source-to-channel mapping")
+
+        applied_details = path.events[-1].details
+        if applied_details.get("event_kind") not in {None, kind}:
+            raise ValueError("applied path receipt belongs to a different event kind")
+        if applied_details.get("logical_time") not in {None, logical_time}:
+            raise ValueError("applied path receipt belongs to a different logical time")
+        if applied_details.get("receiver_ack_emitted") is not True:
+            raise ValueError("receiver application receipt does not attest to ACK emission")
+
+        snapshot = self.coordinator.snapshot()
+        if not isinstance(snapshot, Mapping):
+            raise ValueError("E-CPU coordinator snapshot must be a mapping")
+        event_links = _event_entry(snapshot.get("links"), kind, logical_time, "evidence links")
+        raw_links = event_links.get("sources")
+        if not isinstance(raw_links, (list, tuple)) or not raw_links:
+            raise ValueError("E-CPU event lacks source evidence links")
+
+        expected_by_source = {}
+        for link in raw_links:
+            if not isinstance(link, Mapping):
+                raise ValueError("E-CPU evidence link is malformed")
+            source = _nonempty(link.get("source"), "evidence source")
+            channel_name = _nonempty(link.get("channel"), "evidence channel")
+            sequence = link.get("sequence")
+            if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence <= 0:
+                raise ValueError("E-CPU evidence sequence must be a positive integer")
+            if source in expected_by_source:
+                raise ValueError("E-CPU event has duplicate source evidence links")
+            expected_by_source[source] = (channel_name, sequence)
+
+        if set(sender_channels) != set(expected_by_source):
+            raise ValueError("sender channel sources must exactly match the event evidence sources")
+
+        expected_event_sequences = []
+        for source in sorted(expected_by_source):
+            channel_name, sequence = expected_by_source[source]
+            channel = sender_channels[source]
+            if getattr(channel, "source", None) != source:
+                raise ValueError(f"sender channel identity mismatch for source {source}")
+            if getattr(channel, "channel", None) != channel_name:
+                raise ValueError(f"sender channel name mismatch for source {source}")
+            pending_fn = getattr(channel, "pending_sequences", None)
+            if not callable(pending_fn):
+                raise TypeError(f"sender channel {source} must expose pending_sequences()")
+            pending = pending_fn()
+            if sequence not in pending:
+                raise ValueError(
+                    f"event sequence {sequence} for source {source} is not pending before ACK processing"
+                )
+            expected_event_sequences.append({
+                "source": source,
+                "channel": channel_name,
+                "sequence": sequence,
+            })
+
+        process_acks = getattr(self.coordinator, "process_acks", None)
+        if not callable(process_acks):
+            raise TypeError("E-CPU coordinator must expose process_acks()")
+        removed_by_source = process_acks(sender_channels)
+        if not isinstance(removed_by_source, Mapping):
+            raise ValueError("E-CPU process_acks() must return a source-to-sequences mapping")
+
+        acknowledged_sequences = []
+        acknowledged_sources = []
+        expected_identities = {
+            (item["source"], item["channel"], item["sequence"])
+            for item in expected_event_sequences
+        }
+        acknowledged_identities = set()
+
+        for source in sorted(sender_channels):
+            channel = sender_channels[source]
+            removed = removed_by_source.get(source)
+            if not isinstance(removed, (list, tuple)):
+                raise ValueError(f"E-CPU ACK result for source {source} must be a sequence")
+            if len(set(removed)) != len(removed):
+                raise ValueError(f"E-CPU ACK result for source {source} contains duplicates")
+            if removed:
+                acknowledged_sources.append(source)
+            pending_after = channel.pending_sequences()
+            for sequence in removed:
+                if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence <= 0:
+                    raise ValueError("E-CPU ACK result contains an invalid sequence")
+                if sequence in pending_after:
+                    raise ValueError(
+                        f"sender sequence {sequence} for source {source} remains pending after ACK processing"
+                    )
+                channel_name = expected_by_source[source][0]
+                entry = {"source": source, "channel": channel_name, "sequence": sequence}
+                acknowledged_sequences.append(entry)
+                acknowledged_identities.add((source, channel_name, sequence))
+
+        if not expected_identities.issubset(acknowledged_identities):
+            missing = sorted(expected_identities - acknowledged_identities)
+            raise ValueError(f"E-CPU sender ACK processing did not clear every event sequence: {missing}")
+
+        digest_payload = {
+            "event_kind": kind,
+            "logical_time": logical_time,
+            "acknowledged_sequences": acknowledged_sequences,
+            "expected_event_sequences": expected_event_sequences,
+        }
+        ack_digest = _digest(digest_payload)
+        path.append(
+            "sender_acknowledged",
+            actor,
+            evidence_ref=acknowledgement_ref,
+            details={
+                **digest_payload,
+                "sources": acknowledged_sources,
+                "ack_digest": ack_digest,
+            },
+        )
+
+        return ECPUSenderAcknowledgementRecord(
+            event_kind=kind,
+            logical_time=logical_time,
+            acknowledged_sources=tuple(acknowledged_sources),
+            expected_event_sequences=tuple(
+                (item["source"], item["channel"], item["sequence"])
+                for item in expected_event_sequences
+            ),
+            acknowledged_sequences=tuple(
+                (item["source"], item["channel"], item["sequence"])
+                for item in acknowledged_sequences
+            ),
+            ack_digest=ack_digest,
+            acknowledgement_ref=acknowledgement_ref,
         )
