@@ -21,6 +21,11 @@ Activating a revision retains every hypothesis from its parent revision and adds
 
 This is deliberately an expansion-only operation. Hypothesis removal or retraction would require a separate explicit revision operation with its own evidence and review contract.
 
+## Construction and verification
+
+- [Construction report](construction-report.md) describes the revision rules, provenance extraction, and test boundaries.
+- [CI receipt](results/ci-run-131.json) records the successful 15-test run and its integrity digest.
+
 ## Files
 
 - hypothesis_revision.py — append-only revision and proposal ledger.
