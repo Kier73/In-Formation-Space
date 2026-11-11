@@ -4,7 +4,9 @@
 Verifies hard constraints and success criteria from brief:d2r-poset-01.
 """
 
+import random
 import unittest
+from itertools import permutations
 from poset_interleaver import PosetCycleError, PosetInterleaver
 
 
@@ -108,6 +110,77 @@ class TestPosetInterleaver(unittest.TestCase):
         self.assertEqual(poset.events, orig_events)
         self.assertEqual(poset.edge_count, orig_edges)
 
+class TestPosetInterleaverAdditionalProperties(unittest.TestCase):
+    def test_empty_poset_has_one_empty_linear_extension(self):
+        poset = PosetInterleaver()
+        self.assertEqual(poset.count_linear_extensions(), 1)
+        self.assertEqual(list(poset.generate_linear_extensions()), [[]])
+        self.assertEqual(poset.verify_trace([]), (True, None, None))
+
+    def test_queries_do_not_mutate_adjacency_maps(self):
+        poset = PosetInterleaver()
+        poset.add_event("isolated")
+        successors_before = {key: set(value) for key, value in poset._successors.items()}
+        predecessors_before = {key: set(value) for key, value in poset._predecessors.items()}
+        successor_keys_before = set(poset._successors)
+        predecessor_keys_before = set(poset._predecessors)
+
+        poset.find_cycle()
+        poset.is_acyclic()
+        poset.count_linear_extensions()
+        list(poset.generate_linear_extensions())
+        poset.verify_trace(["isolated"])
+
+        self.assertEqual(dict(poset._successors), successors_before)
+        self.assertEqual(dict(poset._predecessors), predecessors_before)
+        self.assertEqual(set(poset._successors), successor_keys_before)
+        self.assertEqual(set(poset._predecessors), predecessor_keys_before)
+
+    def test_trace_blame_is_deterministic_in_edge_insertion_order(self):
+        poset = PosetInterleaver()
+        poset.add_edge("z", "a")
+        poset.add_edge("y", "b")
+        trace = ["a", "b", "y", "z"]
+        observed = [poset.verify_trace(trace)[2] for _ in range(10)]
+        self.assertEqual(observed, [("z", "a")] * 10)
+
+    def test_random_small_dags_match_brute_force_and_generator(self):
+        rng = random.Random(20261111)
+        for n in range(0, 7):
+            for sample in range(8):
+                with self.subTest(n=n, sample=sample):
+                    poset = PosetInterleaver()
+                    events = [f"e{i}" for i in range(n)]
+                    for event in events:
+                        poset.add_event(event)
+                    for i in range(n):
+                        for j in range(i + 1, n):
+                            if rng.random() < 0.38:
+                                poset.add_edge(events[i], events[j])
+
+                    brute_count = sum(
+                        1 for ordering in permutations(events)
+                        if poset.verify_trace(ordering)[0]
+                    )
+                    dp_count = poset.count_linear_extensions()
+                    generated = list(poset.generate_linear_extensions())
+                    self.assertEqual(dp_count, brute_count)
+                    self.assertEqual(len(generated), brute_count)
+                    self.assertTrue(all(poset.verify_trace(ordering)[0] for ordering in generated))
+
+    def test_duplicate_edge_does_not_duplicate_constraint_or_count(self):
+        poset = PosetInterleaver()
+        poset.add_edge("a", "b")
+        poset.add_edge("a", "b")
+        self.assertEqual(poset.edge_count, 1)
+        self.assertEqual(poset.count_linear_extensions(), 1)
+        self.assertEqual(list(poset.generate_linear_extensions()), [["a", "b"]])
+
+    def test_negative_generation_limit_is_rejected(self):
+        poset = PosetInterleaver()
+        poset.add_event("a")
+        with self.assertRaises(ValueError):
+            list(poset.generate_linear_extensions(limit=-1))
 
 if __name__ == "__main__":
     unittest.main()
