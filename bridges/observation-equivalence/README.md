@@ -2,7 +2,7 @@
 
 **Status:** Conceptual bridge connecting formal language theory, transition system abstractions, and structural memory.  
 **Date:** 2026-11-11  
-**Lineage:** Bridges [Trial 02](../../experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/README.md), [IBV](file:///C:/Users/kross/Downloads/IBV_Binary_As_Finite_Container_v0_13.md), [E-CPU Structural Memory](file:///C:/Users/kross/Downloads/structural-memory-adaptive-ecpu.md), and [Symbolic Capacity](file:///C:/Users/kross/Downloads/symbolic_capacity_space.py).
+**Lineage:** [Trial 02](../../experiments/description-to-realization/trials/trial-02-finite-description-unbounded-space/README.md), [E-CPU](https://github.com/Kier73/E-CPU), and the finite partition experiment in [Trial 03](../../experiments/description-to-realization/trials/trial-03-distinction-refinement/README.md). The original synthesis also referenced local IBV and Symbolic Capacity notes; their portable repository paths and revisions have not yet been established, so they are not treated as independently traceable source artifacts here.
 
 ---
 
@@ -18,7 +18,7 @@ The answer is always a **quotient space** induced by an observation or continuat
 S_{\text{effective}} = S_{\text{concrete}} \,/\, \sim
 \]
 
-Two objects $x$ and $y$ are equivalent ($x \sim y$) if and only if no permitted future observation or operation can distinguish them.
+At the contract level, two objects $x$ and $y$ are equivalent ($x \sim y$) when no permitted future observation or operation can distinguish them. This is a universal statement over the declared observation contract. The executable `QuotientSpace` below only checks a **finite supplied test suite**: agreement on those tests is evidence of finite-test equivalence, not proof of universal equivalence unless the suite is known to be complete.
 
 ---
 
@@ -56,14 +56,14 @@ A program binary $B$ interpreted under context $C$ defines transition system $\m
 \[
 s \sim_{C, P} t \iff O_{C, P}(s) = O_{C, P}(t)
 \]
-States may be merged in an abstract state space $A$ via abstraction map $\alpha: S_C \to A$ if and only if $\alpha(s) = \alpha(t) \implies s \sim_{C, P} t$.
+Equality of current property observations is a necessary starting point, but is not always enough to merge states safely. For a deterministic transition system, an observation partition must also be transition-stable: for every action $a$, if $s \sim t$, then $T(s,a) \sim T(t,a)$. Otherwise two currently indistinguishable states can produce distinguishable futures. This is the quotient-congruence condition exercised by [transition_congruence.py](transition_congruence.py). The checker is exhaustive only over the finite states, actions, and tests supplied to it.
 
 ### 2.3 Structural Memory (E-CPU)
 Rather than materializing every point along a 64-bit integer or memory trajectory $x_0, x_1, \dots, x_t$, structural memory represents the trajectory as an admitted parameter vector $\theta$ under an algebraic generator $G$:
 \[
 x_t = G(\theta, t)
 \]
-Two distinct execution histories are structurally identical with respect to read queries if their admitted generators yield identical outputs across all addressable coordinates $k$:
+Two distinct execution histories are structurally identical with respect to a read contract if their admitted generators yield identical outputs across all addressable coordinates $k$. Agreement on a finite sample of coordinates only establishes sampled equivalence:
 \[
 H_1 \sim_{\text{read}} H_2 \iff \forall k \in \mathcal{K}, \quad G_1(\theta_1, k) = G_2(\theta_2, k)
 \]
@@ -118,18 +118,20 @@ s \sim_{1 \land 2} t \iff (s \sim_1 t) \land (s \sim_2 t)
    \[
    |S / \sim| = \infty
    \]
-   The system cannot be navigated within any fixed finite-dimensional quotient space.
+   No finite-state automaton recognizes this language. This is a statement about the chosen finite-state model, not a claim that every computational model or navigation strategy fails.
 
 ---
 
 ## 4. Demonstrating the Bridge
 
-The companion script [`demonstration.py`](demonstration.py) demonstrates how the exact same Nerode equivalence code checks:
+The companion script [`demonstration.py`](demonstration.py) demonstrates how one generic finite-test quotient checker can be applied to:
 1. Formal language prefix equivalence (Trial 02).
 2. Machine register observation equivalence (IBV).
 3. Affine structural memory generator equivalence (E-CPU).
 
-The accompanying test suite [`test_demonstration.py`](test_demonstration.py) verifies partition soundness, coverage, reflexivity, symmetry, and witness extraction across all three domains.
+The accompanying test suite [`test_demonstration.py`](test_demonstration.py) verifies finite-test partition properties and includes a counterexample showing that a bounded suffix suite can miss a longer Myhill-Nerode distinguishing continuation. It does not infer universal equivalence from a finite sample.
+
+The additional [transition congruence checker](transition_congruence.py) tests whether current observational classes remain valid after every supplied transition. This matters for state abstraction: matching current register observations alone does not ensure matching future behavior. See [test_transition_congruence.py](test_transition_congruence.py) for a finite system where adding one transition-relevant observation repairs an unsound merge.
 Execution receipt is verified in [`results/bridge-encounter.json`](results/bridge-encounter.json).
 
 See also [Trial 03: Distinction Refinement](../../experiments/description-to-realization/trials/trial-03-distinction-refinement/README.md), which implements the finite partition refinement lattice and conditional entropy $H(D \mid O)$ described in Section 3.
