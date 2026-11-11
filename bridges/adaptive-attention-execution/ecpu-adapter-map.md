@@ -1,6 +1,6 @@
 # E-CPU adapter map: observation and realization boundaries
 
-**Status:** interface mapping against E-CPU commit `800f94f83ffd6f527ed093c8d1c1e93e153c34f6` (2026-11-11). The adapter remains dependency-injected; it does not import or duplicate E-CPU runtime code.  
+**Status:** interface mapping and live integration against E-CPU commit `800f94f83ffd6f527ed093c8d1c1e93e153c34f6` (2026-11-11). The adapter remains dependency-injected; it does not import or duplicate E-CPU runtime code.  
 **Purpose:** show where the generic In-Formation-Space observation path can reuse existing E-CPU interfaces without duplicating transport, consensus, VM application, Structural Memory, or Hypervisor authority.
 
 ## The most important distinction
@@ -69,6 +69,12 @@ A production adapter should:
 5. Record `interpreted` only after the declared authority/application gates have been satisfied and the actual interpreter has produced a traceable interpretation artifact.
 6. Keep each clock coordinate paired with its own clock-domain identifier. E-CPU already carries source and receiver `TemporalFrame` values; the adapter must not subtract them unless an explicit calibrated mapping exists.
 7. Keep `ObservationGroundBuilder.admit()` and Hypervisor `ALLOW` as later authorization boundaries. Do not treat an admitted Ground proposal or an observer digest as a substitute for receiver authorization.
+
+## Live integration evidence
+
+The In-Formation-Space CI workflow checks out E-CPU at the exact commit above and runs [`ecpu_live_integration.py`](../observation-path/ecpu_live_integration.py). The passing [run 172 receipt](../observation-path/results/live-ecpu-integration-run-172.json) exercises both an authorized commit and a strict consensus conflict using E-CPU's actual durable mailbox transport and VM.
+
+The E-CPU repository's separate multi-platform specification matrix is tracked independently. The passing In-Formation-Space integration job does not imply that the whole E-CPU test matrix has passed.
 
 ## References inspected
 
