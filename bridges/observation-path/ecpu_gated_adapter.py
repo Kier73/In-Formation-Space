@@ -86,13 +86,16 @@ class ECPUApplicationRecord:
 
 @dataclass(frozen=True)
 class ECPUSenderAcknowledgementRecord:
+    status: str
+    complete: bool
     event_kind: str
     logical_time: int
     acknowledged_sources: tuple[str, ...]
     expected_event_sequences: tuple[tuple[str, str, int], ...]
     acknowledged_sequences: tuple[tuple[str, str, int], ...]
-    ack_digest: str
-    acknowledgement_ref: str
+    missing_event_sequences: tuple[tuple[str, str, int], ...]
+    ack_digest: str | None
+    acknowledgement_ref: str | None
 
 
 class ECPUGatedObservationAdapter:
@@ -488,18 +491,18 @@ class ECPUGatedObservationAdapter:
         acknowledgement_ref: str,
         actor: str = "ecpu-sender-ack",
     ) -> ECPUSenderAcknowledgementRecord:
-        """Process sender ACKs and record only sequences actually removed as pending.
+        """Process sender ACKs and preserve partial or complete progress.
 
-        E-CPU commit emits receiver-side RACK messages. This method is a later,
-        separate operation: it calls process_acks(), checks that every sequence
-        belonging to this event was returned by the sender channels, and verifies
-        those sequences no longer appear in each sender's pending set.
-        Additional earlier ACKs drained by the same call are recorded too.
+        E-CPU commit emits receiver-side RACK messages. This later operation calls
+        process_acks(), merges the sequences actually removed from sender pending
+        sets with any earlier progress events, and records either
+        sender_ack_progress or sender_acknowledged. Partial acknowledgements are
+        never discarded: a subsequent call can complete the same path.
         """
         if not isinstance(path, ObservationPath):
             raise TypeError("path must be an ObservationPath")
-        if path.status != "applied":
-            raise ValueError("sender acknowledgement requires a completed receiver application")
+        if path.status not in {"applied", "sender_ack_progress"}:
+            raise ValueError("sender acknowledgement requires applied or sender_ack_progress status")
         if not path.intent.sender_ack_required:
             raise ValueError("sender acknowledgement is not required by this observation intent")
         _nonempty(kind, "kind")
@@ -509,7 +512,13 @@ class ECPUGatedObservationAdapter:
         if not isinstance(sender_channels, Mapping) or not sender_channels:
             raise ValueError("sender_channels must be a non-empty source-to-channel mapping")
 
-        applied_details = path.events[-1].details
+        applied_event = next(
+            (event for event in path.events if event.stage == "applied"),
+            None,
+        )
+        if applied_event is None:
+            raise ValueError("sender acknowledgement path lacks an applied event")
+        applied_details = applied_event.details
         if applied_details.get("event_kind") not in {None, kind}:
             raise ValueError("applied path receipt belongs to a different event kind")
         if applied_details.get("logical_time") not in {None, logical_time}:
@@ -541,7 +550,24 @@ class ECPUGatedObservationAdapter:
         if set(sender_channels) != set(expected_by_source):
             raise ValueError("sender channel sources must exactly match the event evidence sources")
 
-        expected_event_sequences = []
+        expected_event_sequences = [
+            {"source": source, "channel": channel_name, "sequence": sequence}
+            for source, (channel_name, sequence) in sorted(expected_by_source.items())
+        ]
+        expected_ids = {
+            (item["source"], item["channel"], item["sequence"])
+            for item in expected_event_sequences
+        }
+
+        prior_acknowledged = {}
+        for event in path.events:
+            if event.stage != "sender_ack_progress":
+                continue
+            for item in event.details.get("acknowledged_sequences", ()):
+                identity = (item["source"], item["channel"], item["sequence"])
+                prior_acknowledged[identity] = item
+        prior_ids = set(prior_acknowledged)
+
         for source in sorted(expected_by_source):
             channel_name, sequence = expected_by_source[source]
             channel = sender_channels[source]
@@ -552,16 +578,17 @@ class ECPUGatedObservationAdapter:
             pending_fn = getattr(channel, "pending_sequences", None)
             if not callable(pending_fn):
                 raise TypeError(f"sender channel {source} must expose pending_sequences()")
-            pending = pending_fn()
-            if sequence not in pending:
+            pending = set(pending_fn())
+            identity = (source, channel_name, sequence)
+            if identity in prior_ids:
+                if sequence in pending:
+                    raise ValueError(
+                        f"previously acknowledged event sequence {sequence} for {source} is pending again"
+                    )
+            elif sequence not in pending:
                 raise ValueError(
                     f"event sequence {sequence} for source {source} is not pending before ACK processing"
                 )
-            expected_event_sequences.append({
-                "source": source,
-                "channel": channel_name,
-                "sequence": sequence,
-            })
 
         process_acks = getattr(self.coordinator, "process_acks", None)
         if not callable(process_acks):
@@ -570,14 +597,7 @@ class ECPUGatedObservationAdapter:
         if not isinstance(removed_by_source, Mapping):
             raise ValueError("E-CPU process_acks() must return a source-to-sequences mapping")
 
-        acknowledged_sequences = []
-        acknowledged_sources = []
-        expected_identities = {
-            (item["source"], item["channel"], item["sequence"])
-            for item in expected_event_sequences
-        }
-        acknowledged_identities = set()
-
+        newly_acknowledged = {}
         for source in sorted(sender_channels):
             channel = sender_channels[source]
             removed = removed_by_source.get(source)
@@ -585,9 +605,8 @@ class ECPUGatedObservationAdapter:
                 raise ValueError(f"E-CPU ACK result for source {source} must be a sequence")
             if len(set(removed)) != len(removed):
                 raise ValueError(f"E-CPU ACK result for source {source} contains duplicates")
-            if removed:
-                acknowledged_sources.append(source)
-            pending_after = channel.pending_sequences()
+            pending_after = set(channel.pending_sequences())
+            channel_name = expected_by_source[source][0]
             for sequence in removed:
                 if isinstance(sequence, bool) or not isinstance(sequence, int) or sequence <= 0:
                     raise ValueError("E-CPU ACK result contains an invalid sequence")
@@ -595,24 +614,55 @@ class ECPUGatedObservationAdapter:
                     raise ValueError(
                         f"sender sequence {sequence} for source {source} remains pending after ACK processing"
                     )
-                channel_name = expected_by_source[source][0]
                 entry = {"source": source, "channel": channel_name, "sequence": sequence}
-                acknowledged_sequences.append(entry)
-                acknowledged_identities.add((source, channel_name, sequence))
+                identity = (source, channel_name, sequence)
+                if identity in newly_acknowledged:
+                    raise ValueError("E-CPU ACK result duplicates a sequence identity")
+                newly_acknowledged[identity] = entry
 
-        if not expected_identities.issubset(acknowledged_identities):
-            missing = sorted(expected_identities - acknowledged_identities)
-            raise ValueError(f"E-CPU sender ACK processing did not clear every event sequence: {missing}")
+        cumulative = dict(prior_acknowledged)
+        cumulative.update(newly_acknowledged)
+        cumulative_ids = set(cumulative)
+        missing_ids = expected_ids - cumulative_ids
+        acknowledged_sequences = [
+            cumulative[identity]
+            for identity in sorted(cumulative)
+        ]
+        missing_event_sequences = [
+            {"source": source, "channel": channel, "sequence": sequence}
+            for source, channel, sequence in sorted(missing_ids)
+        ]
+        acknowledged_sources = sorted({item["source"] for item in acknowledged_sequences})
+        complete = not missing_ids
+
+        # If this poll returned nothing new and the event is still incomplete,
+        # report pending state to the caller without appending a duplicate event.
+        if not newly_acknowledged and not complete:
+            ack_digest = None
+            return ECPUSenderAcknowledgementRecord(
+                status="sender_ack_pending",
+                complete=False,
+                event_kind=kind,
+                logical_time=logical_time,
+                acknowledged_sources=tuple(acknowledged_sources),
+                expected_event_sequences=tuple(sorted(expected_ids)),
+                acknowledged_sequences=tuple(sorted(cumulative_ids)),
+                missing_event_sequences=tuple(sorted(missing_ids)),
+                ack_digest=ack_digest,
+                acknowledgement_ref=None,
+            )
 
         digest_payload = {
             "event_kind": kind,
             "logical_time": logical_time,
             "acknowledged_sequences": acknowledged_sequences,
             "expected_event_sequences": expected_event_sequences,
+            "missing_event_sequences": missing_event_sequences,
         }
         ack_digest = _digest(digest_payload)
+        stage = "sender_acknowledged" if complete else "sender_ack_progress"
         path.append(
-            "sender_acknowledged",
+            stage,
             actor,
             evidence_ref=acknowledgement_ref,
             details={
@@ -623,17 +673,14 @@ class ECPUGatedObservationAdapter:
         )
 
         return ECPUSenderAcknowledgementRecord(
+            status=stage,
+            complete=complete,
             event_kind=kind,
             logical_time=logical_time,
             acknowledged_sources=tuple(acknowledged_sources),
-            expected_event_sequences=tuple(
-                (item["source"], item["channel"], item["sequence"])
-                for item in expected_event_sequences
-            ),
-            acknowledged_sequences=tuple(
-                (item["source"], item["channel"], item["sequence"])
-                for item in acknowledged_sequences
-            ),
+            expected_event_sequences=tuple(sorted(expected_ids)),
+            acknowledged_sequences=tuple(sorted(cumulative_ids)),
+            missing_event_sequences=tuple(sorted(missing_ids)),
             ack_digest=ack_digest,
             acknowledgement_ref=acknowledgement_ref,
         )
