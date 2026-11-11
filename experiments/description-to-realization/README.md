@@ -3,6 +3,8 @@
 **Status:** open hypothesis and experiment proposal; not yet empirically tested.  
 **Seed intuition:** “Describe what you want, and it exists as a result; information is an infinite dimension in-formation.” The wording is retained as a starting intuition, not treated as an established law.
 
+An optional [construction brief template](brief-template.md) is included for preparing a common input to independent contributors.
+
 ## 1. The question
 
 When does a description stop being merely a statement about a desired thing and become an effective means of bringing a thing into being?
