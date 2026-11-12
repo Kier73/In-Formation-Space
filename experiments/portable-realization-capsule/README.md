@@ -188,3 +188,25 @@ and terminal state were recomputed must still fail semantic replay.
 This is a portable checkpoint and one-step continuation prototype. It is not
 yet a concurrent or distributed host handoff, signed checkpoint protocol,
 encrypted transport, or general VM process checkpoint.
+
+## SRH-001: quorum-fenced stateful recovery rehome
+
+The companion [Stateful Runtime Recovery Handoff](STATEFUL-RECOVERY-HANDOFF-001.md)
+experiment composes PSC-001 with E-CPU's existing quorum-anchored
+`TransferableExecutionClaimStore`. The portable checkpoint carries exact
+state, time, model revision, event lineage, and realization capsules; the
+claim carries the live owner assignment, checkpoint binding, typed resume
+operator, and implementation identity.
+
+After a source-loss reassignment, the receiver must verify the current quorum
+high-water and exact target identity before replaying the PSC runtime and
+publishing one continuation checkpoint. The claim epoch fences stale result
+publication; it does not stop an isolated source CPU from continuing local
+pure computation. A successor checkpoint receives a new claim for its next
+transition.
+
+The first integration fixture exercises repeated recovery reassignment,
+stale-owner rejection, JSON envelope reconstruction, a resumed counter
+transition, idempotent completion, and tamper/target-mismatch rejection. It
+uses three durable authority journals in one test environment: it is not yet
+a multi-machine transport test or a graceful source-coordinated migration.
