@@ -277,6 +277,53 @@ class SQLiteRouteEpochLedgerStoreTests(unittest.TestCase):
         ):
             store.load()
 
+    def test_execution_authorization_ticket_survives_sqlite_restart(self):
+        store = SQLiteRouteEpochLedgerStore(self.database_path)
+        host, worker, ledger = self.make_open_ledger(
+            store,
+            epoch_id="sqlite-execution-epoch",
+            owner_id="sqlite-execution-owner",
+        )
+        host.dispatch_next()
+        received = worker.receive_request()
+        self.assertIsNotNone(received)
+
+        dispatch = worker.execute_request(
+            received,
+            runner_id="sqlite-restartable-runner",
+            runner=lambda execution_id, request: {
+                "execution_id": execution_id,
+                "attempt_id": request["attempt_id"],
+            },
+        )
+        self.assertIsNotNone(dispatch)
+
+        # Reopen both the durable adapter and ledger as a separate process.
+        reopened_store = SQLiteRouteEpochLedgerStore(self.database_path)
+        reopened_ledger = ProofActionRouteEpochLedger.from_dict(
+            reopened_store.load(),
+            store=reopened_store,
+        )
+        execution_events = [
+            event for event in reopened_ledger.entries
+            if event["event_type"] == "execution_authorized"
+        ]
+        self.assertEqual(len(execution_events), 1)
+        self.assertEqual(
+            execution_events[0]["details"]["execution_id"],
+            dispatch.execution_id,
+        )
+        self.assertEqual(
+            execution_events[0]["details"]["runner_id"],
+            "sqlite-restartable-runner",
+        )
+        history = reopened_store.revision_history()
+        self.assertEqual(len(history), 3)
+        self.assertEqual(
+            history[-1]["appended_event_digests"],
+            [execution_events[0]["event_digest"]],
+        )
+
     def test_invalid_paths_and_timeout_values_are_rejected(self):
         with self.assertRaisesRegex(SQLiteRouteEpochStoreError, "filesystem database path"):
             SQLiteRouteEpochLedgerStore(":memory:")
