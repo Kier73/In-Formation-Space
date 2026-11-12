@@ -191,10 +191,8 @@ class ProofActionRouteEpochTests(unittest.TestCase):
             ]),
             1,
         )
-        self.assertEqual(
-            ledger.entries[-1]["details"]["owner_generation"],
-            1,
-        )
+        self.assertEqual(first_event["details"]["owner_generation"], 1)
+        self.assertEqual(ledger.active_epoch["owner_generation"], 2)
 
     def test_worker_admission_is_durably_recorded_before_reliable_ack(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
