@@ -8,7 +8,7 @@ The first target is deliberately finite: two-input XOR, followed by a semantic e
 
 - **VGI reference:** use the Boolean subgroup embedding \(0\mapsto0, 1\mapsto4\) in \(\mathbb Z/8\mathbb Z\). Since \(4+4=0\pmod 8\), group addition realizes XOR. A nested equality/conditional expression realizes AND without adding new VGI opcodes.
 - **E-CPU reference program:** use the existing MailCPU instruction algebra (COMPARE, BRANCH, SET, MUL, HALT) as an ordinary executable specification.
-- **Neural realization:** the E-CPU module constructs dense 2–85–112–1 and 2–17–254–21–1 ReLU MLPs, each with exactly 10,000 parameters including biases. Only nine parameters are nonzero for XOR and eight for AND in either layout. No optimizer, dataset, or training loop is used.
+- **Neural realization:** the E-CPU module constructs dense 2–85–112–1 and 2–17–254–21–1 ReLU MLPs, each with exactly 10,000 parameters including biases. The shallow layout has nine active parameters for XOR and eight for AND; the deeper layout has eleven for XOR and ten for AND because of its additional feature-copy layer. No optimizer, dataset, or training loop is used.
 - **Intervention:** XOR becomes AND by changing only the two final-layer weights from (1, -2) to (0, 1).
 - **Semantic evidence:** E-CPU's existing TranslationContract and paired-observation checker bind the program, model snapshot, input case, and exact output comparison. The VGI side separately exhausts its four input combinations.
 
