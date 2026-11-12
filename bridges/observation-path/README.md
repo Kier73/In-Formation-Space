@@ -129,6 +129,37 @@ The terminal `query_determined` stage requires a Boolean result, the hypothesis-
 
 An adaptive coordinator now uses this ledger for one-request-at-a-time policy execution: [Adaptive Attention Execution](../adaptive-attention-execution/README.md). It records a continuation between attempts, while an outcome outside the predicted policy branches is retained as an unresolved model mismatch.
 
+## VGI partial-aware probe execution
+
+The [VGI partial-attention planner](https://github.com/Kier73/Virtual-Ground-Interpreter/blob/cedcc4540a9d75228cf83aaf21e1ba960fe8a555/virtual_ground_interpreter/vgi/partial_attention.py) scores one currently unknown or ambiguous Ground state/action cell by evaluating explicit counterfactual outcomes. It reports scenario bounds when no calibrated distribution is supplied, and exact expected pair-resolution only when every scenario has an exact rational weight. This bridge reuses that planner; it does not duplicate its scoring or refinement algorithms.
+
+`partial_probe_execution.py` binds the score to:
+
+- the exact source Ground fingerprint and cell record;
+- observer actions/channels and the horizon;
+- the pinned VGI source revision;
+- the cell, every proposed outcome, exact rational scenario weights, and per-scenario score;
+- the score summary and a canonical SHA-256 plan/scenario digest.
+
+The digest-bound plan is a proposal reference, not a measurement receipt. The bridge does not execute the probe. A host adapter still has to report dispatch, receiver admission, and an admitted raw return. The actual interpreted `TransitionOutcome` is then compared with the proposal's scenario set. An outcome outside the set is preserved as an `unresolved` model mismatch; it is not mapped to the nearest prediction.
+
+A matched observation changes no Ground by itself. A caller must first record the existing explicit `evidence_authorized` stage (normally through the E-CPU gated adapter); declared application and sender-ACK requirements must also be satisfied before interpretation. `build_ground_revision()` then returns a new VGI Ground value with every available append-only path reference (plan, dispatch, admission, raw return, authorization, optional application/ACK, and interpretation) in its evidence list and a revision entry in Ground metadata. The original Ground remains unchanged, and a stale source fingerprint is rejected.
+
+The update semantics preserve uncertainty:
+
+- an unknown cell may become a singleton known transition from the admitted observation;
+- an ambiguous cell keeps every prior alternative and remains ambiguous, even when the new observation matches one of those alternatives;
+- the new return increments support count once; it does not silently adjudicate competing alternatives;
+- an unauthorized, unadmitted, mismatching, or stale attempt cannot produce a Ground revision.
+
+The module intentionally has no VGI runtime dependency. The interoperability tests import the real VGI implementation from pinned commit `cedcc4540a9d75228cf83aaf21e1ba960fe8a555`; CI checks the cross-repository contract against that exact revision. The bridge's evidence references are retained, not fetched or authenticated by this module. The E-CPU adapter and Encounter Envelope validation remain the relevant trust boundaries.
+
+Reproduce the cross-repository contract test from a checkout with that VGI revision available:
+
+```bash
+PYTHONPATH=external/Virtual-Ground-Interpreter/virtual_ground_interpreter python -m unittest discover -s bridges/observation-path -p 'test_partial_probe_execution.py' -v
+```
+
 ## Recorded verification
 
 The integrated lifecycle, schema, and adaptive-coordinator suites passed in [GitHub Actions run 112](https://github.com/Kier73/In-Formation-Space/actions/runs/43108746664). The machine-readable [CI encounter receipt](results/ci-run-112.json) records the tested commit, job, suite counts, and integrity digest.
