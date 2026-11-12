@@ -167,6 +167,25 @@ class WorkloadMatrixTests(unittest.TestCase):
         )
         jsonschema.validate(manifest, schema)
 
+    def test_first_live_ci_summary_schema_and_digest(self):
+        summary_path = Path(__file__).with_name("results") / "live-ci-run-271-summary.json"
+        schema_path = Path(__file__).with_name("results") / "run-summary.schema.json"
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        jsonschema.validate(summary, schema)
+        core = {key: value for key, value in summary.items() if key != "summary_digest"}
+        calculated = hashlib.sha256(
+            json.dumps(
+                core, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        self.assertEqual(summary["summary_digest"], calculated)
+        self.assertEqual(summary["workflow"]["run_id"], 43130567381)
+        self.assertEqual(summary["matrix"]["attempt_count"], 72)
+        self.assertEqual(summary["matrix"]["span_count"], 2448)
+        self.assertTrue(summary["matrix"]["all_sender_acknowledgements_complete"])
+
     def test_fixture_information_model_reports_one_bit_expected_gain(self):
         document = build_observation_outcome(
             attempt_id="attempt-fixture",

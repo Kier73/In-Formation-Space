@@ -71,6 +71,30 @@ The run writes:
 
 CI uploads these under the artifact name `ecpu-observation-cost-information-experiment`.
 
+
+## First live CI pilot
+
+The first full matrix completed successfully in [GitHub Actions Run 271](https://github.com/Kier73/In-Formation-Space/actions/runs/43130567381). Its `ecpu-observation-cost-information-experiment` artifact is retained by that run. The [checked-in summary receipt](results/live-ci-run-271-summary.json) records the artifact digest, run and E-CPU revisions, profile-matrix digest, and a compact view of the measured distributions.
+
+**Observed coverage:** 24 conditions × 3 repetitions = 72 attempts; 2,448 operation spans; 144 evidence records and 144 information outcomes. Every sender ACK path completed. All six instrumented operation boundaries reached the three-sample descriptive threshold in the target-event profiles.
+
+The following values are medians of condition-level target-event medians, in milliseconds. At each single-factor level, the 12 condition medians are equally weighted; these are not pooled per-call estimates.
+
+| Operation | Payload 64 B | Payload 1,024 B | Queue depth 1 | Queue depth 3 | Receiver load 0 | Receiver load 2 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `ingest_available()` | 0.1371 | 0.1430 | 0.1393 | 0.1390 | 0.1385 | 0.1396 |
+| `commit_event()` | 34.8753 | 33.5270 | 33.5270 | 44.5605 | 34.3316 | 33.9628 |
+| `save_checkpoint()` | 3.4164 | 3.0343 | 2.5650 | 3.5487 | 3.0531 | 3.4540 |
+| `process_acks()` | 1.7651 | 1.6372 | 1.6372 | 1.6593 | 1.6848 | 1.6468 |
+
+The initial signal is that queue depth is associated with higher target commit/checkpoint medians in this workload, whereas changing the observation value field from 64 to 1,024 bytes did not increase these medians. The same-process receiver-load condition produced similar medians to its no-background-call counterpart. These are descriptive contrasts, not causal conclusions.
+
+The source/quorum factor is a **joint** design, not a full independent cross: (2 sources, quorum 2), (4, quorum 2), and (4, quorum 4). For target `commit_event()`, the corresponding medians of condition medians were 26.8335 ms, 41.4252 ms, and 39.1624 ms. The run cannot attribute those differences separately to source count or quorum width.
+
+All 144 synthetic information outcomes report one bit of expected information gain and a modelled query-resolution probability of one. The 72 target outcomes were 48 hits and 24 misses, both of which resolved the fixture's Boolean query. This validates the distinction and reconstruction path between actual E-CPU observations and a declared model; it does not establish the model as external sensor truth.
+
+The summary receipt's `summary_digest` is SHA-256 over all fields except itself. The run-manifest and cost-profile digests are retained separately. The source span/evidence/outcome artifacts remain available from the linked Actions run for independent re-analysis.
+
 ## Reproduce
 
 With E-CPU checked out at the pinned revision:
