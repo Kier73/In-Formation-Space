@@ -149,7 +149,9 @@ class CalibrationConstructionTests(unittest.TestCase):
 class CalibrationMappingTests(unittest.TestCase):
     def test_mapping_returns_envelope_over_every_admissible_mapping(self):
         item = calibration()
-        result = map_source_interval(item, 50)
+        result = map_source_interval(
+            item, source_clock_id="controller:C", source_coordinate=50, source_unit="tick"
+        )
         self.assertLessEqual(result["target_lower"], result["target_upper"])
         self.assertEqual(result["source_coordinate"], 50)
         self.assertEqual(result["interpretation"], "feasible_set_envelope_not_probability_or_confidence_interval")
@@ -164,9 +166,13 @@ class CalibrationMappingTests(unittest.TestCase):
     def test_mapping_refuses_extrapolation(self):
         item = calibration()
         with self.assertRaises(CalibrationRangeError):
-            map_source_interval(item, -1)
+            map_source_interval(
+                item, source_clock_id="controller:C", source_coordinate=-1, source_unit="tick"
+            )
         with self.assertRaises(CalibrationRangeError):
-            map_source_interval(item, 201)
+            map_source_interval(
+                item, source_clock_id="controller:C", source_coordinate=201, source_unit="tick"
+            )
 
     def test_disjoint_mapped_and_target_intervals_prove_before(self):
         report = build_demonstration()
@@ -191,10 +197,14 @@ class CalibrationMappingTests(unittest.TestCase):
         result = compare_cross_clock_intervals(
             item,
             source_event_id="controller-late",
+            source_clock_id="controller:C",
             source_coordinate=150,
+            source_unit="tick",
             target_event_id="sensor-early",
+            target_clock_id="sensor:S",
             target_lower=200,
             target_upper=201,
+            target_unit="tick",
         )
         self.assertEqual(result["relation"], "after")
 
@@ -204,10 +214,14 @@ class CalibrationMappingTests(unittest.TestCase):
         result = compare_cross_clock_intervals(
             item,
             source_event_id="source",
+            source_clock_id="controller:C",
             source_coordinate=50,
+            source_unit="tick",
             target_event_id="target",
+            target_clock_id="sensor:S",
             target_lower=mapped["target_upper"],
             target_upper=mapped["target_upper"] + 0.01,
+            target_unit="tick",
         )
         self.assertEqual(result["relation"], "overlap_unresolved")
 
@@ -217,10 +231,14 @@ class CalibrationMappingTests(unittest.TestCase):
             compare_cross_clock_intervals(
                 item,
                 source_event_id="a",
+                source_clock_id="controller:C",
                 source_coordinate=10,
+                source_unit="tick",
                 target_event_id="b",
+                target_clock_id="sensor:S",
                 target_lower=10,
                 target_upper=9,
+                target_unit="tick",
             )
 
     def test_event_ids_must_differ(self):
