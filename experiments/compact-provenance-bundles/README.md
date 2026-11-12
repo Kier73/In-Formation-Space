@@ -29,3 +29,7 @@ The runner records raw and compressed standalone sizes, raw/compressed header si
 ## Evidence boundary
 
 Zlib output is exact with respect to the decompressed canonical header and original payload, but compressed bytes may vary across zlib implementations or versions. Bundle entries depend on their manifest and are not standalone when detached. SHA-256 is integrity/identity, not authentication or authorization. Neither format is integrated into E-CPU transport, admission, durable storage, or remote execution yet.
+
+## First verified CPB-001 result
+
+The [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43319093051) passed the complete finite-domain capsule corpus and all integrity checks. It created and replayed 288 compressed capsules, six per-encoding bundles, and one global bundle. The [retained evidence](results/ci-run-43319093051.md) records an important outcome: zlib-compressed standalone capsules reduce the raw set by 26.8%, whereas the global shared-manifest bundle reduces raw standalone size by only 5.4% and is 29.2% larger than the compressed set. Shared provenance helps, but uncompressed local entry JSON remains the dominant cost.
