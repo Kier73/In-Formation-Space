@@ -127,6 +127,7 @@ def issue_initial_decision_from_attempt(
     attempt: Mapping[str, Any],
     evidence_records: Sequence[Mapping[str, Any]],
     *,
+    event_key: Mapping[str, Any] | None = None,
     policy_digest: str,
     issued_by: str,
     rationale: str,
@@ -163,8 +164,6 @@ def issue_initial_decision_from_attempt(
         )
         for record in evidence_records
     ]
-    if not normalized:
-        raise ObservationEvidenceError("a finalized attempt must retain at least one evidence record")
     if len({item["source"] for item in normalized}) != len(normalized):
         raise ObservationEvidenceError("attempt evidence has more than one record for a source")
     actual_sources = sorted(item["source"] for item in normalized)
@@ -173,20 +172,40 @@ def issue_initial_decision_from_attempt(
     if attempt.get("evidence_received_count") != len(normalized):
         raise ObservationEvidenceError("attempt evidence count differs from retained evidence records")
     event_keys = {json.dumps(item["event"], sort_keys=True) for item in normalized}
-    if len(event_keys) != 1:
+    if len(event_keys) > 1:
         raise ObservationEvidenceError("evidence ledger contains multiple logical events")
-    event = normalized[0]["event"]
+    if normalized:
+        event = normalized[0]["event"]
+        if event_key is not None and event != _event_key(event_key):
+            raise ObservationEvidenceError("evidence records differ from the supplied event key")
+    else:
+        if status != "REFUSED":
+            raise ObservationEvidenceError("an empty evidence set can only produce a REFUSED decision")
+        if event_key is None:
+            raise ObservationEvidenceError("an empty evidence set requires an explicit event key")
+        event = _event_key(event_key)
     partition = attempt.get("evidence_partition")
     if not isinstance(partition, Mapping):
         raise ObservationEvidenceError("attempt lacks its reconstructed evidence partition")
     if partition.get("observed_sources") != expected_sources:
         raise ObservationEvidenceError("attempt evidence partition has inconsistent source identities")
+    if partition.get("source_count") != len(normalized):
+        raise ObservationEvidenceError("attempt partition source count differs from evidence records")
+    winner_sources = partition.get("winner_sources")
+    if not isinstance(winner_sources, list) or not set(winner_sources).issubset(set(expected_sources)):
+        raise ObservationEvidenceError("attempt winning evidence group is inconsistent with received sources")
 
     representative_ref = None
     representative_source = attempt.get("representative_source")
     if status == "AUTHORIZED":
-        if not isinstance(representative_source, str) or representative_source not in expected_sources:
-            raise ObservationEvidenceError("authorized attempt lacks a representative in its evidence set")
+        if (
+            not isinstance(representative_source, str)
+            or representative_source not in expected_sources
+            or representative_source not in winner_sources
+        ):
+            raise ObservationEvidenceError(
+                "authorized attempt lacks a representative in its winning evidence group"
+            )
         representative = next(item for item in normalized if item["source"] == representative_source)
         representative_ref = _record_ref(representative)
     elif representative_source is not None:
