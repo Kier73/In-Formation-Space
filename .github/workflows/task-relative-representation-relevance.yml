@@ -1,0 +1,30 @@
+name: Task-relative representation relevance RIV-001
+
+on:
+  push:
+    paths:
+      - "experiments/task-relative-representation-relevance/**"
+      - ".github/workflows/task-relative-representation-relevance.yml"
+  pull_request:
+    paths:
+      - "experiments/task-relative-representation-relevance/**"
+      - ".github/workflows/task-relative-representation-relevance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  riv-001:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile
+        run: python -m py_compile experiments/task-relative-representation-relevance/task_relative_relevance.py experiments/task-relative-representation-relevance/example.py
+      - name: Run focused tests
+        run: python -m unittest discover -s experiments/task-relative-representation-relevance -p 'test_*.py' -v
+      - name: Reproduce example
+        run: python experiments/task-relative-representation-relevance/example.py
