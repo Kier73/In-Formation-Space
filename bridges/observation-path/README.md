@@ -87,7 +87,7 @@ The live CI probe now executes five additional authorized paths in the same pinn
 
 ## Transition conformance and model revision
 
-The [transition-conformance bridge](transition-conformance.md) closes one gap between Trial 08 planning and actual probe evidence. It compares a completed, admitted, interpreted ObservationPath against one pinned model transition, binding the returned Encounter Envelope references and optional before/after state witnesses.
+The [transition-conformance bridge](transition-conformance.md) closes one gap between Trial 08 planning and actual probe evidence. It compares a completed, admitted, interpreted ObservationPath against one pinned model transition, embedding the source path snapshot and binding the returned Encounter Envelope references and optional before/after state witnesses. Proposal intake reconstructs the record before allowing a transition override candidate.
 
 The record distinguishes `matched`, `outcome_mismatch`, `next_state_mismatch`, `transition_mismatch`, and two outcome-only states where no after-state witness exists. An outcome-only return is never promoted to full transition conformance.
 
