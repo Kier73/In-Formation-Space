@@ -1136,6 +1136,7 @@ def restore_proof_action_route_handoff(
     *,
     restore_transport: Any,
     owner_id: str | None = None,
+    cost_model: Any | None = None,
 ) -> tuple[Transport, ProofActionReliableHost, ProofActionReliableWorker]:
     """Recover the authorized successor after a crash immediately following handoff commit.
 
@@ -1179,6 +1180,7 @@ def restore_proof_action_route_handoff(
         session = ProofAttentionSession.from_snapshot(
             session_snapshot,
             proof_ground,
+            cost_model=cost_model,
         )
     except (AttributeError, TypeError, ValueError) as exc:
         raise ProofActionRouteEpochError(
