@@ -16,6 +16,7 @@ on:
       - "experiments/logistic-map-coverage/**"
       - "experiments/observation-cost-information/**"
       - "experiments/ecpu-reliable-observation-recovery/**"
+      - "experiments/authority-adjudication-space/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   pull_request:
     paths:
@@ -32,6 +33,7 @@ on:
       - "experiments/logistic-map-coverage/**"
       - "experiments/observation-cost-information/**"
       - "experiments/ecpu-reliable-observation-recovery/**"
+      - "experiments/authority-adjudication-space/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   workflow_dispatch:
 
@@ -110,6 +112,8 @@ jobs:
         run: python -m unittest discover -s experiments/observation-cost-information -p "test_*.py" -v
       - name: Run E-CPU reliable observation recovery tests
         run: python -m unittest discover -s experiments/ecpu-reliable-observation-recovery -p "test_*.py" -v
+      - name: Run authority adjudication policy-space tests
+        run: python -m unittest discover -s experiments/authority-adjudication-space -p "test_*.py" -v
       - name: Run live E-CPU gated observation integration
         env:
           PYTHONPATH: external/E-CPU
@@ -126,6 +130,15 @@ jobs:
           PYTHONPATH: external/E-CPU
           ECPU_ROOT: external/E-CPU
         run: python experiments/ecpu-reliable-observation-recovery/run_recovery_matrix.py --output-dir "${{ runner.temp }}/ecpu-reliable-observation-recovery"
+      - name: Enumerate authority adjudication policy space
+        run: python experiments/authority-adjudication-space/run_adjudication_space.py --output-dir "${{ runner.temp }}/authority-adjudication-policy-space"
+      - name: Upload authority adjudication policy-space artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authority-adjudication-policy-space
+          path: ${{ runner.temp }}/authority-adjudication-policy-space/
+          if-no-files-found: warn
       - name: Upload E-CPU reliable observation recovery artifacts
         if: always()
         uses: actions/upload-artifact@v4
