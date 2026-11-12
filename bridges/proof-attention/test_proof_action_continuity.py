@@ -110,7 +110,16 @@ class ProofActionContinuityTests(unittest.TestCase):
     def test_export_rejects_a_trajectory_from_a_different_session(self):
         _session_a, _trace_a, pg_a, _transport_a, host_a, worker_a = make_endpoints()
         _session_b, _trace_b, pg_b, _transport_b, host_b, worker_b = make_endpoints()
+        from proof_action_execution import ProofAttentionSession
+
         host_a.dispatch_next()
+        other_roots = tuple(host_b.session.plan["active_root_obligation_ids"])
+        host_b.session = ProofAttentionSession(
+            pg_b,
+            other_roots,
+            attempt_id_prefix="different-proof-run",
+            query_label="investigate a distinct root intention",
+        )
         host_b.dispatch_next()
 
         with tempfile.TemporaryDirectory() as temporary:
