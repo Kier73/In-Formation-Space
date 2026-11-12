@@ -35,6 +35,7 @@ def authorized_attempt():
         "observation_id": "observation-1",
         "final_status": "AUTHORIZED",
         "evidence_received_sources": sources,
+        "evidence_received_count": len(sources),
         "representative_source": "S00",
         "evidence_partition": {
             "observed_sources": sources,
