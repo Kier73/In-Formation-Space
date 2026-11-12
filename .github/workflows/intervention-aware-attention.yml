@@ -1,0 +1,28 @@
+name: Intervention-aware attention Trial 08
+
+on:
+  push:
+    paths:
+      - "experiments/description-to-realization/trials/trial-08-intervention-aware-attention/**"
+      - ".github/workflows/intervention-aware-attention.yml"
+  pull_request:
+    paths:
+      - "experiments/description-to-realization/trials/trial-08-intervention-aware-attention/**"
+      - ".github/workflows/intervention-aware-attention.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  intervention-attention:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile
+        run: python -m py_compile experiments/description-to-realization/trials/trial-08-intervention-aware-attention/intervention_attention.py
+      - name: Run focused tests
+        run: python -m unittest discover -s experiments/description-to-realization/trials/trial-08-intervention-aware-attention -p 'test_*.py' -v

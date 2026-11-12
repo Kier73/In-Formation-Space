@@ -271,12 +271,408 @@ export function verifyCapsule(capsule) {
   };
 }
 
+
+
+class PythonFloat {
+  constructor(value) {
+    this.value = value;
+  }
+}
+
+/** Match Python json.dumps(float) notation for finite binary64 values. */
+function pythonFloatJson(value) {
+  if (!Number.isFinite(value)) fail("sparse model contains a non-finite coefficient");
+  if (Object.is(value, -0)) return "-0.0";
+  const negative = value < 0;
+  const sign = negative ? "-" : "";
+  const absolute = Math.abs(value);
+  let shortest = absolute.toString();
+
+  function expandToFixed(text) {
+    const pieces = text.toLowerCase().split("e");
+    const mantissa = pieces[0];
+    const exponent = pieces.length === 2 ? Number(pieces[1]) : 0;
+    const point = mantissa.indexOf(".");
+    const decimalPosition = (point < 0 ? mantissa.length : point) + exponent;
+    const digits = mantissa.replace(".", "");
+    if (decimalPosition <= 0) {
+      return "0." + "0".repeat(-decimalPosition) + digits;
+    }
+    if (decimalPosition >= digits.length) {
+      return digits + "0".repeat(decimalPosition - digits.length) + ".0";
+    }
+    return digits.slice(0, decimalPosition) + "." + digits.slice(decimalPosition);
+  }
+
+  if (absolute >= 1e-4 && absolute < 1e16) {
+    if (/[eE]/.test(shortest)) shortest = expandToFixed(shortest);
+    if (!shortest.includes(".")) shortest += ".0";
+    return sign + shortest;
+  }
+
+  let mantissa;
+  let exponent;
+  if (/[eE]/.test(shortest)) {
+    const pieces = shortest.toLowerCase().split("e");
+    mantissa = pieces[0];
+    exponent = Number(pieces[1]);
+  } else {
+    const point = shortest.indexOf(".");
+    const decimalPosition = point < 0 ? shortest.length : point;
+    const digits = shortest.replace(".", "");
+    const first = digits.search(/[1-9]/);
+    if (first < 0) return sign + "0.0";
+    exponent = decimalPosition - first - 1;
+    const significant = digits.slice(first).replace(/0+$/, "");
+    mantissa = significant.length > 1
+      ? significant[0] + "." + significant.slice(1)
+      : significant[0];
+  }
+  const exponentText = (exponent >= 0 ? "+" : "-") +
+    String(Math.abs(exponent)).padStart(2, "0");
+  return sign + mantissa + "e" + exponentText;
+}
+
+function canonicalSparse(value) {
+  if (value instanceof PythonFloat) return pythonFloatJson(value.value);
+  if (Array.isArray(value)) {
+    return "[" + value.map((member) => canonicalSparse(member)).join(",") + "]";
+  }
+  if (isObject(value)) {
+    const keys = Object.keys(value);
+    if (keys.some((key) => !/^[\x00-\x7f]*$/.test(key))) {
+      fail("sparse-model digest has a non-ASCII object key");
+    }
+    keys.sort();
+    return "{" + keys.map((key) =>
+      JSON.stringify(key) + ":" + canonicalSparse(value[key])
+    ).join(",") + "}";
+  }
+  return canonical(value);
+}
+
+function rowmaskEnvelope(payload) {
+  if (payload.length < 4) fail("row-mask payload lacks header length");
+  const headerLength = payload.readUInt32LE(0);
+  const bodyOffset = 4 + headerLength;
+  if (headerLength <= 0 || bodyOffset > payload.length) {
+    fail("row-mask binary header is truncated");
+  }
+  const headerBytes = payload.subarray(4, bodyOffset);
+  let header;
+  try {
+    header = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(headerBytes));
+  } catch {
+    fail("row-mask binary header is not valid UTF-8 JSON");
+  }
+  requireObject(header, "row-mask binary header");
+  if (Buffer.compare(Buffer.from(canonical(header), "utf8"), headerBytes) !== 0) {
+    fail("row-mask binary header is not canonical");
+  }
+
+  const { header_sha256: headerHash, ...headerWithoutHash } = header;
+  if (headerHash !== sha256(Buffer.from(canonical(headerWithoutHash), "utf8"))) {
+    fail("row-mask binary header digest mismatch");
+  }
+  const body = payload.subarray(bodyOffset);
+  if (header.body_sha256 !== sha256(body)) {
+    fail("row-mask binary body digest mismatch");
+  }
+  return { header, body };
+}
+
+function readLittleEndianMask(body, offset, width) {
+  const byteLength = Math.ceil(width / 8);
+  const end = offset + byteLength;
+  if (end > body.length) fail("row-mask binary bitmask is truncated");
+  let mask = 0n;
+  for (let index = byteLength - 1; index >= 0; index -= 1) {
+    mask = (mask << 8n) | BigInt(body[offset + index]);
+  }
+  if ((mask >> BigInt(width)) !== 0n) {
+    fail("row-mask binary bitmask has out-of-range bits");
+  }
+  const indices = [];
+  for (let index = 0; index < width; index += 1) {
+    if ((mask & (1n << BigInt(index))) !== 0n) indices.push(index);
+  }
+  return { indices, offset: end };
+}
+
+function readScalarValues(body, offset, count, dtype) {
+  if (!Number.isSafeInteger(count) || count < 0) {
+    fail("row-mask binary scalar count is invalid");
+  }
+  const scalarSize = dtype === "i8" ? 1 : dtype === "f64" ? 8 : 0;
+  if (scalarSize === 0) fail("row-mask binary scalar dtype is unsupported");
+  const end = offset + count * scalarSize;
+  if (!Number.isSafeInteger(end) || end > body.length) {
+    fail("row-mask binary scalar values are truncated");
+  }
+  const values = [];
+  for (let index = 0; index < count; index += 1) {
+    const value = dtype === "i8"
+      ? body.readInt8(offset + index)
+      : body.readDoubleLE(offset + index * 8);
+    if (!Number.isFinite(value) || value === 0) {
+      fail("row-mask binary stores a zero or non-finite coefficient");
+    }
+    values.push(value);
+  }
+  return { values, offset: end };
+}
+
+function decodeRowmaskBinary(payload, capsuleHeader) {
+  const { header, body } = rowmaskEnvelope(payload);
+  if (
+    header.schema !== "sre002.rowmask-binary.v1" ||
+    header.encoding !== "rowmask_binary"
+  ) {
+    fail("unsupported row-mask binary schema/encoding");
+  }
+  if (
+    !Array.isArray(header.architecture) ||
+    header.architecture.length < 3 ||
+    header.architecture.some((width) => !Number.isSafeInteger(width) || width < 1) ||
+    !Array.isArray(header.input_names) ||
+    !Array.isArray(header.output_names) ||
+    !Array.isArray(header.layers) ||
+    header.layers.length !== header.architecture.length - 1
+  ) {
+    fail("row-mask binary model interface is malformed");
+  }
+  const inputNames = header.input_names;
+  const outputNames = header.output_names;
+  if (
+    header.architecture[0] !== inputNames.length ||
+    header.architecture[header.architecture.length - 1] !== outputNames.length ||
+    new Set(inputNames).size !== inputNames.length ||
+    new Set(outputNames).size !== outputNames.length ||
+    inputNames.some((name) => typeof name !== "string" || name.length === 0) ||
+    outputNames.some((name) => typeof name !== "string" || name.length === 0)
+  ) {
+    fail("row-mask binary register names do not match architecture");
+  }
+
+  let offset = 0;
+  let storedParameterCount = 0;
+  const layers = [];
+  for (let layerIndex = 0; layerIndex < header.layers.length; layerIndex += 1) {
+    const layer = header.layers[layerIndex];
+    const inputWidth = header.architecture[layerIndex];
+    const outputWidth = header.architecture[layerIndex + 1];
+    if (
+      requireInteger(layer.input_width, "rowmask.layer.input_width") !== inputWidth ||
+      requireInteger(layer.output_width, "rowmask.layer.output_width") !== outputWidth
+    ) {
+      fail("row-mask binary layer widths do not match architecture");
+    }
+    const nnz = requireInteger(layer.nnz, "rowmask.layer.nnz");
+    const biasNnz = requireInteger(layer.bias_nnz, "rowmask.layer.bias_nnz");
+    if (nnz < 0 || biasNnz < 0 || nnz > inputWidth * outputWidth || biasNnz > outputWidth) {
+      fail("row-mask binary layer scalar counts are out of range");
+    }
+
+    const rowMasks = [];
+    for (let rowIndex = 0; rowIndex < outputWidth; rowIndex += 1) {
+      const result = readLittleEndianMask(body, offset, inputWidth);
+      offset = result.offset;
+      rowMasks.push(result.indices);
+    }
+    const observedWeightCount = rowMasks.reduce((total, indices) => total + indices.length, 0);
+    if (observedWeightCount !== nnz) fail("row-mask binary weight count differs from masks");
+    const weightResult = readScalarValues(body, offset, nnz, layer.weight_dtype);
+    offset = weightResult.offset;
+
+    let valueCursor = 0;
+    const weightRows = rowMasks.map((indices) => indices.map((sourceIndex) => [
+      sourceIndex,
+      new PythonFloat(weightResult.values[valueCursor++]),
+    ]));
+
+    const biasMask = readLittleEndianMask(body, offset, outputWidth);
+    offset = biasMask.offset;
+    if (biasMask.indices.length !== biasNnz) {
+      fail("row-mask binary bias count differs from mask");
+    }
+    const biasResult = readScalarValues(body, offset, biasNnz, layer.bias_dtype);
+    offset = biasResult.offset;
+    const biasEntries = biasMask.indices.map((outputIndex, index) => [
+      outputIndex,
+      new PythonFloat(biasResult.values[index]),
+    ]);
+
+    storedParameterCount += nnz + biasNnz;
+    layers.push({ weight_rows: weightRows, bias_entries: biasEntries });
+  }
+  if (offset !== body.length) fail("row-mask binary contains trailing body bytes");
+  if (
+    requireInteger(header.stored_parameter_count, "rowmask.stored_parameter_count") !==
+    storedParameterCount
+  ) {
+    fail("row-mask binary stored parameter count mismatch");
+  }
+
+  const denseWeightSlots = header.architecture.slice(0, -1).reduce(
+    (total, width, index) => total + width * header.architecture[index + 1],
+    0
+  );
+  const denseEquivalentParameterCount = denseWeightSlots +
+    header.architecture.slice(1).reduce((total, width) => total + width, 0);
+
+  const sparsePayload = {
+    schema: "mailcpu.sparse-transition-relu.v1",
+    source_kind: header.source_kind,
+    source_digest: header.source_digest,
+    source_model_digest: header.source_model_digest,
+    input_names: inputNames,
+    output_names: outputNames,
+    architecture: header.architecture,
+    layers,
+    dense_equivalent_parameter_count: denseEquivalentParameterCount,
+    stored_parameter_count: storedParameterCount,
+  };
+  const sparseModelDigest = sha256(Buffer.from(canonicalSparse(sparsePayload), "utf8"));
+
+  if (
+    header.source_kind !== capsuleHeader.source.kind ||
+    header.source_digest !== capsuleHeader.source.ground_digest ||
+    header.source_model_digest !== capsuleHeader.realization.dense_model_digest ||
+    sparseModelDigest !== capsuleHeader.realization.sparse_model_digest ||
+    JSON.stringify(inputNames) !== JSON.stringify(capsuleHeader.interface.input_names) ||
+    JSON.stringify(outputNames) !== JSON.stringify(capsuleHeader.interface.output_names) ||
+    JSON.stringify(header.architecture) !== JSON.stringify(capsuleHeader.interface.architecture) ||
+    capsuleHeader.codec.name !== "rowmask_binary" ||
+    capsuleHeader.codec.schema !== header.schema ||
+    capsuleHeader.realization.encoding !== "rowmask_binary"
+  ) {
+    fail("decoded row-mask model identity does not match capsule metadata");
+  }
+
+  return {
+    header,
+    sparseModelDigest,
+    storedParameterCount,
+    layers,
+    inputWidth: header.architecture[0],
+    outputWidth: header.architecture[header.architecture.length - 1],
+  };
+}
+
+function predictSparse(model, inputs) {
+  if (
+    !Array.isArray(inputs) ||
+    inputs.length !== model.inputWidth ||
+    inputs.some((value) => value !== 0 && value !== 1)
+  ) {
+    fail("replay input is outside the declared Boolean input domain");
+  }
+  let values = inputs.slice();
+  for (let layerIndex = 0; layerIndex < model.layers.length; layerIndex += 1) {
+    const layer = model.layers[layerIndex];
+    const biasMap = new Map(layer.bias_entries.map(([index, wrapped]) => [index, wrapped.value]));
+    const nextValues = layer.weight_rows.map((row, outputIndex) => {
+      let sum = 0;
+      for (const [inputIndex, wrappedWeight] of row) {
+        sum += wrappedWeight.value * values[inputIndex];
+      }
+      return (biasMap.get(outputIndex) ?? 0) + sum;
+    });
+    values = layerIndex < model.layers.length - 1
+      ? nextValues.map((value) => Math.max(0, value))
+      : nextValues;
+  }
+  return values.map((value) => {
+    const nearest = Math.round(value);
+    if (
+      !Number.isFinite(value) ||
+      (nearest !== 0 && nearest !== 1) ||
+      Math.abs(value - nearest) > 1e-12
+    ) {
+      fail("decoded sparse realization left the exact Boolean output set");
+    }
+    return nearest;
+  });
+}
+
+export function replayRowmaskCapsule(capsule, referenceRecords) {
+  const verified = verifyCapsule(capsule);
+  const capsuleHeaderSize = capsule.readUInt32LE(10);
+  const capsuleHeader = JSON.parse(
+    new TextDecoder("utf-8", { fatal: true }).decode(
+      capsule.subarray(PREFIX_BYTES, PREFIX_BYTES + capsuleHeaderSize)
+    )
+  );
+  if (capsuleHeader.codec.name !== "rowmask_binary") {
+    fail("semantic replay currently supports rowmask_binary only");
+  }
+  const payload = capsule.subarray(PREFIX_BYTES + capsuleHeaderSize);
+  const model = decodeRowmaskBinary(payload, capsuleHeader);
+  const expectedRows = requireInteger(
+    capsuleHeader.verification.input_row_count,
+    "verification.input_row_count"
+  );
+  if (!Array.isArray(referenceRecords) || referenceRecords.length !== expectedRows) {
+    fail("independent reference does not cover the declared complete input domain");
+  }
+  if (
+    capsuleHeader.verification.reference_outputs_sha256 !==
+    sha256(Buffer.from(canonical(referenceRecords), "utf8"))
+  ) {
+    fail("independent reference digest does not match capsule verification receipt");
+  }
+
+  const seenInputs = new Set();
+  for (const record of referenceRecords) {
+    requireObject(record, "reference row");
+    const inputs = record.inputs;
+    const outputs = record.outputs;
+    if (
+      !Array.isArray(inputs) || inputs.length !== model.inputWidth ||
+      inputs.some((value) => value !== 0 && value !== 1) ||
+      !Array.isArray(outputs) || outputs.length !== model.outputWidth ||
+      outputs.some((value) => value !== 0 && value !== 1)
+    ) {
+      fail("independent reference row is outside the declared Boolean interface");
+    }
+    const key = inputs.join("");
+    if (seenInputs.has(key)) fail("independent reference repeats an input assignment");
+    seenInputs.add(key);
+    const actual = predictSparse(model, inputs);
+    if (JSON.stringify(actual) !== JSON.stringify(outputs)) {
+      fail("decoded row-mask realization disagrees with independent scalar reference");
+    }
+  }
+  if (seenInputs.size !== 2 ** model.inputWidth) {
+    fail("independent reference omits one or more Boolean input assignments");
+  }
+  return {
+    valid: true,
+    capsule_sha256: verified.capsule_sha256,
+    payload_sha256: verified.payload_sha256,
+    sparse_model_sha256: model.sparseModelDigest,
+    codec: "rowmask_binary",
+    input_rows_replayed: seenInputs.size,
+    semantic_comparisons: seenInputs.size,
+    stored_parameter_count: model.storedParameterCount,
+  };
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
     const file = process.argv[2];
-    if (!file) fail("usage: node verify_capsule.mjs <capsule.bin>");
-    const report = verifyCapsule(readFileSync(file));
-    process.stdout.write(`${JSON.stringify({ valid: true, ...report })}\n`);
+    if (!file) fail("usage: node verify_capsule.mjs <capsule.bin> [--reference reference.json]");
+    const referenceFlag = process.argv.indexOf("--reference");
+    let report;
+    if (referenceFlag >= 0) {
+      const referencePath = process.argv[referenceFlag + 1];
+      if (!referencePath) fail("--reference requires a JSON file path");
+      const references = JSON.parse(readFileSync(referencePath, "utf8"));
+      report = replayRowmaskCapsule(readFileSync(file), references);
+    } else {
+      report = { valid: true, ...verifyCapsule(readFileSync(file)) };
+    }
+    process.stdout.write(`${JSON.stringify(report)}\n`);
   } catch (error) {
     process.stderr.write(`invalid capsule: ${error.message}\n`);
     process.exitCode = 1;
