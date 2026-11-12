@@ -331,7 +331,7 @@ def restore_proof_attention_trajectory(
     events_by_attempt: dict[str, list[dict[str, Any]]] = defaultdict(list)
     flat_events: list[dict[str, Any]] = []
     observed_receipts: list[str] = []
-    last_attempt_sequence = 0
+    last_attempt_sequence = [0]
     try:
         with TrajectoryReader(data_path, index_path) as reader:
             if reader.stride != stride:
@@ -375,11 +375,11 @@ def restore_proof_attention_trajectory(
                         f"trajectory frame {frame.sequence} does not match its session event"
                     )
                 attempt_sequence = payload["attempt_sequence"]
-                if attempt_sequence < last_attempt_sequence:
+                if attempt_sequence < last_attempt_sequence[0]:
                     raise ProofAttentionTrajectoryError(
                         "trajectory frames interleave attempt event groups"
                     )
-                last_attempt_sequence = attempt_sequence
+                last_attempt_sequence[0] = attempt_sequence
                 attempt_id = payload["attempt_id"]
                 events_by_attempt[attempt_id].append(event_copy)
                 flat_events.append(event_copy)
