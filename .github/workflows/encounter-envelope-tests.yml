@@ -226,6 +226,15 @@ jobs:
           name: authority-signed-review-ledger
           path: ${{ runner.temp }}/signed-review-ledger-example.json
           if-no-files-found: warn
+      - name: Generate root-signed reviewer trust manifest example
+        run: python bridges/authority-lineage/review_trust_manifest_demo.py --output "${{ runner.temp }}/review-trust-manifest-example.json"
+      - name: Upload root-signed reviewer trust manifest example
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authority-review-trust-manifest
+          path: ${{ runner.temp }}/review-trust-manifest-example.json
+          if-no-files-found: warn
       - name: Run append-only hypothesis revision tests
         run: python -m unittest discover -s bridges/hypothesis-revision -p "test_*.py" -v
       - name: Run Poset Interleaver property tests
