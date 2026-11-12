@@ -530,6 +530,9 @@ class ProofActionRouteEpochLedger:
             next_entries = [*self._entries, *events]
             next_core = {"format": LEDGER_FORMAT, "entries": next_entries}
             replacement = {**next_core, "ledger_digest": _digest(next_core)}
+            # Validate the complete replay semantics before asking the backing
+            # authority to publish the new revision.
+            type(self).from_dict(replacement)
             if not self._store.compare_and_swap(
                 expected_digest, replacement, actor_id=actor_id
             ):
