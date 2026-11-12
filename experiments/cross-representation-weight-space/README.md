@@ -1,6 +1,6 @@
 # Cross-representation weight-space experiment
 
-**Status: implementation in progress.** This experiment asks whether one small computational specification can be realized and checked through three distinct representations: VGI signal-state instructions, an E-CPU reference program, and an analytically generated neural network.
+**Status: WSP-001 baseline verified within its declared finite domain; follow-on extensions remain in progress.** This experiment asks whether one small computational specification can be realized and checked through three distinct representations: VGI signal-state instructions, an E-CPU reference program, and an analytically generated neural network.
 
 The first target is deliberately finite: two-input XOR, followed by a semantic edit to AND. The same specification is compiled into two different 10,000-parameter MLP layouts: `2–85–112–1` (two hidden layers) and `2–17–254–21–1` (three hidden layers).
 
