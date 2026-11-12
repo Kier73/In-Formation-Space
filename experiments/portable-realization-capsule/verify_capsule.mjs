@@ -670,7 +670,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
       const references = JSON.parse(readFileSync(referencePath, "utf8"));
       report = replayRowmaskCapsule(readFileSync(file), references);
     } else {
-      report = verifyCapsule(readFileSync(file));
+      report = { valid: true, ...verifyCapsule(readFileSync(file)) };
     }
     process.stdout.write(`${JSON.stringify(report)}\n`);
   } catch (error) {
