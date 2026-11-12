@@ -109,6 +109,14 @@ Every hypothesis needs hypothesis_id, prior_probability, and predicted_outcome. 
 
 The live E-CPU spans now carry the same explicit observation_id convention in their context in addition to attempt identity. This establishes a correlation field; it does not invent a prior model for E-CPU timing symbols or claim that informational outcomes have already been measured on the live path. A domain-specific hypothesis model must be independently specified before such outcomes can be attached.
 
+## Controlled E-CPU workload matrix
+
+The companion [controlled observation cost–information experiment](../../experiments/observation-cost-information/README.md) varies payload-field size, per-source queue depth, source count/quorum, and synchronized independent receiver intake against the pinned E-CPU runtime. It records actual synchronous spans around send, receiver intake, finalization, commit, each internal checkpoint-save call, and sender ACK processing.
+
+The experiment builds cost profiles separately for each workload condition and separately reports the full queue-drain path versus the target observation's own event. It also records each typed resolver outcome against an explicit deterministic hit/miss fixture model. These information records are not inferred from timing and are not fed into an adaptive policy.
+
+The matrix is a controlled same-host pilot. It does not establish production performance or external sensor truth. See the experiment's [workload definition, reproducibility instructions, and limits](../../experiments/observation-cost-information/README.md).
+
 ## Evidence and clocks
 
 Dispatch, receiver admission, raw return, evidence authorization/refusal, optional receiver-state application, interpretation, and query-resolution events can each reference their own receipt or artifact. A returned payload must reference an Encounter Envelope and include its encounter ID, payload digest, and declared canonicalization. The path ledger records those declarations; it does not fetch or authenticate the referenced artifact. The Encounter Envelope validator remains responsible for validating the referenced envelope when it is available.

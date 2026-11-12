@@ -1,0 +1,457 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/observation-cost-information/results/run-summary.schema.json",
+  "title": "Controlled E-CPU observation cost-information CI run summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "experiment_id",
+    "workflow",
+    "artifact",
+    "ecpu_reference_commit",
+    "clock_actor_id",
+    "clock_segment_id",
+    "matrix",
+    "source_digests",
+    "target_scope_median_of_condition_medians_ms",
+    "information",
+    "interpretation",
+    "summary_digest",
+    "replication"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.ecpu-observation-cost-information-run-summary"
+    },
+    "schema": {
+      "const": "in-formation.ecpu-observation-cost-information-run-summary/0.1"
+    },
+    "experiment_id": {
+      "const": "ecpu-observation-cost-information-v1"
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "run_number",
+        "url",
+        "conclusion",
+        "commit"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "run_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "conclusion": {
+          "const": "success"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "name",
+        "size_bytes",
+        "sha256"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "ecpu_reference_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "clock_actor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clock_segment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "condition_count",
+        "attempt_count",
+        "replicates_per_condition",
+        "span_count",
+        "evidence_record_count",
+        "information_outcome_count",
+        "minimum_profile_samples",
+        "all_sender_acknowledgements_complete"
+      ],
+      "properties": {
+        "condition_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "attempt_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "replicates_per_condition": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "span_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "evidence_record_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "information_outcome_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimum_profile_samples": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "all_sender_acknowledgements_complete": {
+          "const": true
+        }
+      }
+    },
+    "source_digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_manifest_digest",
+        "cost_profile_matrix_digest"
+      ],
+      "properties": {
+        "run_manifest_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "cost_profile_matrix_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "target_scope_median_of_condition_medians_ms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit_event",
+        "ingest_available",
+        "save_checkpoint",
+        "process_acks"
+      ],
+      "properties": {
+        "commit_event": {
+          "$ref": "#/$defs/factorSummaries"
+        },
+        "ingest_available": {
+          "$ref": "#/$defs/factorSummaries"
+        },
+        "save_checkpoint": {
+          "$ref": "#/$defs/factorSummaries"
+        },
+        "process_acks": {
+          "$ref": "#/$defs/factorSummaries"
+        }
+      }
+    },
+    "information": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected_information_gain_bits_values",
+        "expected_query_resolution_probability_values",
+        "target_observed_outcomes",
+        "target_realized_entropy_change_bits_counts"
+      ],
+      "properties": {
+        "expected_information_gain_bits_values": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number"
+          }
+        },
+        "expected_query_resolution_probability_values": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "target_observed_outcomes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hit",
+            "miss"
+          ],
+          "properties": {
+            "hit": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "miss": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "target_realized_entropy_change_bits_counts": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "interpretation": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "summary_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "replication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "design",
+        "second_run",
+        "matched_target_condition_count",
+        "operation_comparisons",
+        "interpretation_limits"
+      ],
+      "properties": {
+        "design": {
+          "type": "string",
+          "minLength": 1
+        },
+        "second_run": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "run_id",
+            "run_number",
+            "url",
+            "conclusion",
+            "commit",
+            "clock_segment_id",
+            "artifact",
+            "run_manifest_digest",
+            "cost_profile_matrix_digest"
+          ],
+          "properties": {
+            "run_id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "run_number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "conclusion": {
+              "const": "success"
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$"
+            },
+            "clock_segment_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "artifact": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "artifact_id",
+                "name",
+                "size_bytes",
+                "sha256"
+              ],
+              "properties": {
+                "artifact_id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "size_bytes": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            },
+            "run_manifest_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "cost_profile_matrix_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "matched_target_condition_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "operation_comparisons": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ingest_available",
+            "commit_event",
+            "save_checkpoint",
+            "process_acks"
+          ],
+          "properties": {
+            "ingest_available": {
+              "$ref": "#/$defs/replicationMetric"
+            },
+            "commit_event": {
+              "$ref": "#/$defs/replicationMetric"
+            },
+            "save_checkpoint": {
+              "$ref": "#/$defs/replicationMetric"
+            },
+            "process_acks": {
+              "$ref": "#/$defs/replicationMetric"
+            }
+          }
+        },
+        "interpretation_limits": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "factorSummaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_value_bytes",
+        "queue_depth_initial_per_source",
+        "receiver_load_workers",
+        "source_quorum_pair"
+      ],
+      "properties": {
+        "payload_value_bytes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "queue_depth_initial_per_source": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "receiver_load_workers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "source_quorum_pair": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "replicationMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_271_median_of_condition_medians_ms",
+        "run_273_median_of_condition_medians_ms",
+        "paired_median_run273_over_run271_ratio",
+        "median_absolute_paired_relative_difference_percent"
+      ],
+      "properties": {
+        "run_271_median_of_condition_medians_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "run_273_median_of_condition_medians_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "paired_median_run273_over_run271_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "median_absolute_paired_relative_difference_percent": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
