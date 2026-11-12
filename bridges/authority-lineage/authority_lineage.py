@@ -392,7 +392,11 @@ def issue_decision(
     return new_ledger, decision_id
 
 
-def validate_ledger(ledger: Mapping[str, Any]) -> None:
+def validate_ledger(
+    ledger: Mapping[str, Any],
+    *,
+    validate_embedded_certificates: bool = True,
+) -> None:
     """Rebuild the entire append-only hash chain and all lineage constraints."""
     if not isinstance(ledger, Mapping):
         raise TypeError("ledger must be a mapping")
@@ -649,6 +653,17 @@ def validate_ledger(ledger: Mapping[str, Any]) -> None:
 
     if ledger.get("ledger_digest") != _ledger_digest(entries):
         raise ValueError("ledger digest does not match entry chain")
+    if validate_embedded_certificates and any(
+        entry["entry_type"] == "proposal_review_certified"
+        for entry in entries
+    ):
+        try:
+            from review_certificates import validate_review_certificates_in_ledger
+        except ImportError as exc:
+            raise ValueError(
+                "review certificate validator is required to validate this ledger"
+            ) from exc
+        validate_review_certificates_in_ledger(ledger, validate_core=False)
 
 
 def _frontier_decisions(
