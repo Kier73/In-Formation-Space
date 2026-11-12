@@ -122,6 +122,18 @@ Unknown context, a dimension not supplied, and an attempt with no assignment rem
 - [Tests](test_transition_context.py)
 - [Focused CI](../../.github/workflows/contextual-transition-evidence.yml)
 
+## VGI context-attention policy
+
+The [context-attention bridge](context-attention-policy.md) converts repeated attempts from one transition cell into a synthetic VGI observer-space Ground. Context-capture methods become actions, declared values become finite outcome branches, and the pinned VGI minimax planner proposes an AND/OR measurement policy. Existing observed context is represented separately from unknown, not-supplied, and unassigned cells. The report also counts residual `(outcome, next_state)` disagreement among currently context-equivalent full-transition pairs.
+
+This is a plan only: no context observation is dispatched and no source Ground, transition model, or attention policy changes. Declared branches are not probability or exhaustiveness claims; a future out-of-set measurement must be treated as model mismatch.
+
+- [Implementation](context_attention.py)
+- [Schema](context-attention-policy.schema.json)
+- [Tests](test_context_attention.py)
+- [Focused CI](../../.github/workflows/context-attention-policy.yml)
+- [Pinned VGI policy planner](https://github.com/Kier73/Virtual-Ground-Interpreter/tree/ac13c1bbd92dfd09f17de51adef7adb2d2088bf6)
+
 ## Observation outcomes and information value
 
 The companion [observation-outcome implementation](observation_outcomes.py) records what a candidate observation was expected to distinguish and what outcome was actually observed. It is deliberately separate from the operation-span cost profiler.

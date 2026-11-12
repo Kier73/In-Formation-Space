@@ -60,6 +60,12 @@ jobs:
           repository: Kier73/Virtual-Ground-Interpreter
           ref: cedcc4540a9d75228cf83aaf21e1ba960fe8a555
           path: external/Virtual-Ground-Interpreter
+      - name: Check out pinned VGI policy planner for context attention
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter-context-policy
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -139,6 +145,10 @@ jobs:
         run: python -m unittest discover -s bridges/observation-path -p "test_validate_observation_path.py" -v
       - name: Run adaptive policy execution bridge tests
         run: python -m unittest discover -s bridges/observation-path -p "test_adaptive_policy_execution.py" -v
+      - name: Run VGI context-attention policy bridge tests
+        env:
+          PYTHONPATH: external/Virtual-Ground-Interpreter-context-policy/virtual_ground_interpreter
+        run: python -m unittest discover -s bridges/observation-path -p "test_context_attention.py" -v
       - name: Run VGI partial-probe evidence-path interoperability tests
         env:
           PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter:bridges/hypothesis-revision
