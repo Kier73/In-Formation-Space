@@ -1206,7 +1206,9 @@ def restore_proof_action_route_handoff(
                 f"route epoch {supplied['epoch_id']} closed while action was at stage {active_attempt.status}: {details['reason']}",
                 evidence_ref=f"urn:sha256:{uncertainty_digest}",
             )
-        expected_document = expected_postclose_session.to_dict()
+        # Canonical JSON normalizes tuple-backed event sequences to the
+        # portable list representation stored in the ledger snapshot.
+        expected_document = _copy(expected_postclose_session.to_dict())
         if expected_document != session_snapshot:
             differing_fields = [
                 key for key in expected_document
