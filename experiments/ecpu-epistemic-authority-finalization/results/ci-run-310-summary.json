@@ -1,0 +1,83 @@
+{
+  "artifact": {
+    "artifact_id": 13907361958,
+    "name": "ecpu-epistemic-authority-finalization",
+    "sha256": "9c53340cdb92e54456a8205c8d15f70d30a2c6171a3b327e311771d18c08c16d",
+    "size_bytes": 11846
+  },
+  "experiment_id": "ecpu-epistemic-authority-finalization-v1",
+  "format": "in-formation.ecpu-epistemic-authority-finalization-run-summary",
+  "interpretation": [
+    "strict=True: only the four-source unanimous scenario was authorized; majority dissent and tied split were conflicts, while partial unanimous and sub-quorum evidence were refused at finalization.",
+    "strict=False: partial unanimous evidence authorized with two of four sources missing; three-versus-one dissent authorized; and a two-versus-two tie also authorized.",
+    "In every permissive tied-split attempt, canonical payload ordering selected the miss group from S02 and S03; VM resolver_hit read back as 0. This is deterministic selection, not stronger evidence.",
+    "The permissive policy authorized six attempts with dissent and three attempts with missing sources. The committed representative was applied while all admitted evidence links, including dissenting ones, were consumed and remained in the evidence ledger.",
+    "All finalized events rejected new consensus evidence. Partial-evidence cases attempted late sources through the transport intake; full-evidence cases attempted a changed value for an already represented source directly through consensus.",
+    "Every checkpoint was restored from a copied durable mailbox journal, and all source artifacts verified under the pinned E-CPU runtime."
+  ],
+  "invariants": {
+    "attempt_count": 30,
+    "authorized_despite_dissent_count": 6,
+    "authorized_despite_missing_count": 3,
+    "checkpoint_restore_success_count": 30,
+    "direct_late_policy_rejection_count": 30,
+    "durable_log_verification_success_count": 30,
+    "evidence_record_count": 90,
+    "final_status_counts": {
+      "AUTHORIZED": 15,
+      "CONFLICT": 6,
+      "REFUSED": 9
+    },
+    "late_transport_attempt_count": 12,
+    "late_transport_rejection_count": 12,
+    "tied_split_miss_representative_count": 3,
+    "tied_split_permissive_authorized_count": 3
+  },
+  "matrix": {
+    "condition_count": 10,
+    "quorum": 2,
+    "replicates_per_condition": 3,
+    "scenario_ids": [
+      "partial_unanimous",
+      "full_unanimous",
+      "majority_dissent",
+      "tied_split",
+      "subquorum_partial"
+    ],
+    "source_ids": [
+      "S00",
+      "S01",
+      "S02",
+      "S03"
+    ],
+    "strict_levels": [
+      true,
+      false
+    ]
+  },
+  "runtime": {
+    "clock_basis": "deterministic logical event time 1; this is a state-transition experiment, not a timing benchmark",
+    "ecpu_commit": "800f94f83ffd6f527ed093c8d1c1e93e153c34f6",
+    "machine": "x86_64",
+    "platform": "Linux",
+    "python_implementation": "CPython",
+    "python_version": "3.11.18"
+  },
+  "schema": "in-formation.ecpu-epistemic-authority-finalization-run-summary/0.1",
+  "source_digests": {
+    "attempt_results": "43bc105e2da113c29efdb8a2c598d4a688548b5c5877b9301b7d54b12bf6f224",
+    "evidence_ledger": "7c81ccee65cc9f649b76c46c72cec77cbc44301118f7a2fc311880541b5b7888",
+    "run_manifest": "f2aa6a1bc8639553a251bf49d3e4118a854fac80bc1d02a936eefecabebd36ac",
+    "summary": "26e9b1ed8c78990bf076221535258c43f294dc28314d62e5cc1d653849e56a0f",
+    "trace": "7da9985e0536397be5b6d236e1e5b7617f97f8ab9e2411863b0b92c94c6a241a"
+  },
+  "workflow": {
+    "conclusion": "success",
+    "head_commit": "245132b7d9d20ae61b164882885cad48062477e2",
+    "observed_at_utc": "2026-11-12T01:35:49Z",
+    "run_id": 43135518309,
+    "run_number": 310,
+    "url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43135518309"
+  },
+  "summary_digest": "a6e935cee4a4650df58eabc14293a758a88923a3c48af4bcb5844c7d86976061"
+}

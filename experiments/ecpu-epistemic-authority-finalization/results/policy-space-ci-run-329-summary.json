@@ -1,0 +1,118 @@
+{
+  "artifact": {
+    "id": 13906624232,
+    "name": "ecpu-epistemic-policy-space",
+    "sha256": "e8f941a8284482ef864a5b8bf9c8df37c909ca7da8a45096a1d716c79e36f9cb",
+    "size_bytes": 5822
+  },
+  "experiment_id": "ecpu-epistemic-authority-policy-space-v1",
+  "format": "in-formation.ecpu-epistemic-authority-policy-space-run-summary",
+  "interpretation": [
+    "The finite four-source, absent/HIT/MISS product contains 81 distinct evidence patterns. These are exhaustively enumerated configurations, not a probability distribution.",
+    "Pinned runtime strict=True authorizes only the two complete unanimous patterns; it refuses incomplete non-conflicting evidence and marks any cross-source dissent as conflict.",
+    "Pinned runtime strict=False authorizes 60 of the 81 configurations, including all 6 exact top ties, 38 patterns with dissent, and 44 with at least one missing source.",
+    "A unique-plurality quorum rule authorizes 54 patterns, conflicts on 6 top ties, and refuses 21 patterns below quorum. In this binary four-source space it has the same decisions as strict majority of observed sources.",
+    "Observed-source unanimity with quorum authorizes 22 patterns, refuses 21 below quorum, and classifies 38 patterns containing dissent as conflict.",
+    "A two-source lead-margin rule authorizes 30 patterns, conflicts on 30 patterns with insufficient separation, and refuses 21 patterns below quorum.",
+    "A configured-source majority rule authorizes 18 patterns, conflicts on 18 tied patterns, and refuses 45; it can authorize three agreeing sources while the fourth is absent.",
+    "The comparisons define decision coverage and rejection classes only. They do not estimate truth, reliability, or expected utility because no empirical priors or conditional likelihoods were supplied."
+  ],
+  "matrix": {
+    "source_ids": [
+      "S00",
+      "S01",
+      "S02",
+      "S03"
+    ],
+    "source_states": [
+      "-",
+      "H",
+      "M"
+    ],
+    "pattern_count": 81,
+    "quorum": 2,
+    "policy_count": 8,
+    "probability_assignment": null
+  },
+  "policy_results": {
+    "runtime_strict": {
+      "authorized": 2,
+      "conflict": 50,
+      "refused": 29,
+      "authorized_with_missing": 0,
+      "authorized_with_dissent": 0,
+      "authorized_on_tie": 0
+    },
+    "runtime_permissive": {
+      "authorized": 60,
+      "conflict": 0,
+      "refused": 21,
+      "authorized_with_missing": 44,
+      "authorized_with_dissent": 38,
+      "authorized_on_tie": 6
+    },
+    "observed_unanimity_quorum": {
+      "authorized": 22,
+      "conflict": 38,
+      "refused": 21,
+      "authorized_with_missing": 20,
+      "authorized_with_dissent": 0,
+      "authorized_on_tie": 0
+    },
+    "unique_plurality_quorum": {
+      "authorized": 54,
+      "conflict": 6,
+      "refused": 21,
+      "authorized_with_missing": 44,
+      "authorized_with_dissent": 32,
+      "authorized_on_tie": 0
+    },
+    "observed_strict_majority": {
+      "authorized": 54,
+      "conflict": 6,
+      "refused": 21,
+      "authorized_with_missing": 44,
+      "authorized_with_dissent": 32,
+      "authorized_on_tie": 0
+    },
+    "configured_majority": {
+      "authorized": 18,
+      "conflict": 18,
+      "refused": 45,
+      "authorized_with_missing": 8,
+      "authorized_with_dissent": 8,
+      "authorized_on_tie": 0
+    },
+    "plurality_margin_two": {
+      "authorized": 30,
+      "conflict": 30,
+      "refused": 21,
+      "authorized_with_missing": 20,
+      "authorized_with_dissent": 8,
+      "authorized_on_tie": 0
+    },
+    "complete_roster_unique_plurality": {
+      "authorized": 10,
+      "conflict": 6,
+      "refused": 65,
+      "authorized_with_missing": 0,
+      "authorized_with_dissent": 8,
+      "authorized_on_tie": 0
+    }
+  },
+  "source_digests": {
+    "policy_space_json": "3fd95c0a5efef4f9b530d3f0f99c85f3df00dccf27df045a021ae6c976675a1c",
+    "policy_space_summary_json": "5f22e08bd1c35b270285faf008c5fb854ace1437434acfd13790a8b8d83793de",
+    "policy_space_report_digest": "f0f22386ba8ac75604e5726ad3e753000e8202c7a1c6dcba03949b610d0a29f7",
+    "policy_space_summary_digest": "0a9da90d42ec2b1a1dbe552a6ac1429103b41b19ffb8a09f9bb6881e4c617aa2"
+  },
+  "workflow": {
+    "run_id": 43136379052,
+    "run_number": 329,
+    "conclusion": "success",
+    "commit": "416c2121f9e3caa9aa4743bc80654bc336efbdcb",
+    "url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43136379052"
+  },
+  "schema": "in-formation.ecpu-epistemic-authority-policy-space-run-summary/0.1",
+  "summary_digest": "3d51d25fd2ca1c96013814ededfcb8402300564e3872f88facb59c9212da82cc"
+}

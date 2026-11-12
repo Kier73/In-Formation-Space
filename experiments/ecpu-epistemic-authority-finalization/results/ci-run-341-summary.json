@@ -1,0 +1,81 @@
+{
+  "artifacts": {
+    "authority": {
+      "id": 13908065750,
+      "name": "ecpu-epistemic-authority-finalization",
+      "sha256": "f3dbb396e2c0f969d5e2a8d06ef9ddcf6054d3ccbdc9a3e1d9e588e7737d9e65",
+      "size_bytes": 12891
+    },
+    "policy_space": {
+      "id": 13906794316,
+      "name": "ecpu-epistemic-policy-space",
+      "sha256": "a09313e0acbd06b6ee773dd42d6fa021ddd7402c7cbe4ab5bfb1fed5c0a376b0",
+      "size_bytes": 5822
+    }
+  },
+  "experiment_id": "ecpu-epistemic-authority-finalization-v1",
+  "format": "in-formation.ecpu-epistemic-authority-finalization-run-summary",
+  "interpretation": [
+    "The 30-case authority matrix repeated the first run's outcomes: 15 AUTHORIZED, 6 CONFLICT, 9 REFUSED; 6 authorized despite dissent and 3 despite missing sources.",
+    "Six additional direct consensus probes tested one source (S00) issuing HIT and then MISS for the same event, three repetitions under each strictness mode.",
+    "All six same-source contradictions raised ObservationConflictError, recorded S00 in the conflict-source set, and forced final status CONFLICT even under strict=False, where two different sources initially formed a quorum.",
+    "The equivocation marker and final conflict survived consensus snapshot reconstruction in all six probes.",
+    "After finalization, new-source and changed-existing-source proposals were rejected in all six probes; an exact replay of the original S00 HIT remained idempotent and left the conflict snapshot unchanged.",
+    "These equivocation probes exercise ObservationConsensus directly, not the reliable transport path. Per-source FIFO/link behavior for a second same-event frame from the same channel is a separate integration question."
+  ],
+  "invariants": {
+    "authority_attempt_count": 30,
+    "authority_evidence_record_count": 90,
+    "authority_final_status_counts": {
+      "AUTHORIZED": 15,
+      "CONFLICT": 6,
+      "REFUSED": 9
+    },
+    "authority_checkpoint_restore_count": 30,
+    "authority_late_policy_rejection_count": 30,
+    "source_equivocation_probe_count": 6,
+    "source_equivocation_pre_status_counts": {
+      "PENDING": 3,
+      "QUORUM": 3
+    },
+    "source_equivocation_conflict_count": 6,
+    "source_equivocation_final_conflict_count": 6,
+    "source_equivocation_conflict_source_s00_count": 6,
+    "source_equivocation_snapshot_restore_count": 6,
+    "source_equivocation_new_source_rejection_count": 6,
+    "source_equivocation_changed_value_rejection_count": 6,
+    "source_equivocation_exact_replay_idempotent_count": 6,
+    "source_equivocation_snapshot_unchanged_count": 6
+  },
+  "runtime": {
+    "ecpu_commit": "800f94f83ffd6f527ed093c8d1c1e93e153c34f6",
+    "platform": "Linux x86_64",
+    "python_implementation": "CPython",
+    "python_version": "3.11.18"
+  },
+  "schema": "in-formation.ecpu-epistemic-authority-finalization-run-summary/0.2",
+  "source_digests": {
+    "attempt_results": "d93c9d349aeb081f81ac3945c9a8160724f92b9b8b9cfdfbe34b2f34b024ffed",
+    "evidence_ledger": "c308f3f1c4b62a5169c4242be36a939068991269b6f3f910a02e5a217c27a076",
+    "run_manifest": "e1c0746d57ed6466ef8988c171c187cc6b50a1ba8eff314aaf151f06613ee3da",
+    "summary": "d2d1a6388fc70db6ad3201c1dd955284c7394b8c7603904481c39bb21ae14139",
+    "transition_trace": "9747aa6a660321fb02b0eec13dc7c21efa0a6f29c375458f9d02578f3de56969",
+    "source_equivocation_probes": "b6d8c5fb045abb366bea38039d1cff2a6b286fd88a4f9b405fd84638584f5719"
+  },
+  "manifest": {
+    "source_equivocation_probe_count": 6,
+    "source_equivocation_conflict_count": 6,
+    "source_equivocation_restore_success_count": 6,
+    "source_equivocation_late_rejection_count": 6,
+    "source_equivocation_digest": "3000084f56d387ea1f2d894ea841fdb80ed7f2db44b96f4b035178ca5391e335",
+    "report_digest": "be19b476995a2900f30cbbb734d06da143e46f09d01a7d2cf2897a233396c676"
+  },
+  "workflow": {
+    "run_id": 43136797999,
+    "run_number": 341,
+    "conclusion": "success",
+    "commit": "d5e24b2b15c312e97d97cedd3a188f961f4ffb9c",
+    "url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43136797999"
+  },
+  "summary_digest": "2ece2a70a13f30347bccecc71f881dced2324de8aa18970087c0f4e66d2d1bd5"
+}

@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://in-formation-space.invalid/schemas/ecpu-epistemic-authority-finalization-run-manifest-0.1.json",
+  "title": "E-CPU epistemic authority finalization run manifest",
+  "type": "object",
+  "required": [
+    "format",
+    "schema",
+    "experiment_id",
+    "ecpu_reference_commit",
+    "python_version",
+    "platform",
+    "replicates_per_condition",
+    "source_ids",
+    "quorum",
+    "strict_levels",
+    "scenario_ids",
+    "condition_count",
+    "attempt_count",
+    "evidence_record_count",
+    "final_status_counts",
+    "authorized_despite_dissent_count",
+    "authorized_despite_missing_count",
+    "late_policy_rejection_count",
+    "checkpoint_restore_success_count",
+    "durable_log_verification_success_count",
+    "attempt_results_digest",
+    "evidence_ledger_digest",
+    "trace_digest",
+    "interpretation_limits",
+    "report_digest",
+    "source_equivocation_probe_count",
+    "source_equivocation_conflict_count",
+    "source_equivocation_restore_success_count",
+    "source_equivocation_late_rejection_count",
+    "source_equivocation_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.ecpu-epistemic-authority-finalization"
+    },
+    "schema": {
+      "const": "in-formation.ecpu-epistemic-authority-finalization/0.1"
+    },
+    "experiment_id": {
+      "const": "ecpu-epistemic-authority-finalization-v1"
+    },
+    "ecpu_reference_commit": {
+      "const": "800f94f83ffd6f527ed093c8d1c1e93e153c34f6"
+    },
+    "python_version": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "object",
+      "required": [
+        "system",
+        "release",
+        "machine",
+        "python_implementation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "system": {
+          "type": "string"
+        },
+        "release": {
+          "type": "string"
+        },
+        "machine": {
+          "type": "string"
+        },
+        "python_implementation": {
+          "type": "string"
+        }
+      }
+    },
+    "replicates_per_condition": {
+      "type": "integer",
+      "minimum": 3
+    },
+    "source_ids": {
+      "const": [
+        "S00",
+        "S01",
+        "S02",
+        "S03"
+      ]
+    },
+    "quorum": {
+      "const": 2
+    },
+    "strict_levels": {
+      "const": [
+        true,
+        false
+      ]
+    },
+    "scenario_ids": {
+      "const": [
+        "partial_unanimous",
+        "full_unanimous",
+        "majority_dissent",
+        "tied_split",
+        "subquorum_partial"
+      ]
+    },
+    "condition_count": {
+      "const": 10
+    },
+    "attempt_count": {
+      "type": "integer",
+      "minimum": 30
+    },
+    "evidence_record_count": {
+      "type": "integer",
+      "minimum": 30
+    },
+    "final_status_counts": {
+      "type": "object",
+      "required": [
+        "AUTHORIZED",
+        "CONFLICT",
+        "REFUSED"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "AUTHORIZED": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "CONFLICT": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "REFUSED": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "authorized_despite_dissent_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "authorized_despite_missing_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "late_policy_rejection_count": {
+      "type": "integer",
+      "minimum": 30
+    },
+    "checkpoint_restore_success_count": {
+      "type": "integer",
+      "minimum": 30
+    },
+    "durable_log_verification_success_count": {
+      "type": "integer",
+      "minimum": 30
+    },
+    "attempt_results_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "evidence_ledger_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "trace_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "report_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_equivocation_probe_count": {
+      "type": "integer",
+      "minimum": 6
+    },
+    "source_equivocation_conflict_count": {
+      "type": "integer",
+      "minimum": 6
+    },
+    "source_equivocation_restore_success_count": {
+      "type": "integer",
+      "minimum": 6
+    },
+    "source_equivocation_late_rejection_count": {
+      "type": "integer",
+      "minimum": 6
+    },
+    "source_equivocation_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

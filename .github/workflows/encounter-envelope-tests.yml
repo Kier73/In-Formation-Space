@@ -16,6 +16,7 @@ on:
       - "experiments/logistic-map-coverage/**"
       - "experiments/observation-cost-information/**"
       - "experiments/ecpu-reliable-observation-recovery/**"
+      - "experiments/ecpu-epistemic-authority-finalization/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   pull_request:
     paths:
@@ -32,6 +33,7 @@ on:
       - "experiments/logistic-map-coverage/**"
       - "experiments/observation-cost-information/**"
       - "experiments/ecpu-reliable-observation-recovery/**"
+      - "experiments/ecpu-epistemic-authority-finalization/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   workflow_dispatch:
 
@@ -110,6 +112,11 @@ jobs:
         run: python -m unittest discover -s experiments/observation-cost-information -p "test_*.py" -v
       - name: Run E-CPU reliable observation recovery tests
         run: python -m unittest discover -s experiments/ecpu-reliable-observation-recovery -p "test_*.py" -v
+      - name: Run E-CPU epistemic authority finalization tests
+        env:
+          PYTHONPATH: external/E-CPU
+          ECPU_ROOT: external/E-CPU
+        run: python -m unittest discover -s experiments/ecpu-epistemic-authority-finalization -p "test_*.py" -v
       - name: Run live E-CPU gated observation integration
         env:
           PYTHONPATH: external/E-CPU
@@ -126,6 +133,27 @@ jobs:
           PYTHONPATH: external/E-CPU
           ECPU_ROOT: external/E-CPU
         run: python experiments/ecpu-reliable-observation-recovery/run_recovery_matrix.py --output-dir "${{ runner.temp }}/ecpu-reliable-observation-recovery"
+      - name: Run E-CPU epistemic authority and finalization matrix
+        env:
+          PYTHONPATH: external/E-CPU
+          ECPU_ROOT: external/E-CPU
+        run: python experiments/ecpu-epistemic-authority-finalization/run_authority_matrix.py --output-dir "${{ runner.temp }}/ecpu-epistemic-authority-finalization"
+      - name: Enumerate exhaustive finite authority policy space
+        run: python experiments/ecpu-epistemic-authority-finalization/run_policy_space.py --output-dir "${{ runner.temp }}/ecpu-epistemic-policy-space"
+      - name: Upload exhaustive authority policy space artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecpu-epistemic-policy-space
+          path: ${{ runner.temp }}/ecpu-epistemic-policy-space/
+          if-no-files-found: warn
+      - name: Upload E-CPU epistemic authority artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecpu-epistemic-authority-finalization
+          path: ${{ runner.temp }}/ecpu-epistemic-authority-finalization/
+          if-no-files-found: warn
       - name: Upload E-CPU reliable observation recovery artifacts
         if: always()
         uses: actions/upload-artifact@v4
