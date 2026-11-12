@@ -143,7 +143,7 @@ The [VGI partial-attention planner](https://github.com/Kier73/Virtual-Ground-Int
 
 The digest-bound plan is a proposal reference, not a measurement receipt. The bridge does not execute the probe. A host adapter still has to report dispatch, receiver admission, and an admitted raw return. The actual interpreted `TransitionOutcome` is then compared with the proposal's scenario set. An outcome outside the set is preserved as an `unresolved` model mismatch; it is not mapped to the nearest prediction.
 
-A matched observation changes no Ground by itself. A caller must first record the existing explicit `evidence_authorized` stage (normally through the E-CPU gated adapter); declared application and sender-ACK requirements must also be satisfied before interpretation. `build_ground_revision()` then returns a new VGI Ground value with the return, authorization, optional application/ACK, and interpretation references in its evidence list and an append-only revision entry in Ground metadata. The original Ground remains unchanged, and a stale source fingerprint is rejected.
+A matched observation changes no Ground by itself. A caller must first record the existing explicit `evidence_authorized` stage (normally through the E-CPU gated adapter); declared application and sender-ACK requirements must also be satisfied before interpretation. `build_ground_revision()` then returns a new VGI Ground value with every available append-only path reference (plan, dispatch, admission, raw return, authorization, optional application/ACK, and interpretation) in its evidence list and a revision entry in Ground metadata. The original Ground remains unchanged, and a stale source fingerprint is rejected.
 
 The update semantics preserve uncertainty:
 

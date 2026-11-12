@@ -550,12 +550,8 @@ class PartialProbeExecution:
 
         evidence_refs = []
         for event in self.path.events:
-            if event.stage in (
-                "returned", "evidence_authorized", "applied",
-                "sender_acknowledged", "interpreted",
-            ):
-                if event.evidence_ref and event.evidence_ref not in evidence_refs:
-                    evidence_refs.append(event.evidence_ref)
+            if event.evidence_ref and event.evidence_ref not in evidence_refs:
+                evidence_refs.append(event.evidence_ref)
         combined_evidence = list(old_evidence)
         for reference in evidence_refs:
             if reference not in combined_evidence:

@@ -163,6 +163,9 @@ class PartialProbeExecutionTests(unittest.TestCase):
         self.assertEqual(system.status("b", "Y"), "unknown")
         self.assertEqual(revision.system.step("b", "Y").target, "a")
         self.assertEqual(revision.evidence_refs, (
+            attempt.plan_ref,
+            "dispatch-receipt",
+            "admission-receipt",
             "encounter://probe-return-1",
             "consensus://decision-1",
             "application://commit-1",
