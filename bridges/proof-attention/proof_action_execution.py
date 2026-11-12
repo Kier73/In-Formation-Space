@@ -23,7 +23,7 @@ _ALLOWED_NEXT = {
     "planned": {"dispatched", "dispatch_failed", "route_closed"},
     "dispatched": {"admitted", "execution_rejected", "returned_unadmitted", "delivery_unconfirmed", "route_closed"},
     "admitted": {"returned", "no_result", "route_closed"},
-    "returned": {"interpreted", "interpretation_failed"},
+    "returned": {"interpreted", "interpretation_failed", "route_closed"},
     "interpreted": {"continued", "query_determined", "unresolved"},
 }
 _TERMINAL = {
