@@ -6,12 +6,10 @@ the authority outcome is correct. Those remain independent verification steps.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 from typing import Any, Mapping, Sequence
 
 from authority_lineage import (
-    create_ledger,
     decision_frontier,
     digest,
     issue_decision,
