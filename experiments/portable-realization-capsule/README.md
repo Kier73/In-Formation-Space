@@ -130,9 +130,13 @@ E-CPU sparse-model digest.
 
 The integration test uses E-CPU's typed reset-dominant two-bit counter
 (`state_1`, `state_0`, `advance`, `reset` → two next-state bits) and the
-live compositional compiler. Python constructs the capsule and a separately
-written scalar transition oracle; Node decodes the hybrid payload and checks
-all 16 one-step Boolean assignments.
+live compositional compiler. One output-disconnected ReLU feature is added as
+a controlled codec probe: its dense input row has an all-zero outgoing column,
+so it cannot alter the represented transition function. This makes the
+fixture exercise both dense-row and sparse-row encoding branches rather than
+assuming the naturally sparse counter model will select both. Python
+constructs the capsule and a separately written scalar transition oracle;
+Node decodes the hybrid payload and checks all 16 one-step Boolean assignments.
 
 The test then has Node replay a complete recurrent corpus: all four initial
 states and every length-four sequence over the four advance/reset control
