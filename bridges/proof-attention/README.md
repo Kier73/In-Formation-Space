@@ -93,7 +93,7 @@ A later increment could admit new elaboration frames from a real tactic runner, 
 
 The [proof-action execution session](proof_action_execution.py) adds the next interface after planning: one selected tactic candidate can be handed to an external proof worker, carried through an evidence-gated execution lifecycle, and correlated with a refreshed VGI ProofGround before the next plan is generated.
 
-\`\`\`python
+```python
 from proof_action_execution import ProofAttentionSession
 
 session = ProofAttentionSession(
@@ -122,31 +122,31 @@ session.interpret_result(
     interpretation_ref="interpretation://...",
 )
 next_attempt = session.begin_next()
-\`\`\`
+```
 
 ### Lifecycle and correlation
 
 Each attempt has its own SHA-256-linked event sequence:
 
-\`planned → dispatched → admitted → returned → interpreted\`
+`planned → dispatched → admitted → returned → interpreted`
 
-Transport or execution failures are explicit terminal events: \`dispatch_failed\`, \`execution_rejected\`, \`returned_unadmitted\`, \`no_result\`, or \`interpretation_failed\`. They are never converted into tactic outcomes.
+Transport or execution failures are explicit terminal events: `dispatch_failed`, `execution_rejected`, `returned_unadmitted`, `no_result`, or `interpretation_failed`. They are never converted into tactic outcomes.
 
 A result can be interpreted only after an admitted raw return. The refreshed ProofGround must:
 
 - preserve the exact proof environment and all previously known obligation fingerprints;
 - retain the selected source obligation;
 - contain exactly one result hyper-transition for the selected source and tactic;
-- bind that result edge's \`evidence_ref\` to the exact \`attempt_id\`;
-- report one of VGI's observed result statuses: \`elaborated\`, \`timeout\`, or \`rejected\`.
+- bind that result edge's `evidence_ref` to the exact `attempt_id`;
+- report one of VGI's observed result statuses: `elaborated`, `timeout`, or `rejected`.
 
 The attempt ID is the correlation key the external trace adapter must write into the resulting VGI hyper-transition. This connects the raw return receipt to the normalized proof trace without pretending this bridge authenticates either artifact. The adapter remains responsible for checking that the trace was derived from the returned proof-worker output.
 
 ### Replanning and completion
 
-After a result is correlated, the session rebuilds the attention plan from the refreshed ProofGround. The prior attempt is closed with a \`continued\` event before a next candidate is opened. Candidate transition IDs already attempted in this session are skipped, even if the refreshed Ground still carries their original candidate records.
+After a result is correlated, the session rebuilds the attention plan from the refreshed ProofGround. The prior attempt is closed with a `continued` event before a next candidate is opened. Candidate transition IDs already attempted in this session are skipped, even if the refreshed Ground still carries their original candidate records.
 
-The session reaches \`complete\` only when every explicit root intention has a matched \`kernel_accepted\` receipt in the refreshed ProofGround. A timeout, rejected tactic, empty tactic subgoal list, or exhausted candidate frontier cannot establish completion. When no unattempted candidates remain and roots are not all kernel-accepted, the session becomes \`exhausted\` and the last interpreted attempt records \`unresolved\`; this is a scheduling result, not a theorem of unprovability.
+The session reaches `complete` only when every explicit root intention has a matched `kernel_accepted` receipt in the refreshed ProofGround. A timeout, rejected tactic, empty tactic subgoal list, or exhausted candidate frontier cannot establish completion. When no unattempted candidates remain and roots are not all kernel-accepted, the session becomes `exhausted` and the last interpreted attempt records `unresolved`; this is a scheduling result, not a theorem of unprovability.
 
 The session and every attempt expose deterministic JSON snapshots and digests. Each attempt event includes its sequence, prior event digest, and current event digest, so a later reader can verify the local event chain.
 
@@ -167,14 +167,14 @@ This is a coordinator and receipt ledger, not a tactic runner. It does not launc
 
 A proof action deliberately has a proof-specific lifecycle rather than being forced into the ordinary partial-transition probe interface: a tactic result is a hyper-transition with AND subgoals and OR alternatives, not a single state/action outcome that directly revises a transition Ground.
 
-Focused tests cover stage ordering, return/admission gates, attempt correlation, environment and obligation continuity, timeout/rejection handling, frontier exhaustion, receipt-gated completion, and deterministic event-chain export. The existing \`.github/workflows/proof-attention.yml\` discovers both proof-attention test modules against the pinned VGI revision.
+Focused tests cover stage ordering, return/admission gates, attempt correlation, environment and obligation continuity, timeout/rejection handling, frontier exhaustion, receipt-gated completion, and deterministic event-chain export. The existing `.github/workflows/proof-attention.yml` discovers both proof-attention test modules against the pinned VGI revision.
 
 
 ## E-CPU trajectory persistence
 
 The [trajectory adapter](proof_attention_trajectory.py) persists the current proof-attention session into E-CPU's existing indexed binary trajectory and EventJournal formats:
 
-\`\`\`python
+```python
 from proof_attention_trajectory import (
     export_proof_attention_trajectory,
     restore_proof_attention_trajectory,
@@ -195,16 +195,16 @@ restored = restore_proof_attention_trajectory(
     "proof-session.mtrj.idx",
     freshly_imported_proof_ground,
 )
-\`\`\`
+```
 
-The adapter reuses E-CPU's \`TrajectoryWriter\`, \`TrajectoryReader\`, and \`EventJournal\`; it does not fork or reimplement those formats. Every attempt event becomes one trajectory frame. Frames carry the original session snapshot digest, global event sequence, attempt sequence/ID, attempt-local event sequence/digest, and the complete attempt event.
+The adapter reuses E-CPU's `TrajectoryWriter`, `TrajectoryReader`, and `EventJournal`; it does not fork or reimplement those formats. Every attempt event becomes one trajectory frame. Frames carry the original session snapshot digest, global event sequence, attempt sequence/ID, attempt-local event sequence/digest, and the complete attempt event.
 
 Two independently reconstructed integrity views accompany the portable session manifest:
 
 1. The binary trajectory receipt chain covers ordered frame payloads and local event coordinates.
 2. The EventJournal projection covers the same ordered attempt events, with attempt IDs, local sequence numbers, event actors, evidence references, details, and original event-chain links.
 
-The manifest contains attempt headers plus the session core, so the full event stream is reconstructed from the binary trajectory rather than duplicated into the manifest. Restore verifies the manifest digest, trajectory header/stride, all frame identities, contiguous per-attempt sequences, attempt-group ordering, trajectory receipt head, EventJournal projection head, and the reconstructed session digest. It then delegates session and action-event validation to \`ProofAttentionSession.from_snapshot\` against a caller-supplied fresh VGI ProofGround.
+The manifest contains attempt headers plus the session core, so the full event stream is reconstructed from the binary trajectory rather than duplicated into the manifest. Restore verifies the manifest digest, trajectory header/stride, all frame identities, contiguous per-attempt sequences, attempt-group ordering, trajectory receipt head, EventJournal projection head, and the reconstructed session digest. It then delegates session and action-event validation to `ProofAttentionSession.from_snapshot` against a caller-supplied fresh VGI ProofGround.
 
 ### Time and trust boundaries
 
@@ -212,7 +212,7 @@ The trajectory logical time is the one-based append order of session events. It 
 
 The data stream, sparse index, and manifest are separate files, not a transactional distributed store. SHA-256 chains and manifest digests detect inconsistent modification relative to a trusted head; they are not signatures or external authentication. The restored session is only as trustworthy as the supplied proof trace and upstream evidence/kernel-receipt validation. The trajectory adapter preserves and cross-checks those records; it does not authenticate a previous worker or execute Lean.
 
-The workflow pins E-CPU to \`c82d795e6b7602cc3d6e8c41e8622820914f5cbf\` and runs the trajectory tests alongside the planner and proof-action lifecycle suites.
+The workflow pins E-CPU to `c82d795e6b7602cc3d6e8c41e8622820914f5cbf` and runs the trajectory tests alongside the planner and proof-action lifecycle suites.
 
 
 ## Portable proof-worker handoff protocol
@@ -221,12 +221,12 @@ The [proof-action protocol](proof_action_protocol.py) defines the request and re
 
 ### Build a request
 
-\`\`\`python
+```python
 from proof_action_protocol import build_proof_action_request
 
 attempt = session.begin_next()
 request = build_proof_action_request(session, proof_ground)
-\`\`\`
+```
 
 The request is JSON-serializable and includes:
 
@@ -242,7 +242,7 @@ The request declares that the candidate is not an observation, its proposed subg
 
 After the host has actually dispatched the request, recorded receiver admission and preserved the raw return, the result envelope can be constructed and imported:
 
-\`\`\`python
+```python
 from proof_action_protocol import (
     make_proof_action_result,
     import_proof_action_result,
@@ -269,22 +269,94 @@ imported = import_proof_action_result(
     verified_receipts=kernel_receipts,
 )
 proof_ground = imported.proof_ground
-\`\`\`
+```
 
 Before importing, the bridge:
 
 1. recomputes the request from the current session and ProofGround and requires exact request-digest equality;
-2. requires the session's active attempt to be at the admitted \`returned\` stage;
+2. requires the session's active attempt to be at the admitted `returned` stage;
 3. compares the result's attempt ID, request digest, Encounter reference, Encounter ID, payload digest and canonicalization with the exact return event already recorded on that attempt;
-4. imports the normalized trace through VGI's \`ProofGroundAdapter\`, passing through separately supplied \`VerifiedKernelReceipt\` objects;
-5. delegates the final source/tactic/attempt correlation and environment/obligation continuity checks to \`ProofAttentionSession.interpret_result\`.
+4. imports the normalized trace through VGI's `ProofGroundAdapter`, passing through separately supplied `VerifiedKernelReceipt` objects;
+5. delegates the final source/tactic/attempt correlation and environment/obligation continuity checks to `ProofAttentionSession.interpret_result`.
 
-The worker must write the exact attempt ID into the result hyper-transition's \`evidence_ref\`. A trace that references another attempt, a different environment, an unknown source, or duplicate matching result edges is not accepted as the result of this action.
+The worker must write the exact attempt ID into the result hyper-transition's `evidence_ref`. A trace that references another attempt, a different environment, an unknown source, or duplicate matching result edges is not accepted as the result of this action.
 
 ### Interpretation and trust boundaries
 
 The request digest binds the portable action description; the result digest binds its request reference, return receipt and normalized proof trace. These are deterministic integrity digests, not signatures. The importer checks equality with the host-recorded return but does not fetch or authenticate the Encounter Envelope itself. The caller remains responsible for validating the transport receipt and any external signature.
 
-The VGI adapter parses normalized Lean trace JSON; it does not execute Lean. A supplied \`VerifiedKernelReceipt\` is checked for consistency and environment binding by VGI, but a production host must authenticate the upstream checker receipt and proof-term fingerprint. Neither a tactic candidate, an elaborated hyper-transition, an empty subgoal bundle, nor a result digest is kernel acceptance.
+The VGI adapter parses normalized Lean trace JSON; it does not execute Lean. A supplied `VerifiedKernelReceipt` is checked for consistency and environment binding by VGI, but a production host must authenticate the upstream checker receipt and proof-term fingerprint. Neither a tactic candidate, an elaborated hyper-transition, an empty subgoal bundle, nor a result digest is kernel acceptance.
 
 The protocol therefore supplies a portable interchange contract, not an autonomous proof worker. A host still chooses the process, launches the proof assistant, records actual dispatch/admission/return receipts, and provides authenticated kernel results.
+
+
+## E-CPU reliable-channel host/worker adapter
+
+The [ReliableChannel adapter](proof_action_reliable_channel.py) connects the portable request/result protocol to E-CPU's existing sequenced at-least-once channel. It does not implement a second transport or retry system.
+
+A host-side session and worker endpoint can share an E-CPU `Transport` implementation:
+
+```python
+from mailcpu.reliability import ReliabilityPolicy
+from mailcpu.transport import InMemoryTransport
+from proof_action_reliable_channel import (
+    ProofActionReliableHost,
+    ProofActionReliableWorker,
+)
+
+transport = InMemoryTransport()  # Replace with a Transport backed by the host's substrate.
+policy = ReliabilityPolicy(lease_ticks=3, max_attempts=4, window_size=8)
+
+host = ProofActionReliableHost(
+    session,
+    proof_ground,
+    transport,
+    host_id="proof-host",
+    worker_id="proof-worker",
+    policy=policy,
+)
+worker = ProofActionReliableWorker(
+    transport,
+    host_id="proof-host",
+    worker_id="proof-worker",
+    policy=policy,
+)
+
+dispatch = host.dispatch_next()
+request = worker.receive_request()
+admitted = host.observe_request_admission()
+# The worker's external tactic runner consumes request.request, then packages
+# a result with make_proof_action_result(...).
+# The worker sends it with worker.send_result(result_document).
+# kernel_receipts comes from the host's separately trusted kernel-checker adapter.
+imported = host.receive_result(verified_receipts=kernel_receipts)
+worker.process_result_acknowledgements()
+```
+
+### Delivery and proof semantics
+
+- The host marks `dispatched` only after E-CPU admits the frame to the reliable sender.
+- The worker validates the request digest and format in ReliableChannel's receive-side commit callback. Invalid request payloads are not consumed or acknowledged.
+- The host records `admitted` only after the request sequence's E-CPU acknowledgement returns. That ACK means the worker's receive endpoint validated and consumed the request; it is not proof that a tactic ran or succeeded.
+- A dropped request or ACK is retried using the original reliable sequence. A duplicate request is consumed and acknowledged by E-CPU but is not delivered to the worker a second time. The worker also deduplicates by proof `attempt_id`: an identical request replayed under a new reliable sequence is ACKed without a second tactic handoff, while a conflicting digest for the same attempt is rejected before ACK.
+- Request retry exhaustion is represented as `delivery_unconfirmed`. This means delivery/admission was not confirmed; it is not an execution rejection, timeout observation, or theorem result. Because E-CPU channels are strictly in-order and the receiver may or may not have advanced (for example, data delivered but every ACK lost), the affected endpoint is fenced after retry exhaustion. Do not reuse it for later attempts; recreate host/worker endpoints with fresh route identities/channel epoch so an uncertain old sequence cannot block or collide with new work.
+- A worker result uses the response ReliableChannel. The host records the raw returned payload after the response frame is consumed and ACKed, then checks the result envelope against the active attempt, request digest and recorded return evidence before importing the VGI trace.
+- A response duplicate is acknowledged without a second proof interpretation. A malformed or mismatched result remains a recorded raw return followed by `interpretation_failed`. A late or uncorrelated JSON response is retained in the quarantine ledger as its full canonical payload plus a payload digest and hash-chained reason record; non-JSON payloads retain a representation and digest.
+- The worker's response sender can clear its pending sequence only after it receives the host's response ACK. A transport ACK is never promoted to a kernel receipt. Result-channel retry exhaustion fences both directions of that worker endpoint: it can no longer send a result or receive another proof request. A rejected in-order request also fences the worker request receiver because it cannot skip an unacknowledged sequence. In either case, replace both endpoints with a fresh channel epoch before continuing. The host supplies independently verified kernel receipts to `receive_result(verified_receipts=...)`; they remain separate from the worker's transport ACK and result digest.
+
+The adapter's `Transport` is injected. The in-memory and fault-injecting E-CPU transports make the lifecycle reproducible in tests; an external host must supply a transport implementation that routes the mailboxes between its processes. This merge does not claim that a remote network backend, Lean tactic runner, or physical worker has been deployed.
+
+### Failure separation
+
+| Event | Session outcome | Meaning |
+|---|---|---|
+| Request retry limit reached before worker ACK | `delivery_unconfirmed` | No confirmed worker admission |
+| Worker admits request but returns nothing by host deadline | `no_result` | Execution result unavailable |
+| Raw response arrives but envelope/trace cannot be imported | `interpretation_failed` | Return exists; semantic interpretation failed |
+| Normalized trace records tactic timeout | Interpreted result `timeout` | A tactic timeout was actually observed |
+| Normalized trace records tactic rejection | Interpreted result `rejected` | That tactic attempt was rejected; proposition not proven impossible |
+| VGI trace carries a matched verified kernel receipt for every active root | Session `complete` after replanning | The supplied external kernel receipts satisfy the declared root intentions |
+
+The transport adapter therefore preserves the distinction between delivery, admission, raw return, interpretation and kernel acceptance. It uses E-CPU's reliability semantics unchanged; it does not infer theorem truth from message delivery.
+
+The pinned proof-attention workflow already checks out E-CPU and VGI and discovers the reliable-channel tests along with the planner, protocol, execution and trajectory suites.
