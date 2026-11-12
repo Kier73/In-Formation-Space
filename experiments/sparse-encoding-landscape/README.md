@@ -26,7 +26,7 @@ A dense binary baseline is also recorded. Coefficients use signed int8 only when
 
 Every encoding has a decoder. Decoding must reconstruct the original sparse model digest and interface. Every input in every complete Boolean domain is then evaluated by the decoded sparse model and compared with the independent scalar reference and dense model through an E-CPU Semantic Translation Contract.
 
-The dense binary baseline is decoded back to its exact dense matrices and biases and executed over the same input domain.
+The dense binary baseline is decoded back to its exact dense matrices and biases and executed over the same input domain. JSON payloads carry a canonical payload digest; binary envelopes carry both a body digest and a separate header digest. Each of the six sparse encodings is subjected to a deliberate source-metadata tamper probe, which must be rejected by its decoder.
 
 ## Measurements
 
