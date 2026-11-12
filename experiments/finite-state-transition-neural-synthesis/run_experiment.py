@@ -24,6 +24,7 @@ from mailcpu.semantic_translation import (
 from mailcpu.transition_space import (
     FiniteTransitionTable,
     apply_table_intervention,
+    compile_compositional_transition_program,
     compile_transition_program,
     compile_transition_table,
     two_bit_counter_program,
@@ -118,6 +119,7 @@ def _translation_contract(
     architecture_name: str,
     row_index: int,
     typed_program_digest: str,
+    compiler_id: str = "mailcpu.transition_space.compile_transition_table",
 ) -> TranslationContract:
     """Bind one reference-program/model comparison to its typed source and exact case."""
     program_ref = program_representation_ref(program)
@@ -134,11 +136,10 @@ def _translation_contract(
         "mailcpu.finite-transition-table-to-relu",
         1,
         {
-            "compiler": "mailcpu.transition_space.compile_transition_table",
-            "table_digest": table.digest,
+            "compiler": compiler_id,
+            "derived_table_digest": table.digest,
             "architecture": list(model.architecture),
             "architecture_name": architecture_name,
-            "minterm_count": table.row_count,
             "typed_transition_program_digest": typed_program_digest,
         },
     )
@@ -190,6 +191,7 @@ def _run_case(
     architecture_name: str,
     row_index: int,
     typed_program_digest: str,
+    compiler_id: str = "mailcpu.transition_space.compile_transition_table",
 ) -> dict[str, Any]:
     """Compare one case across typed source, table, MailCPU, VGI, and neural weights."""
     initial = dict(zip(table.input_names, inputs))
@@ -235,6 +237,7 @@ def _run_case(
         architecture_name=architecture_name,
         row_index=row_index,
         typed_program_digest=typed_program_digest,
+        compiler_id=compiler_id,
     )
     comparison = compare_projected_observations(
         contract,
@@ -361,8 +364,67 @@ def run_experiment() -> dict[str, Any]:
         all_cases.extend(source_cases)
         all_cases.extend(target_cases)
 
+    compositional_source_model = compile_compositional_transition_program(
+        source_specification
+    )
+    compositional_target_model = compile_compositional_transition_program(
+        target_specification
+    )
+    compositional_source_program = compile_transition_program(source_table)
+    compositional_target_program = compile_transition_program(target_table)
+    compositional_source_cases = [
+        _run_case(
+            source_table,
+            compositional_source_model,
+            compositional_source_program,
+            row.inputs,
+            phase="compositional-baseline",
+            architecture_name="compositional-source",
+            row_index=row_index,
+            typed_program_digest=source_specification.digest,
+            compiler_id="mailcpu.transition_space.compile_compositional_transition_program",
+        )
+        for row_index, row in enumerate(source_table.rows)
+    ]
+    compositional_target_cases = [
+        _run_case(
+            target_table,
+            compositional_target_model,
+            compositional_target_program,
+            row.inputs,
+            phase="compositional-row-override",
+            architecture_name="compositional-override",
+            row_index=row_index,
+            typed_program_digest=target_specification.digest,
+            compiler_id="mailcpu.transition_space.compile_compositional_transition_program",
+        )
+        for row_index, row in enumerate(target_table.rows)
+    ]
+    compositional_models = [
+        {
+            "name": "compositional-source",
+            "program_digest": source_specification.digest,
+            "table_digest": source_table.digest,
+            "model_digest": compositional_source_model.digest,
+            "architecture": list(compositional_source_model.architecture),
+            "parameter_count": compositional_source_model.parameter_count,
+            "active_parameter_count": compositional_source_model.active_parameter_count,
+        },
+        {
+            "name": "compositional-override",
+            "program_digest": target_specification.digest,
+            "table_digest": target_table.digest,
+            "model_digest": compositional_target_model.digest,
+            "architecture": list(compositional_target_model.architecture),
+            "parameter_count": compositional_target_model.parameter_count,
+            "active_parameter_count": compositional_target_model.active_parameter_count,
+        },
+    ]
+    all_cases.extend(compositional_source_cases)
+    all_cases.extend(compositional_target_cases)
+
     return {
-        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v2",
+        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v3",
         "status": "verified-within-complete-finite-domain",
         "typed_transition_program": source_specification.to_dict(),
         "typed_transition_program_digest": source_specification.digest,
@@ -383,6 +445,8 @@ def run_experiment() -> dict[str, Any]:
             ),
         },
         "architecture_count": len(architecture_results),
+        "compositional_model_count": len(compositional_models),
+        "compositional_models": compositional_models,
         "transition_rows": source_table.row_count,
         "phase_count": 2,
         "case_count": len(all_cases),
@@ -391,13 +455,14 @@ def run_experiment() -> dict[str, Any]:
         "verification_scope": (
             "All 16 inputs of the complete four-bit Boolean transition domain, "
             "for the baseline typed transition program and a compositional one-row "
-            "override, across two exact ReLU architectures, VGI Signal8, MailCPU "
-            "reference and queue interpreters, and per-case semantic comparisons."
+            "override, across two truth-table minterm architectures and two direct "
+            "Boolean-DAG architectures, VGI Signal8, MailCPU reference and queue "
+            "interpreters, and per-case semantic comparisons."
         ),
         "limitations": [
             "The truth-table compiler allocates one hidden minterm per input row; width grows exponentially with input-bit count.",
             "The result is exact on the declared finite Boolean domain, not a learned or generalizing model.",
-            "The one-row typed override changes one selected output coefficient in each neural architecture.",
+            "The one-row typed override changes one selected output coefficient in each minterm architecture; the direct-DAG model is recompiled from the edited expression.",
             "No noise tolerance, quantization, training, arbitrary real-valued input behavior, or hardware speed is tested.",
         ],
     }
