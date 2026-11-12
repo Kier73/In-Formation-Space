@@ -135,3 +135,9 @@ The E-CPU stateful runtime is now integrated. A live state of `01` holds for one
 The [v6 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43227224371) passed the 128 one-step cases, 2,048 three-step recurrent trajectories, the runtime lifecycle comparison against VGI and both MailCPU interpreters, and all focused E-CPU/VGI tests. See the [v6 result note](results/ci-run-43227224371.md) and [summary JSON](results/ci-run-43227224371-summary.json).
 
 The runtime's local patch lifecycle proves that the current typed program and neural model can be revised while retaining state/time and recording a replay-verifiable event chain. It is not yet a concurrent, distributed, durable, signed, or physical vCPU runtime.
+
+## Compiler algebra corpus and invariant registry
+
+The E-CPU transition compiler tests now include 24 seeded, structurally varied Boolean transition programs. Each is exhaustively evaluated on its complete 3-input domain and compared across truth-table minterms, direct expression-DAG synthesis, and liveness-compacted expression-DAG synthesis. The E-CPU branch also registers explicit N-7…N-12 invariants for the finite Boolean table, neural equivalence, state/tick transitions, revision continuity, hash-chain replay, and mathematics annotations.
+
+The updated IFS workflow is pinned to E-CPU `5a3b97cba802889976c815421e4ffffac7e4bdcc`, which contains the generated-program regression and invariant-resolution test. Its dedicated run will verify those additions alongside the 128-case, 2,048-trajectory, and stateful runtime scenario.
