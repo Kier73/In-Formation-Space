@@ -30,3 +30,8 @@ Every encoding must round-trip to the same source identity and exact sparse para
 ## Limitations
 
 This is a finite benchmark of selected compiler artifacts. JSON and binary byte counts are serialization properties; neither establishes resident memory or transport throughput. The binary encodings are prototypes and are not integrated into E-CPU runtime or communication paths.
+
+
+## First integrity-checked verification
+
+The pinned [SRE-002 CI run](https://github.com/Kier73/In-Formation-Space/actions/runs/43308005095) passed the sparse E-CPU regression suite, exact six-format round-trip and tamper checks, exhaustive finite-domain semantic comparisons, and evidence upload. It covers 16 workloads, 1,364 input rows, 48 compiler/model artifacts, and 24,552 dense-to-encoded-sparse comparisons. The [retained run record](results/ci-run-43308005095.md) identifies the evidence boundary and the initial pilot byte totals.
