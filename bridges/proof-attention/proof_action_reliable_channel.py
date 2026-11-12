@@ -112,6 +112,7 @@ class ProofActionReliableWorker:
         )
         self._admitted_requests: dict[str, str] = {}
         self._result_sent_attempt_ids: set[str] = set()
+        self._result_channel_failed = False
 
     def receive_request(self) -> ReceivedProofActionRequest | None:
         """Receive one in-order request; duplicate frames are acknowledged but not redelivered."""
@@ -150,6 +151,10 @@ class ProofActionReliableWorker:
 
     def send_result(self, result_document: Mapping[str, Any]) -> int:
         """Send one portable result envelope over the reliable response channel."""
+        if self._result_channel_failed:
+            raise ProofActionReliableChannelError(
+                "result channel is fenced after retry exhaustion; create fresh host/worker endpoints"
+            )
         if not isinstance(result_document, Mapping):
             raise ProofActionReliableChannelError("proof-action result must be a JSON object")
         copied = json.loads(_canonical(dict(result_document)))
@@ -176,8 +181,11 @@ class ProofActionReliableWorker:
         return self._result_sender.process_ack()
 
     def advance_result_retry_tick(self) -> tuple[int, ...]:
-        """Advance the result sender's bounded retry clock and report exhausted sequences."""
-        return self._result_sender.tick()
+        """Advance retries; fence this endpoint if an in-order result sequence exhausts."""
+        failed = self._result_sender.tick()
+        if failed:
+            self._result_channel_failed = True
+        return failed
 
     @property
     def pending_result_sequences(self) -> tuple[int, ...]:
@@ -237,6 +245,7 @@ class ProofActionReliableHost:
         self._active_attempt = None
         self._active_request: dict[str, Any] | None = None
         self._request_sequence: int | None = None
+        self._request_channel_failed = False
         self._quarantined_results: list[dict[str, Any]] = []
 
     @property
@@ -291,6 +300,10 @@ class ProofActionReliableHost:
         the attempt remains planned; a repeated call retries the same action
         instead of selecting a different candidate.
         """
+        if self._request_channel_failed:
+            raise ProofActionReliableChannelError(
+                "request channel is fenced after retry exhaustion; create fresh host/worker endpoints"
+            )
         if self._active_attempt is None:
             attempt = self.session.begin_next()
             if attempt is None:
@@ -367,6 +380,8 @@ class ProofActionReliableHost:
         failed = self._request_sender.tick()
         sequence = self._request_sequence
         attempt = self._active_attempt
+        if sequence is not None and sequence in failed:
+            self._request_channel_failed = True
         if (
             sequence is not None
             and sequence in failed
