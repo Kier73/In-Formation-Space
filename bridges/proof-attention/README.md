@@ -551,3 +551,39 @@ The recovery function verifies that the exact close event is present in the ledg
 
 Recovery therefore covers the commit-to-process-construction interruption window. It still relies on the transport backend's real persistence guarantees and on the authority store's linearizable, authenticated CAS implementation; the in-memory examples are deterministic reference tests, not a deployed distributed service.
 
+
+### Durable same-host authority with SQLite
+
+`SQLiteRouteEpochLedgerStore` is a concrete durable implementation of `RouteEpochLedgerStore` for multiple processes on one host sharing a local SQLite database file. It opens a short-lived database connection per operation, enables WAL journaling and full synchronous commits, and performs compare-and-swap inside `BEGIN IMMEDIATE`. The expected ledger digest is checked while SQLite holds the write reservation; a stale writer receives `False` rather than overwriting the newer owner generation.
+
+```python
+from proof_action_route_epoch import (
+    ProofActionRouteEpochLedger,
+    SQLiteRouteEpochLedgerStore,
+    open_proof_action_route_epoch,
+)
+
+# Derive this authorization from verified process identity / local credentials.
+# Do not authorize merely because a caller supplied an arbitrary actor string.
+def authorize_actor(actor_id, current_document, replacement_document):
+    return process_identity_service.is_authorized_route_writer(actor_id)
+
+store = SQLiteRouteEpochLedgerStore(
+    "state/proof-route-authority.sqlite3",
+    authorize_actor=authorize_actor,
+)
+ledger = ProofActionRouteEpochLedger(store=store)
+open_proof_action_route_epoch(
+    host, worker, ledger,
+    epoch_id="proof-route-1",
+    owner_id=verified_process_id,
+)
+```
+
+Create a new `SQLiteRouteEpochLedgerStore` with the same database path in another process and call `ProofActionRouteEpochLedger.from_dict(store.load(), store=store)` to rehydrate the ledger. Claims and handoffs then use the database transaction to serialize updates, while old endpoints check the same durable revision on every guarded operation.
+
+SQLite supplies durable local-file transactions and cross-process writer serialization on a supported local filesystem. It is not a distributed database and should not be placed on an arbitrary network share to coordinate independent machines. For multi-host routing, implement `RouteEpochLedgerStore` over a transactional database or consensus-backed authority with equivalent linearizable compare-and-swap semantics.
+
+The callback is mandatory because storage concurrency is not identity authentication. The application must bind `actor_id` to a verified process/principal and apply authorization policy before accepting a replacement ledger. SQLite persists the resulting audit ledger; it does not itself establish who the actor is.
+
+Focused tests now cover reopening the authority database through a distinct store instance, generation-two claims fencing a still-live generation-one endpoint, rejection of stale CAS writes from another connection, actor-authorization rejection, and durable atomic close+successor-open restoration.
