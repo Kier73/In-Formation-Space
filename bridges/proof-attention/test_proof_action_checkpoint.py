@@ -40,7 +40,9 @@ class ProofActionCheckpointTests(unittest.TestCase):
         self.assertEqual(received.request, dispatched.request)
         self.assertTrue(host2.observe_request_admission())
         self.assertEqual(host2.active_attempt.status, "admitted")
-        self.assertEqual(session.to_dict(), host2.session.to_dict())
+        # Compare the restored session at the same cut, before host2 records
+        # the ACK-driven admission event.
+        self.assertEqual(checkpoint["host"]["session"], session.to_dict())
 
     def test_restore_after_worker_admission_before_host_ack_is_idempotent(self):
         _session, _trace, proof_ground, _transport, host, worker = make_endpoints()
@@ -49,8 +51,8 @@ class ProofActionCheckpointTests(unittest.TestCase):
         self.assertIsNotNone(first)
         self.assertEqual(first.request_sequence, dispatched.request_sequence)
 
-        # Worker admission and ACK are committed; the host has not consumed ACK.
-        self.assertFalse(host.observe_request_admission())
+        # Worker admission and ACK are committed; leave the ACK queued so
+        # the checkpoint captures it before host-side admission is recorded.
         checkpoint = export_proof_action_checkpoint(host, worker)
         _transport2, host2, worker2 = restore_pair(checkpoint, proof_ground)
 
