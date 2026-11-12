@@ -218,12 +218,39 @@ class ProofActionRouteEpochTests(unittest.TestCase):
             successor_request_channel="integrity-request-2",
             successor_result_channel="integrity-result-2",
         )
+        closed_again = handoff_proof_action_route_epoch(
+            closed.host,
+            closed.worker,
+            ledger,
+            epoch_id="integrity-epoch-2",
+            reason_code="planned_migration",
+            reason="close successor before testing route reuse",
+            successor_epoch_id="integrity-epoch-3",
+            successor_host_id="integrity-host-3",
+            successor_worker_id="integrity-worker-3",
+            successor_request_channel="integrity-request-3",
+            successor_result_channel="integrity-result-3",
+        )
+        # The old tuple is now invalid even though no epoch is currently open.
+        second_close = handoff_proof_action_route_epoch(
+            closed_again.host,
+            closed_again.worker,
+            ledger,
+            epoch_id="integrity-epoch-3",
+            reason_code="planned_migration",
+            reason="close third epoch for route reuse assertion",
+            successor_epoch_id="integrity-epoch-4",
+            successor_host_id="integrity-host-4",
+            successor_worker_id="integrity-worker-4",
+            successor_request_channel="integrity-request-4",
+            successor_result_channel="integrity-result-4",
+        )
         with self.assertRaisesRegex(ProofActionRouteEpochError, "already used"):
             ledger.open_epoch(
                 "epoch-reuse",
                 closed.closed_epoch["route"],
                 owner_id="owner-2",
-                predecessor_close_digest=closed.closed_epoch["event_digest"],
+                predecessor_close_digest=second_close.closed_epoch["event_digest"],
             )
 
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
