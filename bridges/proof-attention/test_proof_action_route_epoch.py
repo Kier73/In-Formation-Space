@@ -443,6 +443,115 @@ class ProofActionRouteEpochTests(unittest.TestCase):
                 successor_route=successor,
             )
 
+    def test_stale_owner_cannot_commit_handoff_after_replacement_claim(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        store = InMemoryRouteEpochLedgerStore()
+        old_ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, old_ledger,
+            epoch_id="stale-close-epoch", owner_id="stale-close-owner"
+        )
+        host.dispatch_next()
+        checkpoint = export_proof_action_checkpoint(host, worker)
+        uncertainty = _uncertainty_projection(checkpoint)
+        session_digest = host.session.to_dict()["session_digest"]
+
+        replacement_ledger = ProofActionRouteEpochLedger.from_dict(
+            store.load(), store=store
+        )
+        replacement_ledger.claim_epoch(
+            "stale-close-epoch", owner_id="replacement-close-owner"
+        )
+        successor = {
+            "host_id": "stale-close-host-next",
+            "worker_id": "stale-close-worker-next",
+            "request_channel": "stale-close-request-next",
+            "result_channel": "stale-close-result-next",
+            "policy": {
+                "lease_ticks": host.policy.lease_ticks,
+                "max_attempts": host.policy.max_attempts,
+                "window_size": host.policy.window_size,
+            },
+        }
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError, "stale owner generation"
+        ):
+            old_ledger.handoff_epoch(
+                "stale-close-epoch",
+                old_ledger.active_epoch["route"],
+                reason_code="operator_rotation",
+                reason="stale process tried to close after replacement claim",
+                owner_id="stale-close-owner",
+                owner_generation=1,
+                pair_checkpoint=checkpoint,
+                preclose_session_digest=session_digest,
+                postclose_session_digest=session_digest,
+                uncertainty=uncertainty,
+                successor_epoch_id="stale-close-epoch-next",
+                successor_owner_id="stale-close-successor",
+                successor_route=successor,
+            )
+        self.assertEqual(host.active_attempt.status, "dispatched")
+        self.assertEqual(
+            replacement_ledger.active_epoch["owner_id"],
+            "replacement-close-owner",
+        )
+
+    def test_handoff_commits_close_and_successor_open_in_one_cas_write(self):
+        class CountingStore(InMemoryRouteEpochLedgerStore):
+            def __init__(self):
+                super().__init__()
+                self.write_count = 0
+
+            def compare_and_swap(
+                self, expected_ledger_digest, replacement, *, actor_id
+            ):
+                self.write_count += 1
+                return super().compare_and_swap(
+                    expected_ledger_digest, replacement, actor_id=actor_id
+                )
+
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        store = CountingStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="atomic-handoff-epoch"
+        )
+        self.assertEqual(store.write_count, 1)
+        host.dispatch_next()
+
+        handoff = handoff_proof_action_route_epoch(
+            host,
+            worker,
+            ledger,
+            epoch_id="atomic-handoff-epoch",
+            reason_code="operator_rotation",
+            reason="commit close and successor as one authority revision",
+            successor_epoch_id="atomic-handoff-epoch-next",
+            successor_host_id="atomic-handoff-host-next",
+            successor_worker_id="atomic-handoff-worker-next",
+            successor_request_channel="atomic-handoff-request-next",
+            successor_result_channel="atomic-handoff-result-next",
+        )
+        self.assertEqual(store.write_count, 2)
+        persisted = store.load()
+        tail = persisted["entries"][-2:]
+        self.assertEqual([event["event_type"] for event in tail], ["closed", "opened"])
+        self.assertEqual(
+            tail[1]["previous_event_digest"],
+            tail[0]["event_digest"],
+        )
+        self.assertEqual(
+            tail[1]["details"]["predecessor_close_digest"],
+            tail[0]["event_digest"],
+        )
+        self.assertEqual(
+            ProofActionRouteEpochLedger.from_dict(persisted).active_epoch["epoch_id"],
+            handoff.opened_epoch["epoch_id"],
+        )
+        with self.assertRaisesRegex(ProofActionRouteEpochError, "authoritative store"):
+            host.dispatch_next()
+
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
         ledger = ProofActionRouteEpochLedger()
