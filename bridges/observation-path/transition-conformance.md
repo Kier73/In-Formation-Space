@@ -34,7 +34,7 @@ The state witness values are references and labels supplied by the caller. This 
 | `outcome_only_match` | Visible outcome matches, but no after-state witness was supplied. |
 | `outcome_mismatch_state_unknown` | Visible outcome differs, but no after-state witness was supplied. |
 
-A conformance document has a digest and can be independently rebuilt from the pinned model and the source ObservationPath using `validate_transition_conformance_record()`.
+A conformance document embeds the source ObservationPath snapshot as well as its digest. It can therefore be independently rebuilt from the pinned model and the embedded lifecycle using `validate_transition_conformance_record()` without access to the originating process. A caller may also supply the path separately; the supplied value must equal the embedded snapshot exactly. This makes the record self-contained for reproducibility, not self-authenticating.
 
 ## Operation duration is not intervention cost
 
@@ -44,7 +44,7 @@ The operation span remains a performance measurement. It is not converted into t
 
 ## Append-only model revision
 
-`TransitionModelRevisionLedger` retains the initial Trial 08 model and later revisions. A complete mismatch with a witnessed next state can be proposed as a candidate override for one `(probe_id, current_state)` cell.
+`TransitionModelRevisionLedger` first reconstructs every proposed conformance record against its active Trial 08 model and embedded ObservationPath snapshot. It then retains the initial model and later revisions. A complete mismatch with a witnessed next state can be proposed as a candidate override for one `(probe_id, current_state)` cell.
 
 The lifecycle is explicit:
 
