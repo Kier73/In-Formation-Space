@@ -11,9 +11,16 @@
   "experiment_id": "ecpu-observation-cost-information-v1",
   "format": "in-formation.ecpu-observation-cost-information-run-summary",
   "information": {
-    "expected_information_gain_bits_values": [1.0],
-    "expected_query_resolution_probability_values": [1.0],
-    "target_observed_outcomes": {"hit": 48, "miss": 24},
+    "expected_information_gain_bits_values": [
+      1
+    ],
+    "expected_query_resolution_probability_values": [
+      1
+    ],
+    "target_observed_outcomes": {
+      "hit": 48,
+      "miss": 24
+    },
     "target_realized_entropy_change_bits_counts": {
       "-0.875488750216": 24,
       "-1.124511249784": 48
@@ -38,36 +45,139 @@
     "replicates_per_condition": 3,
     "span_count": 2448
   },
+  "replication": {
+    "design": "A second workflow execution of the same commit and 24-condition matrix, with a distinct process-local monotonic clock segment.",
+    "interpretation_limits": [
+      "The paired comparison matches the 24 workload condition tuples and compares target-event per-condition medians; it does not pool raw calls across different workload conditions.",
+      "Only two CI workflow executions are compared. They use separate process-local clock segments but no independently verified hardware/host identity is available in the records.",
+      "The median absolute relative difference is descriptive and is not a confidence interval or a guarantee of future runtime stability.",
+      "The comparison does not establish production performance, host-to-host repeatability, or a causal model for any workload factor."
+    ],
+    "matched_target_condition_count": 24,
+    "operation_comparisons": {
+      "commit_event": {
+        "median_absolute_paired_relative_difference_percent": 2.53,
+        "paired_median_run273_over_run271_ratio": 1.0206,
+        "run_271_median_of_condition_medians_ms": 34.2144,
+        "run_273_median_of_condition_medians_ms": 35.2053
+      },
+      "ingest_available": {
+        "median_absolute_paired_relative_difference_percent": 2.61,
+        "paired_median_run273_over_run271_ratio": 1.01,
+        "run_271_median_of_condition_medians_ms": 0.139,
+        "run_273_median_of_condition_medians_ms": 0.1405
+      },
+      "process_acks": {
+        "median_absolute_paired_relative_difference_percent": 4.78,
+        "paired_median_run273_over_run271_ratio": 1.0255,
+        "run_271_median_of_condition_medians_ms": 1.6468,
+        "run_273_median_of_condition_medians_ms": 1.7156
+      },
+      "save_checkpoint": {
+        "median_absolute_paired_relative_difference_percent": 1.91,
+        "paired_median_run273_over_run271_ratio": 1.0174,
+        "run_271_median_of_condition_medians_ms": 3.4164,
+        "run_273_median_of_condition_medians_ms": 3.0657
+      }
+    },
+    "second_run": {
+      "artifact": {
+        "artifact_id": 13905362223,
+        "name": "ecpu-observation-cost-information-experiment",
+        "sha256": "5c608210c5794bd802b13ee598e3c03d46f5bc78a1ba90ac83d2522bb31fcc76",
+        "size_bytes": 431490
+      },
+      "clock_segment_id": "43130924950-1",
+      "commit": "0f43fb91f590c43589fcb3864a11e9ee828c3ef1",
+      "conclusion": "success",
+      "cost_profile_matrix_digest": "11467889d7aceda9a7f8fdabb363329a68b6dc965b2b3b9f163e472b00e9787c",
+      "run_id": 43130924950,
+      "run_manifest_digest": "0dd8a1e8a63eea3ddd0761c65a5085b9cd955be694bed5b462c33ea9e33bad21",
+      "run_number": 273,
+      "url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43130924950"
+    }
+  },
   "schema": "in-formation.ecpu-observation-cost-information-run-summary/0.1",
   "source_digests": {
     "cost_profile_matrix_digest": "d23fbcb3a0bc2055edf9d217e9b741c9f84d044b5720fc6eaf2d1c9e7af38165",
     "run_manifest_digest": "be9e4041ae90b8ae49550c327034d5e46b147c8ca746ce0a5ab1fc52da932777"
   },
-  "summary_digest": "97209fabb9aaeb85811ce5d4d91c3b37c645c22ede520f28edd7b35d99630f2d",
   "target_scope_median_of_condition_medians_ms": {
     "commit_event": {
-      "payload_value_bytes": {"1024": 33.527, "64": 34.8753},
-      "queue_depth_initial_per_source": {"1": 33.527, "3": 44.5605},
-      "receiver_load_workers": {"0": 34.3316, "2": 33.9628},
-      "source_quorum_pair": {"2/2": 26.8335, "4/2": 41.4252, "4/4": 39.1624}
+      "payload_value_bytes": {
+        "64": 34.8753,
+        "1024": 33.527
+      },
+      "queue_depth_initial_per_source": {
+        "1": 33.527,
+        "3": 44.5605
+      },
+      "receiver_load_workers": {
+        "0": 34.3316,
+        "2": 33.9628
+      },
+      "source_quorum_pair": {
+        "2/2": 26.8335,
+        "4/2": 41.4252,
+        "4/4": 39.1624
+      }
     },
     "ingest_available": {
-      "payload_value_bytes": {"1024": 0.143, "64": 0.1371},
-      "queue_depth_initial_per_source": {"1": 0.1393, "3": 0.139},
-      "receiver_load_workers": {"0": 0.1385, "2": 0.1396},
-      "source_quorum_pair": {"2/2": 0.0823, "4/2": 0.1429, "4/4": 0.1418}
+      "payload_value_bytes": {
+        "64": 0.1371,
+        "1024": 0.143
+      },
+      "queue_depth_initial_per_source": {
+        "1": 0.1393,
+        "3": 0.139
+      },
+      "receiver_load_workers": {
+        "0": 0.1385,
+        "2": 0.1396
+      },
+      "source_quorum_pair": {
+        "2/2": 0.0823,
+        "4/2": 0.1429,
+        "4/4": 0.1418
+      }
     },
     "process_acks": {
-      "payload_value_bytes": {"1024": 1.6372, "64": 1.7651},
-      "queue_depth_initial_per_source": {"1": 1.6372, "3": 1.6593},
-      "receiver_load_workers": {"0": 1.6848, "2": 1.6468},
-      "source_quorum_pair": {"2/2": 0.9141, "4/2": 1.8421, "4/4": 1.6593}
+      "payload_value_bytes": {
+        "64": 1.7651,
+        "1024": 1.6372
+      },
+      "queue_depth_initial_per_source": {
+        "1": 1.6372,
+        "3": 1.6593
+      },
+      "receiver_load_workers": {
+        "0": 1.6848,
+        "2": 1.6468
+      },
+      "source_quorum_pair": {
+        "2/2": 0.9141,
+        "4/2": 1.8421,
+        "4/4": 1.6593
+      }
     },
     "save_checkpoint": {
-      "payload_value_bytes": {"1024": 3.0343, "64": 3.4164},
-      "queue_depth_initial_per_source": {"1": 2.565, "3": 3.5487},
-      "receiver_load_workers": {"0": 3.0531, "2": 3.454},
-      "source_quorum_pair": {"2/2": 3.4164, "4/2": 3.1238, "4/4": 3.0239}
+      "payload_value_bytes": {
+        "64": 3.4164,
+        "1024": 3.0343
+      },
+      "queue_depth_initial_per_source": {
+        "1": 2.565,
+        "3": 3.5487
+      },
+      "receiver_load_workers": {
+        "0": 3.0531,
+        "2": 3.454
+      },
+      "source_quorum_pair": {
+        "2/2": 3.4164,
+        "4/2": 3.1238,
+        "4/4": 3.0239
+      }
     }
   },
   "workflow": {
@@ -76,5 +186,6 @@
     "run_id": 43130567381,
     "run_number": 271,
     "url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43130567381"
-  }
+  },
+  "summary_digest": "da394adf6a39f84c33d9fe597ef67c8089319290c99fda934607bcbafcb47259"
 }

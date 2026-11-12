@@ -185,6 +185,13 @@ class WorkloadMatrixTests(unittest.TestCase):
         self.assertEqual(summary["matrix"]["attempt_count"], 72)
         self.assertEqual(summary["matrix"]["span_count"], 2448)
         self.assertTrue(summary["matrix"]["all_sender_acknowledgements_complete"])
+        self.assertEqual(summary["replication"]["matched_target_condition_count"], 24)
+        self.assertAlmostEqual(
+            summary["replication"]["operation_comparisons"]["commit_event"][
+                "median_absolute_paired_relative_difference_percent"
+            ],
+            2.53,
+        )
 
     def test_fixture_information_model_reports_one_bit_expected_gain(self):
         document = build_observation_outcome(

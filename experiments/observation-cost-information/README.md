@@ -95,6 +95,14 @@ All 144 synthetic information outcomes report one bit of expected information ga
 
 The summary receipt's `summary_digest` is SHA-256 over all fields except itself. The run-manifest and cost-profile digests are retained separately. The source span/evidence/outcome artifacts remain available from the linked Actions run for independent re-analysis.
 
+
+### Second workflow run
+
+The same matrix was executed again in [Run 273](https://github.com/Kier73/In-Formation-Space/actions/runs/43130924950), using the same pinned E-CPU revision and a distinct process-local clock segment. It again completed 24 conditions, 72 attempts, 2,448 spans, 144 evidence records, and 144 information outcomes.
+
+Across the 24 matched target-event condition medians, the median absolute run-to-run relative differences were 2.61% for `ingest_available()`, 2.53% for `commit_event()`, 1.91% for `save_checkpoint()`, and 4.78% for `process_acks()`. The [summary receipt](results/live-ci-run-271-summary.json) now records both runs, both artifact digests, the paired comparison method, and its limits.
+
+This is a useful first check that the condition-level distributions are not wildly changing between two separate workflow/process segments. It is not a confidence interval, a claim of verified independent hardware, or proof of production repeatability. The next useful replication is across explicitly identified independent hosts and longer sample series.
 ## Reproduce
 
 With E-CPU checked out at the pinned revision:
