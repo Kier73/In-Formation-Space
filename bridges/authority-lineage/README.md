@@ -160,6 +160,38 @@ The ledger retains a public trust-store snapshot so signature verification is re
 
 A production caller should use `validate_signed_review_bundles_in_ledger(..., trusted_store_digests=...)` or `resolve_signed_reviewed_proposal(..., trusted_trust_store=...)` with a digest/key map provisioned independently from the ledger. Trust-store enrollment, organizational delegation, key rotation, expiry, revocation, and recovery remain out of scope. When the bundle states that review-artifact bytes were checked at creation, a later verifier can repeat that check only by supplying those bytes through `review_artifacts_by_proposal`; signature verification alone does not fetch them.
 
+## Root-signed, versioned reviewer trust manifests
+
+`review_trust_manifest.py` adds a root-authorized metadata envelope around the reviewer trust store. Its manifest binds a stable `registry_id`, a strictly positive `generation`, the SHA-256 digest of the previous manifest (null only for generation 1), explicit UTC `issued_at` and `expires_at` bounds, and the complete reviewer trust-store document plus its digest.
+
+The manifest is signed as a DSSE payload by one or more Ed25519 root keys. Verification uses a caller-supplied, independently pinned root-key map and a caller-supplied root signature threshold. A root key ID is only a public-key fingerprint/lookup hint; the pinned key map is the actual trust anchor. The manifest does not authenticate its own root key.
+
+### Verification and rollback controls
+
+- `build_trust_manifest()` creates genesis or successor metadata and checks its trust store and validity interval.
+- `sign_trust_manifest()` signs exact serialized manifest bytes and payload type. Multiple root keys may sign; the verifier enforces a threshold of distinct pinned keys.
+- `verify_trust_manifest()` verifies signatures, payload type, manifest/trust-store digests, registry identity, and the supplied UTC verification time.
+- `minimum_generation` represents caller-persisted anti-rollback state. A manifest below that value is rejected.
+- Strict successor verification supplies both `expected_generation` and `expected_previous_manifest_digest`. This requires the exact next generation and exact prior digest; a skipped version or forked predecessor is rejected.
+- `verify_review_bundle_with_manifest()` checks that a signed review bundle uses the exact trust store authorized by the root-signed manifest.
+- `verify_ledger_signed_review_bundle_with_manifest()` does the same for one immutable signed event already recorded in an authority ledger.
+
+The verifier deliberately requires an explicit verification time rather than silently reading the system clock. The caller should capture one trusted verification time for the whole validation operation and persist the highest accepted generation/digest. If the caller loses that anti-rollback state, a valid old manifest can be replayed until it expires; signatures and expiry alone cannot prove that a newer generation exists.
+
+Generation links only provide continuity when the verifier remembers the last accepted digest or is given the exact expected predecessor. Merely checking `minimum_generation` prevents rollback below a floor but does not prove a direct one-step chain. Root-key rotation is intentionally out-of-band in this version: new root keys must be pinned through a separately trusted configuration update.
+
+The manifest validity window governs when the reviewer trust mapping is authorized. It does not establish when an individual reviewer signed a receipt, because the current vote payload has no trusted signed-at timestamp. Historical verification can use the archived manifest that applied at the time, but the verifier cannot infer exact key validity at an unrecorded signing instant.
+
+### Reproduce
+
+    python bridges/authority-lineage/review_trust_manifest_demo.py --output results/review-trust-manifest-example.json
+
+The CI example uses an ephemeral root key, creates generation 1 and generation 2, and rotates reviewer public keys while retaining principal labels. It verifies the generation-1 bundle with generation 1, verifies a newly signed bundle with generation 2, and rejects the old key set under generation 2. The artifact contains public keys only and explicitly states that the root key is not authenticated by being included in the example.
+
+### Relationship to TUF
+
+The design borrows selected protections from [The Update Framework specification](https://theupdateframework.github.io/specification/latest/): trusted root keys must be provisioned out of band, signed metadata is versioned and expires, and clients must retain state to detect rollback/freeze attacks. TUF also specifies stronger root-key migration continuity (including signatures under old and new root roles) and distinct timestamp/snapshot/targets roles. This module is **not a TUF implementation** and does not provide TUF interoperability, metadata retrieval, persistent client storage, root rotation, or a full freeze/fast-forward defense.
+
 The ledger schema now includes the signed event and the resolution's signed-bundle digest. Reproduce the complete lifecycle with:
 
     python bridges/authority-lineage/signed_review_ledger_demo.py --output results/signed-review-ledger-example.json
