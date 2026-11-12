@@ -322,6 +322,99 @@ class ProofActionAttempt:
             details={"reason": reason},
         )
 
+    @classmethod
+    def from_dict(cls, record: Mapping[str, Any]) -> "ProofActionAttempt":
+        """Restore one attempt after verifying its snapshot and event hash chain."""
+        if not isinstance(record, Mapping):
+            raise ProofActionExecutionError("proof-action attempt snapshot must be an object")
+        supplied = _copy(dict(record))
+        required = {
+            "format", "attempt_id", "query_label", "plan_digest",
+            "proof_ground_digest", "action", "status", "terminal",
+            "events", "attempt_digest",
+        }
+        if set(supplied) != required:
+            raise ProofActionExecutionError("proof-action attempt snapshot fields are invalid")
+        if supplied["format"] != "in-formation.proof-action-attempt/0.1":
+            raise ProofActionExecutionError("unsupported proof-action attempt snapshot format")
+        digest = supplied.pop("attempt_digest")
+        if _sha256(digest, "attempt_digest") != _digest(supplied):
+            raise ProofActionExecutionError("proof-action attempt snapshot digest mismatch")
+
+        attempt_id = _text(supplied["attempt_id"], "attempt_id")
+        query_label = _text(supplied["query_label"], "query_label")
+        plan_digest = _sha256(supplied["plan_digest"], "plan_digest")
+        ground_digest = _sha256(supplied["proof_ground_digest"], "proof_ground_digest")
+        action = supplied["action"]
+        if not isinstance(action, Mapping):
+            raise ProofActionExecutionError("proof-action attempt action must be an object")
+        action = _copy(dict(action))
+        _text(action.get("transition_id"), "action.transition_id")
+        _text(action.get("source_obligation_id"), "action.source_obligation_id")
+        _text(action.get("tactic"), "action.tactic")
+
+        events = supplied["events"]
+        if not isinstance(events, list) or not events:
+            raise ProofActionExecutionError("proof-action attempt requires an event sequence")
+        prior_digest = "0" * 64
+        prior_stage = None
+        for index, event in enumerate(events, start=1):
+            if not isinstance(event, Mapping):
+                raise ProofActionExecutionError("proof-action event must be an object")
+            event = dict(event)
+            expected_fields = {
+                "sequence", "attempt_id", "stage", "actor", "evidence_ref",
+                "details", "previous_event_digest", "event_digest",
+            }
+            if set(event) != expected_fields:
+                raise ProofActionExecutionError("proof-action event fields are invalid")
+            if type(event["sequence"]) is not int or event["sequence"] != index:
+                raise ProofActionExecutionError("proof-action event sequence is not contiguous")
+            if event["attempt_id"] != attempt_id:
+                raise ProofActionExecutionError("proof-action event belongs to another attempt")
+            stage = _text(event["stage"], "event.stage")
+            if (prior_stage is None and stage != "planned") or (
+                prior_stage is not None and stage not in _ALLOWED_NEXT.get(prior_stage, set())
+            ):
+                raise ProofActionExecutionError("proof-action event lifecycle is invalid")
+            _text(event["actor"], "event.actor")
+            if event["evidence_ref"] is not None:
+                _text(event["evidence_ref"], "event.evidence_ref")
+            if not isinstance(event["details"], Mapping):
+                raise ProofActionExecutionError("proof-action event details must be an object")
+            if event["previous_event_digest"] != prior_digest:
+                raise ProofActionExecutionError("proof-action event chain predecessor mismatch")
+            event_core = {key: value for key, value in event.items() if key != "event_digest"}
+            observed_digest = _sha256(event["event_digest"], "event.event_digest")
+            if observed_digest != _digest(event_core):
+                raise ProofActionExecutionError("proof-action event digest mismatch")
+            prior_digest = observed_digest
+            prior_stage = stage
+
+        if supplied["status"] != prior_stage:
+            raise ProofActionExecutionError("proof-action attempt status disagrees with its event tail")
+        if type(supplied["terminal"]) is not bool or supplied["terminal"] != (prior_stage in _TERMINAL):
+            raise ProofActionExecutionError("proof-action attempt terminal flag is inconsistent")
+        first = events[0]
+        first_details = first["details"]
+        if (
+            first_details.get("plan_digest") != plan_digest
+            or first_details.get("proof_ground_digest") != ground_digest
+            or first_details.get("transition_id") != action["transition_id"]
+            or first_details.get("source_obligation_id") != action["source_obligation_id"]
+            or first_details.get("tactic") != action["tactic"]
+        ):
+            raise ProofActionExecutionError("proof-action planned event does not match its action snapshot")
+
+        instance = cls.__new__(cls)
+        instance.attempt_id = attempt_id
+        instance.action = action
+        instance.plan_digest = plan_digest
+        instance.proof_ground_digest = ground_digest
+        instance.query_label = query_label
+        instance._events = _copy(events)
+        return instance
+
     def to_dict(self) -> dict[str, Any]:
         core = {
             "format": "in-formation.proof-action-attempt/0.1",
@@ -524,6 +617,110 @@ class ProofAttentionSession:
             "updated_plan_digest": updated_plan["plan_digest"],
             "event_digest": event["event_digest"],
         }
+
+    @classmethod
+    def from_snapshot(
+        cls,
+        snapshot: Mapping[str, Any],
+        proof_ground: Any,
+        *,
+        cost_model: Any | None = None,
+    ) -> "ProofAttentionSession":
+        """Restore against a freshly imported Ground and verify the full handoff snapshot.
+
+        This restores orchestration state only. It does not authenticate prior
+        workers, returned Encounters, or upstream kernel receipts.
+        """
+        if not isinstance(snapshot, Mapping):
+            raise ProofActionExecutionError("proof-attention session snapshot must be an object")
+        supplied = _copy(dict(snapshot))
+        required = {
+            "format", "attempt_id_prefix", "query_label", "active_root_obligation_ids",
+            "status", "current_proof_ground_digest", "current_plan_digest",
+            "current_plan", "attempted_transition_ids", "attempts", "session_digest",
+        }
+        if set(supplied) != required:
+            raise ProofActionExecutionError("proof-attention session snapshot fields are invalid")
+        if supplied["format"] != "in-formation.proof-attention-session/0.1":
+            raise ProofActionExecutionError("unsupported proof-attention session snapshot format")
+        session_digest = _sha256(supplied.pop("session_digest"), "session_digest")
+        if session_digest != _digest(supplied):
+            raise ProofActionExecutionError("proof-attention session snapshot digest mismatch")
+
+        roots = supplied["active_root_obligation_ids"]
+        if not isinstance(roots, list) or not roots or any(
+            not isinstance(item, str) or not item for item in roots
+        ):
+            raise ProofActionExecutionError("session snapshot requires explicit root obligation IDs")
+        if roots != sorted(set(roots)):
+            raise ProofActionExecutionError("session snapshot root obligation IDs must be sorted and unique")
+        status = supplied["status"]
+        if status not in ("ready", "active", "complete", "exhausted"):
+            raise ProofActionExecutionError("session snapshot status is invalid")
+
+        restored = cls(
+            proof_ground,
+            tuple(roots),
+            attempt_id_prefix=supplied["attempt_id_prefix"],
+            query_label=supplied["query_label"],
+            cost_model=cost_model,
+        )
+        current_plan = supplied["current_plan"]
+        if not isinstance(current_plan, Mapping) or _copy(dict(current_plan)) != restored.plan:
+            raise ProofActionExecutionError("supplied ProofGround does not reproduce the session's current plan")
+        if (
+            supplied["current_plan_digest"] != restored._plan["plan_digest"]
+            or supplied["current_proof_ground_digest"] != restored._plan["proof_ground_digest"]
+        ):
+            raise ProofActionExecutionError("session snapshot plan fingerprints do not match supplied ProofGround")
+
+        raw_attempts = supplied["attempts"]
+        if not isinstance(raw_attempts, list):
+            raise ProofActionExecutionError("session snapshot attempts must be an array")
+        attempts = [ProofActionAttempt.from_dict(item) for item in raw_attempts]
+        attempt_ids = [item.attempt_id for item in attempts]
+        transition_ids = [item.action["transition_id"] for item in attempts]
+        if len(set(attempt_ids)) != len(attempt_ids):
+            raise ProofActionExecutionError("session snapshot contains duplicate attempt IDs")
+        if len(set(transition_ids)) != len(transition_ids):
+            raise ProofActionExecutionError("session snapshot repeats an attempted transition ID")
+        expected_attempt_ids = [
+            f"{supplied['attempt_id_prefix']}:{index:06d}"
+            for index in range(1, len(attempts) + 1)
+        ]
+        if attempt_ids != expected_attempt_ids:
+            raise ProofActionExecutionError("session snapshot attempt sequence is not contiguous")
+        if any(item.query_label != supplied["query_label"] for item in attempts):
+            raise ProofActionExecutionError("session snapshot mixes query labels")
+        attempted = supplied["attempted_transition_ids"]
+        if not isinstance(attempted, list) or attempted != sorted(transition_ids):
+            raise ProofActionExecutionError("session snapshot attempted transition index is inconsistent")
+
+        if status == "ready" and attempts:
+            raise ProofActionExecutionError("ready session snapshot cannot contain attempts")
+        if status == "active" and not attempts:
+            raise ProofActionExecutionError("active session snapshot must contain an active attempt")
+        if status == "active" and attempts[-1].status in ("continued", "query_determined", "unresolved"):
+            raise ProofActionExecutionError("active session snapshot ends in a closed attempt")
+        roots_accepted = all(
+            proof_ground.kernel_status(root) == "kernel_accepted" for root in roots
+        )
+        if status == "complete" and not roots_accepted:
+            raise ProofActionExecutionError("complete session snapshot lacks accepted receipts for every root")
+        if status == "exhausted":
+            remaining = [
+                action for action in restored._plan["candidate_actions"]
+                if action["transition_id"] not in set(transition_ids)
+            ]
+            if roots_accepted or remaining:
+                raise ProofActionExecutionError("exhausted session snapshot contradicts current proof frontier")
+
+        restored._attempts = attempts
+        restored._attempted_transition_ids = set(transition_ids)
+        restored._next_sequence = len(attempts) + 1
+        restored._status = status
+        restored._active = attempts[-1] if status == "active" else None
+        return restored
 
     def to_dict(self) -> dict[str, Any]:
         core = {
