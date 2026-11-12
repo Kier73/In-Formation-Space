@@ -1,7 +1,7 @@
 # Portable Realization Capsule
 
 **Experiment:** PRC-001 · Bind an exact encoded realization to source identity and replay evidence  
-**Status:** candidate; pinned cross-repository CI is the acceptance gate.
+**Status:** verified within the 16 declared complete finite Boolean domains. See the [PRC-001 verification record](results/ci-run-43317088331.md).
 
 PRC-001 advances SRE-002 from encoded model snapshots to portable realization capsules. A capsule contains an exact codec payload and a canonical metadata header binding that payload to its source Ground, dense and sparse model digests, compiler route, interface, codec schema, toolchain revisions, and complete finite-domain verification receipt.
 
@@ -47,3 +47,8 @@ The runner records inner payload bytes, total capsule bytes, metadata/header ove
 ## Evidence boundary
 
 The capsule format is currently an In-Formation-Space research artifact. It is not yet integrated into E-CPU admission, ReliableChannel, distributed fabric discovery, durable session storage, or remote execution. The capsule packages an existing sparse realization; it does not itself execute it. Verification covers the 16 selected finite Boolean workloads, not arbitrary models or continuous-valued domains.
+
+
+## First verified capsule result
+
+The [PRC-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43317088331) created and replayed 288 capsules, covering 1,364 input rows and 49,104 pre/post-package semantic comparisons. All 288 header and payload tampering probes were rejected. The [retained evidence](results/ci-run-43317088331.md) exposes an important cost: metadata averages about 2.5 KB per capsule and exceeds the inner payload for the compact binary formats. This motivates a follow-on study of compressed headers and shared-provenance bundles.
