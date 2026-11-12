@@ -20,15 +20,16 @@ class ProofActionExecutionError(ValueError):
 
 
 _ALLOWED_NEXT = {
-    "planned": {"dispatched", "dispatch_failed"},
-    "dispatched": {"admitted", "execution_rejected", "returned_unadmitted", "delivery_unconfirmed"},
-    "admitted": {"returned", "no_result"},
+    "planned": {"dispatched", "dispatch_failed", "route_closed"},
+    "dispatched": {"admitted", "execution_rejected", "returned_unadmitted", "delivery_unconfirmed", "route_closed"},
+    "admitted": {"returned", "no_result", "route_closed"},
     "returned": {"interpreted", "interpretation_failed"},
     "interpreted": {"continued", "query_determined", "unresolved"},
 }
 _TERMINAL = {
     "dispatch_failed",
     "execution_rejected",
+    "route_closed",
     "delivery_unconfirmed",
     "returned_unadmitted",
     "no_result",
@@ -37,7 +38,7 @@ _TERMINAL = {
     "unresolved",
 }
 _FAILURE_STAGES = {
-    "dispatch_failed", "execution_rejected", "delivery_unconfirmed", "no_result", "interpretation_failed"
+    "dispatch_failed", "execution_rejected", "delivery_unconfirmed", "no_result", "interpretation_failed", "route_closed"
 }
 _RESULT_STAGES = {"elaborated", "timeout", "rejected"}
 
