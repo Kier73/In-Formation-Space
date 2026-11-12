@@ -1,7 +1,6 @@
 import itertools
 import unittest
 
-from operation_spans import OperationSpanRecorder
 from run_recovery_matrix import (
     DROP_FIRST_ACK,
     DROP_FIRST_DATA_FRAME,
@@ -13,6 +12,9 @@ from run_recovery_matrix import (
     validate_attempt_result,
     validate_condition,
 )
+
+# Import after run_recovery_matrix adds the observation-path bridge directory.
+from operation_spans import OperationSpanRecorder
 
 
 def valid_attempt_record():
