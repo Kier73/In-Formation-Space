@@ -628,6 +628,12 @@ class ProofActionRouteEpochLedger:
             raise ProofActionRouteEpochError("only the active route epoch can be claimed")
         if owner_id == active["owner_id"]:
             raise ProofActionRouteEpochError("new owner ID must differ from the current owner")
+        if any(
+            (entry["event_type"] == "opened" and entry["details"]["owner_id"] == owner_id)
+            or (entry["event_type"] == "claimed" and entry["details"]["owner_id"] == owner_id)
+            for entry in self._entries
+        ):
+            raise ProofActionRouteEpochError("route owner ID was already used")
         return self._append(
             "claimed", epoch_id, active["epoch_number"], active["route"],
             {"owner_generation": active["owner_generation"] + 1, "previous_owner_id": active["owner_id"], "owner_id": owner_id},
@@ -1179,6 +1185,39 @@ def restore_proof_action_route_handoff(
         details.get("postclose_session_snapshot"),
         expected_session_digest=details["postclose_session_digest"],
     )
+    # Reconstruct the post-close session from the pre-close checkpoint and the
+    # declared lifecycle transition. This proves the snapshot is not merely a
+    # self-consistent replacement document with a freshly recomputed digest.
+    preclose_snapshot = details["pair_checkpoint"]["host"]["session"]
+    try:
+        expected_postclose_session = ProofAttentionSession.from_snapshot(
+            preclose_snapshot,
+            proof_ground,
+            cost_model=cost_model,
+        )
+        active_attempt = expected_postclose_session.active_attempt
+        uncertainty_digest = details["uncertainty"]["uncertainty_digest"]
+        if active_attempt is not None and active_attempt.status in (
+            "dispatched", "admitted", "returned"
+        ):
+            active_attempt.mark_failure(
+                "route_closed",
+                supplied["route"]["host_id"],
+                f"route epoch {supplied['epoch_id']} closed while action was at stage {active_attempt.status}: {details['reason']}",
+                evidence_ref=f"urn:sha256:{uncertainty_digest}",
+            )
+        expected_document = expected_postclose_session.to_dict()
+        if expected_document != session_snapshot:
+            raise ProofActionRouteEpochError(
+                "post-close session snapshot is not the exact lifecycle transition from the preserved pre-close session"
+            )
+    except ProofActionRouteEpochError:
+        raise
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ProofActionRouteEpochError(
+            f"pre-close proof session could not be reconstructed: {exc}"
+        ) from exc
+
     try:
         session = ProofAttentionSession.from_snapshot(
             session_snapshot,
