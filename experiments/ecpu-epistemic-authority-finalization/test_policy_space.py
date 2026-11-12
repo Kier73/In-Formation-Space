@@ -1,6 +1,7 @@
 import hashlib
 import json
 import unittest
+from pathlib import Path
 
 from run_policy_space import build_report, digest, validate_report
 from policy_space import (
@@ -111,6 +112,30 @@ class PolicySpaceTests(unittest.TestCase):
         altered = dict(report, policy_names=list(reversed(report["policy_names"])))
         with self.assertRaisesRegex(ValueError, "digest"):
             validate_report(altered)
+
+    def test_first_exhaustive_policy_space_receipt_digest(self):
+        receipt_path = (
+            Path(__file__).with_name("results")
+            / "policy-space-ci-run-329-summary.json"
+        )
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        core = {
+            key: value for key, value in receipt.items()
+            if key != "summary_digest"
+        }
+        calculated = hashlib.sha256(
+            json.dumps(
+                core, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        self.assertEqual(receipt["summary_digest"], calculated)
+        self.assertEqual(receipt["matrix"]["pattern_count"], 81)
+        self.assertEqual(receipt["matrix"]["policy_count"], 8)
+        self.assertEqual(
+            receipt["policy_results"]["runtime_permissive"]["authorized_on_tie"],
+            6,
+        )
 
 
 if __name__ == "__main__":
