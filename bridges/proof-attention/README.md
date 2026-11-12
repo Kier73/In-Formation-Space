@@ -11,14 +11,14 @@ A proof-search host still needs to decide what to inspect or execute next. The o
 
 ## API
 
-\`\`\`python
+```python
 from proof_attention import build_proof_attention_plan
 
 plan = build_proof_attention_plan(
     proof_ground,
     root_obligation_ids=(root_obligation_id,),
 )
-\`\`\`
+```
 
 root_obligation_ids is required. The planner never guesses the theorem or goal of interest from insertion order, surface text, or the shape of the graph.
 
@@ -49,13 +49,13 @@ Root coverage is structural reachability, not a probability or confidence estima
 
 An existing EmpiricalProbeCostModel may be supplied through its provenance_for(method_id) interface:
 
-\`\`\`python
+```python
 plan = build_proof_attention_plan(
     proof_ground,
     root_obligation_ids=(root_obligation_id,),
     cost_model=empirical_probe_cost_model,
 )
-\`\`\`
+```
 
 The model's method IDs must be explicitly bound to tactic labels (for example, simp to lean.tactic.simp) using ProbeCostBinding. It must contain sufficient successful samples for every candidate tactic, all measured on the same clock actor, process/clock segment and percentile. Only when every candidate method is bound and comparable does the planner use empirical p90/p95 nanoseconds as an additional tie-break after intention coverage and elaboration distance.
 
@@ -77,10 +77,10 @@ The optional interface reuses bridges/observation-path/operation_spans.py and em
 
 The focused workflow checks this bridge against the pinned public VGI implementation and tests both structural behavior and optional cost binding:
 
-\`\`\`bash
+```bash
 PYTHONPATH=bridges/proof-attention:bridges/observation-path:/path/to/Virtual-Ground-Interpreter/virtual_ground_interpreter \\
   python -m unittest discover -s bridges/proof-attention -p 'test_*.py' -v
-\`\`\`
+```
 
 The workflow records its exact VGI commit in .github/workflows/proof-attention.yml.
 
