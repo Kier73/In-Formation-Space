@@ -171,27 +171,29 @@ class RecoveryMatrixTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "checkpoint count"):
             validate_attempt_result(invalid)
 
-    def test_first_live_ci_summary_has_reconstructible_digest(self):
-        summary_path = Path(__file__).with_name("results") / "ci-run-293-summary.json"
-        summary = json.loads(summary_path.read_text(encoding="utf-8"))
-        core = {
-            key: value for key, value in summary.items()
-            if key != "summary_digest"
-        }
-        calculated = hashlib.sha256(
-            json.dumps(
-                core, sort_keys=True, separators=(",", ":"),
-                ensure_ascii=False, allow_nan=False,
-            ).encode("utf-8")
-        ).hexdigest()
-        self.assertEqual(summary["summary_digest"], calculated)
-        self.assertEqual(summary["workflow"]["run_number"], 293)
-        self.assertEqual(summary["manifest"]["condition_count"], 24)
-        self.assertEqual(summary["manifest"]["attempt_count"], 72)
-        self.assertEqual(summary["manifest"]["operation_span_count"], 1980)
-        self.assertEqual(summary["manifest"]["phase_profile_count"], 204)
-        self.assertTrue(summary["invariants"]["all_durable_logs_verified"])
-        self.assertTrue(summary["invariants"]["all_senders_acknowledged"])
+    def test_live_ci_summaries_have_reconstructible_digests(self):
+        results = Path(__file__).with_name("results")
+        for run_number in (293, 299):
+            summary_path = results / f"ci-run-{run_number}-summary.json"
+            summary = json.loads(summary_path.read_text(encoding="utf-8"))
+            core = {
+                key: value for key, value in summary.items()
+                if key != "summary_digest"
+            }
+            calculated = hashlib.sha256(
+                json.dumps(
+                    core, sort_keys=True, separators=(",", ":"),
+                    ensure_ascii=False, allow_nan=False,
+                ).encode("utf-8")
+            ).hexdigest()
+            self.assertEqual(summary["summary_digest"], calculated)
+            self.assertEqual(summary["workflow"]["run_number"], run_number)
+            self.assertEqual(summary["manifest"]["condition_count"], 24)
+            self.assertEqual(summary["manifest"]["attempt_count"], 72)
+            self.assertEqual(summary["manifest"]["operation_span_count"], 1980)
+            self.assertEqual(summary["manifest"]["phase_profile_count"], 204)
+            self.assertTrue(summary["invariants"]["all_durable_logs_verified"])
+            self.assertTrue(summary["invariants"]["all_senders_acknowledged"])
 
     def test_cost_profiles_keep_initial_and_recovery_phases_separate(self):
         condition = matrix_conditions()[0]
