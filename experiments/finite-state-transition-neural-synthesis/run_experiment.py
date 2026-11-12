@@ -26,7 +26,7 @@ from mailcpu.transition_space import (
     apply_table_intervention,
     compile_transition_program,
     compile_transition_table,
-    two_bit_counter_table,
+    two_bit_counter_program,
 )
 from mailcpu.weight_space import decode_boolean_signal
 from vgi import (
@@ -117,8 +117,9 @@ def _translation_contract(
     phase: str,
     architecture_name: str,
     row_index: int,
+    typed_program_digest: str,
 ) -> TranslationContract:
-    """Bind one reference-program/model comparison to the exact case and table."""
+    """Bind one reference-program/model comparison to its typed source and exact case."""
     program_ref = program_representation_ref(program)
     observation = ObservationContract.from_definition(
         "mailcpu.finite-state-next-value",
@@ -138,6 +139,7 @@ def _translation_contract(
             "architecture": list(model.architecture),
             "architecture_name": architecture_name,
             "minterm_count": table.row_count,
+            "typed_transition_program_digest": typed_program_digest,
         },
     )
     initial = dict(zip(table.input_names, inputs))
@@ -153,7 +155,11 @@ def _translation_contract(
         mapping=mapping,
         observation=observation,
         context_digest=canonical_value_digest(
-            {"table_digest": table.digest, "inputs": initial}
+            {
+                "table_digest": table.digest,
+                "typed_transition_program_digest": typed_program_digest,
+                "inputs": initial,
+            }
         ),
         precondition_digests=(
             canonical_value_digest(
@@ -183,8 +189,9 @@ def _run_case(
     phase: str,
     architecture_name: str,
     row_index: int,
+    typed_program_digest: str,
 ) -> dict[str, Any]:
-    """Compare one case across the truth table, two MailCPU backends, VGI, and weights."""
+    """Compare one case across typed source, table, MailCPU, VGI, and neural weights."""
     initial = dict(zip(table.input_names, inputs))
     reference = ReferenceInterpreter(program).run(initial_registers=initial)
     queued = QueueInterpreter(program).run(initial_registers=initial)
@@ -227,11 +234,13 @@ def _run_case(
         phase=phase,
         architecture_name=architecture_name,
         row_index=row_index,
+        typed_program_digest=typed_program_digest,
     )
     comparison = compare_projected_observations(
         contract,
         case_payload={
             "table_digest": table.digest,
+            "typed_transition_program_digest": typed_program_digest,
             "input_registers": initial,
         },
         source_observation=dict(zip(table.output_names, reference_outputs)),
@@ -243,6 +252,7 @@ def _run_case(
     return {
         "phase": phase,
         "architecture": architecture_name,
+        "typed_transition_program_digest": typed_program_digest,
         "row_index": row_index,
         "inputs": list(inputs),
         "expected_outputs": list(expected),
@@ -256,13 +266,23 @@ def _run_case(
 
 
 def run_experiment() -> dict[str, Any]:
-    """Exhaust both 16-row transition tables through two neural architectures."""
-    source_table = two_bit_counter_table()
-    target_table = source_table.with_output(
+    """Derive two finite tables from typed transition programs and exhaust both."""
+    source_specification = two_bit_counter_program()
+    target_specification = source_specification.with_row_output(
         EDITED_INPUTS,
         EDITED_OUTPUTS,
         name="two-bit-counter.reset-exception.v1",
     )
+    source_table = source_specification.to_table()
+    target_table = target_specification.to_table()
+    expected_target = source_table.with_output(
+        EDITED_INPUTS,
+        EDITED_OUTPUTS,
+        name=target_specification.name,
+    )
+    if target_table != expected_target:
+        raise AssertionError("typed row override and table row override disagree")
+
     architecture_results: list[dict[str, Any]] = []
     all_cases: list[dict[str, Any]] = []
 
@@ -284,6 +304,7 @@ def run_experiment() -> dict[str, Any]:
                 phase="baseline",
                 architecture_name=architecture_name,
                 row_index=row_index,
+                typed_program_digest=source_specification.digest,
             )
             for row_index, row in enumerate(source_table.rows)
         ]
@@ -305,6 +326,7 @@ def run_experiment() -> dict[str, Any]:
                 phase="single-row-intervention",
                 architecture_name=architecture_name,
                 row_index=row_index,
+                typed_program_digest=target_specification.digest,
             )
             for row_index, row in enumerate(target_table.rows)
         ]
@@ -340,8 +362,16 @@ def run_experiment() -> dict[str, Any]:
         all_cases.extend(target_cases)
 
     return {
-        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v1",
+        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v2",
         "status": "verified-within-complete-finite-domain",
+        "typed_transition_program": source_specification.to_dict(),
+        "typed_transition_program_digest": source_specification.digest,
+        "edited_typed_transition_program": target_specification.to_dict(),
+        "edited_typed_transition_program_digest": target_specification.digest,
+        "compiler_path": (
+            "typed Boolean transition program -> enumerated finite table -> "
+            "ReLU minterm network and MailCPU reference program"
+        ),
         "transition_table": source_table.to_dict(),
         "intervention": {
             "inputs": list(EDITED_INPUTS),
@@ -360,14 +390,14 @@ def run_experiment() -> dict[str, Any]:
         "cases": all_cases,
         "verification_scope": (
             "All 16 inputs of the complete four-bit Boolean transition domain, "
-            "for the baseline table and a one-row edited table, across two exact "
-            "ReLU architectures, VGI Signal8, MailCPU reference and queue interpreters, "
-            "and per-case semantic translation comparisons."
+            "for the baseline typed transition program and a compositional one-row "
+            "override, across two exact ReLU architectures, VGI Signal8, MailCPU "
+            "reference and queue interpreters, and per-case semantic comparisons."
         ),
         "limitations": [
             "The truth-table compiler allocates one hidden minterm per input row; width grows exponentially with input-bit count.",
             "The result is exact on the declared finite Boolean domain, not a learned or generalizing model.",
-            "The intervention changes one selected output coefficient because the target table differs in one output bit on one row.",
+            "The one-row typed override changes one selected output coefficient in each neural architecture.",
             "No noise tolerance, quantization, training, arbitrary real-valued input behavior, or hardware speed is tested.",
         ],
     }
