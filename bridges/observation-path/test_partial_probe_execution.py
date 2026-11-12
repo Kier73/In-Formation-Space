@@ -207,6 +207,52 @@ class PartialProbeExecutionTests(unittest.TestCase):
         self.assertIn("old-observation-b", record["evidence"])
         self.assertIn("encounter://probe-return-1", record["evidence"])
 
+    def test_new_observed_alternative_is_appended_without_resolving_ambiguity(self):
+        system = make_ground(ambiguous=True)
+        observer = ObserverContext.full(system)
+        probe = TransitionProbe(
+            "b",
+            "Y",
+            (
+                ProbeScenario(TransitionOutcome("a", (0,)), Fraction(1, 3)),
+                ProbeScenario(TransitionOutcome("c", (1,)), Fraction(1, 3)),
+                ProbeScenario(TransitionOutcome("b", (2,)), Fraction(1, 3)),
+            ),
+            cost=Fraction(2),
+            label="include-third-possible-outcome",
+        )
+        score = score_partial_probe(system, observer, probe, 2)
+        attempt = PartialProbeExecution(
+            system,
+            observer,
+            score,
+            2,
+            attempt_id="probe-attempt-new-alternative",
+            query_label="retain a new alternative",
+            vgi_revision=VGI_REVISION,
+        )
+        result = finish_authorized_attempt(
+            attempt, TransitionOutcome("b", (2,))
+        )
+        self.assertEqual(result["status"], "scenario_matched_not_yet_adjudicated")
+
+        revision = attempt.build_ground_revision(system)
+        self.assertEqual(revision.system.status("b", "Y"), "ambiguous")
+        record = next(
+            item for item in revision.system.to_dict()["observations"]
+            if item["source"] == "b" and item["action"] == "Y"
+        )
+        self.assertEqual(
+            record["outcomes"],
+            [
+                {"target": "a", "output": [0]},
+                {"target": "c", "output": [1]},
+                {"target": "b", "output": [2]},
+            ],
+        )
+        self.assertEqual(record["support_count"], 3)
+        self.assertEqual(system.status("b", "Y"), "ambiguous")
+
     def test_unmodeled_outcome_is_retained_as_unresolved_not_admitted(self):
         system = make_ground()
         attempt = make_attempt(system)
