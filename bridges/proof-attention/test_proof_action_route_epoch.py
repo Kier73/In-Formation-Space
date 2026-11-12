@@ -133,7 +133,7 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         )
         self.assertEqual(
             host._request_sender.process_ack(),
-            (replay_sequence,),
+            (dispatched.request_sequence, replay_sequence),
         )
 
     def test_admission_token_is_rejected_after_its_owner_generation_is_replaced(self):
