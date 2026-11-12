@@ -26,6 +26,7 @@
     "all_senders_acknowledged",
     "all_durable_logs_verified",
     "profile_matrix_digest",
+    "phase_profile_count",
     "minimum_profile_samples",
     "interpretation_limits",
     "report_digest"
@@ -175,6 +176,10 @@
     "report_digest": {
       "type": "string",
       "pattern": "^[0-9a-f]{64}$"
+    },
+    "phase_profile_count": {
+      "type": "integer",
+      "minimum": 24
     }
   },
   "additionalProperties": false
