@@ -7,7 +7,7 @@ the reliable return frame has arrived.
 """
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import json
@@ -21,6 +21,7 @@ from mailcpu.reliability import (
 from mailcpu.transport import Transport
 
 from proof_action_execution import ProofAttentionSession
+from vgi.proof import VerifiedKernelReceipt
 from proof_action_protocol import (
     ImportedProofActionResult,
     ProofActionProtocolError,
@@ -134,15 +135,17 @@ class ProofActionReliableWorker:
                 raise ProofActionReliableChannelError(
                     "one worker attempt ID was admitted with conflicting request digests"
                 )
+            # Commit the worker's application-level admission before
+            # ReliableChannel consumes the frame and emits its ACK.
+            self._admitted_requests[attempt_id] = request_digest
             validated_payload.update(validated)
 
         received = self._request_receiver.receive(commit=validate_before_ack)
         if received is None:
             return None
         sequence, _payload = received
-        attempt_id = validated_payload["attempt_id"]
-        request_digest = validated_payload["request_digest"]
-        self._admitted_requests[attempt_id] = request_digest
+        # A successful new delivery has already committed the attempt identity
+        # in validate_before_ack. Duplicate deliveries return None after ACK.
         return ReceivedProofActionRequest(sequence, validated_payload)
 
     def send_result(self, result_document: Mapping[str, Any]) -> int:
@@ -393,6 +396,7 @@ class ProofActionReliableHost:
         self,
         *,
         interpretation_ref: str | None = None,
+        verified_receipts: Sequence[VerifiedKernelReceipt] = (),
     ) -> ImportedProofActionResult | None:
         """Receive, record, correlate and import one worker result.
 
@@ -504,6 +508,7 @@ class ProofActionReliableHost:
                 interpretation_ref=interpretation_ref or (
                     f"mailcpu://{self.result_channel}/sequence/{result_sequence}"
                 ),
+                verified_receipts=tuple(verified_receipts),
             )
         except (ProofActionProtocolError, ValueError, TypeError) as exc:
             attempt.mark_failure(
