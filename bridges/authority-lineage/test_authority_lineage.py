@@ -179,7 +179,7 @@ class AuthorityLineageTests(unittest.TestCase):
             rationale="This decision explicitly merges both reviewed branches.",
             proposal_id=merge_proposal,
         )
-        merged = decision_history(ledger, example["event_key"])[-1]
+        merged = decision_history(ledger, EVENT)[-1]
         self.assertEqual(set(merged["supersedes_decision_ids"]), {decision_a, decision_b})
         self.assertEqual(merged["generation"], 2)
         self.assertEqual(decision_frontier(ledger, EVENT)["status"], "SINGLE_DECISION")
@@ -273,7 +273,7 @@ class AuthorityLineageTests(unittest.TestCase):
         self.assertEqual(
             example["frontier_after_merge"]["status"], "SINGLE_DECISION"
         )
-        merged = decision_history(ledger, EVENT)[-1]
+        merged = decision_history(ledger, example["event_key"])[-1]
         self.assertEqual(
             set(merged["supersedes_decision_ids"]),
             set(example["branch_decision_ids"]),
