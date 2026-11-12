@@ -100,6 +100,17 @@ An optional operation span is attached only as performance evidence. Its elapsed
 - [Tests](test_transition_conformance.py)
 - [Focused CI](../../.github/workflows/intervention-transition-conformance.yml)
 
+## Repeated transition evidence
+
+The [repeated-transition evidence experiment](transition-evidence.md) aggregates independently reconstructed conformance records by `(probe_id, current_state)`. It retains exact observed outcome/next-state counts, separate outcome-only counts, sample frequencies, and source evidence references. It reports whether one or multiple distinct transitions have been observed without inferring a deterministic or stochastic process.
+
+This is descriptive evidence only: the aggregation does not activate a revised transition model, infer probabilities, or change attention policy. Adaptive sampling bias and unmodelled process/context changes remain open.
+
+- [Implementation](transition_evidence.py)
+- [Schema](transition-evidence-summary.schema.json)
+- [Tests](test_transition_evidence.py)
+- [Focused CI](../../.github/workflows/repeated-transition-evidence.yml)
+
 ## Observation outcomes and information value
 
 The companion [observation-outcome implementation](observation_outcomes.py) records what a candidate observation was expected to distinguish and what outcome was actually observed. It is deliberately separate from the operation-span cost profiler.

@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/transition-evidence-summary.schema.json",
+  "title": "Repeated Trial 08 Transition Evidence Summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "model_ref",
+    "model_digest",
+    "source_conformance_digests",
+    "source_conformance_records",
+    "cells",
+    "frequency_semantics",
+    "policy_effect",
+    "interpretation_limits",
+    "summary_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.transition-evidence-summary"
+    },
+    "schema": {
+      "const": "in-formation.transition-evidence-summary/0.1"
+    },
+    "model_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_conformance_digests": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "source_conformance_records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "format",
+          "schema",
+          "attempt_id",
+          "model_digest",
+          "conformance_digest"
+        ],
+        "properties": {
+          "format": {
+            "const": "in-formation.transition-conformance"
+          },
+          "schema": {
+            "const": "in-formation.transition-conformance/0.1"
+          },
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "model_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "conformance_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "cells": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "probe_id",
+          "current_state",
+          "predicted_transition",
+          "sample_count",
+          "full_transition_sample_count",
+          "outcome_only_sample_count",
+          "conformance_status_counts",
+          "transition_diversity",
+          "prediction_status",
+          "full_transition_histogram",
+          "outcome_only_histogram",
+          "source_samples",
+          "interpretation"
+        ],
+        "properties": {
+          "probe_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "current_state": {
+            "type": "string",
+            "minLength": 1
+          },
+          "predicted_transition": {
+            "type": "object",
+            "required": [
+              "outcome",
+              "next_state",
+              "intervention_cost"
+            ],
+            "properties": {
+              "outcome": {},
+              "next_state": {
+                "type": "string",
+                "minLength": 1
+              },
+              "intervention_cost": {
+                "$ref": "#/$defs/rational"
+              }
+            }
+          },
+          "sample_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "full_transition_sample_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "outcome_only_sample_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "conformance_status_counts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "transition_diversity": {
+            "enum": [
+              "no_full_transition_witnesses",
+              "one_distinct_full_transition_observed",
+              "multiple_distinct_full_transitions_observed"
+            ]
+          },
+          "prediction_status": {
+            "enum": [
+              "outcome_only_evidence_not_sufficient_for_transition_comparison",
+              "all_full_samples_match_prediction",
+              "at_least_one_full_sample_mismatches_prediction"
+            ]
+          },
+          "full_transition_histogram": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "outcome",
+                "next_state",
+                "count",
+                "empirical_frequency",
+                "source_attempt_ids"
+              ],
+              "properties": {
+                "outcome": {},
+                "next_state": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "empirical_frequency": {
+                  "$ref": "#/$defs/rational"
+                },
+                "source_attempt_ids": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          },
+          "outcome_only_histogram": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "outcome",
+                "count",
+                "empirical_frequency",
+                "source_attempt_ids"
+              ],
+              "properties": {
+                "outcome": {},
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "empirical_frequency": {
+                  "$ref": "#/$defs/rational"
+                },
+                "source_attempt_ids": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          },
+          "source_samples": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "attempt_id",
+                "conformance_id",
+                "conformance_digest",
+                "conformance_status",
+                "returned_ref",
+                "encounter_id",
+                "payload_digest",
+                "before_state_evidence",
+                "after_state_evidence"
+              ],
+              "properties": {
+                "attempt_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "conformance_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "conformance_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "conformance_status": {
+                  "type": "string"
+                },
+                "returned_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "encounter_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "payload_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "before_state_evidence": {
+                  "type": "object"
+                },
+                "after_state_evidence": {
+                  "type": [
+                    "object",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "interpretation": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "frequency_semantics": {
+      "const": "descriptive_empirical_sample_fraction_not_transition_probability"
+    },
+    "policy_effect": {
+      "const": "none"
+    },
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "summary_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "rational": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}
