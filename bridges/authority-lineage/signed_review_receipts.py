@@ -686,8 +686,15 @@ def validate_signed_review_bundles_in_ledger(
             _lineage_sha256(expected_trust_digest, "trusted trust-store digest")
             if actual_trust_digest != expected_trust_digest:
                 raise SignedReviewError("embedded trust store differs from out-of-band trust pin")
+        if (
+            review_artifacts_by_proposal is not None
+            and proposal_id not in review_artifacts_by_proposal
+        ):
+            raise SignedReviewError(
+                f"no review-artifact bytes supplied for proposal {proposal_id}"
+            )
         review_artifacts = (
-            review_artifacts_by_proposal.get(proposal_id)
+            review_artifacts_by_proposal[proposal_id]
             if review_artifacts_by_proposal is not None
             else None
         )
