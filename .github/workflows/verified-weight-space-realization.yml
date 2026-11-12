@@ -48,10 +48,9 @@ jobs:
           PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
           ECPU_REVISION: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
           VGI_REVISION: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
-          IFS_REVISION: $GITHUB_SHA
         run: >-
           python experiments/verified-weight-space-realization/run_experiment.py
-          --output "$RUNNER_TEMP/wsp-002-result.json"
+          --output "experiments/verified-weight-space-realization/results/ci-result.json"
 
       - name: Run E-CPU transition compiler tests
         env:
@@ -84,5 +83,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wsp-002-verified-weight-space-realization
-          path: $RUNNER_TEMP/wsp-002-result.json
+          path: experiments/verified-weight-space-realization/results/ci-result.json
           if-no-files-found: warn
