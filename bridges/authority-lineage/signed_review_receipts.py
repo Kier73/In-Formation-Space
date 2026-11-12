@@ -27,7 +27,21 @@ FORMAT = "in-formation.signed-review-bundle"
 SCHEMA = "in-formation.signed-review-bundle/0.1"
 TRUST_STORE_FORMAT = "in-formation.review-trust-store"
 TRUST_STORE_SCHEMA = "in-formation.review-trust-store/0.1"
-PAYLOAD_TYPE = "application/vnd.in-formation.authority-review-vote+json;version=0.1"
+PAYLOAD_TYPE = "application/vnd.in-formation.authority-review-vote+json;version=0.2"
+SIGNED_PAYLOAD_FORMAT = "in-formation.signed-authority-review-vote"
+SIGNED_PAYLOAD_SCHEMA = "in-formation.signed-authority-review-vote/0.2"
+SIGNED_CONTEXT_FIELDS = {
+    "format",
+    "schema",
+    "certificate_digest",
+    "proposal_id",
+    "proposal_digest",
+    "event_key",
+    "base_decision_ids",
+    "base_decision_digests",
+    "policy_digest",
+}
+SIGNED_PAYLOAD_FIELDS = SIGNED_CONTEXT_FIELDS | {"vote"}
 SIGNATURE_PROFILE = "DSSEv1+Ed25519"
 _HEX_256 = re.compile(r"^[0-9a-f]{64}$")
 REVIEW_SEATS = ("R00", "R01", "R02")
@@ -263,17 +277,41 @@ def _validate_trust_store(
     return by_keyid
 
 
+def _certificate_context(certificate: Mapping[str, Any]) -> dict[str, Any]:
+    _certificate_core(certificate)
+    context = {
+        "format": SIGNED_PAYLOAD_FORMAT,
+        "schema": SIGNED_PAYLOAD_SCHEMA,
+        "certificate_digest": certificate["certificate_digest"],
+        "proposal_id": certificate["proposal_id"],
+        "proposal_digest": certificate["proposal_digest"],
+        "event_key": copy.deepcopy(certificate["event_key"]),
+        "base_decision_ids": list(certificate["base_decision_ids"]),
+        "base_decision_digests": copy.deepcopy(certificate["base_decision_digests"]),
+        "policy_digest": certificate["policy_digest"],
+    }
+    _sha256(context["certificate_digest"], "certificate_digest")
+    _sha256(context["proposal_digest"], "proposal_digest")
+    _sha256(context["policy_digest"], "policy_digest")
+    return context
+
+
 def sign_review_vote(
+    certificate: Mapping[str, Any],
     vote: Mapping[str, Any],
     private_key: Ed25519PrivateKey,
 ) -> dict[str, Any]:
-    """Create a one-signature DSSE envelope for one review-vote payload."""
+    """Sign one vote together with its exact proposal and decision context."""
     normalized = _normalize_vote(vote)
     if not isinstance(private_key, Ed25519PrivateKey):
         raise TypeError("private_key must be an Ed25519PrivateKey")
     raw_public = _raw_public_key(private_key.public_key())
     keyid = hashlib.sha256(raw_public).hexdigest()
-    payload = _json_bytes(normalized)
+    payload_object = {
+        **_certificate_context(certificate),
+        "vote": normalized,
+    }
+    payload = _json_bytes(payload_object)
     signature = private_key.sign(pae(PAYLOAD_TYPE, payload))
     return {
         "payloadType": PAYLOAD_TYPE,
@@ -315,13 +353,46 @@ def verify_signed_review_vote(
     except InvalidSignature as exc:
         raise SignedReviewError("DSSE Ed25519 signature verification failed") from exc
 
-    vote = _normalize_vote(_strict_json(raw_payload))
+    signed_payload = _strict_json(raw_payload)
+    if set(signed_payload) != SIGNED_PAYLOAD_FIELDS:
+        raise SignedReviewError("signed payload has missing or unrecognized fields")
+    if (
+        signed_payload["format"] != SIGNED_PAYLOAD_FORMAT
+        or signed_payload["schema"] != SIGNED_PAYLOAD_SCHEMA
+    ):
+        raise SignedReviewError("unsupported signed review payload format or schema")
+    context = {key: signed_payload[key] for key in SIGNED_CONTEXT_FIELDS}
+    _sha256(context["certificate_digest"], "signed payload certificate_digest")
+    _sha256(context["proposal_digest"], "signed payload proposal_digest")
+    _sha256(context["policy_digest"], "signed payload policy_digest")
+    if not isinstance(context["base_decision_ids"], list) or not context["base_decision_ids"]:
+        raise SignedReviewError("signed payload must retain base decision IDs")
+    if not isinstance(context["base_decision_digests"], Mapping):
+        raise SignedReviewError("signed payload base decision digests must be an object")
+    if set(context["base_decision_ids"]) != set(context["base_decision_digests"]):
+        raise SignedReviewError("signed payload base decision digests do not cover its bases")
+    for decision_id, decision_digest in context["base_decision_digests"].items():
+        _nonempty(decision_id, "base decision ID")
+        _sha256(decision_digest, "base decision digest")
+    if (
+        not isinstance(context["event_key"], Mapping)
+        or set(context["event_key"]) != {"kind", "logical_time"}
+        or not isinstance(context["event_key"]["kind"], str)
+        or not context["event_key"]["kind"].strip()
+        or isinstance(context["event_key"]["logical_time"], bool)
+        or not isinstance(context["event_key"]["logical_time"], int)
+        or context["event_key"]["logical_time"] < 0
+    ):
+        raise SignedReviewError("signed payload event key is invalid")
+
+    vote = _normalize_vote(signed_payload["vote"])
     if vote["seat"] != trusted["seat"]:
         raise SignedReviewError("signed vote seat differs from the trusted key's assigned seat")
     if vote["reviewer_ref"] != trusted["principal"]:
         raise SignedReviewError("signed vote reviewer_ref differs from the trusted principal")
     return {
         "vote": vote,
+        "context": context,
         "keyid": keyid,
         "principal": trusted["principal"],
         "seat": trusted["seat"],
@@ -382,6 +453,7 @@ def build_signed_review_bundle(
     if not isinstance(envelopes, (list, tuple)):
         raise TypeError("envelopes must be a sequence")
     cert_votes = certificate["votes"]
+    expected_context = _certificate_context(certificate)
     if not cert_votes:
         raise SignedReviewError("cannot build a signed bundle with no review votes")
     if len(envelopes) != len(cert_votes):
@@ -399,6 +471,8 @@ def build_signed_review_bundle(
         expected_vote = remaining.pop(identity, None)
         if expected_vote is None or vote != expected_vote:
             raise SignedReviewError("signed vote does not exactly match a certificate review receipt")
+        if verified["context"] != expected_context:
+            raise SignedReviewError("signed vote is bound to a different proposal or authority context")
         if verified["keyid"] in seen_keyids:
             raise SignedReviewError("one trusted key cannot sign multiple reviewer seats")
         seen_keyids.add(verified["keyid"])
