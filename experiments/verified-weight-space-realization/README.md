@@ -1,7 +1,7 @@
 # Verified Weight-Space Realization
 
 **Experiment:** WSP-002 · Structured Algorithm Compilation and Equivalent-Weight Navigation  
-**Status:** executable candidate; CI verification required before any result is called verified.
+**Status:** <em>verified within the declared finite domain</em> by the pinned WSP-002 workflow. See the [retained CI evidence and parameter measurements](results/ci-run-43296273607.md).
 
 This experiment continues the existing WSP-001 baseline. It does not repeat XOR/AND as its central result. It asks whether a composed finite-state law can be compiled through three routes, revised at both a local and algorithmic level, and moved through known ReLU parameter symmetries without changing its declared observations.
 
@@ -50,7 +50,7 @@ PYTHONPATH=external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_int
   --output experiments/verified-weight-space-realization/results/local-run.json
 ~~~
 
-The GitHub Actions workflow runs this experiment and the focused E-CPU/VGI regression suites. A passing local script or workflow establishes only the explicit finite-domain and replay claims above. It does not establish arbitrary trained-network interpretation, real-valued input behavior, continuous robustness, distributed execution, or a performance advantage.
+The [pinned GitHub Actions workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43296273607) passed this experiment and the focused E-CPU/VGI regression suites. The retained run note records exact source revisions, the output-artifact digest, parameter counts, and verification totals. This establishes only the explicit finite-domain and replay claims above. It does not establish arbitrary trained-network interpretation, real-valued input behavior, continuous robustness, distributed execution, or a performance advantage.
 
 ## Research ownership
 
