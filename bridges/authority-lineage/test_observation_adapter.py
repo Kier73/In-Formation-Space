@@ -171,6 +171,48 @@ class ObservationAdapterTests(unittest.TestCase):
                 reason="Wrong event must not enter review.", proposed_by="reviewer",
             )
 
+    def test_revision_requires_known_records_to_reconstruct_current_decision(self):
+        ledger = create_ledger("adapter-evidence-binding", created_by="test-suite")
+        known = [evidence("S00", "a" * 64), evidence("S01", "b" * 64)]
+        ledger, decision_id, _ = issue_initial_decision_from_attempt(
+            ledger, authorized_attempt(), known, policy_digest=POLICY_DIGEST,
+            issued_by="authority", rationale="Initial authority.",
+        )
+        altered_known = [evidence("S00", "c" * 64), known[1]]
+        late = evidence("S02", "d" * 64, attempt="late", observation="late")
+        with self.assertRaisesRegex(ObservationEvidenceError, "do not reconstruct"):
+            propose_revision_from_new_evidence(
+                ledger, event_key=EVENT, base_decision_ids=[decision_id],
+                known_evidence_records=altered_known, new_evidence_records=[late],
+                reason="Mismatched evidence store must not revise authority.",
+                proposed_by="reviewer",
+            )
+
+    def test_revision_adapter_requires_complete_current_frontier(self):
+        ledger = create_ledger("adapter-frontier", created_by="test-suite")
+        known = [evidence("S00", "a" * 64), evidence("S01", "b" * 64)]
+        ledger, decision_id, _ = issue_initial_decision_from_attempt(
+            ledger, authorized_attempt(), known, policy_digest=POLICY_DIGEST,
+            issued_by="authority", rationale="Initial authority.",
+        )
+        late = evidence("S02", "c" * 64, attempt="late", observation="late")
+        with self.assertRaisesRegex(ObservationEvidenceError, "complete current"):
+            propose_revision_from_new_evidence(
+                ledger, event_key=EVENT, base_decision_ids=[],
+                known_evidence_records=known, new_evidence_records=[late],
+                reason="A revision cannot omit its base.", proposed_by="reviewer",
+            )
+
+    def test_initial_decision_requires_attempt_evidence_count_to_match(self):
+        ledger = create_ledger("adapter-count", created_by="test-suite")
+        attempt = dict(authorized_attempt(), evidence_received_count=3)
+        records = [evidence("S00", "a" * 64), evidence("S01", "b" * 64)]
+        with self.assertRaisesRegex(ObservationEvidenceError, "evidence count"):
+            issue_initial_decision_from_attempt(
+                ledger, attempt, records, policy_digest=POLICY_DIGEST,
+                issued_by="authority", rationale="Count mismatch must not be accepted.",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
