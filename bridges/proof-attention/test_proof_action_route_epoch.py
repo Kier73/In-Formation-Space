@@ -26,6 +26,7 @@ from proof_action_route_epoch import (
     bind_existing_proof_action_route_epoch,
     handoff_proof_action_route_epoch,
     open_proof_action_route_epoch,
+    restore_proof_action_route_handoff,
     _uncertainty_projection,
 )
 from test_proof_action_execution import make_session, ground
@@ -437,6 +438,7 @@ class ProofActionRouteEpochTests(unittest.TestCase):
                 pair_checkpoint=checkpoint,
                 preclose_session_digest=session_digest,
                 postclose_session_digest=session_digest,
+                postclose_session_snapshot=host.session.to_dict(),
                 uncertainty=uncertainty,
                 successor_epoch_id="uncertainty-epoch-next",
                 successor_owner_id="uncertainty-owner-next",
@@ -486,6 +488,7 @@ class ProofActionRouteEpochTests(unittest.TestCase):
                 pair_checkpoint=checkpoint,
                 preclose_session_digest=session_digest,
                 postclose_session_digest=session_digest,
+                postclose_session_snapshot=host.session.to_dict(),
                 uncertainty=uncertainty,
                 successor_epoch_id="stale-close-epoch-next",
                 successor_owner_id="stale-close-successor",
@@ -551,6 +554,66 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ProofActionRouteEpochError, "closed or superseded"):
             host.dispatch_next()
+
+    def test_restore_successor_after_crash_immediately_following_handoff_commit(self):
+        _session, _trace, proof_ground, _old_transport, host, worker = make_endpoints()
+        store = InMemoryRouteEpochLedgerStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger,
+            epoch_id="crash-recovery-epoch",
+            owner_id="crash-process-owner",
+        )
+        dispatched = host.dispatch_next()
+        received = worker.receive_request()
+        self.assertEqual(received.request_sequence, dispatched.request_sequence)
+
+        handoff = handoff_proof_action_route_epoch(
+            host,
+            worker,
+            ledger,
+            epoch_id="crash-recovery-epoch",
+            reason_code="worker_replacement",
+            reason="simulate process loss after route handoff commit",
+            successor_epoch_id="crash-recovery-epoch-next",
+            successor_host_id="crash-recovery-host-next",
+            successor_worker_id="crash-recovery-worker-next",
+            successor_request_channel="crash-recovery-request-next",
+            successor_result_channel="crash-recovery-result-next",
+        )
+        self.assertEqual(host.session.attempts[0].status, "route_closed")
+
+        # Simulate a fresh process loading only the durable ledger and close record;
+        # discard the returned endpoint objects from the original handoff call.
+        recovered_ledger = ProofActionRouteEpochLedger.from_dict(
+            store.load(), store=store
+        )
+        transport, recovered_host, recovered_worker = restore_proof_action_route_handoff(
+            handoff.closed_epoch,
+            recovered_ledger,
+            proof_ground,
+            restore_transport=InMemoryTransport.from_snapshot,
+            owner_id="crash-recovery-new-process",
+        )
+
+        self.assertIsInstance(transport, InMemoryTransport)
+        self.assertEqual(recovered_ledger.active_epoch["epoch_id"], "crash-recovery-epoch-next")
+        self.assertEqual(recovered_ledger.active_epoch["owner_generation"], 2)
+        self.assertEqual(
+            recovered_host.session.to_dict()["session_digest"],
+            handoff.closed_epoch["details"]["postclose_session_digest"],
+        )
+        self.assertEqual(recovered_host.session.attempts[0].status, "route_closed")
+        self.assertIsNone(recovered_worker.receive_request())
+        self.assertGreater(transport.pending(), 0)
+
+        # The successor selects a new attempt; the route-closed action is not replayed.
+        next_dispatch = recovered_host.dispatch_next()
+        self.assertIsNotNone(next_dispatch)
+        self.assertNotEqual(next_dispatch.attempt_id, dispatched.attempt_id)
+        next_request = recovered_worker.receive_request()
+        self.assertEqual(next_request.request, next_dispatch.request)
+        self.assertTrue(recovered_host.observe_request_admission())
 
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
