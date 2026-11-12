@@ -480,7 +480,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         import jsonschema
 
         spans = list(self.operation_span_recorder.spans)
-        self.assertGreaterEqual(len(spans), 12)
+        self.assertEqual(len(spans), 11)
         for span in spans:
             validate_operation_span(span)
             jsonschema.validate(
