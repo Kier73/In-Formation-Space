@@ -210,3 +210,9 @@ stale-owner rejection, JSON envelope reconstruction, a resumed counter
 transition, idempotent completion, and tamper/target-mismatch rejection. It
 uses three durable authority journals in one test environment: it is not yet
 a multi-machine transport test or a graceful source-coordinated migration.
+
+## SRH-002: process-separated recovery authorities
+
+The companion [Distributed Stateful Recovery Handoff](DISTRIBUTED-STATEFUL-RECOVERY-HANDOFF-002.md) test uses E-CPU's `DistributedRecoveryLineageCoordinator` with two authority members running in separate Python interpreters. Their durable journals survive hard process termination; a newly constructed owner reconnects to fresh processes, recovers the same quorum high-water, and revalidates the completed and successor claims.
+
+The existing PSC-001 counter and PRC capsules are reused. The quorum messages travel over E-CPU ReliableChannel/SocketTransport TCP connections. The PSC payload and continuation still run in the integration-test process, so this is not yet end-to-end state transfer to a separate worker or physical host.

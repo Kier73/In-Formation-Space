@@ -71,6 +71,7 @@ jobs:
           experiments/portable-realization-capsule/test_portable_realization.py
           experiments/portable-realization-capsule/test_portable_stateful_checkpoint.py
           experiments/portable-realization-capsule/test_stateful_recovery_handoff.py
+          experiments/portable-realization-capsule/test_distributed_stateful_recovery_handoff.py
           external/E-CPU/tests/test_transition_space.py
 
       - name: Execute portable realization capsule corpus

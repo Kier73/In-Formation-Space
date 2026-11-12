@@ -157,3 +157,5 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Compact provenance and capsule bundles
 
 - [CPB-001: Compressed standalone capsules and shared-provenance bundles](experiments/compact-provenance-bundles/README.md) — compares zlib-compressed PRC-001 headers, six per-encoding shared bundles and one 288-entry global bundle. The [verification record](experiments/compact-provenance-bundles/results/ci-run-43319093051.md) distinguishes size savings against raw capsules from the larger size relative to compressed standalone capsules.
+
+- [SRH-002: Process-separated stateful recovery authorities](experiments/portable-realization-capsule/DISTRIBUTED-STATEFUL-RECOVERY-HANDOFF-002.md) — connects PSC-bound rehome claims to E-CPU's distributed recovery-lineage coordinator. Two remote authority processes retain their journals across hard restart, then a fresh owner reconstructs the same quorum high-water and re-admits the completed and successor claims. The PSC payload and computation are still local to the test process; the next step is to transport the checkpoint into a separate execution worker.
