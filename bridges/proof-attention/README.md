@@ -597,3 +597,17 @@ transport, host, worker = restore_proof_action_route_handoff(
 The recovery function verifies that the exact close event is present in the ledger and that its authorized successor is still active. It restores the pre-close transport snapshot, restores the separately recorded post-close ProofAttentionSession against a freshly imported ProofGround, then claims the successor under a fresh owner generation. The old transport queues remain available for inspection but are not consumed by the successor's fresh channel names.
 
 Recovery therefore covers the commit-to-process-construction interruption window. It still relies on the transport backend's real persistence guarantees and on the authority store's linearizable, authenticated CAS implementation; the in-memory examples are deterministic reference tests, not a deployed distributed service.
+
+### Route-fenced request admission at the reliable receive commit
+
+When endpoints are bound to an active route epoch, the worker's `ReliableChannel.receive(commit=...)` callback now calls `ProofActionRouteEpochLedger.record_request_admission` before E-CPU consumes the `RDATA` frame and emits its `RACK`. The admission event is appended through the same CAS authority used by owner claims and handoffs, and records the exact epoch, owner ID/generation, attempt ID, request digest and reliable sequence.
+
+This creates a clear linearization rule for a claim racing with a request:
+
+- If the admission CAS wins first, the request was admitted under the old generation before the claim. The returned `ReceivedProofActionRequest` carries that route-owner token.
+- If the owner-claim CAS wins first, admission returns false. The old in-order frame is consumed and acknowledged so it cannot block the reliable stream, but the worker does not add it to its application admission registry and does not return it to the tactic runner.
+- Replaying the same application attempt under a new reliable sequence is idempotent: the request is acknowledged, but the route ledger retains one admission and the worker does not hand it off twice.
+
+A worker runner must call `worker.assert_request_current(received)` at its own execution-admission point immediately before starting the tactic. This rechecks the exact owner-generation token after the transport ACK; it rejects an otherwise valid admission that was superseded between message receipt and runner dispatch. A production runner must still integrate cancellation/cleanup for work already running, and the transport/receiver should enforce generation tokens at its own commit boundary where possible.
+
+The admission CAS is a durable record of the communication decision, not a tactic execution receipt and not a kernel proof receipt. A route admission followed by a later route closure remains a route lifecycle event; it does not imply that the tactic ran or failed.

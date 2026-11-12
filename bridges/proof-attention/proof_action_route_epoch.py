@@ -662,6 +662,88 @@ class ProofActionRouteEpochLedger:
             actor_id=owner_id,
         )
 
+    def record_request_admission(
+        self,
+        epoch_id: str,
+        route_digest: str,
+        *,
+        owner_id: str,
+        owner_generation: int,
+        request_sequence: int,
+        attempt_id: str,
+        request_digest: str,
+    ) -> bool:
+        """Linearize worker request admission against route ownership changes.
+
+        The admission event and a competing owner claim both append through the
+        authority CAS. Whichever CAS wins defines the ordering. A stale worker
+        returns False so ReliableChannel can consume+ACK the obsolete frame
+        without exposing it to the tactic runner.
+        """
+        if type(owner_generation) is not int or owner_generation <= 0:
+            raise ProofActionRouteEpochError("owner_generation must be a positive integer")
+        if type(request_sequence) is not int or request_sequence <= 0:
+            raise ProofActionRouteEpochError("request_sequence must be a positive integer")
+        owner_id = _text(owner_id, "owner_id")
+        attempt_id = _text(attempt_id, "attempt_id")
+        request_digest = _sha256(request_digest, "request_digest")
+        route_digest = _sha256(route_digest, "route_digest")
+
+        for _ in range(3):
+            self.refresh()
+            active = self.active_epoch
+            if (
+                active is None
+                or active["epoch_id"] != epoch_id
+                or active["route_digest"] != route_digest
+                or active["owner_id"] != owner_id
+                or active["owner_generation"] != owner_generation
+            ):
+                return False
+
+            prior = [
+                entry for entry in self._entries
+                if entry["event_type"] == "admitted"
+                and entry["epoch_id"] == epoch_id
+                and entry["details"]["attempt_id"] == attempt_id
+            ]
+            if prior:
+                prior_digest = prior[0]["details"]["request_digest"]
+                if prior_digest != request_digest:
+                    raise ProofActionRouteEpochError(
+                        "one attempt ID was route-admitted with conflicting request digests"
+                    )
+                # Same application attempt replayed under a new ReliableChannel
+                # sequence: it is already admitted, but is never dispatched twice.
+                return True
+
+            details = {
+                "owner_id": owner_id,
+                "owner_generation": owner_generation,
+                "attempt_id": attempt_id,
+                "request_digest": request_digest,
+                "request_sequence": request_sequence,
+            }
+            try:
+                self._append(
+                    "admitted",
+                    epoch_id,
+                    active["epoch_number"],
+                    active["route"],
+                    details,
+                    actor_id=owner_id,
+                )
+                return True
+            except ProofActionRouteEpochError as exc:
+                if "compare-and-swap conflict" not in str(exc):
+                    raise
+                # Another authority writer moved the revision. Refresh and
+                # determine whether this owner still holds the epoch.
+                continue
+        raise ProofActionRouteEpochError(
+            "request admission could not acquire the route authority revision"
+        )
+
     def close_epoch(
         self,
         epoch_id: str,
@@ -942,6 +1024,8 @@ class ProofActionRouteEpochLedger:
         used_epoch_ids: set[str] = set()
         used_route_keys: set[tuple[str, str, str, str]] = set()
         used_owner_ids: set[str] = set()
+        admitted_attempt_digests: dict[tuple[str, str], str] = {}
+        admitted_request_sequences: set[tuple[str, int]] = set()
         last_close_digest: str | None = None
         for index, raw in enumerate(raw_entries, 1):
             if not isinstance(raw, Mapping):
@@ -1019,6 +1103,43 @@ class ProofActionRouteEpochLedger:
                     raise ProofActionRouteEpochError("route claim reuses a historical owner ID")
                 used_owner_ids.add(new_owner)
                 active = event
+            elif event["event_type"] == "admitted":
+                if set(details) != {
+                    "owner_id", "owner_generation", "attempt_id",
+                    "request_digest", "request_sequence",
+                }:
+                    raise ProofActionRouteEpochError("admitted route event details are invalid")
+                if active is None or active["epoch_id"] != event["epoch_id"]:
+                    raise ProofActionRouteEpochError("request admission targets a non-active route epoch")
+                if event["epoch_number"] != active["epoch_number"] or route != active["route"]:
+                    raise ProofActionRouteEpochError("request admission route differs from active route")
+                if (
+                    details.get("owner_id") != active["details"]["owner_id"]
+                    or details.get("owner_generation") != active["details"]["owner_generation"]
+                ):
+                    raise ProofActionRouteEpochError("request admission was recorded by a stale owner generation")
+                attempt_id = _text(details.get("attempt_id"), "admitted.attempt_id")
+                request_digest = _sha256(details.get("request_digest"), "admitted.request_digest")
+                request_sequence = details.get("request_sequence")
+                if type(request_sequence) is not int or request_sequence <= 0:
+                    raise ProofActionRouteEpochError("admitted request sequence must be positive")
+                attempt_key = (event["epoch_id"], attempt_id)
+                previous_request_digest = admitted_attempt_digests.get(attempt_key)
+                if previous_request_digest is not None:
+                    if previous_request_digest != request_digest:
+                        raise ProofActionRouteEpochError(
+                            "route ledger contains conflicting request digests for one attempt"
+                        )
+                    raise ProofActionRouteEpochError(
+                        "route ledger contains a duplicate admission event for one attempt"
+                    )
+                sequence_key = (event["epoch_id"], request_sequence)
+                if sequence_key in admitted_request_sequences:
+                    raise ProofActionRouteEpochError(
+                        "route ledger reuses a ReliableChannel admission sequence"
+                    )
+                admitted_attempt_digests[attempt_key] = request_digest
+                admitted_request_sequences.add(sequence_key)
             elif event["event_type"] == "closed":
                 expected_close_fields = {
                     "owner_generation", "owner_id", "reason_code", "reason",
@@ -1108,10 +1229,28 @@ def _attach_route_guard(
             raise ProofActionRouteEpochError("endpoint route epoch binding was changed")
         ledger.assert_active(epoch_id, route_digest, owner_id=owner_id, owner_generation=owner_generation)
 
+    def admit_request(sequence: int, request: Mapping[str, Any]) -> bool:
+        if not isinstance(request, Mapping):
+            raise ProofActionRouteEpochError("route-admitted request must be an object")
+        return ledger.record_request_admission(
+            epoch_id,
+            route_digest,
+            owner_id=owner_id,
+            owner_generation=owner_generation,
+            request_sequence=sequence,
+            attempt_id=request.get("attempt_id"),
+            request_digest=request.get("request_digest"),
+        )
+
     host._route_epoch_id = epoch_id
     worker._route_epoch_id = epoch_id
+    host._route_owner_id = owner_id
+    worker._route_owner_id = owner_id
+    host._route_owner_generation = owner_generation
+    worker._route_owner_generation = owner_generation
     host._route_guard = guard
     worker._route_guard = guard
+    worker._route_admission_commit = admit_request
 
 
 def open_proof_action_route_epoch(

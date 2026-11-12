@@ -77,6 +77,67 @@ class SQLiteRouteEpochLedgerStoreTests(unittest.TestCase):
         self.assertEqual(len(history[0]["appended_event_digests"]), 1)
         self.assertEqual(len(history[1]["appended_event_digests"]), 1)
 
+    def test_worker_admission_is_durable_across_sqlite_store_reopen(self):
+        first_store = SQLiteRouteEpochLedgerStore(self.database_path)
+        _host, _worker, ledger = self.make_open_ledger(
+            first_store,
+            epoch_id="sqlite-admission-epoch",
+            owner_id="sqlite-admission-owner",
+        )
+        # Endpoint pair comes from the helper for the exact route/transport pair.
+        # Build another helper call with the same route identities on that
+        # transport so the worker and host share the same admitted message path.
+        transport = _host.transport
+        session = _host.session
+        proof_ground = _host.proof_ground
+        from proof_action_reliable_channel import (
+            ProofActionReliableHost, ProofActionReliableWorker
+        )
+        host = ProofActionReliableHost(
+            session, proof_ground, transport,
+            host_id=_host.host_id, worker_id=_host.worker_id,
+            request_channel=_host.request_channel, result_channel=_host.result_channel,
+            policy=_host.policy,
+        )
+        worker = ProofActionReliableWorker(
+            transport,
+            host_id=_host.host_id, worker_id=_host.worker_id,
+            request_channel=_host.request_channel, result_channel=_host.result_channel,
+            policy=_host.policy,
+        )
+        from proof_action_route_epoch import bind_existing_proof_action_route_epoch
+        bind_existing_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="sqlite-admission-epoch",
+            owner_id="sqlite-admission-replacement-owner",
+        )
+        dispatch = host.dispatch_next()
+        received = worker.receive_request()
+        self.assertIsNotNone(received)
+        self.assertEqual(received.request_sequence, dispatch.request_sequence)
+
+        # Reload using a completely new SQLite adapter as a fresh process would.
+        second_store = SQLiteRouteEpochLedgerStore(self.database_path)
+        restored = ProofActionRouteEpochLedger.from_dict(
+            second_store.load(), store=second_store
+        )
+        admission = [
+            event for event in restored.entries
+            if event["event_type"] == "admitted"
+        ]
+        self.assertEqual(len(admission), 1)
+        self.assertEqual(admission[0]["details"]["attempt_id"], dispatch.attempt_id)
+        self.assertEqual(
+            admission[0]["details"]["request_digest"],
+            dispatch.request_digest,
+        )
+        history = second_store.revision_history()
+        self.assertEqual(len(history), 3)
+        self.assertEqual(len(history[-1]["appended_event_digests"]), 1)
+        self.assertEqual(
+            history[-1]["appended_event_digests"][0],
+            admission[0]["event_digest"],
+        )
+
     def test_atomic_route_handoff_is_one_durable_revision_with_two_events(self):
         store = SQLiteRouteEpochLedgerStore(self.database_path)
         _host, _worker, ledger = self.make_open_ledger(store)
