@@ -1,0 +1,81 @@
+name: Compact provenance bundles CPB-001
+
+on:
+  push:
+    paths:
+      - "experiments/compact-provenance-bundles/**"
+      - ".github/workflows/compact-provenance-bundles.yml"
+  pull_request:
+    paths:
+      - "experiments/compact-provenance-bundles/**"
+      - ".github/workflows/compact-provenance-bundles.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpb-001-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  compact-provenance-bundles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out experiment workspace
+        uses: actions/checkout@v4
+
+      - name: Check out pinned E-CPU implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+
+      - name: Check out pinned Virtual-Ground-Interpreter
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Check compact provenance modules and runner syntax
+        run: >-
+          python -m py_compile
+          experiments/compact-provenance-bundles/compact_provenance.py
+          experiments/compact-provenance-bundles/run_experiment.py
+
+      - name: Run compact capsule, portable capsule, and E-CPU regressions
+        env:
+          PYTHONPATH: experiments/compact-provenance-bundles:experiments/portable-realization-capsule:external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: >-
+          python -m pytest
+          experiments/compact-provenance-bundles/test_compact_provenance.py
+          experiments/portable-realization-capsule/test_portable_realization.py
+          external/E-CPU/tests/test_transition_space.py -q
+
+      - name: Execute compressed capsule and shared bundle corpus
+        env:
+          PYTHONPATH: experiments/compact-provenance-bundles:experiments/portable-realization-capsule:external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+          ECPU_REVISION: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          VGI_REVISION: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          IFS_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: >-
+          python experiments/compact-provenance-bundles/run_experiment.py
+          --output experiments/compact-provenance-bundles/results/ci-result.json
+
+      - name: Upload compact provenance bundle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compact-provenance-bundles-cpb-001
+          path: experiments/compact-provenance-bundles/results/ci-result.json
+          if-no-files-found: warn
