@@ -36,6 +36,125 @@ from test_proof_action_reliable_channel import deliver_request_and_admit, make_e
 
 
 class ProofActionRouteEpochTests(unittest.TestCase):
+    def test_worker_admission_is_durably_recorded_before_reliable_ack(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        store = InMemoryRouteEpochLedgerStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="admission-epoch", owner_id="admission-owner"
+        )
+
+        dispatched = host.dispatch_next()
+        received = worker.receive_request()
+        self.assertIsNotNone(received)
+        self.assertEqual(received.request_sequence, dispatched.request_sequence)
+        self.assertEqual(received.route_epoch_id, "admission-epoch")
+        self.assertEqual(received.route_owner_id, "admission-owner")
+        self.assertEqual(received.route_owner_generation, 1)
+        worker.assert_request_current(received)
+
+        admission_events = [
+            event for event in ledger.entries if event["event_type"] == "admitted"
+        ]
+        self.assertEqual(len(admission_events), 1)
+        details = admission_events[0]["details"]
+        self.assertEqual(details["attempt_id"], dispatched.attempt_id)
+        self.assertEqual(details["request_digest"], dispatched.request_digest)
+        self.assertEqual(details["request_sequence"], dispatched.request_sequence)
+        self.assertEqual(details["owner_generation"], 1)
+
+        # The admission CAS happened inside ReliableChannel's commit callback,
+        # before receive consumed the frame and emitted its RACK.
+        self.assertEqual(host._request_sender.process_ack(), (dispatched.request_sequence,))
+        self.assertTrue(
+            any(entry["event_type"] == "admitted" for entry in store.load()["entries"])
+        )
+        restored = ProofActionRouteEpochLedger.from_dict(store.load())
+        self.assertEqual(restored.entries[-1]["details"], details)
+
+    def test_owner_claim_winning_before_receive_commit_consumes_but_never_dispatches_stale_frame(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="admission-race-epoch", owner_id="owner-before-race"
+        )
+        dispatched = host.dispatch_next()
+        original_admission = worker._route_admission_commit
+
+        def claim_before_admission(sequence, request):
+            active = ledger.active_epoch
+            ledger.claim_epoch(
+                "admission-race-epoch",
+                owner_id="replacement-owner",
+                expected_owner_id=active["owner_id"],
+                expected_owner_generation=active["owner_generation"],
+            )
+            return original_admission(sequence, request)
+
+        # Deterministic failure injection: the owner-claim CAS wins in the
+        # exact interval after the API preflight guard and before receive commit.
+        worker._route_admission_commit = claim_before_admission
+        self.assertIsNone(worker.receive_request())
+        self.assertEqual(ledger.active_epoch["owner_generation"], 2)
+        self.assertEqual(worker._admitted_requests, {})
+        self.assertEqual(worker._request_receiver._next_receive_sequence, 2)
+        self.assertFalse(
+            any(entry["event_type"] == "admitted" for entry in ledger.entries)
+        )
+
+        # The stale frame was still consumed and ACKed to preserve the
+        # ReliableChannel in-order cursor, but it was never returned as work.
+        self.assertEqual(
+            host._request_sender.process_ack(),
+            (dispatched.request_sequence,),
+        )
+        with self.assertRaisesRegex(ProofActionRouteEpochError, "closed or superseded"):
+            host.observe_request_admission()
+
+    def test_same_attempt_replayed_under_new_transport_sequence_is_admitted_only_once(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="admission-dedupe-epoch", owner_id="dedupe-owner"
+        )
+        dispatched = host.dispatch_next()
+        first = worker.receive_request()
+        self.assertIsNotNone(first)
+        self.assertEqual(first.request_sequence, dispatched.request_sequence)
+        self.assertEqual(
+            len([e for e in ledger.entries if e["event_type"] == "admitted"]), 1
+        )
+
+        replay_sequence = host._request_sender.send(first.request)
+        self.assertGreater(replay_sequence, first.request_sequence)
+        self.assertIsNone(worker.receive_request())
+        self.assertEqual(
+            len([e for e in ledger.entries if e["event_type"] == "admitted"]), 1
+        )
+        self.assertEqual(
+            host._request_sender.process_ack(),
+            (replay_sequence,),
+        )
+
+    def test_admission_token_is_rejected_after_its_owner_generation_is_replaced(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="admission-token-epoch", owner_id="token-owner"
+        )
+        host.dispatch_next()
+        received = worker.receive_request()
+        self.assertIsNotNone(received)
+        active = ledger.active_epoch
+        ledger.claim_epoch(
+            "admission-token-epoch",
+            owner_id="token-owner-next",
+            expected_owner_id=active["owner_id"],
+            expected_owner_generation=active["owner_generation"],
+        )
+        with self.assertRaisesRegex(ProofActionRouteEpochError, "closed or superseded"):
+            worker.assert_request_current(received)
+
     def test_handoff_preserves_uncertain_request_and_fences_old_endpoints(self):
         _session, _trace, _pg, transport, host, worker = make_endpoints()
         ledger = ProofActionRouteEpochLedger()
