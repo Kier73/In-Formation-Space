@@ -2,13 +2,13 @@
 
 **Status: implementation in progress.** This experiment asks whether one small computational specification can be realized and checked through three distinct representations: VGI signal-state instructions, an E-CPU reference program, and an analytically generated neural network.
 
-The first target is deliberately finite: two-input XOR, followed by a semantic edit to AND.
+The first target is deliberately finite: two-input XOR, followed by a semantic edit to AND. The same specification is compiled into two different 10,000-parameter MLP layouts: `2–85–112–1` (two hidden layers) and `2–17–254–21–1` (three hidden layers).
 
 ## What is being built
 
 - **VGI reference:** use the Boolean subgroup embedding \(0\mapsto0, 1\mapsto4\) in \(\mathbb Z/8\mathbb Z\). Since \(4+4=0\pmod 8\), group addition realizes XOR. A nested equality/conditional expression realizes AND without adding new VGI opcodes.
 - **E-CPU reference program:** use the existing MailCPU instruction algebra (COMPARE, BRANCH, SET, MUL, HALT) as an ordinary executable specification.
-- **Neural realization:** the E-CPU module constructs a dense 2–85–112–1 ReLU MLP with exactly 10,000 parameters, including biases. Only nine parameters are nonzero for XOR and eight for AND. No optimizer, dataset, or training loop is used.
+- **Neural realization:** the E-CPU module constructs dense 2–85–112–1 and 2–17–254–21–1 ReLU MLPs, each with exactly 10,000 parameters including biases. Only nine parameters are nonzero for XOR and eight for AND in either layout. No optimizer, dataset, or training loop is used.
 - **Intervention:** XOR becomes AND by changing only the two final-layer weights from (1, -2) to (0, 1).
 - **Semantic evidence:** E-CPU's existing TranslationContract and paired-observation checker bind the program, model snapshot, input case, and exact output comparison. The VGI side separately exhausts its four input combinations.
 
@@ -26,7 +26,7 @@ For binary inputs, \(h_0\in\{0,1,2\}\) and \(h_1=a\land b\). The second hidden l
 \operatorname{AND}(a,b)=h_1.
 \]
 
-The final two coefficients are the only changed parameters. This is an exact construction over the declared finite input domain, not a claim that arbitrary trained networks can be synthesized this way.
+The final two coefficients are the only changed parameters in both architectures (layer 2 in the first, layer 3 in the second). This is an exact construction over the declared finite input domain, not a claim that arbitrary trained networks can be synthesized this way.
 
 ## Repository locations
 
@@ -47,7 +47,7 @@ PYTHONPATH=/path/to/E-CPU:/path/to/Virtual-Ground-Interpreter/virtual_ground_int
   --output experiments/cross-representation-weight-space/results/first-run.json
 \`\`\`
 
-The integration runner compares all four Boolean input pairs across the VGI task, E-CPU reference program, E-CPU queue interpreter, and generated weight model. It also records the exact parameter intervention and per-case paired semantic checks.
+The integration runner compares all four Boolean input pairs across the VGI task, E-CPU reference program, E-CPU queue interpreter, and both generated neural architectures, before and after the XOR-to-AND edit. It therefore records sixteen cases, the exact parameter interventions, and per-case paired semantic checks.
 
 The focused repository tests are:
 
@@ -59,7 +59,7 @@ The focused repository tests are:
 
 ## Evidence boundary
 
-A successful run would establish equivalence only for these two functions on the complete four-element input domain, under the specific VGI, MailCPU, and MLP implementations and observation projections used by the runner. It would not establish arbitrary program-to-network compilation, universal equivalence of neural representations, robustness outside binary inputs, learned generalization, or a hardware performance advantage.
+A successful run establishes equivalence only for these two functions on the complete four-element input domain, under the specific VGI, MailCPU, and two MLP implementations and observation projections used by the runner. It would not establish arbitrary program-to-network compilation, universal equivalence of neural representations, robustness outside binary inputs, learned generalization, or a hardware performance advantage.
 
 The model is dense in its declared architecture and sparse in its active values. The 10,000 count includes zero-valued weights and biases; the active count is reported separately. The two-weight edit is an exact property of this chosen parameterization, not a general lower bound for XOR-to-AND interventions.
 
