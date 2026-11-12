@@ -1302,14 +1302,19 @@ def handoff_proof_action_route_epoch(
         ) from exc
 
     carried_attempt = successor_session.active_attempt
-    if carried_attempt is not None and not carried_attempt.terminal:
-        if carried_attempt.status != "planned":
-            carried_attempt.mark_failure(
-                "route_closed",
-                host.host_id,
-                f"route epoch {epoch_id} closed while action was at stage {carried_attempt.status}: {reason}",
-                evidence_ref=f"urn:sha256:{uncertainty['uncertainty_digest']}",
-            )
+    if (
+        carried_attempt is not None
+        and carried_attempt.status in ("dispatched", "admitted", "returned")
+    ):
+        carried_attempt.mark_failure(
+            "route_closed",
+            host.host_id,
+            f"route epoch {epoch_id} closed while action was at stage {carried_attempt.status}: {reason}",
+            evidence_ref=f"urn:sha256:{uncertainty['uncertainty_digest']}",
+        )
+    # A planned attempt has not entered the route and is carried unchanged.
+    # An interpreted attempt already has a semantic result; it remains
+    # interpreted so the successor can finish/replan the session normally.
     postclose_session_digest = successor_session.to_dict()["session_digest"]
     successor_owner_id = f"owner-{uuid.uuid4().hex}"
 
