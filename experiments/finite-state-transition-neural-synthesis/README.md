@@ -146,3 +146,11 @@ The updated IFS workflow pins E-CPU at `5a3b97cba802889976c815421e4ffffac7e4bdcc
 ## Module-resolved neural invariants
 
 The E-CPU invariant verifier now resolves the neural modules to their concrete public symbols, and the registry uses one module per annotation invariant (N-12 for `weight_space`, N-13 for `transition_space`, N-14 for `stateful_transition`). The IFS workflow is pinned to E-CPU revision `5ccf9f87c3169d23cf3b01fe8b1c85bf69f6b60a`, which includes that stricter registry resolution and its dedicated regression test.
+
+## V7: indexed trajectory persistence and same-tick revision seek
+
+The stateful runtime's committed step/revision events now export through E-CPU's existing binary `TrajectoryWriter`, with a sparse logical-time index, and are independently projected into `EventJournal`. Restore reconstructs the runtime event list from the trajectory and checks all three integrity views: runtime replay chain, EventJournal head, and binary trajectory receipts.
+
+The [v7 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43233742488) passed the full 128-case matrix, 2,048 recurrent trajectories, the stateful lifecycle, six trajectory bridge tests, all other focused E-CPU suites and both VGI suites. See the [v7 result note](results/ci-run-43233742488.md) and [summary](results/ci-run-43233742488-summary.json).
+
+The key time-navigation result is that events have logical times `[1,1,2]` for `step → revision → step`. Seeking tick 1 returns the revision frame (trajectory index 1, runtime event sequence 2); seeking tick 2 returns the next step and state `10`. This makes a model revision discoverable at the same logical time coordinate without artificially incrementing the machine's tick.
