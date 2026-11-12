@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 from pathlib import Path
 from typing import Any
 
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from authority_lineage import digest
@@ -173,7 +173,7 @@ def build_demonstration() -> dict[str, Any]:
         "pinned_root_keyid": root_keyid,
         "pinned_root_public_key": {
             "algorithm": "Ed25519",
-            "raw_base64": __import__("base64").b64encode(_raw_public(root_public)).decode("ascii"),
+            "raw_base64": base64.b64encode(_raw_public(root_public)).decode("ascii"),
         },
         "generation_1": {
             "manifest": manifest_1,
