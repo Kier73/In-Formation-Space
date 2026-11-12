@@ -36,7 +36,7 @@ def build_demonstration() -> dict[str, Any]:
         for vote in certificate["votes"]
     ])
     envelopes = [
-        sign_review_vote(vote, private_keys[vote["reviewer_ref"]])
+        sign_review_vote(certificate, vote, private_keys[vote["reviewer_ref"]])
         for vote in certificate["votes"]
     ]
     review_artifacts = {
