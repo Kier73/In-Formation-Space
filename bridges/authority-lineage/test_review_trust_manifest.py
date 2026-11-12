@@ -18,7 +18,9 @@ from review_trust_manifest import (
     verify_ledger_signed_review_bundle_with_manifest,
     verify_review_bundle_with_manifest,
     verify_trust_manifest,
+    pae,
 )
+from signed_review_receipts import SignedReviewError
 from signed_review_ledger_demo import build_demonstration as build_signed_ledger_demo
 from signed_review_receipts import build_trust_store, pae
 
@@ -164,7 +166,18 @@ class ReviewTrustManifestTests(unittest.TestCase):
         manifest["trust_store_digest"] = "e" * 64
         core = {key: value for key, value in manifest.items() if key != "manifest_digest"}
         manifest["manifest_digest"] = digest(core)
-        envelope = sign_trust_manifest(manifest, root_keys)
+        raw = json.dumps(
+            manifest, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        ).encode("utf-8")
+        root_keyid = hashlib.sha256(raw_public_key(root_keys[0])).hexdigest()
+        envelope = {
+            "payloadType": PAYLOAD_TYPE,
+            "payload": base64.b64encode(raw).decode("ascii"),
+            "signatures": [{
+                "keyid": root_keyid,
+                "sig": base64.b64encode(root_keys[0].sign(pae(PAYLOAD_TYPE, raw))).decode("ascii"),
+            }],
+        }
         with self.assertRaises(TrustManifestError):
             verify_trust_manifest(
                 envelope, pinned_roots, verification_time=VERIFY_AT
