@@ -122,7 +122,7 @@ def test_capsule_rejects_truncation_and_wrong_magic():
     payload, arguments = _arguments()
     capsule = encode_capsule(payload, **arguments)
 
-    with pytest.raises(PortableRealizationError, match="truncated"):
+    with pytest.raises(PortableRealizationError, match="payload byte length mismatch"):
         decode_capsule(capsule[:-2])
 
     changed = b"BADMAGIC" + capsule[len(MAGIC):]
