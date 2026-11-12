@@ -1208,8 +1208,26 @@ def restore_proof_action_route_handoff(
             )
         expected_document = expected_postclose_session.to_dict()
         if expected_document != session_snapshot:
+            differing_fields = [
+                key for key in expected_document
+                if expected_document.get(key) != session_snapshot.get(key)
+            ]
+            attempt_diffs = []
+            expected_attempts = expected_document.get("attempts", [])
+            supplied_attempts = session_snapshot.get("attempts", [])
+            for index, (expected_attempt, supplied_attempt) in enumerate(
+                zip(expected_attempts, supplied_attempts)
+            ):
+                differing = [
+                    key for key in expected_attempt
+                    if expected_attempt.get(key) != supplied_attempt.get(key)
+                ]
+                if differing:
+                    attempt_diffs.append({"index": index, "fields": differing})
             raise ProofActionRouteEpochError(
-                "post-close session snapshot is not the exact lifecycle transition from the preserved pre-close session"
+                "post-close session snapshot is not the exact lifecycle transition "
+                f"from the preserved pre-close session; session_fields={differing_fields}, "
+                f"attempt_diffs={attempt_diffs}"
             )
     except ProofActionRouteEpochError:
         raise
