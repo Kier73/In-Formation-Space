@@ -1171,13 +1171,576 @@ export function replayHybridCapsule(capsule, referenceRecords, trajectories = []
   return replayBinaryCapsule(capsule, referenceRecords, trajectories, "hybrid_binary");
 }
 
+
+
+const PORTABLE_CHECKPOINT_MAGIC = Buffer.from("IFSPCK01", "ascii");
+const PORTABLE_CHECKPOINT_SCHEMA = "in-formation-space.portable-stateful-checkpoint.v1";
+const STATEFUL_RUNTIME_SCHEMA = "mailcpu.stateful-transition-runtime.v1";
+const STATEFUL_GENESIS_DOMAIN = "mailcpu.stateful-transition-runtime.genesis.v1";
+const STATEFUL_COMPILER_ID = "mailcpu.transition_space.compile_live_compositional_transition_program";
+
+function exactKeys(value, keys, field) {
+  requireObject(value, field);
+  const actual = Object.keys(value).sort();
+  const expected = [...keys].sort();
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    fail(`${field} fields do not match its schema`);
+  }
+}
+
+function strictBit(value, field) {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || (value !== 0 && value !== 1)) {
+    fail(`${field} must be a strict Boolean bit`);
+  }
+  return value;
+}
+
+function validateTypedProgram(program, field = "program") {
+  exactKeys(
+    program,
+    ["schema", "name", "input_names", "output_names", "outputs"],
+    field
+  );
+  if (program.schema !== "mailcpu.finite-transition-program.v1") {
+    fail(`${field} schema is unsupported`);
+  }
+  requireText(program.name, `${field}.name`);
+  if (
+    !Array.isArray(program.input_names) || program.input_names.length === 0 ||
+    program.input_names.some((name) => typeof name !== "string" || name.length === 0) ||
+    new Set(program.input_names).size !== program.input_names.length
+  ) {
+    fail(`${field}.input_names must be unique non-empty strings`);
+  }
+  if (
+    !Array.isArray(program.output_names) || program.output_names.length === 0 ||
+    program.output_names.some((name) => typeof name !== "string" || name.length === 0) ||
+    new Set(program.output_names).size !== program.output_names.length
+  ) {
+    fail(`${field}.output_names must be unique non-empty strings`);
+  }
+  if (!Array.isArray(program.outputs) || program.outputs.length !== program.output_names.length) {
+    fail(`${field}.outputs do not match the output interface`);
+  }
+  for (let index = 0; index < program.outputs.length; index += 1) {
+    const output = program.outputs[index];
+    exactKeys(output, ["name", "expression"], `${field}.outputs[${index}]`);
+    if (output.name !== program.output_names[index]) {
+      fail(`${field} output names/order do not match`);
+    }
+    validateBooleanExpression(output.expression, new Set(program.input_names), 0);
+  }
+  return sha256(Buffer.from(canonical(program), "utf8"));
+}
+
+function validateBooleanExpression(expression, inputNames, depth) {
+  if (depth > 256) fail("typed Boolean expression exceeds maximum depth");
+  requireObject(expression, "Boolean expression");
+  switch (expression.type) {
+    case "input":
+      exactKeys(expression, ["type", "name"], "Boolean input expression");
+      if (typeof expression.name !== "string" || !inputNames.has(expression.name)) {
+        fail("Boolean expression references an undeclared input");
+      }
+      return;
+    case "constant":
+      exactKeys(expression, ["type", "value"], "Boolean constant expression");
+      strictBit(expression.value, "Boolean constant");
+      return;
+    case "not":
+      exactKeys(expression, ["type", "value"], "Boolean not expression");
+      validateBooleanExpression(expression.value, inputNames, depth + 1);
+      return;
+    case "and":
+    case "xor":
+      exactKeys(expression, ["type", "left", "right"], `Boolean ${expression.type} expression`);
+      validateBooleanExpression(expression.left, inputNames, depth + 1);
+      validateBooleanExpression(expression.right, inputNames, depth + 1);
+      return;
+    case "select":
+      exactKeys(expression, ["type", "condition", "when_one", "when_zero"], "Boolean select expression");
+      validateBooleanExpression(expression.condition, inputNames, depth + 1);
+      validateBooleanExpression(expression.when_one, inputNames, depth + 1);
+      validateBooleanExpression(expression.when_zero, inputNames, depth + 1);
+      return;
+    default:
+      fail("Boolean expression type is unsupported");
+  }
+}
+
+function evaluateBooleanExpression(expression, environment) {
+  switch (expression.type) {
+    case "input":
+      if (!Object.hasOwn(environment, expression.name)) {
+        fail("Boolean expression input is missing from its environment");
+      }
+      return environment[expression.name];
+    case "constant":
+      return expression.value;
+    case "not":
+      return 1 - evaluateBooleanExpression(expression.value, environment);
+    case "and":
+      return evaluateBooleanExpression(expression.left, environment) &
+        evaluateBooleanExpression(expression.right, environment);
+    case "xor":
+      return evaluateBooleanExpression(expression.left, environment) ^
+        evaluateBooleanExpression(expression.right, environment);
+    case "select":
+      return evaluateBooleanExpression(expression.condition, environment)
+        ? evaluateBooleanExpression(expression.when_one, environment)
+        : evaluateBooleanExpression(expression.when_zero, environment);
+    default:
+      fail("Boolean expression type is unsupported");
+  }
+}
+
+function evaluateTypedProgram(program, inputs) {
+  if (!Array.isArray(inputs) || inputs.length !== program.input_names.length) {
+    fail("typed program input vector width is invalid");
+  }
+  const environment = {};
+  program.input_names.forEach((name, index) => {
+    environment[name] = strictBit(inputs[index], `program input ${name}`);
+  });
+  return program.outputs.map((output) =>
+    evaluateBooleanExpression(output.expression, environment)
+  );
+}
+
+function equalCanonical(left, right) {
+  return canonical(left) === canonical(right);
+}
+
+function requireDigestBinding(actual, expected, field) {
+  if (requireDigest(actual, field) !== expected) {
+    fail(`${field} does not match its realization binding`);
+  }
+}
+
+/**
+ * Verify a portable stateful checkpoint, replay every source event, validate
+ * every revision's independently decoded sparse model, and calculate one
+ * continuation step in the receiving process.
+ */
+export function verifyPortableStatefulCheckpoint(checkpoint) {
+  if (!Buffer.isBuffer(checkpoint) || checkpoint.length < PREFIX_BYTES) {
+    fail("portable stateful checkpoint is truncated");
+  }
+  if (!checkpoint.subarray(0, 8).equals(PORTABLE_CHECKPOINT_MAGIC)) {
+    fail("portable stateful checkpoint magic does not match");
+  }
+  if (checkpoint.readUInt16LE(8) !== 1) {
+    fail("unsupported portable stateful checkpoint framing version");
+  }
+  const headerLength = checkpoint.readUInt32LE(10);
+  const end = PREFIX_BYTES + headerLength;
+  if (headerLength <= 0 || end !== checkpoint.length) {
+    fail("portable stateful checkpoint header length does not match file size");
+  }
+  const headerBytes = checkpoint.subarray(PREFIX_BYTES, end);
+  let header;
+  try {
+    header = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(headerBytes));
+  } catch {
+    fail("portable stateful checkpoint header is not valid UTF-8 JSON");
+  }
+  requireObject(header, "portable stateful checkpoint");
+  if (Buffer.compare(Buffer.from(canonical(header), "utf8"), headerBytes) !== 0) {
+    fail("portable stateful checkpoint header is not canonical");
+  }
+  const { checkpoint_sha256: checkpointHash, ...core } = header;
+  requireDigestBinding(
+    checkpointHash,
+    sha256(Buffer.from(canonical(core), "utf8")),
+    "checkpoint_sha256"
+  );
+  exactKeys(core, ["schema", "version", "runtime", "realizations", "resume_controls"], "checkpoint core");
+  if (
+    core.schema !== PORTABLE_CHECKPOINT_SCHEMA ||
+    requireInteger(core.version, "checkpoint.version") !== 1
+  ) {
+    fail("unsupported portable stateful checkpoint schema/version");
+  }
+
+  const runtime = requireObject(core.runtime, "checkpoint.runtime");
+  exactKeys(runtime, [
+    "schema", "compiler_id", "initial_state", "state_input_names",
+    "initial_program", "current_program", "current_model_digest",
+    "state", "tick", "revision", "events", "genesis_digest",
+    "chain_head_digest",
+  ], "checkpoint.runtime");
+  if (
+    runtime.schema !== STATEFUL_RUNTIME_SCHEMA ||
+    runtime.compiler_id !== STATEFUL_COMPILER_ID
+  ) {
+    fail("unsupported stateful runtime/compiler identity");
+  }
+
+  const initialProgramDigest = validateTypedProgram(runtime.initial_program, "initial_program");
+  const currentProgramDigest = validateTypedProgram(runtime.current_program, "current_program");
+  const initialState = runtime.initial_state;
+  const stateInputNames = runtime.state_input_names;
+  if (
+    !Array.isArray(initialState) || initialState.length === 0 ||
+    initialState.some((value) => value !== 0 && value !== 1) ||
+    !Array.isArray(stateInputNames) || stateInputNames.length !== initialState.length ||
+    stateInputNames.some((name) => typeof name !== "string" || !name) ||
+    new Set(stateInputNames).size !== stateInputNames.length
+  ) {
+    fail("runtime initial state or state-register interface is invalid");
+  }
+  if (stateInputNames.some((name) => !runtime.initial_program.input_names.includes(name))) {
+    fail("runtime state register is not an initial program input");
+  }
+  if (runtime.initial_program.output_names.length !== stateInputNames.length) {
+    fail("runtime outputs do not match the state-register width");
+  }
+  const initialControlNames = runtime.initial_program.input_names.filter(
+    (name) => !stateInputNames.includes(name)
+  );
+  const currentControlNames = runtime.current_program.input_names.filter(
+    (name) => !stateInputNames.includes(name)
+  );
+
+  const realizationRecords = core.realizations;
+  if (
+    !Array.isArray(realizationRecords) ||
+    realizationRecords.length !== requireInteger(runtime.revision, "runtime.revision") + 1
+  ) {
+    fail("checkpoint does not carry exactly one realization per revision");
+  }
+  const realizations = [];
+  let exhaustiveRows = 0;
+  for (let revision = 0; revision < realizationRecords.length; revision += 1) {
+    const record = realizationRecords[revision];
+    exactKeys(
+      record,
+      ["revision", "program_digest", "model_digest", "capsule_sha256", "capsule_base64"],
+      `realizations[${revision}]`
+    );
+    if (requireInteger(record.revision, `realizations[${revision}].revision`) !== revision) {
+      fail("checkpoint realization revisions are not contiguous");
+    }
+    const programPayload = revision === 0
+      ? runtime.initial_program
+      : null;
+    const programDigest = requireDigest(record.program_digest, "realization.program_digest");
+    const modelDigest = requireDigest(record.model_digest, "realization.model_digest");
+    const capsuleHash = requireDigest(record.capsule_sha256, "realization.capsule_sha256");
+    if (typeof record.capsule_base64 !== "string") {
+      fail("realization capsule encoding is invalid");
+    }
+    const capsule = Buffer.from(record.capsule_base64, "base64");
+    if (capsule.toString("base64") !== record.capsule_base64) {
+      fail("realization capsule base64 is not canonical");
+    }
+    if (sha256(capsule) !== capsuleHash) {
+      fail("realization capsule byte digest mismatch");
+    }
+    const verifiedCapsule = verifyCapsule(capsule);
+    const capsuleHeaderLength = capsule.readUInt32LE(10);
+    const capsuleHeader = JSON.parse(
+      new TextDecoder("utf-8", { fatal: true }).decode(
+        capsule.subarray(PREFIX_BYTES, PREFIX_BYTES + capsuleHeaderLength)
+      )
+    );
+    if (
+      capsuleHeader.codec.name !== "hybrid_binary" ||
+      capsuleHeader.source.program_digest !== programDigest ||
+      capsuleHeader.realization.dense_model_digest !== modelDigest ||
+      capsuleHeader.source.kind !== "transition_program" ||
+      capsuleHeader.verification.input_row_count !== 2 ** capsuleHeader.interface.input_names.length
+    ) {
+      fail("realization capsule does not bind the declared program/model revision");
+    }
+    const payload = capsule.subarray(PREFIX_BYTES + capsuleHeaderLength);
+    const decodedModel = decodeHybridBinary(payload, capsuleHeader);
+    const program = revision === 0
+      ? runtime.initial_program
+      : null;
+    if (programPayload && (
+      programPayload.input_names.join("\0") !== capsuleHeader.interface.input_names.join("\0") ||
+      programPayload.output_names.join("\0") !== capsuleHeader.interface.output_names.join("\0")
+    )) {
+      fail("initial program interface differs from its realization capsule");
+    }
+    realizations.push({
+      revision,
+      programDigest,
+      modelDigest,
+      capsuleHash,
+      capsuleHeader,
+      model: decodedModel,
+      program: program,
+      verifiedCapsule,
+    });
+  }
+
+  // Bind all supplied revisions to the exact typed source programs and ensure
+  // each capsule independently realizes that program on its complete domain.
+  const revisionPrograms = [runtime.initial_program];
+  if (!Array.isArray(runtime.events)) fail("runtime.events must be an ordered array");
+  for (const event of runtime.events) {
+    if (event && event.kind === "revision") revisionPrograms.push(event.target_program);
+  }
+  if (revisionPrograms.length !== realizations.length) {
+    fail("runtime event revisions and realization capsules do not align");
+  }
+  for (let revision = 0; revision < revisionPrograms.length; revision += 1) {
+    const program = revisionPrograms[revision];
+    const digest = validateTypedProgram(program, `revision_programs[${revision}]`);
+    const realization = realizations[revision];
+    if (
+      digest !== realization.programDigest ||
+      program.input_names.join("\0") !== realization.capsuleHeader.interface.input_names.join("\0") ||
+      program.output_names.join("\0") !== realization.capsuleHeader.interface.output_names.join("\0")
+    ) {
+      fail("typed program digest/interface differs from its realization capsule");
+    }
+    realization.program = program;
+    const width = program.input_names.length;
+    if (width > 20) fail("portable stateful checkpoint finite domain exceeds verifier budget");
+    for (let mask = 0; mask < 2 ** width; mask += 1) {
+      const inputs = Array.from({ length: width }, (_, bit) =>
+        (mask >> (width - bit - 1)) & 1
+      );
+      const typedOutputs = evaluateTypedProgram(program, inputs);
+      const modelOutputs = predictSparse(realization.model, inputs);
+      if (!equalCanonical(typedOutputs, modelOutputs)) {
+        fail(`realization ${revision} differs from its typed program on the finite domain`);
+      }
+      exhaustiveRows += 1;
+    }
+  }
+  if (
+    initialProgramDigest !== realizations[0].programDigest ||
+    currentProgramDigest !== realizations[realizations.length - 1].programDigest ||
+    runtime.current_model_digest !== realizations[realizations.length - 1].modelDigest
+  ) {
+    fail("runtime initial/current program or model identity is inconsistent");
+  }
+
+  const genesisDigest = sha256(Buffer.from(canonical({
+    domain: STATEFUL_GENESIS_DOMAIN,
+    schema: runtime.schema,
+    initial_state: initialState,
+    state_input_names: stateInputNames,
+    initial_program_digest: initialProgramDigest,
+    initial_model_digest: realizations[0].modelDigest,
+    compiler_id: runtime.compiler_id,
+  }), "utf8"));
+  if (runtime.genesis_digest !== genesisDigest) {
+    fail("runtime genesis digest does not bind the initial realization");
+  }
+
+  let state = initialState.slice();
+  let tick = 0;
+  let revision = 0;
+  let activeProgram = runtime.initial_program;
+  let activeProgramDigest = initialProgramDigest;
+  let activeModel = realizations[0].model;
+  let activeModelDigest = realizations[0].modelDigest;
+  let chainHead = genesisDigest;
+  let stepCount = 0;
+  let revisionCount = 0;
+
+  for (let index = 0; index < runtime.events.length; index += 1) {
+    const event = runtime.events[index];
+    requireObject(event, `runtime.events[${index}]`);
+    if (
+      requireInteger(event.sequence, "runtime event sequence") !== index + 1 ||
+      event.previous_event_digest !== chainHead
+    ) {
+      fail("runtime event sequence or predecessor digest is invalid");
+    }
+    const { event_digest: eventDigest, ...eventPayload } = event;
+    requireDigestBinding(
+      eventDigest,
+      sha256(Buffer.from(canonical(eventPayload), "utf8")),
+      "runtime event digest"
+    );
+
+    if (event.kind === "step") {
+      exactKeys(event, [
+        "sequence", "previous_event_digest", "kind", "tick_before",
+        "tick_after", "revision", "state_before", "state_after",
+        "controls", "input_values", "outputs", "program_digest",
+        "model_digest", "event_digest",
+      ], "runtime step event");
+      if (
+        requireInteger(event.tick_before, "step.tick_before") !== tick ||
+        requireInteger(event.tick_after, "step.tick_after") !== tick + 1 ||
+        requireInteger(event.revision, "step.revision") !== revision ||
+        event.program_digest !== activeProgramDigest ||
+        event.model_digest !== activeModelDigest ||
+        !equalCanonical(event.state_before, state)
+      ) {
+        fail("runtime step event does not continue the active state/time/model");
+      }
+      const controlNames = activeProgram.input_names.filter(
+        (name) => !stateInputNames.includes(name)
+      );
+      exactKeys(event.controls, controlNames, "runtime step controls");
+      const controls = {};
+      for (const name of controlNames) controls[name] = strictBit(event.controls[name], `control ${name}`);
+      const inputValues = {};
+      const inputVector = activeProgram.input_names.map((name) => {
+        const value = stateInputNames.includes(name)
+          ? state[stateInputNames.indexOf(name)]
+          : controls[name];
+        inputValues[name] = value;
+        return value;
+      });
+      if (!equalCanonical(event.input_values, inputValues)) {
+        fail("runtime step event input mapping does not match state and controls");
+      }
+      const typedOutputs = evaluateTypedProgram(activeProgram, inputVector);
+      const modelOutputs = predictSparse(activeModel, inputVector);
+      if (
+        !equalCanonical(typedOutputs, modelOutputs) ||
+        !equalCanonical(event.outputs, typedOutputs) ||
+        !equalCanonical(event.state_after, typedOutputs)
+      ) {
+        fail("runtime step event does not match independent typed/model execution");
+      }
+      state = typedOutputs;
+      tick += 1;
+      stepCount += 1;
+    } else if (event.kind === "revision") {
+      exactKeys(event, [
+        "sequence", "previous_event_digest", "kind", "tick",
+        "revision_before", "revision_after", "state_preserved",
+        "source_program_digest", "target_program_digest",
+        "source_model_digest", "target_model_digest", "target_program",
+        "event_digest",
+      ], "runtime revision event");
+      const targetProgram = event.target_program;
+      const targetProgramDigest = validateTypedProgram(targetProgram, "revision.target_program");
+      if (
+        requireInteger(event.tick, "revision.tick") !== tick ||
+        requireInteger(event.revision_before, "revision.revision_before") !== revision ||
+        requireInteger(event.revision_after, "revision.revision_after") !== revision + 1 ||
+        !equalCanonical(event.state_preserved, state) ||
+        event.source_program_digest !== activeProgramDigest ||
+        event.source_model_digest !== activeModelDigest ||
+        event.target_program_digest !== targetProgramDigest
+      ) {
+        fail("runtime revision event breaks state/time or source-model continuity");
+      }
+      if (
+        targetProgram.input_names.join("\0") !== activeProgram.input_names.join("\0") ||
+        targetProgram.output_names.join("\0") !== activeProgram.output_names.join("\0") ||
+        targetProgramDigest === activeProgramDigest
+      ) {
+        fail("runtime revision changes interface or is a no-op");
+      }
+      const nextRevision = revision + 1;
+      const realization = realizations[nextRevision];
+      if (
+        !realization ||
+        realization.programDigest !== targetProgramDigest ||
+        realization.modelDigest !== event.target_model_digest
+      ) {
+        fail("runtime revision target is not bound to its realization capsule");
+      }
+      activeProgram = targetProgram;
+      activeProgramDigest = targetProgramDigest;
+      activeModel = realization.model;
+      activeModelDigest = realization.modelDigest;
+      revision = nextRevision;
+      revisionCount += 1;
+    } else {
+      fail("runtime event kind is unsupported");
+    }
+    chainHead = eventDigest;
+  }
+
+  if (
+    revision !== requireInteger(runtime.revision, "runtime.revision") ||
+    tick !== requireInteger(runtime.tick, "runtime.tick") ||
+    !equalCanonical(state, runtime.state) ||
+    chainHead !== runtime.chain_head_digest ||
+    activeProgramDigest !== currentProgramDigest ||
+    activeModelDigest !== runtime.current_model_digest ||
+    stepCount !== tick ||
+    revisionCount !== revision
+  ) {
+    fail("runtime terminal state, counters, or chain head disagree with replay");
+  }
+
+  exactKeys(core.resume_controls, currentControlNames, "checkpoint.resume_controls");
+  const resumeControls = {};
+  for (const name of currentControlNames) {
+    resumeControls[name] = strictBit(core.resume_controls[name], `resume control ${name}`);
+  }
+  const inputValues = {};
+  const inputVector = activeProgram.input_names.map((name) => {
+    const value = stateInputNames.includes(name)
+      ? state[stateInputNames.indexOf(name)]
+      : resumeControls[name];
+    inputValues[name] = value;
+    return value;
+  });
+  const typedOutputs = evaluateTypedProgram(activeProgram, inputVector);
+  const modelOutputs = predictSparse(activeModel, inputVector);
+  if (!equalCanonical(typedOutputs, modelOutputs)) {
+    fail("transferred realization disagrees with typed program on resume input");
+  }
+  const resumeEventPayload = {
+    sequence: runtime.events.length + 1,
+    previous_event_digest: chainHead,
+    kind: "step",
+    tick_before: tick,
+    tick_after: tick + 1,
+    revision,
+    state_before: state,
+    state_after: typedOutputs,
+    controls: resumeControls,
+    input_values: inputValues,
+    outputs: typedOutputs,
+    program_digest: activeProgramDigest,
+    model_digest: activeModelDigest,
+  };
+
+  return {
+    valid: true,
+    checkpoint_sha256: checkpointHash,
+    event_count: runtime.events.length,
+    step_count: stepCount,
+    revision_count: revisionCount,
+    realization_count: realizations.length,
+    exhaustive_model_rows: exhaustiveRows,
+    restored_state: state,
+    restored_tick: tick,
+    restored_revision: revision,
+    restored_program_digest: activeProgramDigest,
+    restored_model_digest: activeModelDigest,
+    chain_head_digest: chainHead,
+    resume_controls: resumeControls,
+    resumed_state: typedOutputs,
+    resumed_tick: tick + 1,
+    resumed_revision: revision,
+    resumed_event_digest: sha256(Buffer.from(canonical(resumeEventPayload), "utf8")),
+  };
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
+    let exitCli = false;
+    const checkpointFlag = process.argv.indexOf("--checkpoint");
+    if (checkpointFlag >= 0) {
+      const checkpointPath = process.argv[checkpointFlag + 1];
+      if (!checkpointPath) fail("--checkpoint requires a file path");
+      const checkpointBytes = readFileSync(checkpointPath);
+      report = verifyPortableStatefulCheckpoint(checkpointBytes);
+      process.stdout.write(`${JSON.stringify(report)}\\n`);
+      exitCli = true;
+    }
     const file = process.argv[2];
-    if (!file) fail("usage: node verify_capsule.mjs <capsule.bin> [--reference reference.json] [--trajectories trajectories.json]");
+    if (!exitCli && !file) fail("usage: node verify_capsule.mjs <capsule.bin> [--reference reference.json] [--trajectories trajectories.json] | --checkpoint <stateful-checkpoint.bin>");
     const referenceFlag = process.argv.indexOf("--reference");
     let report;
-    if (referenceFlag >= 0) {
+    if (!exitCli && referenceFlag >= 0) {
       const referencePath = process.argv[referenceFlag + 1];
       if (!referencePath) fail("--reference requires a JSON file path");
       const capsuleBytes = readFileSync(file);
