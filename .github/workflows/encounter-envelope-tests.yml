@@ -217,6 +217,15 @@ jobs:
           name: authority-signed-review-receipts
           path: ${{ runner.temp }}/signed-authority-review-example.json
           if-no-files-found: warn
+      - name: Generate signed-review authority ledger example
+        run: python bridges/authority-lineage/signed_review_ledger_demo.py --output "${{ runner.temp }}/signed-review-ledger-example.json"
+      - name: Upload signed-review authority ledger example
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authority-signed-review-ledger
+          path: ${{ runner.temp }}/signed-review-ledger-example.json
+          if-no-files-found: warn
       - name: Run append-only hypothesis revision tests
         run: python -m unittest discover -s bridges/hypothesis-revision -p "test_*.py" -v
       - name: Run Poset Interleaver property tests
