@@ -388,6 +388,31 @@ class TransitionContextAnalysisTests(unittest.TestCase):
         with self.assertRaises(TransitionContextError):
             validate_transition_context_analysis(tampered, model_document=self.model)
 
+    def test_analysis_is_invariant_to_source_record_order(self):
+        records = [
+            make_record(self.model, attempt_id="a", outcome="ready", next_state="s1"),
+            make_record(self.model, attempt_id="b", outcome="other", next_state="s2"),
+            make_record(self.model, attempt_id="c", outcome="ready", next_state="s1"),
+        ]
+        assignments = [
+            assignment(record, {
+                "mode": {"status": "observed", "value": value},
+                "host": {"status": "observed", "value": "one"},
+            })
+            for record, value in zip(records, ("A", "B", "A"))
+        ]
+        forward = build_transition_context_analysis(
+            model_document=self.model,
+            conformance_records=records,
+            context_assignments=assignments,
+        )
+        reverse = build_transition_context_analysis(
+            model_document=self.model,
+            conformance_records=list(reversed(records)),
+            context_assignments=list(reversed(assignments)),
+        )
+        self.assertEqual(forward, reverse)
+
     def test_empty_context_assignments_preserve_all_attempts_as_unassigned(self):
         record = make_record(self.model, attempt_id="a")
         analysis = build_transition_context_analysis(
