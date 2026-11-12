@@ -480,6 +480,107 @@ def _run_attempt(
         }
 
 
+def _run_source_equivocation_probe(
+    mailcpu: Mapping[str, Any],
+    strict: bool,
+    replicate: int,
+) -> dict[str, Any]:
+    """Exercise one source changing its same-event value at the consensus layer.
+
+    This is intentionally separate from two different sources disagreeing.
+    E-CPU rejects the changed same-source payload and records the source as
+    equivocal even when strict=False.
+    """
+    attempt_id = f"equivocation-strict-{int(strict)}-replicate-{replicate:02d}"
+    policy = mailcpu["ObservationAuthorityPolicy"](
+        "resolver", SOURCES, quorum=QUORUM, strict=strict
+    )
+    consensus = mailcpu["ObservationConsensus"](policy)
+    first = observation_for(mailcpu, "S00", "hit")
+    peer = observation_for(mailcpu, "S01", "hit")
+    conflicting = observation_for(mailcpu, "S00", "miss")
+    consensus.ingest(first)
+    consensus.ingest(peer)
+    predecision = consensus.status("resolver", 1)
+
+    conflict_error = None
+    try:
+        consensus.ingest(conflicting)
+    except mailcpu["ObservationConflictError"] as error:
+        conflict_error = f"{type(error).__name__}: {error}"
+    if conflict_error is None:
+        raise AssertionError("same-source contradictory observation was not rejected")
+
+    conflicted = consensus.status("resolver", 1)
+    if conflicted.status != "CONFLICT":
+        raise AssertionError("source equivocation did not force a consensus conflict")
+    finalized = consensus.finalize("resolver", 1)
+    if finalized.status != "CONFLICT":
+        raise AssertionError("source-equivocation conflict did not survive finalization")
+
+    snapshot = consensus.snapshot()
+    conflict_item = next(
+        item for item in snapshot["conflicts"]
+        if item["kind"] == "resolver" and item["logical_time"] == 1
+    )
+    if conflict_item["sources"] != ["S00"]:
+        raise AssertionError("consensus did not retain the equivocal source identity")
+
+    restored = mailcpu["ObservationConsensus"].from_snapshot(snapshot)
+    restore_matches = digest(restored.snapshot()) == digest(snapshot)
+    restored_status = restored.status("resolver", 1)
+    if not restore_matches or restored_status.status != "CONFLICT":
+        raise AssertionError("source-equivocation conflict did not survive consensus snapshot replay")
+
+    late_new_rejected = False
+    late_new_error = None
+    try:
+        restored.ingest(observation_for(mailcpu, "S02", "hit"))
+    except mailcpu["ObservationError"] as error:
+        late_new_rejected = True
+        late_new_error = f"{type(error).__name__}: {error}"
+
+    late_changed_rejected = False
+    late_changed_error = None
+    try:
+        restored.ingest(observation_for(mailcpu, "S01", "miss"))
+    except mailcpu["ObservationError"] as error:
+        late_changed_rejected = True
+        late_changed_error = f"{type(error).__name__}: {error}"
+
+    idempotent_replay = restored.ingest(first)
+    final_snapshot_unchanged = digest(restored.snapshot()) == digest(snapshot)
+    if not late_new_rejected or not late_changed_rejected:
+        raise AssertionError("post-finalization source or changed-value proposal was accepted")
+    if idempotent_replay.status != "CONFLICT" or not final_snapshot_unchanged:
+        raise AssertionError("exact prior evidence replay changed the finalized conflict")
+
+    return {
+        "attempt_id": attempt_id,
+        "event": {"kind": "resolver", "logical_time": 1},
+        "strict": strict,
+        "replicate": replicate,
+        "initial_sources": ["S00", "S01"],
+        "pre_equivocation_status": predecision.status,
+        "equivocal_source": "S00",
+        "first_payload_digest": digest(list(first.to_payload())),
+        "conflicting_payload_digest": digest(list(conflicting.to_payload())),
+        "conflict_error": conflict_error,
+        "conflicted_status": conflicted.status,
+        "final_status": finalized.status,
+        "conflict_sources": conflict_item["sources"],
+        "restored_conflict_status": restored_status.status,
+        "snapshot_restore_matches": restore_matches,
+        "late_new_source_rejected": late_new_rejected,
+        "late_new_source_error": late_new_error,
+        "late_changed_source_value_rejected": late_changed_rejected,
+        "late_changed_source_value_error": late_changed_error,
+        "exact_original_replay_status": idempotent_replay.status,
+        "snapshot_unchanged_after_late_proposals": final_snapshot_unchanged,
+        "consensus_snapshot_digest": digest(snapshot),
+    }
+
+
 def validate_attempt_result(record: Mapping[str, Any]) -> dict[str, Any]:
     strict = record["strict"]
     scenario = record["scenario"]
@@ -557,6 +658,7 @@ def run_matrix(output_dir: str | Path, *, replicates: int = DEFAULT_REPLICATES) 
         "Instruction", "Op", "ReliabilityPolicy", "ReliableChannel",
         "ObservationAuthorityPolicy", "ResolverObservation",
         "GatedObservationCoordinator", "ObservationError",
+        "ObservationConflictError", "ObservationConsensus",
         "load_gated_checkpoint",
     )
     missing = [name for name in required if not hasattr(mailcpu, name)]
@@ -582,6 +684,20 @@ def run_matrix(output_dir: str | Path, *, replicates: int = DEFAULT_REPLICATES) 
         status: sum(record["final_status"] == status for record in attempts)
         for status in ("AUTHORIZED", "CONFLICT", "REFUSED")
     }
+    equivocation_probes = [
+        _run_source_equivocation_probe(vars(mailcpu), strict, replicate)
+        for strict in STRICT_LEVELS
+        for replicate in range(replicates)
+    ]
+    if not all(
+        item["final_status"] == "CONFLICT"
+        and item["snapshot_restore_matches"]
+        and item["late_new_source_rejected"]
+        and item["late_changed_source_value_rejected"]
+        and item["snapshot_unchanged_after_late_proposals"]
+        for item in equivocation_probes
+    ):
+        raise AssertionError("one or more source-equivocation probes failed")
     report_core = {
         "format": "in-formation.ecpu-epistemic-authority-finalization",
         "schema": EXPERIMENT_SCHEMA,
@@ -618,6 +734,18 @@ def run_matrix(output_dir: str | Path, *, replicates: int = DEFAULT_REPLICATES) 
         "durable_log_verification_success_count": sum(
             record["durable_log_verified"] for record in attempts
         ),
+        "source_equivocation_probe_count": len(equivocation_probes),
+        "source_equivocation_conflict_count": sum(
+            item["final_status"] == "CONFLICT" for item in equivocation_probes
+        ),
+        "source_equivocation_restore_success_count": sum(
+            item["snapshot_restore_matches"] for item in equivocation_probes
+        ),
+        "source_equivocation_late_rejection_count": sum(
+            item["late_new_source_rejected"] and item["late_changed_source_value_rejected"]
+            for item in equivocation_probes
+        ),
+        "source_equivocation_digest": digest(equivocation_probes),
         "attempt_results_digest": digest(attempts),
         "evidence_ledger_digest": digest(evidence),
         "trace_digest": digest(trace),
@@ -660,6 +788,11 @@ def run_matrix(output_dir: str | Path, *, replicates: int = DEFAULT_REPLICATES) 
                 and record["final_status"] == "AUTHORIZED"
                 for record in attempts
             ),
+            "source_equivocation_probe_count": len(equivocation_probes),
+            "source_equivocation_conflict_count": report["source_equivocation_conflict_count"],
+            "source_equivocation_restore_success_count": report["source_equivocation_restore_success_count"],
+            "source_equivocation_late_rejection_count": report["source_equivocation_late_rejection_count"],
+            "source_equivocation_digest": report["source_equivocation_digest"],
         },
         "digests": {
             "report_digest": report["report_digest"],
@@ -676,6 +809,7 @@ def run_matrix(output_dir: str | Path, *, replicates: int = DEFAULT_REPLICATES) 
         "attempt-results.json": attempts,
         "evidence-ledger.json": evidence,
         "transition-trace.json": trace,
+        "source-equivocation-probes.json": equivocation_probes,
     }
     for name, document in documents.items():
         (output / name).write_text(
@@ -691,6 +825,14 @@ def run_matrix(output_dir: str | Path, *, replicates: int = DEFAULT_REPLICATES) 
         raise AssertionError("checkpoint or durable-log verification failed")
     if not all(record["late_evidence"]["direct_policy_rejected"] for record in attempts):
         raise AssertionError("a late evidence proposal crossed finalization")
+    if not all(
+        item["final_status"] == "CONFLICT"
+        and item["snapshot_restore_matches"]
+        and item["late_new_source_rejected"]
+        and item["late_changed_source_value_rejected"]
+        for item in equivocation_probes
+    ):
+        raise AssertionError("source-equivocation conflict invariants failed")
     return report
 
 
