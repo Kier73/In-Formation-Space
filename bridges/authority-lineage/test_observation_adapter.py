@@ -39,6 +39,7 @@ def authorized_attempt():
         "representative_source": "S00",
         "evidence_partition": {
             "observed_sources": sources,
+            "source_count": len(sources),
             "winner_sources": sources,
             "dissenting_sources": [],
             "missing_sources": ["S02", "S03"],
