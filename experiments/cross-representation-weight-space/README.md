@@ -68,3 +68,8 @@ This work should be read as an executable seed for weight-space programming. The
 ## Recorded run
 
 The first two pinned GitHub Actions runs passed and produced byte-identical result JSON. See [the retained result](results/ci-run-43154718665.json) and [the provenance/evaluation note](results/ci-run-43154718665.md), including exact dependency revisions, model digests, intervention coordinates, and the bounded verification claim.
+
+
+## Dual-architecture result schema
+
+The dual-architecture runner emits schema `in-formation-space.cross-representation-weight-space.v2`. It records both the two-hidden-layer and three-hidden-layer architectures independently, including each model's source/target digest, active-parameter count, two changed coordinates, and eight corresponding cross-runtime cases (four per gate). The integration workflow pins the exact E-CPU and VGI commits used in each run and retains the generated JSON artifact.
