@@ -391,6 +391,7 @@ def build_transition_conformance_record(
         },
         "conformance_status": status,
         "state_evidence": state_evidence,
+        "source_observation_path": _copy_json(dict(observation_path), "source observation path"),
         "source_evidence": {
             "observation_path_digest": _digest(dict(observation_path)),
             "returned_ref": returned_details and path_info["returned"]["evidence_ref"],
@@ -418,15 +419,28 @@ def validate_transition_conformance_record(
     record: Mapping[str, Any],
     *,
     model_document: Mapping[str, Any],
-    observation_path: Mapping[str, Any],
+    observation_path: Optional[Mapping[str, Any]] = None,
 ) -> dict[str, Any]:
-    """Rebuild a conformance record from the pinned model and source path."""
+    """Rebuild a conformance record from its pinned model and embedded path.
+
+    A caller may also supply the original path separately; when present it
+    must match the embedded snapshot exactly. The snapshot supports
+    self-contained reconstruction, not authentication of external evidence.
+    """
     if not isinstance(record, Mapping):
         raise TypeError("transition conformance record must be a mapping")
     supplied = dict(record)
     digest = supplied.pop("conformance_digest", None)
     if not isinstance(digest, str) or digest != _digest(supplied):
         raise TransitionConformanceError("transition conformance digest does not match its contents")
+    embedded_path = supplied.get("source_observation_path")
+    if not isinstance(embedded_path, Mapping):
+        raise TransitionConformanceError("source_observation_path snapshot is missing")
+    if observation_path is not None and _canonical(dict(observation_path)) != _canonical(dict(embedded_path)):
+        raise TransitionConformanceError("supplied observation path differs from the embedded snapshot")
+    source_path = embedded_path if observation_path is None else observation_path
+    if _digest(dict(source_path)) != supplied.get("source_evidence", {}).get("observation_path_digest"):
+        raise TransitionConformanceError("embedded observation path digest does not match source evidence")
     operation_timing = supplied.get("operation_timing")
     operation_span = None if operation_timing is None else operation_timing.get("span")
     state_evidence = supplied.get("state_evidence")
@@ -437,7 +451,7 @@ def validate_transition_conformance_record(
         conformance_id=supplied["conformance_id"],
         model_document=model_document,
         model_ref=supplied["model_ref"],
-        observation_path=observation_path,
+        observation_path=source_path,
         probe_id=supplied["probe_id"],
         current_state=supplied["current_state"],
         observed_outcome=supplied["observed_transition"]["outcome"],
@@ -550,6 +564,10 @@ class TransitionModelRevisionLedger:
         if candidate_id in self._candidates:
             raise ValueError(f"candidate_id already exists: {candidate_id}")
         record = _copy_json(conformance_record, "conformance_record")
+        validate_transition_conformance_record(
+            record,
+            model_document=self._current_model,
+        )
         digest = record.pop("conformance_digest", None)
         if not isinstance(digest, str) or digest != _digest(record):
             raise TransitionConformanceError("source conformance record digest is invalid")
