@@ -110,6 +110,153 @@ def _vgi_observe(table: FiniteTransitionTable, inputs: tuple[int, ...]) -> tuple
     )
 
 
+def _make_vgi_observer(table: FiniteTransitionTable):
+    """Create a reusable VGI interpreter closure for repeated transition steps."""
+    backend = Signal8Backend()
+    interpreter = VirtualGroundInterpreter()
+    task = _vgi_task(table)
+    observer_coordinates = (1, 3, 5, 7)
+
+    def observe(inputs: tuple[int, ...]) -> tuple[int, ...]:
+        """Evaluate one transition using the prebuilt VGI task and Signal8 Ground."""
+        memory = {
+            f"input.{name}": backend.encode_symbol(
+                4 * bit,
+                observer=observer,
+            )
+            for name, bit, observer in zip(
+                table.input_names,
+                inputs,
+                observer_coordinates,
+            )
+        }
+        memory["input.zero"] = backend.encode_symbol(0, observer=1)
+        memory["input.one"] = backend.encode_symbol(4, observer=7)
+        result = interpreter.interpret(task, memory)
+        observed = result.observed_outputs(backend)
+        return tuple(
+            decode_boolean_signal(observed[name])
+            for name in table.output_names
+        )
+
+    return observe
+
+
+def _verify_recurrent_rollouts(
+    table: FiniteTransitionTable,
+    model,
+    program,
+    *,
+    model_name: str,
+    typed_program_digest: str,
+    compiler_id: str,
+    horizon: int = 3,
+) -> dict[str, Any]:
+    """Exhaust every short control trajectory while each representation feeds back its own state."""
+    if horizon < 1:
+        raise ValueError("rollout horizon must be positive")
+    control_pairs = tuple(itertools.product((0, 1), repeat=2))
+    control_sequences = tuple(itertools.product(control_pairs, repeat=horizon))
+    reference = ReferenceInterpreter(program)
+    queued = QueueInterpreter(program)
+    vgi_observe = _make_vgi_observer(table)
+    trajectory_records: list[dict[str, Any]] = []
+
+    systems = ("oracle", "neural", "vgi", "mailcpu_reference", "mailcpu_queue")
+    for initial_state in range(4):
+        initial_bits = ((initial_state >> 1) & 1, initial_state & 1)
+        for controls in control_sequences:
+            states = {name: initial_bits for name in systems}
+            observed_outputs: list[list[int]] = []
+
+            for advance, reset in controls:
+                oracle_state = states["oracle"]
+                inputs = (
+                    oracle_state[0],
+                    oracle_state[1],
+                    advance,
+                    reset,
+                )
+                expected = table.row_for(inputs).outputs
+
+                reference_result = reference.run(
+                    initial_registers=dict(zip(table.input_names, inputs))
+                )
+                queue_result = queued.run(
+                    initial_registers=dict(zip(table.input_names, inputs))
+                )
+                if (
+                    reference_result.status.value != "halted"
+                    or queue_result.status.value != "halted"
+                ):
+                    raise AssertionError("MailCPU rollout transition did not halt")
+                if canonical_result(reference_result) != canonical_result(queue_result):
+                    raise AssertionError("MailCPU rollout traces diverged")
+
+                neural_outputs = model.predict(inputs)
+                vgi_outputs = vgi_observe(inputs)
+                reference_outputs = tuple(
+                    reference_result.state.registers[name]
+                    for name in table.output_names
+                )
+                queue_outputs = tuple(
+                    queue_result.state.registers[name]
+                    for name in table.output_names
+                )
+                observed = {
+                    "neural": neural_outputs,
+                    "vgi": vgi_outputs,
+                    "mailcpu_reference": reference_outputs,
+                    "mailcpu_queue": queue_outputs,
+                }
+                if any(value != expected for value in observed.values()):
+                    raise AssertionError(
+                        {
+                            "model": model_name,
+                            "initial_state": initial_state,
+                            "controls": controls,
+                            "input": inputs,
+                            "expected": expected,
+                            "observed": observed,
+                        }
+                    )
+
+                states["oracle"] = expected
+                states["neural"] = neural_outputs
+                states["vgi"] = vgi_outputs
+                states["mailcpu_reference"] = reference_outputs
+                states["mailcpu_queue"] = queue_outputs
+                if any(states[name] != states["oracle"] for name in systems):
+                    raise AssertionError("a recurrent state diverged after a transition")
+                observed_outputs.append(list(expected))
+
+            trajectory_records.append(
+                {
+                    "initial_state": list(initial_bits),
+                    "controls": [list(pair) for pair in controls],
+                    "outputs": observed_outputs,
+                    "final_state": list(states["oracle"]),
+                }
+            )
+
+    return {
+        "model_name": model_name,
+        "compiler_id": compiler_id,
+        "typed_program_digest": typed_program_digest,
+        "table_digest": table.digest,
+        "model_digest": model.digest,
+        "horizon": horizon,
+        "initial_state_count": 4,
+        "control_pair_count": len(control_pairs),
+        "control_sequence_count": len(control_sequences),
+        "trajectory_count": len(trajectory_records),
+        "transition_step_count": len(trajectory_records) * horizon,
+        "systems": list(systems),
+        "all_trajectories_match": True,
+        "trajectory_digest": canonical_value_digest(trajectory_records),
+    }
+
+
 def _translation_contract(
     table: FiniteTransitionTable,
     program,
