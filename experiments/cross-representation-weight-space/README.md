@@ -73,3 +73,5 @@ The first two pinned GitHub Actions runs passed and produced byte-identical resu
 ## Dual-architecture result schema
 
 The dual-architecture runner emits schema `in-formation-space.cross-representation-weight-space.v2`. It records both the two-hidden-layer and three-hidden-layer architectures independently, including each model's source/target digest, active-parameter count, two changed coordinates, and eight corresponding cross-runtime cases (four per gate). The integration workflow pins the exact E-CPU and VGI commits used in each run and retains the generated JSON artifact.
+
+The v2 dual-architecture run is now verified: [16-case JSON](results/ci-run-43155336248.json), [provenance and scope](results/ci-run-43155336248.md), and [successful Actions run](https://github.com/Kier73/In-Formation-Space/actions/runs/43155336248). The earlier v1 eight-case output is retained as historical evidence.
