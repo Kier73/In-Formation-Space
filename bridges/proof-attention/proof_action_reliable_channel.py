@@ -409,8 +409,6 @@ class ProofActionReliableHost:
             if received is None:
                 return None
             received_sequence, payload = received
-            if received_sequence < self._result_receiver.next_receive_sequence:
-                return None
             self._quarantine_result(
                 received_sequence,
                 payload,
