@@ -1,8 +1,7 @@
 """Interop test against the pinned E-CPU TemporalFrame implementation."""
 from __future__ import annotations
 
-from mailcpu.chemical_time import SystemEpoch
-from mailcpu.temporal import ClockDomain, TemporalContext, TemporalProfile
+import unittest
 
 from temporal_provenance import compare_observations, validate_temporal_frame
 
@@ -18,8 +17,15 @@ class SequenceClock:
         return value
 
 
-def test_actual_ecpu_temporal_frames_round_trip_and_keep_wall_time_separate():
-    profile = TemporalProfile(frozenset({
+class ECPUTemporalInteropTests(unittest.TestCase):
+    def test_actual_ecpu_temporal_frames_round_trip_and_keep_wall_time_separate(self):
+        try:
+            from mailcpu.chemical_time import SystemEpoch
+            from mailcpu.temporal import ClockDomain, TemporalContext, TemporalProfile
+        except ImportError:
+            self.skipTest("pinned E-CPU runtime is not on PYTHONPATH")
+
+        profile = TemporalProfile(frozenset({
         ClockDomain.MONOTONIC,
         ClockDomain.WALL,
         ClockDomain.CAUSAL,
@@ -27,15 +33,15 @@ def test_actual_ecpu_temporal_frames_round_trip_and_keep_wall_time_separate():
         ClockDomain.EVENT,
         ClockDomain.CHRONON,
         ClockDomain.CHEMICAL,
-    }))
-    context = TemporalContext(
-        "interop-worker",
-        profile,
-        monotonic_ns=SequenceClock(100, 120, 130),
-        wall_time_ns=SequenceClock(1_000, 900),
-    )
+        }))
+        context = TemporalContext(
+            "interop-worker",
+            profile,
+            monotonic_ns=SequenceClock(100, 120, 130),
+            wall_time_ns=SequenceClock(1_000, 900),
+        )
 
-    context.emit_causal_stamp()
+        context.emit_causal_stamp()
     first = context.observe(
         scheduler_id="interop-scheduler",
         scheduler_tick=10,
@@ -76,3 +82,7 @@ def test_actual_ecpu_temporal_frames_round_trip_and_keep_wall_time_separate():
     assert comparison["relations"]["scheduler"]["status"] == "before"
     assert comparison["relations"]["wall"]["status"] == "not_used"
     assert comparison["cross_domain_consistency"] == "not_assessed"
+
+
+if __name__ == "__main__":
+    unittest.main()
