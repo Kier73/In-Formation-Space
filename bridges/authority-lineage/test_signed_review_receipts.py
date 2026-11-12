@@ -3,6 +3,7 @@ import copy
 import hashlib
 import unittest
 
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from authority_lineage import digest
@@ -125,8 +126,9 @@ class SignedReviewReceiptTests(unittest.TestCase):
     def test_trust_store_seat_assignment_is_bound_to_vote(self):
         _, trust_store, envelopes, _, _ = signed_fixture()
         altered = copy.deepcopy(trust_store)
-        altered["keys"][0]["seat"] = "R00" if altered["keys"][0]["seat"] != "R00" else "R01"
-        altered["keys"].sort(key=lambda item: item["keyid"])
+        signer_keyid = envelopes[0]["signatures"][0]["keyid"]
+        target = next(item for item in altered["keys"] if item["keyid"] == signer_keyid)
+        target["seat"] = "R00" if target["seat"] != "R00" else "R01"
         with self.assertRaises(SignedReviewError):
             verify_signed_review_vote(envelopes[0], altered)
 
@@ -140,11 +142,13 @@ class SignedReviewReceiptTests(unittest.TestCase):
     def test_trust_store_cannot_relabel_public_key_without_fingerprint_change(self):
         _, trust_store, _, _, _ = signed_fixture()
         altered = copy.deepcopy(trust_store)
+        envelope = sign_review_vote(
+            build_demonstration()["certificate"]["votes"][0],
+            Ed25519PrivateKey.generate(),
+        )
         altered["keys"][0]["public_key"] = base64.b64encode(b"x" * 32).decode("ascii")
         with self.assertRaises(SignedReviewError):
-            build_signed_review_bundle(
-                build_demonstration()["certificate"], [], altered
-            )
+            verify_signed_review_vote(envelope, altered)
 
     def test_bundle_rejects_missing_receipt(self):
         certificate, trust_store, envelopes, _, _ = signed_fixture()
@@ -195,11 +199,6 @@ class SignedReviewReceiptTests(unittest.TestCase):
         example = build_demonstration()
         certificate = example["certificate"]
         key = Ed25519PrivateKey.generate()
-        trust_store = build_trust_store([
-            {"seat": vote["seat"], "principal": vote["reviewer_ref"], "public_key": key.public_key()}
-            for vote in certificate["votes"]
-        ]) if False else None
-        self.assertIsNone(trust_store)
         with self.assertRaises(SignedReviewError):
             build_trust_store([
                 {"seat": "R01", "principal": "agent://one", "public_key": key.public_key()},
@@ -217,8 +216,8 @@ class SignedReviewReceiptTests(unittest.TestCase):
         from signed_review_receipts import pae, _b64encode
         signature = keys["agent://reviewer-one"].sign(pae(PAYLOAD_TYPE, raw))
         pub = keys["agent://reviewer-one"].public_key().public_bytes(
-            encoding=__import__("cryptography").hazmat.primitives.serialization.Encoding.Raw,
-            format=__import__("cryptography").hazmat.primitives.serialization.PublicFormat.Raw,
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
         )
         keyid = hashlib.sha256(pub).hexdigest()
         envelope = {
