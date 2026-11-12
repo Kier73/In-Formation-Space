@@ -28,7 +28,12 @@
     "evidence_ledger_digest",
     "trace_digest",
     "interpretation_limits",
-    "report_digest"
+    "report_digest",
+    "source_equivocation_probe_count",
+    "source_equivocation_conflict_count",
+    "source_equivocation_restore_success_count",
+    "source_equivocation_late_rejection_count",
+    "source_equivocation_digest"
   ],
   "properties": {
     "format": {
@@ -174,6 +179,26 @@
       }
     },
     "report_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_equivocation_probe_count": {
+      "type": "integer",
+      "minimum": 6
+    },
+    "source_equivocation_conflict_count": {
+      "type": "integer",
+      "minimum": 6
+    },
+    "source_equivocation_restore_success_count": {
+      "type": "integer",
+      "minimum": 6
+    },
+    "source_equivocation_late_rejection_count": {
+      "type": "integer",
+      "minimum": 6
+    },
+    "source_equivocation_digest": {
       "type": "string",
       "pattern": "^[0-9a-f]{64}$"
     }
