@@ -87,3 +87,73 @@ The workflow records its exact VGI commit in .github/workflows/proof-attention.y
 ## Next experiments
 
 A later increment could admit new elaboration frames from a real tactic runner, then replan from the newly observed frontier. Another could compare the structural intention policy with a separate AND/OR cost-to-go algorithm on finite proof graphs. Neither should weaken the external kernel receipt boundary or infer a proof from an empty child list.
+
+
+## Proof-action execution and replanning
+
+The [proof-action execution session](proof_action_execution.py) adds the next interface after planning: one selected tactic candidate can be handed to an external proof worker, carried through an evidence-gated execution lifecycle, and correlated with a refreshed VGI ProofGround before the next plan is generated.
+
+\`\`\`python
+from proof_action_execution import ProofAttentionSession
+
+session = ProofAttentionSession(
+    proof_ground,
+    root_obligation_ids=(root_obligation_id,),
+    attempt_id_prefix="proof-run",
+    query_label="establish the theorem",
+)
+
+attempt = session.begin_next()
+# The host performs the real operation, then reports its receipts:
+attempt.mark_dispatched("sender", "dispatch://...")
+attempt.mark_admitted("worker", "admission://...")
+attempt.record_return(
+    "worker",
+    evidence_ref="encounter://...",
+    encounter_id="encounter-...",
+    payload_digest="...",
+    canonicalization="canonical-json-v1",
+)
+
+# Import the refreshed trace through VGI's ProofGroundAdapter first.
+session.interpret_result(
+    refreshed_proof_ground,
+    actor="proof-trace-adapter",
+    interpretation_ref="interpretation://...",
+)
+next_attempt = session.begin_next()
+\`\`\`
+
+### Lifecycle and correlation
+
+Each attempt has its own SHA-256-linked event sequence:
+
+\`planned → dispatched → admitted → returned → interpreted\`
+
+Transport or execution failures are explicit terminal events: \`dispatch_failed\`, \`execution_rejected\`, \`returned_unadmitted\`, \`no_result\`, or \`interpretation_failed\`. They are never converted into tactic outcomes.
+
+A result can be interpreted only after an admitted raw return. The refreshed ProofGround must:
+
+- preserve the exact proof environment and all previously known obligation fingerprints;
+- retain the selected source obligation;
+- contain exactly one result hyper-transition for the selected source and tactic;
+- bind that result edge's \`evidence_ref\` to the exact \`attempt_id\`;
+- report one of VGI's observed result statuses: \`elaborated\`, \`timeout\`, or \`rejected\`.
+
+The attempt ID is the correlation key the external trace adapter must write into the resulting VGI hyper-transition. This connects the raw return receipt to the normalized proof trace without pretending this bridge authenticates either artifact. The adapter remains responsible for checking that the trace was derived from the returned proof-worker output.
+
+### Replanning and completion
+
+After a result is correlated, the session rebuilds the attention plan from the refreshed ProofGround. The prior attempt is closed with a \`continued\` event before a next candidate is opened. Candidate transition IDs already attempted in this session are skipped, even if the refreshed Ground still carries their original candidate records.
+
+The session reaches \`complete\` only when every explicit root intention has a matched \`kernel_accepted\` receipt in the refreshed ProofGround. A timeout, rejected tactic, empty tactic subgoal list, or exhausted candidate frontier cannot establish completion. When no unattempted candidates remain and roots are not all kernel-accepted, the session becomes \`exhausted\` and the last interpreted attempt records \`unresolved\`; this is a scheduling result, not a theorem of unprovability.
+
+The session and every attempt expose deterministic JSON snapshots and digests. Each attempt event includes its sequence, prior event digest, and current event digest, so a later reader can verify the local event chain.
+
+### Deliberate boundary
+
+This is a coordinator and receipt ledger, not a tactic runner. It does not launch Lean or another proof assistant, dispatch network messages, parse arbitrary Lean syntax, authenticate an Encounter Envelope, or cryptographically validate a VerifiedKernelReceipt. Those operations remain with the host, trace adapter, and trusted kernel/checker integration.
+
+A proof action deliberately has a proof-specific lifecycle rather than being forced into the ordinary partial-transition probe interface: a tactic result is a hyper-transition with AND subgoals and OR alternatives, not a single state/action outcome that directly revises a transition Ground.
+
+Focused tests cover stage ordering, return/admission gates, attempt correlation, environment and obligation continuity, timeout/rejection handling, frontier exhaustion, receipt-gated completion, and deterministic event-chain export. The existing \`.github/workflows/proof-attention.yml\` discovers both proof-attention test modules against the pinned VGI revision.
