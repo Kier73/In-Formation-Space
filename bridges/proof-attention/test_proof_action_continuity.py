@@ -135,7 +135,15 @@ class ProofActionContinuityTests(unittest.TestCase):
     def test_restore_rejects_a_different_persisted_trajectory_manifest(self):
         _session_a, _trace_a, pg_a, _transport_a, host_a, worker_a = make_endpoints()
         _session_b, _trace_b, pg_b, _transport_b, host_b, worker_b = make_endpoints()
+        from proof_action_execution import ProofAttentionSession
+
         host_a.dispatch_next()
+        host_b.session = ProofAttentionSession(
+            pg_b,
+            tuple(host_b.session.plan["active_root_obligation_ids"]),
+            attempt_id_prefix="different-restore-run",
+            query_label="a distinct restoration intention",
+        )
         host_b.dispatch_next()
 
         with tempfile.TemporaryDirectory() as temporary:
