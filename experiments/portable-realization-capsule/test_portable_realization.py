@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import itertools
 import json
 import shutil
@@ -462,11 +463,11 @@ def test_independent_node_receiver_decodes_hybrid_binary_and_replays_stateful_co
 
     root = Path(__file__).resolve().parents[2]
     runner_path = root / "experiments" / "portable-realization-capsule" / "run_experiment.py"
-    spec = __import__("importlib.util", fromlist=["spec_from_file_location"]).spec_from_file_location(
+    spec = importlib.util.spec_from_file_location(
         "prc_hybrid_stateful_fixture", runner_path
     )
     assert spec is not None and spec.loader is not None
-    prc = __import__("importlib.util", fromlist=["module_from_spec"]).module_from_spec(spec)
+    prc = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(prc)
     sre = prc.sre002
 
