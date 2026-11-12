@@ -64,6 +64,18 @@ This is intentionally distinct from the temporal checkpoint trace above. A span 
 
 The [operation-span schema](operation-span.schema.json) and [cost-profile schema](operation-cost-profiles.schema.json) define the portable artifacts. [`test_operation_spans.py`](test_operation_spans.py) tests call semantics, failures, clock regression and failure, partitioning, source reconstruction, and schema validity.
 
+Saved artifacts can be analyzed offline and combined as inputs without losing clock boundaries:
+
+```bash
+python bridges/observation-path/operation_spans.py \
+  --input run-a/operation-spans.json \
+  --input run-b/operation-spans.json \
+  --minimum-samples 5 \
+  --output operation-cost-profiles.json
+```
+
+Each input may be a top-level span array or the CI artifact object containing `spans`. Duplicate `(attempt_id, span_id)` identities are rejected so replaying the same artifact cannot inflate sample counts. The CLI validates each source span and independently rebuilds the output profile. Different clock segments remain separate partitions even when they come from the same named operation.
+
 These profiles describe only observed invocations. They do not estimate the cost of a candidate that was never executed, correct for selection bias, or justify changing a policy without a separate validation experiment.
 
 ### Live pinned-runtime measurements
