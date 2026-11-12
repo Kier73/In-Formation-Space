@@ -1,0 +1,115 @@
+{
+  "schema": "in-formation-space.finite-state-transition-neural-synthesis.v4",
+  "status": "verified-within-complete-finite-domain",
+  "workflow_run_id": 43158333796,
+  "workflow_url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43158333796",
+  "workflow_head": "56afbe9a5bfdb9cc93b23ad4d695e2349b9284f2",
+  "dependency_revisions": {
+    "E-CPU": "4999f326a77c94dfe68bfb0b5862de117e9e26c9",
+    "Virtual-Ground-Interpreter": "b3a9de5b6c0e23651e4816530d3962a86d4ecdb4"
+  },
+  "artifact_json_sha256": "1a7e450599a6ad3739c276dc5e64d9cb193c2d7a873f92f1ddb8dc0baa4a447f",
+  "typed_transition_program_digest": "311348e8c24e6c2c24aa29a582e12c397f25115b8747c47c0f0f629a60220cac",
+  "edited_typed_transition_program_digest": "9ed86f3bb77490a6142683bc0c346b73dd828639b5e7ef0c37c5db68e65106e5",
+  "transition_table": {
+    "name": "two-bit-counter.reset-dominant.v1",
+    "input_names": ["state_1", "state_0", "advance", "reset"],
+    "output_names": ["next_state_1", "next_state_0"],
+    "rows": 16,
+    "source_digest": "f147c483a81efd85a4ba651fdba7fe2fc058d05762069b2736f5329d264aff96",
+    "edited_digest": "5779747a9b5a7ec11ab6382a4fe5e541ab9e67fbc3749a3e63561c34ea19754d"
+  },
+  "intervention": {
+    "inputs": [0, 1, 1, 1],
+    "source_outputs": [0, 0],
+    "target_outputs": [1, 0],
+    "changed_rows": 1,
+    "unchanged_rows": 15
+  },
+  "verification": {
+    "cases": 128,
+    "translation_equivalent": 128,
+    "all_outputs_match": true,
+    "phase_counts": {
+      "baseline_minterm": 32,
+      "one_row_intervention_minterm": 32,
+      "baseline_compositional": 16,
+      "one_row_override_compositional": 16,
+      "baseline_live_compositional": 16,
+      "one_row_override_live_compositional": 16
+    },
+    "independent_paths": [
+      "VGI Signal8",
+      "E-CPU MailCPU ReferenceInterpreter",
+      "E-CPU MailCPU QueueInterpreter",
+      "ReLU truth-table minterm compiler",
+      "ReLU direct Boolean-DAG compiler",
+      "ReLU live-feature Boolean-DAG compiler"
+    ]
+  },
+  "models": {
+    "truth_table_minterm": [
+      {
+        "name": "one-hidden-layer",
+        "architecture": [4, 16, 2],
+        "parameters": 114,
+        "active_before": 84,
+        "active_after": 85,
+        "changed_parameters": 1
+      },
+      {
+        "name": "two-hidden-layer",
+        "architecture": [4, 16, 16, 2],
+        "parameters": 386,
+        "active_before": 100,
+        "active_after": 101,
+        "changed_parameters": 1
+      }
+    ],
+    "direct_compositional_dag": [
+      {
+        "name": "compositional-source",
+        "architecture": [4, 7, 11, 15, 2],
+        "parameters": 335,
+        "active_parameters": 54,
+        "model_digest": "047128259f348f2be3a8fa5f49b82913b09321bdf69314b640db6eeb3c4e497d"
+      },
+      {
+        "name": "compositional-override",
+        "architecture": [4, 8, 12, 16, 18, 2],
+        "parameters": 700,
+        "active_parameters": 81,
+        "model_digest": "8980a715d5314d364ac21a291de4b63a8fff082e3acc16d6f8ab4a5382e6074f"
+      }
+    ],
+    "live_feature_compositional_dag": [
+      {
+        "name": "live-compositional-source",
+        "architecture": [4, 7, 5, 4, 2],
+        "parameters": 109,
+        "active_parameters": 37,
+        "model_digest": "625b8bd5300239de55775afcaaeb16bb670e28ecf97a232c2653c0befeb66b25"
+      },
+      {
+        "name": "live-compositional-override",
+        "architecture": [4, 8, 6, 5, 4, 2],
+        "parameters": 163,
+        "active_parameters": 50,
+        "model_digest": "b2e2cbc1e653d309d23b40c3f03e45e23125795fbb5ef63c293d9a6a28211a16"
+      }
+    ]
+  },
+  "liveness_reduction": {
+    "baseline_total_parameters": {"before": 335, "after": 109, "reduced_by": 226, "fraction": 0.6746},
+    "baseline_active_parameters": {"before": 54, "after": 37, "reduced_by": 17, "fraction": 0.3148},
+    "override_total_parameters": {"before": 700, "after": 163, "reduced_by": 537, "fraction": 0.7671},
+    "override_active_parameters": {"before": 81, "after": 50, "reduced_by": 31, "fraction": 0.3827}
+  },
+  "limitations": [
+    "The table compiler allocates one hidden minterm per Boolean input row.",
+    "The direct and liveness-compacted DAG compilers are exact for the typed Boolean expression algebra over the finite Boolean domain.",
+    "The compact model still uses dense layer matrices; zero-valued weights remain included in total parameter counts.",
+    "Exact correctness is established on the complete 16-row Boolean domain only.",
+    "No learned generalization, robustness outside the Boolean domain, quantization tolerance, or hardware performance is claimed."
+  ]
+}
