@@ -87,3 +87,24 @@ The [PRC-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs
 ## Final PR-head verification
 
 The final PR-head [workflow run 43317477207](https://github.com/Kier73/In-Formation-Space/actions/runs/43317477207) passed all steps, including 288 capsules, 49,104 pre/post-package semantic comparisons, and 288/288 header plus 288/288 payload tamper rejections. The [final-head evidence record](results/ci-run-43317477207.md) preserves exact source revisions, byte totals, and artifact digests.
+
+
+## Independent sparse decoding and semantic replay
+
+The Node.js receiver now has a narrowly scoped `rowmask_binary` decoder.
+It reconstructs each sparse layer from its little-endian row masks and exact
+int8/float64 scalar streams, validates the inner SRE-002 envelope, rebuilds the
+E-CPU sparse snapshot identity, and executes the decoded network.
+
+The cross-language test creates a real parity-2 realization with the SRE-002
+Python encoder, packages its row-mask binary payload in a PRC capsule, and
+passes the capsule plus a separately generated scalar-reference table to Node.
+The Node process must cover all four Boolean assignments, reproduce the
+reference output for each, and match the declared sparse-model digest. The
+reference table is checked against the SHA-256 recorded in the capsule receipt.
+A changed reference is rejected.
+
+This is a first semantic interoperability result for one codec and one small
+finite Ground. It does not yet establish interoperability for the other five
+encodings, arbitrary coefficient formats, or an independently implemented
+typed-Ground parser/compiler.
