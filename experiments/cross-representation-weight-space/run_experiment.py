@@ -212,6 +212,7 @@ def run_experiment() -> dict[str, Any]:
                 f"{architecture_name} declared {model.parameter_count} parameters"
             )
         initial_digest = model.digest
+        initial_active_parameters = model.active_parameter_count
         xor_cases = [
             _run_case("xor", model, left, right)
             for left, right in product((0, 1), repeat=2)
@@ -239,7 +240,7 @@ def run_experiment() -> dict[str, Any]:
                 "architecture": list(model.architecture),
                 "parameter_count": model.parameter_count,
                 "active_parameters": {
-                    "xor": 9,
+                    "xor": initial_active_parameters,
                     "and": model.active_parameter_count,
                 },
                 "initial_xor_model_digest": initial_digest,
