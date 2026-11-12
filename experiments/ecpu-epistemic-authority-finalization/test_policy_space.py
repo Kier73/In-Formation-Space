@@ -1,0 +1,100 @@
+import unittest
+
+from policy_space import (
+    POLICY_NAMES,
+    SOURCE_STATES,
+    evaluate_policy,
+    evidence_counts,
+    enumerate_evidence_space,
+    summarize_policy_space,
+    validate_policy_space,
+)
+
+
+class PolicySpaceTests(unittest.TestCase):
+    def test_all_four_source_absent_hit_miss_patterns_are_enumerated(self):
+        records = enumerate_evidence_space()
+        self.assertEqual(len(records), 3 ** 4)
+        self.assertEqual(len({record["pattern"] for record in records}), 81)
+        self.assertEqual(set(SOURCE_STATES), {"-", "H", "M"})
+        summary = summarize_policy_space(records)
+        self.assertEqual(summary["pattern_count"], 81)
+        self.assertIsNone(summary["probability_assignment"])
+        for name in POLICY_NAMES:
+            counts = summary["policies"][name]["state_counts"]
+            self.assertEqual(sum(counts.values()), 81)
+
+    def test_known_partial_unanimous_pattern_distinguishes_strict_and_permissive(self):
+        counts = evidence_counts(("H", "H", "-", "-"))
+        self.assertEqual(
+            evaluate_policy("runtime_strict", counts)["status"], "REFUSED"
+        )
+        self.assertEqual(
+            evaluate_policy("runtime_permissive", counts)["status"], "AUTHORIZED"
+        )
+        self.assertEqual(
+            evaluate_policy("observed_unanimity_quorum", counts)["status"], "AUTHORIZED"
+        )
+        self.assertEqual(
+            evaluate_policy("complete_roster_unique_plurality", counts)["status"],
+            "REFUSED",
+        )
+
+    def test_majority_dissent_and_tied_split_are_separated(self):
+        majority = evidence_counts(("H", "H", "H", "M"))
+        self.assertEqual(
+            evaluate_policy("runtime_permissive", majority)["status"], "AUTHORIZED"
+        )
+        self.assertEqual(
+            evaluate_policy("runtime_strict", majority)["status"], "CONFLICT"
+        )
+        self.assertEqual(
+            evaluate_policy("configured_majority", majority)["status"], "AUTHORIZED"
+        )
+        self.assertEqual(
+            evaluate_policy("observed_unanimity_quorum", majority)["status"], "CONFLICT"
+        )
+
+        tied = evidence_counts(("H", "H", "M", "M"))
+        self.assertTrue(tied["top_tie"])
+        self.assertEqual(
+            evaluate_policy("runtime_permissive", tied)["status"], "AUTHORIZED"
+        )
+        self.assertEqual(
+            evaluate_policy("unique_plurality_quorum", tied)["status"], "CONFLICT"
+        )
+        self.assertEqual(
+            evaluate_policy("observed_strict_majority", tied)["status"], "CONFLICT"
+        )
+
+    def test_one_source_never_reaches_quorum(self):
+        counts = evidence_counts(("H", "-", "-", "-"))
+        for name in POLICY_NAMES:
+            self.assertNotEqual(
+                evaluate_policy(name, counts)["status"], "AUTHORIZED", name
+            )
+
+    def test_margin_policy_requires_two_source_lead(self):
+        one_margin = evidence_counts(("H", "H", "M", "-"))
+        two_margin = evidence_counts(("H", "H", "H", "M"))
+        self.assertEqual(
+            evaluate_policy("plurality_margin_two", one_margin)["status"],
+            "CONFLICT",
+        )
+        self.assertEqual(
+            evaluate_policy("plurality_margin_two", two_margin)["status"],
+            "AUTHORIZED",
+        )
+
+    def test_exhaustive_records_and_summary_are_reconstructible(self):
+        records = enumerate_evidence_space()
+        summary = summarize_policy_space(records)
+        validate_policy_space(records, summary)
+        tampered = [dict(records[0]), *records[1:]]
+        tampered[0]["missing_count"] = 99
+        with self.assertRaisesRegex(ValueError, "reconstruction"):
+            validate_policy_space(tampered, summary)
+
+
+if __name__ == "__main__":
+    unittest.main()
