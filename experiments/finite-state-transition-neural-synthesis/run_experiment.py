@@ -363,7 +363,7 @@ def _verify_stateful_runtime_revision(
             data_path,
             index_path,
             manifest_path,
-            stride=1,
+            stride=64,
         )
         trajectory_restored = restore_stateful_transition_trajectory(
             manifest_path,
@@ -423,6 +423,7 @@ def _verify_stateful_runtime_revision(
         "event_digests": [event["event_digest"] for event in events],
         "trajectory_schema": MANIFEST_SCHEMA,
         "trajectory_event_count": trajectory_metadata["event_count"],
+        "trajectory_stride": trajectory_metadata["stride"],
         "trajectory_receipt_head": trajectory_metadata["receipt_head"],
         "trajectory_journal_head_digest": trajectory_metadata["journal_head_digest"],
         "trajectory_manifest_digest": manifest["manifest_digest"],
@@ -909,6 +910,7 @@ def run_experiment() -> dict[str, Any]:
         "stateful_trajectory_verification": {
             "schema": stateful_runtime_result["trajectory_schema"],
             "event_count": stateful_runtime_result["trajectory_event_count"],
+            "stride": stateful_runtime_result["trajectory_stride"],
             "receipt_head": stateful_runtime_result["trajectory_receipt_head"],
             "journal_head_digest": stateful_runtime_result["trajectory_journal_head_digest"],
             "manifest_digest": stateful_runtime_result["trajectory_manifest_digest"],
