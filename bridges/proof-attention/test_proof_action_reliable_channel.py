@@ -50,8 +50,8 @@ def make_endpoints(
     )
     worker = ProofActionReliableWorker(
         transport,
-        host_id=HOST_ID,
-        worker_id=WORKER_ID,
+        host_id=host_id,
+        worker_id=worker_id,
         request_channel=request_channel,
         result_channel=result_channel,
         policy=policy,
