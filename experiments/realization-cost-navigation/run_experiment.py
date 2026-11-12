@@ -533,6 +533,19 @@ def _verify_workload(workload: Workload) -> dict[str, Any]:
             raise AssertionError(f"MailCPU execution did not halt for {workload.name}")
         if canonical_result(reference) != canonical_result(queued):
             raise AssertionError(f"MailCPU execution backends diverged for {workload.name}")
+        expected_path_steps = len(table.input_names) + len(table.output_names) + 1
+        reference_steps = reference.state.steps
+        queue_steps = queued.state.steps
+        if reference_steps != expected_path_steps or queue_steps != expected_path_steps:
+            raise AssertionError(
+                {
+                    "workload": workload.name,
+                    "inputs": list(inputs),
+                    "expected_path_steps": expected_path_steps,
+                    "reference_steps": reference_steps,
+                    "queue_steps": queue_steps,
+                }
+            )
         reference_outputs = tuple(
             reference.state.registers[name] for name in table.output_names
         )
@@ -625,6 +638,8 @@ def _verify_workload(workload: Workload) -> dict[str, Any]:
                 "outputs": list(expected),
                 "mailcpu_reference_outputs": list(reference_outputs),
                 "mailcpu_queue_outputs": list(queue_outputs),
+                "mailcpu_reference_steps": reference_steps,
+                "mailcpu_queue_steps": queue_steps,
                 "vgi_outputs": list(vgi_outputs),
                 "neural_routes": route_results,
             }
@@ -670,6 +685,9 @@ def _verify_workload(workload: Workload) -> dict[str, Any]:
         "transition_table_digest": table.digest,
         "mailcpu_reference_compiler": "experiment.binary-input-decision-tree",
         "mailcpu_reference_instruction_count": len(executable.instructions),
+        "mailcpu_reference_path_step_bound": (
+            len(table.input_names) + len(table.output_names) + 1
+        ),
         "independent_observation_digest": observation_digest,
         "route_observation_digests": route_digests,
         "models": list(metrics.values()),
