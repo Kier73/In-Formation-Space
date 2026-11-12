@@ -12,6 +12,7 @@ from typing import Any, Mapping, Sequence
 
 from authority_lineage import (
     create_ledger,
+    decision_frontier,
     digest,
     issue_decision,
     propose_revision,
@@ -171,6 +172,8 @@ def issue_initial_decision_from_attempt(
     actual_sources = sorted(item["source"] for item in normalized)
     if actual_sources != expected_sources:
         raise ObservationEvidenceError("evidence ledger sources differ from the attempt partition")
+    if attempt.get("evidence_received_count") != len(normalized):
+        raise ObservationEvidenceError("attempt evidence count differs from retained evidence records")
     event_keys = {json.dumps(item["event"], sort_keys=True) for item in normalized}
     if len(event_keys) != 1:
         raise ObservationEvidenceError("evidence ledger contains multiple logical events")
@@ -251,11 +254,33 @@ def propose_revision_from_new_evidence(
     known_by_source: dict[str, dict[str, Any]] = {}
     for item in known:
         previous = known_by_source.get(item["source"])
-        if previous is not None and previous["payload_digest"] != item["payload_digest"]:
-            raise SourceEquivocationError(
-                f"known evidence already contains contradictory records for {item['source']}"
+        if previous is not None:
+            if previous["payload_digest"] != item["payload_digest"]:
+                raise SourceEquivocationError(
+                    f"known evidence already contains contradictory records for {item['source']}"
+                )
+            raise DuplicateObservationEvidenceError(
+                f"known evidence repeats a source record: {item['source']}"
             )
         known_by_source[item["source"]] = item
+
+    frontier = decision_frontier(ledger, event)
+    if frontier["status"] != "SINGLE_DECISION":
+        raise ObservationEvidenceError(
+            "late evidence adapter requires a single current decision frontier; merge competing branches first"
+        )
+    frontier_ids = sorted(frontier["decision_ids"])
+    proposed_bases = sorted(base_decision_ids)
+    if frontier_ids != proposed_bases:
+        raise ObservationEvidenceError(
+            "revision base decision IDs differ from the complete current authority frontier"
+        )
+    known_digest = _evidence_set_digest(known)
+    current_decision = frontier["decisions"][0]
+    if known_digest != current_decision["evidence_set_digest"]:
+        raise ObservationEvidenceError(
+            "known evidence records do not reconstruct the current decision's evidence-set digest"
+        )
 
     batch_by_source: dict[str, dict[str, Any]] = {}
     for item in new:
