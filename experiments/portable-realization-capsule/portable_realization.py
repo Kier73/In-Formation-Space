@@ -24,8 +24,63 @@ class PortableRealizationError(ValueError):
     """Raised when a portable realization capsule is invalid or altered."""
 
 
+MAX_SAFE_INTEGER = (1 << 53) - 1
+
+
+def _validate_canonical_value(
+    value: Any,
+    field: str = "$",
+    seen: set[int] | None = None,
+) -> None:
+    """Restrict v1 metadata to values with stable cross-language JSON bytes."""
+    if value is None or type(value) is bool:
+        return
+    if isinstance(value, str):
+        try:
+            value.encode("utf-8")
+        except UnicodeEncodeError as exc:
+            raise PortableRealizationError(f"{field} contains invalid Unicode") from exc
+        return
+    if type(value) is int:
+        if abs(value) > MAX_SAFE_INTEGER:
+            raise PortableRealizationError(
+                f"{field} integer exceeds the interoperable safe range"
+            )
+        return
+    if type(value) is float:
+        raise PortableRealizationError(
+            f"{field} floating-point values are not supported by canonical metadata v1"
+        )
+
+    if seen is None:
+        seen = set()
+    if isinstance(value, (list, tuple, Mapping)):
+        identity = id(value)
+        if identity in seen:
+            raise PortableRealizationError(f"{field} contains a recursive value")
+        seen.add(identity)
+        try:
+            if isinstance(value, Mapping):
+                for key, member in value.items():
+                    if not isinstance(key, str):
+                        raise PortableRealizationError(
+                            f"{field} object keys must be strings"
+                        )
+                    if not key.isascii():
+                        raise PortableRealizationError(
+                            f"{field} object keys must be ASCII for canonical metadata v1"
+                        )
+                    _validate_canonical_value(member, f"{field}.{key}", seen)
+            else:
+                for index, member in enumerate(value):
+                    _validate_canonical_value(member, f"{field}[{index}]", seen)
+        finally:
+            seen.remove(identity)
+
+
 def _canonical(value: Any) -> bytes:
     try:
+        _validate_canonical_value(value)
         return json.dumps(
             value,
             sort_keys=True,
@@ -33,7 +88,9 @@ def _canonical(value: Any) -> bytes:
             ensure_ascii=False,
             allow_nan=False,
         ).encode("utf-8")
-    except (TypeError, ValueError) as exc:
+    except PortableRealizationError:
+        raise
+    except (TypeError, ValueError, UnicodeEncodeError) as exc:
         raise PortableRealizationError("capsule metadata is not canonical JSON data") from exc
 
 
@@ -62,6 +119,12 @@ def _require_digest(value: Any, field: str) -> str:
     return digest
 
 
+def _require_integer(value: Any, field: str) -> int:
+    if type(value) is not int or abs(value) > MAX_SAFE_INTEGER:
+        raise PortableRealizationError(f"{field} must be an interoperable safe integer")
+    return value
+
+
 def _validate_core(core: Mapping[str, Any], payload: bytes) -> None:
     required = {
         "schema",
@@ -77,7 +140,7 @@ def _validate_core(core: Mapping[str, Any], payload: bytes) -> None:
     if set(core) != required:
         raise PortableRealizationError("capsule core fields do not match schema")
 
-    if core["schema"] != SCHEMA or core["version"] != VERSION:
+    if core["schema"] != SCHEMA or _require_integer(core["version"], "version") != VERSION:
         raise PortableRealizationError("unsupported portable realization schema/version")
 
     source = _require_mapping(core["source"], "source")
@@ -122,7 +185,7 @@ def _validate_core(core: Mapping[str, Any], payload: bytes) -> None:
         raise PortableRealizationError("interface.architecture does not match its register names")
     if domain.get("kind") != "finite_boolean":
         raise PortableRealizationError("only finite_boolean interface domains are supported")
-    if domain.get("input_width") != len(input_names):
+    if _require_integer(domain.get("input_width"), "interface.domain.input_width") != len(input_names):
         raise PortableRealizationError("interface domain width does not match input names")
 
     codec = _require_mapping(core["codec"], "codec")
@@ -133,7 +196,7 @@ def _validate_core(core: Mapping[str, Any], payload: bytes) -> None:
     receipt = _require_mapping(core["verification"], "verification")
     if receipt.get("status") != "verified-within-complete-finite-domain":
         raise PortableRealizationError("capsule verification receipt is not complete")
-    if receipt.get("input_row_count") != 2 ** len(input_names):
+    if _require_integer(receipt.get("input_row_count"), "verification.input_row_count") != 2 ** len(input_names):
         raise PortableRealizationError("verification receipt does not cover the complete Boolean domain")
     if receipt.get("output_domain") != "finite_boolean":
         raise PortableRealizationError("verification receipt output domain is unsupported")
@@ -165,7 +228,7 @@ def _validate_core(core: Mapping[str, Any], payload: bytes) -> None:
         raise PortableRealizationError("realization revision contradicts E-CPU toolchain pin")
 
     payload_descriptor = _require_mapping(core["payload"], "payload")
-    if payload_descriptor.get("byte_length") != len(payload):
+    if _require_integer(payload_descriptor.get("byte_length"), "payload.byte_length") != len(payload):
         raise PortableRealizationError("payload byte length mismatch")
     payload_digest = _require_digest(payload_descriptor.get("sha256"), "payload.sha256")
     if payload_digest != _sha256(payload):
