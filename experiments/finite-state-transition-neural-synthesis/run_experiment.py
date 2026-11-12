@@ -10,6 +10,10 @@ from typing import Any
 
 from mailcpu.interpreter import QueueInterpreter, ReferenceInterpreter
 from mailcpu.model import canonical_result
+from mailcpu.stateful_transition import (
+    StatefulTransitionError,
+    StatefulTransitionRuntime,
+)
 from mailcpu.semantic_translation import (
     EffectClass,
     ObservationContract,
@@ -257,6 +261,119 @@ def _verify_recurrent_rollouts(
     }
 
 
+def _verify_stateful_runtime_revision(
+    source_specification,
+    target_specification,
+    source_table: FiniteTransitionTable,
+    target_table: FiniteTransitionTable,
+) -> dict[str, Any]:
+    """Verify a live state survives a compatible model revision and replayed event history."""
+    runtime = StatefulTransitionRuntime(source_specification, (0, 1))
+    source_model_digest = runtime.model_digest
+
+    first = runtime.step({"advance": 0, "reset": 0})
+    if first.state != (0, 1) or first.tick != 1 or first.revision != 0:
+        raise AssertionError("baseline stateful runtime step failed")
+
+    state_before_revision = runtime.state
+    tick_before_revision = runtime.tick
+    revision_event = runtime.revise(target_specification)
+    if (
+        runtime.state != state_before_revision
+        or runtime.tick != tick_before_revision
+        or runtime.revision != 1
+        or runtime.model_digest == source_model_digest
+    ):
+        raise AssertionError("model revision did not preserve live state/time or replace model")
+
+    special_inputs = (
+        runtime.state[0],
+        runtime.state[1],
+        1,
+        1,
+    )
+    expected_outputs = target_table.row_for(special_inputs).outputs
+    second = runtime.step({"advance": 1, "reset": 1})
+
+    target_program = compile_transition_program(target_table)
+    initial_registers = dict(zip(target_table.input_names, special_inputs))
+    reference = ReferenceInterpreter(target_program).run(
+        initial_registers=initial_registers
+    )
+    queued = QueueInterpreter(target_program).run(
+        initial_registers=initial_registers
+    )
+    vgi_outputs = _vgi_observe(target_table, special_inputs)
+    mailcpu_reference = tuple(
+        reference.state.registers[name] for name in target_table.output_names
+    )
+    mailcpu_queue = tuple(
+        queued.state.registers[name] for name in target_table.output_names
+    )
+    if (
+        second.state != expected_outputs
+        or second.state != vgi_outputs
+        or second.state != mailcpu_reference
+        or second.state != mailcpu_queue
+        or reference.status.value != "halted"
+        or queued.status.value != "halted"
+    ):
+        raise AssertionError("revised runtime step diverged from independent references")
+
+    snapshot = runtime.snapshot()
+    restored = StatefulTransitionRuntime.from_snapshot(snapshot)
+    if restored.snapshot() != snapshot:
+        raise AssertionError("runtime snapshot did not survive verified replay")
+
+    tampered = json.loads(json.dumps(snapshot))
+    tampered["events"][0]["controls"]["advance"] = 1
+    tamper_rejected = False
+    try:
+        StatefulTransitionRuntime.from_snapshot(tampered)
+    except StatefulTransitionError:
+        tamper_rejected = True
+    if not tamper_rejected:
+        raise AssertionError("runtime event replay accepted a tampered event")
+
+    events = runtime.events
+    event_kinds = [event["kind"] for event in events]
+    if event_kinds != ["step", "revision", "step"]:
+        raise AssertionError("runtime event ordering did not record step/revision/step")
+    if revision_event["state_preserved"] != [0, 1]:
+        raise AssertionError("revision event did not retain the live state")
+    if runtime.tick != 2 or runtime.revision != 1 or runtime.event_count != 3:
+        raise AssertionError("runtime logical tick, revision, or event count is invalid")
+    if runtime.chain_head_digest != events[-1]["event_digest"]:
+        raise AssertionError("runtime chain head does not match the final event")
+
+    return {
+        "schema": "mailcpu.stateful-transition-runtime.v1",
+        "verified": True,
+        "initial_state": [0, 1],
+        "final_state": list(runtime.state),
+        "tick": runtime.tick,
+        "revision": runtime.revision,
+        "event_count": runtime.event_count,
+        "event_kinds": event_kinds,
+        "source_program_digest": source_specification.digest,
+        "target_program_digest": target_specification.digest,
+        "source_model_digest": source_model_digest,
+        "target_model_digest": runtime.model_digest,
+        "revision_preserved_tick": tick_before_revision,
+        "revision_preserved_state": list(state_before_revision),
+        "edited_transition_inputs": list(special_inputs),
+        "edited_transition_outputs": list(second.state),
+        "vgi_outputs": list(vgi_outputs),
+        "mailcpu_reference_outputs": list(mailcpu_reference),
+        "mailcpu_queue_outputs": list(mailcpu_queue),
+        "snapshot_replay_equal": restored.snapshot() == snapshot,
+        "tampered_event_rejected": tamper_rejected,
+        "genesis_digest": snapshot["genesis_digest"],
+        "chain_head_digest": runtime.chain_head_digest,
+        "event_digests": [event["event_digest"] for event in events],
+    }
+
+
 def _translation_contract(
     table: FiniteTransitionTable,
     program,
@@ -437,6 +554,12 @@ def run_experiment() -> dict[str, Any]:
     architecture_results: list[dict[str, Any]] = []
     all_cases: list[dict[str, Any]] = []
     rollout_results: list[dict[str, Any]] = []
+    stateful_runtime_result = _verify_stateful_runtime_revision(
+        source_specification,
+        target_specification,
+        source_table,
+        target_table,
+    )
 
     for architecture_name, architecture in ARCHITECTURES:
         model = compile_transition_table(
@@ -688,7 +811,7 @@ def run_experiment() -> dict[str, Any]:
     all_cases.extend(live_target_cases)
 
     return {
-        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v5",
+        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v6",
         "status": "verified-within-complete-finite-domain",
         "typed_transition_program": source_specification.to_dict(),
         "typed_transition_program_digest": source_specification.digest,
@@ -722,6 +845,7 @@ def run_experiment() -> dict[str, Any]:
         "case_count": len(all_cases),
         "architectures": architecture_results,
         "cases": all_cases,
+        "stateful_runtime_verification": stateful_runtime_result,
         "recurrent_rollout_verification": {
             "horizon": 3,
             "model_phase_count": len(rollout_results),
