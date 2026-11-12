@@ -466,6 +466,9 @@ class ProofActionReliableChannelTests(unittest.TestCase):
             worker.receive_request()
         self.assertEqual(sender.pending_sequences(), (2,))
         self.assertEqual(attempt.status, "planned")
+        self.assertTrue(worker.request_channel_failed)
+        with self.assertRaisesRegex(ProofActionReliableChannelError, "worker endpoint is fenced"):
+            worker.receive_request()
 
     def test_transport_result_can_supply_verified_kernel_receipt_for_root_completion(self):
         session, source_trace, _pg, _transport, host, worker = make_endpoints()
