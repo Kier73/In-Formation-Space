@@ -105,6 +105,29 @@ The candidate rules expose different tradeoffs between coverage, dissent toleran
 
 The current enumeration includes only absent/HIT/MISS per source. It does not yet include same-source equivocation, dependence between sources, source reliability priors, changing evidence over logical time, or appeal/supersession. Those should be added as separate dimensions, not hidden inside a scalar confidence value. CI uploads the complete per-pattern decision table and a digest-checked summary as the ecpu-epistemic-policy-space artifact.
 
+### First exhaustive run
+
+The full enumeration completed in [GitHub Actions run 329](https://github.com/Kier73/In-Formation-Space/actions/runs/43136379052). The artifact contains all 81 patterns and eight rule evaluations per pattern. Its digest-checked [summary receipt](results/policy-space-ci-run-329-summary.json) includes the ZIP artifact digest, source JSON digests, and policy-level aggregates.
+
+| Rule | AUTHORIZED | CONFLICT | REFUSED | Authorized with missing sources | Authorized with dissent | Authorized on exact tie |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Pinned strict | 2 | 50 | 29 | 0 | 0 | 0 |
+| Pinned permissive | 60 | 0 | 21 | 44 | 38 | 6 |
+| Observed-source unanimity + quorum | 22 | 38 | 21 | 20 | 0 | 0 |
+| Unique plurality + quorum | 54 | 6 | 21 | 44 | 32 | 0 |
+| Strict majority of observed sources | 54 | 6 | 21 | 44 | 32 | 0 |
+| Configured-source majority | 18 | 18 | 45 | 8 | 8 | 0 |
+| Plurality lead margin of two | 30 | 30 | 21 | 20 | 8 | 0 |
+| Complete roster + unique plurality | 10 | 6 | 65 | 0 | 8 | 0 |
+
+Three deductions are useful, but bounded:
+
+1. The permissive runtime rule is a high-coverage rule, not a conservative one: it authorizes every pattern in which some outcome group reaches quorum. It accepts six exact ties, 38 dissenting configurations, and 44 configurations with missing sources.
+2. A tie-abstaining unique-plurality rule removes exactly the six tied authorizations in this finite binary domain. Its 54 authorized states match strict-majority-of-observed because there are only two possible values; with three or more possible outcomes these rules need not coincide.
+3. Observed unanimity and configured majority encode different requirements. The former permits two agreeing observations with two absent sources; the latter requires three configured-source votes and can still tolerate a single dissent or one missing source.
+
+These are exhaustive decision-space counts, not pattern probabilities. The enumerator deliberately does not rank policies by number of accepted states. The application domain must supply source trust assumptions, outcome calibration, and the cost of false authorization versus refusal before a policy can be selected.
+
 ## Retained artifacts
 
 CI uploads:
