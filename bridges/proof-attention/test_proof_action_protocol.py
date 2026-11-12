@@ -115,8 +115,9 @@ class ProofActionProtocolTests(unittest.TestCase):
             next(item.fingerprint for item in imported.proof_ground.obligations if item.goal.get("kind") == "root")
         ), "kernel_accepted")
         self.assertEqual(attempt.status, "interpreted")
-        next_attempt = session.begin_next()
-        self.assertEqual(next_attempt.action["tactic"], "simp")
+        self.assertIsNone(session.begin_next())
+        self.assertEqual(session.status, "complete")
+        self.assertEqual(attempt.status, "query_determined")
 
     def test_request_digest_mismatch_is_rejected_even_with_rehashed_result(self):
         session, payload, _ = make_session()
