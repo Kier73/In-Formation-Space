@@ -236,3 +236,102 @@ def test_independent_node_receiver_verifies_python_capsule_and_unicode_values():
         )
         assert tampered.returncode != 0
         assert "payload SHA-256 mismatch" in tampered.stderr
+
+
+
+def test_independent_node_receiver_decodes_and_replays_rowmask_binary_capsule():
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is required for the independent implementation check")
+
+    import importlib.util
+
+    root = Path(__file__).resolve().parents[2]
+    runner_path = root / "experiments" / "portable-realization-capsule" / "run_experiment.py"
+    spec = importlib.util.spec_from_file_location("prc_replay_fixture", runner_path)
+    assert spec is not None and spec.loader is not None
+    prc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(prc)
+    sre = prc.sre002
+
+    workload = next(
+        item for item in sre.rcn.build_workloads()
+        if item.name == "parity-2"
+    )
+    table = workload.program.to_table()
+    inputs = [tuple(row.inputs) for row in table.rows]
+    expected_records = prc._expected_records(workload, table, inputs)
+
+    dense = sre.compile_models(workload.program, table)["direct_dag"]
+    sparse = sre.SparseTransitionReLUNetwork.from_dense(dense)
+    payload = sre.encode_rowmask_binary(sparse)
+    compiler = "direct_dag"
+    contract_digests = ["0" * 64 for _ in expected_records]
+    receipt = prc._make_verification_receipt(
+        workload,
+        table,
+        compiler,
+        "rowmask_binary",
+        expected_records,
+        expected_records,
+        contract_digests,
+    )
+    capsule = encode_capsule(
+        payload,
+        source=prc._source(workload, sparse, "test-ifs-revision"),
+        realization=prc._realization(
+            compiler, dense, sparse, "test-ecpu-revision", "rowmask_binary"
+        ),
+        interface=prc._interface(table, sparse),
+        codec={
+            "name": "rowmask_binary",
+            "schema": "sre002.rowmask-binary.v1",
+            "payload_sha256": prc.bytes_digest(payload),
+        },
+        verification=receipt,
+        toolchain=prc._toolchain(
+            "test-ifs-revision", "test-ecpu-revision", "test-vgi-revision"
+        ),
+    )
+
+    script = Path(__file__).with_name("verify_capsule.mjs")
+    with tempfile.TemporaryDirectory() as directory:
+        capsule_path = Path(directory) / "parity-2-rowmask.ifsp"
+        reference_path = Path(directory) / "parity-2-reference.json"
+        capsule_path.write_bytes(capsule)
+        reference_path.write_text(
+            json.dumps(expected_records, ensure_ascii=False, separators=(",", ":")),
+            encoding="utf-8",
+        )
+        result = subprocess.run(
+            [node, str(script), str(capsule_path), "--reference", str(reference_path)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        report = json.loads(result.stdout)
+        assert report["valid"] is True
+        assert report["codec"] == "rowmask_binary"
+        assert report["input_rows_replayed"] == 4
+        assert report["semantic_comparisons"] == 4
+        assert report["sparse_model_sha256"] == sparse.digest
+        assert report["stored_parameter_count"] == sparse.stored_parameter_count
+
+        altered = [dict(record) for record in expected_records]
+        altered[0] = {
+            "inputs": list(altered[0]["inputs"]),
+            "outputs": [1 - altered[0]["outputs"][0]],
+        }
+        reference_path.write_text(
+            json.dumps(altered, ensure_ascii=False, separators=(",", ":")),
+            encoding="utf-8",
+        )
+        mismatch = subprocess.run(
+            [node, str(script), str(capsule_path), "--reference", str(reference_path)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert mismatch.returncode != 0
+        assert "reference digest" in mismatch.stderr
