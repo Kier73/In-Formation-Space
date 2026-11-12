@@ -1,6 +1,11 @@
+import base64
 import copy
 import hashlib
+import json
 import unittest
+from pathlib import Path
+
+import jsonschema
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -126,6 +131,9 @@ class SignedReviewLedgerTests(unittest.TestCase):
             item for item in ledger["entries"]
             if item["entry_type"] == "proposal_review_signed"
         )
+        schema_path = Path(__file__).with_name("authority-lineage.schema.json")
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        jsonschema.validate(instance=ledger, schema=schema)
         self.assertEqual(signed_entry["payload"]["bundle_digest"], bundle["bundle_digest"])
         self.assertEqual(signed_entry["payload"]["trust_store_digest"], digest(trust_store))
         ledger = resolve_signed_reviewed_proposal(
@@ -247,9 +255,9 @@ class SignedReviewLedgerTests(unittest.TestCase):
             if item["entry_type"] == "proposal_review_signed"
         )
         envelope = signed_entry["payload"]["bundle"]["signed_review_votes"][0]["envelope"]
-        sig = bytearray(__import__("base64").b64decode(envelope["signatures"][0]["sig"]))
+        sig = bytearray(base64.b64decode(envelope["signatures"][0]["sig"]))
         sig[0] ^= 1
-        envelope["signatures"][0]["sig"] = __import__("base64").b64encode(sig).decode("ascii")
+        envelope["signatures"][0]["sig"] = base64.b64encode(sig).decode("ascii")
         bundle_core = {
             key: value for key, value in signed_entry["payload"]["bundle"].items()
             if key != "bundle_digest"
