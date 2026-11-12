@@ -1766,9 +1766,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
         report = { valid: true, ...verifyCapsule(readFileSync(file)) };
       }
     }
-    process.stdout.write(`${JSON.stringify(report)}\\n`);
+    process.stdout.write(`${JSON.stringify(report)}\n`);
   } catch (error) {
-    process.stderr.write(`invalid capsule: ${error.message}\\n`);
+    process.stderr.write(`invalid capsule: ${error.message}\n`);
     process.exitCode = 1;
   }
 }
