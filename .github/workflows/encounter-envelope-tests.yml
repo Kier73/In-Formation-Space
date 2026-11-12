@@ -54,6 +54,12 @@ jobs:
           repository: Kier73/E-CPU
           ref: 800f94f83ffd6f527ed093c8d1c1e93e153c34f6
           path: external/E-CPU
+      - name: Check out pinned VGI runtime for partial-attention interoperability
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: cedcc4540a9d75228cf83aaf21e1ba960fe8a555
+          path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -133,6 +139,10 @@ jobs:
         run: python -m unittest discover -s bridges/observation-path -p "test_validate_observation_path.py" -v
       - name: Run adaptive policy execution bridge tests
         run: python -m unittest discover -s bridges/observation-path -p "test_adaptive_policy_execution.py" -v
+      - name: Run VGI partial-probe evidence-path interoperability tests
+        env:
+          PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: python -m unittest discover -s bridges/observation-path -p "test_partial_probe_execution.py" -v
       - name: Run E-CPU gated adapter contract tests
         run: python -m unittest discover -s bridges/observation-path -p "test_ecpu_gated_adapter.py" -v
       - name: Run typed E-CPU temporal binding tests
