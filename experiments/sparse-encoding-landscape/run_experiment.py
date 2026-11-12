@@ -262,7 +262,9 @@ def unpack_mask(data: bytes, offset: int, width: int) -> tuple[int, int]:
 
 
 def pack_envelope(header: dict[str, Any], body: bytes) -> bytes:
-    header_bytes = canonical({**header, "body_sha256": sha_bytes(body)})
+    sealed = {**header, "body_sha256": sha_bytes(body)}
+    sealed["header_sha256"] = sha(sealed)
+    header_bytes = canonical(sealed)
     return struct.pack("<I", len(header_bytes)) + header_bytes + body
 
 
@@ -274,6 +276,10 @@ def unpack_envelope(payload: bytes) -> tuple[dict[str, Any], bytes]:
     if split > len(payload):
         raise ValueError("binary header truncated")
     header, body = json.loads(payload[4:split]), payload[split:]
+    supplied_header_digest = header.pop("header_sha256", None)
+    if supplied_header_digest != sha(header):
+        raise ValueError("binary header digest mismatch")
+    header["header_sha256"] = supplied_header_digest
     if header.get("body_sha256") != sha_bytes(body):
         raise ValueError("binary body digest mismatch")
     return header, body
@@ -571,6 +577,32 @@ def codec_table(model):
     }
 
 
+def assert_tampered_payload_rejected(payload: bytes, decoder: Callable[[bytes], Any], *, binary: bool) -> bool:
+    """Reject payload metadata changes before accepting decoded source identity."""
+    if binary:
+        if len(payload) < 4:
+            raise AssertionError("binary payload unexpectedly short")
+        header_size = struct.unpack_from("<I", payload, 0)[0]
+        split = 4 + header_size
+        header, body = json.loads(payload[4:split]), payload[split:]
+        source_digest = header["source_digest"]
+        replacement = "0" if source_digest[0] != "0" else "1"
+        header["source_digest"] = replacement + source_digest[1:]
+        changed_header = canonical(header)
+        tampered = struct.pack("<I", len(changed_header)) + changed_header + body
+    else:
+        data = json.loads(payload)
+        source_digest = data["source_digest"]
+        replacement = "0" if source_digest[0] != "0" else "1"
+        data["source_digest"] = replacement + source_digest[1:]
+        tampered = canonical(data)
+    try:
+        decoder(tampered)
+    except (ValueError, KeyError, TypeError):
+        return True
+    raise AssertionError("tampered encoding was accepted")
+
+
 def compile_models(program, table):
     return {
         "minterm": rcn.compile_transition_table(table),
@@ -607,6 +639,11 @@ def verify_workload(workload):
             decoded_sparse = decoder(payload)
             if decoded_sparse.digest != sparse.digest:
                 raise AssertionError(f"{encoding} failed sparse model round trip")
+            tamper_rejected = assert_tampered_payload_rejected(
+                payload,
+                decoder,
+                binary=encoding.endswith("_binary"),
+            )
             encode_time = measure(encoder)
             decode_time = measure(lambda dec=decoder, raw=payload: dec(raw))
             contract = contract_for(workload, table, compiler, encoding, dense, decoded_sparse, payload)
@@ -640,7 +677,9 @@ def verify_workload(workload):
                 "stored_parameter_count": decoded_sparse.stored_parameter_count,
                 "reduction_vs_dense_json": 1.0 - len(payload) / dense_json_bytes if dense_json_bytes else 0.0,
                 "reduction_vs_dense_binary": 1.0 - len(payload) / len(dense_binary) if dense_binary else 0.0,
-                "round_trip_exact": True, "translation_comparison_count": len(case_records),
+                "round_trip_exact": True,
+                "tampered_payload_rejected": tamper_rejected,
+                "translation_comparison_count": len(case_records),
                 "translation_contract_digest": sha(contract_digests),
                 "case_evidence_digest": sha(case_records),
                 "encode_timing": encode_time, "decode_timing": decode_time,
