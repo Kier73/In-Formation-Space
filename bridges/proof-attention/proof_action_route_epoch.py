@@ -744,6 +744,118 @@ class ProofActionRouteEpochLedger:
             "request admission could not acquire the route authority revision"
         )
 
+    def record_execution_authorization(
+        self,
+        epoch_id: str,
+        route_digest: str,
+        *,
+        owner_id: str,
+        owner_generation: int,
+        attempt_id: str,
+        request_digest: str,
+        runner_id: str,
+    ) -> str | None:
+        """Authorize one idempotent runner execution against the active route.
+
+        The transport admission event must already exist. A competing route
+        claim and this execution authorization are ordered by the authority CAS.
+        The deterministic execution ID is stable across process generations;
+        an external runner must deduplicate/resume by that ID.
+        """
+        if type(owner_generation) is not int or owner_generation <= 0:
+            raise ProofActionRouteEpochError("owner_generation must be a positive integer")
+        owner_id = _text(owner_id, "owner_id")
+        attempt_id = _text(attempt_id, "attempt_id")
+        request_digest = _sha256(request_digest, "request_digest")
+        route_digest = _sha256(route_digest, "route_digest")
+        runner_id = _text(runner_id, "runner_id")
+        execution_id = "urn:sha256:" + _digest({
+            "epoch_id": epoch_id,
+            "attempt_id": attempt_id,
+            "request_digest": request_digest,
+        })
+
+        for _ in range(3):
+            self.refresh()
+            active = self.active_epoch
+            if (
+                active is None
+                or active["epoch_id"] != epoch_id
+                or active["route_digest"] != route_digest
+                or active["owner_id"] != owner_id
+                or active["owner_generation"] != owner_generation
+            ):
+                return None
+
+            admission = next(
+                (
+                    entry for entry in self._entries
+                    if entry["event_type"] == "admitted"
+                    and entry["epoch_id"] == epoch_id
+                    and entry["details"]["attempt_id"] == attempt_id
+                ),
+                None,
+            )
+            if admission is None:
+                raise ProofActionRouteEpochError(
+                    "execution authorization requires a previously admitted request"
+                )
+            if admission["details"]["request_digest"] != request_digest:
+                raise ProofActionRouteEpochError(
+                    "execution request digest differs from its route admission"
+                )
+
+            previous_execution = next(
+                (
+                    entry for entry in self._entries
+                    if entry["event_type"] == "execution_authorized"
+                    and entry["epoch_id"] == epoch_id
+                    and entry["details"]["attempt_id"] == attempt_id
+                ),
+                None,
+            )
+            if previous_execution is not None:
+                details = previous_execution["details"]
+                if (
+                    details["request_digest"] != request_digest
+                    or details["execution_id"] != execution_id
+                    or details["runner_id"] != runner_id
+                ):
+                    raise ProofActionRouteEpochError(
+                        "one proof attempt already has a different execution authorization"
+                    )
+                # The job ticket is stable across route-owner process replacement.
+                # The runner is responsible for resuming/deduplicating this ID.
+                return execution_id
+
+            details = {
+                "owner_id": owner_id,
+                "owner_generation": owner_generation,
+                "attempt_id": attempt_id,
+                "request_digest": request_digest,
+                "request_sequence": admission["details"]["request_sequence"],
+                "admission_event_digest": admission["event_digest"],
+                "execution_id": execution_id,
+                "runner_id": runner_id,
+            }
+            try:
+                self._append(
+                    "execution_authorized",
+                    epoch_id,
+                    active["epoch_number"],
+                    active["route"],
+                    details,
+                    actor_id=owner_id,
+                )
+                return execution_id
+            except ProofActionRouteEpochError as exc:
+                if "compare-and-swap conflict" not in str(exc):
+                    raise
+                continue
+        raise ProofActionRouteEpochError(
+            "execution authorization could not acquire the route authority revision"
+        )
+
     def close_epoch(
         self,
         epoch_id: str,
@@ -1026,6 +1138,8 @@ class ProofActionRouteEpochLedger:
         used_owner_ids: set[str] = set()
         admitted_attempt_digests: dict[tuple[str, str], str] = {}
         admitted_request_sequences: set[tuple[str, int]] = set()
+        admitted_events: dict[tuple[str, str], dict[str, Any]] = {}
+        execution_authorizations: dict[tuple[str, str], str] = {}
         last_close_digest: str | None = None
         for index, raw in enumerate(raw_entries, 1):
             if not isinstance(raw, Mapping):
@@ -1140,6 +1254,67 @@ class ProofActionRouteEpochLedger:
                     )
                 admitted_attempt_digests[attempt_key] = request_digest
                 admitted_request_sequences.add(sequence_key)
+                admitted_events[attempt_key] = event
+            elif event["event_type"] == "execution_authorized":
+                if set(details) != {
+                    "owner_id", "owner_generation", "attempt_id",
+                    "request_digest", "request_sequence", "admission_event_digest",
+                    "execution_id", "runner_id",
+                }:
+                    raise ProofActionRouteEpochError(
+                        "execution authorization event details are invalid"
+                    )
+                if active is None or active["epoch_id"] != event["epoch_id"]:
+                    raise ProofActionRouteEpochError(
+                        "execution authorization targets a non-active route epoch"
+                    )
+                if event["epoch_number"] != active["epoch_number"] or route != active["route"]:
+                    raise ProofActionRouteEpochError(
+                        "execution authorization route differs from the active route"
+                    )
+                if (
+                    details.get("owner_id") != active["details"]["owner_id"]
+                    or details.get("owner_generation") != active["details"]["owner_generation"]
+                ):
+                    raise ProofActionRouteEpochError(
+                        "execution authorization was recorded by a stale owner generation"
+                    )
+                attempt_id = _text(details.get("attempt_id"), "execution.attempt_id")
+                request_digest = _sha256(details.get("request_digest"), "execution.request_digest")
+                runner_id = _text(details.get("runner_id"), "execution.runner_id")
+                request_sequence = details.get("request_sequence")
+                if type(request_sequence) is not int or request_sequence <= 0:
+                    raise ProofActionRouteEpochError(
+                        "execution request sequence must be positive"
+                    )
+                attempt_key = (event["epoch_id"], attempt_id)
+                admission = admitted_events.get(attempt_key)
+                if admission is None:
+                    raise ProofActionRouteEpochError(
+                        "execution authorization has no preceding route admission"
+                    )
+                if (
+                    admission["details"]["request_digest"] != request_digest
+                    or admission["details"]["request_sequence"] != request_sequence
+                    or admission["event_digest"] != details.get("admission_event_digest")
+                ):
+                    raise ProofActionRouteEpochError(
+                        "execution authorization does not match its route admission"
+                    )
+                expected_execution_id = "urn:sha256:" + _digest({
+                    "epoch_id": event["epoch_id"],
+                    "attempt_id": attempt_id,
+                    "request_digest": request_digest,
+                })
+                if details.get("execution_id") != expected_execution_id:
+                    raise ProofActionRouteEpochError(
+                        "execution authorization ID is not the deterministic attempt ticket"
+                    )
+                if attempt_key in execution_authorizations:
+                    raise ProofActionRouteEpochError(
+                        "route ledger contains multiple execution authorizations for one attempt"
+                    )
+                execution_authorizations[attempt_key] = expected_execution_id
             elif event["event_type"] == "closed":
                 expected_close_fields = {
                     "owner_generation", "owner_id", "reason_code", "reason",
@@ -1242,6 +1417,19 @@ def _attach_route_guard(
             request_digest=request.get("request_digest"),
         )
 
+    def authorize_execution(request: Mapping[str, Any], runner_id: str) -> str | None:
+        if not isinstance(request, Mapping):
+            raise ProofActionRouteEpochError("execution request must be an object")
+        return ledger.record_execution_authorization(
+            epoch_id,
+            route_digest,
+            owner_id=owner_id,
+            owner_generation=owner_generation,
+            attempt_id=request.get("attempt_id"),
+            request_digest=request.get("request_digest"),
+            runner_id=runner_id,
+        )
+
     host._route_epoch_id = epoch_id
     worker._route_epoch_id = epoch_id
     host._route_owner_id = owner_id
@@ -1251,6 +1439,7 @@ def _attach_route_guard(
     host._route_guard = guard
     worker._route_guard = guard
     worker._route_admission_commit = admit_request
+    worker._route_execution_authorization = authorize_execution
 
 
 def open_proof_action_route_epoch(
