@@ -1,5 +1,8 @@
 import hashlib
 import json
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -9,6 +12,7 @@ from operation_spans import (
     OperationSpanRecorder,
     build_operation_cost_profiles,
     validate_operation_cost_profiles,
+    load_operation_span_artifact,
     validate_operation_span,
 )
 
@@ -244,6 +248,102 @@ class OperationSpanTests(unittest.TestCase):
         jsonschema.validate(meter.spans[0], span_schema)
         report = build_operation_cost_profiles(list(meter.spans), minimum_samples=1)
         jsonschema.validate(report, profile_schema)
+
+    def test_duplicate_span_identity_cannot_inflate_a_profile(self):
+        meter = recorder([10, 25])
+        meter.measure(
+            attempt_id="attempt-duplicate",
+            span_id="span-duplicate",
+            operation_id="receiver.admit",
+            operation=lambda: None,
+        )
+        span = meter.spans[0]
+        with self.assertRaises(ValueError):
+            build_operation_cost_profiles([span, dict(span)], minimum_samples=1)
+
+    def test_offline_cli_reads_multiple_artifacts_and_keeps_clock_segments_separate(self):
+        first = recorder([10, 30], actor="receiver-1", segment="run-a")
+        second = recorder([100, 145], actor="receiver-1", segment="run-b")
+        first.measure(
+            attempt_id="attempt-a",
+            span_id="span-a",
+            operation_id="receiver.admit",
+            operation=lambda: None,
+        )
+        second.measure(
+            attempt_id="attempt-b",
+            span_id="span-b",
+            operation_id="receiver.admit",
+            operation=lambda: None,
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            artifact_a = root / "run-a.json"
+            artifact_b = root / "run-b.json"
+            output = root / "profiles.json"
+            artifact_a.write_text(
+                json.dumps({"spans": list(first.spans)}),
+                encoding="utf-8",
+            )
+            artifact_b.write_text(
+                json.dumps(list(second.spans)),
+                encoding="utf-8",
+            )
+            self.assertEqual(len(load_operation_span_artifact(artifact_a)), 1)
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(Path(__file__).with_name("operation_spans.py")),
+                    "--input", str(artifact_a),
+                    "--input", str(artifact_b),
+                    "--minimum-samples", "1",
+                    "--output", str(output),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(len(report["profiles"]), 2)
+            self.assertEqual(
+                {item["clock_segment_id"] for item in report["profiles"]},
+                {"run-a", "run-b"},
+            )
+            self.assertEqual(
+                {item["median_ns"] for item in report["profiles"]},
+                {20, 45},
+            )
+            self.assertEqual(report["policy_effect"], "none")
+
+    def test_offline_cli_rejects_duplicate_artifacts(self):
+        meter = recorder([1, 11])
+        meter.measure(
+            attempt_id="attempt-dup",
+            span_id="span-dup",
+            operation_id="receiver.admit",
+            operation=lambda: None,
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            artifact = Path(directory) / "spans.json"
+            artifact.write_text(
+                json.dumps({"spans": list(meter.spans)}),
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(Path(__file__).with_name("operation_spans.py")),
+                    "--input", str(artifact),
+                    "--input", str(artifact),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("duplicate operation-span identity", result.stderr)
 
     def test_invalid_minimum_sample_count_is_rejected(self):
         with self.assertRaises(ValueError):
