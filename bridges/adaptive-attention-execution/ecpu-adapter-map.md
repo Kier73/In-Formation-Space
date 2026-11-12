@@ -40,6 +40,12 @@ The live integration captures one `TemporalFrame` from the local adapter clock a
 
 The analysis reports a total monotonic span only if every adjacent interval contains a non-regressed monotonic elapsed value. If an actor or monotonic segment changes, or a coordinate is unobserved, the total is withheld instead of summing incomparable pieces. Wall-clock differences, causal relation, scheduler ticks, event steps, and chemical-time deltas remain separate. The adapter's causal stamps establish local capture order, not remote causation. See the [analysis schema](../observation-path/temporal-path-analysis.schema.json) and [analysis implementation](../observation-path/analyze_temporal_binding.py).
 
+## Direct operation spans
+
+The adapter accepts an optional operation-span recorder and wraps its direct calls to E-CPU's `finalize_event()`, `commit_event()`, `save_checkpoint()`, and `process_acks()`. The live integration separately wraps `ReliableChannel.send()` and `ingest_available()`. The measured scopes therefore correspond to actual method invocations, not guessed subdivisions inferred from stage intervals.
+
+The CI integration currently captures 11 spans across one authorized path and one consensus-conflict path. Four send calls form the only operation partition above the configured three-sample descriptive threshold; intake and finalization have two samples each, and commit, checkpoint, and ACK processing have one each. The workflow uploads both the source spans and the independently reconstructed profile as `live-ecpu-operation-spans`. Treat the current results as a wiring and measurement-boundary check. More repetitions and varied workload conditions are required before interpreting the distributions as stable operational costs.
+
 ## E-CPU flow in more detail
 
 ### 1. Reliable transport
