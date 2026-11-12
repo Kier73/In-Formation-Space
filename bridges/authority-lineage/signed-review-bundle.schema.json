@@ -29,7 +29,7 @@
       "pattern": "^[0-9a-f]{64}$"
     },
     "payload_type": {
-      "const": "application/vnd.in-formation.authority-review-vote+json;version=0.1"
+      "const": "application/vnd.in-formation.authority-review-vote+json;version=0.2"
     },
     "trust_store_digest": {
       "type": "string",
@@ -74,7 +74,7 @@
             ],
             "properties": {
               "payloadType": {
-                "const": "application/vnd.in-formation.authority-review-vote+json;version=0.1"
+                "const": "application/vnd.in-formation.authority-review-vote+json;version=0.2"
               },
               "payload": {
                 "type": "string",
