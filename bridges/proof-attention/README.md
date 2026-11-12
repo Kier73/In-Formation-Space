@@ -401,3 +401,36 @@ Export is intended for a **quiescent cut**: no concurrent send, receive, retry t
 The `InMemoryTransport` implementation is a deterministic test substrate, not a remote network deployment. A production transport must define how mailbox durability, message identity, ordering and atomic checkpoint boundaries survive process or machine failure.
 
 The checkpoint digests detect inconsistent modification relative to a trusted checkpoint head; they are not signatures, identity authentication, or proof of origin. Restoring a session does not authenticate an earlier worker, validate an Encounter Envelope, execute Lean, or manufacture a `VerifiedKernelReceipt`. The caller still supplies a freshly imported ProofGround and independently trusted kernel evidence. The earlier trajectory/EventJournal adapter remains the append-oriented session history; this adapter captures the live communication state needed to continue it.
+
+## Bind live endpoints to append-only session history
+
+The [continuity bundle](proof_action_continuity.py) binds the paired endpoint checkpoint to one exact E-CPU trajectory manifest and its receipt heads. This keeps two forms of memory distinct while making their relationship verifiable: the trajectory is the append-oriented history of proof-action events; the pair checkpoint is the live communication state required to continue from a particular cut.
+
+After exporting the trajectory from the host's current session, bind its manifest to the paired checkpoint:
+
+```python
+from proof_action_continuity import (
+    export_proof_action_continuity_bundle,
+    restore_proof_action_continuity_bundle,
+)
+
+manifest = export_proof_attention_trajectory(
+    host.session, proof_ground, data_path, index_path, manifest_path
+)
+bundle = export_proof_action_continuity_bundle(host, worker, manifest)
+
+transport, host, worker, history = restore_proof_action_continuity_bundle(
+    bundle,
+    freshly_imported_proof_ground,
+    restore_transport=InMemoryTransport.from_snapshot,
+    trajectory_manifest_path=manifest_path,
+    trajectory_data_path=data_path,
+    trajectory_index_path=index_path,
+)
+```
+
+Export refuses a trajectory manifest whose session digest differs from the host's exact session snapshot. Restore checks the persisted manifest against the bundle's manifest digest, session digest, event counts, stride, trajectory receipt head and EventJournal projection head; it then independently restores the trajectory against the fresh ProofGround and the paired endpoints against the same ProofGround/transport, and requires the two reconstructed session documents to be identical.
+
+The bundle does not embed or replace the trajectory files. Keep the manifest, binary stream, sparse index and paired checkpoint together as one application-level persistence unit. A later session event requires a newly exported trajectory cut and a newly bound bundle; a bundle is not a moving pointer to a future trajectory suffix.
+
+This makes the history/runtime relationship inspectable, not magically transactional. The caller must still create a quiescent cut and persist all components atomically. Receipt and manifest digests detect inconsistency relative to a trusted head; they are not signatures or worker authentication. The trajectory and live transport retain their own semantics and trust boundaries.
