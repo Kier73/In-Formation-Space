@@ -150,6 +150,17 @@ The session reaches \`complete\` only when every explicit root intention has a m
 
 The session and every attempt expose deterministic JSON snapshots and digests. Each attempt event includes its sequence, prior event digest, and current event digest, so a later reader can verify the local event chain.
 
+A later worker can restore the orchestration state against the exact refreshed ProofGround:
+
+```python
+restored = ProofAttentionSession.from_snapshot(
+    saved_session_document,
+    freshly_imported_proof_ground,
+)
+```
+
+Restoration verifies the session and attempt digests, each per-attempt event chain, the attempt sequence, and the supplied Ground's reproduction of the saved current plan. An active worker can resume at its recorded lifecycle stage; attempted transition IDs remain excluded from future selection. A mismatched environment or changed proof frontier is rejected rather than silently rebased. These digests provide integrity checks, not authentication of the previous worker or trusted kernel.
+
 ### Deliberate boundary
 
 This is a coordinator and receipt ledger, not a tactic runner. It does not launch Lean or another proof assistant, dispatch network messages, parse arbitrary Lean syntax, authenticate an Encounter Envelope, or cryptographically validate a VerifiedKernelReceipt. Those operations remain with the host, trace adapter, and trusted kernel/checker integration.
