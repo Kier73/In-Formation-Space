@@ -480,18 +480,26 @@ def build_demonstration() -> dict[str, Any]:
     certain_before = compare_cross_clock_intervals(
         calibration,
         source_event_id="controller-event-050",
+        source_clock_id="controller:C",
         source_coordinate=50,
+        source_unit="tick",
         target_event_id="sensor-event-400",
+        target_clock_id="sensor:S",
         target_lower=400.0,
         target_upper=400.2,
+        target_unit="tick",
     )
     ambiguous_overlap = compare_cross_clock_intervals(
         calibration,
         source_event_id="controller-event-100",
+        source_clock_id="controller:C",
         source_coordinate=100,
+        source_unit="tick",
         target_event_id="sensor-event-300",
+        target_clock_id="sensor:S",
         target_lower=300.1,
         target_upper=300.3,
+        target_unit="tick",
     )
     return {
         "format": ANALYSIS_FORMAT,
