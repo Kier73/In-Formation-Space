@@ -461,3 +461,93 @@ The focused restart tests exercise four cuts: a pending request while the worker
 These are process-replacement tests over the same in-memory transport instance. A production deployment must preserve the actual mailbox substrate (or restore it through the backend's own durable mechanism). Only one process may own a given endpoint identity at a time: terminate or externally fence the old process before activating its replacement, otherwise two senders/receivers can create a split-brain endpoint. The paired checkpoint remains the appropriate atomic artifact when both sides and the transport are being restored together.
 
 Standalone restore is for continuation of the same route epoch. It does not clear an endpoint that was fenced after ambiguous sequence exhaustion; such a route requires a fresh epoch rather than reusing uncertain sequence state.
+
+## Route epochs, ownership generations and explicit handoff
+
+The [route-epoch bridge](proof_action_route_epoch.py) records when a host/worker/channel identity tuple becomes active, which process generation owns it, why it is closed, and exactly which successor route may replace it.
+
+A route identity consists of the host ID, worker ID, request/result channel names and reliability policy. The proof session itself is not part of that identity: its state evolves as actions are interpreted, while the route remains the same. Each epoch has a unique epoch ID and an owner generation. Restoring an endpoint pair and calling `bind_existing_proof_action_route_epoch` claims the route at the next generation; old endpoints holding the previous generation fail their next guarded operation.
+
+```python
+from proof_action_route_epoch import (
+    ProofActionRouteEpochLedger,
+    InMemoryRouteEpochLedgerStore,
+    open_proof_action_route_epoch,
+    handoff_proof_action_route_epoch,
+)
+
+# The in-memory CAS store is for tests. Production must inject a durable,
+# linearizable implementation of RouteEpochLedgerStore.
+store = InMemoryRouteEpochLedgerStore()
+ledger = ProofActionRouteEpochLedger(store=store)
+open_proof_action_route_epoch(
+    host, worker, ledger, epoch_id="proof-route-1"
+)
+
+handoff = handoff_proof_action_route_epoch(
+    host, worker, ledger,
+    epoch_id="proof-route-1",
+    reason_code="operator_rotation",
+    reason="replace the worker route",
+    successor_epoch_id="proof-route-2",
+    successor_host_id="proof-host-2",
+    successor_worker_id="proof-worker-2",
+    successor_request_channel="proof-request-2",
+    successor_result_channel="proof-result-2",
+)
+host, worker = handoff.host, handoff.worker
+```
+
+The close event retains the old paired checkpoint, the pre-close and post-close session digests, the complete post-close proof-session snapshot, an explicit reason code, the complete uncertain reliable-frame projection, and the exact successor epoch ID, owner ID and route identity. The post-close snapshot lets a later process reconstruct the route_closed lifecycle record instead of having only a digest of a state it cannot reproduce. The next open event must match that authorized successor and reference the close-event digest; it cannot substitute a different route. Old pending messages stay on the old channel names, so the successor cannot accidentally consume them.
+
+The orchestrated handoff prepares the successor session first and appends the close and successor-open events in one ledger revision. With a shared CAS store, no competitor can insert a different route in between. The close operation rechecks the caller's exact owner ID and generation at commit time, preventing an owner that became stale during preparation from closing over a replacement.
+
+### Route closure is not a tactic result
+
+- A `planned` attempt has not entered the old route and remains planned for the successor host to dispatch with the same attempt ID.
+- A `dispatched` or `admitted` attempt becomes `route_closed`. This records that its communication route ended before an interpreted result was accepted. It does not mean the tactic failed, timed out, or proved the goal impossible.
+- The close event retains the original pre-close checkpoint, including the old attempt stage and message/ACK state. The post-close session digest records the explicit lifecycle update.
+- Any already queued late result remains part of the old transport snapshot. It is not reinterpreted by the successor through a different channel epoch.
+
+### Shared authority and process ownership
+
+`RouteEpochLedgerStore` defines two operations: `load()` and `compare_and_swap(expected_ledger_digest, replacement, actor_id=...)`. The CAS operation must be linearizable across every process that can use the route. The actor ID lets a production adapter apply its own owner authorization to opens, claims, closes and atomic handoffs. `InMemoryRouteEpochLedgerStore` is a thread-safe reference implementation for tests only; it checks revision concurrency but does not authenticate identities. A production deployment can adapt a transactional database, consensus-backed record, or lease service to this contract.
+
+Every guarded host/worker operation checks the active owner generation against the shared store. When a replacement claims the route, the compare-and-swap advances the owner generation; the previous process then fails its next operation even if it still holds an older local ledger copy. Two concurrent claims cannot both commit from the same expected ledger digest.
+
+The route ledger's event hashes and CAS revision detect inconsistent or stale state relative to the authority store; they are not cryptographic identity proofs. Authentication of processes and authorization to claim an epoch belong to the durable authority/lease backend. A local ledger without a shared store coordinates objects only inside its own process; it must not be used to claim cross-process fencing.
+
+Endpoint guards prevent stale workers from receiving another request or submitting a late result after their epoch has been superseded. They do not forcibly terminate an already-running external tactic process. A production worker runner must observe route fencing and apply its own cancellation/cleanup policy.
+
+Focused tests cover route handoff with an in-flight request and queued ACK, exact successor authorization, planned-action adoption, owner-generation claims, stale-process rejection through a shared CAS store, rejection of stale CAS revisions, full uncertainty/checkpoint consistency, and route-ledger replay/tamper checks. These tests use E-CPU's in-memory transport and authority-store reference implementation; a remote transport and durable distributed authority remain separate integrations.
+
+### Recover if the handoff process itself crashes
+
+The route-close record is sufficient to finish activation even when the process that committed the handoff dies before constructing its replacement endpoints:
+
+```python
+from proof_action_route_epoch import (
+    ProofActionRouteEpochLedger,
+    restore_proof_action_route_handoff,
+)
+from mailcpu.transport import InMemoryTransport
+
+# Load the authoritative ledger in the replacement process.
+ledger = ProofActionRouteEpochLedger.from_dict(
+    durable_store.load(), store=durable_store
+)
+
+transport, host, worker = restore_proof_action_route_handoff(
+    close_event,
+    ledger,
+    freshly_imported_proof_ground,
+    restore_transport=InMemoryTransport.from_snapshot,
+    # Supply the same empirical cost model if the original planner used one.
+    cost_model=restored_cost_model,
+)
+```
+
+The recovery function verifies that the exact close event is present in the ledger and that its authorized successor is still active. It restores the pre-close transport snapshot, restores the separately recorded post-close ProofAttentionSession against a freshly imported ProofGround, then claims the successor under a fresh owner generation. The old transport queues remain available for inspection but are not consumed by the successor's fresh channel names.
+
+Recovery therefore covers the commit-to-process-construction interruption window. It still relies on the transport backend's real persistence guarantees and on the authority store's linearizable, authenticated CAS implementation; the in-memory examples are deterministic reference tests, not a deployed distributed service.
+

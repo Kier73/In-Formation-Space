@@ -114,6 +114,12 @@ class ProofActionReliableWorker:
         self._result_sent_attempt_ids: set[str] = set()
         self._request_channel_failed = False
         self._result_channel_failed = False
+        self._route_epoch_id: str | None = None
+        self._route_guard = None
+
+    def _assert_route_active(self) -> None:
+        if self._route_guard is not None:
+            self._route_guard(self._route_epoch_id)
 
     @property
     def request_channel_failed(self) -> bool:
@@ -129,6 +135,7 @@ class ProofActionReliableWorker:
 
     def receive_request(self) -> ReceivedProofActionRequest | None:
         """Receive one request; duplicate sequences and attempt IDs are ACKed but not redelivered."""
+        self._assert_route_active()
         if self.fenced:
             raise ProofActionReliableChannelError(
                 "worker endpoint is fenced; create fresh host/worker endpoints with new channel identities"
@@ -178,6 +185,7 @@ class ProofActionReliableWorker:
 
     def send_result(self, result_document: Mapping[str, Any]) -> int:
         """Send one portable result envelope over the reliable response channel."""
+        self._assert_route_active()
         if self._result_channel_failed:
             raise ProofActionReliableChannelError(
                 "result channel is fenced after retry exhaustion; create fresh host/worker endpoints"
@@ -205,10 +213,12 @@ class ProofActionReliableWorker:
 
     def process_result_acknowledgements(self) -> tuple[int, ...]:
         """Clear result sequences acknowledged after host-side receiver admission."""
+        self._assert_route_active()
         return self._result_sender.process_ack()
 
     def advance_result_retry_tick(self) -> tuple[int, ...]:
         """Advance retries; fence this endpoint if an in-order result sequence exhausts."""
+        self._assert_route_active()
         failed = self._result_sender.tick()
         if failed:
             # Once an in-order result sequence exhausts retries, the host's
@@ -273,11 +283,21 @@ class ProofActionReliableHost:
             policy=self.policy,
             peer=worker_id,
         )
-        self._active_attempt = None
+        planned_attempt = session.active_attempt
+        self._active_attempt = (
+            planned_attempt if planned_attempt is not None and planned_attempt.status == "planned"
+            else None
+        )
         self._active_request: dict[str, Any] | None = None
         self._request_sequence: int | None = None
         self._request_channel_failed = False
         self._quarantined_results: list[dict[str, Any]] = []
+        self._route_epoch_id: str | None = None
+        self._route_guard = None
+
+    def _assert_route_active(self) -> None:
+        if self._route_guard is not None:
+            self._route_guard(self._route_epoch_id)
 
     @property
     def active_attempt(self):
@@ -341,6 +361,7 @@ class ProofActionReliableHost:
         the attempt remains planned; a repeated call retries the same action
         instead of selecting a different candidate.
         """
+        self._assert_route_active()
         if self._request_channel_failed:
             raise ProofActionReliableChannelError(
                 "request channel is fenced after retry exhaustion; create fresh host/worker endpoints"
@@ -393,6 +414,7 @@ class ProofActionReliableHost:
 
     def observe_request_admission(self) -> bool:
         """Record admission only after the worker's ReliableChannel ACK is received."""
+        self._assert_route_active()
         attempt = self._active_attempt
         sequence = self._request_sequence
         if attempt is None or sequence is None:
@@ -418,6 +440,7 @@ class ProofActionReliableHost:
 
     def advance_request_retry_tick(self) -> tuple[int, ...]:
         """Advance retries; exhausted acknowledgement is recorded as unconfirmed delivery."""
+        self._assert_route_active()
         failed = self._request_sender.tick()
         sequence = self._request_sequence
         attempt = self._active_attempt
@@ -440,6 +463,7 @@ class ProofActionReliableHost:
 
     def mark_no_result(self, reason: str) -> None:
         """Close an admitted request when the worker produces no result by the host's deadline."""
+        self._assert_route_active()
         attempt = self._active_attempt
         if attempt is None or attempt.status != "admitted":
             raise ProofActionReliableChannelError(
@@ -461,6 +485,7 @@ class ProofActionReliableHost:
         twice. A malformed returned payload is retained as a raw return and
         closed with interpretation_failed.
         """
+        self._assert_route_active()
         attempt = self._active_attempt
         if attempt is None:
             peeked = self._result_receiver.peek()
