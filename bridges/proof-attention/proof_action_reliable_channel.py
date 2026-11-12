@@ -232,6 +232,7 @@ class ProofActionReliableHost:
         self._active_attempt = None
         self._active_request: dict[str, Any] | None = None
         self._request_sequence: int | None = None
+        self._quarantined_results: list[dict[str, Any]] = []
 
     @property
     def active_attempt(self):
@@ -244,6 +245,39 @@ class ProofActionReliableHost:
     @property
     def request_pending_sequences(self) -> tuple[int, ...]:
         return self._request_sender.pending_sequences()
+
+    @property
+    def quarantined_results(self) -> tuple[dict[str, Any], ...]:
+        return tuple(json.loads(_canonical(item)) for item in self._quarantined_results)
+
+    def _quarantine_result(self, sequence: int, payload: Any, reason: str) -> None:
+        """Retain and hash-chain a received response that cannot belong to the active action."""
+        try:
+            raw = _canonical(payload)
+            canonicalization = "canonical-json-v1"
+        except ProofActionReliableChannelError:
+            raw = repr(payload)
+            canonicalization = "python-repr-fallback-v1"
+        attempt_id = payload.get("attempt_id") if isinstance(payload, Mapping) else None
+        request_digest = payload.get("request_digest") if isinstance(payload, Mapping) else None
+        core = {
+            "sequence": len(self._quarantined_results) + 1,
+            "response_sequence": sequence,
+            "channel": self.result_channel,
+            "attempt_id": attempt_id if isinstance(attempt_id, str) else None,
+            "request_digest": request_digest if isinstance(request_digest, str) else None,
+            "reason": reason,
+            "canonicalization": canonicalization,
+            "payload_digest": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+            "previous_event_digest": (
+                self._quarantined_results[-1]["event_digest"]
+                if self._quarantined_results else "0" * 64
+            ),
+        }
+        self._quarantined_results.append({
+            **core,
+            "event_digest": hashlib.sha256(_canonical(core).encode("utf-8")).hexdigest(),
+        })
 
     def dispatch_next(self) -> DispatchedProofAction | None:
         """Select one action and reliably dispatch its request.
@@ -371,16 +405,43 @@ class ProofActionReliableHost:
             if peeked is None:
                 return None
             sequence, _payload = peeked
-            if sequence < self._result_receiver.next_receive_sequence:
-                self._result_receiver.receive()
+            received = self._result_receiver.receive()
+            if received is None:
                 return None
-            raise ProofActionReliableChannelError(
-                "a new reliable result arrived without an active proof-action attempt"
+            received_sequence, payload = received
+            if received_sequence < self._result_receiver.next_receive_sequence:
+                return None
+            self._quarantine_result(
+                received_sequence,
+                payload,
+                "response arrived after its proof-action attempt was closed",
             )
+            return None
         if attempt.status != "admitted":
             raise ProofActionReliableChannelError(
                 f"worker result requires an admitted request; current stage is {attempt.status!r}"
             )
+
+        peeked = self._result_receiver.peek()
+        if peeked is None:
+            return None
+        _peek_sequence, peek_payload = peeked
+        if isinstance(peek_payload, Mapping) and (
+            peek_payload.get("attempt_id") != attempt.attempt_id
+            or peek_payload.get("request_digest") != (
+                self._active_request.get("request_digest")
+                if self._active_request is not None else None
+            )
+        ):
+            received = self._result_receiver.receive()
+            if received is not None:
+                received_sequence, payload = received
+                self._quarantine_result(
+                    received_sequence,
+                    payload,
+                    "response attempt ID or request digest does not match the active action",
+                )
+            return None
 
         received = self._result_receiver.receive()
         if received is None:
