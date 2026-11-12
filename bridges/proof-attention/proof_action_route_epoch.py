@@ -619,13 +619,32 @@ class ProofActionRouteEpochLedger:
             actor_id=owner_id,
         )
 
-    def claim_epoch(self, epoch_id: str, *, owner_id: str) -> dict[str, Any]:
-        """Transfer ownership to a new process generation on the same route."""
+    def claim_epoch(
+        self,
+        epoch_id: str,
+        *,
+        owner_id: str,
+        expected_owner_id: str,
+        expected_owner_generation: int,
+    ) -> dict[str, Any]:
+        """Transfer ownership only from the exact owner generation being replaced."""
         self.refresh()
         active = self.active_epoch
         owner_id = _text(owner_id, "owner_id")
+        expected_owner_id = _text(expected_owner_id, "expected_owner_id")
+        if type(expected_owner_generation) is not int or expected_owner_generation <= 0:
+            raise ProofActionRouteEpochError(
+                "expected_owner_generation must be a positive integer"
+            )
         if active is None or active["epoch_id"] != epoch_id:
             raise ProofActionRouteEpochError("only the active route epoch can be claimed")
+        if (
+            active["owner_id"] != expected_owner_id
+            or active["owner_generation"] != expected_owner_generation
+        ):
+            raise ProofActionRouteEpochError(
+                "route claim expected owner does not match the active owner generation"
+            )
         if owner_id == active["owner_id"]:
             raise ProofActionRouteEpochError("new owner ID must differ from the current owner")
         if any(
@@ -1134,7 +1153,12 @@ def bind_existing_proof_action_route_epoch(
     owner_id = _text(
         owner_id or f"owner-{uuid.uuid4().hex}", "replacement_owner_id"
     )
-    claimed = ledger.claim_epoch(epoch_id, owner_id=owner_id)
+    claimed = ledger.claim_epoch(
+        epoch_id,
+        owner_id=owner_id,
+        expected_owner_id=active["owner_id"],
+        expected_owner_generation=active["owner_generation"],
+    )
     _attach_route_guard(host, worker, ledger, epoch_id, owner_id, claimed["details"]["owner_generation"])
 
 
@@ -1301,7 +1325,12 @@ def restore_proof_action_route_handoff(
         policy=policy,
     )
     new_owner_id = owner_id or f"owner-{uuid.uuid4().hex}"
-    claimed = ledger.claim_epoch(successor_epoch_id, owner_id=new_owner_id)
+    claimed = ledger.claim_epoch(
+        successor_epoch_id,
+        owner_id=new_owner_id,
+        expected_owner_id=_text(details.get("successor_owner_id"), "successor_owner_id"),
+        expected_owner_generation=1,
+    )
     _attach_route_guard(
         host,
         worker,
