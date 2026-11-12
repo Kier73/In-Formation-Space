@@ -23,3 +23,9 @@ All 288 compressed capsules must reconstruct and replay the exact PRC-001 capsul
 ## Limitations
 
 This is a finite benchmark of the 16 selected workloads. Zlib byte streams may vary across implementations, although decoded canonical metadata and payloads remain exact. Bundle-local entries require their shared manifest; a detached entry is not independently portable. SHA-256 does not provide origin authentication or execution authorization.
+
+## First verified result
+
+The pinned [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43319093051) passed all focused tests, pre/post-compression semantic replay, per-encoding bundle reconstruction, global bundle reconstruction, and tamper rejection. It covered 16 workloads, 1,364 input rows, 288 capsules, and 49,104 pre/post-compression semantic comparisons. See the [retained measurement record](results/ci-run-43319093051.md).
+
+The current shared-manifest bundle remains larger than header-compressed standalone capsules because local entry headers are still verbose JSON. CPB-002 should compare packed/compressed local entry metadata with a shared manifest and preserve random access.
