@@ -127,6 +127,13 @@ class ProofActionReliableWorker:
                 raise ProofActionReliableChannelError(
                     f"received proof-action request is invalid: {exc}"
                 ) from exc
+            attempt_id = validated["attempt_id"]
+            request_digest = validated["request_digest"]
+            previous = self._admitted_requests.get(attempt_id)
+            if previous is not None and previous != request_digest:
+                raise ProofActionReliableChannelError(
+                    "one worker attempt ID was admitted with conflicting request digests"
+                )
             validated_payload.update(validated)
 
         received = self._request_receiver.receive(commit=validate_before_ack)
@@ -135,11 +142,6 @@ class ProofActionReliableWorker:
         sequence, _payload = received
         attempt_id = validated_payload["attempt_id"]
         request_digest = validated_payload["request_digest"]
-        previous = self._admitted_requests.get(attempt_id)
-        if previous is not None and previous != request_digest:
-            raise ProofActionReliableChannelError(
-                "one worker attempt ID was admitted with conflicting request digests"
-            )
         self._admitted_requests[attempt_id] = request_digest
         return ReceivedProofActionRequest(sequence, validated_payload)
 
