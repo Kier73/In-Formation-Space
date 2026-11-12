@@ -120,3 +120,22 @@ A provisional model is developed in [From Description to Realization](../experim
 6. **When is an observational quotient safe to use as a computational state?** Current-output agreement is insufficient when transitions can expose hidden distinctions. Can finite partition refinement, congruence checking, or product-state cycle proofs provide usable certificates for E-CPU structural memory and machine-state abstraction?
 7. **Can an observation packet resolve a requested property without reconstructing the entire hidden state?** Trials 04 and 05 explore target-state isolation and query-directed hypothesis separation as different weighted set-cover problems. When is question-directed attention cheaper, and which ambiguities remain unresolvable under the available observation family?
 8. **How should a model change after an observation falls outside every predicted branch?** Can an agent propose extensions without silently treating them as facts, preserve the previous hypothesis set and its provenance, and require independent validation before activating a new revision?
+
+
+---
+
+## 6. Compiler Realization Cost and Navigation
+
+### The Problem
+
+A typed computational description may admit several exact realizations. The smallest parameter count, least dense forward work, shallowest network, and sparsest coefficient pattern need not describe the same resource preference. In the current E-CPU transition compiler, zero coefficients still reside in dense matrices and are traversed by the existing forward implementation; active-parameter count is therefore not a measured execution saving.
+
+### Questions
+
+1. Across representative workload families, when do minterm, direct expression-DAG, and liveness-compacted compilers dominate one another?
+2. Which resource dimensions should remain independent in a realization request: dense storage, dense multiply slots, activation count, depth, measured latency, transfer size, or verification cost?
+3. Can a route resolver return a Pareto set and ask for a declared objective only when incomparable candidates remain?
+4. What sparse tensor representation and execution kernel would turn nonzero active-parameter counts into actual work reduction, and what evidence would establish the savings?
+5. How should navigation combine deterministic structural estimates with separately measured host and transport costs without silently converting one into the other?
+
+The initial finite corpus is [RCN-001](../experiments/realization-cost-navigation/README.md). It reports architecture-derived costs and explicitly does not claim physical latency or a universally best compiler.
