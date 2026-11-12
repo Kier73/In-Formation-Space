@@ -344,5 +344,19 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         self.assertEqual(session.attempts[0].status, "interpretation_failed")
         self.assertEqual(host.proof_ground.fingerprint, original_ground_fingerprint)
 
+    def test_unidentifiable_response_is_quarantined_without_closing_active_attempt(self):
+        session, _source_trace, _pg, _transport, host, worker = make_endpoints()
+        _dispatch, _received = deliver_request_and_admit(host, worker)
+        attempt = host.active_attempt
+        # Exercise a malformed raw frame below the worker's public result-envelope API.
+        worker._result_sender.send(["not", "a", "JSON proof-action result"])
+
+        self.assertIsNone(host.receive_result())
+        self.assertEqual(attempt.status, "admitted")
+        self.assertEqual(len(host.quarantined_results), 1)
+        self.assertIsNone(host.quarantined_results[0]["attempt_id"])
+        self.assertIn("not a correlated", host.quarantined_results[0]["reason"])
+        self.assertEqual(worker.process_result_acknowledgements(), (1,))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
