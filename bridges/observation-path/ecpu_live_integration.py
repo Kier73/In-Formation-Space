@@ -46,6 +46,12 @@ from analyze_temporal_binding import (
     analyze_temporal_binding,
     validate_temporal_analysis,
 )
+from operation_spans import (
+    OperationSpanRecorder,
+    build_operation_cost_profiles,
+    validate_operation_cost_profiles,
+    validate_operation_span,
+)
 from observation_path import ObservationIntent, ObservationPath
 from validate_observation_path import validate_path_record
 
@@ -68,6 +74,15 @@ def verify_ecpu_checkout() -> None:
 
 
 class ECPULiveAdapterIntegrationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        run_identity = os.environ.get("GITHUB_RUN_ID", f"local-{os.getpid()}")
+        attempt_identity = os.environ.get("GITHUB_RUN_ATTEMPT", "1")
+        cls.operation_span_recorder = OperationSpanRecorder(
+            clock_actor_id="ecpu-live-integration-process",
+            clock_segment_id=f"{run_identity}-{attempt_identity}",
+        )
+
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
         self.root = Path(self.tempdir.name)
@@ -99,6 +114,24 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         self.adapter = ECPUGatedObservationAdapter(
             self.coordinator,
             decode_substrate_observation,
+            operation_span_recorder=self.operation_span_recorder,
+        )
+
+    def _measure_live_operation(
+        self,
+        path: ObservationPath,
+        logical_time: int,
+        span_name: str,
+        operation_id: str,
+        operation,
+        context=None,
+    ):
+        return self.operation_span_recorder.measure(
+            attempt_id=path.intent.attempt_id,
+            span_id=f"direct:{logical_time}:{span_name}",
+            operation_id=operation_id,
+            operation=operation,
+            context={"logical_time": logical_time, **(context or {})},
         )
 
     def tearDown(self):
@@ -198,8 +231,22 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         observation_b,
         logical_time: int,
     ):
-        sequence_a = self.sender_a.send(observation_a.to_payload())
-        sequence_b = self.sender_b.send(observation_b.to_payload())
+        sequence_a = self._measure_live_operation(
+            path,
+            logical_time,
+            "send-A",
+            "ecpu.ReliableChannel.send",
+            lambda: self.sender_a.send(observation_a.to_payload()),
+            {"source": "A", "channel": "gate-A"},
+        )
+        sequence_b = self._measure_live_operation(
+            path,
+            logical_time,
+            "send-B",
+            "ecpu.ReliableChannel.send",
+            lambda: self.sender_b.send(observation_b.to_payload()),
+            {"source": "B", "channel": "gate-B"},
+        )
         dispatch_ref = self.root / f"dispatch-{logical_time}.json"
         dispatch_ref.write_text(
             json.dumps(
@@ -216,7 +263,14 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         )
         self._capture_temporal_events(path)
 
-        links = self.coordinator.ingest_available()
+        links = self._measure_live_operation(
+            path,
+            logical_time,
+            "receiver-ingest",
+            "ecpu.GatedObservationCoordinator.ingest_available",
+            self.coordinator.ingest_available,
+            {"receiver": "gated-observation-coordinator"},
+        )
         matching_links = [
             link for link in links
             if link.event == ("timing", logical_time)
@@ -420,6 +474,64 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         self.assertEqual(
             [event["stage"] for event in binding.event_bindings],
             [event.stage for event in path.events],
+        )
+
+    def test_zz_operation_span_profiles_preserve_live_call_boundaries(self):
+        import jsonschema
+
+        spans = list(self.operation_span_recorder.spans)
+        self.assertGreaterEqual(len(spans), 12)
+        for span in spans:
+            validate_operation_span(span)
+            jsonschema.validate(
+                span,
+                json.loads(
+                    (Path(__file__).with_name("operation-span.schema.json"))
+                    .read_text(encoding="utf-8")
+                ),
+            )
+
+        profiles = build_operation_cost_profiles(spans, minimum_samples=3)
+        profiles_schema = json.loads(
+            (Path(__file__).with_name("operation-cost-profiles.schema.json"))
+            .read_text(encoding="utf-8")
+        )
+        jsonschema.validate(profiles, profiles_schema)
+        self.assertEqual(validate_operation_cost_profiles(profiles, spans), profiles)
+        self.assertEqual(profiles["policy_effect"], "none")
+
+        by_operation = {item["operation_id"]: item for item in profiles["profiles"]}
+        send_profile = by_operation["ecpu.ReliableChannel.send"]
+        self.assertEqual(send_profile["measured_sample_count"], 4)
+        self.assertEqual(send_profile["readiness"], "descriptive_only")
+
+        # The remaining stages are intentionally below the three-sample
+        # threshold in this two-path smoke run. Their durations are retained,
+        # but not represented as stable cost estimates.
+        for operation_id in (
+            "ecpu.GatedObservationCoordinator.ingest_available",
+            "ecpu.GatedObservationCoordinator.finalize_event",
+            "ecpu.GatedObservationCoordinator.commit_event",
+            "ecpu.GatedObservationCoordinator.save_checkpoint",
+            "ecpu.GatedObservationCoordinator.process_acks",
+        ):
+            self.assertEqual(
+                by_operation[operation_id]["readiness"],
+                "insufficient_samples",
+            )
+
+        output_dir = Path(os.environ.get(
+            "OPERATION_SPAN_OUTPUT_DIR",
+            str(self.root / "operation-span-artifacts"),
+        ))
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "operation-spans-live-ci.json").write_text(
+            json.dumps({"spans": spans}, sort_keys=True, indent=2),
+            encoding="utf-8",
+        )
+        (output_dir / "operation-cost-profiles-live-ci.json").write_text(
+            json.dumps(profiles, sort_keys=True, indent=2),
+            encoding="utf-8",
         )
 
 
