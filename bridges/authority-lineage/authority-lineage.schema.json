@@ -43,6 +43,7 @@
             "enum": [
               "ledger_created",
               "revision_proposed",
+              "proposal_review_certified",
               "proposal_resolved",
               "decision_issued"
             ]
@@ -172,6 +173,53 @@
             "if": {
               "properties": {
                 "entry_type": {
+                  "const": "proposal_review_certified"
+                }
+              },
+              "required": [
+                "entry_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "required": [
+                    "proposal_id",
+                    "event_key",
+                    "certificate_id",
+                    "certificate_digest",
+                    "certificate"
+                  ],
+                  "properties": {
+                    "proposal_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "event_key": {
+                      "$ref": "#/$defs/eventKey"
+                    },
+                    "certificate_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "certificate_digest": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "certificate": {
+                      "$ref": "#/$defs/reviewCertificate"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "entry_type": {
                   "const": "proposal_resolved"
                 }
               },
@@ -220,6 +268,10 @@
                       "items": {
                         "type": "string"
                       }
+                    },
+                    "review_certificate_digest": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
                     }
                   },
                   "additionalProperties": false
@@ -343,6 +395,294 @@
         "logical_time": {
           "type": "integer",
           "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "reviewVote": {
+      "type": "object",
+      "required": [
+        "seat",
+        "reviewer_ref",
+        "vote",
+        "rationale",
+        "review_ref",
+        "review_sha256"
+      ],
+      "properties": {
+        "seat": {
+          "enum": [
+            "R00",
+            "R01",
+            "R02"
+          ]
+        },
+        "reviewer_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vote": {
+          "enum": [
+            "APPROVE",
+            "REJECT",
+            "ABSTAIN"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "reviewCertificate": {
+      "type": "object",
+      "required": [
+        "format",
+        "schema",
+        "certificate_id",
+        "ledger_id",
+        "proposal_id",
+        "proposal_digest",
+        "event_key",
+        "base_decision_ids",
+        "base_decision_digests",
+        "policy_snapshot",
+        "policy_digest",
+        "reviewer_seats",
+        "proposer_seat",
+        "evaluator",
+        "votes",
+        "evaluation",
+        "certificate_digest"
+      ],
+      "properties": {
+        "format": {
+          "const": "in-formation.authority-review-certificate"
+        },
+        "schema": {
+          "const": "in-formation.authority-review-certificate/0.1"
+        },
+        "certificate_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ledger_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proposal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proposal_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "event_key": {
+          "$ref": "#/$defs/eventKey"
+        },
+        "base_decision_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "base_decision_digests": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "policy_snapshot": {
+          "type": "object",
+          "required": [
+            "policy_id",
+            "definition",
+            "reviewer_seats",
+            "proposer_seat",
+            "evaluator"
+          ],
+          "properties": {
+            "policy_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "definition": {
+              "type": "object",
+              "required": [
+                "include_proposer",
+                "minimum_distinct_reviewers",
+                "approvals_required",
+                "rejections_required",
+                "description"
+              ],
+              "properties": {
+                "include_proposer": {
+                  "type": "boolean"
+                },
+                "minimum_distinct_reviewers": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3
+                },
+                "approvals_required": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3
+                },
+                "rejections_required": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "reviewer_seats": {
+              "type": "array",
+              "const": [
+                "R00",
+                "R01",
+                "R02"
+              ]
+            },
+            "proposer_seat": {
+              "const": "R00"
+            },
+            "evaluator": {
+              "const": "in-formation.authority-review-evaluator/0.1"
+            }
+          },
+          "additionalProperties": false
+        },
+        "policy_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "reviewer_seats": {
+          "type": "array",
+          "const": [
+            "R00",
+            "R01",
+            "R02"
+          ]
+        },
+        "proposer_seat": {
+          "const": "R00"
+        },
+        "evaluator": {
+          "const": "in-formation.authority-review-evaluator/0.1"
+        },
+        "votes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reviewVote"
+          }
+        },
+        "evaluation": {
+          "type": "object",
+          "required": [
+            "outcome",
+            "reason",
+            "eligible_reviewers",
+            "present_eligible_reviewers",
+            "approval_count",
+            "rejection_count",
+            "abstention_count",
+            "proposer_vote_counted",
+            "conflicting_thresholds",
+            "seat_pattern"
+          ],
+          "properties": {
+            "outcome": {
+              "enum": [
+                "ACCEPTED",
+                "REJECTED",
+                "INCONCLUSIVE"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "eligible_reviewers": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "R00",
+                  "R01",
+                  "R02"
+                ]
+              }
+            },
+            "present_eligible_reviewers": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "R00",
+                  "R01",
+                  "R02"
+                ]
+              }
+            },
+            "approval_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "rejection_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "abstention_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "proposer_vote_counted": {
+              "type": "boolean"
+            },
+            "conflicting_thresholds": {
+              "type": "boolean"
+            },
+            "seat_pattern": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "enum": [
+                  "ABSENT",
+                  "APPROVE",
+                  "REJECT",
+                  "ABSTAIN"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "certificate_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
         }
       },
       "additionalProperties": false
