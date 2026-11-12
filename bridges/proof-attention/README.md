@@ -328,6 +328,7 @@ admitted = host.observe_request_admission()
 # The worker's external tactic runner consumes request.request, then packages
 # a result with make_proof_action_result(...).
 # The worker sends it with worker.send_result(result_document).
+# kernel_receipts comes from the host's separately trusted kernel-checker adapter.
 imported = host.receive_result(verified_receipts=kernel_receipts)
 worker.process_result_acknowledgements()
 ```
@@ -338,7 +339,7 @@ worker.process_result_acknowledgements()
 - The worker validates the request digest and format in ReliableChannel's receive-side commit callback. Invalid request payloads are not consumed or acknowledged.
 - The host records `admitted` only after the request sequence's E-CPU acknowledgement returns. That ACK means the worker's receive endpoint validated and consumed the request; it is not proof that a tactic ran or succeeded.
 - A dropped request or ACK is retried using the original reliable sequence. A duplicate request is consumed and acknowledged by E-CPU but is not delivered to the worker a second time.
-- If request retries exhaustion is represented as `delivery_unconfirmed`. This means delivery/admission was not confirmed; it is not an execution rejection, timeout observation, or theorem result. Because E-CPU channels are strictly in-order and the receiver may or may not have advanced (for example, data delivered but every ACK lost), the affected endpoint is fenced after retry exhaustion. Do not reuse it for later attempts; recreate host/worker endpoints with fresh route identities/channel epoch so an uncertain old sequence cannot block or collide with new work.
+- Request retry exhaustion is represented as `delivery_unconfirmed`. This means delivery/admission was not confirmed; it is not an execution rejection, timeout observation, or theorem result. Because E-CPU channels are strictly in-order and the receiver may or may not have advanced (for example, data delivered but every ACK lost), the affected endpoint is fenced after retry exhaustion. Do not reuse it for later attempts; recreate host/worker endpoints with fresh route identities/channel epoch so an uncertain old sequence cannot block or collide with new work.
 - A worker result uses the response ReliableChannel. The host records the raw returned payload after the response frame is consumed and ACKed, then checks the result envelope against the active attempt, request digest and recorded return evidence before importing the VGI trace.
 - A response duplicate is acknowledged without a second proof interpretation. A malformed or mismatched result remains a recorded raw return followed by `interpretation_failed`.
 - The worker's response sender can clear its pending sequence only after it receives the host's response ACK. A transport ACK is never promoted to a kernel receipt. Result-channel retry exhaustion also fences that endpoint; later result sequences cannot safely reuse an uncertain in-order cursor. The host supplies independently verified kernel receipts to `receive_result(verified_receipts=...)`; they remain separate from the worker's transport ACK and result digest.
