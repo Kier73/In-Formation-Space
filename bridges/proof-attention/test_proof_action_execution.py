@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import json
 import unittest
 
 from proof_action_execution import (
@@ -451,7 +452,7 @@ class ProofActionExecutionTests(unittest.TestCase):
         snapshot["attempts"][0]["events"][0]["details"]["tactic"] = "forged"
         core = {key: value for key, value in snapshot.items() if key != "session_digest"}
         snapshot["session_digest"] = hashlib.sha256(
-            __import__("json").dumps(
+            json.dumps(
                 core, sort_keys=True, separators=(",", ":"),
                 ensure_ascii=False, allow_nan=False,
             ).encode("utf-8")
