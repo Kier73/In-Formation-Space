@@ -52,3 +52,8 @@ The capsule format is currently an In-Formation-Space research artifact. It is n
 ## First verified capsule result
 
 The [PRC-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43317088331) created and replayed 288 capsules, covering 1,364 input rows and 49,104 pre/post-package semantic comparisons. All 288 header and payload tampering probes were rejected. The [retained evidence](results/ci-run-43317088331.md) exposes an important cost: metadata averages about 2.5 KB per capsule and exceeds the inner payload for the compact binary formats. This motivates a follow-on study of compressed headers and shared-provenance bundles.
+
+
+## Final PR-head verification
+
+The final PR-head [workflow run 43317477207](https://github.com/Kier73/In-Formation-Space/actions/runs/43317477207) passed all steps, including 288 capsules, 49,104 pre/post-package semantic comparisons, and 288/288 header plus 288/288 payload tamper rejections. The [final-head evidence record](results/ci-run-43317477207.md) preserves exact source revisions, byte totals, and artifact digests.
