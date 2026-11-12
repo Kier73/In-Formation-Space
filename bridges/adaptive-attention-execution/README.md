@@ -36,6 +36,10 @@ Clock values remain labeled with their original clock domains; the coordinator p
 
 The adapter has now been exercised against a pinned E-CPU checkout, not only stubs. The [live integration tests](../observation-path/ecpu_live_integration.py) and [run 217 receipt](../observation-path/results/live-ecpu-integration-run-217.json) document the actual transport, quorum, checkpoint, VM readback, sender-ACK processing, and final portable path validation. The same live path now writes a typed [temporal trace binding](../observation-path/ecpu_temporal_binding.py) and a [conservative latency analysis](../observation-path/analyze_temporal_binding.py). Partial ACK progress and temporal analysis limits are covered by dedicated tests.
 
+### Operation cost evidence
+
+The companion [operation-span recorder](../observation-path/operation_spans.py) can time a specific synchronous operation boundary without changing the transport or lifecycle semantics. Repeated spans can be summarized into descriptive cost profiles, partitioned by operation, clock actor, clock segment, and success/failure outcome. These profiles are deliberately not fed into the policy executor: they provide auditable empirical inputs for a later experiment, not an unvalidated feedback loop. A planned observation with no invocation still has unknown operational cost.
+
 ## Construction and verification
 
 - [Construction report](construction-report.md) records the lifecycle, evidence limits, and integrated CI result.
