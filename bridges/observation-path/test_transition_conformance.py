@@ -385,5 +385,43 @@ class TransitionConformanceTests(unittest.TestCase):
         jsonschema.validate(record, schema)
 
 
+    def test_conformance_artifact_is_self_contained_and_ledger_reconstructs_before_proposal(self):
+        import json
+        record = build_record(
+            self.model,
+            make_path(observed_outcome="unexpected"),
+            observed_outcome="unexpected",
+            observed_next_state="s2",
+        )
+        self.assertEqual(record["source_observation_path"], make_path(observed_outcome="unexpected").to_dict())
+        self.assertEqual(
+            validate_transition_conformance_record(record, model_document=self.model),
+            record,
+        )
+
+        # Even a caller that recomputes the document digest cannot make a
+        # fabricated derived classification pass independent reconstruction.
+        tampered = dict(record)
+        tampered["conformance_status"] = "matched"
+        core = {key: value for key, value in tampered.items() if key != "conformance_digest"}
+        tampered["conformance_digest"] = hashlib.sha256(
+            json.dumps(
+                core, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        ledger = TransitionModelRevisionLedger(self.model)
+        with self.assertRaises(TransitionConformanceError):
+            ledger.propose_transition("forged-candidate", tampered, proposer="test-agent")
+
+    def test_external_observation_path_must_equal_embedded_snapshot(self):
+        record = build_record(self.model, self.path)
+        substituted = make_path(attempt_id="different-attempt")
+        with self.assertRaises(TransitionConformanceError):
+            validate_transition_conformance_record(
+                record, model_document=self.model, observation_path=substituted.to_dict()
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
