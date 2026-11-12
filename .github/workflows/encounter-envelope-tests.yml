@@ -14,6 +14,7 @@ on:
       - "experiments/description-to-realization/trials/trial-07-epistemic-frontier/**"
       - "experiments/guarded-shortcut-tradeoff/**"
       - "experiments/logistic-map-coverage/**"
+      - "experiments/observation-cost-information/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   pull_request:
     paths:
@@ -28,6 +29,7 @@ on:
       - "experiments/description-to-realization/trials/trial-07-epistemic-frontier/**"
       - "experiments/guarded-shortcut-tradeoff/**"
       - "experiments/logistic-map-coverage/**"
+      - "experiments/observation-cost-information/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   workflow_dispatch:
 
@@ -102,12 +104,26 @@ jobs:
         run: python -m unittest discover -s bridges/observation-path -p "test_operation_spans.py" -v
       - name: Run observation-outcome information ledger tests
         run: python -m unittest discover -s bridges/observation-path -p "test_observation_outcomes.py" -v
+      - name: Run controlled observation cost-information matrix tests
+        run: python -m unittest discover -s experiments/observation-cost-information -p "test_*.py" -v
       - name: Run live E-CPU gated observation integration
         env:
           PYTHONPATH: external/E-CPU
           ECPU_ROOT: external/E-CPU
           OPERATION_SPAN_OUTPUT_DIR: ${{ runner.temp }}/ecpu-operation-spans
         run: python bridges/observation-path/ecpu_live_integration.py
+      - name: Run controlled E-CPU observation cost-information matrix
+        env:
+          PYTHONPATH: external/E-CPU
+          ECPU_ROOT: external/E-CPU
+        run: python experiments/observation-cost-information/run_experiment.py --output-dir "${{ runner.temp }}/ecpu-observation-cost-information"
+      - name: Upload controlled observation cost-information artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecpu-observation-cost-information-experiment
+          path: ${{ runner.temp }}/ecpu-observation-cost-information/
+          if-no-files-found: warn
       - name: Upload live E-CPU operation-span artifacts
         if: always()
         uses: actions/upload-artifact@v4
