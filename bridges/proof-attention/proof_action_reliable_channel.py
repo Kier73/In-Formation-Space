@@ -424,21 +424,24 @@ class ProofActionReliableHost:
         if peeked is None:
             return None
         _peek_sequence, peek_payload = peeked
-        if isinstance(peek_payload, Mapping) and (
-            peek_payload.get("attempt_id") != attempt.attempt_id
-            or peek_payload.get("request_digest") != (
+        correlation_matches = (
+            isinstance(peek_payload, Mapping)
+            and peek_payload.get("attempt_id") == attempt.attempt_id
+            and peek_payload.get("request_digest") == (
                 self._active_request.get("request_digest")
                 if self._active_request is not None else None
             )
-        ):
+        )
+        if not correlation_matches:
             received = self._result_receiver.receive()
             if received is not None:
                 received_sequence, payload = received
-                self._quarantine_result(
-                    received_sequence,
-                    payload,
-                    "response attempt ID or request digest does not match the active action",
+                reason = (
+                    "response payload is not a correlated proof-action result"
+                    if not isinstance(payload, Mapping)
+                    else "response attempt ID or request digest does not match the active action"
                 )
+                self._quarantine_result(received_sequence, payload, reason)
             return None
 
         received = self._result_receiver.receive()
