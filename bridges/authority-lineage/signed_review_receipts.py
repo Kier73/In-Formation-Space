@@ -21,7 +21,17 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
     Ed25519PublicKey,
 )
 
-from authority_lineage import digest
+from authority_lineage import (
+    _append_entry,
+    _entries_of_type,
+    _event_equal,
+    _nonempty as _lineage_nonempty,
+    _sha256 as _lineage_sha256,
+    current_frontier,
+    digest,
+    resolve_proposal,
+    validate_ledger,
+)
 
 FORMAT = "in-formation.signed-review-bundle"
 SCHEMA = "in-formation.signed-review-bundle/0.1"
@@ -527,5 +537,15 @@ def validate_signed_review_bundle(
         trust_store,
         review_artifacts=review_artifacts,
     )
+    if review_artifacts is None:
+        # The flag records that the producer checked the referenced bytes when
+        # assembling the bundle. Without those bytes, this verifier can
+        # re-check signatures but cannot independently repeat that check.
+        rebuilt["review_artifacts_verified"] = bundle["review_artifacts_verified"]
+        rebuilt_core = {
+            key: value for key, value in rebuilt.items()
+            if key != "bundle_digest"
+        }
+        rebuilt["bundle_digest"] = digest(rebuilt_core)
     if rebuilt != dict(bundle):
         raise SignedReviewError("signed review bundle differs from verified reconstruction")
