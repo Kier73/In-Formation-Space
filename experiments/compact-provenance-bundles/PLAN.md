@@ -39,3 +39,8 @@ The final pinned [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space
 ## Integrated mainline receiver acceptance
 
 After merging the independent PRC canonical metadata profile and Node.js receiver, the final [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43320231327) passed syntax, Python/Node capsule checks, E-CPU sparse tests, complete compression/replay corpus, all bundle round trips, nested tamper rejection and artifact upload. See the [integrated evidence record](results/ci-run-43320231327.md).
+
+
+## Final Node-verified acceptance
+
+The final [CPB-001 PR workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43320550536) passed the Node-enabled PRC canonical metadata receiver test, CPB/PRC/E-CPU regression suites, full 288-capsule corpus, 49,104 semantic comparisons, bundle reconstruction and nested tamper rejection. See the [final integrated receipt](results/ci-run-43320550536.md).
