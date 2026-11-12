@@ -18,7 +18,12 @@ from review_root_rotation import (
     verify_root_transition,
     verify_rotated_trust_manifest,
 )
-from review_trust_manifest import build_trust_manifest, sign_trust_manifest
+from review_trust_manifest import (
+    TrustManifestError,
+    build_trust_manifest,
+    sign_trust_manifest,
+    pae,
+)
 from signed_review_ledger_demo import build_demonstration as build_ledger_demo
 
 
@@ -158,9 +163,15 @@ class ReviewRootRotationTests(unittest.TestCase):
 
     def test_new_root_threshold_is_enforced_by_transition_and_manifest(self):
         fx = build_fixture(new_count=2, new_threshold=2)
+        new_ids = set(fx["new_public"])
+        altered = copy.deepcopy(fx["transition_envelope"])
+        altered["signatures"] = [
+            item for item in altered["signatures"]
+            if item["keyid"] != sorted(new_ids)[-1]
+        ]
         with self.assertRaises(RootRotationError):
             verify_rotated_trust_manifest(
-                fx["transition_envelope"],
+                altered,
                 fx["manifest_envelope"],
                 fx["old_public"],
                 verification_time=VERIFY_2,
@@ -172,7 +183,7 @@ class ReviewRootRotationTests(unittest.TestCase):
     def test_successor_manifest_must_be_signed_by_the_new_root_set(self):
         fx = build_fixture()
         wrongly_signed = sign_trust_manifest(fx["manifest_2"], fx["old_keys"])
-        with self.assertRaises(Exception):
+        with self.assertRaises(TrustManifestError):
             verify_rotated_trust_manifest(
                 fx["transition_envelope"],
                 wrongly_signed,
@@ -279,10 +290,7 @@ class ReviewRootRotationTests(unittest.TestCase):
         fx = build_fixture()
         unknown = Ed25519PrivateKey.generate()
         signature = unknown.sign(
-            __import__("review_trust_manifest").pae(
-                PAYLOAD_TYPE,
-                base64.b64decode(fx["transition_envelope"]["payload"]),
-            )
+            pae(PAYLOAD_TYPE, base64.b64decode(fx["transition_envelope"]["payload"]))
         )
         altered = copy.deepcopy(fx["transition_envelope"])
         altered["signatures"].append({
