@@ -241,7 +241,9 @@ def test_portable_stateful_checkpoint_rejects_corruption_and_semantic_event_forg
     header = decode_checkpoint(checkpoint)
 
     changed_bytes = bytearray(checkpoint)
-    changed_bytes[-1] ^= 0x01
+    digest_anchor = b'"checkpoint_sha256":"' + header["checkpoint_sha256"].encode("ascii")
+    digest_position = checkpoint.index(digest_anchor) + len(b'"checkpoint_sha256":"')
+    changed_bytes[digest_position] = ord("0") if changed_bytes[digest_position] != ord("0") else ord("1")
     with pytest.raises(PortableStatefulCheckpointError, match="checkpoint SHA-256"):
         restore_runtime(bytes(changed_bytes))
 
