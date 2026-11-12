@@ -578,13 +578,19 @@ def event_entries(
     ledger: Mapping[str, Any],
     event_key: Mapping[str, Any],
 ) -> list[dict[str, Any]]:
-    """Return proposals, resolutions, and decisions for one event in append order."""
+    """Return proposals, their resolutions, and decisions for one event in append order."""
     validate_ledger(ledger)
     event = _event_key(event_key)
+    proposal_events = {
+        entry["payload"]["proposal_id"]: entry["payload"]["event_key"]
+        for entry in _entries_of_type(ledger, "revision_proposed")
+    }
     selected = []
     for entry in ledger["entries"]:
         payload = entry["payload"]
         payload_event = payload.get("event_key")
+        if entry["entry_type"] == "proposal_resolved":
+            payload_event = proposal_events[payload["proposal_id"]]
         if isinstance(payload_event, Mapping) and _event_equal(payload_event, event):
             selected.append(copy.deepcopy(dict(entry)))
     return selected
