@@ -3,7 +3,9 @@ import copy
 import hashlib
 import json
 import unittest
+from pathlib import Path
 
+import jsonschema
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -77,6 +79,27 @@ class SignedReviewReceiptTests(unittest.TestCase):
         validate_signed_review_bundle(
             certificate, bundle, trust_store, review_artifacts=artifacts
         )
+
+    def test_portable_schemas_accept_trust_store_bundle_and_signed_payloads(self):
+        certificate, trust_store, envelopes, artifacts, _ = signed_fixture()
+        bundle = build_signed_review_bundle(
+            certificate, envelopes, trust_store, review_artifacts=artifacts
+        )
+        root = Path(__file__).parent
+        trust_schema = json.loads(
+            (root / "review-trust-store.schema.json").read_text(encoding="utf-8")
+        )
+        bundle_schema = json.loads(
+            (root / "signed-review-bundle.schema.json").read_text(encoding="utf-8")
+        )
+        payload_schema = json.loads(
+            (root / "signed-authority-review-vote.schema.json").read_text(encoding="utf-8")
+        )
+        jsonschema.validate(instance=trust_store, schema=trust_schema)
+        jsonschema.validate(instance=bundle, schema=bundle_schema)
+        for envelope in envelopes:
+            payload = json.loads(base64.b64decode(envelope["payload"]).decode("utf-8"))
+            jsonschema.validate(instance=payload, schema=payload_schema)
 
     def test_bundle_without_artifact_bytes_makes_no_artifact_verification_claim(self):
         certificate, trust_store, envelopes, _, _ = signed_fixture()
