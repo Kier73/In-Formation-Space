@@ -139,10 +139,13 @@ class ProofActionAttempt:
         details: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         actor = _text(actor, "actor")
-        if stage not in _ALLOWED_NEXT.get(self.status, set()) if self._events else stage != "planned":
-            raise ProofActionExecutionError(
-                f"invalid proof-action transition: {self.status} -> {stage}"
-            )
+        if self._events:
+            if stage not in _ALLOWED_NEXT.get(self.status, set()):
+                raise ProofActionExecutionError(
+                    f"invalid proof-action transition: {self.status} -> {stage}"
+                )
+        elif stage != "planned":
+            raise ProofActionExecutionError("a proof-action attempt must begin at planned")
         if stage in {
             "dispatched", "admitted", "returned", "returned_unadmitted",
             "interpreted", "continued", "query_determined",
