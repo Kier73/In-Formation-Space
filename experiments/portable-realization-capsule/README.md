@@ -104,6 +104,13 @@ reference output for each, and match the declared sparse-model digest. The
 reference table is checked against the SHA-256 recorded in the capsule receipt.
 A changed reference is rejected.
 
+A second replay applies an exact positive-homogeneity rescaling to the ReLU
+network (first hidden layer × 1/2; next layer's incoming weights × 2). The
+function and all four reference outputs remain unchanged, while the codec is
+forced onto its float64 coefficient path. This checks independent binary64
+decoding and cross-language sparse-model digest reconstruction in addition to
+the int8 path.
+
 This is a first semantic interoperability result for one codec and one small
 finite Ground. It does not yet establish interoperability for the other five
 encodings, arbitrary coefficient formats, or an independently implemented
