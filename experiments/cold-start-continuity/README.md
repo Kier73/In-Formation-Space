@@ -74,6 +74,8 @@ Run 02 and run 03 include manifests ([run 02](runs/2026-11-11-run-02-packet-only
 
 ## Recorded runs
 
+A compact comparison of conditions and claim boundaries is in [runs/README.md](runs/README.md).
+
 - [Run 2026-11-11-run-01](runs/2026-11-11-run-01/response.md) — L0 open-workspace handoff report from an independent recipient (Gemini 3.8 Flash subagent).
   - [Evaluation](runs/2026-11-11-run-01/evaluation.md) — Review against the rubric in `reviewer-guide.md`.
   - [Independent review note](runs/2026-11-11-run-01/review-note.md) — Clarifies the open-context condition, the limits of the 35-ordering count, and follow-up test design.
