@@ -534,6 +534,7 @@ class ProofAttentionSession:
             "status": self._status,
             "current_proof_ground_digest": self._plan["proof_ground_digest"],
             "current_plan_digest": self._plan["plan_digest"],
+            "current_plan": self.plan,
             "attempted_transition_ids": sorted(self._attempted_transition_ids),
             "attempts": [attempt.to_dict() for attempt in self._attempts],
         }
