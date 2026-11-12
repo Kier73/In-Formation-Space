@@ -9,7 +9,9 @@ on:
       - ".github/workflows/verified-weight-space-realization.yml"
   pull_request:
     paths:
-      - "experiments/verified-weight-space-realization/**"
+      - "experiments/verified-weight-space-realization/README.md"
+      - "experiments/verified-weight-space-realization/PLAN.md"
+      - "experiments/verified-weight-space-realization/run_experiment.py"
       - ".github/workflows/verified-weight-space-realization.yml"
   workflow_dispatch:
 
