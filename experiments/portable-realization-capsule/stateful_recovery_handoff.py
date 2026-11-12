@@ -339,7 +339,10 @@ def reassign_after_source_loss(
             ticket,
         )
     except TransferableExecutionClaimError as exc:
-        raise StatefulRuntimeRehomeError(f"quodef resume_on_recovery_host(
+        raise StatefulRuntimeRehomeError(f"quorum reassignment was refused: {exc}") from exc
+
+
+def resume_on_recovery_host(
     store: TransferableExecutionClaimStore,
     envelope: StatefulRuntimeRecoveryEnvelope,
     *,
