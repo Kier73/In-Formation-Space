@@ -21,6 +21,12 @@ Activating a revision retains every hypothesis from its parent revision and adds
 
 This is deliberately an expansion-only operation. Hypothesis removal or retraction would require a separate explicit revision operation with its own evidence and review contract.
 
+## VGI partial-probe mismatch handoff
+
+The [Evidence-gated Observation Path](../observation-path/README.md) can now route a VGI partial-probe result outside its digest-bound scenario set into this ledger through `PartialProbeExecution.propose_hypothesis_revision()`.
+
+The handoff validates the originating attempt's dispatched, admitted, returned, interpreted, and unresolved stages and accepts only the VGI bridge's explicit out-of-scenario reason. It transfers the attempt ID, Encounter Envelope reference and identity, payload digest, canonicalization, and interpretation reference to `propose()`. This creates a candidate in proposed status. It does not mark the candidate supported, change the active hypothesis set, or revise the VGI Ground. Validation and later activation remain governed by the existing rules below.
+
 ## Construction and verification
 
 - [Construction report](construction-report.md) describes the revision rules, provenance extraction, and test boundaries.

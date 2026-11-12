@@ -141,7 +141,7 @@ jobs:
         run: python -m unittest discover -s bridges/observation-path -p "test_adaptive_policy_execution.py" -v
       - name: Run VGI partial-probe evidence-path interoperability tests
         env:
-          PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+          PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter:bridges/hypothesis-revision
         run: python -m unittest discover -s bridges/observation-path -p "test_partial_probe_execution.py" -v
       - name: Run E-CPU gated adapter contract tests
         run: python -m unittest discover -s bridges/observation-path -p "test_ecpu_gated_adapter.py" -v
