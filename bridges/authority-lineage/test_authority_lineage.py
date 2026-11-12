@@ -6,7 +6,6 @@ from pathlib import Path
 import jsonschema
 
 from authority_lineage import (
-    DECISION_STATUSES,
     create_ledger,
     decision_frontier,
     decision_history,
@@ -16,6 +15,7 @@ from authority_lineage import (
     resolve_proposal,
     validate_ledger,
 )
+from demonstration import build_demonstration
 
 
 EVENT = {"kind": "resolver", "logical_time": 5}
@@ -263,6 +263,22 @@ class AuthorityLineageTests(unittest.TestCase):
                 representative_ref="evidence://not-authorized", issued_by="authority",
                 rationale="Conflicts do not select a representative.",
             )
+
+    def test_demonstration_preserves_fork_and_merges_frontier(self):
+        example = build_demonstration()
+        ledger = example["ledger"]
+        self.assertEqual(
+            example["frontier_before_merge"]["status"], "AMBIGUOUS_FRONTIER"
+        )
+        self.assertEqual(
+            example["frontier_after_merge"]["status"], "SINGLE_DECISION"
+        )
+        merged = decision_history(ledger, EVENT)[-1]
+        self.assertEqual(
+            set(merged["supersedes_decision_ids"]),
+            set(example["branch_decision_ids"]),
+        )
+        validate_ledger(ledger)
 
     def test_tampering_with_prior_entry_is_detected(self):
         ledger, _ = initial_ledger()
