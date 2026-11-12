@@ -78,6 +78,7 @@ A second fixture offers a safe probe with observation cost 3 and zero interventi
 - **Trial 06** is the non-intervening special case: every probe preserves the current state and has zero intervention cost. A regression fixture preserves its published expected-cost optimum of 1.5.
 - **VGI partial attention** supplies candidate probes and counterfactual outcomes for partial Grounds. This trial asks a different question: what if performing one of those probes changes the state on which later probes operate?
 - **Evidence-gated Observation Path** remains the execution/provenance boundary. Trial 08 produces a plan over a supplied model; it does not dispatch probes, construct Encounter Envelopes, or claim a real intervention occurred.
+- **Transition conformance bridge** compares completed admitted/interpreted attempts with the pinned Trial 08 transition table. Before/after state witnesses are references, not silently accepted state changes. Full mismatches can become proposed transition overrides, but they require explicit validation and activation into a new immutable model revision. Operation-span duration remains separate from intervention cost; see the [bridge design](../../../../bridges/observation-path/transition-conformance.md).
 
 ## Interpretation limits
 
