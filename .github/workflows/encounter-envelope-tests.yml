@@ -108,6 +108,15 @@ jobs:
           name: bounded-affine-clock-calibration
           path: ${{ runner.temp }}/clock-calibration-example.json
           if-no-files-found: warn
+      - name: Generate two-sided clock calibration example
+        run: python bridges/temporal-provenance/clock_calibration_v2_demo.py --output "${{ runner.temp }}/clock-calibration-v2-example.json"
+      - name: Upload two-sided clock calibration example
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: two-sided-clock-calibration
+          path: ${{ runner.temp }}/clock-calibration-v2-example.json
+          if-no-files-found: warn
       - name: Validate illustrative observation-path record
         run: python bridges/observation-path/validate_observation_path.py bridges/observation-path/examples/happy-path.json
       - name: Validate observation-path CI receipt
