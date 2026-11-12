@@ -360,3 +360,44 @@ The adapter's `Transport` is injected. The in-memory and fault-injecting E-CPU t
 The transport adapter therefore preserves the distinction between delivery, admission, raw return, interpretation and kernel acceptance. It uses E-CPU's reliability semantics unchanged; it does not infer theorem truth from message delivery.
 
 The pinned proof-attention workflow already checks out E-CPU and VGI and discovers the reliable-channel tests along with the planner, protocol, execution and trajectory suites.
+
+## Distributed endpoint checkpoints
+
+The [paired checkpoint adapter](proof_action_checkpoint.py) extends continuity from the proof-session event history to the two live ReliableChannel endpoints and their shared transport state. It records:
+
+- the complete ProofAttentionSession snapshot and active ProofGround digest;
+- host request-sender and result-receiver sequence state;
+- worker request-receiver and result-sender sequence state;
+- pending frames, receive cursors, delivered identities, received payload digests, retry ticks, policies and failed sequences from E-CPU's ReliableChannel snapshots;
+- the worker's admitted attempt-to-request-digest registry and result-once index;
+- the host's active request/sequence, endpoint fence state and complete hash-chained quarantine ledger;
+- the transport backend's own snapshot, so queued DATA and ACK frames are part of the same exported cut.
+
+For E-CPU's deterministic in-memory backend:
+
+```python
+from mailcpu.transport import InMemoryTransport
+from proof_action_checkpoint import (
+    export_proof_action_checkpoint,
+    restore_proof_action_checkpoint,
+)
+
+checkpoint = export_proof_action_checkpoint(host, worker)
+# Persist the JSON-compatible checkpoint as one atomic document.
+
+transport, host, worker = restore_proof_action_checkpoint(
+    checkpoint,
+    freshly_imported_proof_ground,
+    restore_transport=InMemoryTransport.from_snapshot,
+)
+```
+
+The restore path reconstructs the session against the freshly imported ProofGround, verifies that the current plan and active request are exactly reproduced, restores each ReliableChannel against the supplied transport, and checks that host and worker identities, channel names and policies agree. It preserves in-flight requests, ACKs and results rather than inventing a new channel sequence or silently repeating an admitted action.
+
+### Consistent-cut and trust requirements
+
+Export is intended for a **quiescent cut**: no concurrent send, receive, retry tick or ACK processing may mutate either endpoint or the transport while the three snapshots are taken. A process supervisor or storage layer must persist the paired checkpoint as one atomic unit. A backend that cannot snapshot and restore its mailbox state may instead provide its own durable transport checkpoint and restoration callback; endpoint snapshots alone cannot recreate messages that the transport has lost.
+
+The `InMemoryTransport` implementation is a deterministic test substrate, not a remote network deployment. A production transport must define how mailbox durability, message identity, ordering and atomic checkpoint boundaries survive process or machine failure.
+
+The checkpoint digests detect inconsistent modification relative to a trusted checkpoint head; they are not signatures, identity authentication, or proof of origin. Restoring a session does not authenticate an earlier worker, validate an Encounter Envelope, execute Lean, or manufacture a `VerifiedKernelReceipt`. The caller still supplies a freshly imported ProofGround and independently trusted kernel evidence. The earlier trajectory/EventJournal adapter remains the append-oriented session history; this adapter captures the live communication state needed to continue it.
