@@ -25,3 +25,12 @@ All 288 capsules must round-trip. All 1,364 input rows must be covered for every
 ## Explicit limits
 
 The receipt is an experiment record, not a formal proof object or cryptographic signature. SHA-256 is an integrity primitive, not authentication or authorization. The capsule is not yet a transport, admission, storage, or execution integration in E-CPU.
+
+
+## First verified execution
+
+The pinned [PRC-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43317088331) passed all syntax, capsule unit, E-CPU sparse regression, complete workload replay, tamper-rejection, and artifact-upload gates. It produced 288 capsules and 49,104 pre/post-package semantic comparisons. See the [retained evidence](results/ci-run-43317088331.md).
+
+## Follow-on research question
+
+The first result shows that the repeated header/receipt averages approximately 2.5 KB per capsule. For compact inner payloads, metadata dominates the full representation. A next experiment should compare compressed standalone headers with a bundle-level shared provenance manifest, preserving an independently verifiable capsule identity and payload binding.
