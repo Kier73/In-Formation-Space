@@ -351,32 +351,32 @@ function canonicalSparse(value) {
   return canonical(value);
 }
 
-function rowmaskEnvelope(payload) {
-  if (payload.length < 4) fail("row-mask payload lacks header length");
+function sparseBinaryEnvelope(payload) {
+  if (payload.length < 4) fail("sparse binary payload lacks header length");
   const headerLength = payload.readUInt32LE(0);
   const bodyOffset = 4 + headerLength;
   if (headerLength <= 0 || bodyOffset > payload.length) {
-    fail("row-mask binary header is truncated");
+    fail("sparse binary header is truncated");
   }
   const headerBytes = payload.subarray(4, bodyOffset);
   let header;
   try {
     header = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(headerBytes));
   } catch {
-    fail("row-mask binary header is not valid UTF-8 JSON");
+    fail("sparse binary header is not valid UTF-8 JSON");
   }
-  requireObject(header, "row-mask binary header");
+  requireObject(header, "sparse binary header");
   if (Buffer.compare(Buffer.from(canonical(header), "utf8"), headerBytes) !== 0) {
-    fail("row-mask binary header is not canonical");
+    fail("sparse binary header is not canonical");
   }
 
   const { header_sha256: headerHash, ...headerWithoutHash } = header;
   if (headerHash !== sha256(Buffer.from(canonical(headerWithoutHash), "utf8"))) {
-    fail("row-mask binary header digest mismatch");
+    fail("sparse binary header digest mismatch");
   }
   const body = payload.subarray(bodyOffset);
   if (header.body_sha256 !== sha256(body)) {
-    fail("row-mask binary body digest mismatch");
+    fail("sparse binary body digest mismatch");
   }
   return { header, body };
 }
@@ -396,12 +396,12 @@ function readLittleEndianMask(body, offset, width) {
   for (let index = 0; index < width; index += 1) {
     if ((mask & (1n << BigInt(index))) !== 0n) indices.push(index);
   }
-  return { indices, offset: end };
+  return { mask, indices, offset: end };
 }
 
-function readScalarValues(body, offset, count, dtype) {
+function readScalarValues(body, offset, count, dtype, allowZero = false) {
   if (!Number.isSafeInteger(count) || count < 0) {
-    fail("row-mask binary scalar count is invalid");
+    fail("sparse binary scalar count is invalid");
   }
   const scalarSize = dtype === "i8" ? 1 : dtype === "f64" ? 8 : 0;
   if (scalarSize === 0) fail("row-mask binary scalar dtype is unsupported");
@@ -414,8 +414,8 @@ function readScalarValues(body, offset, count, dtype) {
     const value = dtype === "i8"
       ? body.readInt8(offset + index)
       : body.readDoubleLE(offset + index * 8);
-    if (!Number.isFinite(value) || value === 0) {
-      fail("row-mask binary stores a zero or non-finite coefficient");
+    if (!Number.isFinite(value) || (!allowZero && value === 0)) {
+      fail("sparse binary stores a zero or non-finite coefficient");
     }
     values.push(value);
   }
@@ -423,7 +423,7 @@ function readScalarValues(body, offset, count, dtype) {
 }
 
 function decodeRowmaskBinary(payload, capsuleHeader) {
-  const { header, body } = rowmaskEnvelope(payload);
+  const { header, body } = sparseBinaryEnvelope(payload);
   if (
     header.schema !== "sre002.rowmask-binary.v1" ||
     header.encoding !== "rowmask_binary"
@@ -559,6 +559,195 @@ function decodeRowmaskBinary(payload, capsuleHeader) {
   };
 }
 
+
+
+/**
+ * Decode SRE-002 adaptive hybrid binary without invoking the Python codec.
+ *
+ * Each output row independently selects either:
+ * - a dense scalar vector; or
+ * - a little-endian input bitmask followed by exactly its nonzero values.
+ * Biases make a separate dense/sparse choice for each layer.
+ */
+function decodeHybridBinary(payload, capsuleHeader) {
+  const { header, body } = sparseBinaryEnvelope(payload);
+  if (
+    header.schema !== "sre002.hybrid-binary.v1" ||
+    header.encoding !== "hybrid_binary"
+  ) {
+    fail("unsupported hybrid binary schema/encoding");
+  }
+  if (
+    !Array.isArray(header.architecture) ||
+    header.architecture.length < 3 ||
+    header.architecture.some((width) => !Number.isSafeInteger(width) || width < 1) ||
+    !Array.isArray(header.input_names) ||
+    !Array.isArray(header.output_names) ||
+    !Array.isArray(header.layers) ||
+    header.layers.length !== header.architecture.length - 1
+  ) {
+    fail("hybrid binary model interface is malformed");
+  }
+
+  const inputNames = header.input_names;
+  const outputNames = header.output_names;
+  if (
+    header.architecture[0] !== inputNames.length ||
+    header.architecture[header.architecture.length - 1] !== outputNames.length ||
+    new Set(inputNames).size !== inputNames.length ||
+    new Set(outputNames).size !== outputNames.length ||
+    inputNames.some((name) => typeof name !== "string" || name.length === 0) ||
+    outputNames.some((name) => typeof name !== "string" || name.length === 0)
+  ) {
+    fail("hybrid binary register names do not match architecture");
+  }
+
+  let offset = 0;
+  let storedParameterCount = 0;
+  let sparseRowCount = 0;
+  let denseRowCount = 0;
+  const layers = [];
+
+  for (let layerIndex = 0; layerIndex < header.layers.length; layerIndex += 1) {
+    const layer = header.layers[layerIndex];
+    const inputWidth = header.architecture[layerIndex];
+    const outputWidth = header.architecture[layerIndex + 1];
+
+    if (
+      requireInteger(layer.input_width, "hybrid.layer.input_width") !== inputWidth ||
+      requireInteger(layer.output_width, "hybrid.layer.output_width") !== outputWidth ||
+      typeof layer.sparse_bias !== "boolean"
+    ) {
+      fail("hybrid binary layer metadata does not match architecture");
+    }
+    const declaredSparseRows = requireInteger(
+      layer.sparse_row_count,
+      "hybrid.layer.sparse_row_count"
+    );
+    if (declaredSparseRows < 0 || declaredSparseRows > outputWidth) {
+      fail("hybrid binary sparse row count is out of range");
+    }
+
+    const mode = readLittleEndianMask(body, offset, outputWidth);
+    offset = mode.offset;
+    if (mode.indices.length !== declaredSparseRows) {
+      fail("hybrid binary sparse row count mismatch");
+    }
+
+    const sparseRows = new Set(mode.indices);
+    const weightRows = [];
+    for (let rowIndex = 0; rowIndex < outputWidth; rowIndex += 1) {
+      if (sparseRows.has(rowIndex)) {
+        const mask = readLittleEndianMask(body, offset, inputWidth);
+        offset = mask.offset;
+        const values = readScalarValues(
+          body, offset, mask.indices.length, layer.weight_dtype
+        );
+        offset = values.offset;
+        weightRows.push(mask.indices.map((inputIndex, valueIndex) => [
+          inputIndex,
+          new PythonFloat(values.values[valueIndex]),
+        ]));
+        sparseRowCount += 1;
+      } else {
+        const values = readScalarValues(
+          body, offset, inputWidth, layer.weight_dtype, true
+        );
+        offset = values.offset;
+        const entries = [];
+        values.values.forEach((value, inputIndex) => {
+          if (value !== 0) entries.push([inputIndex, new PythonFloat(value)]);
+        });
+        weightRows.push(entries);
+        denseRowCount += 1;
+      }
+    }
+
+    let biasEntries;
+    if (layer.sparse_bias) {
+      const mask = readLittleEndianMask(body, offset, outputWidth);
+      offset = mask.offset;
+      const values = readScalarValues(
+        body, offset, mask.indices.length, layer.bias_dtype
+      );
+      offset = values.offset;
+      biasEntries = mask.indices.map((outputIndex, valueIndex) => [
+        outputIndex,
+        new PythonFloat(values.values[valueIndex]),
+      ]);
+    } else {
+      const values = readScalarValues(
+        body, offset, outputWidth, layer.bias_dtype, true
+      );
+      offset = values.offset;
+      biasEntries = [];
+      values.values.forEach((value, outputIndex) => {
+        if (value !== 0) biasEntries.push([outputIndex, new PythonFloat(value)]);
+      });
+    }
+
+    storedParameterCount += weightRows.reduce((total, row) => total + row.length, 0);
+    storedParameterCount += biasEntries.length;
+    layers.push({ weight_rows: weightRows, bias_entries: biasEntries });
+  }
+
+  if (offset !== body.length) fail("hybrid binary contains trailing body bytes");
+  if (
+    requireInteger(header.stored_parameter_count, "hybrid.stored_parameter_count") !==
+    storedParameterCount
+  ) {
+    fail("hybrid binary stored parameter count mismatch");
+  }
+
+  const denseWeightSlots = header.architecture.slice(0, -1).reduce(
+    (total, width, index) => total + width * header.architecture[index + 1],
+    0
+  );
+  const denseEquivalentParameterCount = denseWeightSlots +
+    header.architecture.slice(1).reduce((total, width) => total + width, 0);
+  const sparsePayload = {
+    schema: "mailcpu.sparse-transition-relu.v1",
+    source_kind: header.source_kind,
+    source_digest: header.source_digest,
+    source_model_digest: header.source_model_digest,
+    input_names: inputNames,
+    output_names: outputNames,
+    architecture: header.architecture,
+    layers,
+    dense_equivalent_parameter_count: denseEquivalentParameterCount,
+    stored_parameter_count: storedParameterCount,
+  };
+  const sparseModelDigest = sha256(
+    Buffer.from(canonicalSparse(sparsePayload), "utf8")
+  );
+
+  if (
+    header.source_kind !== capsuleHeader.source.kind ||
+    header.source_digest !== capsuleHeader.source.ground_digest ||
+    header.source_model_digest !== capsuleHeader.realization.dense_model_digest ||
+    sparseModelDigest !== capsuleHeader.realization.sparse_model_digest ||
+    JSON.stringify(inputNames) !== JSON.stringify(capsuleHeader.interface.input_names) ||
+    JSON.stringify(outputNames) !== JSON.stringify(capsuleHeader.interface.output_names) ||
+    JSON.stringify(header.architecture) !== JSON.stringify(capsuleHeader.interface.architecture) ||
+    capsuleHeader.codec.name !== "hybrid_binary" ||
+    capsuleHeader.codec.schema !== header.schema ||
+    capsuleHeader.realization.encoding !== "hybrid_binary"
+  ) {
+    fail("decoded hybrid model identity does not match capsule metadata");
+  }
+
+  return {
+    header,
+    sparseModelDigest,
+    storedParameterCount,
+    sparseRowCount,
+    denseRowCount,
+    layers,
+    inputWidth: header.architecture[0],
+    outputWidth: header.architecture[header.architecture.length - 1],
+  };
+}
+
 function predictSparse(model, inputs) {
   if (
     !Array.isArray(inputs) ||
@@ -658,17 +847,187 @@ export function replayRowmaskCapsule(capsule, referenceRecords) {
   };
 }
 
+
+/**
+ * Independently decode and replay an adaptive hybrid-binary capsule.
+ *
+ * The finite reference covers every Boolean input row. Optional trajectories
+ * add a complete product of initial counter states and control sequences.
+ */
+export function replayHybridCapsule(capsule, referenceRecords, trajectories = []) {
+  const verified = verifyCapsule(capsule);
+  const capsuleHeaderSize = capsule.readUInt32LE(10);
+  const capsuleHeader = JSON.parse(
+    new TextDecoder("utf-8", { fatal: true }).decode(
+      capsule.subarray(PREFIX_BYTES, PREFIX_BYTES + capsuleHeaderSize)
+    )
+  );
+  if (capsuleHeader.codec.name !== "hybrid_binary") {
+    fail("semantic replay currently supports hybrid_binary only");
+  }
+  const payload = capsule.subarray(PREFIX_BYTES + capsuleHeaderSize);
+  const model = decodeHybridBinary(payload, capsuleHeader);
+  const expectedRows = requireInteger(
+    capsuleHeader.verification.input_row_count,
+    "verification.input_row_count"
+  );
+  if (!Array.isArray(referenceRecords) || referenceRecords.length !== expectedRows) {
+    fail("independent reference does not cover the declared complete input domain");
+  }
+  if (
+    capsuleHeader.verification.reference_outputs_sha256 !==
+    sha256(Buffer.from(canonical(referenceRecords), "utf8"))
+  ) {
+    fail("independent reference digest does not match capsule verification receipt");
+  }
+
+  const seenInputs = new Set();
+  for (const record of referenceRecords) {
+    requireObject(record, "reference row");
+    const inputs = record.inputs;
+    const outputs = record.outputs;
+    if (
+      !Array.isArray(inputs) || inputs.length !== model.inputWidth ||
+      inputs.some((value) => value !== 0 && value !== 1) ||
+      !Array.isArray(outputs) || outputs.length !== model.outputWidth ||
+      outputs.some((value) => value !== 0 && value !== 1)
+    ) {
+      fail("independent reference row is outside the declared Boolean interface");
+    }
+    const key = inputs.join("");
+    if (seenInputs.has(key)) fail("independent reference repeats an input assignment");
+    seenInputs.add(key);
+    const actual = predictSparse(model, inputs);
+    if (JSON.stringify(actual) !== JSON.stringify(outputs)) {
+      fail("decoded hybrid realization disagrees with independent scalar reference");
+    }
+  }
+  if (seenInputs.size !== 2 ** model.inputWidth) {
+    fail("independent reference omits one or more Boolean input assignments");
+  }
+
+  let trajectoryCount = 0;
+  let trajectoryStepCount = 0;
+  if (trajectories.length > 0) {
+    if (
+      model.inputWidth !== 4 ||
+      model.outputWidth !== 2 ||
+      JSON.stringify(capsuleHeader.interface.input_names) !==
+        JSON.stringify(["state_1", "state_0", "advance", "reset"]) ||
+      JSON.stringify(capsuleHeader.interface.output_names) !==
+        JSON.stringify(["next_state_1", "next_state_0"])
+    ) {
+      fail("recurrent replay requires the declared two-bit counter interface");
+    }
+    if (!Array.isArray(trajectories)) {
+      fail("trajectory reference must be an array");
+    }
+    const horizon = Array.isArray(trajectories[0]?.controls)
+      ? trajectories[0].controls.length
+      : 0;
+    if (horizon < 1 || !Number.isSafeInteger(horizon)) {
+      fail("trajectory horizon must be a positive integer");
+    }
+    const expectedTrajectoryCount = 4 * (4 ** horizon);
+    if (
+      !Number.isSafeInteger(expectedTrajectoryCount) ||
+      trajectories.length !== expectedTrajectoryCount
+    ) {
+      fail("trajectory reference does not cover every initial state/control sequence");
+    }
+
+    const seenTrajectories = new Set();
+    for (const trajectory of trajectories) {
+      requireObject(trajectory, "trajectory reference");
+      const initial = trajectory.initial_state;
+      const controls = trajectory.controls;
+      const expectedStates = trajectory.expected_states;
+      if (
+        !Array.isArray(initial) || initial.length !== 2 ||
+        initial.some((value) => value !== 0 && value !== 1) ||
+        !Array.isArray(controls) || controls.length !== horizon ||
+        !Array.isArray(expectedStates) || expectedStates.length !== horizon ||
+        controls.some((pair) =>
+          !Array.isArray(pair) || pair.length !== 2 ||
+          pair.some((value) => value !== 0 && value !== 1)
+        ) ||
+        expectedStates.some((state) =>
+          !Array.isArray(state) || state.length !== 2 ||
+          state.some((value) => value !== 0 && value !== 1)
+        )
+      ) {
+        fail("trajectory reference is outside the two-bit counter interface");
+      }
+      const key = initial.join("") + ":" + controls.map((pair) => pair.join("")).join(",");
+      if (seenTrajectories.has(key)) fail("trajectory reference repeats a state/control sequence");
+      seenTrajectories.add(key);
+
+      let state = initial.slice();
+      for (let step = 0; step < horizon; step += 1) {
+        const inputs = [...state, ...controls[step]];
+        const actual = predictSparse(model, inputs);
+        const expected = expectedStates[step];
+        if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+          fail("decoded hybrid realization disagrees with recurrent trajectory reference");
+        }
+        state = actual;
+        trajectoryStepCount += 1;
+      }
+      trajectoryCount += 1;
+    }
+    if (seenTrajectories.size !== expectedTrajectoryCount) {
+      fail("trajectory reference omits one or more initial state/control sequences");
+    }
+  }
+
+  return {
+    valid: true,
+    capsule_sha256: verified.capsule_sha256,
+    payload_sha256: verified.payload_sha256,
+    sparse_model_sha256: model.sparseModelDigest,
+    codec: "hybrid_binary",
+    input_rows_replayed: seenInputs.size,
+    semantic_comparisons: seenInputs.size,
+    stored_parameter_count: model.storedParameterCount,
+    sparse_row_count: model.sparseRowCount,
+    dense_row_count: model.denseRowCount,
+    trajectory_count: trajectoryCount,
+    trajectory_steps: trajectoryStepCount,
+  };
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
     const file = process.argv[2];
-    if (!file) fail("usage: node verify_capsule.mjs <capsule.bin> [--reference reference.json]");
+    if (!file) fail("usage: node verify_capsule.mjs <capsule.bin> [--reference reference.json] [--trajectories trajectories.json]");
     const referenceFlag = process.argv.indexOf("--reference");
     let report;
     if (referenceFlag >= 0) {
       const referencePath = process.argv[referenceFlag + 1];
       if (!referencePath) fail("--reference requires a JSON file path");
+      const capsuleBytes = readFileSync(file);
+      const capsuleHeaderSize = capsuleBytes.readUInt32LE(10);
+      const capsuleHeader = JSON.parse(
+        new TextDecoder("utf-8", { fatal: true }).decode(
+          capsuleBytes.subarray(PREFIX_BYTES, PREFIX_BYTES + capsuleHeaderSize)
+        )
+      );
       const references = JSON.parse(readFileSync(referencePath, "utf8"));
-      report = replayRowmaskCapsule(readFileSync(file), references);
+      if (capsuleHeader.codec.name === "hybrid_binary") {
+        const trajectoriesFlag = process.argv.indexOf("--trajectories");
+        let trajectories = [];
+        if (trajectoriesFlag >= 0) {
+          const trajectoriesPath = process.argv[trajectoriesFlag + 1];
+          if (!trajectoriesPath) fail("--trajectories requires a JSON file path");
+          trajectories = JSON.parse(readFileSync(trajectoriesPath, "utf8"));
+        }
+        report = replayHybridCapsule(capsuleBytes, references, trajectories);
+      } else {
+        if (process.argv.includes("--trajectories")) {
+          fail("--trajectories is currently supported only for hybrid_binary");
+        }
+        report = replayRowmaskCapsule(capsuleBytes, references);
+      }
     } else {
       report = { valid: true, ...verifyCapsule(readFileSync(file)) };
     }
