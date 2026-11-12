@@ -25,6 +25,7 @@ from mailcpu.transition_space import (
     FiniteTransitionTable,
     apply_table_intervention,
     compile_compositional_transition_program,
+    compile_live_compositional_transition_program,
     compile_transition_program,
     compile_transition_table,
     two_bit_counter_program,
@@ -400,6 +401,41 @@ def run_experiment() -> dict[str, Any]:
         )
         for row_index, row in enumerate(target_table.rows)
     ]
+    live_source_model = compile_live_compositional_transition_program(
+        source_specification
+    )
+    live_target_model = compile_live_compositional_transition_program(
+        target_specification
+    )
+    live_source_cases = [
+        _run_case(
+            source_table,
+            live_source_model,
+            compositional_source_program,
+            row.inputs,
+            phase="live-compositional-baseline",
+            architecture_name="live-compositional-source",
+            row_index=row_index,
+            typed_program_digest=source_specification.digest,
+            compiler_id="mailcpu.transition_space.compile_live_compositional_transition_program",
+        )
+        for row_index, row in enumerate(source_table.rows)
+    ]
+    live_target_cases = [
+        _run_case(
+            target_table,
+            live_target_model,
+            compositional_target_program,
+            row.inputs,
+            phase="live-compositional-row-override",
+            architecture_name="live-compositional-override",
+            row_index=row_index,
+            typed_program_digest=target_specification.digest,
+            compiler_id="mailcpu.transition_space.compile_live_compositional_transition_program",
+        )
+        for row_index, row in enumerate(target_table.rows)
+    ]
+
     compositional_models = [
         {
             "name": "compositional-source",
@@ -419,12 +455,32 @@ def run_experiment() -> dict[str, Any]:
             "parameter_count": compositional_target_model.parameter_count,
             "active_parameter_count": compositional_target_model.active_parameter_count,
         },
+        {
+            "name": "live-compositional-source",
+            "program_digest": source_specification.digest,
+            "table_digest": source_table.digest,
+            "model_digest": live_source_model.digest,
+            "architecture": list(live_source_model.architecture),
+            "parameter_count": live_source_model.parameter_count,
+            "active_parameter_count": live_source_model.active_parameter_count,
+        },
+        {
+            "name": "live-compositional-override",
+            "program_digest": target_specification.digest,
+            "table_digest": target_table.digest,
+            "model_digest": live_target_model.digest,
+            "architecture": list(live_target_model.architecture),
+            "parameter_count": live_target_model.parameter_count,
+            "active_parameter_count": live_target_model.active_parameter_count,
+        },
     ]
     all_cases.extend(compositional_source_cases)
     all_cases.extend(compositional_target_cases)
+    all_cases.extend(live_source_cases)
+    all_cases.extend(live_target_cases)
 
     return {
-        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v3",
+        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v4",
         "status": "verified-within-complete-finite-domain",
         "typed_transition_program": source_specification.to_dict(),
         "typed_transition_program_digest": source_specification.digest,
@@ -447,6 +503,12 @@ def run_experiment() -> dict[str, Any]:
         "architecture_count": len(architecture_results),
         "compositional_model_count": len(compositional_models),
         "compositional_models": compositional_models,
+        "neural_compiler_count": 3,
+        "neural_compilers": [
+            "truth-table-minterm",
+            "direct-expression-dag",
+            "live-feature-expression-dag",
+        ],
         "transition_rows": source_table.row_count,
         "phase_count": 2,
         "case_count": len(all_cases),
@@ -462,7 +524,7 @@ def run_experiment() -> dict[str, Any]:
         "limitations": [
             "The truth-table compiler allocates one hidden minterm per input row; width grows exponentially with input-bit count.",
             "The result is exact on the declared finite Boolean domain, not a learned or generalizing model.",
-            "The one-row typed override changes one selected output coefficient in each minterm architecture; the direct-DAG model is recompiled from the edited expression.",
+            "The one-row typed override changes one selected output coefficient in each minterm architecture; both DAG compilers independently recompile the edited typed expression.",
             "No noise tolerance, quantization, training, arbitrary real-valued input behavior, or hardware speed is tested.",
         ],
     }
