@@ -111,6 +111,17 @@ This is descriptive evidence only: the aggregation does not activate a revised t
 - [Tests](test_transition_evidence.py)
 - [Focused CI](../../.github/workflows/repeated-transition-evidence.yml)
 
+## Context-stratified transition evidence
+
+The [context-stratified analysis](transition-context-analysis.md) takes repeated conformance records plus optional, attempt-bound context assignments. For each observed context dimension and complete joint context, it compares exact unordered-pair disagreement before partitioning with disagreement within and between strata. Full transition witnesses use the `(outcome, next_state)` pair; outcome-only returns remain visible but never enter the transition-pair denominators.
+
+Unknown context, a dimension not supplied, and an attempt with no assignment remain distinct. A context value is a supplied partition label, not a causal explanation. The report can show that a partition separates or reduces disagreement in the supplied sample; it does not establish hidden-state identity, stochasticity, determinism, future generalization, or a model update. Context digests provide content identity, not source authentication.
+
+- [Implementation](transition_context.py)
+- [Schema](transition-context-analysis.schema.json)
+- [Tests](test_transition_context.py)
+- [Focused CI](../../.github/workflows/contextual-transition-evidence.yml)
+
 ## Observation outcomes and information value
 
 The companion [observation-outcome implementation](observation_outcomes.py) records what a candidate observation was expected to distinguish and what outcome was actually observed. It is deliberately separate from the operation-span cost profiler.
