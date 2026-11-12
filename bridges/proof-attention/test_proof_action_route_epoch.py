@@ -72,6 +72,58 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         restored = ProofActionRouteEpochLedger.from_dict(store.load())
         self.assertEqual(restored.entries[-1]["details"], details)
 
+    def test_route_ledger_replay_rejects_admission_written_by_another_owner_generation(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger,
+            epoch_id="admission-replay-epoch", owner_id="admission-replay-owner"
+        )
+        host.dispatch_next()
+        received = worker.receive_request()
+        self.assertIsNotNone(received)
+
+        tampered = ledger.to_dict()
+        admission = next(
+            event for event in tampered["entries"]
+            if event["event_type"] == "admitted"
+        )
+        admission["details"]["owner_generation"] = 2
+        event_core = {
+            key: value for key, value in admission.items()
+            if key != "event_digest"
+        }
+        admission["event_digest"] = hashlib.sha256(
+            json.dumps(
+                event_core,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        ledger_core = {
+            "format": tampered["format"],
+            "entries": tampered["entries"],
+        }
+        tampered["ledger_digest"] = hashlib.sha256(
+            json.dumps(
+                ledger_core,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+
+        # The attacker recomputed the event and document digests. Replay must
+        # still reject the admission because the active owner was generation one.
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError,
+            "stale owner generation",
+        ):
+            ProofActionRouteEpochLedger.from_dict(tampered)
+
     def test_owner_claim_winning_before_receive_commit_consumes_but_never_dispatches_stale_frame(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
         ledger = ProofActionRouteEpochLedger()
