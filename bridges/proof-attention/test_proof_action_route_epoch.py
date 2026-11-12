@@ -19,6 +19,7 @@ from proof_action_reliable_channel import (
     ProofActionReliableWorker,
 )
 from proof_action_route_epoch import (
+    InMemoryRouteEpochLedgerStore,
     ProofActionRouteEpochError,
     ProofActionRouteEpochLedger,
     bind_existing_proof_action_route_epoch,
@@ -252,6 +253,78 @@ class ProofActionRouteEpochTests(unittest.TestCase):
                 owner_id="owner-2",
                 predecessor_close_digest=second_close.closed_epoch["event_digest"],
             )
+
+    def test_authoritative_claim_fences_old_process_using_shared_store(self):
+        _session, _trace, proof_ground, transport, old_host, old_worker = make_endpoints()
+        store = InMemoryRouteEpochLedgerStore()
+        old_ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            old_host,
+            old_worker,
+            old_ledger,
+            epoch_id="authority-epoch",
+            owner_id="owner-process-a",
+        )
+
+        host_snapshot = snapshot_proof_action_host(old_host)
+        worker_snapshot = snapshot_proof_action_worker(old_worker)
+        replacement_host = restore_proof_action_host(
+            host_snapshot, proof_ground, transport
+        )
+        replacement_worker = restore_proof_action_worker(
+            worker_snapshot, transport
+        )
+        replacement_ledger = ProofActionRouteEpochLedger.from_dict(
+            store.load(), store=store
+        )
+        bind_existing_proof_action_route_epoch(
+            replacement_host,
+            replacement_worker,
+            replacement_ledger,
+            epoch_id="authority-epoch",
+        )
+
+        current = replacement_ledger.active_epoch
+        self.assertEqual(current["owner_generation"], 2)
+        self.assertNotEqual(current["owner_id"], "owner-process-a")
+        # The old process retains its generation-one local ledger, but the
+        # authority check reads generation two on every guarded operation.
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError, "authoritative store"
+        ):
+            old_host.dispatch_next()
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError, "authoritative store"
+        ):
+            old_worker.receive_request()
+
+        dispatch = replacement_host.dispatch_next()
+        received = replacement_worker.receive_request()
+        self.assertEqual(received.request, dispatch.request)
+        self.assertTrue(replacement_host.observe_request_admission())
+
+    def test_shared_store_compare_and_swap_rejects_stale_revision(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        store = InMemoryRouteEpochLedgerStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="cas-epoch", owner_id="cas-owner-1"
+        )
+        stale_document = store.load()
+        stale_digest = stale_document["ledger_digest"]
+
+        ledger.claim_epoch("cas-epoch", owner_id="cas-owner-2")
+        current_document = store.load()
+        self.assertNotEqual(current_document["ledger_digest"], stale_digest)
+        self.assertFalse(
+            store.compare_and_swap(stale_digest, stale_document)
+        )
+        self.assertEqual(
+            ProofActionRouteEpochLedger.from_dict(current_document).active_epoch[
+                "owner_generation"
+            ],
+            2,
+        )
 
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
