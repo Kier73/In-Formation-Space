@@ -1,0 +1,443 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/transition-conformance.schema.json",
+  "title": "In-Formation-Space Trial 08 Transition Conformance Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "conformance_id",
+    "attempt_id",
+    "probe_id",
+    "model_ref",
+    "model_digest",
+    "plan_ref",
+    "hypothesis_set_digest",
+    "current_state",
+    "predicted_transition",
+    "observed_transition",
+    "conformance_status",
+    "state_evidence",
+    "source_observation_path",
+    "source_evidence",
+    "operation_timing",
+    "interpretation_limits",
+    "conformance_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.transition-conformance"
+    },
+    "schema": {
+      "const": "in-formation.transition-conformance/0.1"
+    },
+    "conformance_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "probe_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "plan_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hypothesis_set_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "current_state": {
+      "type": "string",
+      "minLength": 1
+    },
+    "predicted_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "next_state",
+        "intervention_cost"
+      ],
+      "properties": {
+        "outcome": {},
+        "next_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intervention_cost": {
+          "$ref": "#/$defs/rational"
+        }
+      }
+    },
+    "observed_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "next_state"
+      ],
+      "properties": {
+        "outcome": {},
+        "next_state": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      }
+    },
+    "conformance_status": {
+      "enum": [
+        "matched",
+        "outcome_mismatch",
+        "next_state_mismatch",
+        "transition_mismatch",
+        "outcome_only_match",
+        "outcome_mismatch_state_unknown"
+      ]
+    },
+    "state_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "before",
+        "after"
+      ],
+      "properties": {
+        "before": {
+          "$ref": "#/$defs/stateWitness"
+        },
+        "after": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/stateWitness"
+            }
+          ]
+        }
+      }
+    },
+    "source_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observation_path_digest",
+        "returned_ref",
+        "encounter_id",
+        "payload_digest",
+        "canonicalization",
+        "interpretation_ref",
+        "interpretation_method"
+      ],
+      "properties": {
+        "observation_path_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "returned_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "encounter_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload_digest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonicalization": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interpretation_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interpretation_method": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "operation_timing": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "span",
+            "elapsed_ns",
+            "clock_actor_id",
+            "clock_segment_id",
+            "measurement_scope",
+            "semantic_role"
+          ],
+          "properties": {
+            "span": {
+              "type": "object",
+              "required": [
+                "format",
+                "schema",
+                "attempt_id",
+                "span_id",
+                "operation_id",
+                "clock_actor_id",
+                "clock_segment_id",
+                "elapsed_ns",
+                "clock_status",
+                "outcome",
+                "span_digest"
+              ],
+              "properties": {
+                "format": {
+                  "const": "in-formation.operation-span"
+                },
+                "schema": {
+                  "const": "in-formation.operation-span/0.1"
+                },
+                "attempt_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "span_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "operation_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "clock_actor_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "clock_segment_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "elapsed_ns": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "clock_status": {
+                  "const": "measured"
+                },
+                "outcome": {
+                  "const": "succeeded"
+                },
+                "span_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            },
+            "elapsed_ns": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "clock_actor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "clock_segment_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "measurement_scope": {
+              "type": "string",
+              "minLength": 1
+            },
+            "semantic_role": {
+              "const": "performance_only_not_intervention_cost"
+            }
+          }
+        }
+      ]
+    },
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 7,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "conformance_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_observation_path": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "intent",
+        "status",
+        "terminal",
+        "events"
+      ],
+      "properties": {
+        "attempt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intent": {
+          "type": "object",
+          "required": [
+            "candidate_name",
+            "query",
+            "hypothesis_set_digest",
+            "estimated_cost",
+            "plan_ref"
+          ],
+          "properties": {
+            "candidate_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "query": {
+              "type": "string",
+              "minLength": 1
+            },
+            "hypothesis_set_digest": {
+              "type": "string",
+              "minLength": 1
+            },
+            "estimated_cost": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "plan_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "authority_required": {
+              "type": "boolean"
+            },
+            "application_required": {
+              "type": "boolean"
+            },
+            "sender_ack_required": {
+              "type": "boolean"
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "terminal": {
+          "type": "boolean"
+        },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "stage",
+              "actor",
+              "clock_value",
+              "clock_domain",
+              "evidence_ref",
+              "details"
+            ],
+            "properties": {
+              "stage": {
+                "type": "string",
+                "minLength": 1
+              },
+              "actor": {
+                "type": "string",
+                "minLength": 1
+              },
+              "clock_value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "clock_domain": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidence_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "details": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "rational": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "properties": {
+        "numerator": {
+          "type": "integer"
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "stateWitness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "evidence_ref",
+        "evidence_digest"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

@@ -85,6 +85,21 @@ The live integration now instruments the actual calls to `ReliableChannel.send()
 The live CI probe now executes five additional authorized paths in the same pinned E-CPU process, alongside the primary success and conflict cases. It emits 46 spans: 14 sends, seven receiver-intake calls, seven finalizations, six VM commits, six additional checkpoint saves, and six sender ACK polls. With a five-sample threshold, every operation partition reaches `descriptive_only`. The raw spans and independently reconstructed cost profile are uploaded as the `live-ecpu-operation-spans` artifact on the workflow run. These are repeated samples under one controlled CI workload and clock segment, not a stable production benchmark or an adaptive policy input.
 
 
+## Transition conformance and model revision
+
+The [transition-conformance bridge](transition-conformance.md) closes one gap between Trial 08 planning and actual probe evidence. It compares a completed, admitted, interpreted ObservationPath against one pinned model transition, embedding the source path snapshot and binding the returned Encounter Envelope references and optional before/after state witnesses. Proposal intake reconstructs the record before allowing a transition override candidate.
+
+The record distinguishes `matched`, `outcome_mismatch`, `next_state_mismatch`, `transition_mismatch`, and two outcome-only states where no after-state witness exists. An outcome-only return is never promoted to full transition conformance.
+
+An optional operation span is attached only as performance evidence. Its elapsed nanoseconds, clock actor, and clock segment are preserved; they are not converted into Trial 08 intervention cost.
+
+`TransitionModelRevisionLedger` then records a mismatching observed transition as a proposal. The active model changes only after an explicit `supported` validation result and an explicit activation that creates a new immutable Trial 08 planner document. The transition's existing intervention-cost value is preserved. Digests and validation references are provenance aids, not authentication of referenced artifacts or reviewers.
+
+- [Implementation](transition_conformance.py)
+- [Schema](transition-conformance.schema.json)
+- [Tests](test_transition_conformance.py)
+- [Focused CI](../../.github/workflows/intervention-transition-conformance.yml)
+
 ## Observation outcomes and information value
 
 The companion [observation-outcome implementation](observation_outcomes.py) records what a candidate observation was expected to distinguish and what outcome was actually observed. It is deliberately separate from the operation-span cost profiler.
