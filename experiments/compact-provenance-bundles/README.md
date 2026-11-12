@@ -38,3 +38,8 @@ The [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs
 ## Final PR-head verification
 
 The final [CPB-001 PR-head run](https://github.com/Kier73/In-Formation-Space/actions/runs/43319482543) passed all checks, the full 288-capsule replay corpus, all six per-encoding bundles, the global bundle, and nested tamper probes. The [final-head evidence record](results/ci-run-43319482543.md) includes the exact IFS/E-CPU/VGI pins and measured standalone-versus-bundle sizes.
+
+
+## Final integrated verification
+
+The final [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43320231327) passed after merging the independent Node.js PRC receiver and canonical metadata v1 profile into the branch. It ran Node 22, executed Python-generated capsules through the independent receiver tests, and passed the complete 288-capsule compression/bundle corpus. The [integrated evidence record](results/ci-run-43320231327.md) retains the exact source pins, byte totals and artifact digests.
