@@ -189,10 +189,16 @@ The calibration digest detects changes to the declared artifact. It does not aut
 
 A clock calibration can establish a bounded temporal relation under its assumptions. It cannot establish that one event caused another, that a controller's "accepted" or "completed" record means physical actuation, or that a sensor sample belongs to a particular command unless a separate correlation witness says so.
 
+### Standards context
+
+The [NTPv4 specification (RFC 5905)](https://www.rfc-editor.org/rfc/rfc5905.html) explicitly tracks clock dispersion and synchronization distance. Its synchronization-distance measure combines dispersion with half the round-trip delay to represent a maximum-error bound; dispersion also grows over time as clock-frequency tolerance accumulates. That is a useful standards precedent for treating time synchronization as an uncertainty-bearing estimate rather than an exact scalar. This bridge does not implement NTP, its peer-selection algorithm, or its synchronization-distance calculation. [RFC 5905](https://www.rfc-editor.org/rfc/rfc5905.html)
+
+For the separate authenticity question, [Network Time Security (RFC 8915)](https://www.rfc-editor.org/rfc/rfc8915.html) specifies TLS-based key establishment and authenticated time-transfer packets for NTP. It illustrates that authenticated time-source identity is a distinct protocol obligation. The anchor witness references in this experiment are not NTS messages, are not authenticated by this code, and do not inherit NTS guarantees. [RFC 8915](https://www.rfc-editor.org/rfc/rfc8915.html)
+
 ## Boundaries and next experiments
 
 - Clock IDs and actor IDs are labels; this format does not authenticate their owners.
-- No calibration or affine clock-fit model is inferred. A future calibration extension should carry anchor events, uncertainty bounds, validity intervals, and provenance, then prove order only when mapped intervals are disjoint.
+- No calibration is inferred from event streams or similarity matches. The optional calibration artifact only evaluates explicit supplied anchors; it does not promote VGI-style correspondence into a causal edge or clock-synchronization witness.
 - A VGI-style event correspondence can be added as a separate relation. It must not be treated as a causal edge or as a clock calibration unless a separate contract establishes that implication.
 - The analyzer is pairwise (O(n^2)). It is intended for inspectable traces, not an unbounded event database.
 - The vector-clock model assumes actor IDs are uniquely owned by one active writer. Split-brain actor identity invalidates its causal interpretation.
