@@ -513,13 +513,30 @@ The orchestrated handoff prepares the successor session first and appends the cl
 
 `RouteEpochLedgerStore` defines two operations: `load()` and `compare_and_swap(expected_ledger_digest, replacement, actor_id=...)`. The CAS operation must be linearizable across every process that can use the route. The actor ID lets a production adapter apply its own owner authorization to opens, claims, closes and atomic handoffs. `InMemoryRouteEpochLedgerStore` is a thread-safe reference implementation for tests only; it checks revision concurrency but does not authenticate identities. A production deployment can adapt a transactional database, consensus-backed record, or lease service to this contract.
 
-Every guarded host/worker operation checks the active owner generation against the shared store. When a replacement claims the route, the compare-and-swap advances the owner generation; the previous process then fails its next operation even if it still holds an older local ledger copy. Two concurrent claims cannot both commit from the same expected ledger digest.
+Every guarded host/worker operation checks the active owner generation against the shared store. A claim names the exact `expected_owner_id` and `expected_owner_generation` being replaced; a replacement cannot accidentally claim a generation that has already moved. When a replacement claims the route, the compare-and-swap advances the owner generation. Two concurrent claims cannot both commit from the same expected ledger digest, and a recovery from a handoff record cannot pre-empt a successor that has already claimed it.
 
-The route ledger's event hashes and CAS revision detect inconsistent or stale state relative to the authority store; they are not cryptographic identity proofs. Authentication of processes and authorization to claim an epoch belong to the durable authority/lease backend. A local ledger without a shared store coordinates objects only inside its own process; it must not be used to claim cross-process fencing.
+The route ledger validates its entire event replay before publishing each CAS revision. Event hashes and CAS revisions detect inconsistent or stale state relative to the authority store; they are not cryptographic identity proofs. Authentication of processes and authorization to claim an epoch belong to the durable authority/lease backend. A local ledger without a shared store coordinates objects only inside its own process; it must not be used to claim cross-process fencing.
 
-Endpoint guards prevent stale workers from receiving another request or submitting a late result after their epoch has been superseded. They do not forcibly terminate an already-running external tactic process. A production worker runner must observe route fencing and apply its own cancellation/cleanup policy.
+The endpoint checks are preflight guards. There is still a check-to-effect interval between a process validating its owner generation and the underlying transport committing a send or receive. A production transport/receiver must enforce the owner-generation fencing token at its own admission/commit point to close that race. The in-memory reference transport does not yet provide that atomic cross-process fence.
+
+Endpoint guards reject stale processes on subsequent API operations once supersession is visible, but they do not forcibly terminate an already-running external tactic process or retract a message already committed to a transport. A production worker runner must observe route fencing and apply its own cancellation/cleanup policy.
 
 Focused tests cover route handoff with an in-flight request and queued ACK, exact successor authorization, planned-action adoption, owner-generation claims, stale-process rejection through a shared CAS store, rejection of stale CAS revisions, full uncertainty/checkpoint consistency, and route-ledger replay/tamper checks. These tests use E-CPU's in-memory transport and authority-store reference implementation; a remote transport and durable distributed authority remain separate integrations.
+
+
+The direct claim API requires the caller to state what it expects to replace:
+
+```python
+active = ledger.active_epoch
+ledger.claim_epoch(
+    active["epoch_id"],
+    owner_id="new-process-identity",
+    expected_owner_id=active["owner_id"],
+    expected_owner_generation=active["owner_generation"],
+)
+```
+
+The expected generation is checked again after loading the latest store revision, before the CAS write. The close-and-open handoff uses the same owner check and commits both route events atomically.
 
 ### Recover if the handoff process itself crashes
 
@@ -550,4 +567,3 @@ transport, host, worker = restore_proof_action_route_handoff(
 The recovery function verifies that the exact close event is present in the ledger and that its authorized successor is still active. It restores the pre-close transport snapshot, restores the separately recorded post-close ProofAttentionSession against a freshly imported ProofGround, then claims the successor under a fresh owner generation. The old transport queues remain available for inspection but are not consumed by the successor's fresh channel names.
 
 Recovery therefore covers the commit-to-process-construction interruption window. It still relies on the transport backend's real persistence guarantees and on the authority store's linearizable, authenticated CAS implementation; the in-memory examples are deterministic reference tests, not a deployed distributed service.
-
