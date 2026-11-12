@@ -1114,6 +1114,7 @@ def bind_existing_proof_action_route_epoch(
     ledger: ProofActionRouteEpochLedger,
     *,
     epoch_id: str,
+    owner_id: str | None = None,
 ) -> None:
     """Reattach guards after checkpoint restoration against a separately restored ledger."""
     active = ledger.active_epoch
@@ -1124,7 +1125,9 @@ def bind_existing_proof_action_route_epoch(
         or active["route"] != route
     ):
         raise ProofActionRouteEpochError("restored endpoints do not match the active route epoch")
-    owner_id = f"owner-{uuid.uuid4().hex}"
+    owner_id = _text(
+        owner_id or f"owner-{uuid.uuid4().hex}", "replacement_owner_id"
+    )
     claimed = ledger.claim_epoch(epoch_id, owner_id=owner_id)
     _attach_route_guard(host, worker, ledger, epoch_id, owner_id, claimed["details"]["owner_generation"])
 
@@ -1243,6 +1246,7 @@ def handoff_proof_action_route_epoch(
     successor_worker_id: str,
     successor_request_channel: str,
     successor_result_channel: str,
+    successor_owner_id: str | None = None,
 ) -> ProofActionRouteHandoff:
     """Atomically close a route and activate its pre-authorized successor.
 
@@ -1316,7 +1320,10 @@ def handoff_proof_action_route_epoch(
     # An interpreted attempt already has a semantic result; it remains
     # interpreted so the successor can finish/replan the session normally.
     postclose_session_digest = successor_session.to_dict()["session_digest"]
-    successor_owner_id = f"owner-{uuid.uuid4().hex}"
+    successor_owner_id = _text(
+        successor_owner_id or f"owner-{uuid.uuid4().hex}",
+        "successor_owner_id",
+    )
 
     try:
         close_event, opened_event = ledger.handoff_epoch(
