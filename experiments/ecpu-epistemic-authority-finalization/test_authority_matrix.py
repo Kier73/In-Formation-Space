@@ -107,6 +107,30 @@ class AuthorityMatrixTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "scenario"):
             validate_condition({"strict": True, "scenario": "unknown", "quorum": 2})
 
+    def test_source_equivocation_ci_receipt_digest_and_invariants(self):
+        receipt_path = (
+            Path(__file__).with_name("results") / "ci-run-341-summary.json"
+        )
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        core = {
+            key: value for key, value in receipt.items()
+            if key != "summary_digest"
+        }
+        calculated = hashlib.sha256(
+            json.dumps(
+                core, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        self.assertEqual(receipt["summary_digest"], calculated)
+        self.assertEqual(receipt["workflow"]["run_number"], 341)
+        self.assertEqual(receipt["invariants"]["source_equivocation_probe_count"], 6)
+        self.assertEqual(receipt["invariants"]["source_equivocation_conflict_count"], 6)
+        self.assertEqual(receipt["invariants"]["source_equivocation_snapshot_restore_count"], 6)
+        self.assertEqual(receipt["invariants"]["source_equivocation_new_source_rejection_count"], 6)
+        self.assertEqual(receipt["invariants"]["source_equivocation_changed_value_rejection_count"], 6)
+        self.assertEqual(receipt["invariants"]["source_equivocation_exact_replay_idempotent_count"], 6)
+
     def test_first_live_ci_summary_digest_and_outcome_counts(self):
         summary_path = (
             Path(__file__).with_name("results") / "ci-run-310-summary.json"
