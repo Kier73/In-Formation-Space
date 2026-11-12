@@ -287,8 +287,24 @@ class AuthorityLineageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "entry digest"):
             validate_ledger(altered)
 
-    def test_event_history_excludes_unrelated_events(self):
-        ledger, _ = initial_ledger()
+    def test_event_history_includes_proposal_resolution_and_excludes_other_events(self):
+        ledger, initial_id = initial_ledger()
+        ledger, proposal_id = propose_revision(
+            ledger,
+            event_key=EVENT,
+            base_decision_ids=[initial_id],
+            evidence_refs=EVIDENCE_1,
+            reason="Review proposal for event history test.",
+            proposed_by="reviewer",
+        )
+        ledger = resolve_proposal(
+            ledger,
+            proposal_id,
+            outcome="REJECTED",
+            rationale="The new evidence does not change the decision.",
+            resolved_by="authority",
+        )
+
         other_ledger = create_ledger("other-event", created_by="test-suite")
         other_ledger, _ = issue_decision(
             other_ledger, event_key=OTHER_EVENT, status="REFUSED",
@@ -296,7 +312,13 @@ class AuthorityLineageTests(unittest.TestCase):
             representative_ref=None, issued_by="authority",
             rationale="Independent logical event.",
         )
-        self.assertEqual(len(event_entries(ledger, EVENT)), 1)
+        event_types = {
+            item["entry_type"] for item in event_entries(ledger, EVENT)
+        }
+        self.assertEqual(
+            event_types,
+            {"decision_issued", "revision_proposed", "proposal_resolved"},
+        )
         self.assertEqual(event_entries(ledger, OTHER_EVENT), [])
         self.assertEqual(
             {item["entry_type"] for item in event_entries(other_ledger, OTHER_EVENT)},
