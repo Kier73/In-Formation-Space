@@ -1,7 +1,7 @@
 # Sparse Encoding Landscape
 
 **Experiment:** SRE-002 · Exact sparse snapshot encodings  
-**Status:** candidate; pinned cross-repository CI is the verification gate.
+**Status:** verified within the 16 declared complete finite Boolean domains. See the [integrity-checked CI evidence](results/ci-run-43308005095.md).
 
 SRE-002 follows the storage finding from [SRE-001](../sparse-transition-execution/README.md): COO-style JSON pair records reduce scalar parameter count but can increase serialized bytes for dense minterm models. This experiment compares alternative encodings without changing the underlying sparse model or its semantics.
 
@@ -41,3 +41,8 @@ This tests only the selected finite Boolean workloads and exact compiler-generat
 ## Relationship to SRE-001
 
 SRE-001 showed that a sparse representation can reduce stored parameters and arithmetic, while a pair-list snapshot can still grow in bytes for dense rows. SRE-002 asks which exact layout best preserves that sparsity in a portable artifact.
+
+
+## First integrity-checked CI result
+
+The [SRE-002 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43308005095) passed the E-CPU sparse transition regression suite and exhaustively evaluated all six encodings across the 48 compiler/model artifacts. It checked 1,364 input rows and completed 24,552 semantic comparisons. Each decoder reconstructed the exact sparse model identity, and every codec rejected deliberate source-metadata tampering. The [retained evidence note](results/ci-run-43308005095.md) distinguishes preliminary pre-header-hash byte measurements from the authoritative final artifact.
