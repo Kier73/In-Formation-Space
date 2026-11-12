@@ -15,6 +15,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 import hashlib
 import json
+import uuid
 from typing import Any
 
 from mailcpu.reliability import ReliabilityPolicy
@@ -244,7 +245,9 @@ class ProofActionRouteEpochLedger:
         active = None
         for entry in self._entries:
             if entry["event_type"] == "opened":
-                active = entry
+                active = {**entry, "owner_generation": entry["details"]["owner_generation"], "owner_id": entry["details"]["owner_id"]}
+            elif entry["event_type"] == "claimed" and active is not None:
+                active = {**active, "owner_generation": entry["details"]["owner_generation"], "owner_id": entry["details"]["owner_id"], "last_claim_event_digest": entry["event_digest"]}
             elif entry["event_type"] == "closed":
                 active = None
         return None if active is None else _copy(active)
@@ -280,6 +283,7 @@ class ProofActionRouteEpochLedger:
         epoch_id: str,
         route: Mapping[str, Any],
         *,
+        owner_id: str,
         predecessor_close_digest: str | None = None,
     ) -> dict[str, Any]:
         epoch_id = _text(epoch_id, "epoch_id")
@@ -303,7 +307,20 @@ class ProofActionRouteEpochLedger:
             epoch_id,
             epoch_number,
             checked_route,
-            {"predecessor_close_digest": predecessor_close_digest},
+            {"predecessor_close_digest": predecessor_close_digest, "owner_generation": 1, "owner_id": _text(owner_id, "owner_id")},
+        )
+
+    def claim_epoch(self, epoch_id: str, *, owner_id: str) -> dict[str, Any]:
+        """Transfer ownership to a new process generation on the same route."""
+        active = self.active_epoch
+        owner_id = _text(owner_id, "owner_id")
+        if active is None or active["epoch_id"] != epoch_id:
+            raise ProofActionRouteEpochError("only the active route epoch can be claimed")
+        if owner_id == active["owner_id"]:
+            raise ProofActionRouteEpochError("new owner ID must differ from the current owner")
+        return self._append(
+            "claimed", epoch_id, active["epoch_number"], active["route"],
+            {"owner_generation": active["owner_generation"] + 1, "previous_owner_id": active["owner_id"], "owner_id": owner_id},
         )
 
     def close_epoch(
@@ -351,6 +368,8 @@ class ProofActionRouteEpochLedger:
         }):
             raise ProofActionRouteEpochError("uncertainty projection digest mismatch")
         details = {
+            "owner_generation": active["owner_generation"],
+            "owner_id": active["owner_id"],
             "reason_code": reason_code,
             "reason": reason,
             "preclose_session_digest": preclose_session_digest,
@@ -369,12 +388,14 @@ class ProofActionRouteEpochLedger:
             details,
         )
 
-    def assert_active(self, epoch_id: str, route_digest: str) -> None:
+    def assert_active(self, epoch_id: str, route_digest: str, *, owner_id: str, owner_generation: int) -> None:
         active = self.active_epoch
         if (
             active is None
             or active["epoch_id"] != epoch_id
             or active["route_digest"] != route_digest
+            or active["owner_id"] != owner_id
+            or active["owner_generation"] != owner_generation
         ):
             raise ProofActionRouteEpochError(
                 f"route epoch {epoch_id!r} is closed or superseded"
@@ -444,14 +465,32 @@ class ProofActionRouteEpochLedger:
                 predecessor = details.get("predecessor_close_digest")
                 if predecessor != last_close_digest:
                     raise ProofActionRouteEpochError("route successor predecessor reference is invalid")
+                if details.get("owner_generation") != 1:
+                    raise ProofActionRouteEpochError("new epoch must begin at owner generation one")
+                _text(details.get("owner_id"), "opened.owner_id")
                 used_epoch_ids.add(event["epoch_id"])
                 used_route_keys.add(_route_key(route))
+                active = event
+            elif event["event_type"] == "claimed":
+                if active is None or active["epoch_id"] != event["epoch_id"]:
+                    raise ProofActionRouteEpochError("route claim targets a non-active epoch")
+                if event["epoch_number"] != active["epoch_number"] or route != active["route"]:
+                    raise ProofActionRouteEpochError("route claim differs from active route")
+                if details.get("owner_generation") != active["details"]["owner_generation"] + 1:
+                    raise ProofActionRouteEpochError("route owner generation is not monotonic")
+                if details.get("previous_owner_id") != active["details"]["owner_id"]:
+                    raise ProofActionRouteEpochError("route claim omits the prior owner")
+                new_owner = _text(details.get("owner_id"), "claim.owner_id")
+                if new_owner == active["details"]["owner_id"]:
+                    raise ProofActionRouteEpochError("route claim reuses its prior owner")
                 active = event
             elif event["event_type"] == "closed":
                 if active is None or active["epoch_id"] != event["epoch_id"]:
                     raise ProofActionRouteEpochError("route ledger closes a non-active epoch")
                 if event["epoch_number"] != active["epoch_number"] or route != active["route"]:
                     raise ProofActionRouteEpochError("route ledger close does not match its open event")
+                if details.get("owner_generation") != active["details"]["owner_generation"] or details.get("owner_id") != active["details"]["owner_id"]:
+                    raise ProofActionRouteEpochError("route close does not match current owner")
                 _sha256(details.get("pair_checkpoint_digest"), "pair_checkpoint_digest")
                 _sha256(details.get("preclose_session_digest"), "preclose_session_digest")
                 _sha256(details.get("postclose_session_digest"), "postclose_session_digest")
@@ -488,6 +527,8 @@ def _attach_route_guard(
     worker: ProofActionReliableWorker,
     ledger: ProofActionRouteEpochLedger,
     epoch_id: str,
+    owner_id: str,
+    owner_generation: int,
 ) -> None:
     route = _route_document(host, worker)
     route_digest = _digest(route)
@@ -495,7 +536,7 @@ def _attach_route_guard(
     def guard(candidate_epoch_id: str | None) -> None:
         if candidate_epoch_id != epoch_id:
             raise ProofActionRouteEpochError("endpoint route epoch binding was changed")
-        ledger.assert_active(epoch_id, route_digest)
+        ledger.assert_active(epoch_id, route_digest, owner_id=owner_id, owner_generation=owner_generation)
 
     host._route_epoch_id = epoch_id
     worker._route_epoch_id = epoch_id
@@ -509,6 +550,7 @@ def open_proof_action_route_epoch(
     ledger: ProofActionRouteEpochLedger,
     *,
     epoch_id: str,
+    owner_id: str | None = None,
 ) -> dict[str, Any]:
     """Register the initial route epoch and attach operation guards to both endpoints."""
     if not isinstance(ledger, ProofActionRouteEpochLedger):
@@ -518,8 +560,9 @@ def open_proof_action_route_epoch(
     ) is not None:
         raise ProofActionRouteEpochError("endpoint is already bound to a route epoch")
     route = _route_document(host, worker)
-    event = ledger.open_epoch(epoch_id, route)
-    _attach_route_guard(host, worker, ledger, epoch_id)
+    owner_id = owner_id or f"owner-{uuid.uuid4().hex}"
+    event = ledger.open_epoch(epoch_id, route, owner_id=owner_id)
+    _attach_route_guard(host, worker, ledger, epoch_id, owner_id, 1)
     return event
 
 
@@ -539,7 +582,9 @@ def bind_existing_proof_action_route_epoch(
         or active["route"] != route
     ):
         raise ProofActionRouteEpochError("restored endpoints do not match the active route epoch")
-    _attach_route_guard(host, worker, ledger, epoch_id)
+    owner_id = f"owner-{uuid.uuid4().hex}"
+    claimed = ledger.claim_epoch(epoch_id, owner_id=owner_id)
+    _attach_route_guard(host, worker, ledger, epoch_id, owner_id, claimed["details"]["owner_generation"])
 
 
 def handoff_proof_action_route_epoch(
@@ -566,7 +611,7 @@ def handoff_proof_action_route_epoch(
     current_route = _route_document(host, worker)
     if active is None or active["epoch_id"] != epoch_id or active["route"] != current_route:
         raise ProofActionRouteEpochError("handoff source is not the active route epoch")
-    ledger.assert_active(epoch_id, active["route_digest"])
+    ledger.assert_active(epoch_id, active["route_digest"], owner_id=active["owner_id"], owner_generation=active["owner_generation"])
 
     try:
         preclose_checkpoint = export_proof_action_checkpoint(host, worker)
@@ -608,6 +653,13 @@ def handoff_proof_action_route_epoch(
         "proof_ground_digest": host.session.plan["proof_ground_digest"],
     }
     successor_route = _validate_route(successor_route)
+    if reason_code not in REASON_CODES:
+        raise ProofActionRouteEpochError("unsupported route-close reason code")
+    _text(reason, "reason")
+    if _route_key(successor_route) in {_route_key(old) for old in ledger._all_routes()}:
+        raise ProofActionRouteEpochError("successor route identity tuple was already used")
+    if successor_epoch_id == epoch_id or any(item["epoch_id"] == successor_epoch_id for item in ledger.entries):
+        raise ProofActionRouteEpochError("successor epoch ID must be new")
 
     close_event = ledger.close_epoch(
         epoch_id,
@@ -643,12 +695,14 @@ def handoff_proof_action_route_epoch(
         result_channel=successor_result_channel,
         policy=host.policy,
     )
+    successor_owner_id = f"owner-{uuid.uuid4().hex}"
     opened_event = ledger.open_epoch(
         successor_epoch_id,
         _route_document(successor_host, successor_worker),
+        owner_id=successor_owner_id,
         predecessor_close_digest=close_event["event_digest"],
     )
-    _attach_route_guard(successor_host, successor_worker, ledger, successor_epoch_id)
+    _attach_route_guard(successor_host, successor_worker, ledger, successor_epoch_id, successor_owner_id, 1)
     return ProofActionRouteHandoff(
         closed_epoch=close_event,
         opened_epoch=opened_event,
