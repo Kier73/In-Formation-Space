@@ -1,0 +1,47 @@
+name: Proof attention frontier bridge
+
+on:
+  push:
+    paths:
+      - "bridges/proof-attention/**"
+      - "bridges/observation-path/operation_spans.py"
+      - "bridges/observation-path/empirical_probe_costs.py"
+      - ".github/workflows/proof-attention.yml"
+  pull_request:
+    paths:
+      - "bridges/proof-attention/**"
+      - "bridges/observation-path/operation_spans.py"
+      - "bridges/observation-path/empirical_probe_costs.py"
+      - ".github/workflows/proof-attention.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof-attention:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+
+      - name: Check out VGI proof-ground implementation at pinned revision
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run proof-attention bridge tests
+        env:
+          PYTHONPATH: bridges/proof-attention:bridges/observation-path:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: >-
+          python -m unittest discover
+          -s bridges/proof-attention
+          -p 'test_*.py'
+          -v
