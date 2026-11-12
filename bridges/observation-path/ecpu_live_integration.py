@@ -442,6 +442,59 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             for interval in binding.intervals
         ))
 
+    def test_live_repeated_authorized_paths_generate_operation_cost_samples(self):
+        # Five independent event times provide repeated, same-process samples
+        # for each major E-CPU call boundary. This is a controlled CI probe,
+        # not a claim of representative production load.
+        for logical_time in range(40, 45):
+            path = self._start_path(f"ecpu-live-cost:{logical_time}", logical_time)
+            observation_a = TimingObservationProducer("A").observe_interval(logical_time, 35.0)
+            observation_b = TimingObservationProducer("B").observe_interval(logical_time, 35.0)
+            self._send_and_record_raw(
+                path, observation_a, observation_b, logical_time
+            )
+
+            decision = self.adapter.record_finalized_decision(
+                path,
+                "timing",
+                logical_time,
+                decision_ref=str(self.root / f"consensus-cost-{logical_time}.json"),
+            )
+            self.assertEqual(decision.status, "AUTHORIZED")
+            self._capture_temporal_events(path)
+
+            checkpoint = self.root / f"gated-cost-{logical_time}.checkpoint"
+            application = self.adapter.record_application_commit(
+                path,
+                "timing",
+                logical_time,
+                checkpoint,
+                checkpoint_ref=str(checkpoint),
+            )
+            self.assertEqual(path.status, "applied")
+            self.assertEqual(application.target_pid, self.pid)
+            self._capture_temporal_events(path)
+
+            acknowledgement = self.adapter.record_sender_acknowledgements(
+                path,
+                "timing",
+                logical_time,
+                {"A": self.sender_a, "B": self.sender_b},
+                acknowledgement_ref=str(self.root / f"sender-acks-cost-{logical_time}.json"),
+            )
+            self.assertTrue(acknowledgement.complete)
+            self.assertEqual(path.status, "sender_acknowledged")
+            self.assertEqual(self.sender_a.pending_sequences(), ())
+            self.assertEqual(self.sender_b.pending_sequences(), ())
+            self._capture_temporal_events(path)
+            validate_path_record(
+                path.to_dict(),
+                json.loads(
+                    (Path(__file__).with_name("observation-path.schema.json"))
+                    .read_text(encoding="utf-8")
+                ),
+            )
+
     def test_real_ecpu_consensus_conflict_is_refusal_not_negative_measurement(self):
         logical_time = 31
         path = self._start_path("ecpu-live:31", logical_time)
@@ -480,7 +533,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         import jsonschema
 
         spans = list(self.operation_span_recorder.spans)
-        self.assertEqual(len(spans), 11)
+        self.assertEqual(len(spans), 46)
         for span in spans:
             validate_operation_span(span)
             jsonschema.validate(
@@ -491,7 +544,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
                 ),
             )
 
-        profiles = build_operation_cost_profiles(spans, minimum_samples=3)
+        profiles = build_operation_cost_profiles(spans, minimum_samples=5)
         profiles_schema = json.loads(
             (Path(__file__).with_name("operation-cost-profiles.schema.json"))
             .read_text(encoding="utf-8")
@@ -502,22 +555,22 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
 
         by_operation = {item["operation_id"]: item for item in profiles["profiles"]}
         send_profile = by_operation["ecpu.ReliableChannel.send"]
-        self.assertEqual(send_profile["measured_sample_count"], 4)
-        self.assertEqual(send_profile["readiness"], "descriptive_only")
-
-        # The remaining stages are intentionally below the three-sample
-        # threshold in this two-path smoke run. Their durations are retained,
-        # but not represented as stable cost estimates.
-        for operation_id in (
-            "ecpu.GatedObservationCoordinator.ingest_available",
-            "ecpu.GatedObservationCoordinator.finalize_event",
-            "ecpu.GatedObservationCoordinator.commit_event",
-            "ecpu.GatedObservationCoordinator.save_checkpoint",
-            "ecpu.GatedObservationCoordinator.process_acks",
-        ):
+        expected_samples = {
+            "ecpu.ReliableChannel.send": 14,
+            "ecpu.GatedObservationCoordinator.ingest_available": 7,
+            "ecpu.GatedObservationCoordinator.finalize_event": 7,
+            "ecpu.GatedObservationCoordinator.commit_event": 6,
+            "ecpu.GatedObservationCoordinator.save_checkpoint": 6,
+            "ecpu.GatedObservationCoordinator.process_acks": 6,
+        }
+        for operation_id, expected_count in expected_samples.items():
+            self.assertEqual(
+                by_operation[operation_id]["measured_sample_count"],
+                expected_count,
+            )
             self.assertEqual(
                 by_operation[operation_id]["readiness"],
-                "insufficient_samples",
+                "descriptive_only",
             )
 
         output_dir = Path(os.environ.get(
