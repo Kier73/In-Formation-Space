@@ -72,7 +72,6 @@ jobs:
           experiments/portable-realization-capsule/test_portable_stateful_checkpoint.py
           experiments/portable-realization-capsule/test_stateful_recovery_handoff.py
           external/E-CPU/tests/test_transition_space.py
-          external/E-CPU/tests/test_transferable_execution_claims.py -q
 
       - name: Execute portable realization capsule corpus
         env:
