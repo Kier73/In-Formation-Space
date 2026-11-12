@@ -1222,8 +1222,29 @@ def restore_proof_action_route_handoff(
                     key for key in expected_attempt
                     if expected_attempt.get(key) != supplied_attempt.get(key)
                 ]
+                event_diffs = []
+                for event_index, (expected_event, supplied_event) in enumerate(
+                    zip(expected_attempt.get("events", []), supplied_attempt.get("events", []))
+                ):
+                    event_fields = [
+                        key for key in expected_event
+                        if expected_event.get(key) != supplied_event.get(key)
+                    ]
+                    if event_fields:
+                        event_diffs.append({
+                            "event_index": event_index,
+                            "fields": event_fields,
+                            "expected": expected_event,
+                            "supplied": supplied_event,
+                        })
                 if differing:
-                    attempt_diffs.append({"index": index, "fields": differing})
+                    attempt_diffs.append({
+                        "index": index,
+                        "fields": differing,
+                        "event_diffs": event_diffs,
+                        "expected_event_count": len(expected_attempt.get("events", [])),
+                        "supplied_event_count": len(supplied_attempt.get("events", [])),
+                    })
             raise ProofActionRouteEpochError(
                 "post-close session snapshot is not the exact lifecycle transition "
                 f"from the preserved pre-close session; session_fields={differing_fields}, "
