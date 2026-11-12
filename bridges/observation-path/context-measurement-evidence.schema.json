@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/context-measurement-evidence.schema.json",
+  "title": "Authorized VGI Context Measurement Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "source_context_analysis_digest",
+    "policy_report_digest",
+    "attempt_id",
+    "conformance_digest",
+    "method_id",
+    "dimension",
+    "observed_value",
+    "observation_path",
+    "observation_path_digest",
+    "prior_context_assignment",
+    "context_assignment",
+    "measurement_manifest_digest",
+    "measurement_manifest",
+    "updated_context_analysis",
+    "execution_status",
+    "context_analysis_effect",
+    "ground_effect",
+    "model_effect",
+    "interpretation_limits",
+    "record_digest"
+  ],
+  "properties": {
+    "format": {"const": "in-formation.context-measurement-evidence"},
+    "schema": {"const": "in-formation.context-measurement-evidence/0.1"},
+    "source_context_analysis_digest": {"$ref": "#/$defs/digest"},
+    "policy_report_digest": {"$ref": "#/$defs/digest"},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "conformance_digest": {"$ref": "#/$defs/digest"},
+    "method_id": {"type": "string", "minLength": 1},
+    "dimension": {"type": "string", "minLength": 1},
+    "observed_value": {"$ref": "#/$defs/scalar"},
+    "observation_path": {"$ref": "#/$defs/observationPath"},
+    "observation_path_digest": {"$ref": "#/$defs/digest"},
+    "prior_context_assignment": {
+      "anyOf": [
+        {"type": "null"},
+        {"type": "object"}
+      ]
+    },
+    "measurement_manifest_digest": {"$ref": "#/$defs/digest"},
+    "context_assignment": {
+      "type": "object",
+      "required": [
+        "format",
+        "schema",
+        "attempt_id",
+        "conformance_digest",
+        "dimensions",
+        "source_ref",
+        "assignment_digest"
+      ],
+      "properties": {
+        "format": {"const": "in-formation.transition-context-assignment"},
+        "schema": {"const": "in-formation.transition-context-assignment/0.1"},
+        "attempt_id": {"type": "string", "minLength": 1},
+        "conformance_digest": {"$ref": "#/$defs/digest"},
+        "dimensions": {"type": "object", "minProperties": 1},
+        "source_ref": {"type": "string", "pattern": "^urn:sha256:[0-9a-f]{64}$"},
+        "assignment_digest": {"$ref": "#/$defs/digest"}
+      },
+      "additionalProperties": true
+    },
+    "measurement_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "schema",
+        "policy_report_digest",
+        "source_context_analysis_digest",
+        "attempt_id",
+        "conformance_digest",
+        "method_id",
+        "dimension",
+        "observed_value",
+        "observation_path_digest",
+        "prior_assignment_digest",
+        "prior_source_ref",
+        "dispatch_evidence_ref",
+        "admission_evidence_ref",
+        "return_evidence_ref",
+        "encounter_id",
+        "payload_digest",
+        "canonicalization",
+        "authority_evidence_ref",
+        "authority_policy_digest",
+        "authority_decision_digest",
+        "authority_decision_status",
+        "authority_quorum",
+        "authority_strict",
+        "authority_observed_sources",
+        "authority_dissenting_sources",
+        "authority_missing_sources",
+        "authority_representative_source",
+        "interpretation_evidence_ref",
+        "interpretation_method",
+        "measurement_manifest_digest"
+      ],
+      "properties": {
+        "format": {"const": "in-formation.context-measurement-manifest"},
+        "schema": {"const": "in-formation.context-measurement-manifest/0.1"},
+        "policy_report_digest": {"$ref": "#/$defs/digest"},
+        "source_context_analysis_digest": {"$ref": "#/$defs/digest"},
+        "attempt_id": {"type": "string", "minLength": 1},
+        "conformance_digest": {"$ref": "#/$defs/digest"},
+        "method_id": {"type": "string", "minLength": 1},
+        "dimension": {"type": "string", "minLength": 1},
+        "observed_value": {"$ref": "#/$defs/scalar"},
+        "observation_path_digest": {"$ref": "#/$defs/digest"},
+        "prior_assignment_digest": {
+          "anyOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]
+        },
+        "prior_source_ref": {
+          "anyOf": [{"type": "string"}, {"type": "null"}]
+        },
+        "dispatch_evidence_ref": {"type": "string", "minLength": 1},
+        "admission_evidence_ref": {"type": "string", "minLength": 1},
+        "return_evidence_ref": {"type": "string", "minLength": 1},
+        "encounter_id": {"type": "string", "minLength": 1},
+        "payload_digest": {"type": "string", "minLength": 1},
+        "canonicalization": {"type": "string", "minLength": 1},
+        "authority_evidence_ref": {"type": "string", "minLength": 1},
+        "authority_policy_digest": {"type": "string", "minLength": 1},
+        "authority_decision_digest": {"type": "string", "minLength": 1},
+        "authority_decision_status": {"const": "AUTHORIZED"},
+        "authority_quorum": {"type": "integer", "minimum": 1},
+        "authority_strict": {"type": "boolean"},
+        "authority_observed_sources": {"type": "array", "items": {"type": "string"}},
+        "authority_dissenting_sources": {"type": "array", "items": {"type": "string"}},
+        "authority_missing_sources": {"type": "array", "items": {"type": "string"}},
+        "authority_representative_source": {"type": "string", "minLength": 1},
+        "interpretation_evidence_ref": {"type": "string", "minLength": 1},
+        "interpretation_method": {"const": "exact-context-scalar-v1"},
+        "measurement_manifest_digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "updated_context_analysis": {"type": "object"},
+    "execution_status": {"const": "interpreted_authorized_context_measurement"},
+    "context_analysis_effect": {"const": "new_immutable_analysis_revision"},
+    "ground_effect": {"const": "none"},
+    "model_effect": {"const": "none"},
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "record_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "scalar": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "boolean"},
+        {"type": "null"}
+      ]
+    },
+    "observationPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempt_id", "intent", "status", "terminal", "events"],
+      "properties": {
+        "attempt_id": {"type": "string", "minLength": 1},
+        "intent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_name",
+            "query",
+            "hypothesis_set_digest",
+            "estimated_cost",
+            "plan_ref",
+            "authority_required",
+            "application_required",
+            "sender_ack_required"
+          ],
+          "properties": {
+            "candidate_name": {"type": "string", "minLength": 1},
+            "query": {"type": "string", "minLength": 1},
+            "hypothesis_set_digest": {"$ref": "#/$defs/digest"},
+            "estimated_cost": {"type": "number", "exclusiveMinimum": 0},
+            "plan_ref": {"type": "string", "minLength": 1},
+            "authority_required": {"const": true},
+            "application_required": {"const": false},
+            "sender_ack_required": {"const": false}
+          }
+        },
+        "status": {"const": "interpreted"},
+        "terminal": {"const": false},
+        "events": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "prefixItems": [
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"}
+          ],
+          "items": false
+        }
+      }
+    },
+    "pathEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage", "actor", "clock_value", "clock_domain",
+        "evidence_ref", "details"
+      ],
+      "properties": {
+        "stage": {
+          "enum": [
+            "planned", "dispatched", "admitted", "returned",
+            "evidence_authorized", "interpreted"
+          ]
+        },
+        "actor": {"type": "string", "minLength": 1},
+        "clock_value": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "clock_domain": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "evidence_ref": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "details": {"type": "object"}
+      }
+    }
+  }
+}

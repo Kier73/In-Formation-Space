@@ -134,6 +134,17 @@ This is a plan only: no context observation is dispatched and no source Ground, 
 - [Focused CI](../../.github/workflows/context-attention-policy.yml)
 - [Pinned VGI policy planner](https://github.com/Kier73/Virtual-Ground-Interpreter/tree/ac13c1bbd92dfd09f17de51adef7adb2d2088bf6)
 
+## Authorized context-measurement evidence
+
+The [context-measurement evidence bridge](context-measurement-evidence.md) closes the VGI context-attention loop. It creates a planned `ObservationPath` for the exact next `(attempt_id, method_id, dimension)`, then accepts a measurement only after the path is reconstructed through dispatch, admission, returned Encounter Envelope, explicit AUTHORIZED decision, and exact scalar interpretation.
+
+The observed context value must exactly match a declared VGI scenario value. An out-of-set value is a model mismatch and is not coerced or silently admitted. Accepted evidence creates a new immutable context assignment whose `source_ref` binds to a digest of the complete measurement manifest, then rebuilds the context analysis. The original analysis and transition model remain unchanged; a new attention policy must be computed from the updated analysis.
+
+- [Implementation](context_measurement.py)
+- [Schema](context-measurement-evidence.schema.json)
+- [Tests](test_context_measurement.py)
+- [Focused CI](../../.github/workflows/context-measurement-evidence.yml)
+
 ## Observation outcomes and information value
 
 The companion [observation-outcome implementation](observation_outcomes.py) records what a candidate observation was expected to distinguish and what outcome was actually observed. It is deliberately separate from the operation-span cost profiler.
