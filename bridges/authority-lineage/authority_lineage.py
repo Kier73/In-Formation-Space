@@ -264,6 +264,25 @@ def resolve_proposal(
         raise ValueError("stale proposal cannot be accepted against a changed authority frontier")
     if outcome == "STALE" and not is_stale:
         raise ValueError("proposal is not stale relative to the current authority frontier")
+    certificate_entries = [
+        entry for entry in _entries_of_type(ledger, "proposal_review_certified")
+        if entry["payload"]["proposal_id"] == proposal_id
+    ]
+    if len(certificate_entries) > 1:
+        raise ValueError("proposal has more than one immutable review certificate")
+    certificate_digest = None
+    if certificate_entries:
+        certificate_payload = certificate_entries[0]["payload"]
+        certificate = certificate_payload["certificate"]
+        expected_outcome = (
+            "STALE" if is_stale else certificate["evaluation"]["outcome"]
+        )
+        if outcome != expected_outcome:
+            raise ValueError(
+                "resolution outcome differs from the recorded review certificate"
+            )
+        certificate_digest = certificate_payload["certificate_digest"]
+
     payload = {
         "proposal_id": proposal_id,
         "outcome": outcome,
@@ -271,6 +290,8 @@ def resolve_proposal(
         "base_decision_ids": list(proposal["base_decision_ids"]),
         "frontier_at_resolution": frontier,
     }
+    if certificate_digest is not None:
+        payload["review_certificate_digest"] = certificate_digest
     return _append_entry(
         ledger, "proposal_resolved", _nonempty(resolved_by, "resolved_by"), payload
     )
@@ -388,6 +409,7 @@ def validate_ledger(ledger: Mapping[str, Any]) -> None:
     resolutions: dict[str, dict[str, Any]] = {}
     decisions: dict[str, dict[str, Any]] = {}
     decision_proposals: set[str] = set()
+    review_certificates: dict[str, dict[str, Any]] = {}
     previous = ZERO_DIGEST
 
     def frontier_at(event: Mapping[str, Any]) -> list[str]:
@@ -457,6 +479,82 @@ def validate_ledger(ledger: Mapping[str, Any]) -> None:
             if payload.get("status_at_creation") != "PROPOSED":
                 raise ValueError("new revision proposals must begin as PROPOSED")
             proposals[proposal_id] = dict(payload)
+        elif entry_type == "proposal_review_certified":
+            proposal_id = _nonempty(payload.get("proposal_id"), "proposal_id")
+            if proposal_id not in proposals:
+                raise ValueError("review certificate precedes its revision proposal")
+            if proposal_id in review_certificates:
+                raise ValueError("proposal has more than one immutable review certificate")
+            if proposal_id in resolutions:
+                raise ValueError("review certificate cannot follow proposal resolution")
+            expected_payload_fields = {
+                "proposal_id", "event_key", "certificate_id",
+                "certificate_digest", "certificate",
+            }
+            if set(payload) != expected_payload_fields:
+                raise ValueError("review certificate ledger entry has invalid fields")
+            proposal = proposals[proposal_id]
+            certificate = payload.get("certificate")
+            if not isinstance(certificate, Mapping):
+                raise TypeError("review certificate payload must be a mapping")
+            if certificate.get("format") != "in-formation.authority-review-certificate":
+                raise ValueError("unsupported review certificate format")
+            if certificate.get("schema") != "in-formation.authority-review-certificate/0.1":
+                raise ValueError("unsupported review certificate schema")
+            certificate_id = _nonempty(payload.get("certificate_id"), "certificate_id")
+            if certificate_id != f"review-certificate:{proposal_id}":
+                raise ValueError("review certificate ID does not bind its proposal")
+            if certificate.get("certificate_id") != certificate_id:
+                raise ValueError("ledger and certificate IDs differ")
+            certificate_digest = _sha256(
+                payload.get("certificate_digest"), "review certificate digest"
+            )
+            certificate_core = {
+                key: value for key, value in certificate.items()
+                if key != "certificate_digest"
+            }
+            if certificate.get("certificate_digest") != certificate_digest:
+                raise ValueError("embedded certificate digest differs from ledger entry")
+            if digest(certificate_core) != certificate_digest:
+                raise ValueError("embedded review certificate digest mismatch")
+            if certificate.get("ledger_id") != ledger["ledger_id"]:
+                raise ValueError("review certificate belongs to another ledger")
+            if certificate.get("proposal_id") != proposal_id:
+                raise ValueError("review certificate belongs to another proposal")
+            if certificate.get("proposal_digest") != digest(proposal):
+                raise ValueError("review certificate proposal digest mismatch")
+            event = _event_key(payload.get("event_key"))
+            if not _event_equal(event, proposal["event_key"]):
+                raise ValueError("review certificate entry event differs from its proposal")
+            if not _event_equal(certificate.get("event_key", {}), event):
+                raise ValueError("embedded review certificate event differs from its proposal")
+            if certificate.get("base_decision_ids") != proposal["base_decision_ids"]:
+                raise ValueError("review certificate base decisions differ from proposal")
+            if frontier_at(event) != proposal["base_decision_ids"]:
+                raise ValueError("review certificate was recorded against a stale frontier")
+            base_digests = certificate.get("base_decision_digests")
+            expected_base_digests = {
+                decision_id: decisions[decision_id]["decision_digest"]
+                for decision_id in proposal["base_decision_ids"]
+                if decision_id in decisions
+            }
+            if base_digests != expected_base_digests:
+                raise ValueError("review certificate base decision digests mismatch")
+            policy_snapshot = certificate.get("policy_snapshot")
+            if not isinstance(policy_snapshot, Mapping):
+                raise TypeError("review certificate policy snapshot must be a mapping")
+            _sha256(certificate.get("policy_digest"), "review certificate policy digest")
+            if certificate["policy_digest"] != digest(policy_snapshot):
+                raise ValueError("review certificate policy digest mismatch")
+            evaluation = certificate.get("evaluation")
+            if not isinstance(evaluation, Mapping) or evaluation.get("outcome") not in {
+                "ACCEPTED", "REJECTED", "INCONCLUSIVE"
+            }:
+                raise ValueError("review certificate has an invalid evaluation outcome")
+            review_certificates[proposal_id] = {
+                "certificate_digest": certificate_digest,
+                "certificate": dict(certificate),
+            }
         elif entry_type == "proposal_resolved":
             proposal_id = _nonempty(payload.get("proposal_id"), "proposal_id")
             if proposal_id not in proposals:
@@ -477,6 +575,19 @@ def validate_ledger(ledger: Mapping[str, Any]) -> None:
                 raise ValueError("stale revision proposal cannot be accepted")
             if outcome == "STALE" and not stale:
                 raise ValueError("STALE outcome requires a changed authority frontier")
+            certificate_record = review_certificates.get(proposal_id)
+            if certificate_record is None:
+                if "review_certificate_digest" in payload:
+                    raise ValueError("resolution references an unrecorded review certificate")
+            else:
+                certificate = certificate_record["certificate"]
+                expected_outcome = (
+                    "STALE" if stale else certificate["evaluation"]["outcome"]
+                )
+                if outcome != expected_outcome:
+                    raise ValueError("proposal resolution differs from its review certificate")
+                if payload.get("review_certificate_digest") != certificate_record["certificate_digest"]:
+                    raise ValueError("proposal resolution review certificate digest mismatch")
             _nonempty(payload.get("rationale"), "proposal resolution rationale")
             resolutions[proposal_id] = dict(payload)
         elif entry_type == "decision_issued":
