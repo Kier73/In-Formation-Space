@@ -26,6 +26,7 @@ from proof_action_checkpoint import (
     ProofActionCheckpointError,
     export_proof_action_checkpoint,
 )
+from proof_action_execution import ProofAttentionSession
 from proof_action_reliable_channel import (
     ProofActionReliableChannelError,
     ProofActionReliableHost,
@@ -1096,75 +1097,103 @@ def handoff_proof_action_route_epoch(
     successor_request_channel: str,
     successor_result_channel: str,
 ) -> ProofActionRouteHandoff:
-    """Close the old route, preserve its uncertain state, and open fresh endpoints.
+    """Atomically close a route and activate its pre-authorized successor.
 
-    An active dispatched/admitted attempt becomes route_closed. A merely planned
-    attempt remains planned and is adopted by the successor host. No tactic result
-    or theorem outcome is inferred by route migration.
+    The successor session is prepared from a verified clone before the CAS
+    commit. A failed owner check or store revision leaves the caller's live
+    session untouched. The close and open events are appended in one ledger
+    revision when a shared CAS store is configured.
     """
     active = ledger.active_epoch
     current_route = _route_document(host, worker)
     if active is None or active["epoch_id"] != epoch_id or active["route"] != current_route:
         raise ProofActionRouteEpochError("handoff source is not the active route epoch")
-    ledger.assert_active(epoch_id, active["route_digest"], owner_id=active["owner_id"], owner_generation=active["owner_generation"])
+    ledger.assert_active(
+        epoch_id,
+        active["route_digest"],
+        owner_id=active["owner_id"],
+        owner_generation=active["owner_generation"],
+    )
 
     try:
         preclose_checkpoint = export_proof_action_checkpoint(host, worker)
     except (ProofActionCheckpointError, ValueError, TypeError) as exc:
-        raise ProofActionRouteEpochError(f"could not preserve old route checkpoint: {exc}") from exc
+        raise ProofActionRouteEpochError(
+            f"could not preserve old route checkpoint: {exc}"
+        ) from exc
     uncertainty = _uncertainty_projection(preclose_checkpoint)
-    preclose_session_digest = host.session.to_dict()["session_digest"]
+    preclose_session_document = host.session.to_dict()
+    preclose_session_digest = preclose_session_document["session_digest"]
 
-    successor_route = {
+    successor_route = _validate_route({
         "host_id": _text(successor_host_id, "successor_host_id"),
         "worker_id": _text(successor_worker_id, "successor_worker_id"),
         "request_channel": _text(successor_request_channel, "successor_request_channel"),
         "result_channel": _text(successor_result_channel, "successor_result_channel"),
         "policy": _policy_document(host.policy),
-    }
-    successor_route = _validate_route(successor_route)
+    })
     if reason_code not in REASON_CODES:
         raise ProofActionRouteEpochError("unsupported route-close reason code")
-    _text(reason, "reason")
+    reason = _text(reason, "reason")
+    successor_epoch_id = _text(successor_epoch_id, "successor_epoch_id")
     if _route_key(successor_route) in {_route_key(old) for old in ledger._all_routes()}:
         raise ProofActionRouteEpochError("successor route identity tuple was already used")
-    if successor_epoch_id == epoch_id or any(item["epoch_id"] == successor_epoch_id for item in ledger.entries):
+    if successor_epoch_id == epoch_id or any(
+        item["epoch_id"] == successor_epoch_id for item in ledger.entries
+    ):
         raise ProofActionRouteEpochError("successor epoch ID must be new")
 
-    attempt = host.active_attempt
-    if attempt is not None and not attempt.terminal:
-        if attempt.status == "planned":
-            # The intended action has not entered the old communication route;
-            # retain the planned attempt for exact dispatch on the successor.
-            pass
-        else:
-            attempt.mark_failure(
+    try:
+        successor_session = ProofAttentionSession.from_snapshot(
+            preclose_session_document,
+            host.proof_ground,
+            cost_model=getattr(host.session, "_cost_model", None),
+        )
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ProofActionRouteEpochError(
+            f"could not prepare a verified successor proof session: {exc}"
+        ) from exc
+
+    carried_attempt = successor_session.active_attempt
+    if carried_attempt is not None and not carried_attempt.terminal:
+        if carried_attempt.status != "planned":
+            carried_attempt.mark_failure(
                 "route_closed",
                 host.host_id,
-                f"route epoch {epoch_id} closed while action was at stage {attempt.status}: {reason}",
+                f"route epoch {epoch_id} closed while action was at stage {carried_attempt.status}: {reason}",
                 evidence_ref=f"urn:sha256:{uncertainty['uncertainty_digest']}",
             )
+    postclose_session_digest = successor_session.to_dict()["session_digest"]
+    successor_owner_id = f"owner-{uuid.uuid4().hex}"
+
+    try:
+        close_event, opened_event = ledger.handoff_epoch(
+            epoch_id,
+            current_route,
+            reason_code=reason_code,
+            reason=reason,
+            owner_id=active["owner_id"],
+            owner_generation=active["owner_generation"],
+            pair_checkpoint=preclose_checkpoint,
+            preclose_session_digest=preclose_session_digest,
+            postclose_session_digest=postclose_session_digest,
+            uncertainty=uncertainty,
+            successor_epoch_id=successor_epoch_id,
+            successor_owner_id=successor_owner_id,
+            successor_route=successor_route,
+        )
+    except ProofActionRouteEpochError:
+        # The successor copy has not been installed, and the original live
+        # session/endpoint objects remain unchanged.
+        raise
+
+    # The authority has committed both the close and exact successor open in
+    # one append/CAS revision. Retire old local pointers only after that commit.
+    host.session = successor_session
     host._clear_active()
-    postclose_session_digest = host.session.to_dict()["session_digest"]
 
-    close_event = ledger.close_epoch(
-        epoch_id,
-        current_route,
-        reason_code=reason_code,
-        reason=reason,
-        pair_checkpoint=preclose_checkpoint,
-        preclose_session_digest=preclose_session_digest,
-        postclose_session_digest=postclose_session_digest,
-        uncertainty=uncertainty,
-        successor_epoch_id=successor_epoch_id,
-        successor_route=successor_route,
-    )
-
-    # Fresh route names are mandatory. The shared transport may retain the old
-    # epoch's queues; they remain inspectable in the close event and cannot be
-    # consumed by the successor channels.
     successor_host = ProofActionReliableHost(
-        host.session,
+        successor_session,
         host.proof_ground,
         host.transport,
         host_id=successor_host_id,
@@ -1181,21 +1210,20 @@ def handoff_proof_action_route_epoch(
         result_channel=successor_result_channel,
         policy=host.policy,
     )
-    successor_owner_id = f"owner-{uuid.uuid4().hex}"
-    opened_event = ledger.open_epoch(
+    _attach_route_guard(
+        successor_host,
+        successor_worker,
+        ledger,
         successor_epoch_id,
-        _route_document(successor_host, successor_worker),
-        owner_id=successor_owner_id,
-        predecessor_close_digest=close_event["event_digest"],
+        successor_owner_id,
+        1,
     )
-    _attach_route_guard(successor_host, successor_worker, ledger, successor_epoch_id, successor_owner_id, 1)
     return ProofActionRouteHandoff(
         closed_epoch=close_event,
         opened_epoch=opened_event,
         host=successor_host,
         worker=successor_worker,
     )
-
 
 __all__ = [
     "LEDGER_FORMAT",
