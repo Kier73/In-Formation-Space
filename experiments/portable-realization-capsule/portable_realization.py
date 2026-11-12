@@ -126,8 +126,9 @@ def _validate_core(core: Mapping[str, Any], payload: bytes) -> None:
         raise PortableRealizationError("interface domain width does not match input names")
 
     codec = _require_mapping(core["codec"], "codec")
-    _require_text(codec.get("name"), "codec.name")
+    codec_name = _require_text(codec.get("name"), "codec.name")
     _require_text(codec.get("schema"), "codec.schema")
+    codec_payload_digest = _require_digest(codec.get("payload_sha256"), "codec.payload_sha256")
 
     receipt = _require_mapping(core["verification"], "verification")
     if receipt.get("status") != "verified-within-complete-finite-domain":
@@ -139,7 +140,18 @@ def _validate_core(core: Mapping[str, Any], payload: bytes) -> None:
     _require_digest(receipt.get("reference_outputs_sha256"), "verification.reference_outputs_sha256")
     _require_digest(receipt.get("case_evidence_sha256"), "verification.case_evidence_sha256")
     _require_digest(receipt.get("translation_contracts_sha256"), "verification.translation_contracts_sha256")
+    _require_digest(receipt.get("typed_program_digest"), "verification.typed_program_digest")
+    _require_digest(receipt.get("transition_table_digest"), "verification.transition_table_digest")
+    _require_text(receipt.get("workload_id"), "verification.workload_id")
+    _require_text(receipt.get("compiler_route"), "verification.compiler_route")
+    _require_text(receipt.get("codec"), "verification.codec")
     _require_digest(receipt.get("receipt_sha256"), "verification.receipt_sha256")
+    if source.get("program_digest") != receipt["typed_program_digest"]:
+        raise PortableRealizationError("source program digest contradicts verification receipt")
+    if realization.get("compiler_route") != receipt["compiler_route"]:
+        raise PortableRealizationError("compiler route contradicts verification receipt")
+    if codec_name != receipt["codec"] or realization.get("encoding") != codec_name:
+        raise PortableRealizationError("codec identity contradicts realization/verification receipt")
     receipt_unsigned = {key: value for key, value in receipt.items() if key != "receipt_sha256"}
     if receipt["receipt_sha256"] != _sha256(_canonical(receipt_unsigned)):
         raise PortableRealizationError("verification receipt digest mismatch")
@@ -147,12 +159,19 @@ def _validate_core(core: Mapping[str, Any], payload: bytes) -> None:
     toolchain = _require_mapping(core["toolchain"], "toolchain")
     for key in ("ecpu_revision", "vgi_revision", "ifs_revision"):
         _require_text(toolchain.get(key), f"toolchain.{key}")
+    if source["revision"] != toolchain["ifs_revision"]:
+        raise PortableRealizationError("source revision contradicts IFS toolchain pin")
+    if realization["revision"] != toolchain["ecpu_revision"]:
+        raise PortableRealizationError("realization revision contradicts E-CPU toolchain pin")
 
     payload_descriptor = _require_mapping(core["payload"], "payload")
     if payload_descriptor.get("byte_length") != len(payload):
         raise PortableRealizationError("payload byte length mismatch")
-    if payload_descriptor.get("sha256") != _sha256(payload):
+    payload_digest = _require_digest(payload_descriptor.get("sha256"), "payload.sha256")
+    if payload_digest != _sha256(payload):
         raise PortableRealizationError("payload SHA-256 mismatch")
+    if codec_payload_digest != payload_digest:
+        raise PortableRealizationError("codec payload digest contradicts payload descriptor")
 
 
 def encode_capsule(
