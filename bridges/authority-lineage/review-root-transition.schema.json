@@ -83,31 +83,5 @@
       "pattern": "^[0-9a-f]{64}$"
     }
   },
-  "allOf": [
-    {
-      "properties": {
-        "next_generation": {
-          "type": "integer"
-        }
-      },
-      "if": {
-        "properties": {
-          "previous_generation": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "previous_generation"
-        ]
-      },
-      "then": {
-        "properties": {
-          "next_generation": {
-            "type": "integer"
-          }
-        }
-      }
-    }
-  ],
   "additionalProperties": false
 }
