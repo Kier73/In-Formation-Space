@@ -157,4 +157,4 @@ RCN-001 showed that liveness-compacted models can contain far fewer nonzero para
 4. Would sparse activation vectors, packed Boolean operations, or bitset layers improve the result beyond sparse weights alone?
 5. How do these costs change when the model is hosted through E-CPU's execution/fabric path, where communication, admission, and provenance costs remain separate?
 
-The initial finite-domain comparison is [SRE-001](../experiments/sparse-transition-execution/README.md). It explicitly separates structural operation counts, serialized size, conversion cost, and measured Python inference time.
+The initial finite-domain comparison is [SRE-001](../experiments/sparse-transition-execution/README.md). It explicitly separates structural operation counts, serialized size, conversion cost, and measured Python inference time. Its [first corrected evidence record](../experiments/sparse-transition-execution/results/ci-run-43302944580.md) shows why sparse parameter count, JSON payload size, and runtime must remain distinct: the minterm sparse JSON was larger even though the sparse operation path used fewer multiply slots.
