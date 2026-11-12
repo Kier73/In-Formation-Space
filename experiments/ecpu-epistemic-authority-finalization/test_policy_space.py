@@ -1,5 +1,8 @@
+import hashlib
+import json
 import unittest
 
+from run_policy_space import build_report, digest, validate_report
 from policy_space import (
     POLICY_NAMES,
     SOURCE_STATES,
@@ -94,6 +97,20 @@ class PolicySpaceTests(unittest.TestCase):
         tampered[0]["missing_count"] = 99
         with self.assertRaisesRegex(ValueError, "reconstruction"):
             validate_policy_space(tampered, summary)
+
+    def test_policy_space_report_digest_and_reconstruction(self):
+        report = build_report()
+        validate_report(report)
+        self.assertEqual(report["pattern_model"]["pattern_count"], 81)
+        self.assertIsNone(report["pattern_model"]["probability_assignment"])
+        core = {
+            key: value for key, value in report.items()
+            if key != "report_digest"
+        }
+        self.assertEqual(report["report_digest"], digest(core))
+        altered = dict(report, policy_names=list(reversed(report["policy_names"])))
+        with self.assertRaisesRegex(ValueError, "digest"):
+            validate_report(altered)
 
 
 if __name__ == "__main__":
