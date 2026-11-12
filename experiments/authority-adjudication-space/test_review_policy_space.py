@@ -68,13 +68,23 @@ class ReviewPolicySpaceTests(unittest.TestCase):
         )
 
     def test_veto_and_split_thresholds_are_explicit(self):
+        # Independent reviewers split one-to-one: neither independent rule
+        # reaches its two-vote approval threshold; the veto rule is inconclusive
+        # because its one-vote rejection threshold is met and approval is not.
         approve_and_reject = ("ABSENT", "APPROVE", "REJECT")
         veto = evaluate_review_policy("independent_two_of_two_veto", approve_and_reject)
         consensus = evaluate_review_policy("independent_two_of_two", approve_and_reject)
-        self.assertEqual(veto["outcome"], "INCONCLUSIVE")
-        self.assertTrue(veto["conflicting_thresholds"])
+        self.assertEqual(veto["outcome"], "REJECTED")
+        self.assertFalse(veto["conflicting_thresholds"])
         self.assertEqual(consensus["outcome"], "INCONCLUSIVE")
         self.assertFalse(consensus["conflicting_thresholds"])
+
+        # Both thresholds are met only when the proposer is eligible and
+        # two approvals coexist with one rejection.
+        both_thresholds = ("APPROVE", "APPROVE", "REJECT")
+        conflicted = evaluate_review_policy("two_approval_veto", both_thresholds)
+        self.assertEqual(conflicted["outcome"], "INCONCLUSIVE")
+        self.assertTrue(conflicted["conflicting_thresholds"])
 
         reject_and_abstain = ("ABSENT", "REJECT", "ABSTAIN")
         self.assertEqual(
