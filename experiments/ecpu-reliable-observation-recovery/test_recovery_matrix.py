@@ -1,10 +1,13 @@
+import itertools
 import unittest
 
+from operation_spans import OperationSpanRecorder
 from run_recovery_matrix import (
     DROP_FIRST_ACK,
     DROP_FIRST_DATA_FRAME,
     QUORUM_WIDTHS,
     SOURCE_COUNTS,
+    build_cost_profile_matrix,
     fault_drop_indices,
     matrix_conditions,
     validate_attempt_result,
@@ -162,6 +165,44 @@ class RecoveryMatrixTests(unittest.TestCase):
         invalid = dict(record, checkpoint_call_count=record["checkpoint_call_count"] - 1)
         with self.assertRaisesRegex(ValueError, "checkpoint count"):
             validate_attempt_result(invalid)
+
+    def test_cost_profiles_keep_initial_and_recovery_phases_separate(self):
+        condition = matrix_conditions()[0]
+        ticks = itertools.count(100)
+        recorder = OperationSpanRecorder(
+            clock_actor_id="recovery-matrix-test",
+            clock_segment_id="recovery-matrix-test-segment",
+            clock_ns=lambda: next(ticks),
+        )
+        for replicate in range(3):
+            for phase in ("initial_intake", "duplicate_cleanup"):
+                attempt_id = f"attempt-{replicate}"
+                recorder.measure(
+                    attempt_id=attempt_id,
+                    span_id=f"{phase}-{replicate}",
+                    operation_id="ecpu.GatedObservationCoordinator.ingest_available",
+                    operation=lambda: None,
+                    context={
+                        **condition,
+                        "experiment_id": "ecpu-reliable-observation-recovery-v1",
+                        "workload_id": attempt_id,
+                        "observation_id": f"{attempt_id}:observation",
+                        "logical_time": 1,
+                        "phase": phase,
+                    },
+                )
+        spans = list(recorder.spans)
+        profiles = build_cost_profile_matrix(
+            [condition], spans, minimum_samples=3
+        )
+        phases = {entry["phase"]: entry for entry in profiles["phase_profiles"]}
+        self.assertEqual(set(phases), {"initial_intake", "duplicate_cleanup"})
+        for entry in phases.values():
+            self.assertEqual(entry["span_count"], 3)
+            self.assertEqual(
+                entry["profile"]["profiles"][0]["measured_sample_count"], 3
+            )
+
 
 
 if __name__ == "__main__":
