@@ -1,7 +1,7 @@
 # Realization Cost and Navigation
 
 **Experiment:** RCN-001 · Compiler-cost landscape across finite Boolean workloads  
-**Status:** verified within the 16 declared complete finite Boolean domains. See the [pinned CI evidence and cost observations](results/ci-run-43299824228.md).
+**Status:** verified within the 16 declared complete finite Boolean domains. See the [pinned CI evidence and cost observations](results/ci-run-43300255809.md).
 
 This experiment follows WSP-002. Rather than adding another isolated function, it asks how three existing E-CPU compiler routes behave across a family of structurally different Boolean computations, and whether an explicit objective can navigate their trade-offs without inventing a universal score.
 
@@ -74,6 +74,6 @@ A successful run verifies only the selected finite Boolean workloads and their d
 WSP-002 demonstrated multiple exact realizations of one feedback law and constructive ReLU symmetries. RCN-001 varies the law itself and measures the structural costs of the available compiler paths. The next research question is not just whether a description can be realized, but which verified realization is admissible under a stated set of resources and intentions.
 
 
-## First pinned CI result
+## Integrated-branch CI result
 
-The [successful RCN-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43299824228) exhaustively checked 1,364 input rows across all 16 workloads and completed 4,092 neural/reference semantic translation comparisons. The retained [run record](results/ci-run-43299824228.md) gives the exact IFS, E-CPU, and VGI revisions; structural cost totals; Pareto route selections; per-row MailCPU path bound; result digest; and verification limits.
+The [successful RCN-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43300255809) exhaustively checked 1,364 input rows across all 16 workloads and completed 4,092 neural/reference semantic translation comparisons. The retained [run record](results/ci-run-43300255809.md) gives the exact IFS, E-CPU, and VGI revisions; structural cost totals; Pareto route selections; per-row MailCPU path bound; result digest; and verification limits.
