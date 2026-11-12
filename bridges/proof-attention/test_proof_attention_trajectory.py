@@ -160,6 +160,25 @@ class ProofAttentionTrajectoryTests(unittest.TestCase):
         self.assertEqual(restored.to_dict(), session.to_dict())
         self.assertEqual(restored.status, "exhausted")
 
+    def test_ready_session_with_unattempted_candidates_roundtrips_without_frames(self):
+        session, payload, _ = make_session()
+        self.assertEqual(session.status, "ready")
+        proof_ground = ground(payload)
+
+        with tempfile.TemporaryDirectory() as directory:
+            data, index, manifest_path = paths(Path(directory), "ready")
+            manifest = export_proof_attention_trajectory(
+                session, proof_ground, data, index, manifest_path
+            )
+            restored = restore_proof_attention_trajectory(
+                manifest_path, data, index, proof_ground
+            )
+            next_attempt = restored.begin_next()
+
+        self.assertEqual(manifest["trajectory"]["event_count"], 0)
+        self.assertEqual(restored.status, "active")
+        self.assertEqual(next_attempt.action["tactic"], "induction")
+
     def test_binary_frame_tampering_is_rejected(self):
         session, payload, _ = make_session()
         attempt = session.begin_next()
