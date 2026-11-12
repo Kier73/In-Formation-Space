@@ -334,7 +334,7 @@ def map_source_interval(
 ) -> dict[str, Any]:
     """Return the target-coordinate envelope across every feasible affine mapping."""
     calibration = validate_calibration(calibration)
-    source = _integer(source_coordinate, "source_coordinate")
+    source = _integer(source_coordinate, "source_coordinate", minimum=-(2**63))
     if not (
         calibration["validity_source_min"]
         <= source
