@@ -1,4 +1,7 @@
+import hashlib
+import json
 import unittest
+from pathlib import Path
 
 from run_authority_matrix import (
     EXPECTED,
@@ -103,6 +106,40 @@ class AuthorityMatrixTests(unittest.TestCase):
             validate_condition({"strict": 1, "scenario": "partial_unanimous", "quorum": 2})
         with self.assertRaisesRegex(ValueError, "scenario"):
             validate_condition({"strict": True, "scenario": "unknown", "quorum": 2})
+
+    def test_first_live_ci_summary_digest_and_outcome_counts(self):
+        summary_path = (
+            Path(__file__).with_name("results") / "ci-run-310-summary.json"
+        )
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        core = {
+            key: value for key, value in summary.items()
+            if key != "summary_digest"
+        }
+        calculated = hashlib.sha256(
+            json.dumps(
+                core, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        self.assertEqual(summary["summary_digest"], calculated)
+        self.assertEqual(summary["workflow"]["run_number"], 310)
+        self.assertEqual(summary["matrix"]["condition_count"], 10)
+        self.assertEqual(summary["matrix"]["attempt_count"], 30)
+        self.assertEqual(summary["invariants"]["evidence_record_count"], 90)
+        self.assertEqual(
+            summary["invariants"]["final_status_counts"],
+            {"AUTHORIZED": 15, "CONFLICT": 6, "REFUSED": 9},
+        )
+        self.assertEqual(
+            summary["invariants"]["tied_split_miss_representative_count"], 3
+        )
+        self.assertEqual(
+            summary["invariants"]["checkpoint_restore_success_count"], 30
+        )
+        self.assertEqual(
+            summary["invariants"]["direct_late_policy_rejection_count"], 30
+        )
 
 
 if __name__ == "__main__":
