@@ -306,6 +306,40 @@ class PartialProbeExecutionTests(unittest.TestCase):
         self.assertEqual(ledger.events[-1].event_type, "hypothesis_proposed")
         self.assertEqual(system.status("b", "Y"), "unknown")
 
+    def test_hypothesis_handoff_rejects_a_return_bound_to_another_plan(self):
+        system = make_ground()
+        attempt = make_attempt(system)
+        attempt.mark_dispatched("probe-sender", "dispatch-receipt")
+        attempt.mark_admitted("probe-receiver", "admission-receipt")
+        attempt.path.append(
+            "returned",
+            "probe-receiver",
+            evidence_ref="encounter://cross-attempt",
+            details={
+                "encounter_id": "encounter-cross-attempt",
+                "payload_digest": "c" * 64,
+                "canonicalization": "canonical-json-v1",
+                "plan_digest": "another-plan",
+                "scenario_digest": attempt.scenario_digest,
+            },
+        )
+        authorize(attempt)
+        attempt.interpret(
+            TransitionOutcome("b", (2,)),
+            actor="vgi-interpreter",
+            interpretation_ref="interpretation://cross-attempt",
+        )
+        ledger = HypothesisRevisionLedger((
+            HypothesisDefinition("H1", "The prior model's existing explanation."),
+        ))
+        with self.assertRaisesRegex(PartialProbeExecutionError, "not bound to this probe plan"):
+            attempt.propose_hypothesis_revision(
+                ledger,
+                "H2",
+                "A mismatching return from a different plan.",
+            )
+        self.assertEqual(len(ledger.candidates), 0)
+
     def test_matched_probe_cannot_create_a_hypothesis_revision(self):
         system = make_ground()
         attempt = make_attempt(system)

@@ -529,6 +529,32 @@ class PartialProbeExecution:
         returned = _event(self.path, "returned")
         interpreted = _event(self.path, "interpreted")
         returned_details = returned.details
+        interpreted_details = interpreted.details
+        for label, details in (
+            ("returned", returned_details),
+            ("interpreted", interpreted_details),
+            ("unresolved", unresolved.details),
+        ):
+            if details.get("plan_digest") != self.plan_digest:
+                raise PartialProbeExecutionError(
+                    f"{label} event is not bound to this probe plan"
+                )
+            if details.get("scenario_digest") != self.scenario_digest:
+                raise PartialProbeExecutionError(
+                    f"{label} event is not bound to this scenario set"
+                )
+        if interpreted_details.get("scenario_match") is not False:
+            raise PartialProbeExecutionError(
+                "interpreted event must explicitly record a scenario mismatch"
+            )
+        if interpreted_details.get("outcome_digest") != self._interpretation["outcome_digest"]:
+            raise PartialProbeExecutionError(
+                "interpreted event outcome digest does not match the recorded mismatch"
+            )
+        if unresolved.details.get("outcome_digest") != self._interpretation["outcome_digest"]:
+            raise PartialProbeExecutionError(
+                "unresolved event outcome digest does not match the recorded mismatch"
+            )
         encounter_ref = _nonempty(returned.evidence_ref, "returned.evidence_ref")
         encounter_id = _nonempty(
             returned_details.get("encounter_id"), "returned.encounter_id"
