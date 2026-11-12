@@ -182,7 +182,9 @@ class SignedReviewReceiptTests(unittest.TestCase):
     def test_trust_store_principal_assignment_is_bound_to_vote(self):
         _, trust_store, envelopes, _, _ = signed_fixture()
         altered = copy.deepcopy(trust_store)
-        altered["keys"][0]["principal"] = "agent://different-agent"
+        signer_keyid = envelopes[0]["signatures"][0]["keyid"]
+        target = next(item for item in altered["keys"] if item["keyid"] == signer_keyid)
+        target["principal"] = "agent://different-agent"
         with self.assertRaises(SignedReviewError):
             verify_signed_review_vote(envelopes[0], altered)
 
