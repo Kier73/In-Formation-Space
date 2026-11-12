@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://in-formation-space.invalid/schemas/authority-adjudication-review-space-summary-0.1.json",
+  "title": "Authority adjudication reviewer policy-space summary",
+  "type": "object",
+  "required": [
+    "format",
+    "schema",
+    "experiment_id",
+    "pattern_count",
+    "policy_count",
+    "policy_summary",
+    "report_digest",
+    "interpretation_limits",
+    "summary_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.authority-adjudication-review-space-summary"
+    },
+    "schema": {
+      "const": "in-formation.authority-adjudication-review-space/0.1/summary"
+    },
+    "experiment_id": {
+      "const": "authority-adjudication-review-space-v1"
+    },
+    "pattern_count": {
+      "const": 64
+    },
+    "policy_count": {
+      "const": 7
+    },
+    "policy_summary": {
+      "type": "object",
+      "minProperties": 7
+    },
+    "report_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "summary_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}
