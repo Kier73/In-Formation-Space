@@ -26,6 +26,7 @@ from proof_action_protocol import (
     ProofActionProtocolError,
     build_proof_action_request,
     import_proof_action_result,
+    validate_proof_action_request,
 )
 
 
@@ -119,7 +120,13 @@ class ProofActionReliableWorker:
             raise ProofActionReliableChannelError(
                 "proof-action request frame must contain a JSON object"
             )
-        return ReceivedProofActionRequest(sequence, dict(payload))
+        try:
+            validated = validate_proof_action_request(payload)
+        except ProofActionProtocolError as exc:
+            raise ProofActionReliableChannelError(
+                f"received proof-action request is invalid: {exc}"
+            ) from exc
+        return ReceivedProofActionRequest(sequence, validated)
 
     def send_result(self, result_document: Mapping[str, Any]) -> int:
         """Send one portable result envelope over the reliable response channel."""
