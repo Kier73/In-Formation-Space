@@ -872,7 +872,7 @@ def run_experiment() -> dict[str, Any]:
     all_cases.extend(live_target_cases)
 
     return {
-        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v7",
+        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v8",
         "status": "verified-within-complete-finite-domain",
         "typed_transition_program": source_specification.to_dict(),
         "typed_transition_program_digest": source_specification.digest,
