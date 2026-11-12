@@ -511,9 +511,17 @@ class ProofActionRouteEpochLedger:
             raise ProofActionRouteEpochError("a route epoch is already active")
         closed_entries = [entry for entry in self._entries if entry["event_type"] == "closed"]
         if closed_entries:
-            expected_predecessor = closed_entries[-1]["event_digest"]
+            previous_close = closed_entries[-1]
+            expected_predecessor = previous_close["event_digest"]
             if predecessor_close_digest != expected_predecessor:
                 raise ProofActionRouteEpochError("successor must reference the latest route-close event")
+            if (
+                epoch_id != previous_close["details"]["successor_epoch_id"]
+                or checked_route != previous_close["details"]["successor_route"]
+            ):
+                raise ProofActionRouteEpochError(
+                    "opened route does not match the successor authorized by the close event"
+                )
         elif predecessor_close_digest is not None:
             raise ProofActionRouteEpochError("initial route cannot name a predecessor close event")
         epoch_number = len(self._all_routes()) + 1
@@ -584,6 +592,11 @@ class ProofActionRouteEpochLedger:
             preclose_session_digest=preclose_session_digest,
         )
         uncertainty_copy = _validate_uncertainty_projection(uncertainty)
+        expected_uncertainty = _uncertainty_projection(checkpoint)
+        if uncertainty_copy != expected_uncertainty:
+            raise ProofActionRouteEpochError(
+                "uncertainty projection does not describe the preserved pair checkpoint"
+            )
         details = {
             "owner_generation": active["owner_generation"],
             "owner_id": active["owner_id"],
@@ -707,6 +720,16 @@ class ProofActionRouteEpochLedger:
                 predecessor = details.get("predecessor_close_digest")
                 if predecessor != last_close_digest:
                     raise ProofActionRouteEpochError("route successor predecessor reference is invalid")
+                if last_close_digest is not None:
+                    previous_close = restored._entries[-1]
+                    if (
+                        previous_close["event_type"] != "closed"
+                        or event["epoch_id"] != previous_close["details"]["successor_epoch_id"]
+                        or route != previous_close["details"]["successor_route"]
+                    ):
+                        raise ProofActionRouteEpochError(
+                            "route open does not match its close-authorized successor"
+                        )
                 if type(details.get("owner_generation")) is not int or details["owner_generation"] != 1:
                     raise ProofActionRouteEpochError("new epoch must begin at owner generation one")
                 owner = _text(details.get("owner_id"), "opened.owner_id")
@@ -758,6 +781,10 @@ class ProofActionRouteEpochLedger:
                 if _digest(checkpoint) != checkpoint_digest:
                     raise ProofActionRouteEpochError("closed route checkpoint digest mismatch")
                 uncertainty = _validate_uncertainty_projection(details.get("uncertainty"))
+                if uncertainty != _uncertainty_projection(checkpoint):
+                    raise ProofActionRouteEpochError(
+                        "closed route uncertainty does not match its preserved pair checkpoint"
+                    )
                 successor = _validate_route(details.get("successor_route"))
                 if _route_key(successor) == _route_key(route) or _route_key(successor) in used_route_keys:
                     raise ProofActionRouteEpochError("closed route successor identity was already used")
