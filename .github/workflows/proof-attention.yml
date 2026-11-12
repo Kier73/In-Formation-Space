@@ -32,6 +32,13 @@ jobs:
           ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
           path: external/Virtual-Ground-Interpreter
 
+      - name: Check out E-CPU trajectory and journal implementation at pinned revision
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -39,7 +46,7 @@ jobs:
 
       - name: Run proof-attention bridge tests
         env:
-          PYTHONPATH: bridges/proof-attention:bridges/observation-path:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+          PYTHONPATH: bridges/proof-attention:bridges/observation-path:external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
         run: >-
           python -m unittest discover
           -s bridges/proof-attention
