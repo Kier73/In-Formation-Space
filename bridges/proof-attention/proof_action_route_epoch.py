@@ -503,12 +503,12 @@ class ProofActionRouteEpochLedger:
         self.refresh()
         epoch_id = _text(epoch_id, "epoch_id")
         checked_route = _validate_route(route)
-        if self.active_epoch is not None:
-            raise ProofActionRouteEpochError("a route epoch is already active")
         if any(entry["epoch_id"] == epoch_id for entry in self._entries):
             raise ProofActionRouteEpochError("route epoch IDs cannot be reused")
         if any(_route_key(old) == _route_key(checked_route) for old in self._all_routes()):
             raise ProofActionRouteEpochError("route identity tuple was already used by an earlier epoch")
+        if self.active_epoch is not None:
+            raise ProofActionRouteEpochError("a route epoch is already active")
         closed_entries = [entry for entry in self._entries if entry["event_type"] == "closed"]
         if closed_entries:
             expected_predecessor = closed_entries[-1]["event_digest"]
