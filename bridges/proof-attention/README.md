@@ -288,3 +288,74 @@ The request digest binds the portable action description; the result digest bind
 The VGI adapter parses normalized Lean trace JSON; it does not execute Lean. A supplied \`VerifiedKernelReceipt\` is checked for consistency and environment binding by VGI, but a production host must authenticate the upstream checker receipt and proof-term fingerprint. Neither a tactic candidate, an elaborated hyper-transition, an empty subgoal bundle, nor a result digest is kernel acceptance.
 
 The protocol therefore supplies a portable interchange contract, not an autonomous proof worker. A host still chooses the process, launches the proof assistant, records actual dispatch/admission/return receipts, and provides authenticated kernel results.
+
+
+## E-CPU reliable-channel host/worker adapter
+
+The [ReliableChannel adapter](proof_action_reliable_channel.py) connects the portable request/result protocol to E-CPU's existing sequenced at-least-once channel. It does not implement a second transport or retry system.
+
+A host-side session and worker endpoint can share an E-CPU \`Transport\` implementation:
+
+\`\`\`python
+from mailcpu.reliability import ReliabilityPolicy
+from mailcpu.transport import InMemoryTransport
+from proof_action_reliable_channel import (
+    ProofActionReliableHost,
+    ProofActionReliableWorker,
+)
+
+transport = InMemoryTransport()  # Replace with a Transport backed by the host's substrate.
+policy = ReliabilityPolicy(lease_ticks=3, max_attempts=4, window_size=8)
+
+host = ProofActionReliableHost(
+    session,
+    proof_ground,
+    transport,
+    host_id="proof-host",
+    worker_id="proof-worker",
+    policy=policy,
+)
+worker = ProofActionReliableWorker(
+    transport,
+    host_id="proof-host",
+    worker_id="proof-worker",
+    policy=policy,
+)
+
+dispatch = host.dispatch_next()
+request = worker.receive_request()
+admitted = host.observe_request_admission()
+# The worker's external tactic runner consumes request.request, then packages
+# a result with make_proof_action_result(...).
+# The worker sends it with worker.send_result(result_document).
+imported = host.receive_result()
+worker.process_result_acknowledgements()
+\`\`\`
+
+### Delivery and proof semantics
+
+- The host marks \`dispatched\` only after E-CPU admits the frame to the reliable sender.
+- The worker validates the request digest and format in ReliableChannel's receive-side commit callback. Invalid request payloads are not consumed or acknowledged.
+- The host records \`admitted\` only after the request sequence's E-CPU acknowledgement returns. That ACK means the worker's receive endpoint validated and consumed the request; it is not proof that a tactic ran or succeeded.
+- A dropped request or ACK is retried using the original reliable sequence. A duplicate request is consumed and acknowledged by E-CPU but is not delivered to the worker a second time.
+- If request retries exhaust before an ACK arrives, the attempt closes as \`delivery_unconfirmed\`. This means delivery/admission was not confirmed; it is not an execution rejection, timeout observation, or theorem result.
+- A worker result uses the response ReliableChannel. The host records the raw returned payload after the response frame is consumed and ACKed, then checks the result envelope against the active attempt, request digest and recorded return evidence before importing the VGI trace.
+- A response duplicate is acknowledged without a second proof interpretation. A malformed or mismatched result remains a recorded raw return followed by \`interpretation_failed\`.
+- The worker's response sender can clear its pending sequence only after it receives the host's response ACK. A transport ACK is never promoted to a kernel receipt.
+
+The adapter's \`Transport\` is injected. The in-memory and fault-injecting E-CPU transports make the lifecycle reproducible in tests; an external host must supply a transport implementation that routes the mailboxes between its processes. This merge does not claim that a remote network backend, Lean tactic runner, or physical worker has been deployed.
+
+### Failure separation
+
+| Event | Session outcome | Meaning |
+|---|---|---|
+| Request retry limit reached before worker ACK | \`delivery_unconfirmed\` | No confirmed worker admission |
+| Worker admits request but returns nothing by host deadline | \`no_result\` | Execution result unavailable |
+| Raw response arrives but envelope/trace cannot be imported | \`interpretation_failed\` | Return exists; semantic interpretation failed |
+| Normalized trace records tactic timeout | Interpreted result \`timeout\` | A tactic timeout was actually observed |
+| Normalized trace records tactic rejection | Interpreted result \`rejected\` | That tactic attempt was rejected; proposition not proven impossible |
+| VGI trace carries a matched verified kernel receipt for every active root | Session \`complete\` after replanning | The supplied external kernel receipts satisfy the declared root intentions |
+
+The transport adapter therefore preserves the distinction between delivery, admission, raw return, interpretation and kernel acceptance. It uses E-CPU's reliability semantics unchanged; it does not infer theorem truth from message delivery.
+
+The pinned proof-attention workflow already checks out E-CPU and VGI and discovers the reliable-channel tests along with the planner, protocol, execution and trajectory suites.
