@@ -111,3 +111,11 @@ Focused tests:
 The experiment targets a complete finite Boolean domain, not continuous state or arbitrary algorithms. The truth-table compiler scales exponentially with input width because it allocates one minterm unit per input row. The model's behavior outside the declared Boolean input domain is not part of the proof. No generalization, stochastic robustness, quantization tolerance, training, or hardware performance is claimed.
 
 The next useful difficulty increase is to remove the explicit complete truth table from the compiler input and derive the state rows from a typed transition program or a compositional decision graph, while retaining exact independent execution and provenance.
+
+## V3: direct compositional neural compiler
+
+The next compiler path now starts from the typed Boolean expression DAG and generates ReLU features directly, without first creating one hidden unit for every possible input row. It supports the same source nodes (input, constant, NOT, AND, XOR, SELECT), structurally shares repeated AST nodes, and self-verifies its generated model over the complete small Boolean domain.
+
+The integration runner now compares four neural realizations: two truth-table minterm networks, the direct compositional network for the source program, and a directly compiled network for the edited one-row override. This gives 96 cross-representation cases. See [the v3 result and parameter comparison](results/ci-run-43157537916.md), [the retained summary JSON](results/ci-run-43157537916-summary.json), and [the successful workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43157537916).
+
+One important measured limitation: the compositional source network uses 54 active parameters in 335 dense slots, better than the table models' 84/100 active parameters, but the edited override expression expands the DAG and costs 130 active parameters in 1,678 dense slots. The current compiler preserves feature paths through dense identity layers; compositional compilation therefore is not automatically compression. This points to the next optimization: feature liveness and sparse/compact layer construction, especially for row-selector subexpressions.
