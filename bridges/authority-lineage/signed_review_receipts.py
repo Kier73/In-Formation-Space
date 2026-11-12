@@ -549,3 +549,200 @@ def validate_signed_review_bundle(
         rebuilt["bundle_digest"] = digest(rebuilt_core)
     if rebuilt != dict(bundle):
         raise SignedReviewError("signed review bundle differs from verified reconstruction")
+
+
+def _proposal_certificate_entry(
+    ledger: Mapping[str, Any],
+    proposal_id: str,
+) -> dict[str, Any]:
+    entries = [
+        entry for entry in _entries_of_type(ledger, "proposal_review_certified")
+        if entry["payload"]["proposal_id"] == proposal_id
+    ]
+    if len(entries) != 1:
+        raise SignedReviewError("proposal must have exactly one recorded review certificate")
+    return entries[0]
+
+
+def _proposal_signed_entries(
+    ledger: Mapping[str, Any],
+    proposal_id: str,
+) -> list[dict[str, Any]]:
+    return [
+        entry for entry in _entries_of_type(ledger, "proposal_review_signed")
+        if entry["payload"]["proposal_id"] == proposal_id
+    ]
+
+
+def record_signed_review_bundle(
+    ledger: Mapping[str, Any],
+    proposal_id: str,
+    bundle: Mapping[str, Any],
+    trust_store: Mapping[str, Any],
+    *,
+    recorded_by: str,
+    review_artifacts: Mapping[str, bytes | str] | None = None,
+) -> dict[str, Any]:
+    """Append a complete signed-review bundle and its public trust-store snapshot."""
+    validate_ledger(ledger)
+    proposal_id = _lineage_nonempty(proposal_id, "proposal_id")
+    proposal_entries = [
+        entry for entry in _entries_of_type(ledger, "revision_proposed")
+        if entry["payload"]["proposal_id"] == proposal_id
+    ]
+    if len(proposal_entries) != 1:
+        raise SignedReviewError("proposal must exist exactly once")
+    certificate_entry = _proposal_certificate_entry(ledger, proposal_id)
+    proposal = proposal_entries[0]["payload"]
+    if any(
+        entry["payload"]["proposal_id"] == proposal_id
+        for entry in _entries_of_type(ledger, "proposal_resolved")
+    ):
+        raise SignedReviewError("cannot record signed receipts after proposal resolution")
+    if _proposal_signed_entries(ledger, proposal_id):
+        raise SignedReviewError("proposal already has an immutable signed review bundle")
+    frontier = current_frontier(ledger, proposal["event_key"])["decision_ids"]
+    if frontier != proposal["base_decision_ids"]:
+        raise SignedReviewError("cannot record signed receipts against a stale proposal frontier")
+
+    certificate = certificate_entry["payload"]["certificate"]
+    validate_signed_review_bundle(
+        certificate,
+        bundle,
+        trust_store,
+        review_artifacts=review_artifacts,
+    )
+    if bundle["certificate_digest"] != certificate_entry["payload"]["certificate_digest"]:
+        raise SignedReviewError("signed bundle certificate digest differs from ledger certificate")
+    trust_digest = digest(trust_store)
+    if bundle["trust_store_digest"] != trust_digest:
+        raise SignedReviewError("signed bundle trust-store digest differs from supplied trust store")
+
+    payload = {
+        "proposal_id": proposal_id,
+        "event_key": copy.deepcopy(proposal["event_key"]),
+        "certificate_digest": certificate_entry["payload"]["certificate_digest"],
+        "bundle_digest": bundle["bundle_digest"],
+        "trust_store_digest": trust_digest,
+        "bundle": copy.deepcopy(dict(bundle)),
+        "trust_store": copy.deepcopy(dict(trust_store)),
+    }
+    updated = _append_entry(
+        ledger,
+        "proposal_review_signed",
+        _lineage_nonempty(recorded_by, "recorded_by"),
+        payload,
+    )
+    validate_signed_review_bundles_in_ledger(
+        updated,
+        trusted_store_digests={proposal_id: trust_digest},
+        review_artifacts_by_proposal=(
+            {proposal_id: review_artifacts} if review_artifacts is not None else None
+        ),
+        validate_core=False,
+    )
+    return updated
+
+
+def validate_signed_review_bundles_in_ledger(
+    ledger: Mapping[str, Any],
+    *,
+    trusted_store_digests: Mapping[str, str] | None = None,
+    review_artifacts_by_proposal: Mapping[str, Mapping[str, bytes | str]] | None = None,
+    validate_core: bool = True,
+) -> None:
+    """Reverify every ledger-anchored bundle against its embedded public-key snapshot.
+
+    Supplying trusted_store_digests pins one or more proposal trust stores to an
+    out-of-band digest. Without that parameter, this function verifies
+    possession of the embedded public keys but does not authenticate who
+    provisioned those keys.
+    """
+    if validate_core:
+        validate_ledger(
+            ledger,
+            validate_embedded_certificates=False,
+            validate_embedded_signatures=False,
+        )
+    if trusted_store_digests is not None and not isinstance(trusted_store_digests, Mapping):
+        raise TypeError("trusted_store_digests must map proposal IDs to pinned digests")
+    for entry in _entries_of_type(ledger, "proposal_review_signed"):
+        payload = entry["payload"]
+        proposal_id = _lineage_nonempty(payload.get("proposal_id"), "proposal_id")
+        certificate_entry = _proposal_certificate_entry(ledger, proposal_id)
+        certificate = certificate_entry["payload"]["certificate"]
+        if payload["certificate_digest"] != certificate_entry["payload"]["certificate_digest"]:
+            raise SignedReviewError("signed ledger event certificate digest mismatch")
+        trust_store = payload["trust_store"]
+        actual_trust_digest = digest(trust_store)
+        if payload["trust_store_digest"] != actual_trust_digest:
+            raise SignedReviewError("signed ledger event trust-store digest mismatch")
+        if trusted_store_digests is not None:
+            expected_trust_digest = trusted_store_digests.get(proposal_id)
+            if expected_trust_digest is None:
+                raise SignedReviewError(
+                    f"no out-of-band trust-store pin supplied for proposal {proposal_id}"
+                )
+            _lineage_sha256(expected_trust_digest, "trusted trust-store digest")
+            if actual_trust_digest != expected_trust_digest:
+                raise SignedReviewError("embedded trust store differs from out-of-band trust pin")
+        review_artifacts = (
+            review_artifacts_by_proposal.get(proposal_id)
+            if review_artifacts_by_proposal is not None
+            else None
+        )
+        validate_signed_review_bundle(
+            certificate,
+            payload["bundle"],
+            trust_store,
+            review_artifacts=review_artifacts,
+        )
+
+
+def resolve_signed_reviewed_proposal(
+    ledger: Mapping[str, Any],
+    proposal_id: str,
+    *,
+    trusted_trust_store: Mapping[str, Any],
+    rationale: str,
+    resolved_by: str,
+    review_artifacts: Mapping[str, bytes | str] | None = None,
+) -> dict[str, Any]:
+    """Resolve a signed proposal only when its recorded trust store is supplied by caller."""
+    validate_ledger(ledger)
+    proposal_id = _lineage_nonempty(proposal_id, "proposal_id")
+    certificate_entry = _proposal_certificate_entry(ledger, proposal_id)
+    signed_entries = _proposal_signed_entries(ledger, proposal_id)
+    if len(signed_entries) != 1:
+        raise SignedReviewError("proposal must have exactly one ledger-anchored signed bundle")
+    record = signed_entries[0]["payload"]
+    if digest(trusted_trust_store) != record["trust_store_digest"]:
+        raise SignedReviewError("caller-supplied trusted store does not match the recorded trust-store pin")
+    validate_signed_review_bundle(
+        certificate_entry["payload"]["certificate"],
+        record["bundle"],
+        trusted_trust_store,
+        review_artifacts=review_artifacts,
+    )
+    certificate = certificate_entry["payload"]["certificate"]
+    proposal_entries = [
+        entry for entry in _entries_of_type(ledger, "revision_proposed")
+        if entry["payload"]["proposal_id"] == proposal_id
+    ]
+    if len(proposal_entries) != 1:
+        raise SignedReviewError("proposal must exist exactly once")
+    proposal = proposal_entries[0]["payload"]
+    frontier = current_frontier(ledger, proposal["event_key"])["decision_ids"]
+    outcome = (
+        "STALE"
+        if frontier != proposal["base_decision_ids"]
+        else certificate["evaluation"]["outcome"]
+    )
+    return resolve_proposal(
+        ledger,
+        proposal_id,
+        outcome=outcome,
+        rationale=rationale,
+        resolved_by=resolved_by,
+        signed_review_bundle_digest=record["bundle_digest"],
+    )
