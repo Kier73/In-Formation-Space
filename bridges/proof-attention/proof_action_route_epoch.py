@@ -618,29 +618,6 @@ def handoff_proof_action_route_epoch(
     uncertainty = _uncertainty_projection(preclose_checkpoint)
     preclose_session_digest = host.session.to_dict()["session_digest"]
 
-    attempt = host.active_attempt
-    if attempt is not None and not attempt.terminal:
-        if attempt.status == "planned":
-            # The intended action has not entered the old communication route;
-            # retain the planned attempt for exact dispatch on the successor.
-            pass
-        elif attempt.status in ("dispatched", "admitted"):
-            attempt.mark_failure(
-                "route_closed",
-                host.host_id,
-                f"route epoch {epoch_id} closed before this action produced an interpreted result: {reason}",
-                evidence_ref=f"urn:sha256:{uncertainty['uncertainty_digest']}",
-            )
-        else:
-            attempt.mark_failure(
-                "route_closed",
-                host.host_id,
-                f"route epoch {epoch_id} closed while action was at stage {attempt.status}: {reason}",
-                evidence_ref=f"urn:sha256:{uncertainty['uncertainty_digest']}",
-            )
-    host._clear_active()
-    postclose_session_digest = host.session.to_dict()["session_digest"]
-
     successor_route = {
         "host_id": _text(successor_host_id, "successor_host_id"),
         "worker_id": _text(successor_worker_id, "successor_worker_id"),
@@ -656,6 +633,22 @@ def handoff_proof_action_route_epoch(
         raise ProofActionRouteEpochError("successor route identity tuple was already used")
     if successor_epoch_id == epoch_id or any(item["epoch_id"] == successor_epoch_id for item in ledger.entries):
         raise ProofActionRouteEpochError("successor epoch ID must be new")
+
+    attempt = host.active_attempt
+    if attempt is not None and not attempt.terminal:
+        if attempt.status == "planned":
+            # The intended action has not entered the old communication route;
+            # retain the planned attempt for exact dispatch on the successor.
+            pass
+        else:
+            attempt.mark_failure(
+                "route_closed",
+                host.host_id,
+                f"route epoch {epoch_id} closed while action was at stage {attempt.status}: {reason}",
+                evidence_ref=f"urn:sha256:{uncertainty['uncertainty_digest']}",
+            )
+    host._clear_active()
+    postclose_session_digest = host.session.to_dict()["session_digest"]
 
     close_event = ledger.close_epoch(
         epoch_id,
