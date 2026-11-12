@@ -56,15 +56,21 @@ These are checkpoint-to-checkpoint measurements, not isolated operation runtimes
 
 ## Operation spans and empirical cost profiles
 
-[\`operation_spans.py\`](operation_spans.py) adds a separate measurement boundary around one supplied synchronous callable. The recorder samples a local monotonic clock immediately before and after the invocation, preserves the callable's exact result or re-raises its original exception, and records successful and raised calls separately. A clock failure does not prevent the operation from running. A regressed clock is retained as a regressed span with no duration.
+[`operation_spans.py`](operation_spans.py) adds a separate measurement boundary around one supplied synchronous callable. The recorder samples a local monotonic clock immediately before and after the invocation, preserves the callable's exact result or re-raises its original exception, and records successful and raised calls separately. A clock failure does not prevent the operation from running. A regressed clock is retained as a regressed span with no duration.
 
-This is intentionally distinct from the temporal checkpoint trace above. A span around \`GatedObservationCoordinator.finalize_event()\`, for example, measures that synchronous call boundary (including any blocking inside it); it does not claim to measure CPU time or to isolate the call's internal sub-operations. The span carries a clock actor and segment identity so measurements from different processes or clock lifetimes cannot silently be combined.
+This is intentionally distinct from the temporal checkpoint trace above. A span around `GatedObservationCoordinator.finalize_event()`, for example, measures that synchronous call boundary (including any blocking inside it); it does not claim to measure CPU time or to isolate the call's internal sub-operations. The span carries a clock actor and segment identity so measurements from different processes or clock lifetimes cannot silently be combined.
 
-\`build_operation_cost_profiles()\` summarizes repeated spans by operation, clock actor, clock segment, and outcome. It reports sample counts, median, nearest-rank p90/p95, and range. Regressed spans do not enter duration statistics; raised calls remain a separate outcome partition. A minimum-sample threshold controls only whether a partition is labelled \`insufficient_samples\` or \`descriptive_only\`. Even above the threshold, the report's \`policy_effect\` is always \`none\`: profiles are evidence for later review, not automatic adaptive-attention costs.
+`build_operation_cost_profiles()` summarizes repeated spans by operation, clock actor, clock segment, and outcome. It reports sample counts, median, nearest-rank p90/p95, and range. Regressed spans do not enter duration statistics; raised calls remain a separate outcome partition. A minimum-sample threshold controls only whether a partition is labelled `insufficient_samples` or `descriptive_only`. Even above the threshold, the report's `policy_effect` is always `none`: profiles are evidence for later review, not automatic adaptive-attention costs.
 
-The [operation-span schema](operation-span.schema.json) and [cost-profile schema](operation-cost-profiles.schema.json) define the portable artifacts. [\`test_operation_spans.py\`](test_operation_spans.py) tests call semantics, failures, clock regression and failure, partitioning, source reconstruction, and schema validity.
+The [operation-span schema](operation-span.schema.json) and [cost-profile schema](operation-cost-profiles.schema.json) define the portable artifacts. [`test_operation_spans.py`](test_operation_spans.py) tests call semantics, failures, clock regression and failure, partitioning, source reconstruction, and schema validity.
 
 These profiles describe only observed invocations. They do not estimate the cost of a candidate that was never executed, correct for selection bias, or justify changing a policy without a separate validation experiment.
+
+### Live pinned-runtime measurements
+
+The live integration now instruments the actual calls to `ReliableChannel.send()`, `GatedObservationCoordinator.ingest_available()`, `finalize_event()`, `commit_event()`, `save_checkpoint()`, and `process_acks()`. The wrappers sit directly around those calls and retain their synchronous call-boundary scope. They do not replace or emulate E-CPU behavior.
+
+The current two-path CI smoke run emits 11 spans: four sends, two receiver-intake calls, two finalizations, one VM commit, one additional checkpoint save, and one sender ACK poll. With a three-sample threshold, only the pooled send-operation partition reaches `descriptive_only`; every other partition remains `insufficient_samples`. The raw spans and reconstructed cost profile are uploaded as the `live-ecpu-operation-spans` artifact on the workflow run. These are initial observations, not a stable benchmark or an adaptive policy input.
 
 ## Evidence and clocks
 
