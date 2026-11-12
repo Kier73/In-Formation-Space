@@ -84,9 +84,38 @@ PYTHONPATH=bridges/proof-attention:bridges/observation-path:/path/to/Virtual-Gro
 
 The workflow records its exact VGI commit in .github/workflows/proof-attention.yml.
 
+## Experimental AND/OR cost-to-go comparison
+
+The separate `and_or_cost_to_go.py` module compares the structural attention order above with an additive cost-to-go estimate over the VGI proof hypergraph. It is analysis-only; it does not replace `build_proof_attention_plan` or change `ProofAttentionSession` execution.
+
+```python
+from and_or_cost_to_go import build_and_or_cost_to_go
+
+comparison = build_and_or_cost_to_go(
+    proof_ground,
+    root_obligation_ids=(root_obligation_id,),
+    cost_model=empirical_probe_cost_model,
+)
+```
+
+The recurrence treats each candidate or elaborated hyper-transition as an OR alternative and requires every child in the selected transition's AND bundle. Candidate tactic costs come from explicit `EmpiricalProbeCostModel` provenance. An already-elaborated transition has zero remaining tactic cost, but its children must still be discharged. The planner computes a least finite continuation; a cycle without a finite exit has no route, and a positive-cost/edge-count tie-break prevents a zero-cost elaborated cycle from displacing a finite route.
+
+The output includes a structural baseline order, a selected conditional continuation per active root, the currently dispatchable candidate transitions, source cost provenance, and a content digest. Candidate descendants can be costed in the continuation tree, but remain marked conditional and are not included in the current dispatchable action list until reached by observed elaboration.
+
+### Interpretation limits
+
+- The estimate adds component p90 or p95 values. Their sum is not itself an end-to-end p90 or p95.
+- Repeated obligation occurrences are charged independently; the experiment does not optimize proof reuse across branches or roots.
+- A candidate with an empty subgoal bundle is only an action whose proposed continuation has no child obligations. Its parent still requires a separate verified kernel receipt.
+- Kernel-rejected obligations are not accepted terminals. Timeout and rejected tactic attempts remain history, not retry actions.
+- The bound synchronous operation may include whatever blocking the caller measured. This experiment does not independently isolate CPU, transport, admission, provenance or kernel-check time.
+- No tactic success probability, proof, or execution authorization is inferred.
+
+The focused proof-attention workflow runs the new finite-graph tests against the same pinned VGI and E-CPU revisions as the existing bridge.
+
 ## Next experiments
 
-A later increment could admit new elaboration frames from a real tactic runner, then replan from the newly observed frontier. Another could compare the structural intention policy with a separate AND/OR cost-to-go algorithm on finite proof graphs. Neither should weaken the external kernel receipt boundary or infer a proof from an empty child list.
+Useful follow-ons include comparing this per-occurrence estimate with a global shared-subgoal optimizer, testing sensitivity to different measured percentiles and workload strata, and replaying the analysis from a real Lean trace exporter with independently authenticated kernel receipts. None should weaken the distinction between proposed and elaborated subgoals or infer a proof from an empty child list.
 
 
 ## Proof-action execution and replanning
