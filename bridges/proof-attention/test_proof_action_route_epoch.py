@@ -134,6 +134,7 @@ class ProofActionRouteEpochTests(unittest.TestCase):
             return_evidence=return_evidence(interpreted_attempt),
             proof_trace=add_result_payload(source_trace, interpreted_attempt),
         )
+        worker.send_result(result)
         self.assertIsNotNone(host.receive_result())
         self.assertEqual(interpreted_attempt.status, "interpreted")
 
