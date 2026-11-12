@@ -1,0 +1,457 @@
+"""DSSE/Ed25519 signatures for authority-review vote receipts.
+
+This module verifies signatures against a caller-supplied trust store. It does
+not establish how that trust store was provisioned, nor does a key fingerprint
+prove an agent's identity. Review payload bytes are signed exactly as carried;
+no cross-language JSON canonicalization claim is made.
+"""
+from __future__ import annotations
+
+import base64
+import copy
+import hashlib
+import json
+import re
+from typing import Any, Mapping, Sequence
+
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+    Ed25519PrivateKey,
+    Ed25519PublicKey,
+)
+
+from authority_lineage import digest
+
+FORMAT = "in-formation.signed-review-bundle"
+SCHEMA = "in-formation.signed-review-bundle/0.1"
+TRUST_STORE_FORMAT = "in-formation.review-trust-store"
+TRUST_STORE_SCHEMA = "in-formation.review-trust-store/0.1"
+PAYLOAD_TYPE = "application/vnd.in-formation.authority-review-vote+json;version=0.1"
+SIGNATURE_PROFILE = "DSSEv1+Ed25519"
+_HEX_256 = re.compile(r"^[0-9a-f]{64}$")
+REVIEW_SEATS = ("R00", "R01", "R02")
+VOTE_FIELDS = {
+    "seat",
+    "reviewer_ref",
+    "vote",
+    "rationale",
+    "review_ref",
+    "review_sha256",
+}
+TRUST_STORE_FIELDS = {"format", "schema", "keys"}
+TRUST_KEY_FIELDS = {"keyid", "principal", "seat", "public_key"}
+ENVELOPE_FIELDS = {"payloadType", "payload", "signatures"}
+SIGNATURE_FIELDS = {"keyid", "sig"}
+BUNDLE_FIELDS = {
+    "format",
+    "schema",
+    "signature_profile",
+    "certificate_digest",
+    "payload_type",
+    "trust_store_digest",
+    "review_artifacts_verified",
+    "signed_review_votes",
+    "bundle_digest",
+}
+
+
+class SignedReviewError(ValueError):
+    """A signed review receipt, envelope, or trust store is invalid."""
+
+
+def _nonempty(value: object, label: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise SignedReviewError(f"{label} must be a non-empty string")
+    return value.strip()
+
+
+def _sha256(value: object, label: str) -> str:
+    if not isinstance(value, str) or not _HEX_256.fullmatch(value):
+        raise SignedReviewError(f"{label} must be a lowercase SHA-256 digest")
+    return value
+
+
+def _b64encode(raw: bytes) -> str:
+    return base64.b64encode(raw).decode("ascii")
+
+
+def _b64decode(value: object, label: str) -> bytes:
+    if not isinstance(value, str) or not value:
+        raise SignedReviewError(f"{label} must be a non-empty base64 string")
+    try:
+        raw = base64.b64decode(value.encode("ascii"), validate=True)
+    except (ValueError, UnicodeEncodeError) as exc:
+        raise SignedReviewError(f"{label} is not valid base64") from exc
+    if _b64encode(raw) != value:
+        raise SignedReviewError(f"{label} is not canonical base64")
+    return raw
+
+
+def _json_bytes(value: Mapping[str, Any]) -> bytes:
+    try:
+        return json.dumps(
+            dict(value),
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+    except (TypeError, ValueError) as exc:
+        raise SignedReviewError("review payload is not serializable JSON") from exc
+
+
+def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise SignedReviewError(f"duplicate JSON object key: {key}")
+        result[key] = value
+    return result
+
+
+def _strict_json(raw: bytes) -> dict[str, Any]:
+    try:
+        parsed = json.loads(
+            raw.decode("utf-8"),
+            object_pairs_hook=_reject_duplicate_keys,
+            parse_constant=lambda value: (_ for _ in ()).throw(
+                SignedReviewError(f"non-finite JSON number is forbidden: {value}")
+            ),
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SignedReviewError("signed review payload is not valid UTF-8 JSON") from exc
+    if not isinstance(parsed, dict):
+        raise SignedReviewError("signed review payload must be a JSON object")
+    return parsed
+
+
+def pae(payload_type: str, payload: bytes) -> bytes:
+    """DSSE pre-authentication encoding over UTF-8 payload type and raw bytes."""
+    if not isinstance(payload_type, str) or not payload_type:
+        raise SignedReviewError("payload_type must be a non-empty string")
+    if not isinstance(payload, bytes):
+        raise TypeError("payload must be bytes")
+    type_bytes = payload_type.encode("utf-8")
+    return (
+        b"DSSEv1 "
+        + str(len(type_bytes)).encode("ascii")
+        + b" "
+        + type_bytes
+        + b" "
+        + str(len(payload)).encode("ascii")
+        + b" "
+        + payload
+    )
+
+
+def _normalize_vote(vote: Mapping[str, Any]) -> dict[str, str]:
+    if not isinstance(vote, Mapping) or set(vote) != VOTE_FIELDS:
+        raise SignedReviewError("review vote has missing or unrecognized fields")
+    normalized = {
+        "seat": _nonempty(vote.get("seat"), "vote.seat"),
+        "reviewer_ref": _nonempty(vote.get("reviewer_ref"), "vote.reviewer_ref"),
+        "vote": _nonempty(vote.get("vote"), "vote.vote"),
+        "rationale": _nonempty(vote.get("rationale"), "vote.rationale"),
+        "review_ref": _nonempty(vote.get("review_ref"), "vote.review_ref"),
+        "review_sha256": _sha256(vote.get("review_sha256"), "vote.review_sha256"),
+    }
+    if normalized["seat"] not in REVIEW_SEATS:
+        raise SignedReviewError("review vote names an unknown seat")
+    if normalized["vote"] not in {"APPROVE", "REJECT", "ABSTAIN"}:
+        raise SignedReviewError("review vote must be APPROVE, REJECT, or ABSTAIN")
+    return normalized
+
+
+def _raw_public_key(public_key: Ed25519PublicKey) -> bytes:
+    if not isinstance(public_key, Ed25519PublicKey):
+        raise TypeError("public_key must be an Ed25519PublicKey")
+    return public_key.public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw,
+    )
+
+
+def build_trust_store(
+    keys: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Build a trust-store document from provisioned Ed25519 public keys.
+
+    The returned structure is not self-authenticating. Its digest is useful for
+    pinning a trust-store version; callers must obtain the store through a
+    trusted configuration or governance channel.
+    """
+    if not isinstance(keys, (list, tuple)) or not keys:
+        raise SignedReviewError("trust store requires at least one trusted key")
+    normalized = []
+    seats: set[str] = set()
+    principals: set[str] = set()
+    keyids: set[str] = set()
+    for index, item in enumerate(keys):
+        if not isinstance(item, Mapping) or set(item) != {"seat", "principal", "public_key"}:
+            raise SignedReviewError(f"trust key {index} has invalid fields")
+        seat = _nonempty(item.get("seat"), f"keys[{index}].seat")
+        principal = _nonempty(item.get("principal"), f"keys[{index}].principal")
+        if seat not in REVIEW_SEATS:
+            raise SignedReviewError(f"trust key {index} uses an unknown seat")
+        public_key = item.get("public_key")
+        raw = _raw_public_key(public_key)
+        keyid = hashlib.sha256(raw).hexdigest()
+        if seat in seats or principal in principals or keyid in keyids:
+            raise SignedReviewError("trust store seats, principals, and key IDs must be unique")
+        normalized.append({
+            "keyid": keyid,
+            "principal": principal,
+            "seat": seat,
+            "public_key": _b64encode(raw),
+        })
+        seats.add(seat)
+        principals.add(principal)
+        keyids.add(keyid)
+    return {
+        "format": TRUST_STORE_FORMAT,
+        "schema": TRUST_STORE_SCHEMA,
+        "keys": sorted(normalized, key=lambda item: item["keyid"]),
+    }
+
+
+def _validate_trust_store(
+    trust_store: Mapping[str, Any],
+) -> dict[str, dict[str, Any]]:
+    if not isinstance(trust_store, Mapping) or set(trust_store) != TRUST_STORE_FIELDS:
+        raise SignedReviewError("trust store has missing or unrecognized fields")
+    if trust_store["format"] != TRUST_STORE_FORMAT or trust_store["schema"] != TRUST_STORE_SCHEMA:
+        raise SignedReviewError("unsupported review trust-store format or schema")
+    keys = trust_store["keys"]
+    if not isinstance(keys, list) or not keys:
+        raise SignedReviewError("trust store must contain at least one public key")
+    by_keyid: dict[str, dict[str, Any]] = {}
+    seats: set[str] = set()
+    principals: set[str] = set()
+    previous_keyid = ""
+    for index, item in enumerate(keys):
+        if not isinstance(item, Mapping) or set(item) != TRUST_KEY_FIELDS:
+            raise SignedReviewError(f"trust store key {index} has invalid fields")
+        keyid = _sha256(item.get("keyid"), f"trust_store.keys[{index}].keyid")
+        principal = _nonempty(item.get("principal"), f"trust_store.keys[{index}].principal")
+        seat = _nonempty(item.get("seat"), f"trust_store.keys[{index}].seat")
+        if seat not in REVIEW_SEATS:
+            raise SignedReviewError(f"trust store key {index} uses an unknown seat")
+        if keyid in by_keyid or seat in seats or principal in principals:
+            raise SignedReviewError("trust store keys, seats, and principals must be unique")
+        if previous_keyid and keyid <= previous_keyid:
+            raise SignedReviewError("trust store keys must be sorted by keyid")
+        raw = _b64decode(item.get("public_key"), f"trust_store.keys[{index}].public_key")
+        if len(raw) != 32:
+            raise SignedReviewError("Ed25519 public keys must contain exactly 32 bytes")
+        expected_keyid = hashlib.sha256(raw).hexdigest()
+        if keyid != expected_keyid:
+            raise SignedReviewError("trust-store keyid is not the public-key fingerprint")
+        try:
+            public_key = Ed25519PublicKey.from_public_bytes(raw)
+        except ValueError as exc:
+            raise SignedReviewError("invalid Ed25519 public key") from exc
+        by_keyid[keyid] = {
+            "keyid": keyid,
+            "principal": principal,
+            "seat": seat,
+            "public_key": public_key,
+        }
+        seats.add(seat)
+        principals.add(principal)
+        previous_keyid = keyid
+    return by_keyid
+
+
+def sign_review_vote(
+    vote: Mapping[str, Any],
+    private_key: Ed25519PrivateKey,
+) -> dict[str, Any]:
+    """Create a one-signature DSSE envelope for one review-vote payload."""
+    normalized = _normalize_vote(vote)
+    if not isinstance(private_key, Ed25519PrivateKey):
+        raise TypeError("private_key must be an Ed25519PrivateKey")
+    raw_public = _raw_public_key(private_key.public_key())
+    keyid = hashlib.sha256(raw_public).hexdigest()
+    payload = _json_bytes(normalized)
+    signature = private_key.sign(pae(PAYLOAD_TYPE, payload))
+    return {
+        "payloadType": PAYLOAD_TYPE,
+        "payload": _b64encode(payload),
+        "signatures": [{"keyid": keyid, "sig": _b64encode(signature)}],
+    }
+
+
+def verify_signed_review_vote(
+    envelope: Mapping[str, Any],
+    trust_store: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Verify DSSE PAE signature and bind signed seat/principal to trusted key."""
+    if not isinstance(envelope, Mapping) or set(envelope) != ENVELOPE_FIELDS:
+        raise SignedReviewError("DSSE envelope has missing or unrecognized fields")
+    if envelope["payloadType"] != PAYLOAD_TYPE:
+        raise SignedReviewError("DSSE payloadType is not the authority-review vote type")
+    raw_payload = _b64decode(envelope["payload"], "DSSE payload")
+    signatures = envelope["signatures"]
+    if not isinstance(signatures, list) or len(signatures) != 1:
+        raise SignedReviewError("each review vote envelope must contain exactly one signature")
+    signature_record = signatures[0]
+    if not isinstance(signature_record, Mapping) or set(signature_record) != SIGNATURE_FIELDS:
+        raise SignedReviewError("DSSE signature record has invalid fields")
+    keyid = _sha256(signature_record.get("keyid"), "DSSE signature keyid")
+    signature = _b64decode(signature_record.get("sig"), "DSSE signature")
+    if len(signature) != 64:
+        raise SignedReviewError("Ed25519 signatures must contain exactly 64 bytes")
+
+    trusted_keys = _validate_trust_store(trust_store)
+    trusted = trusted_keys.get(keyid)
+    if trusted is None:
+        raise SignedReviewError("DSSE keyid is not present in the supplied trust store")
+    try:
+        trusted["public_key"].verify(
+            signature,
+            pae(envelope["payloadType"], raw_payload),
+        )
+    except InvalidSignature as exc:
+        raise SignedReviewError("DSSE Ed25519 signature verification failed") from exc
+
+    vote = _normalize_vote(_strict_json(raw_payload))
+    if vote["seat"] != trusted["seat"]:
+        raise SignedReviewError("signed vote seat differs from the trusted key's assigned seat")
+    if vote["reviewer_ref"] != trusted["principal"]:
+        raise SignedReviewError("signed vote reviewer_ref differs from the trusted principal")
+    return {
+        "vote": vote,
+        "keyid": keyid,
+        "principal": trusted["principal"],
+        "seat": trusted["seat"],
+        "payload_sha256": hashlib.sha256(raw_payload).hexdigest(),
+    }
+
+
+def _certificate_core(certificate: Mapping[str, Any]) -> dict[str, Any]:
+    if not isinstance(certificate, Mapping):
+        raise TypeError("certificate must be a mapping")
+    if certificate.get("format") != "in-formation.authority-review-certificate":
+        raise SignedReviewError("unsupported authority review certificate format")
+    if certificate.get("schema") != "in-formation.authority-review-certificate/0.1":
+        raise SignedReviewError("unsupported authority review certificate schema")
+    supplied = _sha256(certificate.get("certificate_digest"), "certificate_digest")
+    core = {key: value for key, value in certificate.items() if key != "certificate_digest"}
+    if digest(core) != supplied:
+        raise SignedReviewError("authority review certificate digest mismatch")
+    votes = certificate.get("votes")
+    if not isinstance(votes, list):
+        raise SignedReviewError("authority review certificate votes must be a list")
+    return core
+
+
+def _check_review_artifacts(
+    votes: Sequence[Mapping[str, Any]],
+    review_artifacts: Mapping[str, bytes | str] | None,
+) -> bool:
+    if review_artifacts is None:
+        return False
+    if not isinstance(review_artifacts, Mapping):
+        raise TypeError("review_artifacts must map artifact references to bytes or text")
+    expected_refs = {vote["review_ref"] for vote in votes}
+    if set(review_artifacts) != expected_refs:
+        raise SignedReviewError("review artifact set does not exactly cover the signed vote references")
+    for vote in votes:
+        value = review_artifacts[vote["review_ref"]]
+        raw = value.encode("utf-8") if isinstance(value, str) else value
+        if not isinstance(raw, bytes):
+            raise TypeError("review artifact values must be bytes or strings")
+        if hashlib.sha256(raw).hexdigest() != vote["review_sha256"]:
+            raise SignedReviewError(
+                f"review artifact digest does not match signed receipt: {vote['review_ref']}"
+            )
+    return True
+
+
+def build_signed_review_bundle(
+    certificate: Mapping[str, Any],
+    envelopes: Sequence[Mapping[str, Any]],
+    trust_store: Mapping[str, Any],
+    *,
+    review_artifacts: Mapping[str, bytes | str] | None = None,
+) -> dict[str, Any]:
+    """Verify every signed vote and bind its bundle to a review certificate."""
+    certificate_core = _certificate_core(certificate)
+    trust_keys = _validate_trust_store(trust_store)
+    if not isinstance(envelopes, (list, tuple)):
+        raise TypeError("envelopes must be a sequence")
+    cert_votes = certificate["votes"]
+    if not cert_votes:
+        raise SignedReviewError("cannot build a signed bundle with no review votes")
+    if len(envelopes) != len(cert_votes):
+        raise SignedReviewError("signed envelope count must equal certificate vote count")
+    remaining = {
+        (vote["seat"], vote["reviewer_ref"]): vote
+        for vote in cert_votes
+    }
+    signed = []
+    seen_keyids: set[str] = set()
+    for envelope in envelopes:
+        verified = verify_signed_review_vote(envelope, trust_store)
+        vote = verified["vote"]
+        identity = (vote["seat"], vote["reviewer_ref"])
+        expected_vote = remaining.pop(identity, None)
+        if expected_vote is None or vote != expected_vote:
+            raise SignedReviewError("signed vote does not exactly match a certificate review receipt")
+        if verified["keyid"] in seen_keyids:
+            raise SignedReviewError("one trusted key cannot sign multiple reviewer seats")
+        seen_keyids.add(verified["keyid"])
+        signed.append({
+            "seat": verified["seat"],
+            "reviewer_ref": verified["principal"],
+            "keyid": verified["keyid"],
+            "envelope": copy.deepcopy(dict(envelope)),
+        })
+    if remaining:
+        raise SignedReviewError("signed bundle omits one or more certificate review receipts")
+    signed.sort(key=lambda item: REVIEW_SEATS.index(item["seat"]))
+    artifacts_verified = _check_review_artifacts(cert_votes, review_artifacts)
+    core = {
+        "format": FORMAT,
+        "schema": SCHEMA,
+        "signature_profile": SIGNATURE_PROFILE,
+        "certificate_digest": certificate["certificate_digest"],
+        "payload_type": PAYLOAD_TYPE,
+        "trust_store_digest": digest(trust_store),
+        "review_artifacts_verified": artifacts_verified,
+        "signed_review_votes": signed,
+    }
+    return {**core, "bundle_digest": digest(core)}
+
+
+def validate_signed_review_bundle(
+    certificate: Mapping[str, Any],
+    bundle: Mapping[str, Any],
+    trust_store: Mapping[str, Any],
+    *,
+    review_artifacts: Mapping[str, bytes | str] | None = None,
+) -> None:
+    """Reverify the envelope signatures, certificate correspondence, and bundle."""
+    if not isinstance(bundle, Mapping) or set(bundle) != BUNDLE_FIELDS:
+        raise SignedReviewError("signed review bundle has missing or unrecognized fields")
+    supplied_digest = _sha256(bundle.get("bundle_digest"), "bundle_digest")
+    core = {key: value for key, value in bundle.items() if key != "bundle_digest"}
+    if digest(core) != supplied_digest:
+        raise SignedReviewError("signed review bundle digest mismatch")
+    if bundle["format"] != FORMAT or bundle["schema"] != SCHEMA:
+        raise SignedReviewError("unsupported signed review bundle format or schema")
+    if bundle["signature_profile"] != SIGNATURE_PROFILE:
+        raise SignedReviewError("unsupported signed review signature profile")
+    if bundle["payload_type"] != PAYLOAD_TYPE:
+        raise SignedReviewError("signed review bundle payload type mismatch")
+    if bundle["trust_store_digest"] != digest(trust_store):
+        raise SignedReviewError("signed review bundle was produced against a different trust store")
+    rebuilt = build_signed_review_bundle(
+        certificate,
+        [item["envelope"] for item in bundle["signed_review_votes"]],
+        trust_store,
+        review_artifacts=review_artifacts,
+    )
+    if rebuilt != dict(bundle):
+        raise SignedReviewError("signed review bundle differs from verified reconstruction")
