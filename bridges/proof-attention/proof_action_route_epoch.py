@@ -366,6 +366,38 @@ def _validate_pair_checkpoint_binding(
     return copied
 
 
+def _validate_postclose_session_snapshot(
+    payload: Any,
+    *,
+    expected_session_digest: str,
+) -> dict[str, Any]:
+    if not isinstance(payload, Mapping):
+        raise ProofActionRouteEpochError("post-close proof session snapshot must be an object")
+    copied = _copy(dict(payload))
+    required = {
+        "format", "attempt_id_prefix", "query_label", "active_root_obligation_ids",
+        "status", "current_proof_ground_digest", "current_plan_digest",
+        "current_plan", "attempted_transition_ids", "attempts", "session_digest",
+    }
+    if set(copied) != required:
+        raise ProofActionRouteEpochError("post-close proof session snapshot fields are invalid")
+    if copied["format"] != "in-formation.proof-attention-session/0.1":
+        raise ProofActionRouteEpochError("post-close proof session format is unsupported")
+    digest = _sha256(copied["session_digest"], "postclose_session_snapshot.session_digest")
+    core = {key: value for key, value in copied.items() if key != "session_digest"}
+    if digest != expected_session_digest or _digest(core) != digest:
+        raise ProofActionRouteEpochError("post-close proof session snapshot digest mismatch")
+    _sha256(copied["current_proof_ground_digest"], "postclose.current_proof_ground_digest")
+    _sha256(copied["current_plan_digest"], "postclose.current_plan_digest")
+    if not isinstance(copied["current_plan"], Mapping):
+        raise ProofActionRouteEpochError("post-close proof session current plan is invalid")
+    if not isinstance(copied["attempts"], list):
+        raise ProofActionRouteEpochError("post-close proof session attempts must be an array")
+    if not isinstance(copied["active_root_obligation_ids"], list) or not copied["active_root_obligation_ids"]:
+        raise ProofActionRouteEpochError("post-close proof session root intentions are invalid")
+    return copied
+
+
 class RouteEpochLedgerStore(Protocol):
     """Atomic durable authority contract for a route-epoch ledger.
 
@@ -614,6 +646,7 @@ class ProofActionRouteEpochLedger:
         pair_checkpoint: Mapping[str, Any],
         preclose_session_digest: str,
         postclose_session_digest: str,
+        postclose_session_snapshot: Mapping[str, Any],
         uncertainty: Mapping[str, Any],
         successor_epoch_id: str,
         successor_owner_id: str,
@@ -678,6 +711,10 @@ class ProofActionRouteEpochLedger:
             "reason": reason,
             "preclose_session_digest": preclose_session_digest,
             "postclose_session_digest": postclose_session_digest,
+            "postclose_session_snapshot": _validate_postclose_session_snapshot(
+                postclose_session_snapshot,
+                expected_session_digest=postclose_session_digest,
+            ),
             "pair_checkpoint": checkpoint,
             "pair_checkpoint_digest": checkpoint_digest,
             "uncertainty": uncertainty_copy,
@@ -706,6 +743,7 @@ class ProofActionRouteEpochLedger:
         pair_checkpoint: Mapping[str, Any],
         preclose_session_digest: str,
         postclose_session_digest: str,
+        postclose_session_snapshot: Mapping[str, Any],
         uncertainty: Mapping[str, Any],
         successor_epoch_id: str,
         successor_owner_id: str,
@@ -771,6 +809,10 @@ class ProofActionRouteEpochLedger:
             "reason": reason,
             "preclose_session_digest": preclose_session_digest,
             "postclose_session_digest": postclose_session_digest,
+            "postclose_session_snapshot": _validate_postclose_session_snapshot(
+                postclose_session_snapshot,
+                expected_session_digest=postclose_session_digest,
+            ),
             "pair_checkpoint": checkpoint,
             "pair_checkpoint_digest": _digest(checkpoint),
             "uncertainty": uncertainty_copy,
@@ -953,7 +995,7 @@ class ProofActionRouteEpochLedger:
                 expected_close_fields = {
                     "owner_generation", "owner_id", "reason_code", "reason",
                     "preclose_session_digest", "postclose_session_digest",
-                    "pair_checkpoint", "pair_checkpoint_digest", "uncertainty",
+                    "postclose_session_snapshot", "pair_checkpoint", "pair_checkpoint_digest", "uncertainty",
                     "successor_epoch_id", "successor_owner_id", "successor_route",
                 }
                 if set(details) != expected_close_fields:
@@ -965,7 +1007,11 @@ class ProofActionRouteEpochLedger:
                 if details.get("owner_generation") != active["details"]["owner_generation"] or details.get("owner_id") != active["details"]["owner_id"]:
                     raise ProofActionRouteEpochError("route close does not match current owner")
                 preclose_digest = _sha256(details.get("preclose_session_digest"), "preclose_session_digest")
-                _sha256(details.get("postclose_session_digest"), "postclose_session_digest")
+                postclose_digest = _sha256(details.get("postclose_session_digest"), "postclose_session_digest")
+                _validate_postclose_session_snapshot(
+                    details.get("postclose_session_snapshot"),
+                    expected_session_digest=postclose_digest,
+                )
                 checkpoint = _validate_pair_checkpoint_binding(
                     details.get("pair_checkpoint"),
                     route=route,
