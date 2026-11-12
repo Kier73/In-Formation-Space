@@ -357,6 +357,21 @@ class ProofActionReliableChannelTests(unittest.TestCase):
             worker.receive_request()
         self.assertEqual(sender.pending_sequences(), (1,))
 
+    def test_worker_acknowledges_same_attempt_replayed_on_a_new_reliable_sequence_once(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        _dispatched, received = deliver_request_and_admit(host, worker)
+
+        # Simulate a host replay bug using a fresh reliable sequence but the
+        # exact same application-level request and attempt ID.
+        replay_sequence = host._request_sender.send(received.request)
+        self.assertEqual(replay_sequence, 2)
+        self.assertIsNone(worker.receive_request())
+        self.assertEqual(host._request_sender.process_ack(), (2,))
+        self.assertEqual(
+            worker._admitted_requests[received.request["attempt_id"]],
+            received.request["request_digest"],
+        )
+
     def test_worker_rejects_conflicting_request_digest_for_an_already_admitted_attempt(self):
         import copy
         import hashlib
