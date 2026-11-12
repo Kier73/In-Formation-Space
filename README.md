@@ -113,3 +113,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Additional finite-state neural experiment
 
 - [Finite-state transition neural synthesis](experiments/finite-state-transition-neural-synthesis/README.md) — compiles a total 16-row counter transition relation into two exact ReLU architectures, then changes one transition row by editing one output weight. The experiment compares VGI, MailCPU reference/queue execution, and both neural realizations with per-case semantic translation evidence.
+
+## Stateful transition runtime experiment
+
+- [Stateful transition runtime integration](experiments/finite-state-transition-neural-synthesis/results/ci-run-43227224371.md) — extends the finite-state neural synthesis experiments with a live model revision that preserves state and logical tick, records step/revision events in a SHA-256 chain, and verifies snapshot restoration by replay.
