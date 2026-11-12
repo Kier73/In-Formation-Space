@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Kier73/E-CPU
-          ref: ce4c6fc90225a996895935d1d92fb8a2304586e3
+          ref: 1ccac8a1ae0b890c5cede6a0eb694e66ec7c8596
           path: external/E-CPU
 
       - name: Check out pinned VGI reference
@@ -59,7 +59,7 @@ jobs:
       - name: Execute dense versus sparse workload corpus
         env:
           PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
-          ECPU_REVISION: ce4c6fc90225a996895935d1d92fb8a2304586e3
+          ECPU_REVISION: 1ccac8a1ae0b890c5cede6a0eb694e66ec7c8596
           VGI_REVISION: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
           IFS_REVISION: \${{ github.event.pull_request.head.sha || github.sha }}
         run: >-
