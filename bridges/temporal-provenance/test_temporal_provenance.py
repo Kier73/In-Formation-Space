@@ -12,7 +12,9 @@ from temporal_provenance import (
     FORMAT,
     TemporalProvenanceError,
     analyze_observations,
+    attach_to_encounter_envelope,
     compare_observations,
+    extract_from_encounter_envelope,
     validate_observation,
     validate_temporal_frame,
 )
@@ -295,6 +297,55 @@ class PartialOrderAnalysisTests(unittest.TestCase):
         ]
         with self.assertRaises(TemporalProvenanceError):
             analyze_observations(records)
+
+    def test_encounter_extension_round_trip_is_copying_and_identity_bound(self):
+        envelope = {
+            "format": "in-formation.encounter/0.1",
+            "id": "event-17",
+            "source": {"kind": "test"},
+            "payload": {"value": "observed"},
+        }
+        record = observation("event-17", clock_id="controller:C", coordinate=105)
+        updated = attach_to_encounter_envelope(envelope, record)
+        self.assertNotIn("extensions", envelope)
+        self.assertEqual(
+            extract_from_encounter_envelope(updated),
+            validate_observation(record),
+        )
+        self.assertNotIn("extensions", envelope)
+
+    def test_encounter_extension_rejects_event_id_mismatch_and_duplicate(self):
+        envelope = {
+            "format": "in-formation.encounter/0.1",
+            "id": "event-17",
+            "source": {"kind": "test"},
+            "payload": {"value": "observed"},
+        }
+        with self.assertRaises(TemporalProvenanceError):
+            attach_to_encounter_envelope(
+                envelope,
+                observation("different-event", clock_id="C", coordinate=1),
+            )
+        updated = attach_to_encounter_envelope(
+            envelope, observation("event-17", clock_id="C", coordinate=1)
+        )
+        with self.assertRaises(TemporalProvenanceError):
+            attach_to_encounter_envelope(
+                updated, observation("event-17", clock_id="C", coordinate=2)
+            )
+
+    def test_encounter_extension_extraction_rechecks_event_identity(self):
+        envelope = {
+            "format": "in-formation.encounter/0.1",
+            "id": "event-17",
+            "source": {"kind": "test"},
+            "payload": {"value": "observed"},
+            "extensions": {
+                FORMAT: observation("other-event", clock_id="C", coordinate=1)
+            },
+        }
+        with self.assertRaises(TemporalProvenanceError):
+            extract_from_encounter_envelope(envelope)
 
     def test_schema_accepts_e_cpu_compatible_temporal_frame(self):
         if jsonschema is None:
