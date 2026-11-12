@@ -109,3 +109,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Additional active experiment
 
 - [Cross-representation weight-space experiment](experiments/cross-representation-weight-space/README.md) — constructs a fixed 10,000-parameter ReLU realization of two-input XOR, changes it to AND by editing two parameters, and compares neural, VGI signal-state, and MailCPU execution over the complete four-case Boolean domain. The runner and evidence boundary are recorded in that directory.
+
+## Additional finite-state neural experiment
+
+- [Finite-state transition neural synthesis](experiments/finite-state-transition-neural-synthesis/README.md) — compiles a total 16-row counter transition relation into two exact ReLU architectures, then changes one transition row by editing one output weight. The experiment compares VGI, MailCPU reference/queue execution, and both neural realizations with per-case semantic translation evidence.
