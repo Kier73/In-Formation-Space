@@ -26,6 +26,8 @@ from mailcpu.semantic_translation import (
     program_representation_ref,
 )
 from mailcpu.weight_space import (
+    ARCHITECTURE,
+    DEEP_ARCHITECTURE,
     boolean_gate_program,
     compile_boolean_gate,
     decode_boolean_signal,
@@ -117,7 +119,7 @@ def _translation_contract(
         {
             "compiler": "mailcpu.weight_space.compile_boolean_gate",
             "gate": gate,
-            "architecture": [2, 85, 112, 1],
+            "architecture": list(model.architecture),
             "activation": "relu-hidden-linear-output",
         },
     )
@@ -196,54 +198,86 @@ def _run_case(gate: str, model, left: int, right: int) -> dict[str, Any]:
 
 
 def run_experiment() -> dict[str, Any]:
-    model = compile_boolean_gate("xor")
-    initial_digest = model.digest
-    xor_cases = [
-        _run_case("xor", model, left, right)
-        for left, right in product((0, 1), repeat=2)
-    ]
+    architecture_specs = (
+        ("two-hidden-layer", ARCHITECTURE),
+        ("three-hidden-layer", DEEP_ARCHITECTURE),
+    )
+    architecture_results: list[dict[str, Any]] = []
+    all_cases: list[dict[str, Any]] = []
 
-    intervention = edit_boolean_gate(model, "and")
-    if intervention.changed_parameters != 2:
-        raise AssertionError("XOR→AND must change exactly two parameters")
-    and_cases = [
-        _run_case("and", model, left, right)
-        for left, right in product((0, 1), repeat=2)
-    ]
+    for architecture_name, architecture in architecture_specs:
+        model = compile_boolean_gate("xor", architecture=architecture)
+        if model.parameter_count != 10_000:
+            raise AssertionError(
+                f"{architecture_name} declared {model.parameter_count} parameters"
+            )
+        initial_digest = model.digest
+        xor_cases = [
+            _run_case("xor", model, left, right)
+            for left, right in product((0, 1), repeat=2)
+        ]
+
+        intervention = edit_boolean_gate(model, "and")
+        if intervention.changed_parameters != 2:
+            raise AssertionError("XOR-to-AND must change exactly two parameters")
+        and_cases = [
+            _run_case("and", model, left, right)
+            for left, right in product((0, 1), repeat=2)
+        ]
+
+        final_layer = len(architecture) - 2
+        coordinates = {
+            (item.layer_index, item.output_index, item.input_index)
+            for item in intervention.coordinates
+        }
+        if coordinates != {(final_layer, 0, 0), (final_layer, 0, 1)}:
+            raise AssertionError("the intervention did not target the final two coefficients")
+
+        architecture_results.append(
+            {
+                "name": architecture_name,
+                "architecture": list(model.architecture),
+                "parameter_count": model.parameter_count,
+                "active_parameters": {
+                    "xor": 9,
+                    "and": model.active_parameter_count,
+                },
+                "initial_xor_model_digest": initial_digest,
+                "final_and_model_digest": model.digest,
+                "intervention": intervention.to_dict(),
+            }
+        )
+        all_cases.extend(
+            {"architecture": architecture_name, "gate": "xor", **case}
+            for case in xor_cases
+        )
+        all_cases.extend(
+            {"architecture": architecture_name, "gate": "and", **case}
+            for case in and_cases
+        )
 
     return {
         "schema": "in-formation-space.cross-representation-weight-space.v1",
         "status": "verified-within-declared-finite-domain",
         "domain": [[0, 0], [0, 1], [1, 0], [1, 1]],
-        "architecture": list(model.architecture),
-        "parameter_count": model.parameter_count,
-        "active_parameters": {
-            "xor": 9,
-            "and": model.active_parameter_count,
-        },
-        "initial_xor_model_digest": initial_digest,
-        "final_and_model_digest": model.digest,
-        "intervention": intervention.to_dict(),
-        "case_count": len(xor_cases) + len(and_cases),
-        "cases": [
-            {"gate": "xor", **case} for case in xor_cases
-        ] + [
-            {"gate": "and", **case} for case in and_cases
-        ],
+        "architectures": architecture_results,
+        "architecture_count": len(architecture_results),
+        "parameter_count_per_architecture": 10_000,
+        "case_count": len(all_cases),
+        "cases": all_cases,
         "verification_scope": (
-            "Exact equality on all four binary input pairs for the VGI signal "
-            "realization, MailCPU reference interpreter, MailCPU queue interpreter, "
-            "and the constructed 2-85-112-1 ReLU network. Per-case semantic "
-            "translation checks compare MailCPU reference outputs to neural outputs."
+            "Exact equality on all four binary input pairs for XOR and AND, across two distinct "
+            "10,000-parameter ReLU architectures, the VGI Signal8 realization, and the MailCPU "
+            "reference and queue interpreters. Per-case semantic checks compare MailCPU "
+            "reference outputs to neural outputs for each architecture."
         ),
         "limitations": [
-            "This is a hand-constructed finite Boolean example, not general neural synthesis.",
-            "The 10,000 parameter count includes zero-valued weights and biases.",
-            "The network is sparse in active values despite its dense declared architecture.",
+            "Both neural architectures are hand-constructed for this finite Boolean example, not general neural synthesis.",
+            "Each 10,000 parameter count includes zero-valued weights and biases.",
+            "Both networks are sparse in active values despite their dense declared architectures.",
             "No training, generalization, robustness outside binary inputs, or hardware performance is tested.",
         ],
     }
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
