@@ -60,6 +60,8 @@ An E-CPU-compatible temporal frame contains the exact field set emitted by `Temp
 
 The validator checks the actor binding, non-negative counters, vector-clock self component and Lamport bound, and the unit-circle constraint on chronon phase. The remaining SystemEpoch coordinates are retained but are not converted into physical time or used to order events.
 
+`attach_to_encounter_envelope()` returns a copied envelope with the observation under the namespaced extension; `extract_from_encounter_envelope()` checks the extension and requires its `event_id` to match the envelope ID. The helper refuses to overwrite an existing temporal extension.
+
 The frame can be stored in an encounter envelope under a namespaced extension, for example:
 
 ```json
