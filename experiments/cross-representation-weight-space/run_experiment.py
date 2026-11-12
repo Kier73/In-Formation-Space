@@ -213,6 +213,11 @@ def run_experiment() -> dict[str, Any]:
             )
         initial_digest = model.digest
         initial_active_parameters = model.active_parameter_count
+        expected_xor_active = 9 if architecture == ARCHITECTURE else 11
+        if initial_active_parameters != expected_xor_active:
+            raise AssertionError(
+                f"{architecture_name} has unexpected active XOR parameter count"
+            )
         xor_cases = [
             _run_case("xor", model, left, right)
             for left, right in product((0, 1), repeat=2)
@@ -221,6 +226,10 @@ def run_experiment() -> dict[str, Any]:
         intervention = edit_boolean_gate(model, "and")
         if intervention.changed_parameters != 2:
             raise AssertionError("XOR-to-AND must change exactly two parameters")
+        if model.active_parameter_count != expected_xor_active - 1:
+            raise AssertionError(
+                f"{architecture_name} has unexpected active AND parameter count"
+            )
         and_cases = [
             _run_case("and", model, left, right)
             for left, right in product((0, 1), repeat=2)
