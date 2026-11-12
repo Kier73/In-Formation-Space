@@ -171,6 +171,11 @@ def _shared_manifest(headers: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             raise CompactProvenanceError("codec schema differs within provenance bundle")
         codec_schemas[name] = schema
 
+    if (
+        toolchain.get("ifs_revision") != shared["source_revision"]
+        or toolchain.get("ecpu_revision") != shared["realization_revision"]
+    ):
+        raise CompactProvenanceError("shared manifest revisions contradict toolchain pins")
     shared["codec_schemas"] = dict(sorted(codec_schemas.items()))
     return {
         "schema": BUNDLE_SCHEMA,
@@ -237,6 +242,7 @@ def _local_entry(header: Mapping[str, Any], manifest_sha: str) -> dict[str, Any]
         "codec": {"name": codec["name"], "schema": codec["schema"]},
         "verification": dict(verification),
         "payload": dict(payload),
+        "standalone_capsule_sha256": header["capsule_sha256"],
     }
     capsule_sha = _sha(_canonical(core))
     with_capsule_sha = {**core, "capsule_sha256": capsule_sha}
@@ -396,7 +402,10 @@ def decode_bundle(bundle: bytes) -> tuple[dict[str, Any], list[bytes]]:
             toolchain=shared["toolchain"],
         )
         raw_header, raw_payload = decode_capsule(raw_capsule)
-        if raw_payload != payload or raw_header["capsule_sha256"] != supplied_capsule_sha:
+        if (
+            raw_payload != payload
+            or raw_header["capsule_sha256"] != entry.get("standalone_capsule_sha256")
+        ):
             raise CompactProvenanceError("bundle entry did not reconstruct its standalone capsule identity")
         restored_capsules.append(raw_capsule)
 
