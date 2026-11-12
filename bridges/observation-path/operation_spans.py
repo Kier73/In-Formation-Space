@@ -11,10 +11,13 @@ policy.
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import math
+import sys
 import time
+from pathlib import Path
 from collections import defaultdict
 from statistics import median
 from typing import Any, Callable, Mapping, TypeVar
@@ -255,6 +258,21 @@ def _nearest_rank(values: list[int], percentile: float) -> int:
     return ordered[max(0, math.ceil(percentile * len(ordered)) - 1)]
 
 
+def _validated_span_collection(
+    span_documents: list[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    if not isinstance(span_documents, list):
+        raise TypeError("span_documents must be a list")
+    validated = _validated_span_collection(span_documents)
+    identities: set[tuple[str, str]] = set()
+    for span in validated:
+        identity = (span["attempt_id"], span["span_id"])
+        if identity in identities:
+            raise ValueError("duplicate operation-span identity in source collection")
+        identities.add(identity)
+    return validated
+
+
 def build_operation_cost_profiles(
     span_documents: list[Mapping[str, Any]],
     *,
@@ -326,3 +344,75 @@ def validate_operation_cost_profiles(
     if rebuilt != dict(report):
         raise ValueError("cost profile differs from independent reconstruction from source spans")
     return dict(report)
+
+
+def load_operation_span_artifact(path: str | Path) -> list[dict[str, Any]]:
+    """Load a JSON span array or the CI artifact shape {"spans": [...]}."""
+    source = Path(path)
+    try:
+        document = json.loads(source.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot read operation-span artifact {source}: {error}") from error
+    if isinstance(document, Mapping):
+        spans = document.get("spans")
+    else:
+        spans = document
+    if not isinstance(spans, list):
+        raise ValueError(f"operation-span artifact {source} must contain a spans array")
+    return [validate_operation_span(span) for span in spans]
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Command-line reader for one or more saved operation-span artifacts."""
+    parser = argparse.ArgumentParser(
+        description=(
+            "Build conservative operation-cost profiles from saved operation spans. "
+            "Clock actors, clock segments, and outcomes remain separate."
+        )
+    )
+    parser.add_argument(
+        "--input",
+        action="append",
+        required=True,
+        metavar="JSON",
+        help="span artifact JSON; repeat to analyze multiple artifacts",
+    )
+    parser.add_argument(
+        "--minimum-samples",
+        type=int,
+        default=5,
+        help="measured samples required for descriptive_only (default: 5)",
+    )
+    parser.add_argument(
+        "--output",
+        metavar="JSON",
+        help="write the profile document to this path (default: stdout)",
+    )
+    args = parser.parse_args(argv)
+
+    try:
+        spans = []
+        for artifact in args.input:
+            spans.extend(load_operation_span_artifact(artifact))
+        if not spans:
+            raise ValueError("no operation spans were supplied")
+        report = build_operation_cost_profiles(
+            spans,
+            minimum_samples=args.minimum_samples,
+        )
+        validate_operation_cost_profiles(report, spans)
+        rendered = json.dumps(report, sort_keys=True, indent=2, ensure_ascii=False) + "\\n"
+        if args.output:
+            destination = Path(args.output)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(rendered, encoding="utf-8")
+        else:
+            sys.stdout.write(rendered)
+        return 0
+    except (OSError, TypeError, ValueError) as error:
+        parser.error(str(error))
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
