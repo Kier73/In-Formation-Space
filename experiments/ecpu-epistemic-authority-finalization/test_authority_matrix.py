@@ -125,7 +125,7 @@ class AuthorityMatrixTests(unittest.TestCase):
         self.assertEqual(summary["summary_digest"], calculated)
         self.assertEqual(summary["workflow"]["run_number"], 310)
         self.assertEqual(summary["matrix"]["condition_count"], 10)
-        self.assertEqual(summary["matrix"]["attempt_count"], 30)
+        self.assertEqual(summary["invariants"]["attempt_count"], 30)
         self.assertEqual(summary["invariants"]["evidence_record_count"], 90)
         self.assertEqual(
             summary["invariants"]["final_status_counts"],
