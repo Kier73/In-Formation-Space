@@ -242,6 +242,66 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         )
         self.assertEqual(worker.process_result_acknowledgements(), (1,))
 
+    def test_late_result_after_no_result_is_acknowledged_and_quarantined(self):
+        session, source_trace, _pg, _transport, host, worker = make_endpoints()
+        _dispatch, received = deliver_request_and_admit(host, worker)
+        late_attempt = host.active_attempt
+        host.mark_no_result("host deadline elapsed")
+
+        worker.send_result(make_proof_action_result(
+            received.request,
+            return_evidence=return_evidence(late_attempt),
+            proof_trace=add_result_payload(source_trace, late_attempt, result_status="timeout"),
+        ))
+        self.assertIsNone(host.receive_result())
+        self.assertEqual(late_attempt.status, "no_result")
+        self.assertEqual(len(host.quarantined_results), 1)
+        self.assertEqual(host.quarantined_results[0]["attempt_id"], late_attempt.attempt_id)
+        self.assertIn("closed", host.quarantined_results[0]["reason"])
+        self.assertEqual(worker.process_result_acknowledgements(), (1,))
+
+        next_dispatch = host.dispatch_next()
+        self.assertIsNotNone(next_dispatch)
+        self.assertEqual(next_dispatch.request["candidate_transition"]["tactic"], "simp")
+
+    def test_late_result_for_prior_action_cannot_poison_a_new_active_attempt(self):
+        session, source_trace, _pg, _transport, host, worker = make_endpoints()
+        first_dispatch, first_request = deliver_request_and_admit(host, worker)
+        first_attempt = host.active_attempt
+        host.mark_no_result("first worker action exceeded the deadline")
+
+        second_dispatch = host.dispatch_next()
+        second_request = worker.receive_request()
+        self.assertIsNotNone(second_request)
+        self.assertEqual(second_request.request_sequence, second_dispatch.request_sequence)
+        self.assertTrue(host.observe_request_admission())
+        second_attempt = host.active_attempt
+        self.assertEqual(second_attempt.status, "admitted")
+
+        # The worker's delayed first response arrives while attempt two is active.
+        worker.send_result(make_proof_action_result(
+            first_request.request,
+            return_evidence=return_evidence(first_attempt),
+            proof_trace=add_result_payload(source_trace, first_attempt, result_status="timeout"),
+        ))
+        self.assertIsNone(host.receive_result())
+        self.assertEqual(second_attempt.status, "admitted")
+        self.assertEqual(first_attempt.status, "no_result")
+        self.assertEqual(len(host.quarantined_results), 1)
+        self.assertEqual(host.quarantined_results[0]["attempt_id"], first_dispatch.attempt_id)
+        self.assertEqual(worker.process_result_acknowledgements(), (1,))
+
+        worker.send_result(make_proof_action_result(
+            second_request.request,
+            return_evidence=return_evidence(second_attempt),
+            proof_trace=add_result_payload(source_trace, second_attempt, result_status="elaborated"),
+        ))
+        imported = host.receive_result()
+        self.assertIsNotNone(imported)
+        self.assertEqual(imported.attempt_id, second_dispatch.attempt_id)
+        self.assertEqual(second_attempt.status, "interpreted")
+        self.assertEqual(worker.process_result_acknowledgements(), (2,))
+
     def test_worker_does_not_acknowledge_an_invalid_request_before_validation(self):
         # Construct a raw ReliableChannel sender to bypass the host request builder.
         from mailcpu.reliability import ReliableChannel
