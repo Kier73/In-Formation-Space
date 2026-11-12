@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://in-formation-space.invalid/schemas/temporal-provenance-0.1.json",
+  "title": "Clock-domain-safe temporal provenance observation",
+  "type": "object",
+  "required": [
+    "format",
+    "event_id",
+    "local_counter",
+    "temporal_frame"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.temporal-provenance/0.1"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "local_counter": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "clock_id",
+        "coordinate",
+        "unit"
+      ],
+      "properties": {
+        "clock_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "coordinate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "temporal_frame": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "actor_id",
+            "monotonic",
+            "wall",
+            "causal",
+            "scheduler",
+            "event_lambda",
+            "chronon_phase",
+            "chemical_tau"
+          ],
+          "properties": {
+            "actor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "monotonic": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "actor_id",
+                    "segment",
+                    "elapsed_ns"
+                  ],
+                  "properties": {
+                    "actor_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "segment": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "elapsed_ns": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "wall": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "actor_id",
+                    "utc_ns",
+                    "sample_index"
+                  ],
+                  "properties": {
+                    "actor_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "utc_ns": {
+                      "type": "integer"
+                    },
+                    "sample_index": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "causal": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "actor_id",
+                    "lamport",
+                    "vector"
+                  ],
+                  "properties": {
+                    "actor_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "lamport": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "vector": {
+                      "type": "object",
+                      "minProperties": 1,
+                      "additionalProperties": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "scheduler": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "scheduler_id",
+                    "tick"
+                  ],
+                  "properties": {
+                    "scheduler_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "tick": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "event_lambda": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "chronon_phase": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "chemical_tau": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "anyOf": [
+    {
+      "properties": {
+        "local_counter": {
+          "type": "object"
+        }
+      }
+    },
+    {
+      "properties": {
+        "temporal_frame": {
+          "type": "object"
+        }
+      }
+    }
+  ]
+}
