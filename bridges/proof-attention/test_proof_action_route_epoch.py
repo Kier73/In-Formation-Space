@@ -19,6 +19,7 @@ from proof_action_checkpoint import (
 from proof_action_reliable_channel import (
     ProofActionReliableHost,
     ProofActionReliableWorker,
+    ReceivedProofActionRequest,
 )
 from proof_action_route_epoch import (
     InMemoryRouteEpochLedgerStore,
@@ -36,6 +37,165 @@ from test_proof_action_reliable_channel import deliver_request_and_admit, make_e
 
 
 class ProofActionRouteEpochTests(unittest.TestCase):
+    def test_execution_authorization_is_committed_before_external_runner(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger,
+            epoch_id="execution-authorization-epoch",
+            owner_id="execution-owner",
+        )
+        host.dispatch_next()
+        received = worker.receive_request()
+        self.assertIsNotNone(received)
+
+        runner_calls = []
+        def runner(execution_id, request):
+            # The authorization event is durable/visible before control is
+            # handed to the external runner callback.
+            self.assertEqual(ledger.entries[-1]["event_type"], "execution_authorized")
+            runner_calls.append((execution_id, request["attempt_id"]))
+            return {"started": True, "execution_id": execution_id}
+
+        dispatched = worker.execute_request(
+            received,
+            runner_id="deterministic-test-runner",
+            runner=runner,
+        )
+        self.assertIsNotNone(dispatched)
+        self.assertEqual(len(runner_calls), 1)
+        self.assertEqual(runner_calls[0][1], received.request["attempt_id"])
+        event = next(
+            entry for entry in ledger.entries
+            if entry["event_type"] == "execution_authorized"
+        )
+        self.assertEqual(event["details"]["execution_id"], dispatched.execution_id)
+        self.assertEqual(event["details"]["runner_id"], "deterministic-test-runner")
+        self.assertEqual(
+            ProofActionRouteEpochLedger.from_dict(ledger.to_dict()).entries[-1],
+            event,
+        )
+
+    def test_route_claim_winning_before_execution_authorization_never_invokes_runner(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger,
+            epoch_id="execution-race-epoch",
+            owner_id="execution-owner-old",
+        )
+        host.dispatch_next()
+        received = worker.receive_request()
+        self.assertIsNotNone(received)
+        original_authorizer = worker._route_execution_authorization
+
+        def claim_before_execution(request, runner_id):
+            active = ledger.active_epoch
+            ledger.claim_epoch(
+                "execution-race-epoch",
+                owner_id="execution-owner-new",
+                expected_owner_id=active["owner_id"],
+                expected_owner_generation=active["owner_generation"],
+            )
+            return original_authorizer(request, runner_id)
+
+        worker._route_execution_authorization = claim_before_execution
+        calls = []
+        result = worker.execute_request(
+            received,
+            runner_id="racing-runner",
+            runner=lambda execution_id, request: calls.append(execution_id),
+        )
+        self.assertIsNone(result)
+        self.assertEqual(calls, [])
+        self.assertFalse(
+            any(entry["event_type"] == "execution_authorized" for entry in ledger.entries)
+        )
+        self.assertEqual(ledger.active_epoch["owner_id"], "execution-owner-new")
+
+    def test_execution_ticket_survives_worker_restart_and_is_reused_by_replacement(self):
+        _session, _trace, proof_ground, transport, host, worker = make_endpoints()
+        store = InMemoryRouteEpochLedgerStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger,
+            epoch_id="execution-restart-epoch",
+            owner_id="execution-owner-before-restart",
+        )
+        host.dispatch_next()
+        received = worker.receive_request()
+        self.assertIsNotNone(received)
+
+        with self.assertRaisesRegex(RuntimeError, "simulated worker interruption"):
+            worker.execute_request(
+                received,
+                runner_id="restartable-runner",
+                runner=lambda execution_id, request: (_ for _ in ()).throw(
+                    RuntimeError("simulated worker interruption")
+                ),
+            )
+        first_event = next(
+            event for event in ledger.entries
+            if event["event_type"] == "execution_authorized"
+        )
+        execution_id = first_event["details"]["execution_id"]
+
+        # Reconstruct both endpoint objects from their snapshots, then claim a
+        # fresh generation on the same route. The execution ticket remains in
+        # the route ledger and is stable for the idempotent runner.
+        host_snapshot = snapshot_proof_action_host(host)
+        worker_snapshot = snapshot_proof_action_worker(worker)
+        replacement_host = restore_proof_action_host(
+            host_snapshot, proof_ground, transport
+        )
+        replacement_worker = restore_proof_action_worker(
+            worker_snapshot, transport
+        )
+        bind_existing_proof_action_route_epoch(
+            replacement_host,
+            replacement_worker,
+            ledger,
+            epoch_id="execution-restart-epoch",
+            owner_id="execution-owner-after-restart",
+        )
+        active = ledger.active_epoch
+        resumed_request = ReceivedProofActionRequest(
+            request_sequence=received.request_sequence,
+            request=received.request,
+            route_epoch_id=active["epoch_id"],
+            route_owner_id=active["owner_id"],
+            route_owner_generation=active["owner_generation"],
+        )
+
+        jobs = {}
+        def idempotent_runner(ticket, request):
+            if ticket not in jobs:
+                jobs[ticket] = {
+                    "started": True,
+                    "attempt_id": request["attempt_id"],
+                }
+            return jobs[ticket]
+
+        resumed = replacement_worker.execute_request(
+            resumed_request,
+            runner_id="restartable-runner",
+            runner=idempotent_runner,
+        )
+        self.assertIsNotNone(resumed)
+        self.assertEqual(resumed.execution_id, execution_id)
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(
+            len([
+                event for event in ledger.entries
+                if event["event_type"] == "execution_authorized"
+            ]),
+            1,
+        )
+        self.assertEqual(
+            ledger.entries[-1]["details"]["owner_generation"],
+            1,
+        )
+
     def test_worker_admission_is_durably_recorded_before_reliable_ack(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
         store = InMemoryRouteEpochLedgerStore()
