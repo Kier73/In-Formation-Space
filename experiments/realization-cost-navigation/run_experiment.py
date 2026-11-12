@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Callable, Sequence
 
 from mailcpu.interpreter import QueueInterpreter, ReferenceInterpreter
-from mailcpu.model import canonical_result
+from mailcpu.model import Instruction, Op, Program, canonical_result
 from mailcpu.semantic_translation import (
     EffectClass,
     ObservationContract,
@@ -36,7 +36,6 @@ from mailcpu.transition_space import (
     apply_table_intervention,
     compile_compositional_transition_program,
     compile_live_compositional_transition_program,
-    compile_transition_program,
     compile_transition_table,
 )
 from mailcpu.weight_space import decode_boolean_signal
@@ -315,6 +314,42 @@ def build_workloads() -> list[Workload]:
     return workloads
 
 
+def _compile_decision_tree_program(table) -> Program:
+    """Compile a complete table to a MailCPU binary decision tree.
+
+    Each BRANCH tests one declared input bit. The zero subtree falls through;
+    the one subtree is reached by an absolute branch target. Every leaf writes
+    the table output and halts, so one input executes exactly one path of
+    input-width branches plus one output block.
+    """
+    instructions: list[Instruction] = []
+
+    def emit(depth: int, prefix: tuple[int, ...]) -> None:
+        if depth == len(table.input_names):
+            outputs = table.row_for(prefix).outputs
+            for name, bit in zip(table.output_names, outputs):
+                instructions.append(Instruction(Op.SET, (name, bit)))
+            instructions.append(Instruction(Op.HALT))
+            return
+
+        input_name = table.input_names[depth]
+        branch_position = len(instructions)
+        instructions.append(Instruction(Op.BRANCH, (input_name, -1)))
+
+        # A false input falls through to the zero child.
+        emit(depth + 1, prefix + (0,))
+        one_target = len(instructions)
+        emit(depth + 1, prefix + (1,))
+
+        instructions[branch_position] = Instruction(
+            Op.BRANCH,
+            (input_name, one_target),
+        )
+
+    emit(0, ())
+    return Program(tuple(instructions))
+
+
 def _decision_expression(table, output_index: int, depth: int = 0, prefix=()):
     if depth == len(table.input_names):
         row = table.row_for(prefix)
@@ -462,7 +497,7 @@ def _verify_workload(workload: Workload) -> dict[str, Any]:
         "direct_dag": compile_compositional_transition_program(program),
         "live_dag": compile_live_compositional_transition_program(program),
     }
-    executable = compile_transition_program(table)
+    executable = _compile_decision_tree_program(table)
     vgi_observe = _vgi_observer(table)
     metrics = {
         name: model_cost_metrics(name, model)
@@ -633,6 +668,7 @@ def _verify_workload(workload: Workload) -> dict[str, Any]:
         "complete_domain_rows": table.row_count,
         "typed_program_digest": program.digest,
         "transition_table_digest": table.digest,
+        "mailcpu_reference_compiler": "experiment.binary-input-decision-tree",
         "mailcpu_reference_instruction_count": len(executable.instructions),
         "independent_observation_digest": observation_digest,
         "route_observation_digests": route_digests,
