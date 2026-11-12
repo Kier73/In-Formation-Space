@@ -46,7 +46,7 @@
     "span_count": 2448
   },
   "replication": {
-    "design": "A second workflow execution of the same commit and 24-condition matrix, with a distinct process-local monotonic clock segment.",
+    "design": "A second workflow execution of the same experiment implementation and 24-condition matrix, on a subsequent repository commit with a distinct process-local monotonic clock segment.",
     "interpretation_limits": [
       "The paired comparison matches the 24 workload condition tuples and compares target-event per-condition medians; it does not pool raw calls across different workload conditions.",
       "Only two CI workflow executions are compared. They use separate process-local clock segments but no independently verified hardware/host identity is available in the records.",
@@ -187,5 +187,5 @@
     "run_number": 271,
     "url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43130567381"
   },
-  "summary_digest": "68e04b407a02a4ecd4d31c5d1690a21ddaa1046d26c9fa84ef58012f75e9270f"
+  "summary_digest": "1924ea8dde3866444fddc0ba35d3d0913f6677adb8e41282b389ecbd2e988108"
 }
