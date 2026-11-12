@@ -37,9 +37,9 @@ Every attempt must establish all of the following:
 7. the receiver checkpoint digest is independently reconstructed;
 8. the durable mailbox log's hash-chain replay reproduces the in-memory durable state.
 
-The runner records synchronous operation spans around sends, retry ticks, intake, finalization, commit, each checkpoint write, and ACK processing. Per-condition profiles are rebuilt independently from those raw spans; they are descriptive only and never update an attention policy.
+The runner records synchronous operation spans around sends, retry ticks, intake, finalization, commit, each checkpoint write, and ACK processing. Cost profiles are rebuilt independently from those raw spans and partitioned by both workload condition and explicit call phase. Initial intake, data-recovery intake, duplicate cleanup, initial ACK processing, and recovery ACK processing are never pooled into one distribution. Profiles are descriptive only and never update an attention policy.
 
-CI uploads run-manifest.json, attempt-results.json, operation-spans.json, and operation-cost-profiles.json as ecpu-reliable-observation-recovery.
+CI uploads run-manifest.json, attempt-results.json, operation-spans.json, and operation-cost-profiles.json as ecpu-reliable-observation-recovery. The manifest records the number of phase-specific profiles and is checked against the closed run-manifest schema.
 
 ## Interpretation boundaries
 
