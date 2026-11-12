@@ -127,3 +127,11 @@ The liveness compiler adds a third neural construction path and prunes hidden fe
 The live-feature compiler reduces the baseline compositional model from 335 to 109 dense parameters (54 to 37 active), and the one-row override from 700 to 163 dense parameters (81 to 50 active). The full 16-row transition relation and the one-row edit remain exact in every representation. The remaining dense storage overhead is documented as a separate next optimization target.
 
 The edge-tested repeat of v4 is [workflow 43158552396](https://github.com/Kier73/In-Formation-Space/actions/runs/43158552396). Its artifact is byte-identical to the first v4 result and includes the extra leaf/input-pruning tests from E-CPU revision `5edccfcdd9f3173746b1e0f36ca0286c4cb39dc9`. See the [edge-tested provenance note](results/ci-run-43158552396.md) and [summary](results/ci-run-43158552396-summary.json).
+
+## V6: stateful model revision and replay
+
+The E-CPU stateful runtime is now integrated. A live state of `01` holds for one logical tick, accepts a transition-program revision without changing state or tick, then follows the revised exceptional transition to `10`. The step/revision/step history is hash-chained and the runtime snapshot is restored by replaying every event. A modified event is rejected.
+
+The [v6 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43227224371) passed the 128 one-step cases, 2,048 three-step recurrent trajectories, the runtime lifecycle comparison against VGI and both MailCPU interpreters, and all focused E-CPU/VGI tests. See the [v6 result note](results/ci-run-43227224371.md) and [summary JSON](results/ci-run-43227224371-summary.json).
+
+The runtime's local patch lifecycle proves that the current typed program and neural model can be revised while retaining state/time and recording a replay-verifiable event chain. It is not yet a concurrent, distributed, durable, signed, or physical vCPU runtime.
