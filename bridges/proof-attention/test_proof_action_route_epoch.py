@@ -9,6 +9,7 @@ from mailcpu.reliability import ReliabilityPolicy
 from mailcpu.transport import InMemoryTransport
 
 from proof_action_checkpoint import (
+    export_proof_action_checkpoint,
     restore_proof_action_host,
     restore_proof_action_worker,
     snapshot_proof_action_host,
@@ -25,6 +26,7 @@ from proof_action_route_epoch import (
     bind_existing_proof_action_route_epoch,
     handoff_proof_action_route_epoch,
     open_proof_action_route_epoch,
+    _uncertainty_projection,
 )
 from test_proof_action_execution import make_session, ground
 from test_proof_action_reliable_channel import make_endpoints
@@ -325,6 +327,113 @@ class ProofActionRouteEpochTests(unittest.TestCase):
             ],
             2,
         )
+
+    def test_closed_epoch_authorizes_only_its_declared_successor_route(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="authorized-epoch", owner_id="route-owner"
+        )
+        host.dispatch_next()
+        checkpoint = export_proof_action_checkpoint(host, worker)
+        uncertainty = _uncertainty_projection(checkpoint)
+        session_digest = host.session.to_dict()["session_digest"]
+        successor = {
+            "host_id": "authorized-host-next",
+            "worker_id": "authorized-worker-next",
+            "request_channel": "authorized-request-next",
+            "result_channel": "authorized-result-next",
+            "policy": {
+                "lease_ticks": host.policy.lease_ticks,
+                "max_attempts": host.policy.max_attempts,
+                "window_size": host.policy.window_size,
+            },
+        }
+        closed = ledger.close_epoch(
+            "authorized-epoch",
+            ledger.active_epoch["route"],
+            reason_code="planned_migration",
+            reason="test successor authorization",
+            pair_checkpoint=checkpoint,
+            preclose_session_digest=session_digest,
+            postclose_session_digest=session_digest,
+            uncertainty=uncertainty,
+            successor_epoch_id="authorized-epoch-next",
+            successor_route=successor,
+        )
+
+        wrong_route = dict(successor)
+        wrong_route["host_id"] = "unauthorized-host"
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError,
+            "does not match the successor authorized",
+        ):
+            ledger.open_epoch(
+                "unauthorized-epoch",
+                wrong_route,
+                owner_id="unauthorized-owner",
+                predecessor_close_digest=closed["event_digest"],
+            )
+        opened = ledger.open_epoch(
+            "authorized-epoch-next",
+            successor,
+            owner_id="authorized-owner",
+            predecessor_close_digest=closed["event_digest"],
+        )
+        self.assertEqual(ledger.active_epoch["epoch_id"], "authorized-epoch-next")
+        self.assertEqual(opened["route"], successor)
+
+    def test_close_rejects_a_rehashed_but_incomplete_uncertainty_projection(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="uncertainty-epoch"
+        )
+        host.dispatch_next()
+        checkpoint = export_proof_action_checkpoint(host, worker)
+        uncertainty = _uncertainty_projection(checkpoint)
+        uncertainty["pending_frames"] = []
+        uncertainty_core = {
+            key: value for key, value in uncertainty.items()
+            if key != "uncertainty_digest"
+        }
+        uncertainty["uncertainty_digest"] = hashlib.sha256(
+            json.dumps(
+                uncertainty_core,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        session_digest = host.session.to_dict()["session_digest"]
+        successor = {
+            "host_id": "uncertainty-host-next",
+            "worker_id": "uncertainty-worker-next",
+            "request_channel": "uncertainty-request-next",
+            "result_channel": "uncertainty-result-next",
+            "policy": {
+                "lease_ticks": host.policy.lease_ticks,
+                "max_attempts": host.policy.max_attempts,
+                "window_size": host.policy.window_size,
+            },
+        }
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError,
+            "does not describe the preserved pair checkpoint",
+        ):
+            ledger.close_epoch(
+                "uncertainty-epoch",
+                ledger.active_epoch["route"],
+                reason_code="planned_migration",
+                reason="incomplete uncertainty projection",
+                pair_checkpoint=checkpoint,
+                preclose_session_digest=session_digest,
+                postclose_session_digest=session_digest,
+                uncertainty=uncertainty,
+                successor_epoch_id="uncertainty-epoch-next",
+                successor_route=successor,
+            )
 
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
