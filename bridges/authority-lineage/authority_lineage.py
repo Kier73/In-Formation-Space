@@ -543,6 +543,7 @@ def validate_ledger(ledger: Mapping[str, Any]) -> None:
 def _frontier_decisions(
     ledger: Mapping[str, Any], event_key: Mapping[str, Any]
 ) -> list[dict[str, Any]]:
+    validate_ledger(ledger)
     event = _event_key(event_key)
     decisions = _decision_records(ledger)
     frontier = set(_frontier_ids(decisions, event))
