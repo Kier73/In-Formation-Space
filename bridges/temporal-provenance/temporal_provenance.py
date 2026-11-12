@@ -325,31 +325,62 @@ def compare_observations(
     return result
 
 
-def _topological_order(nodes: Sequence[str], edges: Sequence[tuple[str, str]]) -> tuple[list[str], bool]:
+def _cycle_and_components(
+    nodes: Sequence[str],
+    edges: Sequence[tuple[str, str]],
+) -> tuple[bool, list[list[str]]]:
+    """Detect directed cycles and report weakly connected order components.
+
+    Components are intentionally not joined by a chosen linear extension:
+    nodes in separate components have no ordering witness in this domain.
+    """
     outgoing = {node: set() for node in nodes}
     indegree = {node: 0 for node in nodes}
+    undirected = {node: set() for node in nodes}
     for source, target in edges:
         if target not in outgoing[source]:
             outgoing[source].add(target)
             indegree[target] += 1
+            undirected[source].add(target)
+            undirected[target].add(source)
+
     ready = sorted(node for node in nodes if indegree[node] == 0)
-    order: list[str] = []
+    visited = 0
     while ready:
         node = ready.pop(0)
-        order.append(node)
+        visited += 1
         for target in sorted(outgoing[node]):
             indegree[target] -= 1
             if indegree[target] == 0:
                 ready.append(target)
                 ready.sort()
-    return order, len(order) != len(nodes)
+
+    unseen = set(nodes)
+    components: list[list[str]] = []
+    while unseen:
+        root = min(unseen)
+        stack = [root]
+        unseen.remove(root)
+        component = []
+        while stack:
+            node = stack.pop()
+            component.append(node)
+            for neighbor in sorted(undirected[node], reverse=True):
+                if neighbor in unseen:
+                    unseen.remove(neighbor)
+                    stack.append(neighbor)
+        components.append(sorted(component))
+    return visited != len(nodes), sorted(components, key=lambda item: item[0])
 
 
 def analyze_observations(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     """Build independent partial orders for local counters, causality, monotonic and scheduler clocks."""
     if not isinstance(records, (list, tuple)):
         raise TypeError("records must be a sequence")
-    normalized = [validate_observation(record) for record in records]
+    normalized = sorted(
+        (validate_observation(record) for record in records),
+        key=lambda record: record["event_id"],
+    )
     event_ids = [record["event_id"] for record in normalized]
     if len(set(event_ids)) != len(event_ids):
         raise TemporalProvenanceError("event IDs must be unique within an analysis")
@@ -375,7 +406,7 @@ def analyze_observations(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]
                 edges.append((pair["left_event_id"], pair["right_event_id"]))
             elif pair["status"] == "after":
                 edges.append((pair["right_event_id"], pair["left_event_id"]))
-        order, has_cycle = _topological_order(event_ids, edges)
+        has_cycle, components = _cycle_and_components(event_ids, edges)
         outgoing = {source for source, _ in edges}
         domains[domain] = {
             "edge_count": len(set(edges)),
@@ -384,7 +415,7 @@ def analyze_observations(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]
                 for source, target in sorted(set(edges))
             ],
             "has_cycle": has_cycle,
-            "topological_order": None if has_cycle else order,
+            "weakly_connected_components": components,
             "maximal_event_ids": sorted(set(event_ids) - outgoing),
             "pair_status_counts": {
                 status: sum(pair["status"] == status for pair in domain_pairs[domain])
