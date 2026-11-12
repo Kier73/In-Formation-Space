@@ -319,7 +319,9 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         current_document = store.load()
         self.assertNotEqual(current_document["ledger_digest"], stale_digest)
         self.assertFalse(
-            store.compare_and_swap(stale_digest, stale_document)
+            store.compare_and_swap(
+                stale_digest, stale_document, actor_id="stale-process"
+            )
         )
         self.assertEqual(
             ProofActionRouteEpochLedger.from_dict(current_document).active_epoch[
