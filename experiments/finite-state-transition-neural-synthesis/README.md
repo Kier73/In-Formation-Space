@@ -6,7 +6,7 @@ This experiment moves from isolated Boolean gates to a finite-state transition r
 
 ## Transition ground
 
-The source machine is a reset-dominant two-bit counter. Its input tuple is ordered:
+The source machine is a reset-dominant two-bit counter expressed as a compositional typed Boolean program using input, constant, NOT, AND, XOR, and conditional-select nodes. The program is exhaustively evaluated into a 16-row table as a compiler intermediate. Its input tuple is ordered:
 
 [
 (state_1,state_0,advance,reset)
@@ -30,6 +30,14 @@ end{cases}
 ]
 
 The complete input domain contains (2^4=16) rows. The full truth table is retained in the experiment JSON.
+
+## Typed source and table derivation
+
+E-CPU's `two_bit_counter_program()` describes the baseline transition rule without manually listing its 16 rows. The edited machine is built with `FiniteTransitionProgram.with_row_output(...)`, which composes one exact input-pattern selector around the existing output expressions. Both typed programs are enumerated independently, and the edited table is checked against a direct one-row table replacement before neural realization.
+
+The resulting compilation path is:
+
+`typed transition program → complete finite table → neural minterms + MailCPU executable reference`
 
 ## Direct neural realization
 
@@ -76,7 +84,7 @@ Because the hidden layer has one unit for each complete input row, this semantic
 - **E-CPU reference program:** the table compiler builds a MailCPU program by forming the conjunction of input literals for every row and branching to that row's output block.
 - **Neural realization:** E-CPU directly constructs the ReLU weights from the same total table.
 
-The integration runner checks both the baseline and edited transition tables through all four execution paths: VGI, MailCPU reference, MailCPU queue, and both neural architectures. Each source/target comparison is bound by a semantic `TranslationContract`.
+The integration runner checks both the baseline and edited transition tables through all four execution paths: VGI, MailCPU reference, MailCPU queue, and both neural architectures. Each source/target comparison is bound by a semantic `TranslationContract` that includes the digest of the typed source program as well as the derived table, executable MailCPU program, neural snapshot, and input case.
 
 ## Reproduction
 
