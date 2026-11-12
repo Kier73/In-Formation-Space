@@ -2,6 +2,8 @@ name: Realization cost navigation RCN-001
 
 on:
   push:
+    branches:
+      - main
     paths:
       - "experiments/realization-cost-navigation/README.md"
       - "experiments/realization-cost-navigation/PLAN.md"
@@ -21,6 +23,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: rcn-001-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   realization-cost-navigation:
