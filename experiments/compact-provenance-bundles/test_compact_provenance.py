@@ -164,7 +164,7 @@ def test_bundle_rejects_entry_header_tampering_even_with_outer_digest_recomputed
     header_end = header_start + header_length
     header = bytes(bundle[header_start:header_end])
     assert b"live_dag" in header
-    changed = header.replace(b"live_dag", b"other_dag", 1)
+    changed = header.replace(b"live_dag", b"evil_dag", 1)
     assert len(changed) == len(header)
     bundle[header_start:header_end] = changed
     tampered = _refresh_bundle_digest(bundle)
