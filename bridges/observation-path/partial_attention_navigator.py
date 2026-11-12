@@ -90,7 +90,11 @@ def _probe_identity(probe: object) -> str:
     }, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
 
 
-def _score_record(score: object, rank: int) -> dict[str, Any]:
+def _score_record(
+    score: object,
+    rank: int,
+    cost_provenance: Optional[Mapping[str, Any]] = None,
+) -> dict[str, Any]:
     probe = getattr(score, "probe", None)
     state = _nonempty(getattr(probe, "state", None), "score.probe.state")
     action = _nonempty(getattr(probe, "action", None), "score.probe.action")
@@ -131,6 +135,9 @@ def _score_record(score: object, rank: int) -> dict[str, Any]:
             "score.expected_gain_per_cost",
         ),
         "scenario_scores": scenarios,
+        "cost_provenance": (
+            None if cost_provenance is None else dict(cost_provenance)
+        ),
     }
 
 
@@ -195,6 +202,7 @@ class PartialAttentionNavigator:
         vgi_revision: str,
         application_required: bool = False,
         sender_ack_required: bool = False,
+        cost_model: Optional[object] = None,
     ) -> None:
         self._validate_ground(system)
         if not callable(probe_factory):
@@ -214,6 +222,16 @@ class PartialAttentionNavigator:
             raise PartialAttentionNavigationError(
                 "sender_ack_required implies application_required"
             )
+        if cost_model is not None:
+            if not callable(getattr(cost_model, "apply_all", None)):
+                raise PartialAttentionNavigationError(
+                    "cost_model must expose apply_all(probes)"
+                )
+            if not callable(getattr(cost_model, "provenance_for", None)):
+                raise PartialAttentionNavigationError(
+                    "cost_model must expose provenance_for(method_id)"
+                )
+            _nonempty(getattr(cost_model, "model_digest", None), "cost_model.model_digest")
 
         # A Ground revision is a state change, so this coordinator always
         # requires the explicit authority gate. Application and sender ACK are
@@ -225,6 +243,8 @@ class PartialAttentionNavigator:
         self._horizon = horizon
         self._application_required = application_required
         self._sender_ack_required = sender_ack_required
+        self._cost_model = cost_model
+        self._preview_cost_provenance: dict[str, dict[str, Any]] = {}
         self._cycle_index = 0
         self._status = "ready"
         self._active: Optional[PartialAttentionSelection] = None
@@ -279,6 +299,35 @@ class PartialAttentionNavigator:
             ) from exc
         if not probes:
             return ()
+        if self._cost_model is not None:
+            applied = self._cost_model.apply_all(probes)
+            calibrated_probes = getattr(applied, "probes", None)
+            provenance_records = getattr(applied, "records", None)
+            if not isinstance(calibrated_probes, tuple) or len(calibrated_probes) != len(probes):
+                raise PartialAttentionNavigationError(
+                    "cost_model.apply_all must return one calibrated probe per candidate"
+                )
+            if not isinstance(provenance_records, tuple) or len(provenance_records) != len(probes):
+                raise PartialAttentionNavigationError(
+                    "cost_model.apply_all must return one provenance record per candidate"
+                )
+            self._preview_cost_provenance = {}
+            for probe, record in zip(calibrated_probes, provenance_records):
+                method_id = _nonempty(getattr(probe, "label", None), "calibrated probe.label")
+                if not isinstance(record, Mapping) or record.get("method_id") != method_id:
+                    raise PartialAttentionNavigationError(
+                        "cost provenance method identity does not match its calibrated probe"
+                    )
+                if record.get("model_digest") != self._cost_model.model_digest:
+                    raise PartialAttentionNavigationError(
+                        "cost provenance model digest does not match the configured model"
+                    )
+                identity = _probe_identity(probe)
+                self._preview_cost_provenance[identity] = dict(record)
+            probes = calibrated_probes
+        else:
+            self._preview_cost_provenance = {}
+
         identities = [_probe_identity(probe) for probe in probes]
         if len(set(identities)) != len(identities):
             raise PartialAttentionNavigationError(
@@ -335,7 +384,13 @@ class PartialAttentionNavigator:
             cycle_index=self._cycle_index,
             prior_ground_fingerprint=self._system.fingerprint,
             ranking=tuple(
-                _score_record(score, index + 1)
+                _score_record(
+                    score,
+                    index + 1,
+                    self._preview_cost_provenance.get(
+                        _probe_identity(getattr(score, "probe", None))
+                    ),
+                )
                 for index, score in enumerate(ranked)
             ),
             execution=execution,
@@ -578,6 +633,9 @@ class PartialAttentionNavigator:
             "horizon": self._horizon,
             "application_required": self._application_required,
             "sender_ack_required": self._sender_ack_required,
+            "cost_model_digest": (
+                None if self._cost_model is None else self._cost_model.model_digest
+            ),
             "active_attempt": None if self._active is None else {
                 "attempt_id": self._active.execution.path.intent.attempt_id,
                 "prior_ground_fingerprint": self._active.prior_ground_fingerprint,
@@ -587,6 +645,10 @@ class PartialAttentionNavigator:
                 },
                 "plan_digest": self._active.execution.plan_digest,
                 "scenario_digest": self._active.execution.scenario_digest,
+                "cost_provenance": (
+                    None if not self._active.ranking
+                    else self._active.ranking[0]["cost_provenance"]
+                ),
                 "path": self._active.execution.path.to_dict(),
             },
             "history": list(self._history),
