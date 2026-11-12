@@ -379,6 +379,8 @@ class RouteEpochLedgerStore(Protocol):
         self,
         expected_ledger_digest: str | None,
         replacement: Mapping[str, Any],
+        *,
+        actor_id: str,
     ) -> bool: ...
 
 
@@ -397,7 +399,10 @@ class InMemoryRouteEpochLedgerStore:
         self,
         expected_ledger_digest: str | None,
         replacement: Mapping[str, Any],
+        *,
+        actor_id: str,
     ) -> bool:
+        _text(actor_id, "actor_id")
         candidate = _copy(dict(replacement))
         if set(candidate) != {"format", "entries", "ledger_digest"}:
             raise ProofActionRouteEpochError("CAS replacement is not a route ledger document")
@@ -443,6 +448,64 @@ class ProofActionRouteEpochLedger:
                 active = None
         return None if active is None else _copy(active)
 
+    def _build_event(
+        self,
+        *,
+        sequence: int,
+        previous_event_digest: str,
+        event_type: str,
+        epoch_id: str,
+        epoch_number: int,
+        route: Mapping[str, Any],
+        details: Mapping[str, Any],
+    ) -> dict[str, Any]:
+        core = {
+            "sequence": sequence,
+            "event_type": event_type,
+            "epoch_id": epoch_id,
+            "epoch_number": epoch_number,
+            "route": _copy(dict(route)),
+            "route_digest": _digest(route),
+            "details": _copy(dict(details)),
+            "previous_event_digest": previous_event_digest,
+        }
+        return {**core, "event_digest": _digest(core)}
+
+    def _append_many(
+        self,
+        drafts: list[tuple[str, str, int, Mapping[str, Any], Mapping[str, Any]]],
+        *,
+        actor_id: str,
+    ) -> list[dict[str, Any]]:
+        actor_id = _text(actor_id, "actor_id")
+        previous = self._entries[-1]["event_digest"] if self._entries else "0" * 64
+        events = []
+        for offset, (event_type, epoch_id, epoch_number, route, details) in enumerate(drafts, 1):
+            event = self._build_event(
+                sequence=len(self._entries) + offset,
+                previous_event_digest=previous,
+                event_type=event_type,
+                epoch_id=epoch_id,
+                epoch_number=epoch_number,
+                route=route,
+                details=details,
+            )
+            events.append(event)
+            previous = event["event_digest"]
+        if self._store is not None:
+            expected_digest = self.to_dict()["ledger_digest"] if self._entries else None
+            next_entries = [*self._entries, *events]
+            next_core = {"format": LEDGER_FORMAT, "entries": next_entries}
+            replacement = {**next_core, "ledger_digest": _digest(next_core)}
+            if not self._store.compare_and_swap(
+                expected_digest, replacement, actor_id=actor_id
+            ):
+                raise ProofActionRouteEpochError(
+                    "route ledger compare-and-swap conflict; refresh before retrying"
+                )
+        self._entries.extend(events)
+        return [_copy(event) for event in events]
+
     def _append(
         self,
         event_type: str,
@@ -450,32 +513,13 @@ class ProofActionRouteEpochLedger:
         epoch_number: int,
         route: Mapping[str, Any],
         details: Mapping[str, Any],
+        *,
+        actor_id: str,
     ) -> dict[str, Any]:
-        previous = self._entries[-1]["event_digest"] if self._entries else "0" * 64
-        core = {
-            "sequence": len(self._entries) + 1,
-            "event_type": event_type,
-            "epoch_id": epoch_id,
-            "epoch_number": epoch_number,
-            "route": _copy(dict(route)),
-            "route_digest": _digest(route),
-            "details": _copy(dict(details)),
-            "previous_event_digest": previous,
-        }
-        event = {**core, "event_digest": _digest(core)}
-        if self._store is not None:
-            expected_digest = (
-                self.to_dict()["ledger_digest"] if self._entries else None
-            )
-            next_entries = [*self._entries, event]
-            next_core = {"format": LEDGER_FORMAT, "entries": next_entries}
-            replacement = {**next_core, "ledger_digest": _digest(next_core)}
-            if not self._store.compare_and_swap(expected_digest, replacement):
-                raise ProofActionRouteEpochError(
-                    "route ledger compare-and-swap conflict; refresh before retrying"
-                )
-        self._entries.append(event)
-        return _copy(event)
+        return self._append_many(
+            [(event_type, epoch_id, epoch_number, route, details)],
+            actor_id=actor_id,
+        )[0]
 
     def refresh(self) -> None:
         """Reload the latest authoritative ledger revision from the configured store."""
@@ -539,6 +583,7 @@ class ProofActionRouteEpochLedger:
             epoch_number,
             checked_route,
             {"predecessor_close_digest": predecessor_close_digest, "owner_generation": 1, "owner_id": owner_id},
+            actor_id=owner_id,
         )
 
     def claim_epoch(self, epoch_id: str, *, owner_id: str) -> dict[str, Any]:
@@ -553,6 +598,7 @@ class ProofActionRouteEpochLedger:
         return self._append(
             "claimed", epoch_id, active["epoch_number"], active["route"],
             {"owner_generation": active["owner_generation"] + 1, "previous_owner_id": active["owner_id"], "owner_id": owner_id},
+            actor_id=owner_id,
         )
 
     def close_epoch(
@@ -642,6 +688,7 @@ class ProofActionRouteEpochLedger:
             active["epoch_number"],
             checked_route,
             details,
+            actor_id=owner_id,
         )
 
     def assert_active(self, epoch_id: str, route_digest: str, *, owner_id: str, owner_generation: int) -> None:
