@@ -177,3 +177,41 @@ SRE-001 showed that a sparse model can carry fewer nonzero scalar parameters and
 5. Can these exact portable encodings become transportable E-CPU realization objects while retaining source Ground identity, semantic translation contracts, and replay evidence?
 
 The first finite-domain comparison is [SRE-002](../experiments/sparse-encoding-landscape/README.md). It treats byte size, exact reconstruction, and encode/decode work as independent measures.
+
+
+---
+
+## 9. Portable Realization Identity and Evidence
+
+### The Problem
+
+SRE-002 compares exact encodings, but a codec payload alone does not carry all context needed to understand where it came from, which source description it realizes, which interface it expects, which compiler route produced it, or what was verified about it. Without those links, a compact byte sequence is easy to detach from its semantics and evidence.
+
+### Questions
+
+1. Can an encoded realization be packaged with its source Ground digest, dense/sparse model identity, interface, codec, compiler route, and exact toolchain revisions?
+2. Can another process validate the capsule framing and payload integrity before invoking any codec-specific decoder?
+3. Can a verification receipt describe the complete finite domain, independent reference, Semantic TranslationContract comparisons, and case-evidence digest in a replayable way?
+4. How should an execution host distinguish integrity, authenticity, authorization, semantic equivalence, and formal proof instead of treating one digest as all five?
+5. What minimal metadata is sufficient for a receiver to reconstruct, verify, admit, and execute a portable realization without depending on the creator's process memory?
+
+The first implementation is [PRC-001](../experiments/portable-realization-capsule/README.md). It preserves these distinctions and explicitly leaves signatures, trust policy, transport, admission, and remote execution as future work.
+
+
+---
+
+## 10. Compact Portable Provenance and Capsule Bundles
+
+### The Problem
+
+PRC-001 binds payload, source, model, interface, codec, toolchain and replay receipt into a portable capsule. Its first measurements show that the canonical metadata header averages about 2.5 KB per capsule, exceeding the inner model payload for the compact binary formats. Repeating a complete provenance envelope for every realization can undo a large part of the storage reduction achieved by sparse encodings.
+
+### Questions
+
+1. Can a standalone capsule use a compressed canonical header without making decoding ambiguous or changing the source/model identities?
+2. Can a multi-capsule bundle store shared toolchain and source-manifest data once while each capsule remains independently checkable against the shared manifest digest?
+3. What is the trade-off between standalone portability, shared-manifest overhead, compression cost, and random access to one realization?
+4. Can a receiver validate bundle membership and per-capsule payload identity without trusting the bundle builder's process state?
+5. Which metadata is invariant across a workload set, compiler set, encoding set, or deployment, and which fields must remain local to each realization?
+
+The initial measurement is [PRC-001](../experiments/portable-realization-capsule/README.md). The next study should compare standalone compressed capsules with shared-manifest bundles while retaining exact replay receipts.

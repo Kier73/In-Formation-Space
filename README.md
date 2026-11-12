@@ -143,3 +143,13 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Sparse encoding landscape
 
 - [SRE-002: Exact sparse snapshot encodings](experiments/sparse-encoding-landscape/README.md) — compares COO JSON, CSR JSON, row-mask JSON, CSR binary, row-mask binary, and adaptive hybrid binary for the 48 SRE-001 compiler/model artifacts. Every decoded format must reconstruct the exact sparse model digest and pass complete finite-domain semantic comparison.
+
+
+## Portable realization capsules
+
+- [PRC-001: Portable realization capsule](experiments/portable-realization-capsule/README.md) — packages the SRE-002 codec payload with source Ground identity, dense/sparse model identity, interface, compiler route, toolchain revisions, and a replayable finite-domain verification receipt. Header, capsule, and payload integrity are checked separately; this is an experiment format, not yet an E-CPU transport or admission integration.
+
+
+## Portable realization capsules
+
+- [PRC-001: Portable realization capsule](experiments/portable-realization-capsule/README.md) — **verified: 288 capsules, 49,104 pre/post-package semantic comparisons, and complete header/payload tamper rejection**. The [run record](experiments/portable-realization-capsule/results/ci-run-43317088331.md) records metadata overhead and exact source pins.
