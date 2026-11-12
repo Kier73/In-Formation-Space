@@ -20,9 +20,21 @@ HOST_ID = "proof-host"
 WORKER_ID = "proof-worker"
 
 
-def make_endpoints(transport=None, *, policy=None):
-    session, source_trace, _ = make_session()
-    proof_ground = ground(source_trace)
+def make_endpoints(
+    transport=None,
+    *,
+    policy=None,
+    request_channel="proof-action-request",
+    result_channel="proof-action-result",
+    session_override=None,
+    proof_ground_override=None,
+):
+    if session_override is None:
+        session, source_trace, _ = make_session()
+    else:
+        session = session_override
+        source_trace = None
+    proof_ground = proof_ground_override if proof_ground_override is not None else ground(source_trace)
     transport = transport or InMemoryTransport()
     host = ProofActionReliableHost(
         session,
@@ -30,12 +42,16 @@ def make_endpoints(transport=None, *, policy=None):
         transport,
         host_id=HOST_ID,
         worker_id=WORKER_ID,
+        request_channel=request_channel,
+        result_channel=result_channel,
         policy=policy,
     )
     worker = ProofActionReliableWorker(
         transport,
         host_id=HOST_ID,
         worker_id=WORKER_ID,
+        request_channel=request_channel,
+        result_channel=result_channel,
         policy=policy,
     )
     return session, source_trace, proof_ground, transport, host, worker
@@ -158,6 +174,21 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         with self.assertRaisesRegex(ProofActionReliableChannelError, "request channel is fenced"):
             host.dispatch_next()
 
+        # A new pair of endpoints uses a fresh channel epoch; the prior
+        # in-order sequence is never reused on the uncertain route.
+        _new_session, _new_trace, _new_pg, _same_transport, new_host, new_worker = make_endpoints(
+            transport,
+            policy=ReliabilityPolicy(lease_ticks=1, max_attempts=2),
+            request_channel="proof-action-request-epoch-2",
+            result_channel="proof-action-result-epoch-2",
+            session_override=session,
+            proof_ground_override=host.proof_ground,
+        )
+        next_dispatch = new_host.dispatch_next()
+        self.assertEqual(next_dispatch.request["candidate_transition"]["tactic"], "simp")
+        self.assertEqual(new_worker.receive_request().request, next_dispatch.request)
+        self.assertTrue(new_host.observe_request_admission())
+
     def test_result_retry_exhaustion_fences_worker_result_channel(self):
         transport = FaultInjectingTransport(
             FaultProfile(drop_indices=frozenset({3, 4}))
@@ -178,18 +209,29 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         self.assertEqual(worker.pending_result_sequences, ())
 
         host.mark_no_result("the worker result sequence exhausted retries")
-        next_dispatch = host.dispatch_next()
-        self.assertIsNotNone(next_dispatch)
-        next_request = worker.receive_request()
-        self.assertIsNotNone(next_request)
-        self.assertTrue(host.observe_request_admission())
-        second_result = make_proof_action_result(
-            next_request.request,
-            return_evidence=return_evidence(host.active_attempt),
-            proof_trace=add_result_payload(source_trace, host.active_attempt),
+        self.assertTrue(worker.result_channel_failed)
+        self.assertTrue(worker.request_channel_failed)
+        self.assertTrue(worker.fenced)
+        with self.assertRaisesRegex(ProofActionReliableChannelError, "fenced"):
+            worker.receive_request()
+        with self.assertRaisesRegex(ProofActionReliableChannelError, "fenced"):
+            worker.send_result(result)
+
+        # A new host/worker pair gets fresh reliable sequence spaces and can
+        # resume the next unattempted proof candidate.
+        _new_session, _new_trace, _new_pg, _same_transport, new_host, new_worker = make_endpoints(
+            transport,
+            policy=ReliabilityPolicy(lease_ticks=1, max_attempts=2),
+            request_channel="proof-action-request-epoch-2",
+            result_channel="proof-action-result-epoch-2",
+            session_override=_session,
+            proof_ground_override=host.proof_ground,
         )
-        with self.assertRaisesRegex(ProofActionReliableChannelError, "result channel is fenced"):
-            worker.send_result(second_result)
+        next_dispatch = new_host.dispatch_next()
+        self.assertEqual(next_dispatch.request["candidate_transition"]["tactic"], "simp")
+        next_request = new_worker.receive_request()
+        self.assertIsNotNone(next_request)
+        self.assertTrue(new_host.observe_request_admission())
 
     def test_dropped_result_retries_and_imports_once(self):
         # Send order: request=1, request ACK=2, first result=3 (dropped),
@@ -361,6 +403,9 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         with self.assertRaisesRegex(ProofActionReliableChannelError, "request is invalid"):
             worker.receive_request()
         self.assertEqual(sender.pending_sequences(), (1,))
+        self.assertTrue(worker.request_channel_failed)
+        with self.assertRaisesRegex(ProofActionReliableChannelError, "worker endpoint is fenced"):
+            worker.receive_request()
 
     def test_worker_acknowledges_same_attempt_replayed_on_a_new_reliable_sequence_once(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
