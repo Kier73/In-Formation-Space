@@ -54,6 +54,18 @@ For the E-CPU-specific mapping of transport enqueue, receiver evidence intake, q
 
 These are checkpoint-to-checkpoint measurements, not isolated operation runtimes. For example, `dispatched → admitted` includes the interval between the adapter's local capture points after those stages; it is not a CPU-time profile of `ingest_available()` alone.
 
+## Operation spans and empirical cost profiles
+
+[\`operation_spans.py\`](operation_spans.py) adds a separate measurement boundary around one supplied synchronous callable. The recorder samples a local monotonic clock immediately before and after the invocation, preserves the callable's exact result or re-raises its original exception, and records successful and raised calls separately. A clock failure does not prevent the operation from running. A regressed clock is retained as a regressed span with no duration.
+
+This is intentionally distinct from the temporal checkpoint trace above. A span around \`GatedObservationCoordinator.finalize_event()\`, for example, measures that synchronous call boundary (including any blocking inside it); it does not claim to measure CPU time or to isolate the call's internal sub-operations. The span carries a clock actor and segment identity so measurements from different processes or clock lifetimes cannot silently be combined.
+
+\`build_operation_cost_profiles()\` summarizes repeated spans by operation, clock actor, clock segment, and outcome. It reports sample counts, median, nearest-rank p90/p95, and range. Regressed spans do not enter duration statistics; raised calls remain a separate outcome partition. A minimum-sample threshold controls only whether a partition is labelled \`insufficient_samples\` or \`descriptive_only\`. Even above the threshold, the report's \`policy_effect\` is always \`none\`: profiles are evidence for later review, not automatic adaptive-attention costs.
+
+The [operation-span schema](operation-span.schema.json) and [cost-profile schema](operation-cost-profiles.schema.json) define the portable artifacts. [\`test_operation_spans.py\`](test_operation_spans.py) tests call semantics, failures, clock regression and failure, partitioning, source reconstruction, and schema validity.
+
+These profiles describe only observed invocations. They do not estimate the cost of a candidate that was never executed, correct for selection bias, or justify changing a policy without a separate validation experiment.
+
 ## Evidence and clocks
 
 Dispatch, receiver admission, raw return, evidence authorization/refusal, optional receiver-state application, interpretation, and query-resolution events can each reference their own receipt or artifact. A returned payload must reference an Encounter Envelope and include its encounter ID, payload digest, and declared canonicalization. The path ledger records those declarations; it does not fetch or authenticate the referenced artifact. The Encounter Envelope validator remains responsible for validating the referenced envelope when it is available.
