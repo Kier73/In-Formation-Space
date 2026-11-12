@@ -752,6 +752,7 @@ class ProofActionRouteEpochLedger:
                         previous_close["event_type"] != "closed"
                         or event["epoch_id"] != previous_close["details"]["successor_epoch_id"]
                         or route != previous_close["details"]["successor_route"]
+                        or details.get("owner_id") != previous_close["details"]["successor_owner_id"]
                     ):
                         raise ProofActionRouteEpochError(
                             "route open does not match its close-authorized successor"
@@ -786,7 +787,7 @@ class ProofActionRouteEpochLedger:
                     "owner_generation", "owner_id", "reason_code", "reason",
                     "preclose_session_digest", "postclose_session_digest",
                     "pair_checkpoint", "pair_checkpoint_digest", "uncertainty",
-                    "successor_epoch_id", "successor_route",
+                    "successor_epoch_id", "successor_owner_id", "successor_route",
                 }
                 if set(details) != expected_close_fields:
                     raise ProofActionRouteEpochError("closed route event details are invalid")
@@ -817,6 +818,11 @@ class ProofActionRouteEpochLedger:
                 successor_epoch = _text(details.get("successor_epoch_id"), "successor_epoch_id")
                 if successor_epoch == event["epoch_id"] or successor_epoch in used_epoch_ids:
                     raise ProofActionRouteEpochError("closed route successor epoch ID was already used")
+                successor_owner = _text(details.get("successor_owner_id"), "successor_owner_id")
+                if successor_owner in used_owner_ids:
+                    raise ProofActionRouteEpochError("closed route successor owner ID was already used")
+                if _route_key(successor) == _route_key(route):
+                    raise ProofActionRouteEpochError("closed route cannot authorize itself as successor")
                 _text(details.get("reason"), "close.reason")
                 if details.get("reason_code") not in REASON_CODES:
                     raise ProofActionRouteEpochError("route close reason code is invalid")
