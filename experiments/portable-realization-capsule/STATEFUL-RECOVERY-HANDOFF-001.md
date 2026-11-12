@@ -4,7 +4,7 @@
 **Version:** 0.1  
 **Status:** implementation and CI validation in progress
 
-SRH-001 composes the Portable Stateful Checkpoint (PSC-001) format with E-CPU's existing quorum-anchored \`TransferableExecutionClaimStore\`. The purpose is to move one pending state transition to a recovery host after the current source becomes unavailable, while preventing a stale source epoch from publishing a competing accepted checkpoint.
+SRH-001 composes the Portable Stateful Checkpoint (PSC-001) format with E-CPU's existing quorum-anchored `TransferableExecutionClaimStore`. The purpose is to move one pending state transition to a recovery host after the current source becomes unavailable, while preventing a stale source epoch from publishing a competing accepted checkpoint.
 
 This is intentionally a recovery/rehome experiment, not yet a graceful source-coordinated migration protocol.
 
@@ -13,11 +13,11 @@ This is intentionally a recovery/rehome experiment, not yet a graceful source-co
 Two different objects move together:
 
 - **State:** the exact PSC-001 checkpoint bytes, including the typed program, current state, logical tick, revision, event chain, resume controls, and one PRC realization capsule per model revision.
-- **Authority:** a compact \`PortableExecutionClaimBundle\` whose claim binds the session identity, exact checkpoint digest, computational Ground, typed deterministic-pure resume operator, owner peer/Host, and implementation fingerprint.
+- **Authority:** a compact `PortableExecutionClaimBundle` whose claim binds the session identity, exact checkpoint digest, computational Ground, typed deterministic-pure resume operator, owner peer/Host, and implementation fingerprint.
 
 The PSC bytes remain the portable runtime state. E-CPU's claim ledger remains the authority for which host may publish the result of the next deterministic continuation. SRH-001 does not create another consensus implementation.
 
-The resume operator is declared as a deterministic pure \`OperatorSpec\`: it maps one exact checkpoint and its embedded controls to the next canonical checkpoint. The local computation may be repeated; the authority ledger decides which matching assignment may publish an accepted result.
+The resume operator is declared as a deterministic pure `OperatorSpec`: it maps one exact checkpoint and its embedded controls to the next canonical checkpoint. The local computation may be repeated; the authority ledger decides which matching assignment may publish an accepted result.
 
 ## 2. Recovery sequence
 
@@ -47,13 +47,13 @@ The tests reuse the PSC-001 reset-dominant two-bit counter and its exact baselin
 - JSON-only serialization and reconstruction of the handoff envelope;
 - stale-source rejection after rehome;
 - exact receiver and implementation matching;
-- restoration and one-step continuation from state \`10\`, tick 3, revision 1 to state \`11\`, tick 4;
+- restoration and one-step continuation from state `10`, tick 3, revision 1 to state `11`, tick 4;
 - receipt-bound checkpoint completion and successor claim issuance;
 - exact reassignment and completion retries;
 - a second recovery after the first recovery host fails before resume;
 - forged checkpoint bytes, altered claim ownership, invalid Base64, wrong receiver, and conflicting completion rejection.
 
-The CI fixture uses three independent durable authority journals and the existing strict-majority \`RecoveryLineageCoordinator\`. The runtime and authority participants are logical peers in one test environment; this is not yet a test over separate physical machines or an actual network transport.
+The CI fixture uses three independent durable authority journals and the existing strict-majority `RecoveryLineageCoordinator`. The runtime and authority participants are logical peers in one test environment; this is not yet a test over separate physical machines or an actual network transport.
 
 ## 5. Limits and next experiments
 
