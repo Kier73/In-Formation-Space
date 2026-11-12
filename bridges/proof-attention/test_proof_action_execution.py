@@ -86,7 +86,7 @@ def make_session(*, transitions=None, receipts=()):
     return session, payload, root_id
 
 
-def add_result(payload, attempt, *, result_status="elaborated", evidence_ref=None, include_receipt=False):
+def add_result_payload(payload, attempt, *, result_status="elaborated", evidence_ref=None):
     updated = copy.deepcopy(payload)
     updated["transitions"].append({
         "source": "root",
@@ -95,6 +95,13 @@ def add_result(payload, attempt, *, result_status="elaborated", evidence_ref=Non
         "attempt_status": result_status,
         "evidence_ref": evidence_ref or attempt.attempt_id,
     })
+    return updated
+
+
+def add_result(payload, attempt, *, result_status="elaborated", evidence_ref=None, include_receipt=False):
+    updated = add_result_payload(
+        payload, attempt, result_status=result_status, evidence_ref=evidence_ref
+    )
     provisional = ground(updated)
     receipts = (accepted_root_receipt(provisional),) if include_receipt else ()
     return ground(updated, receipts)
@@ -250,7 +257,7 @@ class ProofActionExecutionTests(unittest.TestCase):
         session, payload, _ = make_session()
         attempt = session.begin_next()
         execute_to_return(attempt)
-        updated = add_result(payload, attempt)
+        updated = add_result_payload(payload, attempt)
         duplicate = copy.deepcopy(updated["transitions"][-1])
         updated["transitions"].append(duplicate)
         with self.assertRaisesRegex(ProofActionExecutionError, "exactly one result edge"):
