@@ -57,6 +57,33 @@ The Python API is in authority_lineage.py:
 
 The JSON Schema defines the portable envelope. The Python validator adds cross-entry rules that JSON Schema alone cannot establish, including parent existence, proposal acceptance order, same-event ancestry, generation calculation, and frontier consistency.
 
+## Deterministic review certificates
+
+`review_certificates.py` adds a review record between proposal creation and proposal resolution:
+
+1. `build_review_certificate()` binds the complete proposal payload, its base decision IDs and decision digests, the ledger identity, and the exact frozen policy definition.
+2. Each submitted reviewer receipt records a seat, reviewer reference, APPROVE / REJECT / ABSTAIN vote, rationale, review-artifact reference, and SHA-256 digest of that artifact.
+3. The evaluator reconstructs missing seats as ABSENT, applies the selected policy, and records the full outcome and threshold explanation.
+4. `record_review_certificate()` appends the complete certificate to the same authority-lineage hash chain.
+5. `resolve_reviewed_proposal()` resolves from that recorded certificate. The resolution includes `review_certificate_digest`; the ledger validator rejects a contradictory outcome.
+6. If the authority frontier changes after certification but before resolution, the review is retained and the proposal resolves as STALE. It cannot authorize a superseding decision.
+
+The current certificate profile intentionally reuses the finite three-seat model in [Authority Adjudication Policy Space](../../experiments/authority-adjudication-space/README.md): R00 is the proposer and R01/R02 are independent-review roles. A policy that excludes the proposer still retains an R00 vote if supplied, but the evaluator explicitly excludes it from eligible counts. Abstentions count as participation, not approval or rejection. Missing seats are not invented.
+
+The certificate can be reconstructed with `validate_review_certificate()`; `validate_review_certificates_in_ledger()` checks every embedded certificate. The example runner creates an initial decision, a revision proposal, two independent review receipts, a recorded certificate, a certificate-bound resolution, and a superseding decision:
+
+    python bridges/authority-lineage/review_certificate_demo.py --output results/review-certificate-example.json
+
+The CI workflow runs this example and uploads the resulting ledger/certificate artifact. The tests also alter votes, base-decision digests, and resolution outcomes to ensure the reconstruction and binding checks reject those inconsistencies.
+
+### Security and trust boundary
+
+The certificate is **deterministic and tamper-evident, not authenticated**. Reviewer references such as `agent://reviewer-one` are labels; the implementation cannot establish that they represent separate agents, that a receipt was actually authored by that reviewer, or that the reviewer was eligible and independent. A review-artifact digest binds bytes only when an independent verifier obtains and hashes the referenced artifact. The ledger's SHA-256 chain likewise does not authenticate actors or prevent a party who can rewrite the entire ledger from recomputing it.
+
+The policy evaluator is a frozen, versioned application contract, not a proof that the policy is wise or accurate. An accepted certificate authorizes the lineage workflow to issue a new decision; it does not by itself establish that the reviewed claim is true, that an E-CPU VM applied it, or that any external party must accept it.
+
+For interoperable signatures, the next layer should use a standard canonicalization and credential/signature format rather than treating the current Python JSON serializer as a cross-language signing specification. See [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html) and the [W3C Verifiable Credentials Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/). Those standards inform future work; this iteration does not claim conformance.
+
 ## Observation evidence adapter
 
 The companion observation_adapter.py connects the existing evidence-gated observation records to this lineage ledger without changing E-CPU.
