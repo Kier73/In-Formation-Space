@@ -65,7 +65,7 @@ jobs:
           PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
           ECPU_REVISION: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
           VGI_REVISION: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
-          IFS_REVISION: \${{ github.event.pull_request.head.sha || github.sha }}
+          IFS_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
         run: >-
           python experiments/realization-cost-navigation/run_experiment.py
           --output experiments/realization-cost-navigation/results/ci-result.json
