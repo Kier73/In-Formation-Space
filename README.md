@@ -153,3 +153,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Portable realization capsules
 
 - [PRC-001: Portable realization capsule](experiments/portable-realization-capsule/README.md) — **verified: 288 capsules, 49,104 pre/post-package semantic comparisons, and complete header/payload tamper rejection**. The [run record](experiments/portable-realization-capsule/results/ci-run-43317088331.md) records metadata overhead and exact source pins.
+
+## Compact provenance and capsule bundles
+
+- [CPB-001: Compressed standalone capsules and shared-provenance bundles](experiments/compact-provenance-bundles/README.md) — compares zlib-compressed PRC-001 headers, six per-encoding shared bundles and one 288-entry global bundle. The [verification record](experiments/compact-provenance-bundles/results/ci-run-43319093051.md) distinguishes size savings against raw capsules from the larger size relative to compressed standalone capsules.
