@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import unittest
 from pathlib import Path
@@ -57,7 +58,7 @@ def vote(seat, reviewer_ref, state, suffix):
         "vote": state,
         "rationale": f"{seat} reviewed the cited proposal and records {state}.",
         "review_ref": f"review://{suffix}",
-        "review_sha256": suffix[0].lower() * 64,
+        "review_sha256": hashlib.sha256(suffix.encode("utf-8")).hexdigest(),
     }
 
 
