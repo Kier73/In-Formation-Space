@@ -321,8 +321,9 @@ def _dimension_analysis(
             observed_groups[key].append(record)
 
     full_groups = {
-        key: [record for record in group if _is_full(record)]
+        key: full
         for key, group in observed_groups.items()
+        if (full := [record for record in group if _is_full(record)])
     }
     full_records = [
         record
@@ -379,8 +380,9 @@ def _joint_analysis(
         grouped[key].append(record)
 
     full_groups = {
-        key: [record for record in group if _is_full(record)]
+        key: full
         for key, group in grouped.items()
+        if (full := [record for record in group if _is_full(record)])
     }
     full_records = [
         record
