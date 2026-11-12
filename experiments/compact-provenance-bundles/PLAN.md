@@ -34,3 +34,8 @@ The current shared-manifest bundle remains larger than header-compressed standal
 ## Final PR-head acceptance
 
 The final pinned [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43319482543) passed capsule/bundle/E-CPU tests, 49,104 pre/post-compression semantic comparisons, exact standalone reconstruction for all 288 bundle entries, and nested tamper rejection. See the [final-head evidence record](results/ci-run-43319482543.md).
+
+
+## Integrated mainline receiver acceptance
+
+After merging the independent PRC canonical metadata profile and Node.js receiver, the final [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43320231327) passed syntax, Python/Node capsule checks, E-CPU sparse tests, complete compression/replay corpus, all bundle round trips, nested tamper rejection and artifact upload. See the [integrated evidence record](results/ci-run-43320231327.md).
