@@ -177,3 +177,22 @@ SRE-001 showed that a sparse model can carry fewer nonzero scalar parameters and
 5. Can these exact portable encodings become transportable E-CPU realization objects while retaining source Ground identity, semantic translation contracts, and replay evidence?
 
 The first finite-domain comparison is [SRE-002](../experiments/sparse-encoding-landscape/README.md). It treats byte size, exact reconstruction, and encode/decode work as independent measures.
+
+
+---
+
+## 9. Portable Realization Identity and Evidence
+
+### The Problem
+
+SRE-002 compares exact encodings, but a codec payload alone does not carry all context needed to understand where it came from, which source description it realizes, which interface it expects, which compiler route produced it, or what was verified about it. Without those links, a compact byte sequence is easy to detach from its semantics and evidence.
+
+### Questions
+
+1. Can an encoded realization be packaged with its source Ground digest, dense/sparse model identity, interface, codec, compiler route, and exact toolchain revisions?
+2. Can another process validate the capsule framing and payload integrity before invoking any codec-specific decoder?
+3. Can a verification receipt describe the complete finite domain, independent reference, Semantic TranslationContract comparisons, and case-evidence digest in a replayable way?
+4. How should an execution host distinguish integrity, authenticity, authorization, semantic equivalence, and formal proof instead of treating one digest as all five?
+5. What minimal metadata is sufficient for a receiver to reconstruct, verify, admit, and execute a portable realization without depending on the creator's process memory?
+
+The first implementation is [PRC-001](../experiments/portable-realization-capsule/README.md). It preserves these distinctions and explicitly leaves signatures, trust policy, transport, admission, and remote execution as future work.
