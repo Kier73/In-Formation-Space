@@ -48,3 +48,8 @@ The final [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/action
 ## Final Node-verified PR-head run
 
 The final [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43320550536) passed with the independent PRC Node receiver enabled. The complete 288-capsule corpus, byte-identical bundle reconstruction, nested tamper probes, and pre/post-compression replay all passed. The [final integrated receipt](results/ci-run-43320550536.md) records the strict canonical metadata profile, exact source revisions and artifact digests.
+
+
+## Mainline receiver integration
+
+CPB-001 now carries the independent PRC-001 canonical metadata v1 profile and Node.js receiver from mainline. The CPB verification workflow installs Node 22 and executes the cross-language capsule test before the 288-entry corpus; the [integrated successful run](https://github.com/Kier73/In-Formation-Space/actions/runs/43320231327) demonstrates exact bundle reconstruction under that stricter receiver.
