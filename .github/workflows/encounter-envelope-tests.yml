@@ -86,6 +86,10 @@ jobs:
         run: python -m unittest discover -s bridges/observation-equivalence -p "test_*.py" -v
       - name: Run clock-domain temporal provenance tests
         run: python -m unittest discover -s bridges/temporal-provenance -p "test_*.py" -v
+      - name: Run direct pinned E-CPU temporal-frame interoperability test
+        env:
+          PYTHONPATH: external/E-CPU
+        run: python -m unittest discover -s bridges/temporal-provenance -p "test_ecpu_temporal_interop.py" -v
       - name: Generate clock-domain temporal provenance example
         run: python bridges/temporal-provenance/demonstration.py --output "${{ runner.temp }}/temporal-provenance-example.json"
       - name: Upload clock-domain temporal provenance example
