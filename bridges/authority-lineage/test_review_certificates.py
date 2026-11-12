@@ -9,6 +9,7 @@ import jsonschema
 from authority_lineage import (
     create_ledger,
     decision_frontier,
+    digest,
     event_entries,
     issue_decision,
     propose_revision,
@@ -60,6 +61,21 @@ def vote(seat, reviewer_ref, state, suffix):
         "review_ref": f"review://{suffix}",
         "review_sha256": hashlib.sha256(suffix.encode("utf-8")).hexdigest(),
     }
+
+
+def rehash_ledger(ledger):
+    previous = "0" * 64
+    for entry in ledger["entries"]:
+        entry["previous_digest"] = previous
+        core = {
+            key: entry[key]
+            for key in ("sequence", "entry_type", "actor", "previous_digest", "payload")
+        }
+        entry["entry_digest"] = digest(core)
+        previous = entry["entry_digest"]
+    ledger["ledger_digest"] = digest(
+        [entry["entry_digest"] for entry in ledger["entries"]]
+    )
 
 
 class ReviewCertificateTests(unittest.TestCase):
@@ -247,6 +263,35 @@ class ReviewCertificateTests(unittest.TestCase):
         altered["certificate_digest"] = digest(core)
         with self.assertRaises(ReviewCertificateError):
             validate_review_certificate(ledger, altered)
+
+    def test_ordinary_ledger_validation_reconstructs_embedded_certificate_policy(self):
+        ledger, _, proposal_id = initial_proposal()
+        certificate = build_review_certificate(
+            ledger,
+            proposal_id,
+            policy_name="independent_two_of_two",
+            votes=[
+                vote("R01", "agent://reviewer-one", "APPROVE", "One"),
+                vote("R02", "agent://reviewer-two", "APPROVE", "Two"),
+            ],
+        )
+        ledger = record_review_certificate(ledger, certificate, recorded_by="review-coordinator")
+        altered = copy.deepcopy(ledger)
+        cert_entry = next(
+            item for item in altered["entries"]
+            if item["entry_type"] == "proposal_review_certified"
+        )
+        changed = cert_entry["payload"]["certificate"]
+        changed["votes"][1]["vote"] = "REJECT"
+        cert_core = {
+            key: value for key, value in changed.items()
+            if key != "certificate_digest"
+        }
+        changed["certificate_digest"] = digest(cert_core)
+        cert_entry["payload"]["certificate_digest"] = changed["certificate_digest"]
+        rehash_ledger(altered)
+        with self.assertRaises(ReviewCertificateError):
+            validate_ledger(altered)
 
     def test_certificate_is_bound_to_proposal_and_base_decision_digests(self):
         ledger, _, proposal_id = initial_proposal()
