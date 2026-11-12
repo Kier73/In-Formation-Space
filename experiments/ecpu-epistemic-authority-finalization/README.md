@@ -136,6 +136,10 @@ This is not treated like S00 versus S01 disagreement. The pinned ObservationCons
 
 These probes exercise the consensus layer directly, not the reliable transport path: the transport's per-source FIFO and evidence-link constraints make a same-event second payload from one source a separate integration problem. The distinction is recorded rather than bypassed.
 
+The six probes completed in [GitHub Actions run 341](https://github.com/Kier73/In-Formation-Space/actions/runs/43136797999), with the full repository workflow passing. All six attempts recorded S00 as the equivocal source, restored the CONFLICT state from a consensus snapshot, rejected a late new source and a late changed value, and preserved an exact replay of the first S00 observation as idempotent. The [run 341 receipt](results/ci-run-341-summary.json) includes the artifact ZIP digest, source JSON digests, probe digest, and aggregate invariants.
+
+The pre-equivocation status was PENDING in the three strict=true probes and QUORUM in the three strict=false probes. In every case, the second contradictory S00 payload forced CONFLICT. This is stronger than ordinary permissive dissent handling: strict=false tolerates different sources disagreeing, but it does not allow one source to rewrite its own event evidence.
+
 ## Retained artifacts
 
 CI uploads:
