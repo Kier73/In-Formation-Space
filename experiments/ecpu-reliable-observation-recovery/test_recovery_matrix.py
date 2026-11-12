@@ -12,6 +12,49 @@ from run_recovery_matrix import (
 )
 
 
+def valid_attempt_record():
+    sources = ["S00", "S01", "S02", "S03"]
+    return {
+        "source_count": 4,
+        "quorum": 2,
+        "drop_first_data_frame": True,
+        "drop_first_ack": True,
+        "source_ids": sources,
+        "initial_admitted_sources": sources[1:],
+        "authorization_status": "AUTHORIZED",
+        "authorization_quorum": 2,
+        "admitted_source_count_after_recovery": 4,
+        "data_retry_count": 1,
+        "data_recovery_link_count": 1,
+        "ack_retry_count": 1,
+        "duplicate_cleanup_count": 1,
+        "initial_acknowledged": {
+            "S00": [], "S01": [1], "S02": [1], "S03": [1],
+        },
+        "pending_after_initial_acks": {
+            "S00": [1], "S01": [], "S02": [], "S03": [],
+        },
+        "recovery_acknowledged": {
+            "S00": [1], "S01": [], "S02": [], "S03": [],
+        },
+        "final_pending_sequences": {
+            "S00": [], "S01": [], "S02": [], "S03": [],
+        },
+        "injected_drops": [
+            {"source": "S00", "send_index": 1},
+            {"source": "S00", "send_index": 3},
+        ],
+        "application_count": 1,
+        "register_readback": 1,
+        "checkpoint_call_count": 11,
+        "checkpoint_digests": ["a" * 64] * 11,
+        "checkpoint_digest_reconstructed": True,
+        "durable_log_verified": True,
+        "durable_log_sequence": 64,
+        "durable_log_head": "b" * 64,
+    }
+
+
 class RecoveryMatrixTests(unittest.TestCase):
     def test_source_count_and_quorum_are_orthogonally_crossed(self):
         conditions = matrix_conditions()
@@ -89,26 +132,35 @@ class RecoveryMatrixTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "quorum"):
             validate_condition(invalid)
 
-    def test_attempt_contract_rejects_double_application(self):
-        valid = {
-            "source_count": 4,
-            "drop_first_data_frame": True,
-            "drop_first_ack": True,
-            "authorization_status": "AUTHORIZED",
-            "admitted_source_count_after_recovery": 4,
-            "data_retry_count": 1,
-            "data_recovery_link_count": 1,
-            "ack_retry_count": 1,
-            "duplicate_cleanup_count": 1,
-            "application_count": 1,
-            "register_readback": 1,
-            "checkpoint_digest_reconstructed": True,
-            "durable_log_verified": True,
-            "final_pending_sequences": {"S00": [], "S01": [], "S02": [], "S03": []},
-        }
+    def test_attempt_receipt_checks_exactly_once_and_recovery_boundaries(self):
+        valid = valid_attempt_record()
         self.assertEqual(validate_attempt_result(valid), valid)
+
         invalid = dict(valid, application_count=2)
         with self.assertRaisesRegex(ValueError, "exactly once"):
+            validate_attempt_result(invalid)
+
+        invalid = dict(
+            valid,
+            recovery_acknowledged={
+                "S00": [], "S01": [], "S02": [], "S03": [],
+            },
+        )
+        with self.assertRaisesRegex(ValueError, "recovery ACK receipts"):
+            validate_attempt_result(invalid)
+
+        invalid = dict(
+            valid,
+            injected_drops=[{"source": "S00", "send_index": 1}],
+        )
+        with self.assertRaisesRegex(ValueError, "injected drops"):
+            validate_attempt_result(invalid)
+
+    def test_checkpoint_protocol_count_scales_with_source_count(self):
+        record = valid_attempt_record()
+        self.assertEqual(record["checkpoint_call_count"], 2 * record["source_count"] + 3)
+        invalid = dict(record, checkpoint_call_count=record["checkpoint_call_count"] - 1)
+        with self.assertRaisesRegex(ValueError, "checkpoint count"):
             validate_attempt_result(invalid)
 
 
