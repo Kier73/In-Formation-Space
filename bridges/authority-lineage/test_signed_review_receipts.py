@@ -140,13 +140,17 @@ class SignedReviewReceiptTests(unittest.TestCase):
             verify_signed_review_vote(envelopes[0], altered)
 
     def test_trust_store_cannot_relabel_public_key_without_fingerprint_change(self):
-        _, trust_store, _, _, _ = signed_fixture()
+        certificate, trust_store, envelopes, _, private_keys = signed_fixture()
         altered = copy.deepcopy(trust_store)
-        envelope = sign_review_vote(
-            build_demonstration()["certificate"]["votes"][0],
-            Ed25519PrivateKey.generate(),
+        target = altered["keys"][0]
+        target_vote = next(
+            vote for vote in certificate["votes"]
+            if vote["reviewer_ref"] == target["principal"]
         )
-        altered["keys"][0]["public_key"] = base64.b64encode(b"x" * 32).decode("ascii")
+        envelope = sign_review_vote(
+            target_vote, private_keys[target["principal"]]
+        )
+        target["public_key"] = base64.b64encode(b"x" * 32).decode("ascii")
         with self.assertRaises(SignedReviewError):
             verify_signed_review_vote(envelope, altered)
 
