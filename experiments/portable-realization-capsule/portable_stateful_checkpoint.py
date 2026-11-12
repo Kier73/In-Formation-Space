@@ -275,20 +275,32 @@ def restore_runtime(checkpoint: bytes) -> StatefulTransitionRuntime:
         raise PortableStatefulCheckpointError("unsupported stateful runtime compiler")
     _require_digest(projection["current_model_digest"], "runtime.current_model_digest")
 
+    declared_revision = _require_int(projection["revision"], "runtime.revision")
     realization_records = header["realizations"]
-    if not isinstance(realization_records, list) or len(realization_records) != projection["revision"] + 1:
+    if not isinstance(realization_records, list) or len(realization_records) != declared_revision + 1:
         raise PortableStatefulCheckpointError("checkpoint realization revision count is invalid")
+
+    programs = [projection["initial_program"]]
+    for event in projection["events"]:
+        if isinstance(event, Mapping) and event.get("kind") == "revision":
+            programs.append(event.get("target_program"))
+    if len(programs) != len(realization_records):
+        raise PortableStatefulCheckpointError("runtime revisions and realization capsules do not align")
+
     capsules: list[bytes] = []
-    for revision, record in enumerate(realization_records):
+    for revision, (record, program_payload) in enumerate(zip(realization_records, programs)):
         if not isinstance(record, Mapping) or set(record) != {
             "revision", "program_digest", "model_digest", "capsule_sha256", "capsule_base64"
         }:
             raise PortableStatefulCheckpointError("realization record fields are invalid")
         if _require_int(record["revision"], "realization.revision") != revision:
             raise PortableStatefulCheckpointError("realization revisions are not contiguous")
+        program = FiniteTransitionProgram.from_dict(program_payload)
         _require_digest(record["program_digest"], "realization.program_digest")
         _require_digest(record["model_digest"], "realization.model_digest")
         _require_digest(record["capsule_sha256"], "realization.capsule_sha256")
+        if record["program_digest"] != program.digest:
+            raise PortableStatefulCheckpointError("realization program digest is inconsistent")
         try:
             capsule = base64.b64decode(record["capsule_base64"], validate=True)
         except (ValueError, TypeError) as exc:
@@ -297,6 +309,20 @@ def restore_runtime(checkpoint: bytes) -> StatefulTransitionRuntime:
             raise PortableStatefulCheckpointError("realization capsule base64 is not canonical")
         if _sha256(capsule) != record["capsule_sha256"]:
             raise PortableStatefulCheckpointError("realization capsule digest mismatch")
+        try:
+            capsule_header, _ = decode_capsule(capsule)
+        except PortableRealizationError as exc:
+            raise PortableStatefulCheckpointError("nested realization capsule failed validation") from exc
+        if (
+            capsule_header["codec"]["name"] != "hybrid_binary"
+            or capsule_header["source"]["kind"] != "transition_program"
+            or capsule_header["source"]["program_digest"] != program.digest
+            or capsule_header["source"]["ground_digest"] != program.digest
+            or capsule_header["realization"]["dense_model_digest"] != record["model_digest"]
+            or capsule_header["interface"]["input_names"] != list(program.input_names)
+            or capsule_header["interface"]["output_names"] != list(program.output_names)
+        ):
+            raise PortableStatefulCheckpointError("nested realization capsule binding is inconsistent")
         capsules.append(capsule)
 
     snapshot_for_runtime = {
@@ -344,7 +370,8 @@ def restore_runtime(checkpoint: bytes) -> StatefulTransitionRuntime:
             raise PortableStatefulCheckpointError("runtime event differs from its replay")
 
     if (
-        runtime.program.digest != FiniteTransitionProgram.from_dict(
+        runtime.snapshot()["genesis_digest"] != snapshot_for_runtime["genesis_digest"]
+        or runtime.program.digest != FiniteTransitionProgram.from_dict(
             snapshot_for_runtime["current_program"]
         ).digest
         or runtime.model_digest != projection["current_model_digest"]
