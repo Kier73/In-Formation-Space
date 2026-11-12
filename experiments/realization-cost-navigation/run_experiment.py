@@ -337,6 +337,7 @@ def _vgi_observer(table):
     task = TaskSpec(table.name, addresses + ("input.zero", "input.one"), outputs)
     backend = Signal8Backend()
     interpreter = VirtualGroundInterpreter()
+    compiled_program = interpreter.compile_task(task)
 
     def observe(inputs: tuple[int, ...]) -> tuple[int, ...]:
         memory = {
@@ -348,7 +349,7 @@ def _vgi_observer(table):
         }
         memory["input.zero"] = backend.encode_symbol(0, observer=1)
         memory["input.one"] = backend.encode_symbol(4, observer=7)
-        result = interpreter.interpret(task, memory)
+        result = interpreter.execute(compiled_program, memory)
         observed = result.observed_outputs(backend)
         return tuple(decode_boolean_signal(observed[name]) for name in table.output_names)
 
