@@ -117,8 +117,6 @@ def _route_document(host: Any, worker: Any) -> dict[str, Any]:
         "request_channel": host.request_channel,
         "result_channel": host.result_channel,
         "policy": _policy_document(host.policy),
-        "session_digest": host.session.to_dict()["session_digest"],
-        "proof_ground_digest": host.session.plan["proof_ground_digest"],
     }
 
 
@@ -137,7 +135,7 @@ def _validate_route(route: Any) -> dict[str, Any]:
     copied = _copy(dict(route))
     required = {
         "host_id", "worker_id", "request_channel", "result_channel",
-        "policy", "session_digest", "proof_ground_digest",
+        "policy",
     }
     if set(copied) != required:
         raise ProofActionRouteEpochError("route description fields are invalid")
@@ -649,8 +647,6 @@ def handoff_proof_action_route_epoch(
         "request_channel": _text(successor_request_channel, "successor_request_channel"),
         "result_channel": _text(successor_result_channel, "successor_result_channel"),
         "policy": _policy_document(host.policy),
-        "session_digest": postclose_session_digest,
-        "proof_ground_digest": host.session.plan["proof_ground_digest"],
     }
     successor_route = _validate_route(successor_route)
     if reason_code not in REASON_CODES:
