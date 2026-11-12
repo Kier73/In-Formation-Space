@@ -665,6 +665,7 @@ class ProofActionRouteEpochLedger:
         active: dict[str, Any] | None = None
         used_epoch_ids: set[str] = set()
         used_route_keys: set[tuple[str, str, str, str]] = set()
+        used_owner_ids: set[str] = set()
         last_close_digest: str | None = None
         for index, raw in enumerate(raw_entries, 1):
             if not isinstance(raw, Mapping):
@@ -695,48 +696,73 @@ class ProofActionRouteEpochLedger:
                 raise ProofActionRouteEpochError("route ledger event details must be an object")
 
             if event["event_type"] == "opened":
+                if set(details) != {"predecessor_close_digest", "owner_generation", "owner_id"}:
+                    raise ProofActionRouteEpochError("opened route event details are invalid")
                 if active is not None:
                     raise ProofActionRouteEpochError("route ledger opens an epoch before closing its predecessor")
                 if event["epoch_id"] in used_epoch_ids or _route_key(route) in used_route_keys:
                     raise ProofActionRouteEpochError("route ledger reuses an epoch or route identity")
+                if event["epoch_number"] != len(used_epoch_ids) + 1:
+                    raise ProofActionRouteEpochError("route epoch number is not contiguous")
                 predecessor = details.get("predecessor_close_digest")
                 if predecessor != last_close_digest:
                     raise ProofActionRouteEpochError("route successor predecessor reference is invalid")
-                if details.get("owner_generation") != 1:
+                if type(details.get("owner_generation")) is not int or details["owner_generation"] != 1:
                     raise ProofActionRouteEpochError("new epoch must begin at owner generation one")
-                _text(details.get("owner_id"), "opened.owner_id")
+                owner = _text(details.get("owner_id"), "opened.owner_id")
+                if owner in used_owner_ids:
+                    raise ProofActionRouteEpochError("route owner ID was already used")
+                used_owner_ids.add(owner)
                 used_epoch_ids.add(event["epoch_id"])
                 used_route_keys.add(_route_key(route))
                 active = event
             elif event["event_type"] == "claimed":
+                if set(details) != {"owner_generation", "previous_owner_id", "owner_id"}:
+                    raise ProofActionRouteEpochError("claimed route event details are invalid")
                 if active is None or active["epoch_id"] != event["epoch_id"]:
                     raise ProofActionRouteEpochError("route claim targets a non-active epoch")
                 if event["epoch_number"] != active["epoch_number"] or route != active["route"]:
                     raise ProofActionRouteEpochError("route claim differs from active route")
-                if details.get("owner_generation") != active["details"]["owner_generation"] + 1:
+                if type(details.get("owner_generation")) is not int or details["owner_generation"] != active["details"]["owner_generation"] + 1:
                     raise ProofActionRouteEpochError("route owner generation is not monotonic")
                 if details.get("previous_owner_id") != active["details"]["owner_id"]:
                     raise ProofActionRouteEpochError("route claim omits the prior owner")
                 new_owner = _text(details.get("owner_id"), "claim.owner_id")
-                if new_owner == active["details"]["owner_id"]:
-                    raise ProofActionRouteEpochError("route claim reuses its prior owner")
+                if new_owner in used_owner_ids:
+                    raise ProofActionRouteEpochError("route claim reuses a historical owner ID")
+                used_owner_ids.add(new_owner)
                 active = event
             elif event["event_type"] == "closed":
+                expected_close_fields = {
+                    "owner_generation", "owner_id", "reason_code", "reason",
+                    "preclose_session_digest", "postclose_session_digest",
+                    "pair_checkpoint", "pair_checkpoint_digest", "uncertainty",
+                    "successor_epoch_id", "successor_route",
+                }
+                if set(details) != expected_close_fields:
+                    raise ProofActionRouteEpochError("closed route event details are invalid")
                 if active is None or active["epoch_id"] != event["epoch_id"]:
                     raise ProofActionRouteEpochError("route ledger closes a non-active epoch")
                 if event["epoch_number"] != active["epoch_number"] or route != active["route"]:
                     raise ProofActionRouteEpochError("route ledger close does not match its open event")
                 if details.get("owner_generation") != active["details"]["owner_generation"] or details.get("owner_id") != active["details"]["owner_id"]:
                     raise ProofActionRouteEpochError("route close does not match current owner")
-                _sha256(details.get("pair_checkpoint_digest"), "pair_checkpoint_digest")
-                _sha256(details.get("preclose_session_digest"), "preclose_session_digest")
+                preclose_digest = _sha256(details.get("preclose_session_digest"), "preclose_session_digest")
                 _sha256(details.get("postclose_session_digest"), "postclose_session_digest")
-                if _digest(details.get("pair_checkpoint")) != details["pair_checkpoint_digest"]:
+                checkpoint = _validate_pair_checkpoint_binding(
+                    details.get("pair_checkpoint"),
+                    route=route,
+                    preclose_session_digest=preclose_digest,
+                )
+                checkpoint_digest = _sha256(details.get("pair_checkpoint_digest"), "pair_checkpoint_digest")
+                if _digest(checkpoint) != checkpoint_digest:
                     raise ProofActionRouteEpochError("closed route checkpoint digest mismatch")
+                uncertainty = _validate_uncertainty_projection(details.get("uncertainty"))
                 successor = _validate_route(details.get("successor_route"))
-                if _route_key(successor) in used_route_keys:
+                if _route_key(successor) == _route_key(route) or _route_key(successor) in used_route_keys:
                     raise ProofActionRouteEpochError("closed route successor identity was already used")
-                if details.get("successor_epoch_id") in used_epoch_ids:
+                successor_epoch = _text(details.get("successor_epoch_id"), "successor_epoch_id")
+                if successor_epoch == event["epoch_id"] or successor_epoch in used_epoch_ids:
                     raise ProofActionRouteEpochError("closed route successor epoch ID was already used")
                 _text(details.get("reason"), "close.reason")
                 if details.get("reason_code") not in REASON_CODES:
