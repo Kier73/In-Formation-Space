@@ -15,8 +15,9 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 import hashlib
 import json
+import threading
 import uuid
-from typing import Any
+from typing import Any, Protocol
 
 from mailcpu.reliability import ReliabilityPolicy
 from mailcpu.transport import Transport
@@ -226,11 +227,67 @@ def _uncertainty_projection(pair_checkpoint: Mapping[str, Any]) -> dict[str, Any
     }
 
 
-class ProofActionRouteEpochLedger:
-    """Append-only, hash-chained route ownership history."""
+class RouteEpochLedgerStore(Protocol):
+    """Atomic durable authority contract for a route-epoch ledger.
 
-    def __init__(self) -> None:
+    Implementations must make compare_and_swap linearizable across all hosts and
+    workers. A local cache or eventually consistent document store is insufficient
+    for fencing stale process owners.
+    """
+
+    def load(self) -> Mapping[str, Any] | None: ...
+
+    def compare_and_swap(
+        self,
+        expected_ledger_digest: str | None,
+        replacement: Mapping[str, Any],
+    ) -> bool: ...
+
+
+class InMemoryRouteEpochLedgerStore:
+    """Thread-safe CAS reference store for deterministic tests and simulations."""
+
+    def __init__(self, initial: Mapping[str, Any] | None = None) -> None:
+        self._lock = threading.RLock()
+        self._document = None if initial is None else _copy(dict(initial))
+
+    def load(self) -> dict[str, Any] | None:
+        with self._lock:
+            return None if self._document is None else _copy(self._document)
+
+    def compare_and_swap(
+        self,
+        expected_ledger_digest: str | None,
+        replacement: Mapping[str, Any],
+    ) -> bool:
+        candidate = _copy(dict(replacement))
+        if set(candidate) != {"format", "entries", "ledger_digest"}:
+            raise ProofActionRouteEpochError("CAS replacement is not a route ledger document")
+        supplied_digest = _sha256(candidate["ledger_digest"], "replacement.ledger_digest")
+        candidate_core = {key: value for key, value in candidate.items() if key != "ledger_digest"}
+        if _digest(candidate_core) != supplied_digest:
+            raise ProofActionRouteEpochError("CAS replacement ledger digest is invalid")
+        with self._lock:
+            current_digest = (
+                None if self._document is None else self._document["ledger_digest"]
+            )
+            if current_digest != expected_ledger_digest:
+                return False
+            self._document = candidate
+            return True
+
+
+class ProofActionRouteEpochLedger:
+    """Append-only, hash-chained route ownership history with optional atomic authority."""
+
+    def __init__(self, store: RouteEpochLedgerStore | None = None) -> None:
         self._entries: list[dict[str, Any]] = []
+        self._store = store
+        if store is not None:
+            stored = store.load()
+            if stored is not None:
+                restored = type(self).from_dict(stored)
+                self._entries = restored._entries
 
     @property
     def entries(self) -> tuple[dict[str, Any], ...]:
@@ -268,8 +325,31 @@ class ProofActionRouteEpochLedger:
             "previous_event_digest": previous,
         }
         event = {**core, "event_digest": _digest(core)}
+        if self._store is not None:
+            expected_digest = (
+                self.to_dict()["ledger_digest"] if self._entries else None
+            )
+            next_entries = [*self._entries, event]
+            next_core = {"format": LEDGER_FORMAT, "entries": next_entries}
+            replacement = {**next_core, "ledger_digest": _digest(next_core)}
+            if not self._store.compare_and_swap(expected_digest, replacement):
+                raise ProofActionRouteEpochError(
+                    "route ledger compare-and-swap conflict; refresh before retrying"
+                )
         self._entries.append(event)
         return _copy(event)
+
+    def refresh(self) -> None:
+        """Reload the latest authoritative ledger revision from the configured store."""
+        if self._store is None:
+            return
+        stored = self._store.load()
+        if stored is None:
+            if self._entries:
+                raise ProofActionRouteEpochError("authoritative route ledger disappeared")
+            return
+        restored = type(self).from_dict(stored)
+        self._entries = restored._entries
 
     def _all_routes(self) -> list[dict[str, Any]]:
         return [entry["route"] for entry in self._entries if entry["event_type"] == "opened"]
@@ -282,6 +362,7 @@ class ProofActionRouteEpochLedger:
         owner_id: str,
         predecessor_close_digest: str | None = None,
     ) -> dict[str, Any]:
+        self.refresh()
         epoch_id = _text(epoch_id, "epoch_id")
         checked_route = _validate_route(route)
         if self.active_epoch is not None:
@@ -308,6 +389,7 @@ class ProofActionRouteEpochLedger:
 
     def claim_epoch(self, epoch_id: str, *, owner_id: str) -> dict[str, Any]:
         """Transfer ownership to a new process generation on the same route."""
+        self.refresh()
         active = self.active_epoch
         owner_id = _text(owner_id, "owner_id")
         if active is None or active["epoch_id"] != epoch_id:
@@ -333,6 +415,7 @@ class ProofActionRouteEpochLedger:
         successor_epoch_id: str,
         successor_route: Mapping[str, Any],
     ) -> dict[str, Any]:
+        self.refresh()
         active = self.active_epoch
         if active is None or active["epoch_id"] != epoch_id:
             raise ProofActionRouteEpochError("only the active route epoch can be closed")
@@ -396,6 +479,21 @@ class ProofActionRouteEpochLedger:
             raise ProofActionRouteEpochError(
                 f"route epoch {epoch_id!r} is closed or superseded"
             )
+        if self._store is not None:
+            authoritative = self._store.load()
+            if authoritative is None:
+                raise ProofActionRouteEpochError("authoritative route ledger is unavailable")
+            current = type(self).from_dict(authoritative).active_epoch
+            if (
+                current is None
+                or current["epoch_id"] != epoch_id
+                or current["route_digest"] != route_digest
+                or current["owner_id"] != owner_id
+                or current["owner_generation"] != owner_generation
+            ):
+                raise ProofActionRouteEpochError(
+                    f"route epoch {epoch_id!r} is superseded in the authoritative store"
+                )
 
     def to_dict(self) -> dict[str, Any]:
         core = {
@@ -405,7 +503,12 @@ class ProofActionRouteEpochLedger:
         return {**core, "ledger_digest": _digest(core)}
 
     @classmethod
-    def from_dict(cls, payload: Mapping[str, Any]) -> "ProofActionRouteEpochLedger":
+    def from_dict(
+        cls,
+        payload: Mapping[str, Any],
+        *,
+        store: RouteEpochLedgerStore | None = None,
+    ) -> "ProofActionRouteEpochLedger":
         if not isinstance(payload, Mapping):
             raise ProofActionRouteEpochError("route ledger must be an object")
         supplied = _copy(dict(payload))
@@ -507,6 +610,13 @@ class ProofActionRouteEpochLedger:
             restored._entries.append(event)
         if restored.to_dict()["ledger_digest"] != ledger_digest:
             raise ProofActionRouteEpochError("restored route ledger digest mismatch")
+        if store is not None:
+            authoritative = store.load()
+            if authoritative is None or authoritative.get("ledger_digest") != ledger_digest:
+                raise ProofActionRouteEpochError(
+                    "supplied route ledger does not match the authoritative store revision"
+                )
+            restored._store = store
         return restored
 
 
@@ -701,6 +811,8 @@ def handoff_proof_action_route_epoch(
 __all__ = [
     "LEDGER_FORMAT",
     "REASON_CODES",
+    "RouteEpochLedgerStore",
+    "InMemoryRouteEpochLedgerStore",
     "ProofActionRouteEpochError",
     "ProofActionRouteEpochLedger",
     "ProofActionRouteHandoff",
