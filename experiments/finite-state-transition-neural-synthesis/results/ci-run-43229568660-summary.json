@@ -1,0 +1,87 @@
+{
+  "schema": "in-formation-space.finite-state-transition-neural-synthesis.v6",
+  "status": "verified-within-complete-finite-domain-and-declared-runtime-scenario",
+  "workflow_run_id": 43229568660,
+  "workflow_url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43229568660",
+  "workflow_head": "f0c985fb8bc322467c528a3fa5c52e081ce231bd",
+  "dependency_revisions": {
+    "E-CPU": "5a3b97cba802889976c815421e4ffffac7e4bdcc",
+    "Virtual-Ground-Interpreter": "b3a9de5b0c0a9d75228cf83aaf21e1ba960e8a555"
+  },
+  "artifact_zip_sha256": "45227c5d83ca05b09b47603f790a36f01161b217a3b11876bc241e1ea606e888",
+  "artifact_json_sha256": "efdbebc089d6932b6f6e61957b7d6294180bf770ed392bf128bd2c30d2903881",
+  "finite_transition_verification": {
+    "one_step_cases": 128,
+    "semantic_translation_equivalent": 128,
+    "all_outputs_match": true,
+    "rollout_horizon": 3,
+    "model_phase_count": 8,
+    "recurrent_trajectories": 2048,
+    "recurrent_transition_steps": 6144,
+    "all_trajectories_match": true
+  },
+  "generated_transition_program_corpus": {
+    "program_count": 24,
+    "inputs_per_program": 3,
+    "rows_per_program": 8,
+    "compiler_routes": [
+      "truth-table minterm",
+      "direct expression DAG",
+      "liveness-compacted expression DAG"
+    ],
+    "all_outputs_match": true,
+    "test": "tests/test_transition_space.py::test_all_neural_compilers_match_a_deterministic_generated_boolean_program_corpus"
+  },
+  "focused_test_results": {
+    "E-CPU transition compiler": {"passed": 21},
+    "E-CPU Boolean weight-space": {"passed": 8},
+    "E-CPU stateful runtime and invariant registry": {"passed": 11, "warnings": 3},
+    "VGI finite transition reference": {"passed": true},
+    "VGI Boolean subgroup": {"passed": true}
+  },
+  "new_invariant_registry_entries": [
+    "N-7",
+    "N-8",
+    "N-9",
+    "N-10",
+    "N-11",
+    "N-12"
+  ],
+  "stateful_runtime": {
+    "schema": "mailcpu.stateful-transition-runtime.v1",
+    "verified": true,
+    "initial_state": [0, 1],
+    "final_state": [1, 0],
+    "tick": 2,
+    "revision": 1,
+    "event_count": 3,
+    "event_kinds": ["step", "revision", "step"],
+    "source_program_digest": "311348e8c24e6c2c24aa29a582e12c397f25115b8747c47c0f0f629a60220cac",
+    "target_program_digest": "2e6342e728fe1added1fa16845987d560e1ef189ef786af2d0d464e594b1aba9",
+    "source_model_digest": "625b8bd5300239de55775afcaaeb16bb670e28ecf97a232c2653c0befeb66b25",
+    "target_model_digest": "b2e2cbc1e653d309d23b40c3f03e45e23125795fbb5ef63c293d9a6a28211a16",
+    "revision_preserved_tick": 1,
+    "revision_preserved_state": [0, 1],
+    "edited_transition_inputs": [0, 1, 1, 1],
+    "edited_transition_outputs": [1, 0],
+    "mailcpu_reference_outputs": [1, 0],
+    "mailcpu_queue_outputs": [1, 0],
+    "vgi_outputs": [1, 0],
+    "snapshot_replay_equal": true,
+    "tampered_event_rejected": true,
+    "genesis_digest": "dad95155b7ed8e89d196956c966e32b66c569e2002518a2d57272aa7ba333f19",
+    "chain_head_digest": "41443d7bcfa6d804c2e375b46f9b58d6b9763c4ced73e574afa0f157422ce645",
+    "event_digests": [
+      "ab745d4e5febdc2c59890bcdd0d51b32f452da801e87b46507aba94fab39c2a1",
+      "8a4639508dc48d00fccef0818eab4f2f964e5f1149c0391f046698e1390600b0",
+      "41443d7bcfa6d804c2e375b46f9b58d6b9763c4ced73e574afa0f157422ce645"
+    ]
+  },
+  "limitations": [
+    "The 24 generated source programs form a deterministic finite corpus, not all possible Boolean expression trees.",
+    "All correctness claims are restricted to the complete finite Boolean domains used by each program and to three-step rollouts of the counter transition.",
+    "The stateful patch lifecycle is one explicit execution scenario.",
+    "The runtime is local and deterministic; the event hash chain is not a digital signature or external trust anchor.",
+    "The ReLU models are exact deterministic constructions, not learned models; no arbitrary real-valued generalization, quantization tolerance, or hardware performance is claimed."
+  ]
+}
