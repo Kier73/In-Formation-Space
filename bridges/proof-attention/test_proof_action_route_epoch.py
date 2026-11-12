@@ -3,6 +3,8 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from pathlib import Path
+import tempfile
 import unittest
 
 from mailcpu.reliability import ReliabilityPolicy
@@ -24,6 +26,7 @@ from proof_action_route_epoch import (
     InMemoryRouteEpochLedgerStore,
     ProofActionRouteEpochError,
     ProofActionRouteEpochLedger,
+    SQLiteRouteEpochLedgerStore,
     bind_existing_proof_action_route_epoch,
     handoff_proof_action_route_epoch,
     open_proof_action_route_epoch,
@@ -661,6 +664,145 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         next_request = recovered_worker.receive_request()
         self.assertEqual(next_request.request, next_dispatch.request)
         self.assertTrue(recovered_host.observe_request_admission())
+
+    def test_sqlite_authority_persists_claims_across_store_reopen_and_fences_stale_process(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = Path(temporary) / "route-authority.sqlite3"
+
+            def authorize(actor_id, current, replacement):
+                return actor_id in {"sqlite-process-a", "sqlite-process-b", "sqlite-process-c"}
+
+            store_a = SQLiteRouteEpochLedgerStore(
+                database,
+                authorize_actor=authorize,
+            )
+            _session, _trace, _proof_ground, _transport, host, worker = make_endpoints()
+            ledger_a = ProofActionRouteEpochLedger(store=store_a)
+            open_proof_action_route_epoch(
+                host,
+                worker,
+                ledger_a,
+                epoch_id="sqlite-durable-epoch",
+                owner_id="sqlite-process-a",
+            )
+            stale_document = store_a.load()
+            self.assertIsNotNone(stale_document)
+
+            # A distinct process/store object opens the same database and claims
+            # the route under owner generation two.
+            store_b = SQLiteRouteEpochLedgerStore(
+                database,
+                authorize_actor=authorize,
+            )
+            ledger_b = ProofActionRouteEpochLedger.from_dict(
+                store_b.load(),
+                store=store_b,
+            )
+            claimed = ledger_b.claim_epoch(
+                "sqlite-durable-epoch",
+                owner_id="sqlite-process-b",
+            )
+            self.assertEqual(claimed["details"]["owner_generation"], 2)
+
+            # The process that still holds generation one is fenced by reading
+            # the durable authority revision, not by sharing Python objects.
+            with self.assertRaisesRegex(
+                ProofActionRouteEpochError,
+                "superseded in the authoritative store",
+            ):
+                host.dispatch_next()
+
+            # A delayed CAS from the pre-claim revision cannot overwrite the
+            # newer owner, even through a separate connection.
+            self.assertFalse(
+                store_a.compare_and_swap(
+                    stale_document["ledger_digest"],
+                    stale_document,
+                    actor_id="sqlite-process-c",
+                )
+            )
+
+            store_c = SQLiteRouteEpochLedgerStore(
+                database,
+                authorize_actor=authorize,
+            )
+            persisted = store_c.load()
+            restored = ProofActionRouteEpochLedger.from_dict(persisted)
+            self.assertEqual(restored.active_epoch["owner_id"], "sqlite-process-b")
+            self.assertEqual(restored.active_epoch["owner_generation"], 2)
+
+    def test_sqlite_authority_requires_actor_authorization(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = Path(temporary) / "route-authority.sqlite3"
+            store = SQLiteRouteEpochLedgerStore(
+                database,
+                authorize_actor=lambda actor, current, replacement: actor == "permitted-process",
+            )
+            _session, _trace, _pg, _transport, host, worker = make_endpoints()
+            ledger = ProofActionRouteEpochLedger(store=store)
+
+            with self.assertRaisesRegex(
+                ProofActionRouteEpochError,
+                "not authorized",
+            ):
+                open_proof_action_route_epoch(
+                    host,
+                    worker,
+                    ledger,
+                    epoch_id="sqlite-authz-epoch",
+                    owner_id="untrusted-process",
+                )
+            self.assertIsNone(store.load())
+            self.assertEqual(ledger.entries, ())
+
+    def test_sqlite_authority_persists_atomic_close_and_successor_open(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = Path(temporary) / "route-handoff.sqlite3"
+            store = SQLiteRouteEpochLedgerStore(
+                database,
+                authorize_actor=lambda actor, current, replacement: actor.startswith("sqlite-owner-"),
+            )
+            _session, _trace, _pg, _transport, host, worker = make_endpoints()
+            ledger = ProofActionRouteEpochLedger(store=store)
+            open_proof_action_route_epoch(
+                host,
+                worker,
+                ledger,
+                epoch_id="sqlite-handoff-epoch",
+                owner_id="sqlite-owner-1",
+            )
+            host.dispatch_next()
+
+            handoff = handoff_proof_action_route_epoch(
+                host,
+                worker,
+                ledger,
+                epoch_id="sqlite-handoff-epoch",
+                reason_code="operator_rotation",
+                reason="test durable atomic route handoff",
+                successor_epoch_id="sqlite-handoff-epoch-next",
+                successor_host_id="sqlite-host-next",
+                successor_worker_id="sqlite-worker-next",
+                successor_request_channel="sqlite-request-next",
+                successor_result_channel="sqlite-result-next",
+                successor_owner_id="sqlite-owner-2",
+            )
+            persisted = store.load()
+            self.assertEqual(
+                [event["event_type"] for event in persisted["entries"][-2:]],
+                ["closed", "opened"],
+            )
+            self.assertEqual(
+                persisted["entries"][-1]["previous_event_digest"],
+                persisted["entries"][-2]["event_digest"],
+            )
+            reopened_store = SQLiteRouteEpochLedgerStore(
+                database,
+                authorize_actor=lambda actor, current, replacement: True,
+            )
+            reopened = ProofActionRouteEpochLedger.from_dict(reopened_store.load())
+            self.assertEqual(reopened.active_epoch["epoch_id"], handoff.opened_epoch["epoch_id"])
+            self.assertEqual(reopened.active_epoch["owner_id"], "sqlite-owner-2")
 
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
