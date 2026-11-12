@@ -27,7 +27,11 @@ def _arguments():
         "reference_outputs_sha256": "1" * 64,
         "case_evidence_sha256": "2" * 64,
         "translation_contracts_sha256": "3" * 64,
+        "typed_program_digest": "d" * 64,
+        "transition_table_digest": "e" * 64,
         "workload_id": "two-input-test-ground",
+        "compiler_route": "live_dag",
+        "codec": "rowmask_binary",
     }
     return payload, {
         "source": {
@@ -35,6 +39,7 @@ def _arguments():
             "revision": "ifs-revision-abc123",
             "kind": "transition_program",
             "ground_digest": "a" * 64,
+            "program_digest": "d" * 64,
         },
         "realization": {
             "repository": "Kier73/E-CPU",
@@ -42,6 +47,7 @@ def _arguments():
             "compiler_route": "live_dag",
             "dense_model_digest": "b" * 64,
             "sparse_model_digest": "c" * 64,
+            "encoding": "rowmask_binary",
         },
         "interface": {
             "input_names": ["input_a", "input_b"],
@@ -56,6 +62,7 @@ def _arguments():
         "codec": {
             "name": "rowmask_binary",
             "schema": "sre002.rowmask-binary.v1",
+            "payload_sha256": _sha(payload),
         },
         "verification": receipt,
         "toolchain": {
