@@ -12,7 +12,7 @@ from proof_action_reliable_channel import (
     ProofActionReliableHost,
     ProofActionReliableWorker,
 )
-from test_proof_action_execution import add_result_payload, ground, make_session
+from test_proof_action_execution import accepted_root_receipt, add_result_payload, ground, make_session
 from test_proof_action_protocol import return_evidence
 
 
@@ -367,6 +367,38 @@ class ProofActionReliableChannelTests(unittest.TestCase):
             worker.receive_request()
         self.assertEqual(sender.pending_sequences(), (2,))
         self.assertEqual(attempt.status, "planned")
+
+    def test_transport_result_can_supply_verified_kernel_receipt_for_root_completion(self):
+        session, source_trace, _pg, _transport, host, worker = make_endpoints()
+        dispatched, received = deliver_request_and_admit(host, worker)
+        attempt = host.active_attempt
+        updated_trace = add_result_payload(source_trace, attempt)
+        updated_ground = ground(updated_trace)
+        kernel_receipt = accepted_root_receipt(updated_ground)
+
+        result = make_proof_action_result(
+            received.request,
+            return_evidence=return_evidence(attempt),
+            proof_trace=updated_trace,
+        )
+        worker.send_result(result)
+        imported = host.receive_result(verified_receipts=(kernel_receipt,))
+
+        self.assertIsNotNone(imported)
+        self.assertEqual(imported.attempt_id, dispatched.attempt_id)
+        self.assertEqual(
+            imported.proof_ground.kernel_status(attempt.action["source_obligation_id"]),
+            "kernel_accepted",
+        )
+        self.assertEqual(attempt.status, "interpreted")
+        self.assertIsNone(host.dispatch_next())
+        self.assertEqual(session.status, "complete")
+        self.assertEqual(attempt.status, "query_determined")
+        self.assertEqual(
+            [event["stage"] for event in attempt.events][-2:],
+            ["interpreted", "query_determined"],
+        )
+        self.assertEqual(worker.process_result_acknowledgements(), (1,))
 
     def test_failed_result_import_closes_attempt_without_promoting_wrong_proof_state(self):
         session, source_trace, _pg, _transport, host, worker = make_endpoints()
