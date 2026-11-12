@@ -15,6 +15,7 @@ on:
       - "experiments/guarded-shortcut-tradeoff/**"
       - "experiments/logistic-map-coverage/**"
       - "experiments/observation-cost-information/**"
+      - "experiments/ecpu-reliable-observation-recovery/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   pull_request:
     paths:
@@ -30,6 +31,7 @@ on:
       - "experiments/guarded-shortcut-tradeoff/**"
       - "experiments/logistic-map-coverage/**"
       - "experiments/observation-cost-information/**"
+      - "experiments/ecpu-reliable-observation-recovery/**"
       - ".github/workflows/encounter-envelope-tests.yml"
   workflow_dispatch:
 
@@ -106,6 +108,8 @@ jobs:
         run: python -m unittest discover -s bridges/observation-path -p "test_observation_outcomes.py" -v
       - name: Run controlled observation cost-information matrix tests
         run: python -m unittest discover -s experiments/observation-cost-information -p "test_*.py" -v
+      - name: Run E-CPU reliable observation recovery tests
+        run: python -m unittest discover -s experiments/ecpu-reliable-observation-recovery -p "test_*.py" -v
       - name: Run live E-CPU gated observation integration
         env:
           PYTHONPATH: external/E-CPU
@@ -117,6 +121,18 @@ jobs:
           PYTHONPATH: external/E-CPU
           ECPU_ROOT: external/E-CPU
         run: python experiments/observation-cost-information/run_experiment.py --output-dir "${{ runner.temp }}/ecpu-observation-cost-information"
+      - name: Run E-CPU reliable observation loss and recovery matrix
+        env:
+          PYTHONPATH: external/E-CPU
+          ECPU_ROOT: external/E-CPU
+        run: python experiments/ecpu-reliable-observation-recovery/run_recovery_matrix.py --output-dir "${{ runner.temp }}/ecpu-reliable-observation-recovery"
+      - name: Upload E-CPU reliable observation recovery artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecpu-reliable-observation-recovery
+          path: ${{ runner.temp }}/ecpu-reliable-observation-recovery/
+          if-no-files-found: warn
       - name: Upload controlled observation cost-information artifacts
         if: always()
         uses: actions/upload-artifact@v4

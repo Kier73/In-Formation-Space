@@ -1,0 +1,201 @@
+{
+  "artifact": {
+    "id": 13906850607,
+    "name": "ecpu-reliable-observation-recovery",
+    "sha256": "507ab37dfab271cf990506a5d62335bf766535d788ce72d8f719b63db8f1197a",
+    "size_bytes": 293017
+  },
+  "cost_observations_ms": {
+    "ack_recovery_overhead": {
+      "attempts": 36,
+      "median_per_attempt": 1.30323,
+      "phases": [
+        "ack_recovery_retry",
+        "duplicate_cleanup",
+        "recovery_ack_processing"
+      ]
+    },
+    "aggregation": "Median of per-condition, phase-specific operation medians; condition cells equally weighted. Phases are not pooled.",
+    "checkpoint_save_call_by_source_count": [
+      {
+        "condition_cells": 12,
+        "median": 1.70963,
+        "source_count": 4
+      },
+      {
+        "condition_cells": 12,
+        "median": 1.8237,
+        "source_count": 8
+      }
+    ],
+    "checkpoint_save_total_per_attempt_by_source_count": [
+      {
+        "attempts": 36,
+        "median": 19.35571,
+        "source_count": 4
+      },
+      {
+        "attempts": 36,
+        "median": 35.26211,
+        "source_count": 8
+      }
+    ],
+    "commit_by_quorum": [
+      {
+        "condition_cells": 8,
+        "median": 34.61916,
+        "quorum": 1
+      },
+      {
+        "condition_cells": 8,
+        "median": 32.20302,
+        "quorum": 2
+      },
+      {
+        "condition_cells": 8,
+        "median": 31.83495,
+        "quorum": 4
+      }
+    ],
+    "commit_by_source_count": [
+      {
+        "condition_cells": 12,
+        "median": 22.63492,
+        "source_count": 4
+      },
+      {
+        "condition_cells": 12,
+        "median": 42.0436,
+        "source_count": 8
+      }
+    ],
+    "data_recovery_overhead": {
+      "attempts": 36,
+      "median_per_attempt": 0.41083,
+      "phases": [
+        "data_retry",
+        "data_recovery_intake"
+      ]
+    },
+    "finalize_by_source_count": [
+      {
+        "condition_cells": 12,
+        "median": 0.02594,
+        "source_count": 4
+      },
+      {
+        "condition_cells": 12,
+        "median": 0.02921,
+        "source_count": 8
+      }
+    ],
+    "initial_ack_processing_by_source_count": [
+      {
+        "condition_cells": 12,
+        "median": 1.11077,
+        "source_count": 4
+      },
+      {
+        "condition_cells": 12,
+        "median": 2.27354,
+        "source_count": 8
+      }
+    ],
+    "initial_intake_by_source_count": [
+      {
+        "condition_cells": 12,
+        "median": 0.07289,
+        "source_count": 4
+      },
+      {
+        "condition_cells": 12,
+        "median": 0.13534,
+        "source_count": 8
+      }
+    ]
+  },
+  "experiment_id": "ecpu-reliable-observation-recovery-v1",
+  "factor_levels": {
+    "drop_first_ack": [
+      false,
+      true
+    ],
+    "drop_first_data_frame": [
+      false,
+      true
+    ],
+    "quorum": [
+      1,
+      2,
+      4
+    ],
+    "source_count": [
+      4,
+      8
+    ]
+  },
+  "format": "in-formation.ecpu-reliable-observation-recovery-run-summary",
+  "interpretation": [
+    "Doubling configured sources from four to eight was associated with about 1.86× the median commit call and about 2.05× the median initial ACK-processing call in this local implementation and workload.",
+    "Strict authority required every configured source to be present, so quorum variation changed the threshold, not the number of sources collected or consumed. These quorum contrasts do not measure partial-quorum early-stop behavior.",
+    "Data-loss and ACK-loss recovery costs are separately phase-profiled. The ACK-loss path includes duplicate cleanup after the receiver has already applied and consumed the original event.",
+    "Checkpoint save spans are nested inside commit_event spans; checkpoint totals must not be added to commit_event duration."
+  ],
+  "invariants": {
+    "ack_retry_attempts": 36,
+    "all_durable_logs_verified": true,
+    "all_senders_acknowledged": true,
+    "authorized_attempts": 72,
+    "checkpoint_calls_per_attempt_by_source_count": {
+      "4": 11,
+      "8": 19
+    },
+    "data_retry_attempts": 36,
+    "duplicate_cleanups": 36,
+    "exactly_once_applications": 72
+  },
+  "limitations": [
+    "Deterministic local fault injection over one local durable mailbox; not a network benchmark.",
+    "One GitHub-hosted Linux runner and one process-local clock segment; not independent-host replication.",
+    "Three repetitions per condition; descriptive pilot, not confidence intervals or stable tail estimates.",
+    "All sources agree; conflicts, dissent, refusal, missing quorum, and strict=False partial-source finalization are not tested.",
+    "Synchronous wall spans include Python, filesystem, fsync, and scheduler effects; they are not CPU time.",
+    "No information-per-cost ratio is computed and no adaptive policy is updated."
+  ],
+  "manifest": {
+    "attempt_count": 72,
+    "condition_count": 24,
+    "minimum_profile_samples": 3,
+    "operation_span_count": 1980,
+    "phase_profile_count": 204,
+    "profile_matrix_digest": "b85a633e84e759ee1a7949421fcf47e9057817fcc07081b49a40c255d9c16661",
+    "replicates_per_condition": 3,
+    "report_digest": "54dc04b340da0912fa5824ee94a37c18b6c363806097de112c4028df46d75f52"
+  },
+  "runtime": {
+    "clock_actor_id": "ecpu-observation-recovery-process",
+    "clock_segment_id": "43133401914-2476-28311057021",
+    "commit": "800f94f83ffd6f527ed093c8d1c1e93e153c34f6",
+    "implementation": "CPython",
+    "platform": "Linux x86_64",
+    "python_version": "3.11.18",
+    "repository": "Kier73/E-CPU"
+  },
+  "schema": "in-formation.ecpu-reliable-observation-recovery-run-summary/0.1",
+  "source_artifact_digests": {
+    "attempt_results": "a967472b49a09cb1cf9cdf7fe0b2e3c308a87cdbc63a9e305585e6bae9886b02",
+    "operation_cost_profiles": "fa02b7450af028b1a592d192cfe36f8e219e3a787d37bfdb7b879d1b551d25ef",
+    "operation_spans": "4c1ca26487b95bdb88a151697a7aa2a8d8b30e137b9fd9633ddd63db398feb9c",
+    "run_manifest": "f164c0e4ca90a09939a4d1e7cab9236a620aa32e5a12ececfc1e86196db8d9b3"
+  },
+  "summary_digest": "31d3cf4975084473d7fd442b87b2a00013a92e681cec2c20773b1a0355f4a471",
+  "workflow": {
+    "conclusion": "success",
+    "head_commit": "808a7b56bfb5917a73fc66d779b7f1119ca90871",
+    "observed_at_utc": "2026-11-12T01:17:10Z",
+    "run_id": 43133401914,
+    "run_number": 293,
+    "url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43133401914"
+  }
+}
+
