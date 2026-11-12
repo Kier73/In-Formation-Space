@@ -115,8 +115,9 @@ class ProofActionReliableWorker:
         self._result_channel_failed = False
 
     def receive_request(self) -> ReceivedProofActionRequest | None:
-        """Receive one in-order request; duplicate frames are acknowledged but not redelivered."""
+        """Receive one request; duplicate sequences and attempt IDs are ACKed but not redelivered."""
         validated_payload: dict[str, Any] = {}
+        duplicate_attempt = [False]
 
         def validate_before_ack(sequence: int, payload: Any) -> None:
             if not isinstance(payload, Mapping):
@@ -136,17 +137,20 @@ class ProofActionReliableWorker:
                 raise ProofActionReliableChannelError(
                     "one worker attempt ID was admitted with conflicting request digests"
                 )
-            # Commit the worker's application-level admission before
-            # ReliableChannel consumes the frame and emits its ACK.
-            self._admitted_requests[attempt_id] = request_digest
+            if previous is not None:
+                # A new reliable sequence can replay the same application attempt.
+                # ACK it at the transport layer, but do not redeliver it to the runner.
+                duplicate_attempt[0] = True
+            else:
+                # Commit the worker's application-level admission before
+                # ReliableChannel consumes the frame and emits its ACK.
+                self._admitted_requests[attempt_id] = request_digest
             validated_payload.update(validated)
 
         received = self._request_receiver.receive(commit=validate_before_ack)
-        if received is None:
+        if received is None or duplicate_attempt[0]:
             return None
         sequence, _payload = received
-        # A successful new delivery has already committed the attempt identity
-        # in validate_before_ack. Duplicate deliveries return None after ACK.
         return ReceivedProofActionRequest(sequence, validated_payload)
 
     def send_result(self, result_document: Mapping[str, Any]) -> int:
