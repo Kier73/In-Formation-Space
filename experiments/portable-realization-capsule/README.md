@@ -118,34 +118,46 @@ typed-Ground parser/compiler.
 
 
 
-## Independent hybrid decoding and stateful transition replay
+## Independent sparse-binary decoding and differential stateful replay
 
-The Node.js receiver now independently decodes SRE-002 `hybrid_binary`.
-For each layer it reads the little-endian row-mode bitmask, then decodes each
-output row using either its exact dense scalar vector or its sparse input mask
-and nonzero scalar stream. Biases independently select dense or sparse form.
-It validates the inner envelope digests, layer dimensions, mode counts, exact
-stored-parameter count, source/model/interface identity, and reconstructed
-E-CPU sparse-model digest.
+The Node.js receiver independently decodes all three exact SRE-002 binary
+sparse encodings:
 
-The integration test uses E-CPU's typed reset-dominant two-bit counter
-(`state_1`, `state_0`, `advance`, `reset` → two next-state bits) and the
-live compositional compiler. One output-disconnected ReLU feature is added as
-a controlled codec probe: its dense input row has an all-zero outgoing column,
-so it cannot alter the represented transition function. This makes the
-fixture exercise both dense-row and sparse-row encoding branches rather than
-assuming the naturally sparse counter model will select both. Python
-constructs the capsule and a separately written scalar transition oracle;
-Node decodes the hybrid payload and checks all 16 one-step Boolean assignments.
+- **Row-mask binary:** per-output-row little-endian input masks and compact
+  coefficient streams.
+- **CSR binary:** explicit row pointers, input indices, coefficient streams,
+  and separate bias indices/values. The decoder checks pointer endpoints and
+  monotonicity, strict in-row index ordering, index bounds, scalar widths,
+  coefficient counts, and trailing bytes.
+- **Adaptive hybrid binary:** one dense/sparse storage decision per output row,
+  with a separate dense/sparse decision for each layer's biases.
 
-The test then has Node replay a complete recurrent corpus: all four initial
-states and every length-four sequence over the four advance/reset control
-pairs. This is 1,024 trajectories and 4,096 transition steps. The reference
-trajectory file is independently derived from the scalar transition rule,
-not from the compiled neural model. A deliberately altered recurrent output
-must be rejected.
+All three decoders validate the inner canonical header, header/body digests,
+layer dimensions, stored-parameter count, source/model/interface identity, and
+reconstructed E-CPU sparse-model digest. They share a single independent
+execution and replay path after decoding.
 
-This extends semantic interoperability to a second binary codec and a
-stateful feedback system. It still does not establish arbitrary typed-Ground
-parsing, general compiler interoperability, concurrent or distributed
-runtime execution, or hardware performance.
+The differential integration test uses E-CPU's typed reset-dominant two-bit
+counter (`state_1`, `state_0`, `advance`, `reset` → two next-state bits)
+and the live compositional compiler. One output-disconnected ReLU feature is
+added as a controlled hybrid-codec probe: its dense input row has an all-zero
+outgoing column, so it cannot alter the represented transition function. This
+ensures the hybrid fixture actually exercises both dense-row and sparse-row
+branches.
+
+Python builds three capsules from the same sparse realization, one for each
+binary codec. Each includes an encoding-specific payload, receipt, and
+translation contract. Node independently decodes and replays all three,
+requiring their reconstructed sparse-model SHA-256 digests and stored
+parameter counts to match exactly. Their payload digests must be distinct.
+
+For each codec, Node checks all 16 one-step Boolean assignments against a
+separately implemented scalar transition oracle. It then replays all four
+initial states and every length-four sequence over the four advance/reset
+control pairs: 1,024 trajectories and 4,096 transition steps per encoding.
+An intentionally altered recurrent output must be rejected.
+
+This is cross-language differential execution over a finite, declared Ground.
+It does not establish arbitrary typed-Ground parsing, general compiler
+interoperability, continuous-input equivalence, concurrent/distributed
+execution, or hardware performance.
