@@ -161,3 +161,30 @@ This is cross-language differential execution over a finite, declared Ground.
 It does not establish arbitrary typed-Ground parsing, general compiler
 interoperability, continuous-input equivalence, concurrent/distributed
 execution, or hardware performance.
+
+
+## PSC-001: portable stateful checkpoint and cross-environment resume
+
+The companion [Portable Stateful Checkpoint v1](PORTABLE-STATEFUL-CHECKPOINT-V1.md)
+format binds a live state/time projection and its complete event lineage to
+one PRC realization capsule per model revision. It deliberately avoids
+duplicating dense floating-point model snapshots inside the state-history
+record: exact executable sparse models travel in the nested realization
+capsules.
+
+The checkpoint receiver independently validates every nested capsule,
+interprets each typed Boolean transition program, decodes and exhaustively
+checks its sparse realization over the complete finite domain, replays every
+step and revision event, and checks the terminal state, logical tick, model
+revision, and chain head.
+
+The end-to-end test transfers a reset-dominant two-bit counter after a model
+revision. The receiver reconstructs state `10` at logical tick 3 / revision 1,
+then computes the next transition for the supplied controls. The restored
+E-CPU runtime independently executes the same input; both must produce state
+`11` at tick 4 and the same next event digest. A forged event whose hashes
+and terminal state were recomputed must still fail semantic replay.
+
+This is a portable checkpoint and one-step continuation prototype. It is not
+yet a concurrent or distributed host handoff, signed checkpoint protocol,
+encrypted transport, or general VM process checkpoint.
