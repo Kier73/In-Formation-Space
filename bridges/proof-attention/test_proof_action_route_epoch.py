@@ -362,7 +362,13 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         stale_document = store.load()
         stale_digest = stale_document["ledger_digest"]
 
-        ledger.claim_epoch("cas-epoch", owner_id="cas-owner-2")
+        current = ledger.active_epoch
+        ledger.claim_epoch(
+            "cas-epoch",
+            owner_id="cas-owner-2",
+            expected_owner_id=current["owner_id"],
+            expected_owner_generation=current["owner_generation"],
+        )
         current_document = store.load()
         self.assertNotEqual(current_document["ledger_digest"], stale_digest)
         self.assertFalse(
@@ -508,8 +514,12 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         replacement_ledger = ProofActionRouteEpochLedger.from_dict(
             store.load(), store=store
         )
+        current_owner = replacement_ledger.active_epoch
         replacement_ledger.claim_epoch(
-            "stale-close-epoch", owner_id="replacement-close-owner"
+            "stale-close-epoch",
+            owner_id="replacement-close-owner",
+            expected_owner_id=current_owner["owner_id"],
+            expected_owner_generation=current_owner["owner_generation"],
         )
         successor = {
             "host_id": "stale-close-host-next",
@@ -751,9 +761,70 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         open_proof_action_route_epoch(
             host, worker, ledger, epoch_id="owner-reuse-epoch", owner_id="owner-first"
         )
-        ledger.claim_epoch("owner-reuse-epoch", owner_id="owner-second")
+        ledger.claim_epoch(
+            "owner-reuse-epoch",
+            owner_id="owner-second",
+            expected_owner_id="owner-first",
+            expected_owner_generation=1,
+        )
         with self.assertRaisesRegex(ProofActionRouteEpochError, "already used"):
-            ledger.claim_epoch("owner-reuse-epoch", owner_id="owner-first")
+            ledger.claim_epoch(
+                "owner-reuse-epoch",
+                owner_id="owner-first",
+                expected_owner_id="owner-second",
+                expected_owner_generation=2,
+            )
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError, "expected owner does not match"
+        ):
+            ledger.claim_epoch(
+                "owner-reuse-epoch",
+                owner_id="owner-third",
+                expected_owner_id="owner-first",
+                expected_owner_generation=1,
+            )
+
+    def test_handoff_recovery_cannot_preempt_a_successor_already_claimed(self):
+        _session, _trace, proof_ground, _transport, host, worker = make_endpoints()
+        store = InMemoryRouteEpochLedgerStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="preempt-recovery-epoch"
+        )
+        handoff = handoff_proof_action_route_epoch(
+            host,
+            worker,
+            ledger,
+            epoch_id="preempt-recovery-epoch",
+            reason_code="operator_rotation",
+            reason="activate successor before competing recovery",
+            successor_epoch_id="preempt-recovery-epoch-next",
+            successor_host_id="preempt-recovery-host-next",
+            successor_worker_id="preempt-recovery-worker-next",
+            successor_request_channel="preempt-recovery-request-next",
+            successor_result_channel="preempt-recovery-result-next",
+        )
+        active = ledger.active_epoch
+        ledger.claim_epoch(
+            active["epoch_id"],
+            owner_id="first-successor-process",
+            expected_owner_id=active["owner_id"],
+            expected_owner_generation=active["owner_generation"],
+        )
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError, "expected owner does not match"
+        ):
+            restore_proof_action_route_handoff(
+                handoff.closed_epoch,
+                ledger,
+                proof_ground,
+                restore_transport=InMemoryTransport.from_snapshot,
+                owner_id="competing-recovery-process",
+            )
+        self.assertEqual(
+            ledger.active_epoch["owner_id"],
+            "first-successor-process",
+        )
 
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()
