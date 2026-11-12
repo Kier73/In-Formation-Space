@@ -227,6 +227,144 @@ def _uncertainty_projection(pair_checkpoint: Mapping[str, Any]) -> dict[str, Any
     }
 
 
+def _validate_uncertainty_projection(value: Any) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise ProofActionRouteEpochError("uncertainty projection must be an object")
+    copied = _copy(dict(value))
+    required = {
+        "channel_states", "pending_frames", "queued_reliable_frames", "uncertainty_digest"
+    }
+    if set(copied) != required:
+        raise ProofActionRouteEpochError("uncertainty projection fields are invalid")
+    digest = _sha256(copied["uncertainty_digest"], "uncertainty_digest")
+    core = {key: item for key, item in copied.items() if key != "uncertainty_digest"}
+    if _digest(core) != digest:
+        raise ProofActionRouteEpochError("uncertainty projection digest mismatch")
+
+    channel_states = copied["channel_states"]
+    expected_channels = {
+        "host_request_sender", "host_result_receiver",
+        "worker_request_receiver", "worker_result_sender",
+    }
+    if not isinstance(channel_states, Mapping) or set(channel_states) != expected_channels:
+        raise ProofActionRouteEpochError("uncertainty channel-state index is invalid")
+    channel_fields = {
+        "source", "destination", "peer", "channel", "next_sequence",
+        "next_receive_sequence", "tick", "pending", "delivered",
+        "received_digests", "failed_sequences",
+    }
+    for label, state in channel_states.items():
+        if not isinstance(state, Mapping) or set(state) != channel_fields:
+            raise ProofActionRouteEpochError(f"uncertainty state for {label} is invalid")
+        for field in ("source", "destination", "channel"):
+            _text(state[field], f"{label}.{field}")
+        if state["peer"] is not None:
+            _text(state["peer"], f"{label}.peer")
+        for field in ("next_sequence", "next_receive_sequence"):
+            if type(state[field]) is not int or state[field] <= 0:
+                raise ProofActionRouteEpochError(f"{label}.{field} must be positive")
+        if type(state["tick"]) is not int or state["tick"] < 0:
+            raise ProofActionRouteEpochError(f"{label}.tick must be non-negative")
+        if not isinstance(state["pending"], list) or not isinstance(state["delivered"], list):
+            raise ProofActionRouteEpochError(f"{label} pending/delivered indexes are invalid")
+        if not isinstance(state["received_digests"], Mapping):
+            raise ProofActionRouteEpochError(f"{label} received digest map is invalid")
+        if not isinstance(state["failed_sequences"], list):
+            raise ProofActionRouteEpochError(f"{label} failed sequence index is invalid")
+        sequences = []
+        for pending in state["pending"]:
+            if not isinstance(pending, Mapping) or set(pending) != {
+                "sequence", "frame", "attempts", "last_sent_tick"
+            }:
+                raise ProofActionRouteEpochError(f"{label} pending frame record is invalid")
+            if (
+                type(pending["sequence"]) is not int or pending["sequence"] <= 0
+                or type(pending["attempts"]) is not int or pending["attempts"] <= 0
+                or type(pending["last_sent_tick"]) is not int or pending["last_sent_tick"] < 0
+                or not isinstance(pending["frame"], Mapping)
+            ):
+                raise ProofActionRouteEpochError(f"{label} pending frame coordinates are invalid")
+            sequences.append(pending["sequence"])
+        if sequences != sorted(set(sequences)):
+            raise ProofActionRouteEpochError(f"{label} pending sequence index is not ordered")
+        for field in ("delivered", "failed_sequences"):
+            values = state[field]
+            if any(type(item) is not int or item <= 0 for item in values):
+                raise ProofActionRouteEpochError(f"{label}.{field} contains an invalid sequence")
+            if values != sorted(set(values)):
+                raise ProofActionRouteEpochError(f"{label}.{field} must be sorted and unique")
+        for key, received_digest in state["received_digests"].items():
+            try:
+                sequence = int(key)
+            except (TypeError, ValueError) as exc:
+                raise ProofActionRouteEpochError(f"{label} received digest sequence is invalid") from exc
+            if sequence <= 0 or str(sequence) != str(key):
+                raise ProofActionRouteEpochError(f"{label} received digest sequence is invalid")
+            if received_digest is not None:
+                _sha256(received_digest, f"{label}.received_digests[{key}]")
+
+    pending_frames = copied["pending_frames"]
+    queued_frames = copied["queued_reliable_frames"]
+    if not isinstance(pending_frames, list) or not isinstance(queued_frames, list):
+        raise ProofActionRouteEpochError("uncertainty frame indexes must be arrays")
+    for frame in pending_frames:
+        if not isinstance(frame, Mapping) or set(frame) != {
+            "endpoint", "channel", "sequence", "attempts", "frame"
+        }:
+            raise ProofActionRouteEpochError("pending reliable frame projection is invalid")
+        _text(frame["endpoint"], "pending_frame.endpoint")
+        _text(frame["channel"], "pending_frame.channel")
+        if type(frame["sequence"]) is not int or frame["sequence"] <= 0:
+            raise ProofActionRouteEpochError("pending reliable frame sequence is invalid")
+        if not isinstance(frame["frame"], Mapping):
+            raise ProofActionRouteEpochError("pending reliable frame payload is invalid")
+    for queued in queued_frames:
+        if not isinstance(queued, Mapping) or set(queued) != {"mailbox", "kind", "message"}:
+            raise ProofActionRouteEpochError("queued reliable frame projection is invalid")
+        _text(queued["mailbox"], "queued_frame.mailbox")
+        if queued["kind"] not in ("RDATA", "RACK") or not isinstance(queued["message"], Mapping):
+            raise ProofActionRouteEpochError("queued reliable frame kind or message is invalid")
+    return copied
+
+
+def _validate_pair_checkpoint_binding(
+    checkpoint: Any,
+    *,
+    route: Mapping[str, Any],
+    preclose_session_digest: str,
+) -> dict[str, Any]:
+    if not isinstance(checkpoint, Mapping):
+        raise ProofActionRouteEpochError("closed route pair checkpoint must be an object")
+    copied = _copy(dict(checkpoint))
+    if set(copied) != {"format", "host", "worker", "transport", "snapshot_digest"}:
+        raise ProofActionRouteEpochError("closed route pair checkpoint fields are invalid")
+    if copied["format"] != "in-formation.proof-action-pair-checkpoint/0.1":
+        raise ProofActionRouteEpochError("closed route checkpoint format is unsupported")
+    snapshot_digest = _sha256(copied["snapshot_digest"], "pair_checkpoint.snapshot_digest")
+    core = {key: value for key, value in copied.items() if key != "snapshot_digest"}
+    if _digest(core) != snapshot_digest:
+        raise ProofActionRouteEpochError("closed route pair checkpoint digest mismatch")
+    host = copied["host"]
+    worker = copied["worker"]
+    if not isinstance(host, Mapping) or not isinstance(worker, Mapping):
+        raise ProofActionRouteEpochError("closed route endpoint checkpoints must be objects")
+    for endpoint, label in ((host, "host"), (worker, "worker")):
+        if (
+            endpoint.get("host_id") != route["host_id"]
+            or endpoint.get("worker_id") != route["worker_id"]
+            or endpoint.get("request_channel") != route["request_channel"]
+            or endpoint.get("result_channel") != route["result_channel"]
+            or endpoint.get("policy") != route["policy"]
+        ):
+            raise ProofActionRouteEpochError(f"closed route {label} checkpoint identity differs")
+    session = host.get("session")
+    if not isinstance(session, Mapping) or session.get("session_digest") != preclose_session_digest:
+        raise ProofActionRouteEpochError("closed route checkpoint does not match pre-close session digest")
+    if not isinstance(copied["transport"], Mapping):
+        raise ProofActionRouteEpochError("closed route transport checkpoint must be an object")
+    return copied
+
+
 class RouteEpochLedgerStore(Protocol):
     """Atomic durable authority contract for a route-epoch ledger.
 
@@ -440,12 +578,12 @@ class ProofActionRouteEpochLedger:
 
         checkpoint = _copy(dict(pair_checkpoint))
         checkpoint_digest = _digest(checkpoint)
-        uncertainty_copy = _copy(dict(uncertainty))
-        if uncertainty_copy.get("uncertainty_digest") != _digest({
-            key: value for key, value in uncertainty_copy.items()
-            if key != "uncertainty_digest"
-        }):
-            raise ProofActionRouteEpochError("uncertainty projection digest mismatch")
+        checkpoint = _validate_pair_checkpoint_binding(
+            checkpoint,
+            route=checked_route,
+            preclose_session_digest=preclose_session_digest,
+        )
+        uncertainty_copy = _validate_uncertainty_projection(uncertainty)
         details = {
             "owner_generation": active["owner_generation"],
             "owner_id": active["owner_id"],
