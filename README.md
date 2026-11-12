@@ -147,7 +147,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 
 ## Portable realization capsules
 
-- [PRC-001: Portable realization capsule](experiments/portable-realization-capsule/README.md) — packages SRE-002 codec payloads with source Ground identity, dense/sparse model identity, interface, compiler route, toolchain revisions, and replayable finite-domain evidence. A built-in Node.js receiver independently verifies PRC v1 and decodes/replays SRE-002 `rowmask_binary` capsules over a complete parity-2 Ground using both int8 and float64 coefficient paths. This remains an experiment format, not yet an E-CPU transport or admission integration.
+- [PRC-001: Portable realization capsule and PSC-001: Portable Stateful Checkpoint](experiments/portable-realization-capsule/README.md) — packages exact sparse model realizations with typed Ground identity and finite-domain replay evidence, then binds each stateful model revision to a portable state/time/event-chain checkpoint. Companion [SRH-001: Stateful Runtime Recovery Handoff](experiments/portable-realization-capsule/STATEFUL-RECOVERY-HANDOFF-001.md) composes a PSC checkpoint with E-CPU's quorum-anchored execution claims for crash recovery, monotone reassignment epochs, exact receiver/implementation admission, stale-result fencing, and one-step continuation. It is still a logical-host test, not an actual Transit/ReliableChannel transfer or graceful physical-host migration.
 
 
 ## Portable realization capsules
