@@ -147,7 +147,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 
 ## Portable realization capsules
 
-- [PRC-001: Portable realization capsule](experiments/portable-realization-capsule/README.md) — packages the SRE-002 codec payload with source Ground identity, dense/sparse model identity, interface, compiler route, toolchain revisions, and a replayable finite-domain verification receipt. Header, capsule, and payload integrity are checked separately; this is an experiment format, not yet an E-CPU transport or admission integration.
+- [PRC-001: Portable realization capsule](experiments/portable-realization-capsule/README.md) — packages SRE-002 codec payloads with source Ground identity, dense/sparse model identity, interface, compiler route, toolchain revisions, and replayable finite-domain evidence. A built-in Node.js receiver independently verifies PRC v1 and decodes/replays SRE-002 `rowmask_binary` capsules over a complete parity-2 Ground using both int8 and float64 coefficient paths. This remains an experiment format, not yet an E-CPU transport or admission integration.
 
 
 ## Portable realization capsules
