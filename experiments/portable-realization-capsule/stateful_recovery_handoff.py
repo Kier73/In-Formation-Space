@@ -15,7 +15,6 @@ import re
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from mailcpu.recovery_lineage import RecoveryLineageCoordinator
 from mailcpu.transferable_execution_claim import (
     ExecutionClaimStatus,
     PortableExecutionClaimBundle,
@@ -266,7 +265,7 @@ def _issue_for_checkpoint(
 ) -> StatefulRuntimeRecoveryEnvelope:
     session_id = _require_session_id(session_id)
     _require_digest(implementation_fingerprint, "implementation_fingerprint")
-    runtime = restore_runtime(checkpoint)
+    restore_runtime(checkpoint)
     specification = _claim_specification(session_id, checkpoint)
     ticket = store.create(
         **specification,
@@ -359,7 +358,6 @@ def resume_on_recovery_host(
     _require_digest(implementation_fingerprint, "implementation_fingerprint")
 
     try:
-        runtime = restore_runtime(envelope.checkpoint)
         semantics = _claim_specification(envelope.session_id, envelope.checkpoint)
         envelope.ticket.verify_for_target(
             store.coordinator,
@@ -368,9 +366,10 @@ def resume_on_recovery_host(
             owner_host_id=owner_host_id,
             implementation_fingerprint=implementation_fingerprint,
         )
+        runtime = restore_runtime(envelope.checkpoint)
         header = decode_checkpoint(envelope.checkpoint)
         before = runtime.snapshot()
-        transition = runtime.step(header["resume_controls"])
+        runtime.step(header["resume_controls"])
         realization_capsules = tuple(
             base64.b64decode(item["capsule_base64"], validate=True)
             for item in header["realizations"]
