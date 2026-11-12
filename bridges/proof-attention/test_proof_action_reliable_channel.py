@@ -323,6 +323,51 @@ class ProofActionReliableChannelTests(unittest.TestCase):
             worker.receive_request()
         self.assertEqual(sender.pending_sequences(), (1,))
 
+    def test_worker_rejects_conflicting_request_digest_for_an_already_admitted_attempt(self):
+        import copy
+        import hashlib
+        import json
+
+        from mailcpu.reliability import ReliableChannel
+        from proof_action_protocol import build_proof_action_request
+
+        session, source_trace, _ = make_session()
+        proof_ground = ground(source_trace)
+        attempt = session.begin_next()
+        request = build_proof_action_request(session, proof_ground)
+        transport = InMemoryTransport()
+        worker = ProofActionReliableWorker(
+            transport,
+            host_id=HOST_ID,
+            worker_id=WORKER_ID,
+        )
+        sender = ReliableChannel(
+            transport,
+            source=HOST_ID,
+            destination=WORKER_ID,
+            channel="proof-action-request",
+        )
+        sender.send(request)
+        self.assertIsNotNone(worker.receive_request())
+        self.assertEqual(sender.process_ack(), (1,))
+
+        conflicting = copy.deepcopy(request)
+        conflicting["candidate_transition"]["tactic"] = "forged-tactic"
+        core = {key: value for key, value in conflicting.items() if key != "request_digest"}
+        conflicting["request_digest"] = hashlib.sha256(
+            json.dumps(
+                core, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        sender.send(conflicting)
+        with self.assertRaisesRegex(
+            ProofActionReliableChannelError, "conflicting request digests"
+        ):
+            worker.receive_request()
+        self.assertEqual(sender.pending_sequences(), (2,))
+        self.assertEqual(attempt.status, "planned")
+
     def test_failed_result_import_closes_attempt_without_promoting_wrong_proof_state(self):
         session, source_trace, _pg, _transport, host, worker = make_endpoints()
         dispatched, received = deliver_request_and_admit(host, worker)
