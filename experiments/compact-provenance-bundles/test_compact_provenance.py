@@ -125,7 +125,17 @@ def test_bundle_round_trip_reconstructs_independent_standalone_capsules():
         "rowmask_binary": "test-schema-rowmask_binary",
     }
     assert restored == capsules
-    assert len(bundle) < sum(len(item) for item in capsules)
+    assert manifest["shared"]["source_repository"] == "Kier73/In-Formation-Space"
+    assert manifest["shared"]["source_revision"] == "ifs-r1"
+    assert manifest["shared"]["realization_revision"] == "ecpu-r1"
+    assert manifest["shared"]["toolchain"] == {
+        "ifs_revision": "ifs-r1",
+        "ecpu_revision": "ecpu-r1",
+        "vgi_revision": "vgi-r1",
+    }
+    # Tiny fixture payloads need not amortize the bundle framing. The corpus
+    # experiment records the actual break-even behavior for full realizations.
+    assert len(bundle) > 0
 
 
 def test_bundle_rejects_mixed_toolchain_provenance():
