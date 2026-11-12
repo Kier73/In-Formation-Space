@@ -99,6 +99,15 @@ jobs:
           name: clock-domain-temporal-provenance
           path: ${{ runner.temp }}/temporal-provenance-example.json
           if-no-files-found: warn
+      - name: Generate bounded affine clock calibration example
+        run: python bridges/temporal-provenance/clock_calibration.py --output "${{ runner.temp }}/clock-calibration-example.json"
+      - name: Upload bounded affine clock calibration example
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bounded-affine-clock-calibration
+          path: ${{ runner.temp }}/clock-calibration-example.json
+          if-no-files-found: warn
       - name: Validate illustrative observation-path record
         run: python bridges/observation-path/validate_observation_path.py bridges/observation-path/examples/happy-path.json
       - name: Validate observation-path CI receipt

@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://in-formation-space.invalid/schemas/clock-calibration-0.1.json",
+  "title": "Bounded positive-affine clock calibration",
+  "type": "object",
+  "required": [
+    "format",
+    "model",
+    "calibration_id",
+    "source_clock_id",
+    "target_clock_id",
+    "source_unit",
+    "target_unit",
+    "validity_source_min",
+    "validity_source_max",
+    "minimum_scale",
+    "anchors",
+    "feasible_region",
+    "scale_bounds",
+    "offset_bounds",
+    "calibration_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.clock-calibration/0.1"
+    },
+    "model": {
+      "const": "positive-affine-feasible-set-v1"
+    },
+    "calibration_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_clock_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_clock_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validity_source_min": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "validity_source_max": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "minimum_scale": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "anchors": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "anchor_id",
+          "source_coordinate",
+          "target_lower",
+          "target_upper",
+          "correlation_basis",
+          "witness_ref",
+          "witness_sha256"
+        ],
+        "properties": {
+          "anchor_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_coordinate": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "target_lower": {
+            "type": "number"
+          },
+          "target_upper": {
+            "type": "number"
+          },
+          "correlation_basis": {
+            "enum": [
+              "shared_trigger",
+              "hardware_capture",
+              "common_capture",
+              "controlled_intervention"
+            ]
+          },
+          "witness_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "witness_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "feasible_region": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "scale",
+          "offset"
+        ],
+        "properties": {
+          "scale": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "offset": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "scale_bounds": {
+      "type": "object",
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "properties": {
+        "lower": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "upper": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "offset_bounds": {
+      "type": "object",
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "properties": {
+        "lower": {
+          "type": "number"
+        },
+        "upper": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "calibration_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

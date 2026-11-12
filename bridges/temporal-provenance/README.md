@@ -131,10 +131,74 @@ The split-clock relay demonstration preserves controller ticks C100/C101/C105/C1
 
 A second, explicitly synthetic example shows the different result when vector stamps are actually captured: a receiver that has received a controller message is causally after that send, while an independent sensor event remains concurrent with both.
 
+## Bounded affine clock calibration (separate experiment)
+
+`clock_calibration.py` is an optional follow-on to temporal provenance. It does not rewrite the original observations or attach an alignment to a record unless a caller explicitly stores the resulting calibration. A calibration is a separate artifact with its own digest, anchors, model, and validity range.
+
+### Anchor contract
+
+A calibration anchor declares that one physical correlation event was observed at:
+
+- an exact source-clock coordinate; and
+- a bounded target-clock interval `[target_lower, target_upper]`.
+
+Each anchor carries a unique ID, an explicit correlation basis (`shared_trigger`, `hardware_capture`, `common_capture`, or `controlled_intervention`), a witness reference, and a SHA-256 digest. Two or more anchors at distinct source coordinates are required.
+
+The witness reference is a claim about where the correlation evidence can be inspected. Its digest is an integrity declaration only; this implementation does not retrieve, authenticate, or independently judge it. The caller must be able to defend the assertion that each source and target interval refers to the same physical event. Similarity-based event matching is not accepted as a calibration basis by this interface.
+
+### Feasible-set model
+
+The version-0.1 model assumes one positive affine relation over the declared validity range:
+
+[
+t_{target} = a,t_{source} + b,qquad a ge a_{min} > 0
+]
+
+For every anchor (i), the mapping must satisfy:
+
+[
+y_i^- le a x_i + b le y_i^+
+]
+
+The implementation expresses these constraints as linear half-planes in ((a,b)), computes their feasible vertices, and retains the complete feasible region rather than choosing one best-fit line. The reported scale and offset bounds are projections of that region.
+
+For a source coordinate (x) inside the validity range, `map_source_interval()` evaluates (a x+b) at every feasible vertex and returns the minimum and maximum target coordinates. This is a conservative feasible-set envelope. It is **not** a probability distribution, standard error, Bayesian posterior, or calibrated confidence interval.
+
+`map_source_interval()` and `compare_cross_clock_intervals()` require the caller to repeat the calibration's source/target clock IDs and units. The request is rejected if a reading belongs to another clock segment or names a different unit; the calibration cannot be applied by matching a number alone.
+
+`compare_cross_clock_intervals()` compares that mapped envelope to a target event's supplied interval:
+
+- **before** only when every admissible mapped source coordinate is strictly earlier;
+- **after** only when every admissible mapped source coordinate is strictly later;
+- **overlap_unresolved** when the intervals overlap or even merely touch.
+
+The comparison therefore yields a strict ordering only when every mapping allowed by the anchors agrees. It never chooses a convenient point estimate to force a timeline.
+
+The calibration validity range must lie inside the observed anchor span. Version 0.1 refuses extrapolation outside that span. A non-affine or drifting clock may make the anchors infeasible; if they happen to fit within their uncertainty intervals, that demonstrates only consistency of this finite anchor set with the affine model, not that the model remains valid between or after the anchors.
+
+### Reproduce
+
+    python -m unittest discover -s bridges/temporal-provenance -p 'test_*.py' -v
+    python bridges/temporal-provenance/clock_calibration.py --output results/clock-calibration-example.json
+
+The synthetic example creates three shared-trigger anchor declarations. One source event maps strictly before a target interval; another overlaps its target interval and therefore remains unresolved. The artifact is a mathematical demonstration with synthetic witness references, not a physical calibration.
+
+### Trust and semantic boundary
+
+The calibration digest detects changes to the declared artifact. It does not authenticate the contributor, clock owner, trigger, witness artifact, or correlation event. The affine model and the uncertainty intervals are supplied assumptions. A production system should preserve original uncalibrated coordinates and record who/what admitted each anchor, the hardware or capture method, validity interval, calibration uncertainty semantics, and any drift or recalibration events.
+
+A clock calibration can establish a bounded temporal relation under its assumptions. It cannot establish that one event caused another, that a controller's "accepted" or "completed" record means physical actuation, or that a sensor sample belongs to a particular command unless a separate correlation witness says so.
+
+### Standards context
+
+The [NTPv4 specification (RFC 5905)](https://www.rfc-editor.org/rfc/rfc5905.html) explicitly tracks clock dispersion and synchronization distance. Its synchronization-distance measure combines dispersion with half the round-trip delay to represent a maximum-error bound; dispersion also grows over time as clock-frequency tolerance accumulates. That is a useful standards precedent for treating time synchronization as an uncertainty-bearing estimate rather than an exact scalar. This bridge does not implement NTP, its peer-selection algorithm, or its synchronization-distance calculation. [RFC 5905](https://www.rfc-editor.org/rfc/rfc5905.html)
+
+For the separate authenticity question, [Network Time Security (RFC 8915)](https://www.rfc-editor.org/rfc/rfc8915.html) specifies TLS-based key establishment and authenticated time-transfer packets for NTP. It illustrates that authenticated time-source identity is a distinct protocol obligation. The anchor witness references in this experiment are not NTS messages, are not authenticated by this code, and do not inherit NTS guarantees. [RFC 8915](https://www.rfc-editor.org/rfc/rfc8915.html)
+
 ## Boundaries and next experiments
 
 - Clock IDs and actor IDs are labels; this format does not authenticate their owners.
-- No calibration or affine clock-fit model is inferred. A future calibration extension should carry anchor events, uncertainty bounds, validity intervals, and provenance, then prove order only when mapped intervals are disjoint.
+- No calibration is inferred from event streams or similarity matches. The optional calibration artifact only evaluates explicit supplied anchors; it does not promote VGI-style correspondence into a causal edge or clock-synchronization witness.
 - A VGI-style event correspondence can be added as a separate relation. It must not be treated as a causal edge or as a clock calibration unless a separate contract establishes that implication.
 - The analyzer is pairwise (O(n^2)). It is intended for inspectable traces, not an unbounded event database.
 - The vector-clock model assumes actor IDs are uniquely owned by one active writer. Split-brain actor identity invalidates its causal interpretation.
