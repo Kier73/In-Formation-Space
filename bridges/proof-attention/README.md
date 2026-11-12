@@ -84,38 +84,9 @@ PYTHONPATH=bridges/proof-attention:bridges/observation-path:/path/to/Virtual-Gro
 
 The workflow records its exact VGI commit in .github/workflows/proof-attention.yml.
 
-## Experimental AND/OR cost-to-go comparison
-
-The separate `and_or_cost_to_go.py` module compares the structural attention order above with an additive cost-to-go estimate over the VGI proof hypergraph. It is analysis-only; it does not replace `build_proof_attention_plan` or change `ProofAttentionSession` execution.
-
-```python
-from and_or_cost_to_go import build_and_or_cost_to_go
-
-comparison = build_and_or_cost_to_go(
-    proof_ground,
-    root_obligation_ids=(root_obligation_id,),
-    cost_model=empirical_probe_cost_model,
-)
-```
-
-The recurrence treats each candidate or elaborated hyper-transition as an OR alternative and requires every child in the selected transition's AND bundle. Candidate tactic costs come from explicit `EmpiricalProbeCostModel` provenance. An already-elaborated transition has zero remaining tactic cost, but its children must still be discharged. The planner computes a least finite continuation; a cycle without a finite exit has no route, and a positive-cost/edge-count tie-break prevents a zero-cost elaborated cycle from displacing a finite route.
-
-The output includes a structural baseline order, a selected conditional continuation per active root, the currently dispatchable candidate transitions, source cost provenance, and a content digest. Candidate descendants can be costed in the continuation tree, but remain marked conditional and are not included in the current dispatchable action list until reached by observed elaboration.
-
-### Interpretation limits
-
-- The estimate adds component p90 or p95 values. Their sum is not itself an end-to-end p90 or p95.
-- Repeated obligation occurrences are charged independently; the experiment does not optimize proof reuse across branches or roots.
-- A candidate with an empty subgoal bundle is only an action whose proposed continuation has no child obligations. Its parent still requires a separate verified kernel receipt.
-- Kernel-rejected obligations are not accepted terminals. Timeout and rejected tactic attempts remain history, not retry actions.
-- The bound synchronous operation may include whatever blocking the caller measured. This experiment does not independently isolate CPU, transport, admission, provenance or kernel-check time.
-- No tactic success probability, proof, or execution authorization is inferred.
-
-The focused proof-attention workflow runs the new finite-graph tests against the same pinned VGI and E-CPU revisions as the existing bridge.
-
 ## Next experiments
 
-Useful follow-ons include comparing this per-occurrence estimate with a global shared-subgoal optimizer, testing sensitivity to different measured percentiles and workload strata, and replaying the analysis from a real Lean trace exporter with independently authenticated kernel receipts. None should weaken the distinction between proposed and elaborated subgoals or infer a proof from an empty child list.
+A later increment could admit new elaboration frames from a real tactic runner, then replan from the newly observed frontier. Another could compare the structural intention policy with a separate AND/OR cost-to-go algorithm on finite proof graphs. Neither should weaken the external kernel receipt boundary or infer a proof from an empty child list.
 
 
 ## Proof-action execution and replanning
@@ -640,3 +611,21 @@ This creates a clear linearization rule for a claim racing with a request:
 A worker runner must call `worker.assert_request_current(received)` at its own execution-admission point immediately before starting the tactic. This rechecks the exact owner-generation token after the transport ACK; it rejects an otherwise valid admission that was superseded between message receipt and runner dispatch. A production runner must still integrate cancellation/cleanup for work already running, and the transport/receiver should enforce generation tokens at its own commit boundary where possible.
 
 The admission CAS is a durable record of the communication decision, not a tactic execution receipt and not a kernel proof receipt. A route admission followed by a later route closure remains a route lifecycle event; it does not imply that the tactic ran or failed.
+
+### Idempotent execution authorization tickets
+
+Transport admission is not yet tactic execution. A worker that is about to hand an admitted request to an external tactic runner should use `worker.execute_request(...)`. This appends an `execution_authorized` event through the same route-authority CAS before invoking the runner callback:
+
+```python
+dispatch = worker.execute_request(
+    received_request,
+    runner_id="lean-worker-pool-a",
+    runner=runner.execute,
+)
+```
+
+The runner receives `(execution_id, request)`. The execution ID is a deterministic SHA-256 ticket derived from the route epoch, proof attempt ID and request digest. It stays the same if a worker is replaced and the same already-admitted attempt is recovered. The runner must use this ID as an idempotency key: repeated invocation with the same ID should resume/return the existing job, not create a second tactic execution.
+
+The execution-authorization event and a competing owner claim are ordered by the same CAS. If the claim wins first, `execute_request` returns `None` without invoking the runner. If execution authorization wins first, the runner receives the stable ticket; a later route handoff does not retroactively erase that authorization. The external runner is responsible for cancellation/cleanup of work already started and for ensuring late results cannot be accepted through a superseded route.
+
+An execution-authorization event means the route authority granted a particular runner the right to accept that attempt under an idempotency key. It is not proof that the callback completed, that the tactic succeeded, or that the kernel accepted the resulting proof. A crash after ticket commit but before callback invocation is intentionally recovered by retrying the same ticket with the same runner ID.
