@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import os
 import sys
 import time
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from mailcpu import (
     DistributedRecoveryLineageCoordinator,
@@ -21,6 +22,7 @@ from mailcpu import (
     TransferableExecutionClaimStore,
 )
 
+from portable_stateful_checkpoint import decode_checkpoint
 from stateful_recovery_handoff import (
     StatefulRuntimeRecoveryEnvelope,
     resume_on_recovery_host,
@@ -30,6 +32,7 @@ from stateful_recovery_handoff import (
 REQUEST_CHANNEL = "ifs.psc.stateful-recovery.request.v1"
 RESPONSE_CHANNEL = "ifs.psc.stateful-recovery.response.v1"
 OUTBOX_SCHEMA = "ifs.psc.stateful-recovery-worker-outbox.v1"
+PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v1"
 _MAX_RECORD_BYTES = 96 * 1024 * 1024
 
 
@@ -97,6 +100,136 @@ def _read_outbox(
     return dict(record)
 
 
+def _prepared_path(prepared_directory: Path, claim_id: str) -> Path:
+    return prepared_directory / f"{claim_id}.prepared.json"
+
+
+def _read_prepared(
+    path: Path,
+    *,
+    sequence: int,
+    envelope: StatefulRuntimeRecoveryEnvelope,
+    owner_peer_id: str,
+    owner_host_id: str,
+    implementation_fingerprint: str,
+) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    raw_bytes = path.read_bytes()
+    if not raw_bytes or len(raw_bytes) > _MAX_RECORD_BYTES:
+        raise ValueError("prepared result is empty or exceeds the 96 MiB bound")
+    record = json.loads(raw_bytes.decode("utf-8"))
+    fields = {
+        "schema",
+        "request_sequence",
+        "input_claim_id",
+        "input_checkpoint_sha256",
+        "input_envelope_sha256",
+        "assignment_epoch",
+        "owner_peer_id",
+        "owner_host_id",
+        "implementation_fingerprint",
+        "output_checkpoint_base64",
+        "output_checkpoint_sha256",
+        "receipt_core",
+        "receipt_sha256",
+        "prepared_sha256",
+    }
+    if not isinstance(record, Mapping) or set(record) != fields:
+        raise ValueError("prepared result fields do not match v1")
+    core = {key: record[key] for key in fields if key != "prepared_sha256"}
+    if record["schema"] != PREPARED_SCHEMA or _digest(core) != record["prepared_sha256"]:
+        raise ValueError("prepared result schema or digest is invalid")
+    if (
+        record["request_sequence"] != sequence
+        or record["input_claim_id"] != envelope.claim_id
+        or record["input_checkpoint_sha256"] != envelope.checkpoint_sha256
+        or record["input_envelope_sha256"] != envelope.envelope_sha256
+        or record["assignment_epoch"] != envelope.ticket.claim.current_assignment.epoch
+        or record["owner_peer_id"] != owner_peer_id
+        or record["owner_host_id"] != owner_host_id
+        or record["implementation_fingerprint"] != implementation_fingerprint
+    ):
+        raise ValueError("prepared result does not bind this exact request, assignment, and target")
+    encoded = record["output_checkpoint_base64"]
+    if not isinstance(encoded, str) or len(encoded) > ((_MAX_RECORD_BYTES + 2) // 3) * 4:
+        raise ValueError("prepared checkpoint Base64 is missing or exceeds its bound")
+    output_checkpoint = base64.b64decode(encoded, validate=True)
+    if hashlib.sha256(output_checkpoint).hexdigest() != record["output_checkpoint_sha256"]:
+        raise ValueError("prepared checkpoint digest mismatch")
+    receipt_core = record["receipt_core"]
+    if not isinstance(receipt_core, Mapping) or _digest(receipt_core) != record["receipt_sha256"]:
+        raise ValueError("prepared receipt digest mismatch")
+    if (
+        receipt_core.get("input_claim_id") != envelope.claim_id
+        or receipt_core.get("input_checkpoint_sha256") != envelope.checkpoint_sha256
+        or receipt_core.get("assignment_epoch") != record["assignment_epoch"]
+        or receipt_core.get("owner_peer_id") != owner_peer_id
+        or receipt_core.get("owner_host_id") != owner_host_id
+        or receipt_core.get("implementation_fingerprint") != implementation_fingerprint
+        or receipt_core.get("output_checkpoint_sha256") != record["output_checkpoint_sha256"]
+    ):
+        raise ValueError("prepared receipt is not bound to its checkpoint and target")
+    # Decode the actual checkpoint now, so malformed bytes never become the
+    # source of next-step controls during recovery.
+    decode_checkpoint(output_checkpoint)
+    return {**dict(record), "output_checkpoint": output_checkpoint}
+
+
+def _write_prepared(
+    path: Path,
+    *,
+    sequence: int,
+    envelope: StatefulRuntimeRecoveryEnvelope,
+    output_checkpoint: bytes,
+    receipt_core: Mapping[str, Any],
+    receipt_sha256: str,
+    owner_peer_id: str,
+    owner_host_id: str,
+    implementation_fingerprint: str,
+) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    core = {
+        "schema": PREPARED_SCHEMA,
+        "request_sequence": sequence,
+        "input_claim_id": envelope.claim_id,
+        "input_checkpoint_sha256": envelope.checkpoint_sha256,
+        "input_envelope_sha256": envelope.envelope_sha256,
+        "assignment_epoch": envelope.ticket.claim.current_assignment.epoch,
+        "owner_peer_id": owner_peer_id,
+        "owner_host_id": owner_host_id,
+        "implementation_fingerprint": implementation_fingerprint,
+        "output_checkpoint_base64": base64.b64encode(output_checkpoint).decode("ascii"),
+        "output_checkpoint_sha256": hashlib.sha256(output_checkpoint).hexdigest(),
+        "receipt_core": dict(receipt_core),
+        "receipt_sha256": receipt_sha256,
+    }
+    if _digest(core["receipt_core"]) != receipt_sha256:
+        raise ValueError("worker attempted to persist a prepared result with an invalid receipt digest")
+    record = {**core, "prepared_sha256": _digest(core)}
+    payload = _canonical(record) + b"\n"
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        directory_descriptor = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_descriptor)
+        finally:
+            os.close(directory_descriptor)
+    except BaseException:
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+    return record
+
+
 def _write_outbox(
     path: Path,
     *,
@@ -161,6 +294,7 @@ def _resume_once(
     implementation_fingerprint: str,
     next_resume_controls: Mapping[str, int],
     crash_mode: str,
+    before_claim_complete: Callable[[bytes, Mapping[str, Any], str], None],
 ) -> dict[str, Any]:
     peer_b = RecoveryLineagePeerClient.connect(
         membership,
@@ -208,6 +342,7 @@ def _resume_once(
             owner_host_id=owner_host_id,
             implementation_fingerprint=implementation_fingerprint,
             next_resume_controls=next_resume_controls,
+            before_claim_complete=before_claim_complete,
             after_claim_complete=crash_after_claim_complete,
             after_successor_claim=crash_after_successor_claim,
         )
@@ -298,6 +433,52 @@ def _run(arguments: list[str]) -> int:
             }
             return
 
+        prepared_path = _prepared_path(Path(outbox_directory), envelope.claim_id)
+        prepared = _read_prepared(
+            prepared_path,
+            sequence=sequence,
+            envelope=envelope,
+            owner_peer_id=owner_peer_id,
+            owner_host_id=owner_host_id,
+            implementation_fingerprint=implementation_fingerprint,
+        )
+        selected_next_controls = (
+            decode_checkpoint(prepared["output_checkpoint"])["resume_controls"]
+            if prepared is not None
+            else next_resume_controls
+        )
+
+        def persist_prepared(
+            output_checkpoint: bytes,
+            receipt_core: Mapping[str, Any],
+            receipt_sha256: str,
+        ) -> None:
+            if prepared is not None:
+                if (
+                    prepared["output_checkpoint"] != output_checkpoint
+                    or prepared["receipt_core"] != dict(receipt_core)
+                    or prepared["receipt_sha256"] != receipt_sha256
+                ):
+                    raise ValueError(
+                        "deterministic replay differs from the durable prepared checkpoint or receipt"
+                    )
+                return
+            _write_prepared(
+                prepared_path,
+                sequence=sequence,
+                envelope=envelope,
+                output_checkpoint=output_checkpoint,
+                receipt_core=receipt_core,
+                receipt_sha256=receipt_sha256,
+                owner_peer_id=owner_peer_id,
+                owner_host_id=owner_host_id,
+                implementation_fingerprint=implementation_fingerprint,
+            )
+            if crash_mode == "after-prepared-fsync":
+                # The exact output checkpoint is durable, but quorum completion
+                # has not yet been attempted.
+                os._exit(94)
+
         result = _resume_once(
             envelope=envelope,
             membership=membership,
@@ -310,8 +491,9 @@ def _run(arguments: list[str]) -> int:
             owner_peer_id=owner_peer_id,
             owner_host_id=owner_host_id,
             implementation_fingerprint=implementation_fingerprint,
-            next_resume_controls=next_resume_controls,
+            next_resume_controls=selected_next_controls,
             crash_mode=crash_mode,
+            before_claim_complete=persist_prepared,
         )
         _write_outbox(
             outbox_path,

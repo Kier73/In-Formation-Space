@@ -158,11 +158,12 @@ def _stop(process: subprocess.Popen[str] | None) -> None:
 
 
 @pytest.mark.parametrize(
-    ("crash_mode", "expected_exit", "expect_cached_outbox", "expect_completed_claim_recovery"),
+    ("crash_mode", "expected_exit", "expect_cached_outbox", "expect_completed_claim_recovery", "replacement_controls"),
     (
-        ("after-outbox-fsync", 91, True, False),
-        ("after-claim-complete", 92, False, True),
-        ("after-successor-claim", 93, False, True),
+        ("after-outbox-fsync", 91, True, False, {"advance": 1, "reset": 0}),
+        ("after-prepared-fsync", 94, False, False, {"advance": 1, "reset": 0}),
+        ("after-claim-complete", 92, False, True, {"advance": 1, "reset": 0}),
+        ("after-successor-claim", 93, False, True, {"advance": 1, "reset": 0}),
     ),
 )
 def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
@@ -171,6 +172,7 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
     expected_exit: int,
     expect_cached_outbox: bool,
     expect_completed_claim_recovery: bool,
+    replacement_controls: dict[str, int],
 ) -> None:
     membership = _membership()
     authority_root = tmp_path / "authorities"
@@ -230,6 +232,7 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
 
         outbox_directory = tmp_path / "worker-outbox"
         outbox_path = outbox_directory / f"{assigned.claim_id}.json"
+        prepared_path = outbox_directory / f"{assigned.claim_id}.prepared.json"
         common_arguments = [
             str(membership_path),
             str(authority_paths["authority-a"]),
@@ -279,8 +282,13 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
         # completion but before successor creation, or after successor
         # creation but before the first outbox write.
         first_worker.wait(timeout=20)
-        assert first_worker.returncode == expected_exit
+        first_stdout, first_stderr = first_worker.communicate(timeout=5)
+        assert first_worker.returncode == expected_exit, (
+            f"worker exit mismatch: expected={expected_exit}, "
+            f"actual={first_worker.returncode}, stdout={first_stdout!r}, stderr={first_stderr!r}"
+        )
         assert outbox_path.is_file() is expect_cached_outbox
+        assert prepared_path.is_file()
         assert request_sender.pending_sequences() == (1,)
         first_transport.close()
         first_transport = None
@@ -296,13 +304,20 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
         replacement_arguments = list(common_arguments)
         replacement_arguments[4] = str(port_b)
         replacement_arguments[6] = str(port_c)
+        # The prepared checkpoint carries the next-step controls. A replacement
+        # with a different local default must recover the exact staged result.
+        replacement_arguments[11] = json.dumps(
+            replacement_controls,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
 
         # A replacement worker binds a fresh TCP stream. The requester restores
         # its exact pending reliable frame and retransmits sequence 1. If the
-        # outbox exists it is replayed; if the crash preceded that write, the
-        # completed quorum claim is replayed and checked against the exact
-        # output checkpoint and receipt before the missing successor/outbox
-        # are reconstructed.
+        # outbox exists it is replayed; otherwise the prepared checkpoint is
+        # deterministically checked against the same input before claim commit
+        # or successor/outbox reconstruction. The replacement's CLI controls
+        # intentionally differ from the staged output checkpoint.
         retry_worker, retry_port = _start_worker(
             repository_root,
             replacement_arguments + ["none"],

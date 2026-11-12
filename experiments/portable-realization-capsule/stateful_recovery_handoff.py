@@ -350,6 +350,7 @@ def resume_on_recovery_host(
     owner_host_id: str,
     implementation_fingerprint: str,
     next_resume_controls: Mapping[str, int],
+    before_claim_complete: Callable[[bytes, Mapping[str, Any], str], None] | None = None,
     after_claim_complete: Callable[[PortableExecutionClaimBundle], None] | None = None,
     after_successor_claim: Callable[[StatefulRuntimeRecoveryEnvelope], None] | None = None,
 ) -> StatefulRuntimeRehomeResult:
@@ -368,6 +369,10 @@ def resume_on_recovery_host(
             raise StatefulRuntimeRehomeError("live claim identity differs from the received recovery envelope")
 
         assignment = claim.current_assignment
+        if assignment.epoch != envelope.ticket.claim.current_assignment.epoch:
+            raise StatefulRuntimeRehomeError(
+                "recovery envelope assignment epoch is stale relative to the live claim"
+            )
         if claim.status is ExecutionClaimStatus.ASSIGNED:
             current_ticket.verify_for_target(
                 store.coordinator,
@@ -437,6 +442,8 @@ def resume_on_recovery_host(
         }
         receipt_digest = _digest(receipt_core)
         output_digest = _bytes_digest(next_checkpoint)
+        if before_claim_complete is not None:
+            before_claim_complete(next_checkpoint, receipt_core, receipt_digest)
     except (
         PortableStatefulCheckpointError,
         TransferableExecutionClaimError,
