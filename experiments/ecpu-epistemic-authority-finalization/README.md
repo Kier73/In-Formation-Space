@@ -57,9 +57,35 @@ The late-evidence probe then submits either:
 - a previously absent source for partial-evidence scenarios; or
 - a changed value for a source already represented in a full-evidence scenario.
 
-The system must not silently add the late observation to the finalized event. Depending on whether the old source frames were consumed by an authorized commit, the coordinator's transport intake may either reach and reject the late frame or be blocked behind older unconsumed evidence. The direct consensus-ingestion check must reject the proposal in either case. The attempt receipt records both layers separately, along with whether the late frame remains queued.
+The system must not silently add the late observation to the finalized event. In partial-evidence scenarios, the new source is sent through the real reliable transport after finalization; coordinator intake reaches the new source and consensus rejects it. The late frame remains queued because it was not admitted or acknowledged. In full-evidence scenarios, the probe submits a changed observation for an already represented source directly to consensus; this is also rejected. All 30 attempts record the unchanged finalized status and an unchanged coordinator snapshot after the late proposal.
 
-This is an important distinction: rejection by the consensus finalization rule is not identical to the transport intake loop being blocked by older unconsumed frames.
+The distinction retained in each receipt is between a transport frame being present, transport intake reaching it, and consensus refusing to add it to an already finalized event. A rejected late frame is not silently discarded, and the established authority is not silently revised.
+
+## First live CI result
+
+The first full pinned-runtime matrix completed successfully in [GitHub Actions run 310](https://github.com/Kier73/In-Formation-Space/actions/runs/43135518309). The digest-checked [run summary](results/ci-run-310-summary.json) records the artifact digest, attempt/evidence/trace digests, matrix counts, and exact outcomes.
+
+**Observed coverage:** 10 policy/scenario conditions × 3 repetitions = 30 attempts; 90 typed evidence records; 30/30 checkpoint restorations; 30/30 durable mailbox verifications; and 30/30 rejected post-finalization consensus proposals.
+
+| Evidence shape | strict=true | strict=false |
+| --- | --- | --- |
+| Two agreeing, two absent | REFUSED | AUTHORIZED |
+| Four unanimous | AUTHORIZED | AUTHORIZED |
+| Three agree, one dissents | CONFLICT | AUTHORIZED |
+| Two versus two tie | CONFLICT | AUTHORIZED |
+| One observation only | REFUSED | REFUSED |
+
+Across the 30 attempts, final outcomes were 15 AUTHORIZED, 6 CONFLICT, and 9 REFUSED. Permissive mode authorized six attempts despite dissent (three majority/dissent and three tied splits), plus three attempts with two of the four sources missing.
+
+**Tied-split result:** in all three strict=false 2–2 attempts, the canonical payload order selected the miss group, sources S02 and S03. The coordinator applied S02 as representative and the VM register resolver_hit read back as 0. This is a concrete demonstration that the current deterministic tie-break is reproducible but does not express greater evidential support: both groups had exactly two sources. Strict mode correctly classified those same ties as CONFLICT.
+
+The majority-dissent condition shows a related behavior. Under strict=false, the three-source hit group was authorized despite S03 dissenting. Commit applied the winning representative but consumed all four admitted evidence links, including the dissenter's frame. The dissent remains explicit in the evidence partition and the source-link ledger; it is not the VM value chosen for realization.
+
+For partial unanimous evidence, strict=false authorized the two-source quorum even though S02 and S03 were missing. The strict policy remained PENDING before finalization and then closed the event as REFUSED. A single observed source remained below quorum and was refused under both policy modes.
+
+All 30 late proposals were rejected by consensus after finalization. Twelve partial-evidence cases also sent the late source through the real transport path; the new frame remained queued after consensus refused admission. The other 18 cases had all sources already represented and tested a changed value for an existing source directly against consensus. These are separate probes, not a general revision/supersession protocol.
+
+This run is a finite state-contract experiment using synthetic resolver values, one logical event time, four source identities, fixed quorum two, and one local durable mailbox. It establishes the observed behavior of the pinned E-CPU implementation for these cases, not the safety of strict=false in a deployed system and not a universal theorem about all evidence configurations.
 
 ## Retained artifacts
 
@@ -78,7 +104,7 @@ No information-per-cost ratio is calculated and no adaptive policy is updated.
 - The matrix tests one fixed quorum (two), four sources, and two strictness modes.
 - All observations occur at one logical event time; cross-time revision and supersession are separate problems.
 - The current experiment tests finalized-event immutability, not a revision protocol or appeal/override protocol.
-- Refused/conflicted events are not committed, so their input frames remain unconsumed. This is a useful safety posture but can cause a source's FIFO channel to block later events; that operational consequence is recorded, not assumed away.
+- Refused/conflicted events are not committed, so their input frames remain unconsumed. Late frames from other sources can still be examined by the intake loop; consensus, rather than a global FIFO blockage, is what rejects the post-finalization proposal in the tested partial-evidence cases.
 - Three repetitions verify deterministic contracts; they do not yield statistical generalization.
 - Passing tests establish the inspected finite cases, not a universal theorem about every evidence configuration.
 
