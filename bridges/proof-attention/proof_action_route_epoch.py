@@ -11,10 +11,12 @@ operation; a locally cached ledger cannot fence a remote stale process by itself
 """
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 import hashlib
 import json
+from pathlib import Path
+import sqlite3
 import threading
 import uuid
 from typing import Any, Protocol
@@ -451,6 +453,189 @@ class InMemoryRouteEpochLedgerStore:
                 return False
             self._document = candidate
             return True
+
+
+class SQLiteRouteEpochLedgerStore:
+    """Durable, transactional CAS authority for processes on one host.
+
+    SQLite serializes writers with BEGIN IMMEDIATE and commits the full ledger
+    document in one transaction. The database must reside on a local filesystem
+    with SQLite locking guarantees. This is a multi-process, single-host backend;
+    it is not a distributed database for independent machines.
+
+    An authorization callback is mandatory. It receives the actor ID, the
+    current ledger document (or None on first write), and the proposed complete
+    replacement. A production application should bind this to authenticated
+    process identity, lease ownership, and allowed state transitions.
+    """
+
+    def __init__(
+        self,
+        database_path: str | Path,
+        *,
+        authorize_actor: Callable[
+            [str, Mapping[str, Any] | None, Mapping[str, Any]], bool
+        ],
+        timeout: float = 10.0,
+    ) -> None:
+        if not callable(authorize_actor):
+            raise ProofActionRouteEpochError(
+                "SQLite authority store requires an actor authorization callback"
+            )
+        if type(timeout) not in (int, float) or timeout <= 0:
+            raise ProofActionRouteEpochError("SQLite timeout must be positive")
+        self._path = str(database_path)
+        if self._path == ":memory:":
+            raise ProofActionRouteEpochError(
+                "SQLite route authority requires a durable file path, not :memory:"
+            )
+        self._authorize_actor = authorize_actor
+        self._timeout = float(timeout)
+        Path(self._path).expanduser().parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with self._connect() as connection:
+                connection.execute("PRAGMA journal_mode=WAL")
+                connection.execute("PRAGMA synchronous=FULL")
+                connection.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS proof_action_route_authority (
+                        singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                        revision INTEGER NOT NULL,
+                        ledger_digest TEXT NOT NULL,
+                        ledger_json TEXT NOT NULL,
+                        actor_id TEXT NOT NULL
+                    )
+                    """
+                )
+        except sqlite3.DatabaseError as exc:
+            raise ProofActionRouteEpochError(
+                f"could not initialize SQLite route authority: {exc}"
+            ) from exc
+
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(
+            self._path,
+            timeout=self._timeout,
+            isolation_level=None,
+        )
+        connection.row_factory = sqlite3.Row
+        connection.execute(f"PRAGMA busy_timeout={int(self._timeout * 1000)}")
+        connection.execute("PRAGMA synchronous=FULL")
+        return connection
+
+    @staticmethod
+    def _validate_document(document: Mapping[str, Any]) -> dict[str, Any]:
+        if not isinstance(document, Mapping):
+            raise ProofActionRouteEpochError("SQLite authority document must be an object")
+        candidate = _copy(dict(document))
+        if set(candidate) != {"format", "entries", "ledger_digest"}:
+            raise ProofActionRouteEpochError("SQLite authority document fields are invalid")
+        if candidate["format"] != LEDGER_FORMAT or not isinstance(candidate["entries"], list):
+            raise ProofActionRouteEpochError("SQLite authority document format is invalid")
+        supplied_digest = _sha256(candidate["ledger_digest"], "ledger_digest")
+        core = {key: value for key, value in candidate.items() if key != "ledger_digest"}
+        if _digest(core) != supplied_digest:
+            raise ProofActionRouteEpochError("SQLite authority document digest is invalid")
+        return candidate
+
+    def load(self) -> dict[str, Any] | None:
+        """Read and verify the latest committed route ledger revision."""
+        try:
+            with self._connect() as connection:
+                row = connection.execute(
+                    """
+                    SELECT revision, ledger_digest, ledger_json
+                    FROM proof_action_route_authority
+                    WHERE singleton = 1
+                    """
+                ).fetchone()
+        except sqlite3.DatabaseError as exc:
+            raise ProofActionRouteEpochError(
+                f"could not read SQLite route authority: {exc}"
+            ) from exc
+        if row is None:
+            return None
+        try:
+            rendered = json.loads(row["ledger_json"])
+            document = self._validate_document(rendered)
+        except (TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise ProofActionRouteEpochError(
+                "SQLite route authority contains an invalid ledger document"
+            ) from exc
+        if row["ledger_digest"] != document["ledger_digest"]:
+            raise ProofActionRouteEpochError(
+                "SQLite route authority row digest differs from its stored document"
+            )
+        if type(row["revision"]) is not int or row["revision"] <= 0:
+            raise ProofActionRouteEpochError("SQLite route authority revision is invalid")
+        return document
+
+    def compare_and_swap(
+        self,
+        expected_ledger_digest: str | None,
+        replacement: Mapping[str, Any],
+        *,
+        actor_id: str,
+    ) -> bool:
+        """Atomically compare the current digest and commit one complete revision."""
+        actor = _text(actor_id, "actor_id")
+        candidate = self._validate_document(replacement)
+        try:
+            with self._connect() as connection:
+                connection.execute("BEGIN IMMEDIATE")
+                row = connection.execute(
+                    """
+                    SELECT revision, ledger_digest, ledger_json
+                    FROM proof_action_route_authority
+                    WHERE singleton = 1
+                    """
+                ).fetchone()
+                current_document = None
+                current_digest = None
+                revision = 0
+                if row is not None:
+                    current_document = self._validate_document(
+                        json.loads(row["ledger_json"])
+                    )
+                    current_digest = current_document["ledger_digest"]
+                    revision = int(row["revision"])
+                    if row["ledger_digest"] != current_digest:
+                        connection.rollback()
+                        raise ProofActionRouteEpochError(
+                            "SQLite route authority row digest mismatch"
+                        )
+                if current_digest != expected_ledger_digest:
+                    connection.rollback()
+                    return False
+                if not self._authorize_actor(actor, current_document, candidate):
+                    connection.rollback()
+                    raise ProofActionRouteEpochError(
+                        f"actor {actor!r} is not authorized to update route authority"
+                    )
+                connection.execute(
+                    """
+                    INSERT INTO proof_action_route_authority
+                        (singleton, revision, ledger_digest, ledger_json, actor_id)
+                    VALUES (1, ?, ?, ?, ?)
+                    ON CONFLICT(singleton) DO UPDATE SET
+                        revision = excluded.revision,
+                        ledger_digest = excluded.ledger_digest,
+                        ledger_json = excluded.ledger_json,
+                        actor_id = excluded.actor_id
+                    """,
+                    (
+                        revision + 1,
+                        candidate["ledger_digest"],
+                        _canonical(candidate),
+                        actor,
+                    ),
+                )
+                connection.commit()
+                return True
+        except sqlite3.DatabaseError as exc:
+            raise ProofActionRouteEpochError(
+                f"SQLite route authority transaction failed: {exc}"
+            ) from exc
 
 
 class ProofActionRouteEpochLedger:
@@ -1390,6 +1575,7 @@ __all__ = [
     "REASON_CODES",
     "RouteEpochLedgerStore",
     "InMemoryRouteEpochLedgerStore",
+    "SQLiteRouteEpochLedgerStore",
     "ProofActionRouteEpochError",
     "ProofActionRouteEpochLedger",
     "ProofActionRouteHandoff",
