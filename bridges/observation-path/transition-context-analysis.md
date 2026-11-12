@@ -22,7 +22,7 @@ The analysis accepts the same self-contained transition-conformance records as [
 
 A dimension is either:
 
-- `{"status": "observed", "value": ...}`, where the value is a JSON scalar; or
+- `{"status": "observed", "value": ...}`, where the value is a string, integer, Boolean, or null (floating-point values are intentionally excluded); or
 - `{"status": "unknown", "reason": "..."}`.
 
 A missing assignment, an omitted dimension, and an explicit unknown value remain three distinct cases. Context records are caller-supplied; the digest makes their contents reproducible and detects mutation, but does not authenticate the producer or prove the truth of a context claim.
@@ -62,7 +62,7 @@ Assignments are optional and may cover only part of the sample. A supplied assig
 
 The module reconstructs every conformance record against the pinned Trial 08 model before counting it. For each observed context dimension, and for the joint partition of attempts with every dimension observed, it compares full transition witnesses using exact unordered-pair counts.
 
-For a sample of (n) full transition witnesses, there are (inom{n}{2}) unordered pairs. A pair disagrees when its `(outcome, next_state)` values differ.
+For a sample of n full transition witnesses, there are n(n−1)/2 unordered pairs. A pair disagrees when its `(outcome, next_state)` values differ.
 
 The report keeps three quantities separate:
 
