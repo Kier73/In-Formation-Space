@@ -328,7 +328,7 @@ admitted = host.observe_request_admission()
 # The worker's external tactic runner consumes request.request, then packages
 # a result with make_proof_action_result(...).
 # The worker sends it with worker.send_result(result_document).
-imported = host.receive_result()
+imported = host.receive_result(verified_receipts=kernel_receipts)
 worker.process_result_acknowledgements()
 ```
 
@@ -341,7 +341,7 @@ worker.process_result_acknowledgements()
 - If request retries exhaust before an ACK arrives, the attempt closes as `delivery_unconfirmed`. This means delivery/admission was not confirmed; it is not an execution rejection, timeout observation, or theorem result.
 - A worker result uses the response ReliableChannel. The host records the raw returned payload after the response frame is consumed and ACKed, then checks the result envelope against the active attempt, request digest and recorded return evidence before importing the VGI trace.
 - A response duplicate is acknowledged without a second proof interpretation. A malformed or mismatched result remains a recorded raw return followed by `interpretation_failed`.
-- The worker's response sender can clear its pending sequence only after it receives the host's response ACK. A transport ACK is never promoted to a kernel receipt.
+- The worker's response sender can clear its pending sequence only after it receives the host's response ACK. A transport ACK is never promoted to a kernel receipt. The host supplies independently verified kernel receipts to `receive_result(verified_receipts=...)`; they remain separate from the worker's transport ACK and result digest.
 
 The adapter's `Transport` is injected. The in-memory and fault-injecting E-CPU transports make the lifecycle reproducible in tests; an external host must supply a transport implementation that routes the mailboxes between its processes. This merge does not claim that a remote network backend, Lean tactic runner, or physical worker has been deployed.
 
