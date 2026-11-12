@@ -263,7 +263,7 @@ def _validated_span_collection(
 ) -> list[dict[str, Any]]:
     if not isinstance(span_documents, list):
         raise TypeError("span_documents must be a list")
-    validated = _validated_span_collection(span_documents)
+    validated = [validate_operation_span(span) for span in span_documents]
     identities: set[tuple[str, str]] = set()
     for span in validated:
         identity = (span["attempt_id"], span["span_id"])
@@ -282,7 +282,7 @@ def build_operation_cost_profiles(
     if isinstance(minimum_samples, bool) or not isinstance(minimum_samples, int) or minimum_samples < 1:
         raise ValueError("minimum_samples must be a positive integer")
     groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
-    validated = [validate_operation_span(span) for span in span_documents]
+    validated = _validated_span_collection(span_documents)
     for span in validated:
         key = (
             span["operation_id"], span["clock_actor_id"],
