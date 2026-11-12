@@ -31,3 +31,8 @@ Every row in each declared finite Boolean domain must match the independent scal
 ## Limitations
 
 A lower stored-parameter count does not imply lower Python heap residency or lower latency. The sparse representation continues to hold dense activation vectors. Measurements from one Actions host are descriptive and must not be generalized to other processors, Python implementations, native kernels, GPUs, or deployments.
+
+
+## First corrected verification record
+
+The pinned [SRE-001 CI run](https://github.com/Kier73/In-Formation-Space/actions/runs/43302944580) passed sparse transition equivalence and integrity regressions, the complete 16-workload dense/sparse corpus, and evidence upload. The [retained run record](results/ci-run-43302944580.md) records all 1,364 rows, 4,092 semantic comparisons, exact E-CPU/VGI/IFS revisions, operation profiles, snapshot sizes, seven-sample timing results, and limits.
