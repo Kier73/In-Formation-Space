@@ -906,6 +906,9 @@ export function replayHybridCapsule(capsule, referenceRecords, trajectories = []
     fail("independent reference omits one or more Boolean input assignments");
   }
 
+  if (!Array.isArray(trajectories)) {
+    fail("trajectory reference must be an array");
+  }
   let trajectoryCount = 0;
   let trajectoryStepCount = 0;
   if (trajectories.length > 0) {
@@ -918,9 +921,6 @@ export function replayHybridCapsule(capsule, referenceRecords, trajectories = []
         JSON.stringify(["next_state_1", "next_state_0"])
     ) {
       fail("recurrent replay requires the declared two-bit counter interface");
-    }
-    if (!Array.isArray(trajectories)) {
-      fail("trajectory reference must be an array");
     }
     const horizon = Array.isArray(trajectories[0]?.controls)
       ? trajectories[0].controls.length
