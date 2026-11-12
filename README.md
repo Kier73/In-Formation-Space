@@ -127,4 +127,4 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 
 ## Realization cost and navigation
 
-- [RCN-001: Compiler-cost landscape across finite Boolean workloads](experiments/realization-cost-navigation/README.md) — compares minterm, direct-DAG, and liveness-compacted realizations across parity, multiplexers, adders, comparators, a priority encoder, and state controls. The resource navigator preserves Pareto-incomparable routes and keeps nonzero sparsity separate from the current dense forward cost.
+- [RCN-001: Compiler-cost landscape across finite Boolean workloads](experiments/realization-cost-navigation/README.md) — **verified across 16 complete finite Boolean workloads** (1,364 input rows and 4,092 neural/reference comparisons). It compares minterm, direct-DAG, and liveness-compacted realizations, preserves Pareto-incomparable routes, and keeps nonzero sparsity separate from current dense forward cost. Pinned evidence and measurements are retained in [the RCN-001 run record](experiments/realization-cost-navigation/results/ci-run-43299824228.md).
