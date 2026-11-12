@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Kier73/E-CPU
-          ref: cbc4500c3491f9e428ff902980a68152addf5208
+          ref: bcbc7fc607e8cd8b9830e8f58d1571954df61940
           path: external/E-CPU
 
       - name: Check out VGI transition reference
