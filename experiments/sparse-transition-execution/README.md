@@ -1,7 +1,7 @@
 # Sparse Transition Execution
 
 **Experiment:** SRE-001 · Sparse finite-transition execution against dense source models  
-**Status:** candidate; pinned cross-repository CI is the verification gate.
+**Status:** verified within the 16 declared complete finite Boolean domains. See the [corrected pinned CI evidence and measurements](results/ci-run-43302944580.md).
 
 SRE-001 continues RCN-001 by turning the existing dense compiler outputs into a sparse execution representation. It compares each dense model with a sparse model derived from that exact model, preserving the same architecture, source Ground digest, and dense-model digest.
 
@@ -47,3 +47,8 @@ The workflow pins exact E-CPU, Virtual-Ground-Interpreter, and In-Formation-Spac
 ## Relationship to RCN-001
 
 RCN-001 compared dense compiler structures and exposed active parameters as sparsity diagnostics. SRE-001 asks whether those zeros can be removed from the executable representation and then measures the resulting storage and execution path. The two experiments intentionally retain separate result records so that architecture-derived estimates and measured host behavior are not conflated.
+
+
+## First corrected CI result
+
+The [successful SRE-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43302944580) exhaustively checked 1,364 input rows and completed 4,092 dense-to-sparse semantic comparisons across 48 compiler/model pairs. The [retained run record](results/ci-run-43302944580.md) gives exact source revisions, stored-parameter and operation reductions, the compiler-specific JSON-size trade-offs, seven-sample Python inference measurements, conversion timings, artifact digests, and verification limits.
