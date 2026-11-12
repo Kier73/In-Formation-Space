@@ -549,7 +549,7 @@ class ProofActionRouteEpochTests(unittest.TestCase):
             ProofActionRouteEpochLedger.from_dict(persisted).active_epoch["epoch_id"],
             handoff.opened_epoch["epoch_id"],
         )
-        with self.assertRaisesRegex(ProofActionRouteEpochError, "authoritative store"):
+        with self.assertRaisesRegex(ProofActionRouteEpochError, "closed or superseded"):
             host.dispatch_next()
 
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
