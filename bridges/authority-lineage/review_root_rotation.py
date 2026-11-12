@@ -316,6 +316,12 @@ def verify_root_transition(
         raise RootRotationError("old_root_threshold must be an integer")
     if old_root_threshold < 1 or old_root_threshold > len(old_roots):
         raise RootRotationError("old_root_threshold is outside the trusted old root set")
+    if (
+        isinstance(expected_previous_generation, bool)
+        or not isinstance(expected_previous_generation, int)
+        or expected_previous_generation < 1
+    ):
+        raise RootRotationError("expected_previous_generation must be a positive integer")
     if isinstance(envelope, Mapping) is False or set(envelope) != _ENVELOPE_FIELDS:
         raise RootRotationError("root transition DSSE envelope has invalid fields")
     if envelope["payloadType"] != PAYLOAD_TYPE:
