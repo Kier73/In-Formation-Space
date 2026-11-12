@@ -123,9 +123,9 @@ def _tamper_bundle(bundle: bytes) -> dict[str, bool]:
     header = bundle[header_start:header_end]
     payload_start = header_end
 
-    if b"live_dag" not in header:
+    if b"minterm" not in header:
         raise AssertionError("bundle entry header compiler anchor missing")
-    changed_header = header.replace(b"live_dag", b"evil_dag", 1)
+    changed_header = header.replace(b"minterm", b"evilxxx", 1)
     if len(changed_header) != len(header):
         raise AssertionError("bundle entry header tamper was not length preserving")
     header_probe = bytearray(bundle)
