@@ -215,6 +215,64 @@ result = navigator.complete_active(
 
 The cross-repository tests use VGI commit `cedcc4540a9d75228cf83aaf21e1ba960fe8a555`. The navigator itself remains dependency-injected and does not import VGI or E-CPU at module import time.
 
+## Empirical operation costs in partial-attention ranking
+
+`empirical_probe_costs.py` connects the existing operation-span evidence to VGI's exact positive `TransitionProbe.cost` field. The binding is always caller-declared: each probe label is a method ID and maps to one measured `operation_id`, clock actor, and clock segment. The helper then:
+
+1. validates every source span and independently rebuilds the supplied cost profile from those exact span documents;
+2. requires a successful operation profile with at least the configured number of measured samples;
+3. requires all compared methods to share one monotonic clock actor and segment, and one percentile basis;
+4. defaults to the integer `p90_ns` statistic (or permits `p95_ns`), then supplies that duration as an exact `Fraction` nanosecond cost to a copied VGI probe;
+5. preserves profile digest, model digest, source span digests, sample count, clock domain, statistic, and measurement scope in the navigator's ranked candidate record.
+
+This is a cost-only connection. Scenario weights and counterfactual outcomes remain VGI inputs; timing does not establish a transition, increase a scenario's probability, or authorize execution. The probe's original cost/object is not mutated. A missing method binding, failed-only profile, under-sampled group, zero-resolution duration, mismatched clock segment, or incomparable actor blocks calibrated ranking rather than falling back to an unmeasured estimate.
+
+All candidates being compared in one model must share the same clock actor and segment. This is stricter than merely sharing units: monotonic timestamps from different processes or boot segments are not assumed comparable. The default p90 is an empirical high-percentile estimate of the supplied synchronous callable boundary, not a worst-case bound, CPU time, or total physical energy. The operation recorder's declared scope includes blocking inside that call and excludes later work; a caller should instrument the whole comparable method boundary when that is the intended cost.
+
+### Connect to the navigator
+
+Build a profile from the measured span artifacts using the existing `operation_spans.py` workflow, then declare explicit operation bindings:
+
+```python
+from empirical_probe_costs import (
+    EmpiricalProbeCostModel,
+    ProbeCostBinding,
+)
+from partial_attention_navigator import PartialAttentionNavigator
+
+cost_model = EmpiricalProbeCostModel(
+    span_documents,
+    profile_report,
+    (
+        ProbeCostBinding(
+            "sensor-fast",
+            "adapter.probe_fast",
+            "host-process",
+            "process-boot-7",
+        ),
+        ProbeCostBinding(
+            "sensor-wide",
+            "adapter.probe_wide",
+            "host-process",
+            "process-boot-7",
+        ),
+    ),
+    minimum_samples=5,
+)
+
+navigator = PartialAttentionNavigator(
+    system, observer, probe_factory, rank_partial_probes, horizon,
+    attempt_id_prefix="measured-attention",
+    query_label="refine the current Ground",
+    vgi_revision="cedcc4540a9d75228cf83aaf21e1ba960fe8a555",
+    cost_model=cost_model,
+)
+selection = navigator.begin_next()
+# Every ranking entry now carries the cost basis and source-span digests.
+```
+
+The probe factory must use those declared method IDs as each `TransitionProbe.label`. The navigator applies the model on each freshly generated candidate set, so candidate costs remain tied to the supplied profile and the same methods can be compared again after each Ground revision. The resulting ranked history includes cost provenance alongside VGI's separate expected-gain / scenario-bound metrics.
+
 ## Recorded verification
 
 The integrated lifecycle, schema, and adaptive-coordinator suites passed in [GitHub Actions run 112](https://github.com/Kier73/In-Formation-Space/actions/runs/43108746664). The machine-readable [CI encounter receipt](results/ci-run-112.json) records the tested commit, job, suite counts, and integrity digest.
