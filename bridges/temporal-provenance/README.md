@@ -164,6 +164,8 @@ The implementation expresses these constraints as linear half-planes in ((a,b)),
 
 For a source coordinate (x) inside the validity range, `map_source_interval()` evaluates (a x+b) at every feasible vertex and returns the minimum and maximum target coordinates. This is a conservative feasible-set envelope. It is **not** a probability distribution, standard error, Bayesian posterior, or calibrated confidence interval.
 
+`map_source_interval()` and `compare_cross_clock_intervals()` require the caller to repeat the calibration's source/target clock IDs and units. The request is rejected if a reading belongs to another clock segment or names a different unit; the calibration cannot be applied by matching a number alone.
+
 `compare_cross_clock_intervals()` compares that mapped envelope to a target event's supplied interval:
 
 - **before** only when every admissible mapped source coordinate is strictly earlier;
