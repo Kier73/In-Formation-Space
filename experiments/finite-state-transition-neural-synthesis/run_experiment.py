@@ -436,6 +436,7 @@ def run_experiment() -> dict[str, Any]:
 
     architecture_results: list[dict[str, Any]] = []
     all_cases: list[dict[str, Any]] = []
+    rollout_results: list[dict[str, Any]] = []
 
     for architecture_name, architecture in ARCHITECTURES:
         model = compile_transition_table(
@@ -445,6 +446,16 @@ def run_experiment() -> dict[str, Any]:
         source_model_digest = model.digest
         source_active_parameters = model.active_parameter_count
         source_program = compile_transition_program(source_table)
+        rollout_results.append(
+            _verify_recurrent_rollouts(
+                source_table,
+                model,
+                source_program,
+                model_name=f"minterm:{architecture_name}:baseline",
+                typed_program_digest=source_specification.digest,
+                compiler_id="mailcpu.transition_space.compile_transition_table",
+            )
+        )
 
         source_cases = [
             _run_case(
@@ -468,6 +479,16 @@ def run_experiment() -> dict[str, Any]:
         if intervention.changed_parameters != 1:
             raise AssertionError("the selected transition edit must change exactly one weight")
         target_program = compile_transition_program(target_table)
+        rollout_results.append(
+            _verify_recurrent_rollouts(
+                target_table,
+                model,
+                target_program,
+                model_name=f"minterm:{architecture_name}:one-row-override",
+                typed_program_digest=target_specification.digest,
+                compiler_id="mailcpu.transition_space.compile_transition_table",
+            )
+        )
         target_cases = [
             _run_case(
                 target_table,
@@ -520,6 +541,26 @@ def run_experiment() -> dict[str, Any]:
     )
     compositional_source_program = compile_transition_program(source_table)
     compositional_target_program = compile_transition_program(target_table)
+    rollout_results.extend(
+        [
+            _verify_recurrent_rollouts(
+                source_table,
+                compositional_source_model,
+                compositional_source_program,
+                model_name="direct-dag:baseline",
+                typed_program_digest=source_specification.digest,
+                compiler_id="mailcpu.transition_space.compile_compositional_transition_program",
+            ),
+            _verify_recurrent_rollouts(
+                target_table,
+                compositional_target_model,
+                compositional_target_program,
+                model_name="direct-dag:one-row-override",
+                typed_program_digest=target_specification.digest,
+                compiler_id="mailcpu.transition_space.compile_compositional_transition_program",
+            ),
+        ]
+    )
     compositional_source_cases = [
         _run_case(
             source_table,
@@ -553,6 +594,26 @@ def run_experiment() -> dict[str, Any]:
     )
     live_target_model = compile_live_compositional_transition_program(
         target_specification
+    )
+    rollout_results.extend(
+        [
+            _verify_recurrent_rollouts(
+                source_table,
+                live_source_model,
+                compositional_source_program,
+                model_name="live-dag:baseline",
+                typed_program_digest=source_specification.digest,
+                compiler_id="mailcpu.transition_space.compile_live_compositional_transition_program",
+            ),
+            _verify_recurrent_rollouts(
+                target_table,
+                live_target_model,
+                compositional_target_program,
+                model_name="live-dag:one-row-override",
+                typed_program_digest=target_specification.digest,
+                compiler_id="mailcpu.transition_space.compile_live_compositional_transition_program",
+            ),
+        ]
     )
     live_source_cases = [
         _run_case(
@@ -627,7 +688,7 @@ def run_experiment() -> dict[str, Any]:
     all_cases.extend(live_target_cases)
 
     return {
-        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v4",
+        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v5",
         "status": "verified-within-complete-finite-domain",
         "typed_transition_program": source_specification.to_dict(),
         "typed_transition_program_digest": source_specification.digest,
@@ -661,6 +722,16 @@ def run_experiment() -> dict[str, Any]:
         "case_count": len(all_cases),
         "architectures": architecture_results,
         "cases": all_cases,
+        "recurrent_rollout_verification": {
+            "horizon": 3,
+            "model_phase_count": len(rollout_results),
+            "trajectory_count": sum(item["trajectory_count"] for item in rollout_results),
+            "transition_step_count": sum(item["transition_step_count"] for item in rollout_results),
+            "all_trajectories_match": all(
+                item["all_trajectories_match"] for item in rollout_results
+            ),
+            "per_model": rollout_results,
+        },
         "verification_scope": (
             "All 16 inputs of the complete four-bit Boolean transition domain, "
             "for the baseline typed transition program and a compositional one-row "
@@ -673,6 +744,8 @@ def run_experiment() -> dict[str, Any]:
             "The result is exact on the declared finite Boolean domain, not a learned or generalizing model.",
             "The one-row typed override changes one selected output coefficient in each minterm architecture; both DAG compilers independently recompile the edited typed expression.",
             "No noise tolerance, quantization, training, arbitrary real-valued input behavior, or hardware speed is tested.",
+            "Recurrent verification covers all three-step Boolean control sequences, not unbounded trajectories."
+
         ],
     }
 
