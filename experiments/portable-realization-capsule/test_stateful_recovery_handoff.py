@@ -200,7 +200,7 @@ def test_recovery_owner_can_fail_before_resume_and_be_rehomed_again(tmp_path: Pa
 
     with pytest.raises(TransferableExecutionClaimError, match="not current"):
         host_b.ticket.verify_current(coordinator)
-    with pytest.raises(StatefulRuntimeRehomeError, match="could not admit or resume"):
+    with pytest.raises(StatefulRuntimeRehomeError, match="could not admit or replay"):
         resume_on_recovery_host(
             store,
             host_b,
