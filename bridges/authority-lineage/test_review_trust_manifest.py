@@ -403,8 +403,18 @@ class ReviewTrustManifestTests(unittest.TestCase):
             )
         )
         jsonschema.validate(instance=json.loads(raw), schema=schema)
+        successor = manifest_fixture(
+            generation=2,
+            previous=manifest["manifest_digest"],
+            issued_at="2026-11-12T13:00:00Z",
+            expires_at="2026-11-14T00:00:00Z",
+        )
+        jsonschema.validate(instance=successor, schema=schema)
         verify_trust_manifest(
-            envelope, pinned_roots, verification_time=VERIFY_AT
+            envelope,
+            pinned_roots,
+            verification_time=VERIFY_AT,
+            expected_registry_id=REGISTRY,
         )
 
 
