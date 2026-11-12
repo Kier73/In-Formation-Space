@@ -109,31 +109,62 @@ class ProofActionReliableWorker:
             channel=result_channel,
             policy=self.policy,
         )
+        self._admitted_requests: dict[str, str] = {}
+        self._result_sent_attempt_ids: set[str] = set()
 
     def receive_request(self) -> ReceivedProofActionRequest | None:
         """Receive one in-order request; duplicate frames are acknowledged but not redelivered."""
-        received = self._request_receiver.receive()
+        validated_payload: dict[str, Any] = {}
+
+        def validate_before_ack(sequence: int, payload: Any) -> None:
+            if not isinstance(payload, Mapping):
+                raise ProofActionReliableChannelError(
+                    "proof-action request frame must contain a JSON object"
+                )
+            try:
+                validated = validate_proof_action_request(payload)
+            except ProofActionProtocolError as exc:
+                raise ProofActionReliableChannelError(
+                    f"received proof-action request is invalid: {exc}"
+                ) from exc
+            validated_payload.update(validated)
+
+        received = self._request_receiver.receive(commit=validate_before_ack)
         if received is None:
             return None
-        sequence, payload = received
-        if not isinstance(payload, Mapping):
+        sequence, _payload = received
+        attempt_id = validated_payload["attempt_id"]
+        request_digest = validated_payload["request_digest"]
+        previous = self._admitted_requests.get(attempt_id)
+        if previous is not None and previous != request_digest:
             raise ProofActionReliableChannelError(
-                "proof-action request frame must contain a JSON object"
+                "one worker attempt ID was admitted with conflicting request digests"
             )
-        try:
-            validated = validate_proof_action_request(payload)
-        except ProofActionProtocolError as exc:
-            raise ProofActionReliableChannelError(
-                f"received proof-action request is invalid: {exc}"
-            ) from exc
-        return ReceivedProofActionRequest(sequence, validated)
+        self._admitted_requests[attempt_id] = request_digest
+        return ReceivedProofActionRequest(sequence, validated_payload)
 
     def send_result(self, result_document: Mapping[str, Any]) -> int:
         """Send one portable result envelope over the reliable response channel."""
         if not isinstance(result_document, Mapping):
             raise ProofActionReliableChannelError("proof-action result must be a JSON object")
         copied = json.loads(_canonical(dict(result_document)))
-        return self._result_sender.send(copied)
+        attempt_id = copied.get("attempt_id")
+        request_digest = copied.get("request_digest")
+        if not isinstance(attempt_id, str) or not isinstance(request_digest, str):
+            raise ProofActionReliableChannelError(
+                "proof-action result must identify its admitted attempt and request digest"
+            )
+        if self._admitted_requests.get(attempt_id) != request_digest:
+            raise ProofActionReliableChannelError(
+                "worker result does not match a request admitted by this endpoint"
+            )
+        if attempt_id in self._result_sent_attempt_ids:
+            raise ProofActionReliableChannelError(
+                "worker has already submitted a result for this attempt"
+            )
+        sequence = self._result_sender.send(copied)
+        self._result_sent_attempt_ids.add(attempt_id)
+        return sequence
 
     def process_result_acknowledgements(self) -> tuple[int, ...]:
         """Clear result sequences acknowledged after host-side receiver admission."""
@@ -225,15 +256,18 @@ class ProofActionReliableHost:
             attempt = self.session.begin_next()
             if attempt is None:
                 return None
-            request = build_proof_action_request(self.session, self.proof_ground)
             self._active_attempt = attempt
-            self._active_request = request
+            self._active_request = None
             self._request_sequence = None
 
         attempt = self._active_attempt
-        request = self._active_request
-        if attempt is None or request is None:
+        if attempt is None:
             raise ProofActionReliableChannelError("host active request state is incomplete")
+        if self._active_request is None:
+            self._active_request = build_proof_action_request(
+                self.session, self.proof_ground
+            )
+        request = self._active_request
         if attempt.status != "planned" or self._request_sequence is not None:
             raise ProofActionReliableChannelError(
                 f"host already dispatched the active proof action at stage {attempt.status!r}"
