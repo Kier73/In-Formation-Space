@@ -123,3 +123,8 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Verified weight-space realization
 
 - [WSP-002: Structured Algorithm Compilation and Equivalent-Weight Navigation](experiments/verified-weight-space-realization/README.md) — advances the verified Boolean seed into a three-bit feedback machine, three compiler routes, controlled semantic edits, ReLU symmetry navigation, exhaustive recurrent trajectories, and state-preserving revision/replay checks. Verification status is reported from pinned cross-repository CI.
+
+
+## Realization cost and navigation
+
+- [RCN-001: Compiler-cost landscape across finite Boolean workloads](experiments/realization-cost-navigation/README.md) — compares minterm, direct-DAG, and liveness-compacted realizations across parity, multiplexers, adders, comparators, a priority encoder, and state controls. The resource navigator preserves Pareto-incomparable routes and keeps nonzero sparsity separate from the current dense forward cost.
