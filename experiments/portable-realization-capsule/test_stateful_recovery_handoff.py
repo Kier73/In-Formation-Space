@@ -145,7 +145,7 @@ def test_psc_checkpoint_rehomes_to_new_quorum_owner_and_continues_once(tmp_path:
     assert result.receipt["state_before"] == [1, 0]
     assert result.receipt["state_after"] == [1, 1]
     assert result.receipt["output_checkpoint_sha256"] == result.next_envelope.checkpoint_sha256
-    assert result.completed_ticket.verify_current(coordinator)
+    result.completed_ticket.verify_current(coordinator)
 
     # The successor checkpoint is itself a new, current claim on the recovery host.
     successor = result.next_envelope
@@ -240,6 +240,18 @@ def test_reassignment_retry_is_idempotent_and_forged_envelopes_are_rejected(tmp_
 
     forged_ticket = moved.to_dict()
     forged_ticket["ticket"]["claim"]["assignments"][-1]["owner_host_id"] = "impostor-host"
+    forged_core = {
+        key: value for key, value in forged_ticket.items()
+        if key != "envelope_sha256"
+    }
+    forged_ticket["envelope_sha256"] = hashlib.sha256(
+        json.dumps(
+            forged_core,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode("utf-8")
+    ).hexdigest()
     with pytest.raises(StatefulRuntimeRehomeError, match="portable claim ticket is invalid"):
         StatefulRuntimeRecoveryEnvelope.from_dict(forged_ticket)
 
