@@ -538,6 +538,36 @@ ledger.claim_epoch(
 
 The expected generation is checked again after loading the latest store revision, before the CAS write. The close-and-open handoff uses the same owner check and commits both route events atomically.
 
+### Durable single-host authority with SQLite
+
+The pluggable CAS contract now has a durable local implementation in `sqlite_route_epoch_store.py`. It stores the current route ledger in SQLite, uses WAL and `synchronous=FULL`, serializes writers with `BEGIN IMMEDIATE`, and records a separate append-only revision index containing the prior ledger digest, new digest, actor ID and event digests appended by that revision.
+
+```python
+from proof_action_route_epoch import ProofActionRouteEpochLedger
+from sqlite_route_epoch_store import SQLiteRouteEpochLedgerStore
+
+store = SQLiteRouteEpochLedgerStore(
+    "/var/lib/in-formation-space/proof-routes.sqlite3"
+)
+ledger = ProofActionRouteEpochLedger(store=store)
+
+# In a replacement process, open the same database and recover the ledger:
+replacement_store = SQLiteRouteEpochLedgerStore(
+    "/var/lib/in-formation-space/proof-routes.sqlite3"
+)
+ledger = ProofActionRouteEpochLedger.from_dict(
+    replacement_store.load(),
+    store=replacement_store,
+)
+
+# Inspect the revision chain and actors recorded at each durable commit:
+revisions = replacement_store.revision_history()
+```
+
+The adapter supports concurrent processes on one host sharing the same database file on a local filesystem. Its CAS transaction ensures that two writers using the same expected ledger digest cannot both publish. It also rejects non-append-only replacements and verifies that its revision event index reproduces the current ledger.
+
+This is durable local process authority, not a multi-host consensus service. Do not assume SQLite locking provides safe cross-machine coordination over an arbitrary network filesystem. The `actor_id` is recorded for audit but is not authenticated by SQLite; secure database access and process authorization remain deployment responsibilities. For multi-host routing, use a transactional or consensus-backed implementation of `RouteEpochLedgerStore` with the same linearizable CAS semantics.
+
 ### Recover if the handoff process itself crashes
 
 The route-close record is sufficient to finish activation even when the process that committed the handoff dies before constructing its replacement endpoints:
