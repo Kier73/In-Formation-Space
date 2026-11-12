@@ -12,6 +12,7 @@ operation; a locally cached ledger cannot fence a remote stale process by itself
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from contextlib import closing
 from dataclasses import dataclass
 import hashlib
 import json
@@ -484,16 +485,17 @@ class SQLiteRouteEpochLedgerStore:
             )
         if type(timeout) not in (int, float) or timeout <= 0:
             raise ProofActionRouteEpochError("SQLite timeout must be positive")
-        self._path = str(database_path)
+        normalized_path = Path(database_path).expanduser()
+        self._path = str(normalized_path)
         if self._path == ":memory:":
             raise ProofActionRouteEpochError(
                 "SQLite route authority requires a durable file path, not :memory:"
             )
         self._authorize_actor = authorize_actor
         self._timeout = float(timeout)
-        Path(self._path).expanduser().parent.mkdir(parents=True, exist_ok=True)
+        normalized_path.parent.mkdir(parents=True, exist_ok=True)
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection:
                 connection.execute("PRAGMA journal_mode=WAL")
                 connection.execute("PRAGMA synchronous=FULL")
                 connection.execute(
@@ -541,7 +543,7 @@ class SQLiteRouteEpochLedgerStore:
     def load(self) -> dict[str, Any] | None:
         """Read and verify the latest committed route ledger revision."""
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection:
                 row = connection.execute(
                     """
                     SELECT revision, ledger_digest, ledger_json
@@ -581,7 +583,7 @@ class SQLiteRouteEpochLedgerStore:
         actor = _text(actor_id, "actor_id")
         candidate = self._validate_document(replacement)
         try:
-            with self._connect() as connection:
+            with closing(self._connect()) as connection:
                 connection.execute("BEGIN IMMEDIATE")
                 row = connection.execute(
                     """
