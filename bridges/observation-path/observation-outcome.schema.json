@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://in-formation.space/schemas/observation-outcome-0.1.json",
+  "title": "In-Formation Observation Outcome",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format", "schema", "attempt_id", "observation_id", "evidence_ref",
+    "evidence_digest", "model_ref", "model_digest", "prior_model",
+    "observed_outcome", "analysis", "interpretation_limits", "outcome_digest"
+  ],
+  "properties": {
+    "format": { "const": "in-formation.observation-outcome" },
+    "schema": { "const": "in-formation.observation-outcome/0.1" },
+    "attempt_id": { "type": "string", "minLength": 1 },
+    "observation_id": { "type": "string", "minLength": 1 },
+    "evidence_ref": { "type": "string", "minLength": 1 },
+    "evidence_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "model_ref": { "type": "string", "minLength": 1 },
+    "model_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "prior_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hypotheses"],
+      "properties": {
+        "hypotheses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["hypothesis_id", "prior_probability", "predicted_outcome", "query_value"],
+            "properties": {
+              "hypothesis_id": { "type": "string", "minLength": 1 },
+              "prior_probability": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+              "predicted_outcome": {},
+              "query_value": { "type": ["boolean", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "observed_outcome": {},
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prior_entropy_bits", "expected_posterior_entropy_bits", "expected_information_gain_bits",
+        "expected_query_resolution_probability", "observed_outcome_probability",
+        "posterior_entropy_bits", "realized_entropy_change_bits", "posterior",
+        "model_status", "query_status", "query_value"
+      ],
+      "properties": {
+        "prior_entropy_bits": { "type": "number", "minimum": 0 },
+        "expected_posterior_entropy_bits": { "type": "number", "minimum": 0 },
+        "expected_information_gain_bits": { "type": "number", "minimum": 0 },
+        "expected_query_resolution_probability": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "observed_outcome_probability": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "posterior_entropy_bits": { "type": ["number", "null"], "minimum": 0 },
+        "realized_entropy_change_bits": { "type": ["number", "null"] },
+        "posterior": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["hypothesis_id", "probability"],
+            "properties": {
+              "hypothesis_id": { "type": "string", "minLength": 1 },
+              "probability": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "model_status": { "enum": ["matched", "model_mismatch"] },
+        "query_status": { "enum": ["not_scoped", "resolved", "undetermined", "model_mismatch"] },
+        "query_value": { "type": ["boolean", "null"] }
+      }
+    },
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 7,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "outcome_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}
