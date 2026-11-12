@@ -1,0 +1,98 @@
+{
+  "schema": "in-formation-space.finite-state-transition-neural-synthesis.v3",
+  "status": "verified-within-complete-finite-domain",
+  "workflow_run_id": 43157537916,
+  "workflow_url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43157537916",
+  "workflow_head": "2cdb2bce5072a124a20bb9c20facf9df0866260b",
+  "dependency_revisions": {
+    "E-CPU": "a8a1bfc01f3a602ca15c3d84dfba423c349113f1",
+    "Virtual-Ground-Interpreter": "b3a9de5b6c0e23651e4816530d3962a86d4ecdb4"
+  },
+  "artifact_json_sha256": "153e64539498bcf6f2a3a4e59860769ad5a719bbfbc42755c71c65f91411f2b5",
+  "typed_transition_program_digest": "311348e8c24e6c2c24aa29a582e12c397f25115b8747c47c0f0f629a60220cac",
+  "edited_typed_transition_program_digest": "9ed86f3bb77490a6142683bc0c346b73dd828639b5e7ef0c37c5db68e65106e5",
+  "transition_table": {
+    "name": "two-bit-counter.reset-dominant.v1",
+    "input_names": ["state_1", "state_0", "advance", "reset"],
+    "output_names": ["next_state_1", "next_state_0"],
+    "rows": 16,
+    "source_digest": "f147c483a81efd85a4ba651fdba7fe2fc058d05762069b2736f5329d264aff96",
+    "edited_digest": "5779747a9b5a7ec11ab6382a4fe5e541ab9e67fbc3749a3e63561c34ea19754d"
+  },
+  "intervention": {
+    "inputs": [0, 1, 1, 1],
+    "source_outputs": [0, 0],
+    "target_outputs": [1, 0],
+    "changed_rows": 1,
+    "unchanged_rows": 15
+  },
+  "verification": {
+    "cases": 96,
+    "translation_equivalent": 96,
+    "all_outputs_match": true,
+    "phase_counts": {
+      "baseline_minterm": 32,
+      "one_row_intervention_minterm": 32,
+      "baseline_compositional": 16,
+      "one_row_override_compositional": 16
+    },
+    "independent_paths": [
+      "VGI Signal8",
+      "E-CPU MailCPU ReferenceInterpreter",
+      "E-CPU MailCPU QueueInterpreter",
+      "ReLU truth-table minterm compiler",
+      "ReLU compositional Boolean-DAG compiler"
+    ]
+  },
+  "models": {
+    "truth_table_minterm": [
+      {
+        "name": "one-hidden-layer",
+        "architecture": [4, 16, 2],
+        "parameters": 114,
+        "active_before": 84,
+        "active_after": 85,
+        "changed_parameters": 1,
+        "source_model_digest": "8e35bab379f456ebe5e27ead556fac2881ee8b1e7f870388c46c55d4eac7477b",
+        "target_model_digest": "131112ec369bf333f166abb5cd7e7263c470c07c32bd6f87baa44299a82abf4e",
+        "changed_coordinate": {"layer": 1, "output": 0, "input": 7}
+      },
+      {
+        "name": "two-hidden-layer",
+        "architecture": [4, 16, 16, 2],
+        "parameters": 386,
+        "active_before": 100,
+        "active_after": 101,
+        "changed_parameters": 1,
+        "source_model_digest": "95398b66e466bfcf0c0778596f55dc198ef8cea35ea3ad91fb25e5b57ae583e4",
+        "target_model_digest": "85bcf6621c71c4327ad58a0374361fbd7423822f1c3d043ba63393254c2f1bbc",
+        "changed_coordinate": {"layer": 2, "output": 0, "input": 7}
+      }
+    ],
+    "compositional_dag": [
+      {
+        "name": "compositional-source",
+        "architecture": [4, 7, 11, 15, 2],
+        "parameters": 335,
+        "active_parameters": 54,
+        "program_digest": "311348e8c24e6c2c24aa29a582e12c397f25115b8747c47c0f0f629a60220cac",
+        "model_digest": "047128259f348f2be3a8fa5f49b82913b09321bdf69314b640db6eeb3c4e497d"
+      },
+      {
+        "name": "compositional-override",
+        "architecture": [4, 8, 13, 18, 19, 20, 22, 2],
+        "parameters": 1678,
+        "active_parameters": 130,
+        "program_digest": "9ed86f3bb77490a6142683bc0c346b73dd828639b5e7ef0c37c5db68e65106e5",
+        "model_digest": "f922b39982d2870205e4f648dd71c01b3364451b4d69542ba6b8a99bba687b77"
+      }
+    ]
+  },
+  "limitations": [
+    "The table compiler allocates one hidden minterm per Boolean input row.",
+    "The compositional compiler encodes a typed Boolean expression DAG and still carries dense identity paths for prior features.",
+    "The row-override AST is deeper than the baseline program and therefore compiles to a larger dense model.",
+    "Exact correctness is established on the full 16-row Boolean domain only.",
+    "No learned generalization, robustness outside the Boolean domain, quantization tolerance, or hardware performance is claimed."
+  ]
+}

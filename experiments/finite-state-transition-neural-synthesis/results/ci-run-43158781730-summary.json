@@ -1,0 +1,98 @@
+{
+  "schema": "in-formation-space.finite-state-transition-neural-synthesis.v5",
+  "status": "verified-within-complete-finite-domain",
+  "workflow_run_id": 43158781730,
+  "workflow_url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43158781730",
+  "workflow_head": "7c42fefcfee00cbc09afed40d5b85d9adf7608c5",
+  "dependency_revisions": {
+    "E-CPU": "5edccfcdd9f3173746b1e0f36ca0286c4cb39dc9",
+    "Virtual-Ground-Interpreter": "b3a9de5b6c0e23651e4816530d3962a86d4ecdb4"
+  },
+  "artifact_zip_sha256": "a54ce65b3e83b748698948bfccde4af49900a3456cc056c64b680c6f7261310a",
+  "artifact_json_sha256": "38cdae2535ebc4625efe4c9f523fb495dcfd990423540d268c1087554c8a0fc0",
+  "typed_transition_program_digest": "311348e8c24e6c2c24aa29a582e12c397f25115b8747c47c0f0f629a60220cac",
+  "edited_typed_transition_program_digest": "2e6342e728fe1added1fa16845987d560e1ef189ef786af2d0d464e594b1aba9",
+  "verification": {
+    "one_step_cases": 128,
+    "semantic_translation_equivalent": 128,
+    "all_outputs_match": true,
+    "rollout_horizon": 3,
+    "model_phase_count": 8,
+    "initial_states_per_model_phase": 4,
+    "control_sequences_per_initial_state": 64,
+    "trajectories": 2048,
+    "transition_steps": 6144,
+    "rollout_systems": [
+      "table oracle",
+      "neural model",
+      "VGI Signal8",
+      "MailCPU ReferenceInterpreter",
+      "MailCPU QueueInterpreter"
+    ],
+    "all_trajectories_match": true
+  },
+  "models": [
+    {
+      "name": "minterm:one-hidden-layer:baseline",
+      "architecture": [4, 16, 2],
+      "parameters": 114,
+      "active_parameters": 84,
+      "model_digest": "8e35bab379f456ebe5e27ead556fac2881ee8b1e7f870388c46c55d4eac7477b"
+    },
+    {
+      "name": "minterm:one-hidden-layer:one-row-override",
+      "architecture": [4, 16, 2],
+      "parameters": 114,
+      "active_parameters": 85,
+      "model_digest": "131112ec369bf333f166abb5cd7e7263c470c07c32bd6f87baa44299a82abf4e"
+    },
+    {
+      "name": "minterm:two-hidden-layer:baseline",
+      "architecture": [4, 16, 16, 2],
+      "parameters": 386,
+      "active_parameters": 100,
+      "model_digest": "95398b66e466bfcf0c0778596f55dc198ef8cea35ea3ad91fb25e5b57ae583e4"
+    },
+    {
+      "name": "minterm:two-hidden-layer:one-row-override",
+      "architecture": [4, 16, 16, 2],
+      "parameters": 386,
+      "active_parameters": 101,
+      "model_digest": "85bcf6621c71c4327ad58a0374361fbd7423822f1c3d043ba63393254c2f1bbc"
+    },
+    {
+      "name": "direct-dag:baseline",
+      "architecture": [4, 7, 11, 15, 2],
+      "parameters": 335,
+      "active_parameters": 54,
+      "model_digest": "047128259f348f2be3a8fa5f49b82913b09321bdf69314b640db6eeb3c4e497d"
+    },
+    {
+      "name": "direct-dag:one-row-override",
+      "architecture": [4, 8, 12, 16, 18, 2],
+      "parameters": 700,
+      "active_parameters": 81,
+      "model_digest": "8980a715d5314d364ac21a291de4b63a8fff082e3acc16d6f8ab4a5382e6074f"
+    },
+    {
+      "name": "live-dag:baseline",
+      "architecture": [4, 7, 5, 4, 2],
+      "parameters": 109,
+      "active_parameters": 37,
+      "model_digest": "625b8bd5300239de55775afcaaeb16bb670e28ecf97a232c2653c0befeb66b25"
+    },
+    {
+      "name": "live-dag:one-row-override",
+      "architecture": [4, 8, 6, 5, 4, 2],
+      "parameters": 163,
+      "active_parameters": 50,
+      "model_digest": "b2e2cbc1e653d309d23b40c3f03e45e23125795fbb5ef63c293d9a6a28211a16"
+    }
+  ],
+  "limitations": [
+    "All correctness results are restricted to the complete 16-row Boolean domain and three-step rollout sequences.",
+    "Model weights are exact deterministic realizations, not trained models.",
+    "The liveness-compact compiler reduces dead feature carry but still stores dense matrices.",
+    "No arbitrary real-valued behavior, noise tolerance, quantization robustness, or physical hardware performance is established."
+  ]
+}
