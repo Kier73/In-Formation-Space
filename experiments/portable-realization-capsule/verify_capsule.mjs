@@ -12,7 +12,7 @@ const MAGIC = Buffer.from("IFSPRC01", "ascii");
 const VERSION = 1;
 const PREFIX_BYTES = 14;
 const SCHEMA = "in-formation-space.portable-realization.v1";
-const PYTHON_WHITESPACE = /^[\\u0009-\\u000d\\u001c-\\u0020\\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000]*$/u;
+const PYTHON_WHITESPACE = /^[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]*$/u;
 
 function fail(message) {
   throw new Error(message);
@@ -92,7 +92,7 @@ function canonical(value, field = "$") {
   }
   if (isObject(value)) {
     const keys = Object.keys(value);
-    if (keys.some((key) => !/^[\\x00-\\x7f]*$/.test(key))) {
+    if (keys.some((key) => !/^[\x00-\x7f]*$/.test(key))) {
       fail(`${field} object keys must be ASCII for canonical metadata v1`);
     }
     keys.sort();
