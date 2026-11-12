@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://in-formation-space.invalid/schemas/review-root-transition-0.1.json",
+  "title": "Dual-authorized reviewer root-key transition payload",
+  "type": "object",
+  "required": [
+    "format",
+    "schema",
+    "registry_id",
+    "previous_generation",
+    "previous_manifest_digest",
+    "next_generation",
+    "next_manifest_digest",
+    "new_root_role",
+    "transition_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.review-root-transition"
+    },
+    "schema": {
+      "const": "in-formation.review-root-transition/0.1"
+    },
+    "registry_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "previous_generation": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "previous_manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "next_generation": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "next_manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "new_root_role": {
+      "type": "object",
+      "required": [
+        "keys",
+        "threshold"
+      ],
+      "properties": {
+        "keys": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "keyid",
+              "public_key"
+            ],
+            "properties": {
+              "keyid": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "public_key": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9+/]{43}=$",
+                "contentEncoding": "base64"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "threshold": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "transition_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "next_generation": {
+          "type": "integer"
+        }
+      },
+      "if": {
+        "properties": {
+          "previous_generation": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "previous_generation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_generation": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
