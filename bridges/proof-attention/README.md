@@ -640,3 +640,21 @@ This creates a clear linearization rule for a claim racing with a request:
 A worker runner must call `worker.assert_request_current(received)` at its own execution-admission point immediately before starting the tactic. This rechecks the exact owner-generation token after the transport ACK; it rejects an otherwise valid admission that was superseded between message receipt and runner dispatch. A production runner must still integrate cancellation/cleanup for work already running, and the transport/receiver should enforce generation tokens at its own commit boundary where possible.
 
 The admission CAS is a durable record of the communication decision, not a tactic execution receipt and not a kernel proof receipt. A route admission followed by a later route closure remains a route lifecycle event; it does not imply that the tactic ran or failed.
+
+### Idempotent execution authorization tickets
+
+Transport admission is not yet tactic execution. A worker that is about to hand an admitted request to an external tactic runner should use `worker.execute_request(...)`. This appends an `execution_authorized` event through the same route-authority CAS before invoking the runner callback:
+
+```python
+dispatch = worker.execute_request(
+    received_request,
+    runner_id="lean-worker-pool-a",
+    runner=runner.execute,
+)
+```
+
+The runner receives `(execution_id, request)`. The execution ID is a deterministic SHA-256 ticket derived from the route epoch, proof attempt ID and request digest. It stays the same if a worker is replaced and the same already-admitted attempt is recovered. The runner must use this ID as an idempotency key: repeated invocation with the same ID should resume/return the existing job, not create a second tactic execution.
+
+The execution-authorization event and a competing owner claim are ordered by the same CAS. If the claim wins first, `execute_request` returns `None` without invoking the runner. If execution authorization wins first, the runner receives the stable ticket; a later route handoff does not retroactively erase that authorization. The external runner is responsible for cancellation/cleanup of work already started and for ensuring late results cannot be accepted through a superseded route.
+
+An execution-authorization event means the route authority granted a particular runner the right to accept that attempt under an idempotency key. It is not proof that the callback completed, that the tactic succeeded, or that the kernel accepted the resulting proof. A crash after ticket commit but before callback invocation is intentionally recovered by retrying the same ticket with the same runner ID.
