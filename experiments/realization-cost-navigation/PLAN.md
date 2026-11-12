@@ -10,7 +10,7 @@ Across representative finite Boolean algorithm families, what structural costs d
 2. Keep an independent scalar oracle separate from the typed expression builder.
 3. Compile every source through all three existing E-CPU compiler routes.
 4. Enumerate every Boolean input row.
-5. Compare the independent oracle, typed source, transition table, both MailCPU interpreters, VGI Signal8, and every neural route.
+5. Compile an experiment-specific binary decision tree over the complete table using E-CPU BRANCH/SET/HALT instructions, then compare the independent oracle, typed source, transition table, both MailCPU interpreters, VGI Signal8, and every neural route.
 6. Bind each neural/reference comparison to an explicit E-CPU semantic translation contract.
 7. Derive structural cost vectors and expose Pareto and objective-specific navigation.
 
