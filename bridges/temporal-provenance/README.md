@@ -189,6 +189,42 @@ The calibration digest detects changes to the declared artifact. It does not aut
 
 A clock calibration can establish a bounded temporal relation under its assumptions. It cannot establish that one event caused another, that a controller's "accepted" or "completed" record means physical actuation, or that a sensor sample belongs to a particular command unless a separate correlation witness says so.
 
+## Two-sided clock uncertainty (version 0.2)
+
+The v0.1 calibration keeps a source reading exact and carries uncertainty on the target reading. Real captures can have uncertainty on both clocks. The opt-in v0.2 contract adds `build_interval_affine_calibration()`, `map_source_interval_bounds()`, and `compare_two_sided_cross_clock_intervals()` without changing or reinterpreting existing v0.1 artifacts.
+
+Each v0.2 anchor carries two intervals:
+
+- source clock: `[source_lower, source_upper]`;
+- target clock: `[target_lower, target_upper]`.
+
+The assertion is that the same declared correlation event is represented somewhere inside both intervals. The calibration assumes a positive affine mapping:
+
+```
+target = scale * source + offset
+scale >= minimum_scale > 0
+```
+
+For each anchor, the mapped source interval must intersect the target interval. Because the scale is positive, this is equivalent to two linear constraints:
+
+```
+scale * source_lower + offset <= target_upper
+scale * source_upper + offset >= target_lower
+```
+
+These become half-planes in the same two-dimensional scale/offset space. The builder intersects all of them, retains the full feasible vertex set, and refuses a calibration if there is no positive affine mapping satisfying every anchor. At least two source anchor intervals must be strictly separated so the feasible scale and offset remain bounded.
+
+Query observations also carry source intervals. The mapper evaluates the lower source endpoint for the lower target bound and the upper source endpoint for the upper target bound across every feasible affine mapping. It rejects any query interval outside the declared anchor span. The clock ID and unit must match the calibration explicitly.
+
+This is stronger than pretending one side of the synchronization capture is exact, but it remains an interval-consistency model. It does not assign probability to any point in the feasible set, prove the affine model is stationary, or validate the physical correlation claim. A wide source interval can legitimately make the result too broad to order an event; that uncertainty is retained rather than squeezed away.
+
+### Reproduce the two-sided model
+
+    python -m unittest discover -s bridges/temporal-provenance -p 'test_*.py' -v
+    python bridges/temporal-provenance/clock_calibration_v2_demo.py --output results/clock-calibration-v2-example.json
+
+The v0.2 tests cover exact point intervals (which collapse to the corresponding v0.1 style mapping), dual-sided uncertainty, interval intersection feasibility, non-monotone and non-affine rejection, source-clock/target-clock identity and unit checks, and unresolved results when mapped intervals overlap.
+
 ### Standards context
 
 The [NTPv4 specification (RFC 5905)](https://www.rfc-editor.org/rfc/rfc5905.html) explicitly tracks clock dispersion and synchronization distance. Its synchronization-distance measure combines dispersion with half the round-trip delay to represent a maximum-error bound; dispersion also grows over time as clock-frequency tolerance accumulates. That is a useful standards precedent for treating time synchronization as an uncertainty-bearing estimate rather than an exact scalar. This bridge does not implement NTP, its peer-selection algorithm, or its synchronization-distance calculation. [RFC 5905](https://www.rfc-editor.org/rfc/rfc5905.html)
