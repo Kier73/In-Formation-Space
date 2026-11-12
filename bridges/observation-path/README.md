@@ -70,7 +70,7 @@ These profiles describe only observed invocations. They do not estimate the cost
 
 The live integration now instruments the actual calls to `ReliableChannel.send()`, `GatedObservationCoordinator.ingest_available()`, `finalize_event()`, `commit_event()`, `save_checkpoint()`, and `process_acks()`. The wrappers sit directly around those calls and retain their synchronous call-boundary scope. They do not replace or emulate E-CPU behavior.
 
-The current two-path CI smoke run emits 11 spans: four sends, two receiver-intake calls, two finalizations, one VM commit, one additional checkpoint save, and one sender ACK poll. With a three-sample threshold, only the pooled send-operation partition reaches `descriptive_only`; every other partition remains `insufficient_samples`. The raw spans and reconstructed cost profile are uploaded as the `live-ecpu-operation-spans` artifact on the workflow run. These are initial observations, not a stable benchmark or an adaptive policy input.
+The live CI probe now executes five additional authorized paths in the same pinned E-CPU process, alongside the primary success and conflict cases. It emits 46 spans: 14 sends, seven receiver-intake calls, seven finalizations, six VM commits, six additional checkpoint saves, and six sender ACK polls. With a five-sample threshold, every operation partition reaches `descriptive_only`. The raw spans and independently reconstructed cost profile are uploaded as the `live-ecpu-operation-spans` artifact on the workflow run. These are repeated samples under one controlled CI workload and clock segment, not a stable production benchmark or an adaptive policy input.
 
 ## Evidence and clocks
 
