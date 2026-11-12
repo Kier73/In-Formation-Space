@@ -1,0 +1,85 @@
+name: Finite-state transition neural synthesis
+
+on:
+  push:
+    paths:
+      - "experiments/finite-state-transition-neural-synthesis/**"
+      - ".github/workflows/finite-state-transition-neural-synthesis.yml"
+  pull_request:
+    paths:
+      - "experiments/finite-state-transition-neural-synthesis/**"
+      - ".github/workflows/finite-state-transition-neural-synthesis.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  finite-transition-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out experiment and provenance workspace
+        uses: actions/checkout@v4
+
+      - name: Check out E-CPU transition compiler
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 39df49dc7635342583d127aaeae54efb3e2d3928
+          path: external/E-CPU
+
+      - name: Check out VGI transition reference
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: b3a9de5b6c0e23651e4816530d3962a86d4ecdb4
+          path: external/Virtual-Ground-Interpreter
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Run 64-case cross-representation transition experiment
+        env:
+          PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: >-
+          python experiments/finite-state-transition-neural-synthesis/run_experiment.py
+          --output "${{ runner.temp }}/finite-state-transition-neural-synthesis.json"
+
+      - name: Run E-CPU finite transition compiler tests
+        env:
+          PYTHONPATH: external/E-CPU
+        run: python -m pytest external/E-CPU/tests/test_transition_space.py -q
+
+      - name: Run E-CPU Boolean weight-space regression tests
+        env:
+          PYTHONPATH: external/E-CPU
+        run: python -m pytest external/E-CPU/tests/test_weight_space.py -q
+
+      - name: Run VGI finite transition reference tests
+        env:
+          PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: >-
+          python -m unittest discover
+          -s external/Virtual-Ground-Interpreter/virtual_ground_interpreter/tests
+          -p "test_finite_state_transition.py" -v
+
+      - name: Run VGI Boolean subgroup regression tests
+        env:
+          PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: >-
+          python -m unittest discover
+          -s external/Virtual-Ground-Interpreter/virtual_ground_interpreter/tests
+          -p "test_boolean_subgroup.py" -v
+
+      - name: Upload deterministic transition evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: finite-state-transition-neural-synthesis
+          path: ${{ runner.temp }}/finite-state-transition-neural-synthesis.json
+          if-no-files-found: warn
