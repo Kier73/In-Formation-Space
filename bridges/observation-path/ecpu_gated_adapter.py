@@ -105,6 +105,8 @@ class ECPUGatedObservationAdapter:
         self,
         coordinator: object,
         decode_observation: Callable[[Sequence[Any]], object],
+        *,
+        operation_span_recorder: object | None = None,
     ) -> None:
         if not callable(decode_observation):
             raise TypeError("decode_observation must be callable")
@@ -114,8 +116,39 @@ class ECPUGatedObservationAdapter:
         vm = getattr(coordinator, "vm", None)
         if vm is None or not callable(getattr(vm, "snapshot", None)):
             raise TypeError("coordinator.vm must expose snapshot()")
+        if operation_span_recorder is not None and not callable(
+            getattr(operation_span_recorder, "measure", None)
+        ):
+            raise TypeError("operation_span_recorder must expose measure()")
         self.coordinator = coordinator
         self.decode_observation = decode_observation
+        self.operation_span_recorder = operation_span_recorder
+
+    def _measure_operation(
+        self,
+        path: ObservationPath,
+        kind: str,
+        logical_time: int,
+        span_name: str,
+        operation_id: str,
+        operation: Callable[[], Any],
+    ) -> Any:
+        """Measure one E-CPU call boundary when telemetry is explicitly supplied."""
+        recorder = self.operation_span_recorder
+        if recorder is None:
+            return operation()
+        return recorder.measure(
+            attempt_id=path.intent.attempt_id,
+            span_id=f"{kind}:{logical_time}:{span_name}",
+            operation_id=operation_id,
+            operation=operation,
+            context={
+                "event_kind": kind,
+                "logical_time": logical_time,
+                "attempt_id": path.intent.attempt_id,
+                "boundary": span_name,
+            },
+        )
 
     def record_finalized_decision(
         self,
@@ -143,7 +176,14 @@ class ECPUGatedObservationAdapter:
         if isinstance(logical_time, bool) or not isinstance(logical_time, int) or logical_time < 0:
             raise ValueError("logical_time must be a non-negative integer")
 
-        decision = self.coordinator.finalize_event(kind, logical_time)
+        decision = self._measure_operation(
+            path,
+            kind,
+            logical_time,
+            "finalize-event",
+            "ecpu.GatedObservationCoordinator.finalize_event",
+            lambda: self.coordinator.finalize_event(kind, logical_time),
+        )
         status = getattr(decision, "status", None)
         if status not in {"AUTHORIZED", "CONFLICT", "REFUSED"}:
             raise ValueError(f"E-CPU event was not finalized: {status!r}")
@@ -293,7 +333,14 @@ class ECPUGatedObservationAdapter:
         ):
             raise ValueError("path authorization receipt does not match the requested E-CPU event")
 
-        decision = self.coordinator.commit_event(kind, logical_time, checkpoint_path)
+        decision = self._measure_operation(
+            path,
+            kind,
+            logical_time,
+            "commit-event",
+            "ecpu.GatedObservationCoordinator.commit_event",
+            lambda: self.coordinator.commit_event(kind, logical_time, checkpoint_path),
+        )
         if getattr(decision, "status", None) != "AUTHORIZED":
             raise ValueError("E-CPU commit did not return an AUTHORIZED event")
 
@@ -451,7 +498,14 @@ class ECPUGatedObservationAdapter:
             actual_registers[name] = actual
 
         projection_digest = _digest(dict(sorted(actual_registers.items())))
-        checkpoint_digest = self.coordinator.save_checkpoint(checkpoint_path)
+        checkpoint_digest = self._measure_operation(
+            path,
+            kind,
+            logical_time,
+            "save-checkpoint",
+            "ecpu.GatedObservationCoordinator.save_checkpoint",
+            lambda: self.coordinator.save_checkpoint(checkpoint_path),
+        )
         if not isinstance(checkpoint_digest, str) or _SHA256.fullmatch(checkpoint_digest) is None:
             raise ValueError("E-CPU checkpoint writer returned an invalid SHA-256 digest")
 
@@ -614,7 +668,14 @@ class ECPUGatedObservationAdapter:
         process_acks = getattr(self.coordinator, "process_acks", None)
         if not callable(process_acks):
             raise TypeError("E-CPU coordinator must expose process_acks()")
-        removed_by_source = process_acks(sender_channels)
+        removed_by_source = self._measure_operation(
+            path,
+            kind,
+            logical_time,
+            "process-acks",
+            "ecpu.GatedObservationCoordinator.process_acks",
+            lambda: process_acks(sender_channels),
+        )
         if not isinstance(removed_by_source, Mapping):
             raise ValueError("E-CPU process_acks() must return a source-to-sequences mapping")
 
