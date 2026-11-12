@@ -216,6 +216,15 @@ Textual similarity alone is not a success metric. Functional correspondence, con
 - [Tests](trials/trial-07-epistemic-frontier/test_epistemic_frontier.py)
 - [Encounter receipt](trials/trial-07-epistemic-frontier/results/test-encounter.json)
 
+### Trial 08: Intervention-aware attention
+
+[Trial 08](trials/trial-08-intervention-aware-attention/README.md) extends adaptive attention to probes that change the hidden world state. It preserves each initial hypothesis and its query value while carrying a separate current state through the outcome branches. The planner returns a Pareto frontier over expected and worst-case observation and intervention costs instead of collapsing them into a weighted score.
+
+- [Construction brief](trials/trial-08-intervention-aware-attention/brief.md)
+- [Implementation](trials/trial-08-intervention-aware-attention/intervention_attention.py)
+- [Tests](trials/trial-08-intervention-aware-attention/test_intervention_attention.py)
+- [Construction report](trials/trial-08-intervention-aware-attention/construction-report.md)
+
 ## 7. Open questions
 
 1. Which parts of a description are sufficient to make a construction reproducible across different model families and tool environments?
