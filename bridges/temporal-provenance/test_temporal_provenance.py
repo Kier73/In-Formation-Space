@@ -261,10 +261,6 @@ class PartialOrderAnalysisTests(unittest.TestCase):
             ["S11", "S14", "S8"],
         ])
         self.assertEqual(set(local["maximal_event_ids"]), {"C108", "S14"})
-        self.assertTrue(all(
-            item["status"] == "unobserved"
-            for item in report["domains"]["causal"]["pair_status_counts"].items()
-        ) is False if False else True)  # explicit assertions below
         self.assertEqual(
             report["domains"]["causal"]["pair_status_counts"]["unobserved"], 21
         )
