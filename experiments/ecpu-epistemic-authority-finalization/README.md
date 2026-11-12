@@ -1,0 +1,90 @@
+# E-CPU epistemic authority, dissent, and finalization matrix
+
+**Status:** controlled state-transition experiment; live pinned-runtime execution is part of CI.  
+**Runtime:** E-CPU commit 800f94f83ffd6f527ed093c8d1c1e93e153c34f6.  
+**Question:** What does the observation system do when evidence is incomplete, when observed sources disagree, and when new evidence arrives after the event has been explicitly finalized?
+
+## Core distinction
+
+This experiment treats four states as different objects:
+
+- **Evidence received:** a typed observation has crossed a reliable channel and has an evidence link.
+- **Quorum reached:** one equivalence class of observations has at least the configured number of matching sources.
+- **Authority finalized:** the coordinator has closed the event as AUTHORIZED, CONFLICT, or REFUSED.
+- **VM realization:** the authorized representative is applied and its admitted source frames are consumed.
+
+A count of received observations is not a confidence score. A quorum is not automatically an agreement. An authorized representative does not erase the fact that dissent was present.
+
+## Matrix
+
+The experiment crosses two policy modes with five deterministic evidence shapes, three repetitions each: ten conditions and 30 attempts.
+
+| Scenario | Evidence shape |
+| --- | --- |
+| partial_unanimous | Two sources agree; two are absent |
+| full_unanimous | All four sources agree |
+| majority_dissent | Three agree; one disagrees |
+| tied_split | Two agree on one value; two agree on another |
+| subquorum_partial | One source is present; three are absent |
+
+All conditions use four configured sources and quorum two. The two policy modes are the E-CPU strict=true and strict=false settings. Every observation is a typed ResolverObservation with one synthetic hit or miss fixture value. These values are not external DNS truth.
+
+## Pinned E-CPU behavior under test
+
+The experiment executes the actual ReliableChannel, DurableMailboxTransport, GatedObservationCoordinator, ObservationConsensus, checkpoint restoration, and VM commit path.
+
+In the pinned implementation:
+
+- strict=true requires the complete configured source set and treats any dissent as CONFLICT.
+- strict=false may authorize when one winning equivalence class reaches quorum, even while other sources are missing or dissenting.
+- finalize_event() maps a quorum state to AUTHORIZED, a conflict to CONFLICT, and a pending state to REFUSED.
+- Consensus rejects a new, previously unseen source observation after finalization. It also rejects a changed observation for an already-known source.
+- Authorized commits consume all admitted evidence links, including links from dissenting sources, while applying only the selected representative.
+
+The matrix makes these implementation behaviors observable and retains the underlying evidence partition in each attempt receipt.
+
+## Particularly important edge case: tied quorum
+
+With quorum two, the tied_split case has two groups of size two. In strict=false, the current consensus implementation can still report QUORUM and authorize one group via a deterministic canonical-payload ordering. That makes the result reproducible, but the ordering is not evidence that the selected group is more accurate. The experiment records the tie flag, both groups, selected representative, dissenting group, and actual VM register value.
+
+This is a behavior to evaluate, not a recommendation to enable permissive authority in a real system. A future policy may require a unique plurality, a margin over the next group, or explicit human/authority adjudication. Those alternatives must be evaluated separately rather than smuggled into this experiment.
+
+## Late evidence and checkpoint continuation
+
+For each attempt, the coordinator writes a gated checkpoint, the mailbox journal is copied and independently replayed, and load_gated_checkpoint() reconstructs the finalized coordinator. The restored snapshot must match the live snapshot before late evidence is introduced.
+
+The late-evidence probe then submits either:
+- a previously absent source for partial-evidence scenarios; or
+- a changed value for a source already represented in a full-evidence scenario.
+
+The system must not silently add the late observation to the finalized event. Depending on whether the old source frames were consumed by an authorized commit, the coordinator's transport intake may either reach and reject the late frame or be blocked behind older unconsumed evidence. The direct consensus-ingestion check must reject the proposal in either case. The attempt receipt records both layers separately, along with whether the late frame remains queued.
+
+This is an important distinction: rejection by the consensus finalization rule is not identical to the transport intake loop being blocked by older unconsumed frames.
+
+## Retained artifacts
+
+CI uploads:
+- run-manifest.json — pinned revision, matrix and verification counts, digests;
+- summary.json — digest-checked compact result;
+- attempt-results.json — one complete transition receipt per condition/repetition;
+- evidence-ledger.json — explicit source/channel/sequence and payload digests;
+- transition-trace.json — evidence, status, finalization, realization, checkpoint, and late-evidence references.
+
+No information-per-cost ratio is calculated and no adaptive policy is updated.
+
+## Interpretation boundaries
+
+- Synthetic resolver values are fixture observations, not external sensor truth.
+- The matrix tests one fixed quorum (two), four sources, and two strictness modes.
+- All observations occur at one logical event time; cross-time revision and supersession are separate problems.
+- The current experiment tests finalized-event immutability, not a revision protocol or appeal/override protocol.
+- Refused/conflicted events are not committed, so their input frames remain unconsumed. This is a useful safety posture but can cause a source's FIFO channel to block later events; that operational consequence is recorded, not assumed away.
+- Three repetitions verify deterministic contracts; they do not yield statistical generalization.
+- Passing tests establish the inspected finite cases, not a universal theorem about every evidence configuration.
+
+## Reproduce
+
+    export ECPU_ROOT=external/E-CPU
+    export PYTHONPATH=external/E-CPU
+    python experiments/ecpu-epistemic-authority-finalization/run_authority_matrix.py --output-dir results
+    python -m unittest discover -s experiments/ecpu-epistemic-authority-finalization -p 'test_*.py' -v
