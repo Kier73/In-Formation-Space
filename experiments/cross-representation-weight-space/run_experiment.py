@@ -257,7 +257,7 @@ def run_experiment() -> dict[str, Any]:
         )
 
     return {
-        "schema": "in-formation-space.cross-representation-weight-space.v1",
+        "schema": "in-formation-space.cross-representation-weight-space.v2",
         "status": "verified-within-declared-finite-domain",
         "domain": [[0, 0], [0, 1], [1, 0], [1, 1]],
         "architectures": architecture_results,
