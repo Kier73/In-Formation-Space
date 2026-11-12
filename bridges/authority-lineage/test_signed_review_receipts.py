@@ -1,6 +1,7 @@
 import base64
 import copy
 import hashlib
+import json
 import unittest
 
 from cryptography.hazmat.primitives import serialization
@@ -36,7 +37,7 @@ def signed_fixture():
         for vote in certificate["votes"]
     ])
     envelopes = [
-        sign_review_vote(vote, private_keys[vote["reviewer_ref"]])
+        sign_review_vote(certificate, vote, private_keys[vote["reviewer_ref"]])
         for vote in certificate["votes"]
     ]
     artifacts = {
@@ -107,6 +108,29 @@ class SignedReviewReceiptTests(unittest.TestCase):
         with self.assertRaises(SignedReviewError):
             verify_signed_review_vote(altered, trust_store)
 
+    def test_proposal_context_tampering_invalidates_signature(self):
+        _, trust_store, envelopes, _, _ = signed_fixture()
+        altered = copy.deepcopy(envelopes[0])
+        payload = json.loads(base64.b64decode(altered["payload"]).decode("utf-8"))
+        payload["proposal_digest"] = "e" * 64
+        altered["payload"] = base64.b64encode(
+            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).decode("ascii")
+        with self.assertRaises(SignedReviewError):
+            verify_signed_review_vote(altered, trust_store)
+
+    def test_valid_vote_signature_cannot_be_replayed_for_another_certificate(self):
+        certificate, trust_store, envelopes, _, _ = signed_fixture()
+        other_certificate = copy.deepcopy(certificate)
+        other_certificate["event_key"]["logical_time"] += 1
+        core = {
+            key: value for key, value in other_certificate.items()
+            if key != "certificate_digest"
+        }
+        other_certificate["certificate_digest"] = digest(core)
+        with self.assertRaises(SignedReviewError):
+            build_signed_review_bundle(other_certificate, envelopes, trust_store)
+
     def test_signature_tampering_is_rejected(self):
         _, trust_store, envelopes, _, _ = signed_fixture()
         altered = copy.deepcopy(envelopes[0])
@@ -148,7 +172,7 @@ class SignedReviewReceiptTests(unittest.TestCase):
             if vote["reviewer_ref"] == target["principal"]
         )
         envelope = sign_review_vote(
-            target_vote, private_keys[target["principal"]]
+            certificate, target_vote, private_keys[target["principal"]]
         )
         target["public_key"] = base64.b64encode(b"x" * 32).decode("ascii")
         with self.assertRaises(SignedReviewError):
@@ -170,7 +194,7 @@ class SignedReviewReceiptTests(unittest.TestCase):
         certificate, trust_store, envelopes, _, keys = signed_fixture()
         vote = dict(certificate["votes"][0])
         vote["rationale"] += " altered"
-        envelope = sign_review_vote(vote, keys[vote["reviewer_ref"]])
+        envelope = sign_review_vote(certificate, vote, keys[vote["reviewer_ref"]])
         with self.assertRaises(SignedReviewError):
             build_signed_review_bundle(
                 certificate, [envelope, envelopes[1]], trust_store
@@ -212,12 +236,21 @@ class SignedReviewReceiptTests(unittest.TestCase):
     def test_json_duplicate_keys_are_rejected_after_signature_verification(self):
         certificate, trust_store, _, _, keys = signed_fixture()
         vote = certificate["votes"][0]
+        from signed_review_receipts import _certificate_context, pae, _b64encode
+        context_json = json.dumps(
+            _certificate_context(certificate),
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        vote_without_outer = dict(vote)
+        vote_json = json.dumps(vote_without_outer, sort_keys=True, separators=(",", ":"))
+        duplicate_vote_json = (
+            '{"seat":"R01","seat":"R01",'
+            + vote_json[1:]
+        )
         raw = (
-            '{"seat":"R01","seat":"R01","reviewer_ref":"agent://reviewer-one",'
-            '"vote":"APPROVE","rationale":"duplicate key","review_ref":"review://dup",'
-            '"review_sha256":"' + vote["review_sha256"] + '"}'
+            context_json[:-1] + ',"vote":' + duplicate_vote_json
         ).encode("utf-8")
-        from signed_review_receipts import pae, _b64encode
         signature = keys["agent://reviewer-one"].sign(pae(PAYLOAD_TYPE, raw))
         pub = keys["agent://reviewer-one"].public_key().public_bytes(
             encoding=serialization.Encoding.Raw,
