@@ -43,3 +43,8 @@ The final [CPB-001 PR-head run](https://github.com/Kier73/In-Formation-Space/act
 ## Final integrated verification
 
 The final [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43320231327) passed after merging the independent Node.js PRC receiver and canonical metadata v1 profile into the branch. It ran Node 22, executed Python-generated capsules through the independent receiver tests, and passed the complete 288-capsule compression/bundle corpus. The [integrated evidence record](results/ci-run-43320231327.md) retains the exact source pins, byte totals and artifact digests.
+
+
+## Final Node-verified PR-head run
+
+The final [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43320550536) passed with the independent PRC Node receiver enabled. The complete 288-capsule corpus, byte-identical bundle reconstruction, nested tamper probes, and pre/post-compression replay all passed. The [final integrated receipt](results/ci-run-43320550536.md) records the strict canonical metadata profile, exact source revisions and artifact digests.
