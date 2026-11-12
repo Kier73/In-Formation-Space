@@ -66,6 +66,8 @@ The companion observation_adapter.py connects the existing evidence-gated observ
 - An exact repeat from an already represented source raises DuplicateObservationEvidenceError. A changed payload from that source raises SourceEquivocationError. The adapter never turns same-source equivocation into an ordinary new-source proposal.
 - The adapter currently requires a single current decision frontier. If the generic lineage ledger exposes competing tips, they must be reconciled through an explicit multi-parent merge before this strict observation adapter can propose another source-based revision.
 
+The adapter also supports a REFUSED attempt with an empty evidence set when the caller supplies the event key explicitly; it does not invent event coordinates from an empty list. An AUTHORIZED decision must select a representative within the recorded winning evidence group, not merely any received source.
+
 The adapter still does not fetch/authenticate source artifacts, authenticate actors, or verify external policy correctness. It checks the supplied evidence references and binds their digests to the decision history.
 
 ## Reproduce
