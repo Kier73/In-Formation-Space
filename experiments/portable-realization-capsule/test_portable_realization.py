@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
+import itertools
 import json
 import shutil
 import subprocess
@@ -443,3 +445,220 @@ def test_independent_node_receiver_replays_float64_rowmask_coefficients():
         assert report["semantic_comparisons"] == 4
         assert report["sparse_model_sha256"] == sparse.digest
         assert report["stored_parameter_count"] == sparse.stored_parameter_count
+
+
+
+def test_independent_node_receiver_decodes_hybrid_binary_and_replays_stateful_counter():
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is required for the independent implementation check")
+
+    from types import SimpleNamespace
+
+    from mailcpu.transition_space import (
+        SparseTransitionReLUNetwork,
+        compile_live_compositional_transition_program,
+        two_bit_counter_program,
+    )
+
+    root = Path(__file__).resolve().parents[2]
+    runner_path = root / "experiments" / "portable-realization-capsule" / "run_experiment.py"
+    spec = importlib.util.spec_from_file_location(
+        "prc_hybrid_stateful_fixture", runner_path
+    )
+    assert spec is not None and spec.loader is not None
+    prc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(prc)
+    sre = prc.sre002
+
+    def scalar_counter(inputs):
+        state_1, state_0, advance, reset = inputs
+        if reset:
+            return (0, 0)
+        if advance:
+            return (state_1 ^ state_0, 1 - state_0)
+        return (state_1, state_0)
+
+    program = two_bit_counter_program()
+    table = program.to_table()
+    workload = SimpleNamespace(
+        name=program.name,
+        program=program,
+        reference=scalar_counter,
+    )
+    input_rows = [tuple(row.inputs) for row in table.rows]
+    expected_records = prc._expected_records(workload, table, input_rows)
+
+    compiled_dense = compile_live_compositional_transition_program(program)
+
+    # Add one output-disconnected dense ReLU feature as a codec branch probe.
+    # Its outgoing column is exactly zero, so the transition function is unchanged.
+    weights = [
+        [list(row) for row in layer]
+        for layer in compiled_dense.weights
+    ]
+    biases = [list(layer) for layer in compiled_dense.biases]
+    weights[0].append([1.0] * compiled_dense.architecture[0])
+    biases[0].append(0.0)
+    for row in weights[1]:
+        row.append(0.0)
+    architecture = (
+        compiled_dense.architecture[0],
+        compiled_dense.architecture[1] + 1,
+        *compiled_dense.architecture[2:],
+    )
+    dense = type(compiled_dense)(
+        weights,
+        biases,
+        program_digest=program.digest,
+        input_names=table.input_names,
+        output_names=table.output_names,
+        architecture=architecture,
+    )
+
+    sparse = SparseTransitionReLUNetwork.from_dense(dense)
+    payload = sre.encode_hybrid_binary(sparse)
+    inner_header_length = int.from_bytes(payload[:4], "little")
+    inner_header = json.loads(payload[4:4 + inner_header_length])
+    assert inner_header["schema"] == "sre002.hybrid-binary.v1"
+    total_rows = sum(layer["output_width"] for layer in inner_header["layers"])
+    sparse_rows = sum(layer["sparse_row_count"] for layer in inner_header["layers"])
+    assert 0 < sparse_rows < total_rows, "fixture should exercise both adaptive row modes"
+
+    compiler = "live_dag"
+    encoding = "hybrid_binary"
+    contract = sre.contract_for(
+        workload, table, compiler, encoding, dense, sparse, payload
+    )
+    case_records = []
+    contract_digests = []
+    for row_index, record in enumerate(expected_records):
+        inputs = tuple(record["inputs"])
+        expected = tuple(record["outputs"])
+        dense_outputs = dense.predict(inputs)
+        sparse_outputs = sparse.predict(inputs)
+        assert dense_outputs == expected
+        assert sparse_outputs == expected
+        comparison = sre.compare_projected_observations(
+            contract,
+            case_payload={
+                "program_digest": program.digest,
+                "table_digest": table.digest,
+                "input_registers": dict(zip(table.input_names, inputs)),
+            },
+            source_observation=dict(zip(table.output_names, dense_outputs)),
+            target_observation=dict(zip(table.output_names, sparse_outputs)),
+        )
+        assert comparison.equivalent
+        contract_digests.append(comparison.contract_digest)
+        case_records.append({
+            "row_index": row_index,
+            "inputs": list(inputs),
+            "outputs": list(expected),
+            "restored_outputs": list(sparse_outputs),
+            "translation_contract_digest": comparison.contract_digest,
+        })
+
+    receipt = prc._make_verification_receipt(
+        workload,
+        table,
+        compiler,
+        encoding,
+        expected_records,
+        case_records,
+        contract_digests,
+    )
+    capsule = encode_capsule(
+        payload,
+        source=prc._source(workload, sparse, "test-ifs-revision"),
+        realization=prc._realization(
+            compiler, dense, sparse, "test-ecpu-revision", encoding
+        ),
+        interface=prc._interface(table, sparse),
+        codec={
+            "name": encoding,
+            "schema": "sre002.hybrid-binary.v1",
+            "payload_sha256": prc.bytes_digest(payload),
+        },
+        verification=receipt,
+        toolchain=prc._toolchain(
+            "test-ifs-revision", "test-ecpu-revision", "test-vgi-revision"
+        ),
+    )
+
+    horizon = 4
+    control_pairs = tuple(itertools.product((0, 1), repeat=2))
+    trajectories = []
+    for initial in itertools.product((0, 1), repeat=2):
+        for controls in itertools.product(control_pairs, repeat=horizon):
+            state = tuple(initial)
+            expected_states = []
+            for advance, reset in controls:
+                state = scalar_counter((*state, advance, reset))
+                expected_states.append(list(state))
+            trajectories.append({
+                "initial_state": list(initial),
+                "controls": [list(pair) for pair in controls],
+                "expected_states": expected_states,
+            })
+    assert len(trajectories) == 4 * (4 ** horizon)
+
+    script = Path(__file__).with_name("verify_capsule.mjs")
+    with tempfile.TemporaryDirectory() as directory:
+        capsule_path = Path(directory) / "two-bit-counter-hybrid.ifsp"
+        reference_path = Path(directory) / "two-bit-counter-reference.json"
+        trajectory_path = Path(directory) / "two-bit-counter-trajectories.json"
+        capsule_path.write_bytes(capsule)
+        reference_path.write_text(
+            json.dumps(expected_records, ensure_ascii=False, separators=(",", ":")),
+            encoding="utf-8",
+        )
+        trajectory_path.write_text(
+            json.dumps(trajectories, separators=(",", ":")),
+            encoding="utf-8",
+        )
+        result = subprocess.run(
+            [
+                node, str(script), str(capsule_path),
+                "--reference", str(reference_path),
+                "--trajectories", str(trajectory_path),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        report = json.loads(result.stdout)
+        assert report["valid"] is True
+        assert report["codec"] == "hybrid_binary"
+        assert report["input_rows_replayed"] == 16
+        assert report["semantic_comparisons"] == 16
+        assert report["sparse_model_sha256"] == sparse.digest
+        assert report["stored_parameter_count"] == sparse.stored_parameter_count
+        assert report["sparse_row_count"] == sparse_rows
+        assert report["dense_row_count"] == total_rows - sparse_rows
+        assert report["trajectory_count"] == 1024
+        assert report["trajectory_steps"] == 4096
+
+        altered_trajectories = [dict(item) for item in trajectories]
+        altered_trajectories[0] = dict(altered_trajectories[0])
+        altered_trajectories[0]["expected_states"] = [
+            list(state) for state in altered_trajectories[0]["expected_states"]
+        ]
+        altered_trajectories[0]["expected_states"][0][0] ^= 1
+        trajectory_path.write_text(
+            json.dumps(altered_trajectories, separators=(",", ":")),
+            encoding="utf-8",
+        )
+        mismatch = subprocess.run(
+            [
+                node, str(script), str(capsule_path),
+                "--reference", str(reference_path),
+                "--trajectories", str(trajectory_path),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert mismatch.returncode != 0
+        assert "trajectory reference" in mismatch.stderr or "recurrent trajectory" in mismatch.stderr
