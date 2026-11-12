@@ -234,3 +234,21 @@ CPB-001 shows that zlib-compressing only the PRC-001 canonical header saves 26.8
 5. Which metadata can be deduplicated across source, workload, compiler, codec, and verification layers, and which fields must remain locally bound to each realization?
 
 The first measurement is [CPB-001](../experiments/compact-provenance-bundles/README.md). The next encoding should improve the local-entry representation while preserving standalone reconstruction, replay evidence and nested tamper rejection.
+
+
+---
+
+## 12. Task-relative relevance of representation distinctions
+
+### The question
+
+Information content alone does not say whether a distinction helps a system accomplish a task. When does removing a distinction from an observer's representation change what the observer can reliably do?
+
+### Questions
+
+1. Can task relevance be measured counterfactually by comparing the best achievable outcome under a representation and under a coarser partition?
+2. How sensitive is the measured loss to the task's viability predicate, horizon, initial distribution, and policy class?
+3. When do transition congruence and viability-label homogeneity predict task value, and when do they diverge?
+4. How should this finite, task-relative quantity be related—without conflating them—to semantic information, causal emergence, and algorithmic description?
+
+The initial operational baseline is [RIV-001](../experiments/task-relative-representation-relevance/README.md). It enumerates finite stationary deterministic observation-based controllers and measures exact survival loss after a declared state distinction is ablated. The result is explicitly model-, task-, and controller-class-relative, not an intrinsic measure of meaning.
