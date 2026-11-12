@@ -215,3 +215,22 @@ PRC-001 binds payload, source, model, interface, codec, toolchain and replay rec
 5. Which metadata is invariant across a workload set, compiler set, encoding set, or deployment, and which fields must remain local to each realization?
 
 The initial measurement is [PRC-001](../experiments/portable-realization-capsule/README.md). The next study should compare standalone compressed capsules with shared-manifest bundles while retaining exact replay receipts.
+
+
+---
+
+## 11. Compact Entry Metadata and Random-Access Bundles
+
+### The Problem
+
+CPB-001 shows that zlib-compressing only the PRC-001 canonical header saves 26.8% across 288 standalone capsules. A shared-manifest bundle saves 5.4% against raw capsules, but is 29.2% larger than the compressed standalone set because local entry headers and verification receipts remain verbose JSON.
+
+### Questions
+
+1. Can local entry metadata and verification receipts be represented as compact field-ID records without losing exact source/model/codec identities?
+2. Can local entry headers be compressed independently while the common source/toolchain manifest remains shared once?
+3. Can a bundle preserve random access to one realization without decompressing every other entry?
+4. Can the receiver reconstruct byte-identical standalone PRC-001 capsules from the compact entries and shared manifest?
+5. Which metadata can be deduplicated across source, workload, compiler, codec, and verification layers, and which fields must remain locally bound to each realization?
+
+The first measurement is [CPB-001](../experiments/compact-provenance-bundles/README.md). The next encoding should improve the local-entry representation while preserving standalone reconstruction, replay evidence and nested tamper rejection.
