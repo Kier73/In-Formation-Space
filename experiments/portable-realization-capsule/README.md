@@ -36,9 +36,39 @@ PRC-001 reuses the unchanged 16-workload RCN-001 corpus and all six SRE-002 code
 
 The experiment produces 288 capsules: 16 workloads × three compiler routes × six encodings.
 
+## Canonical metadata and independent receivers
+
+Version 1 uses a deliberately restricted canonical JSON profile so another
+language can reconstruct the exact header bytes:
+
+- UTF-8 JSON with object keys sorted lexicographically; metadata object keys
+  must be ASCII.
+- Values may be strings, booleans, null, arrays, and objects.
+- Integers must be within the interoperable IEEE-754 safe-integer range
+  (−(2^53−1) through 2^53−1). Floating-point values are not permitted.
+- Strings must encode as valid UTF-8 Unicode scalar values. The canonical
+  representation uses unescaped UTF-8 characters and compact JSON separators.
+
+The restrictions are part of the v1 format, not suggestions for one encoder.
+A future format that needs floating-point metadata, non-ASCII object keys, or
+another canonicalization rule must introduce an explicit versioned profile.
+
+[verify_capsule.mjs](verify_capsule.mjs) is an independent Node.js receiver
+using only Node built-ins. It checks the framing, canonical header bytes,
+header/capsule/receipt/payload digests, and the cross-field identity rules
+before returning a payload descriptor. The test suite generates a capsule in
+Python and verifies it in Node, including Unicode string values and a tampered
+payload. This is an interoperability check for the format implementation; it
+does not independently replay the model semantics.
+
 ## Integrity versus authenticity
 
-SHA-256 detects accidental or deliberate byte changes when the digest is not recomputed. It does not prove who created a capsule, authorize its execution, certify that a source repository is trusted, or make an embedded verification receipt a formal proof. The verification receipt is replayable experiment evidence, not a cryptographic attestation. A future signed format would need an explicit trust and key-management model.
+SHA-256 detects accidental or deliberate byte changes when the digest is not
+recomputed. It does not prove who created a capsule, authorize its execution,
+certify that a source repository is trusted, or make an embedded verification
+receipt a formal proof. The verification receipt is replayable experiment
+evidence, not a cryptographic attestation. A future signed format would need an
+explicit trust and key-management model.
 
 ## Measurements
 
