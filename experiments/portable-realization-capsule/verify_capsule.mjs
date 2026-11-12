@@ -1726,50 +1726,49 @@ export function verifyPortableStatefulCheckpoint(checkpoint) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
-    let exitCli = false;
+    let report;
     const checkpointFlag = process.argv.indexOf("--checkpoint");
     if (checkpointFlag >= 0) {
       const checkpointPath = process.argv[checkpointFlag + 1];
       if (!checkpointPath) fail("--checkpoint requires a file path");
-      const checkpointBytes = readFileSync(checkpointPath);
-      report = verifyPortableStatefulCheckpoint(checkpointBytes);
-      process.stdout.write(`${JSON.stringify(report)}\\n`);
-      exitCli = true;
-    }
-    const file = process.argv[2];
-    if (!exitCli && !file) fail("usage: node verify_capsule.mjs <capsule.bin> [--reference reference.json] [--trajectories trajectories.json] | --checkpoint <stateful-checkpoint.bin>");
-    const referenceFlag = process.argv.indexOf("--reference");
-    let report;
-    if (!exitCli && referenceFlag >= 0) {
-      const referencePath = process.argv[referenceFlag + 1];
-      if (!referencePath) fail("--reference requires a JSON file path");
-      const capsuleBytes = readFileSync(file);
-      const capsuleHeaderSize = capsuleBytes.readUInt32LE(10);
-      const capsuleHeader = JSON.parse(
-        new TextDecoder("utf-8", { fatal: true }).decode(
-          capsuleBytes.subarray(PREFIX_BYTES, PREFIX_BYTES + capsuleHeaderSize)
-        )
-      );
-      const references = JSON.parse(readFileSync(referencePath, "utf8"));
-      const trajectoriesFlag = process.argv.indexOf("--trajectories");
-      let trajectories = [];
-      if (trajectoriesFlag >= 0) {
-        const trajectoriesPath = process.argv[trajectoriesFlag + 1];
-        if (!trajectoriesPath) fail("--trajectories requires a JSON file path");
-        trajectories = JSON.parse(readFileSync(trajectoriesPath, "utf8"));
-      }
-      report = replayBinaryCapsule(
-        capsuleBytes,
-        references,
-        trajectories,
-        capsuleHeader.codec.name
-      );
+      report = verifyPortableStatefulCheckpoint(readFileSync(checkpointPath));
     } else {
-      report = { valid: true, ...verifyCapsule(readFileSync(file)) };
+      const file = process.argv[2];
+      if (!file) {
+        fail("usage: node verify_capsule.mjs <capsule.bin> [--reference reference.json] [--trajectories trajectories.json] | --checkpoint <stateful-checkpoint.bin>");
+      }
+      const referenceFlag = process.argv.indexOf("--reference");
+      if (referenceFlag >= 0) {
+        const referencePath = process.argv[referenceFlag + 1];
+        if (!referencePath) fail("--reference requires a JSON file path");
+        const capsuleBytes = readFileSync(file);
+        const capsuleHeaderSize = capsuleBytes.readUInt32LE(10);
+        const capsuleHeader = JSON.parse(
+          new TextDecoder("utf-8", { fatal: true }).decode(
+            capsuleBytes.subarray(PREFIX_BYTES, PREFIX_BYTES + capsuleHeaderSize)
+          )
+        );
+        const references = JSON.parse(readFileSync(referencePath, "utf8"));
+        const trajectoriesFlag = process.argv.indexOf("--trajectories");
+        let trajectories = [];
+        if (trajectoriesFlag >= 0) {
+          const trajectoriesPath = process.argv[trajectoriesFlag + 1];
+          if (!trajectoriesPath) fail("--trajectories requires a JSON file path");
+          trajectories = JSON.parse(readFileSync(trajectoriesPath, "utf8"));
+        }
+        report = replayBinaryCapsule(
+          capsuleBytes,
+          references,
+          trajectories,
+          capsuleHeader.codec.name
+        );
+      } else {
+        report = { valid: true, ...verifyCapsule(readFileSync(file)) };
+      }
     }
-    process.stdout.write(`${JSON.stringify(report)}\n`);
+    process.stdout.write(`${JSON.stringify(report)}\\n`);
   } catch (error) {
-    process.stderr.write(`invalid capsule: ${error.message}\n`);
+    process.stderr.write(`invalid capsule: ${error.message}\\n`);
     process.exitCode = 1;
   }
 }
