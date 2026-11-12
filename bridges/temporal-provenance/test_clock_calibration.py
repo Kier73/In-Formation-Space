@@ -268,10 +268,11 @@ class CalibrationIntegrityTests(unittest.TestCase):
     def test_example_keeps_calibration_and_comparison_boundaries_explicit(self):
         report = build_demonstration()
         self.assertIn("calibration_digest", report["calibration"])
-        self.assertTrue(all(
-            "authenticated" in item or "probability" in item or "causation" in item
-            for item in report["boundaries"]
-        ))
+        self.assertIn("not authenticated", report["boundaries"][0])
+        self.assertIn("not proof", report["boundaries"][1])
+        self.assertIn("not guaranteed", report["boundaries"][2])
+        self.assertIn("not a probability", report["boundaries"][4])
+        self.assertIn("physical causation", report["boundaries"][5])
 
 
 if __name__ == "__main__":
