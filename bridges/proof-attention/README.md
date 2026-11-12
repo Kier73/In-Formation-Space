@@ -213,3 +213,78 @@ The trajectory logical time is the one-based append order of session events. It 
 The data stream, sparse index, and manifest are separate files, not a transactional distributed store. SHA-256 chains and manifest digests detect inconsistent modification relative to a trusted head; they are not signatures or external authentication. The restored session is only as trustworthy as the supplied proof trace and upstream evidence/kernel-receipt validation. The trajectory adapter preserves and cross-checks those records; it does not authenticate a previous worker or execute Lean.
 
 The workflow pins E-CPU to \`c82d795e6b7602cc3d6e8c41e8622820914f5cbf\` and runs the trajectory tests alongside the planner and proof-action lifecycle suites.
+
+
+## Portable proof-worker handoff protocol
+
+The [proof-action protocol](proof_action_protocol.py) defines the request and result documents exchanged with an external proof worker. It fills an important gap between “select a tactic” and “interpret a returned trace”: a worker needs the complete scoped proof state, and a returned trace must identify the exact request and already-admitted raw return it answers.
+
+### Build a request
+
+\`\`\`python
+from proof_action_protocol import build_proof_action_request
+
+attempt = session.begin_next()
+request = build_proof_action_request(session, proof_ground)
+\`\`\`
+
+The request is JSON-serializable and includes:
+
+- the active attempt ID, query label, plan digest and ProofGround digest;
+- all active root intention IDs;
+- the complete source obligation document, including the structured goal, local context, metavariables, assumptions and proof environment;
+- the selected candidate transition, its tactic and proposed AND subgoal IDs;
+- the attention context and a request digest.
+
+The request declares that the candidate is not an observation, its proposed subgoals are jointly required if the tactic is later elaborated, alternative tactic transitions are OR routes, and kernel acceptance still requires a separate verified receipt.
+
+### Return and import a result
+
+After the host has actually dispatched the request, recorded receiver admission and preserved the raw return, the result envelope can be constructed and imported:
+
+\`\`\`python
+from proof_action_protocol import (
+    make_proof_action_result,
+    import_proof_action_result,
+)
+
+result_document = make_proof_action_result(
+    request,
+    return_evidence={
+        "evidence_ref": returned_encounter_ref,
+        "encounter_id": encounter_id,
+        "payload_digest": payload_digest,
+        "canonicalization": canonicalization,
+    },
+    proof_trace=normalized_vgi_lean_trace,
+)
+
+imported = import_proof_action_result(
+    session,
+    proof_ground,
+    request,
+    result_document,
+    actor="proof-trace-adapter",
+    interpretation_ref=interpretation_ref,
+    verified_receipts=kernel_receipts,
+)
+proof_ground = imported.proof_ground
+\`\`\`
+
+Before importing, the bridge:
+
+1. recomputes the request from the current session and ProofGround and requires exact request-digest equality;
+2. requires the session's active attempt to be at the admitted \`returned\` stage;
+3. compares the result's attempt ID, request digest, Encounter reference, Encounter ID, payload digest and canonicalization with the exact return event already recorded on that attempt;
+4. imports the normalized trace through VGI's \`ProofGroundAdapter\`, passing through separately supplied \`VerifiedKernelReceipt\` objects;
+5. delegates the final source/tactic/attempt correlation and environment/obligation continuity checks to \`ProofAttentionSession.interpret_result\`.
+
+The worker must write the exact attempt ID into the result hyper-transition's \`evidence_ref\`. A trace that references another attempt, a different environment, an unknown source, or duplicate matching result edges is not accepted as the result of this action.
+
+### Interpretation and trust boundaries
+
+The request digest binds the portable action description; the result digest binds its request reference, return receipt and normalized proof trace. These are deterministic integrity digests, not signatures. The importer checks equality with the host-recorded return but does not fetch or authenticate the Encounter Envelope itself. The caller remains responsible for validating the transport receipt and any external signature.
+
+The VGI adapter parses normalized Lean trace JSON; it does not execute Lean. A supplied \`VerifiedKernelReceipt\` is checked for consistency and environment binding by VGI, but a production host must authenticate the upstream checker receipt and proof-term fingerprint. Neither a tactic candidate, an elaborated hyper-transition, an empty subgoal bundle, nor a result digest is kernel acceptance.
+
+The protocol therefore supplies a portable interchange contract, not an autonomous proof worker. A host still chooses the process, launches the proof assistant, records actual dispatch/admission/return receipts, and provides authenticated kernel results.
