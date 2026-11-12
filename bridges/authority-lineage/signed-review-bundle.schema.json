@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://in-formation-space.invalid/schemas/signed-review-bundle-0.1.json",
+  "title": "DSSE Ed25519 signed authority review bundle",
+  "type": "object",
+  "required": [
+    "format",
+    "schema",
+    "signature_profile",
+    "certificate_digest",
+    "payload_type",
+    "trust_store_digest",
+    "review_artifacts_verified",
+    "signed_review_votes",
+    "bundle_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.signed-review-bundle"
+    },
+    "schema": {
+      "const": "in-formation.signed-review-bundle/0.1"
+    },
+    "signature_profile": {
+      "const": "DSSEv1+Ed25519"
+    },
+    "certificate_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "payload_type": {
+      "const": "application/vnd.in-formation.authority-review-vote+json;version=0.1"
+    },
+    "trust_store_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "review_artifacts_verified": {
+      "type": "boolean"
+    },
+    "signed_review_votes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "seat",
+          "reviewer_ref",
+          "keyid",
+          "envelope"
+        ],
+        "properties": {
+          "seat": {
+            "enum": [
+              "R00",
+              "R01",
+              "R02"
+            ]
+          },
+          "reviewer_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "keyid": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "envelope": {
+            "type": "object",
+            "required": [
+              "payloadType",
+              "payload",
+              "signatures"
+            ],
+            "properties": {
+              "payloadType": {
+                "const": "application/vnd.in-formation.authority-review-vote+json;version=0.1"
+              },
+              "payload": {
+                "type": "string",
+                "minLength": 1,
+                "contentEncoding": "base64"
+              },
+              "signatures": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "keyid",
+                    "sig"
+                  ],
+                  "properties": {
+                    "keyid": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "sig": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9+/]{86}==$",
+                      "contentEncoding": "base64"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "bundle_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}
