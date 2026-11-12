@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import hashlib
+import json
 import unittest
 
 from mailcpu.reliability import ReliabilityPolicy
@@ -59,8 +61,11 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         closed = handoff.closed_epoch
         self.assertEqual(closed["details"]["reason_code"], "operator_rotation")
         self.assertEqual(
+            len(closed["details"]["preclose_session_digest"]), 64
+        )
+        self.assertNotEqual(
             closed["details"]["preclose_session_digest"],
-            dispatched.request["proof_ground_digest"] if False else closed["details"]["preclose_session_digest"],
+            closed["details"]["postclose_session_digest"],
         )
         uncertainty = closed["details"]["uncertainty"]
         self.assertEqual(uncertainty["channel_states"]["host_request_sender"]["pending"][0]["sequence"], 1)
@@ -74,8 +79,8 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         )
         self.assertEqual(
             closed["details"]["pair_checkpoint_digest"],
-            __import__("hashlib").sha256(
-                __import__("json").dumps(
+            hashlib.sha256(
+                json.dumps(
                     closed["details"]["pair_checkpoint"],
                     sort_keys=True,
                     separators=(",", ":"),
@@ -200,11 +205,25 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         with self.assertRaisesRegex(ProofActionRouteEpochError, "ledger digest mismatch"):
             ProofActionRouteEpochLedger.from_dict(tampered)
 
+        closed = handoff_proof_action_route_epoch(
+            host,
+            worker,
+            ledger,
+            epoch_id="integrity-epoch",
+            reason_code="operator_rotation",
+            reason="rotate after identity reuse test",
+            successor_epoch_id="integrity-epoch-2",
+            successor_host_id="integrity-host-2",
+            successor_worker_id="integrity-worker-2",
+            successor_request_channel="integrity-request-2",
+            successor_result_channel="integrity-result-2",
+        )
         with self.assertRaisesRegex(ProofActionRouteEpochError, "already used"):
             ledger.open_epoch(
                 "epoch-reuse",
-                ledger.active_epoch["route"],
+                closed.closed_epoch["route"],
                 owner_id="owner-2",
+                predecessor_close_digest=closed.closed_epoch["event_digest"],
             )
 
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
