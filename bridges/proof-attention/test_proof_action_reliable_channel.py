@@ -155,7 +155,41 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         self.assertEqual(failed.status, "delivery_unconfirmed")
         self.assertNotIn("execution_rejected", [event["stage"] for event in failed.events])
         self.assertIsNone(host.active_attempt)
-        self.assertEqual(host.dispatch_next().request["candidate_transition"]["tactic"], "simp")
+        with self.assertRaisesRegex(ProofActionReliableChannelError, "request channel is fenced"):
+            host.dispatch_next()
+
+    def test_result_retry_exhaustion_fences_worker_result_channel(self):
+        transport = FaultInjectingTransport(
+            FaultProfile(drop_indices=frozenset({3, 4}))
+        )
+        _session, source_trace, _pg, _transport, host, worker = make_endpoints(
+            transport,
+            policy=ReliabilityPolicy(lease_ticks=1, max_attempts=2),
+        )
+        _dispatched, received = deliver_request_and_admit(host, worker)
+        result = make_proof_action_result(
+            received.request,
+            return_evidence=return_evidence(host.active_attempt),
+            proof_trace=add_result_payload(source_trace, host.active_attempt),
+        )
+        self.assertEqual(worker.send_result(result), 1)
+        self.assertEqual(worker.advance_result_retry_tick(), ())
+        self.assertEqual(worker.advance_result_retry_tick(), (1,))
+        self.assertEqual(worker.pending_result_sequences, ())
+
+        host.mark_no_result("the worker result sequence exhausted retries")
+        next_dispatch = host.dispatch_next()
+        self.assertIsNotNone(next_dispatch)
+        next_request = worker.receive_request()
+        self.assertIsNotNone(next_request)
+        self.assertTrue(host.observe_request_admission())
+        second_result = make_proof_action_result(
+            next_request.request,
+            return_evidence=return_evidence(host.active_attempt),
+            proof_trace=add_result_payload(source_trace, host.active_attempt),
+        )
+        with self.assertRaisesRegex(ProofActionReliableChannelError, "result channel is fenced"):
+            worker.send_result(second_result)
 
     def test_dropped_result_retries_and_imports_once(self):
         # Send order: request=1, request ACK=2, first result=3 (dropped),
