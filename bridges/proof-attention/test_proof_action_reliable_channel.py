@@ -225,8 +225,12 @@ class ProofActionReliableChannelTests(unittest.TestCase):
 
     def test_malformed_result_is_retained_as_raw_return_then_interpretation_failed(self):
         session, _trace, _pg, _transport, host, worker = make_endpoints()
-        _dispatched, _received = deliver_request_and_admit(host, worker)
-        worker.send_result({"not": "a proof-action result"})
+        _dispatched, received = deliver_request_and_admit(host, worker)
+        worker.send_result({
+            "attempt_id": received.request["attempt_id"],
+            "request_digest": received.request["request_digest"],
+            "malformed": "no return_evidence or proof trace",
+        })
         with self.assertRaisesRegex(ProofActionReliableChannelError, "return_evidence"):
             host.receive_result()
 
