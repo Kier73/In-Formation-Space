@@ -1,0 +1,75 @@
+name: Sparse encoding landscape SRE-002
+
+on:
+  push:
+    paths:
+      - "experiments/sparse-encoding-landscape/README.md"
+      - "experiments/sparse-encoding-landscape/PLAN.md"
+      - "experiments/sparse-encoding-landscape/run_experiment.py"
+      - ".github/workflows/sparse-encoding-landscape.yml"
+  pull_request:
+    paths:
+      - "experiments/sparse-encoding-landscape/README.md"
+      - "experiments/sparse-encoding-landscape/PLAN.md"
+      - "experiments/sparse-encoding-landscape/run_experiment.py"
+      - ".github/workflows/sparse-encoding-landscape.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sre-002-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  sparse-encoding-landscape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out experiment workspace
+        uses: actions/checkout@v4
+
+      - name: Check out pinned E-CPU implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+
+      - name: Check out pinned Virtual-Ground-Interpreter
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Run sparse transition implementation regressions
+        env:
+          PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: python -m pytest external/E-CPU/tests/test_transition_space.py -q
+
+      - name: Execute exact sparse encoding landscape
+        env:
+          PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+          ECPU_REVISION: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          VGI_REVISION: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          IFS_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: >-
+          python experiments/sparse-encoding-landscape/run_experiment.py
+          --output experiments/sparse-encoding-landscape/results/ci-result.json
+
+      - name: Upload encoding size and round-trip evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparse-encoding-landscape-sre-002
+          path: experiments/sparse-encoding-landscape/results/ci-result.json
+          if-no-files-found: warn

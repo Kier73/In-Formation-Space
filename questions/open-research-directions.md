@@ -158,3 +158,22 @@ RCN-001 showed that liveness-compacted models can contain far fewer nonzero para
 5. How do these costs change when the model is hosted through E-CPU's execution/fabric path, where communication, admission, and provenance costs remain separate?
 
 The initial finite-domain comparison is [SRE-001](../experiments/sparse-transition-execution/README.md). It explicitly separates structural operation counts, serialized size, conversion cost, and measured Python inference time. Its [first corrected evidence record](../experiments/sparse-transition-execution/results/ci-run-43302944580.md) shows why sparse parameter count, JSON payload size, and runtime must remain distinct: the minterm sparse JSON was larger even though the sparse operation path used fewer multiply slots.
+
+
+---
+
+## 8. Exact Sparse Encoding and Portable Ground Representation
+
+### The Problem
+
+SRE-001 showed that a sparse model can carry fewer nonzero scalar parameters and require fewer weight multiplications while its COO-style JSON payload can still be larger than the dense source for high-density rows. This means sparse numerical structure and portable representation size are separate optimization problems.
+
+### Questions
+
+1. Which exact representation is most compact across different row densities: COO pairs, CSR offsets, row bitmasks, dense rows, or adaptive hybrids?
+2. When do integer coefficient formats preserve exact model values, and when must the representation use wider floating-point values?
+3. Can a decoder reconstruct the exact source-model identity from a compact payload without trusting the encoder's prose or external state?
+4. How do encoding and decoding costs compare with transfer size, durable storage, and subsequent reuse?
+5. Can these exact portable encodings become transportable E-CPU realization objects while retaining source Ground identity, semantic translation contracts, and replay evidence?
+
+The first finite-domain comparison is [SRE-002](../experiments/sparse-encoding-landscape/README.md). It treats byte size, exact reconstruction, and encode/decode work as independent measures.
