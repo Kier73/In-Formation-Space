@@ -43,7 +43,7 @@ jobs:
       - name: Install test runner
         run: python -m pip install --disable-pip-version-check pytest
 
-      - name: Run 128-case, 2,048-trajectory, stateful-revision, and trajectory-replay experiment
+      - name: Run 128-case, 2,048-trajectory, and sparse-index stateful trajectory experiment
         env:
           PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
         run: >-
