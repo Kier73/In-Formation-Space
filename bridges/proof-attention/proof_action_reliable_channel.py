@@ -112,10 +112,27 @@ class ProofActionReliableWorker:
         )
         self._admitted_requests: dict[str, str] = {}
         self._result_sent_attempt_ids: set[str] = set()
+        self._request_channel_failed = False
         self._result_channel_failed = False
+
+    @property
+    def request_channel_failed(self) -> bool:
+        return self._request_channel_failed
+
+    @property
+    def result_channel_failed(self) -> bool:
+        return self._result_channel_failed
+
+    @property
+    def fenced(self) -> bool:
+        return self._request_channel_failed or self._result_channel_failed
 
     def receive_request(self) -> ReceivedProofActionRequest | None:
         """Receive one request; duplicate sequences and attempt IDs are ACKed but not redelivered."""
+        if self.fenced:
+            raise ProofActionReliableChannelError(
+                "worker endpoint is fenced; create fresh host/worker endpoints with new channel identities"
+            )
         validated_payload: dict[str, Any] = {}
         duplicate_attempt = [False]
 
@@ -147,7 +164,13 @@ class ProofActionReliableWorker:
                 self._admitted_requests[attempt_id] = request_digest
             validated_payload.update(validated)
 
-        received = self._request_receiver.receive(commit=validate_before_ack)
+        try:
+            received = self._request_receiver.receive(commit=validate_before_ack)
+        except ProofActionReliableChannelError:
+            # An invalid in-order request cannot be skipped; do not try to
+            # advance this receiver past a frame that was not admitted/ACKed.
+            self._request_channel_failed = True
+            raise
         if received is None or duplicate_attempt[0]:
             return None
         sequence, _payload = received
@@ -188,7 +211,11 @@ class ProofActionReliableWorker:
         """Advance retries; fence this endpoint if an in-order result sequence exhausts."""
         failed = self._result_sender.tick()
         if failed:
+            # Once an in-order result sequence exhausts retries, the host's
+            # receive cursor may or may not have advanced. Fence both directions
+            # of this worker endpoint; a later action needs a fresh channel epoch.
             self._result_channel_failed = True
+            self._request_channel_failed = True
         return failed
 
     @property
@@ -259,6 +286,10 @@ class ProofActionReliableHost:
     @property
     def active_request(self) -> dict[str, Any] | None:
         return None if self._active_request is None else json.loads(_canonical(self._active_request))
+
+    @property
+    def request_channel_failed(self) -> bool:
+        return self._request_channel_failed
 
     @property
     def request_pending_sequences(self) -> tuple[int, ...]:
