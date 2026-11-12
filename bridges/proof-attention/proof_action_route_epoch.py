@@ -622,6 +622,8 @@ class ProofActionRouteEpochLedger:
         active = self.active_epoch
         if active is None or active["epoch_id"] != epoch_id:
             raise ProofActionRouteEpochError("only the active route epoch can be closed")
+        if type(owner_generation) is not int or owner_generation <= 0:
+            raise ProofActionRouteEpochError("owner_generation must be a positive integer")
         if (
             active["owner_id"] != owner_id
             or active["owner_generation"] != owner_generation
@@ -690,6 +692,123 @@ class ProofActionRouteEpochLedger:
             details,
             actor_id=owner_id,
         )
+
+    def handoff_epoch(
+        self,
+        epoch_id: str,
+        route: Mapping[str, Any],
+        *,
+        reason_code: str,
+        reason: str,
+        owner_id: str,
+        owner_generation: int,
+        pair_checkpoint: Mapping[str, Any],
+        preclose_session_digest: str,
+        postclose_session_digest: str,
+        uncertainty: Mapping[str, Any],
+        successor_epoch_id: str,
+        successor_owner_id: str,
+        successor_route: Mapping[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Atomically append a close event and its one authorized successor open.
+
+        When a shared CAS store is configured, both events become visible in one
+        revision. No competing process can insert a different route between
+        closure and successor activation.
+        """
+        self.refresh()
+        active = self.active_epoch
+        if active is None or active["epoch_id"] != epoch_id:
+            raise ProofActionRouteEpochError("only the active route epoch can be handed off")
+        if (
+            active["owner_id"] != owner_id
+            or active["owner_generation"] != owner_generation
+        ):
+            raise ProofActionRouteEpochError(
+                "route handoff was submitted by a stale owner generation"
+            )
+        checked_route = _validate_route(route)
+        if checked_route != active["route"]:
+            raise ProofActionRouteEpochError("handoff route does not match the active route")
+        if reason_code not in REASON_CODES:
+            raise ProofActionRouteEpochError("unsupported route-close reason code")
+        reason = _text(reason, "reason")
+        _sha256(preclose_session_digest, "preclose_session_digest")
+        _sha256(postclose_session_digest, "postclose_session_digest")
+        successor_epoch_id = _text(successor_epoch_id, "successor_epoch_id")
+        successor_owner_id = _text(successor_owner_id, "successor_owner_id")
+        if successor_epoch_id == epoch_id or any(
+            entry["epoch_id"] == successor_epoch_id for entry in self._entries
+        ):
+            raise ProofActionRouteEpochError("successor epoch ID must be new")
+        if any(
+            (entry["event_type"] == "opened" and entry["details"]["owner_id"] == successor_owner_id)
+            or (entry["event_type"] == "claimed" and entry["details"]["owner_id"] == successor_owner_id)
+            for entry in self._entries
+        ):
+            raise ProofActionRouteEpochError("successor owner ID was already used")
+        successor = _validate_route(successor_route)
+        if _route_key(successor) == _route_key(checked_route):
+            raise ProofActionRouteEpochError("successor must use a fresh route identity tuple")
+        if any(_route_key(old) == _route_key(successor) for old in self._all_routes()):
+            raise ProofActionRouteEpochError("successor route identity tuple was already used")
+
+        checkpoint = _validate_pair_checkpoint_binding(
+            pair_checkpoint,
+            route=checked_route,
+            preclose_session_digest=preclose_session_digest,
+        )
+        uncertainty_copy = _validate_uncertainty_projection(uncertainty)
+        if uncertainty_copy != _uncertainty_projection(checkpoint):
+            raise ProofActionRouteEpochError(
+                "uncertainty projection does not describe the preserved pair checkpoint"
+            )
+        close_details = {
+            "owner_generation": active["owner_generation"],
+            "owner_id": active["owner_id"],
+            "reason_code": reason_code,
+            "reason": reason,
+            "preclose_session_digest": preclose_session_digest,
+            "postclose_session_digest": postclose_session_digest,
+            "pair_checkpoint": checkpoint,
+            "pair_checkpoint_digest": _digest(checkpoint),
+            "uncertainty": uncertainty_copy,
+            "successor_epoch_id": successor_epoch_id,
+            "successor_owner_id": successor_owner_id,
+            "successor_route": successor,
+        }
+        close_draft = (
+            "closed", epoch_id, active["epoch_number"], checked_route, close_details
+        )
+        open_details = {
+            "predecessor_close_digest": None,  # replaced after the close event is built below
+            "owner_generation": 1,
+            "owner_id": successor_owner_id,
+        }
+        close_event = self._build_event(
+            sequence=len(self._entries) + 1,
+            previous_event_digest=(
+                self._entries[-1]["event_digest"] if self._entries else "0" * 64
+            ),
+            event_type=close_draft[0],
+            epoch_id=close_draft[1],
+            epoch_number=close_draft[2],
+            route=close_draft[3],
+            details=close_draft[4],
+        )
+        open_details["predecessor_close_digest"] = close_event["event_digest"]
+        open_draft = (
+            "opened",
+            successor_epoch_id,
+            len(self._all_routes()) + 1,
+            successor,
+            open_details,
+        )
+        close_event, opened_event = self._append_many(
+            [close_draft, open_draft],
+            actor_id=owner_id,
+        )
+        return close_event, opened_event
 
     def assert_active(self, epoch_id: str, route_digest: str, *, owner_id: str, owner_generation: int) -> None:
         active = self.active_epoch
