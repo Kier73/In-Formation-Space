@@ -502,6 +502,7 @@ class ProofActionRouteEpochLedger:
     ) -> dict[str, Any]:
         self.refresh()
         epoch_id = _text(epoch_id, "epoch_id")
+        owner_id = _text(owner_id, "owner_id")
         checked_route = _validate_route(route)
         if any(entry["epoch_id"] == epoch_id for entry in self._entries):
             raise ProofActionRouteEpochError("route epoch IDs cannot be reused")
@@ -518,19 +519,26 @@ class ProofActionRouteEpochLedger:
             if (
                 epoch_id != previous_close["details"]["successor_epoch_id"]
                 or checked_route != previous_close["details"]["successor_route"]
+                or owner_id != previous_close["details"]["successor_owner_id"]
             ):
                 raise ProofActionRouteEpochError(
-                    "opened route does not match the successor authorized by the close event"
+                    "opened route or owner does not match the successor authorized by the close event"
                 )
         elif predecessor_close_digest is not None:
             raise ProofActionRouteEpochError("initial route cannot name a predecessor close event")
+        if any(
+            entry["event_type"] == "opened" and entry["details"]["owner_id"] == owner_id
+            or entry["event_type"] == "claimed" and entry["details"]["owner_id"] == owner_id
+            for entry in self._entries
+        ):
+            raise ProofActionRouteEpochError("route owner ID was already used")
         epoch_number = len(self._all_routes()) + 1
         return self._append(
             "opened",
             epoch_id,
             epoch_number,
             checked_route,
-            {"predecessor_close_digest": predecessor_close_digest, "owner_generation": 1, "owner_id": _text(owner_id, "owner_id")},
+            {"predecessor_close_digest": predecessor_close_digest, "owner_generation": 1, "owner_id": owner_id},
         )
 
     def claim_epoch(self, epoch_id: str, *, owner_id: str) -> dict[str, Any]:
@@ -554,17 +562,27 @@ class ProofActionRouteEpochLedger:
         *,
         reason_code: str,
         reason: str,
+        owner_id: str,
+        owner_generation: int,
         pair_checkpoint: Mapping[str, Any],
         preclose_session_digest: str,
         postclose_session_digest: str,
         uncertainty: Mapping[str, Any],
         successor_epoch_id: str,
+        successor_owner_id: str,
         successor_route: Mapping[str, Any],
     ) -> dict[str, Any]:
         self.refresh()
         active = self.active_epoch
         if active is None or active["epoch_id"] != epoch_id:
             raise ProofActionRouteEpochError("only the active route epoch can be closed")
+        if (
+            active["owner_id"] != owner_id
+            or active["owner_generation"] != owner_generation
+        ):
+            raise ProofActionRouteEpochError(
+                "route close was submitted by a stale owner generation"
+            )
         checked_route = _validate_route(route)
         if checked_route != active["route"]:
             raise ProofActionRouteEpochError("closing route does not match the active route binding")
@@ -574,6 +592,13 @@ class ProofActionRouteEpochLedger:
         _sha256(preclose_session_digest, "preclose_session_digest")
         _sha256(postclose_session_digest, "postclose_session_digest")
         _text(successor_epoch_id, "successor_epoch_id")
+        successor_owner_id = _text(successor_owner_id, "successor_owner_id")
+        if any(
+            entry["event_type"] == "opened" and entry["details"]["owner_id"] == successor_owner_id
+            or entry["event_type"] == "claimed" and entry["details"]["owner_id"] == successor_owner_id
+            for entry in self._entries
+        ):
+            raise ProofActionRouteEpochError("successor owner ID was already used")
         successor = _validate_route(successor_route)
         if _route_key(successor) == _route_key(checked_route):
             raise ProofActionRouteEpochError("successor must use a fresh route identity tuple")
@@ -608,6 +633,7 @@ class ProofActionRouteEpochLedger:
             "pair_checkpoint_digest": checkpoint_digest,
             "uncertainty": uncertainty_copy,
             "successor_epoch_id": successor_epoch_id,
+            "successor_owner_id": successor_owner_id,
             "successor_route": successor,
         }
         return self._append(
