@@ -298,9 +298,12 @@ def restore_proof_attention_trajectory(
         session_section["event_count"], "event_count", allow_zero=True
     )
     _sha256(session_section["session_digest"], "session_digest")
-    if len(headers) != expected_attempt_count or trajectory["event_count"] != expected_event_count:
-        raise ProofAttentionTrajectoryError("manifest attempt or event count is inconsistent")
-    if trajectory["event_count"] != expected_event_count:
+    if len(headers) != expected_attempt_count:
+        raise ProofAttentionTrajectoryError("manifest attempt count is inconsistent")
+    trajectory_event_count = _positive_int(
+        trajectory["event_count"], "trajectory.event_count", allow_zero=True
+    )
+    if trajectory_event_count != expected_event_count:
         raise ProofAttentionTrajectoryError("manifest session and trajectory event counts disagree")
     stride = _positive_int(trajectory["stride"], "trajectory.stride")
     receipt_head_expected = _sha256(trajectory["receipt_head"], "trajectory.receipt_head")
@@ -328,6 +331,7 @@ def restore_proof_attention_trajectory(
     events_by_attempt: dict[str, list[dict[str, Any]]] = defaultdict(list)
     flat_events: list[dict[str, Any]] = []
     observed_receipts: list[str] = []
+    last_attempt_sequence = 0
     try:
         with TrajectoryReader(data_path, index_path) as reader:
             if reader.stride != stride:
@@ -362,12 +366,20 @@ def restore_proof_attention_trajectory(
                     or payload["attempt_id"] not in header_by_id
                     or payload["attempt_sequence"] != header_by_id[payload["attempt_id"]][0]
                     or event_copy.get("attempt_id") != payload["attempt_id"]
+                    or type(payload["attempt_event_sequence"]) is not int
+                    or type(event_copy.get("sequence")) is not int
                     or event_copy.get("sequence") != payload["attempt_event_sequence"]
                     or event_copy.get("event_digest") != payload["attempt_event_digest"]
                 ):
                     raise ProofAttentionTrajectoryError(
                         f"trajectory frame {frame.sequence} does not match its session event"
                     )
+                attempt_sequence = payload["attempt_sequence"]
+                if attempt_sequence < last_attempt_sequence:
+                    raise ProofAttentionTrajectoryError(
+                        "trajectory frames interleave attempt event groups"
+                    )
+                last_attempt_sequence = attempt_sequence
                 attempt_id = payload["attempt_id"]
                 events_by_attempt[attempt_id].append(event_copy)
                 flat_events.append(event_copy)
