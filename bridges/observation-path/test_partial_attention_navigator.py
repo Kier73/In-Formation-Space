@@ -277,6 +277,58 @@ class PartialAttentionNavigatorTests(unittest.TestCase):
         with self.assertRaisesRegex(PartialAttentionNavigationError, "candidate count"):
             navigator.preview()
 
+    def test_distinct_observation_methods_for_the_same_cell_can_compete(self):
+        def multiple_methods(system, observer, cycle_index):
+            return (
+                TransitionProbe(
+                    "b",
+                    "Y",
+                    (
+                        ProbeScenario(TransitionOutcome("a", (0,)), Fraction(1, 2)),
+                        ProbeScenario(TransitionOutcome("c", (1,)), Fraction(1, 2)),
+                    ),
+                    cost=Fraction(2),
+                    label="wide-sensor",
+                ),
+                TransitionProbe(
+                    "b",
+                    "Y",
+                    (
+                        ProbeScenario(TransitionOutcome("a", (0,)), Fraction(1, 2)),
+                        ProbeScenario(TransitionOutcome("b", (1,)), Fraction(1, 2)),
+                    ),
+                    cost=Fraction(1),
+                    label="low-latency-sensor",
+                ),
+            )
+
+        navigator, _ = make_navigator(probe_factory=multiple_methods)
+        ranking = navigator.preview()
+        self.assertEqual(len(ranking), 2)
+        self.assertEqual(
+            {(score.probe.state, score.probe.action) for score in ranking},
+            {("b", "Y")},
+        )
+        self.assertEqual(
+            {score.probe.label for score in ranking},
+            {"wide-sensor", "low-latency-sensor"},
+        )
+        selection = navigator.begin_next()
+        self.assertEqual(len(selection.ranking), 2)
+        self.assertEqual(selection.selected_cell, ("b", "Y"))
+
+    def test_exact_duplicate_probe_definitions_are_rejected(self):
+        def duplicate_method(system, observer, cycle_index):
+            one = candidates_for_unknown_y_cells(system, observer, cycle_index)[0]
+            return (one, one)
+
+        navigator, _ = make_navigator(probe_factory=duplicate_method)
+        with self.assertRaisesRegex(
+            PartialAttentionNavigationError,
+            "exact duplicate probe definition",
+        ):
+            navigator.preview()
+
     def test_sender_ack_requirement_cannot_be_declared_without_application(self):
         system = make_ground()
         observer = ObserverContext.full(system)

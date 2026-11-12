@@ -61,6 +61,35 @@ def _outcome_record(outcome: object) -> dict[str, Any]:
     return {"target": target, "output": output}
 
 
+def _probe_identity(probe: object) -> str:
+    """Canonical identity distinguishes different observation methods for one cell."""
+    state = _nonempty(getattr(probe, "state", None), "probe.state")
+    action = _nonempty(getattr(probe, "action", None), "probe.action")
+    label = getattr(probe, "label", "")
+    if not isinstance(label, str):
+        raise PartialAttentionNavigationError("probe.label must be text")
+    cost = _fraction(getattr(probe, "cost", None), "probe.cost")
+    scenarios = getattr(probe, "scenarios", None)
+    if not isinstance(scenarios, (tuple, list)) or not scenarios:
+        raise PartialAttentionNavigationError("probe.scenarios must be a non-empty sequence")
+    scenario_records = []
+    for index, scenario in enumerate(scenarios):
+        scenario_records.append({
+            "outcome": _outcome_record(getattr(scenario, "outcome", None)),
+            "weight": _fraction(
+                getattr(scenario, "weight", None),
+                f"probe.scenarios[{index}].weight",
+            ),
+        })
+    return json.dumps({
+        "state": state,
+        "action": action,
+        "label": label,
+        "cost": cost,
+        "scenarios": scenario_records,
+    }, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+
+
 def _score_record(score: object, rank: int) -> dict[str, Any]:
     probe = getattr(score, "probe", None)
     state = _nonempty(getattr(probe, "state", None), "score.probe.state")
@@ -250,31 +279,26 @@ class PartialAttentionNavigator:
             ) from exc
         if not probes:
             return ()
-        names = []
-        for index, probe in enumerate(probes):
-            state = _nonempty(getattr(probe, "state", None), f"probes[{index}].state")
-            action = _nonempty(getattr(probe, "action", None), f"probes[{index}].action")
-            names.append((state, action))
-        if len(set(names)) != len(names):
+        identities = [_probe_identity(probe) for probe in probes]
+        if len(set(identities)) != len(identities):
             raise PartialAttentionNavigationError(
-                "probe_factory returned more than one proposal for the same Ground cell"
+                "probe_factory returned an exact duplicate probe definition"
             )
         ranked = self._ranker(self._system, self._observer, probes, self._horizon)
         if not isinstance(ranked, (tuple, list)):
             raise PartialAttentionNavigationError("ranker must return a ranked sequence")
         if len(ranked) != len(probes):
             raise PartialAttentionNavigationError("ranker changed the candidate count")
-        ranked_cells = []
-        for index, score in enumerate(ranked):
-            probe = getattr(score, "probe", None)
-            cell = (
-                _nonempty(getattr(probe, "state", None), f"ranked[{index}].probe.state"),
-                _nonempty(getattr(probe, "action", None), f"ranked[{index}].probe.action"),
-            )
-            ranked_cells.append(cell)
-        if len(set(ranked_cells)) != len(ranked_cells) or set(ranked_cells) != set(names):
+        ranked_identities = [
+            _probe_identity(getattr(score, "probe", None))
+            for score in ranked
+        ]
+        if (
+            len(set(ranked_identities)) != len(ranked_identities)
+            or set(ranked_identities) != set(identities)
+        ):
             raise PartialAttentionNavigationError(
-                "ranker must return each supplied Ground cell exactly once"
+                "ranker must return each supplied probe definition exactly once"
             )
         return tuple(ranked)
 
