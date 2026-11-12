@@ -143,6 +143,10 @@ jobs:
         env:
           PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter:bridges/hypothesis-revision
         run: python -m unittest discover -s bridges/observation-path -p "test_partial_probe_execution.py" -v
+      - name: Run VGI partial-attention navigation coordinator tests
+        env:
+          PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter:bridges/hypothesis-revision
+        run: python -m unittest discover -s bridges/observation-path -p "test_partial_attention_navigator.py" -v
       - name: Run E-CPU gated adapter contract tests
         run: python -m unittest discover -s bridges/observation-path -p "test_ecpu_gated_adapter.py" -v
       - name: Run typed E-CPU temporal binding tests

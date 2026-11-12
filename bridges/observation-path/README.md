@@ -162,6 +162,57 @@ Reproduce the cross-repository contract test from a checkout with that VGI revis
 PYTHONPATH=external/Virtual-Ground-Interpreter/virtual_ground_interpreter python -m unittest discover -s bridges/observation-path -p 'test_partial_probe_execution.py' -v
 ```
 
+## Stateful partial-attention navigation
+
+`partial_attention_navigator.py` adds a one-probe-at-a-time controller above VGI's existing ranker and the evidence-gated partial-probe execution bridge. It does not implement another scoring rule. The caller supplies:
+
+- the current VGI Ground and observer;
+- a `probe_factory(system, observer, cycle_index)` that regenerates explicit counterfactual candidates for the *current* Ground;
+- VGI's pinned `rank_partial_probes` callable and its revision;
+- the horizon and query label.
+
+`preview()` ranks without opening a request. `begin_next()` binds the highest-ranked candidate to a digest-bound `PartialProbeExecution` and its existing `ObservationPath`. Only one attempt may be active. The host then uses that same path for real dispatch, receiver admission, raw return, and the selected E-CPU authorization/application/ACK gates. The E-CPU adapter can consume `selection.execution.path` directly; no new lifecycle or authority ledger is introduced.
+
+After those gates, `complete_active(actual_transition_outcome, ...)` interprets the actual result. A matching scenario produces a new immutable Ground revision; the navigator adopts that revision and calls the candidate factory again on the next `preview()` / `begin_next()`. This is the adaptive loop: the next candidate ranking is based on the newly observed Ground, not a policy tree computed once against an old model.
+
+A result outside the scenario set leaves Ground unchanged and pauses the navigator in `model_mismatch`. The caller may pass an append-only hypothesis ledger proposal in `hypothesis_proposal`; this still creates only a proposed candidate. Resuming requires an explicit `resume_after_mismatch(probe_factory=...)`, allowing the caller to supply a candidate source updated from separately validated model context. Timeouts, refusals, unadmitted returns, and dispatch failures are not measurements and cannot be completed as successful probe outcomes.
+
+The navigator intentionally does **not** dispatch transport or manufacture Encounter Envelopes. A host adapter remains responsible for actual send/intake/return artifacts. It also does not assume scenario probabilities: the VGI ranker preserves exact expectations when exact weights were supplied and otherwise ranks using conservative scenario bounds.
+
+### Minimal cycle
+
+```python
+from partial_attention_navigator import PartialAttentionNavigator
+from vgi.partial_attention import rank_partial_probes
+
+navigator = PartialAttentionNavigator(
+    system, observer, probe_factory, rank_partial_probes, horizon,
+    attempt_id_prefix="attention-run",
+    query_label="refine the current Ground",
+    vgi_revision="cedcc4540a9d75228cf83aaf21e1ba960fe8a555",
+)
+
+selection = navigator.begin_next()
+attempt = selection.execution
+
+# Host transport records dispatched, admitted, and returned on attempt.path.
+# ECPUGatedObservationAdapter records authority, application, and optional ACK
+# on this exact same path after its real E-CPU operations have completed.
+
+result = navigator.complete_active(
+    actual_transition_outcome,
+    actor="domain-interpreter",
+    interpretation_ref="interpretations/attempt-0000.json",
+)
+
+# On a Ground revision, the next begin_next() regenerates and re-ranks probes
+# against navigator.system. On model mismatch, explicitly review and resume.
+```
+
+`navigator.to_dict()` preserves the active attempt identity, selected cell, plan/scenario digests, ranked alternatives, append-only path history, and Ground fingerprint. It is a continuity record, not a serialized VGI Ground; the actual Ground remains a separately versioned value.
+
+The cross-repository tests use VGI commit `cedcc4540a9d75228cf83aaf21e1ba960fe8a555`. The navigator itself remains dependency-injected and does not import VGI or E-CPU at module import time.
+
 ## Recorded verification
 
 The integrated lifecycle, schema, and adaptive-coordinator suites passed in [GitHub Actions run 112](https://github.com/Kier73/In-Formation-Space/actions/runs/43108746664). The machine-readable [CI encounter receipt](results/ci-run-112.json) records the tested commit, job, suite counts, and integrity digest.
