@@ -277,6 +277,33 @@ class PartialAttentionNavigatorTests(unittest.TestCase):
         with self.assertRaisesRegex(PartialAttentionNavigationError, "candidate count"):
             navigator.preview()
 
+    def test_terminal_transport_failure_is_preserved_without_negative_reading(self):
+        navigator, _ = make_navigator()
+        selection = navigator.begin_next()
+        execution = selection.execution
+        execution.mark_dispatched("probe-sender", "dispatch://attempt")
+        execution.mark_admitted("probe-receiver", "admission://attempt")
+        execution.path.append(
+            "no_result",
+            "probe-sensor",
+            details={"reason": "sensor timeout"},
+        )
+
+        prior_fingerprint = navigator.system.fingerprint
+        result = navigator.finish_terminal_attempt()
+        self.assertEqual(result.status, "attempt_no_result")
+        self.assertIsNone(result.scenario_match)
+        self.assertEqual(navigator.status, "ready")
+        self.assertEqual(navigator.system.fingerprint, prior_fingerprint)
+        self.assertEqual(navigator.system.status(*selection.selected_cell), "unknown")
+        self.assertIsNone(navigator.history[-1]["interpretation"])
+        self.assertEqual(navigator.history[-1]["terminal_status"], "no_result")
+
+        retry = navigator.begin_next()
+        self.assertIsNotNone(retry)
+        self.assertNotEqual(retry.execution.path.intent.attempt_id, execution.path.intent.attempt_id)
+        self.assertEqual(retry.prior_ground_fingerprint, prior_fingerprint)
+
     def test_distinct_observation_methods_for_the_same_cell_can_compete(self):
         def multiple_methods(system, observer, cycle_index):
             return (

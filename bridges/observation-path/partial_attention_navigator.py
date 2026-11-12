@@ -479,6 +479,71 @@ class PartialAttentionNavigator:
         self._status = "ready" if status == "ground_revised" else "model_mismatch"
         return result
 
+    def finish_terminal_attempt(self) -> AttentionStepResult:
+        """Close a failed/non-observation attempt without treating it as a reading.
+
+        Dispatch failure, receiver rejection, unadmitted return, no-result,
+        evidence refusal, application failure, and interpretation failure are
+        retained as terminal path outcomes. Ground and hypotheses are not
+        changed. The navigator returns to ready so a host may revise the
+        candidate source or explicitly retry as a new attempt.
+        """
+        if self._status != "active" or self._active is None:
+            raise PartialAttentionNavigationError("there is no active probe to close")
+        selection = self._active
+        execution = selection.execution
+        terminal_status = execution.path.status
+        allowed = {
+            "dispatch_failed",
+            "rejected",
+            "returned_unadmitted",
+            "evidence_refused",
+            "no_result",
+            "application_failed",
+            "interpretation_failed",
+        }
+        if not execution.path.terminal or terminal_status not in allowed:
+            raise PartialAttentionNavigationError(
+                "only a terminal non-observation failure can be closed without interpretation"
+            )
+
+        prior_fingerprint = selection.prior_ground_fingerprint
+        if self._system.fingerprint != execution.prior_fingerprint:
+            raise PartialAttentionNavigationError(
+                "active probe is stale relative to the current Ground fingerprint"
+            )
+        self._history.append({
+            "cycle_index": selection.cycle_index,
+            "attempt_id": execution.path.intent.attempt_id,
+            "prior_ground_fingerprint": prior_fingerprint,
+            "current_ground_fingerprint": self._system.fingerprint,
+            "selected_cell": {
+                "state": selection.selected_cell[0],
+                "action": selection.selected_cell[1],
+            },
+            "ranking": list(selection.ranking),
+            "plan_digest": execution.plan_digest,
+            "scenario_digest": execution.scenario_digest,
+            "terminal_status": terminal_status,
+            "path": execution.path.to_dict(),
+            "ground_revision": None,
+            "hypothesis_candidate": None,
+            "interpretation": None,
+        })
+        result = AttentionStepResult(
+            status=f"attempt_{terminal_status}",
+            cycle_index=selection.cycle_index,
+            attempt_id=execution.path.intent.attempt_id,
+            prior_ground_fingerprint=prior_fingerprint,
+            current_ground_fingerprint=self._system.fingerprint,
+            selected_cell=selection.selected_cell,
+            scenario_match=None,
+        )
+        self._cycle_index += 1
+        self._active = None
+        self._status = "ready"
+        return result
+
     def resume_after_mismatch(
         self,
         *,
