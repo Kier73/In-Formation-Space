@@ -1,5 +1,11 @@
+import hashlib
 import itertools
+import json
 import unittest
+from pathlib import Path
+
+import jsonschema
+from run_adjudication_space import build_report, digest, validate_report
 
 from review_policy_space import (
     POLICIES,
@@ -113,6 +119,36 @@ class ReviewPolicySpaceTests(unittest.TestCase):
         invalid["minimum_distinct_reviewers"] = True
         with self.assertRaisesRegex(ValueError, "positive integer"):
             evaluate_review_policy_with_policy(invalid, ("APPROVE", "APPROVE", "ABSENT"))
+
+    def test_report_digest_and_exhaustive_reconstruction(self):
+        report = build_report()
+        validate_report(report)
+        self.assertEqual(report["state_model"]["pattern_count"], 64)
+        self.assertEqual(len(report["policy_ids"]), 7)
+        self.assertIsNone(report["state_model"]["probability_assignment"])
+        core = {key: value for key, value in report.items() if key != "report_digest"}
+        self.assertEqual(report["report_digest"], digest(core))
+        tampered = dict(report, policy_ids=list(reversed(report["policy_ids"])))
+        with self.assertRaisesRegex(ValueError, "digest"):
+            validate_report(tampered)
+
+    def test_summary_schema_accepts_expected_finite_space(self):
+        summary = {
+            "format": "in-formation.authority-adjudication-review-space-summary",
+            "schema": "in-formation.authority-adjudication-review-space/0.1/summary",
+            "experiment_id": "authority-adjudication-review-space-v1",
+            "pattern_count": 64,
+            "policy_count": 7,
+            "policy_summary": {name: {} for name in POLICIES},
+            "report_digest": "a" * 64,
+            "interpretation_limits": ["finite enumeration only"],
+            "summary_digest": "b" * 64,
+        }
+        schema = json.loads(
+            Path(__file__).with_name("summary.schema.json").read_text(encoding="utf-8")
+        )
+        jsonschema.validate(summary, schema)
+
 
 
 def evaluate_review_policy_with_policy(policy, pattern):
