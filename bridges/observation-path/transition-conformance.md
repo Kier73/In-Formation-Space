@@ -67,6 +67,12 @@ python -m unittest discover -s bridges/observation-path -p 'test_transition_conf
 
 The focused suite exercises lifecycle gating, full and partial comparisons, mismatch classifications, exact model reconstruction, optional operation spans, stale proposals, rejected/inconclusive proposals, and explicit supported activation.
 
+
+
+## Repeated observations
+
+The [repeated transition evidence summary](transition-evidence.md) aggregates independently reconstructed conformance records by probe/state cell. It preserves exact empirical frequencies and keeps outcome-only samples separate. It does not infer stochasticity or update the transition model.
+
 ## Limits and next experiments
 
 This version assumes the Trial 08 finite state vocabulary and deterministic transition function. It does not add new world-state labels, infer stochastic distributions, model autonomous evolution, or learn intervention costs. State-space expansion and uncertainty-aware transition learning should be separate revision operations rather than implicit side effects of a mismatch.
