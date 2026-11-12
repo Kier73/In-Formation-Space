@@ -1,0 +1,53 @@
+name: VGI context attention policy
+
+on:
+  push:
+    paths:
+      - "bridges/observation-path/context_attention.py"
+      - "bridges/observation-path/test_context_attention.py"
+      - "bridges/observation-path/context-attention-policy.schema.json"
+      - "bridges/observation-path/context-attention-policy.md"
+      - "bridges/observation-path/transition_context.py"
+      - ".github/workflows/context-attention-policy.yml"
+  pull_request:
+    paths:
+      - "bridges/observation-path/context_attention.py"
+      - "bridges/observation-path/test_context_attention.py"
+      - "bridges/observation-path/context-attention-policy.schema.json"
+      - "bridges/observation-path/context-attention-policy.md"
+      - "bridges/observation-path/transition_context.py"
+      - ".github/workflows/context-attention-policy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  vgi-context-attention:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned VGI policy planner
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter-context-policy
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema dependency
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Compile bridge
+        run: |
+          python -m py_compile bridges/observation-path/transition_context.py
+          python -m py_compile bridges/observation-path/context_attention.py
+      - name: Validate policy schema
+        run: |
+          python -c "import json, jsonschema; p='bridges/observation-path/context-attention-policy.schema.json'; s=json.load(open(p, encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s)"
+      - name: Run VGI context-attention tests
+        env:
+          PYTHONPATH: external/Virtual-Ground-Interpreter-context-policy/virtual_ground_interpreter
+        run: python -m unittest discover -s bridges/observation-path -p "test_context_attention.py" -v

@@ -1,0 +1,335 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/context-attention-policy.schema.json",
+  "title": "VGI Context Attention Policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "source_context_analysis_digest",
+    "source_model_ref",
+    "source_model_digest",
+    "selected_transition_cell",
+    "vgi_revision",
+    "vgi_revision_semantics",
+    "vgi_api_contract",
+    "synthetic_ground",
+    "observer",
+    "methods",
+    "unselected_context_dimensions",
+    "initial_context_pair_relations",
+    "candidate_probe_count",
+    "plan_config",
+    "policy",
+    "next_measurement",
+    "execution_status",
+    "ground_effect",
+    "model_effect",
+    "attention_policy_effect",
+    "interpretation_limits",
+    "report_digest"
+  ],
+  "properties": {
+    "format": {"const": "in-formation.context-attention-policy"},
+    "schema": {"const": "in-formation.context-attention-policy/0.1"},
+    "source_context_analysis_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_model_ref": {"type": "string", "minLength": 1},
+    "source_model_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "selected_transition_cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["probe_id", "current_state", "attempt_ids"],
+      "properties": {
+        "probe_id": {"type": "string", "minLength": 1},
+        "current_state": {"type": "string", "minLength": 1},
+        "attempt_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "vgi_revision": {"const": "ac13c1bbd92dfd09f17de51adef7adb2d2088bf6"},
+    "vgi_revision_semantics": {
+      "const": "focused_and_regression_ci_dependency_pin; runtime_api_argument_is_not_cryptographically_attested"
+    },
+    "vgi_api_contract": {"type": "string", "minLength": 1},
+    "synthetic_ground": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fingerprint", "document"],
+      "properties": {
+        "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "document": {"type": "object"}
+      }
+    },
+    "observer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "actions", "channels"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "actions": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "channels": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      }
+    },
+    "methods": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/method"}
+    },
+    "unselected_context_dimensions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "initial_context_pair_relations": {"$ref": "#/$defs/pairRelations"},
+    "candidate_probe_count": {"type": "integer", "minimum": 0},
+    "plan_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["horizon", "budget", "max_probes_requested", "max_probes_effective", "max_states"],
+      "properties": {
+        "horizon": {"const": 1},
+        "budget": {"$ref": "#/$defs/fraction"},
+        "max_probes_requested": {
+          "anyOf": [
+            {"type": "integer", "minimum": 0},
+            {"type": "null"}
+          ]
+        },
+        "max_probes_effective": {"type": "integer", "minimum": 0},
+        "max_states": {"type": "integer", "minimum": 1}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "format",
+        "system_fingerprint",
+        "observer",
+        "horizon",
+        "budget",
+        "max_probes",
+        "maximum_search_states",
+        "expanded_states",
+        "objective",
+        "scenario_semantics",
+        "optimality_scope",
+        "worst_case_unresolved_pairs",
+        "worst_case_cost",
+        "maximum_probes_on_path",
+        "resolved_in_every_declared_branch",
+        "root",
+        "policy_digest"
+      ],
+      "properties": {
+        "format": {"const": "VGI-PartialProbePolicy-1"},
+        "system_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "observer": {"type": "object"},
+        "horizon": {"const": 1},
+        "budget": {"$ref": "#/$defs/fraction"},
+        "max_probes": {"type": "integer", "minimum": 0},
+        "maximum_search_states": {"type": "integer", "minimum": 1},
+        "expanded_states": {"type": "integer", "minimum": 1},
+        "objective": {"type": "string", "minLength": 1},
+        "scenario_semantics": {"type": "string", "minLength": 1},
+        "optimality_scope": {"type": "string", "minLength": 1},
+        "worst_case_unresolved_pairs": {"type": "integer", "minimum": 0},
+        "worst_case_cost": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["numerator", "denominator"],
+          "properties": {
+            "numerator": {"type": "integer", "minimum": 0},
+            "denominator": {"type": "integer", "minimum": 1}
+          }
+        },
+        "maximum_probes_on_path": {"type": "integer", "minimum": 0},
+        "resolved_in_every_declared_branch": {"type": "boolean"},
+        "root": {"type": "object"},
+        "policy_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": true
+    },
+    "next_measurement": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "attempt_id",
+            "method_id",
+            "dimension",
+            "label",
+            "cost",
+            "declared_scenario_values",
+            "status"
+          ],
+          "properties": {
+            "attempt_id": {"type": "string", "minLength": 1},
+            "method_id": {"type": "string", "minLength": 1},
+            "dimension": {"type": "string", "minLength": 1},
+            "label": {"type": "string"},
+            "cost": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["numerator", "denominator"],
+              "properties": {
+                "numerator": {"type": "integer", "minimum": 1},
+                "denominator": {"type": "integer", "minimum": 1}
+              }
+            },
+            "declared_scenario_values": {"type": "array", "minItems": 1},
+            "status": {"enum": ["unknown", "not_supplied", "unassigned"]}
+          }
+        }
+      ]
+    },
+    "execution_status": {"const": "proposal_only_not_dispatched"},
+    "ground_effect": {"const": "none"},
+    "model_effect": {"const": "none"},
+    "attention_policy_effect": {"const": "none"},
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "fraction": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["numerator", "denominator"],
+          "properties": {
+            "numerator": {"type": "integer"},
+            "denominator": {"type": "integer", "minimum": 1}
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method_id",
+        "dimension",
+        "possible_values",
+        "cost",
+        "value_encoding",
+        "encoding_semantics"
+      ],
+      "properties": {
+        "method_id": {"type": "string", "minLength": 1},
+        "dimension": {"type": "string", "minLength": 1},
+        "possible_values": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "anyOf": [
+              {"type": "string"},
+              {"type": "integer"},
+              {"type": "boolean"},
+              {"type": "null"}
+            ]
+          }
+        },
+        "cost": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["numerator", "denominator"],
+          "properties": {
+            "numerator": {"type": "integer", "minimum": 1},
+            "denominator": {"type": "integer", "minimum": 1}
+          }
+        },
+        "source_ref": {"type": "string", "minLength": 1},
+        "value_encoding": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "output"],
+            "properties": {
+              "value": {
+                "anyOf": [
+                  {"type": "string"},
+                  {"type": "integer"},
+                  {"type": "boolean"},
+                  {"type": "null"}
+                ]
+              },
+              "output": {
+                "type": "array",
+                "minItems": 1,
+                "items": {"type": "integer", "minimum": 0, "maximum": 7}
+              }
+            }
+          }
+        },
+        "encoding_semantics": {
+          "const": "injective_base8_categorical_code_for_synthetic_vgi_observer_ground"
+        }
+      }
+    },
+    "pairRelations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_pair_status_counts",
+        "full_transition_pair_count",
+        "full_transition_disagreement_pair_count",
+        "full_transition_pair_relations",
+        "outcome_only_attempt_count",
+        "pair_semantics",
+        "transition_comparison_semantics"
+      ],
+      "properties": {
+        "attempt_pair_status_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["equivalent", "distinguishable", "unresolved"],
+          "properties": {
+            "equivalent": {"type": "integer", "minimum": 0},
+            "distinguishable": {"type": "integer", "minimum": 0},
+            "unresolved": {"type": "integer", "minimum": 0}
+          }
+        },
+        "full_transition_pair_count": {"type": "integer", "minimum": 0},
+        "full_transition_disagreement_pair_count": {"type": "integer", "minimum": 0},
+        "full_transition_pair_relations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["equivalent", "distinguishable", "unresolved"],
+          "properties": {
+            "equivalent": {"$ref": "#/$defs/relationBucket"},
+            "distinguishable": {"$ref": "#/$defs/relationBucket"},
+            "unresolved": {"$ref": "#/$defs/relationBucket"}
+          }
+        },
+        "outcome_only_attempt_count": {"type": "integer", "minimum": 0},
+        "pair_semantics": {"type": "string", "minLength": 1},
+        "transition_comparison_semantics": {"type": "string", "minLength": 1}
+      }
+    },
+    "relationBucket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pair_count", "transition_disagreement_count"],
+      "properties": {
+        "pair_count": {"type": "integer", "minimum": 0},
+        "transition_disagreement_count": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}
