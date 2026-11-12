@@ -354,11 +354,14 @@ class ProofActionRouteEpochTests(unittest.TestCase):
             ledger.active_epoch["route"],
             reason_code="planned_migration",
             reason="test successor authorization",
+            owner_id=ledger.active_epoch["owner_id"],
+            owner_generation=ledger.active_epoch["owner_generation"],
             pair_checkpoint=checkpoint,
             preclose_session_digest=session_digest,
             postclose_session_digest=session_digest,
             uncertainty=uncertainty,
             successor_epoch_id="authorized-epoch-next",
+            successor_owner_id="authorized-owner",
             successor_route=successor,
         )
 
@@ -427,11 +430,14 @@ class ProofActionRouteEpochTests(unittest.TestCase):
                 ledger.active_epoch["route"],
                 reason_code="planned_migration",
                 reason="incomplete uncertainty projection",
+                owner_id=ledger.active_epoch["owner_id"],
+                owner_generation=ledger.active_epoch["owner_generation"],
                 pair_checkpoint=checkpoint,
                 preclose_session_digest=session_digest,
                 postclose_session_digest=session_digest,
                 uncertainty=uncertainty,
                 successor_epoch_id="uncertainty-epoch-next",
+                successor_owner_id="uncertainty-owner-next",
                 successor_route=successor,
             )
 
