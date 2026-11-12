@@ -273,9 +273,13 @@ class ProofActionReliableHost:
         try:
             raw = _canonical(payload)
             canonicalization = "canonical-json-v1"
+            payload_record = json.loads(raw)
+            payload_repr = None
         except ProofActionReliableChannelError:
             raw = repr(payload)
             canonicalization = "python-repr-fallback-v1"
+            payload_record = None
+            payload_repr = raw
         attempt_id = payload.get("attempt_id") if isinstance(payload, Mapping) else None
         request_digest = payload.get("request_digest") if isinstance(payload, Mapping) else None
         core = {
@@ -286,6 +290,8 @@ class ProofActionReliableHost:
             "request_digest": request_digest if isinstance(request_digest, str) else None,
             "reason": reason,
             "canonicalization": canonicalization,
+            "payload": payload_record,
+            "payload_repr": payload_repr,
             "payload_digest": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
             "previous_event_digest": (
                 self._quarantined_results[-1]["event_digest"]
