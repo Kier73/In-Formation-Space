@@ -399,6 +399,30 @@ function readLittleEndianMask(body, offset, width) {
   return { mask, indices, offset: end };
 }
 
+
+
+function readUnsignedValues(body, offset, count, dtype) {
+  if (!Number.isSafeInteger(count) || count < 0) {
+    fail("CSR binary integer count is invalid");
+  }
+  const scalarSize = dtype === "u8" ? 1 : dtype === "u16" ? 2 : dtype === "u32" ? 4 : 0;
+  if (scalarSize === 0) fail("CSR binary integer dtype is unsupported");
+  const end = offset + count * scalarSize;
+  if (!Number.isSafeInteger(end) || end > body.length) {
+    fail("CSR binary integer values are truncated");
+  }
+  const values = [];
+  for (let index = 0; index < count; index += 1) {
+    const position = offset + index * scalarSize;
+    values.push(
+      scalarSize === 1 ? body.readUInt8(position) :
+      scalarSize === 2 ? body.readUInt16LE(position) :
+      body.readUInt32LE(position)
+    );
+  }
+  return { values, offset: end };
+}
+
 function readScalarValues(body, offset, count, dtype, allowZero = false) {
   if (!Number.isSafeInteger(count) || count < 0) {
     fail("sparse binary scalar count is invalid");
@@ -569,6 +593,200 @@ function decodeRowmaskBinary(payload, capsuleHeader) {
  * - a little-endian input bitmask followed by exactly its nonzero values.
  * Biases make a separate dense/sparse choice for each layer.
  */
+
+
+/**
+ * Decode SRE-002 compressed sparse row (CSR) binary using the explicit
+ * per-layer row pointers, index widths, coefficient dtypes, and bias arrays.
+ */
+function decodeCsrBinary(payload, capsuleHeader) {
+  const { header, body } = sparseBinaryEnvelope(payload);
+  if (
+    header.schema !== "sre002.csr-binary.v1" ||
+    header.encoding !== "csr_binary"
+  ) {
+    fail("unsupported CSR binary schema/encoding");
+  }
+  if (
+    !Array.isArray(header.architecture) ||
+    header.architecture.length < 3 ||
+    header.architecture.some((width) => !Number.isSafeInteger(width) || width < 1) ||
+    !Array.isArray(header.input_names) ||
+    !Array.isArray(header.output_names) ||
+    !Array.isArray(header.layers) ||
+    header.layers.length !== header.architecture.length - 1
+  ) {
+    fail("CSR binary model interface is malformed");
+  }
+
+  const inputNames = header.input_names;
+  const outputNames = header.output_names;
+  if (
+    header.architecture[0] !== inputNames.length ||
+    header.architecture[header.architecture.length - 1] !== outputNames.length ||
+    new Set(inputNames).size !== inputNames.length ||
+    new Set(outputNames).size !== outputNames.length ||
+    inputNames.some((name) => typeof name !== "string" || name.length === 0) ||
+    outputNames.some((name) => typeof name !== "string" || name.length === 0)
+  ) {
+    fail("CSR binary register names do not match architecture");
+  }
+
+  let offset = 0;
+  let storedParameterCount = 0;
+  const layers = [];
+  for (let layerIndex = 0; layerIndex < header.layers.length; layerIndex += 1) {
+    const layer = header.layers[layerIndex];
+    const inputWidth = header.architecture[layerIndex];
+    const outputWidth = header.architecture[layerIndex + 1];
+    if (
+      requireInteger(layer.input_width, "csr.layer.input_width") !== inputWidth ||
+      requireInteger(layer.output_width, "csr.layer.output_width") !== outputWidth
+    ) {
+      fail("CSR binary layer widths do not match architecture");
+    }
+
+    const nnz = requireInteger(layer.nnz, "csr.layer.nnz");
+    const biasNnz = requireInteger(layer.bias_nnz, "csr.layer.bias_nnz");
+    if (
+      nnz < 0 || biasNnz < 0 ||
+      nnz > inputWidth * outputWidth || biasNnz > outputWidth
+    ) {
+      fail("CSR binary coefficient counts are out of range");
+    }
+
+    const pointerResult = readUnsignedValues(
+      body, offset, outputWidth + 1, layer.rowptr_dtype
+    );
+    offset = pointerResult.offset;
+    const indexResult = readUnsignedValues(
+      body, offset, nnz, layer.index_dtype
+    );
+    offset = indexResult.offset;
+    const weightResult = readScalarValues(
+      body, offset, nnz, layer.weight_dtype
+    );
+    offset = weightResult.offset;
+    const biasIndexResult = readUnsignedValues(
+      body, offset, biasNnz, layer.bias_index_dtype
+    );
+    offset = biasIndexResult.offset;
+    const biasValueResult = readScalarValues(
+      body, offset, biasNnz, layer.bias_dtype
+    );
+    offset = biasValueResult.offset;
+
+    const pointers = pointerResult.values;
+    const indices = indexResult.values;
+    const values = weightResult.values;
+    if (
+      pointers.length !== outputWidth + 1 ||
+      pointers[0] !== 0 ||
+      pointers[pointers.length - 1] !== nnz
+    ) {
+      fail("CSR binary row pointers have invalid endpoints");
+    }
+    for (let index = 0; index < pointers.length - 1; index += 1) {
+      if (
+        pointers[index] > pointers[index + 1] ||
+        pointers[index + 1] > nnz
+      ) {
+        fail("CSR binary row pointers are not monotonic or exceed nnz");
+      }
+    }
+
+    const weightRows = [];
+    for (let rowIndex = 0; rowIndex < outputWidth; rowIndex += 1) {
+      const start = pointers[rowIndex];
+      const end = pointers[rowIndex + 1];
+      const row = [];
+      let previousIndex = -1;
+      for (let cursor = start; cursor < end; cursor += 1) {
+        const inputIndex = indices[cursor];
+        if (
+          inputIndex >= inputWidth ||
+          inputIndex <= previousIndex
+        ) {
+          fail("CSR binary row indices are out of range or not strictly ordered");
+        }
+        previousIndex = inputIndex;
+        row.push([inputIndex, new PythonFloat(values[cursor])]);
+      }
+      weightRows.push(row);
+    }
+
+    const biasIndices = biasIndexResult.values;
+    const biasValues = biasValueResult.values;
+    const biasEntries = [];
+    let previousBiasIndex = -1;
+    for (let index = 0; index < biasIndices.length; index += 1) {
+      const outputIndex = biasIndices[index];
+      if (outputIndex >= outputWidth || outputIndex <= previousBiasIndex) {
+        fail("CSR binary bias indices are out of range or not strictly ordered");
+      }
+      previousBiasIndex = outputIndex;
+      biasEntries.push([outputIndex, new PythonFloat(biasValues[index])]);
+    }
+
+    storedParameterCount += nnz + biasNnz;
+    layers.push({ weight_rows: weightRows, bias_entries: biasEntries });
+  }
+
+  if (offset !== body.length) fail("CSR binary contains trailing body bytes");
+  if (
+    requireInteger(header.stored_parameter_count, "csr.stored_parameter_count") !==
+    storedParameterCount
+  ) {
+    fail("CSR binary stored parameter count mismatch");
+  }
+
+  const denseWeightSlots = header.architecture.slice(0, -1).reduce(
+    (total, width, index) => total + width * header.architecture[index + 1],
+    0
+  );
+  const denseEquivalentParameterCount = denseWeightSlots +
+    header.architecture.slice(1).reduce((total, width) => total + width, 0);
+  const sparsePayload = {
+    schema: "mailcpu.sparse-transition-relu.v1",
+    source_kind: header.source_kind,
+    source_digest: header.source_digest,
+    source_model_digest: header.source_model_digest,
+    input_names: inputNames,
+    output_names: outputNames,
+    architecture: header.architecture,
+    layers,
+    dense_equivalent_parameter_count: denseEquivalentParameterCount,
+    stored_parameter_count: storedParameterCount,
+  };
+  const sparseModelDigest = sha256(
+    Buffer.from(canonicalSparse(sparsePayload), "utf8")
+  );
+
+  if (
+    header.source_kind !== capsuleHeader.source.kind ||
+    header.source_digest !== capsuleHeader.source.ground_digest ||
+    header.source_model_digest !== capsuleHeader.realization.dense_model_digest ||
+    sparseModelDigest !== capsuleHeader.realization.sparse_model_digest ||
+    JSON.stringify(inputNames) !== JSON.stringify(capsuleHeader.interface.input_names) ||
+    JSON.stringify(outputNames) !== JSON.stringify(capsuleHeader.interface.output_names) ||
+    JSON.stringify(header.architecture) !== JSON.stringify(capsuleHeader.interface.architecture) ||
+    capsuleHeader.codec.name !== "csr_binary" ||
+    capsuleHeader.codec.schema !== header.schema ||
+    capsuleHeader.realization.encoding !== "csr_binary"
+  ) {
+    fail("decoded CSR model identity does not match capsule metadata");
+  }
+
+  return {
+    header,
+    sparseModelDigest,
+    storedParameterCount,
+    layers,
+    inputWidth: header.architecture[0],
+    outputWidth: header.architecture[header.architecture.length - 1],
+  };
+}
+
 function decodeHybridBinary(payload, capsuleHeader) {
   const { header, body } = sparseBinaryEnvelope(payload);
   if (
@@ -784,77 +1002,13 @@ function predictSparse(model, inputs) {
   });
 }
 
-export function replayRowmaskCapsule(capsule, referenceRecords) {
-  const verified = verifyCapsule(capsule);
-  const capsuleHeaderSize = capsule.readUInt32LE(10);
-  const capsuleHeader = JSON.parse(
-    new TextDecoder("utf-8", { fatal: true }).decode(
-      capsule.subarray(PREFIX_BYTES, PREFIX_BYTES + capsuleHeaderSize)
-    )
-  );
-  if (capsuleHeader.codec.name !== "rowmask_binary") {
-    fail("semantic replay currently supports rowmask_binary only");
-  }
-  const payload = capsule.subarray(PREFIX_BYTES + capsuleHeaderSize);
-  const model = decodeRowmaskBinary(payload, capsuleHeader);
-  const expectedRows = requireInteger(
-    capsuleHeader.verification.input_row_count,
-    "verification.input_row_count"
-  );
-  if (!Array.isArray(referenceRecords) || referenceRecords.length !== expectedRows) {
-    fail("independent reference does not cover the declared complete input domain");
-  }
-  if (
-    capsuleHeader.verification.reference_outputs_sha256 !==
-    sha256(Buffer.from(canonical(referenceRecords), "utf8"))
-  ) {
-    fail("independent reference digest does not match capsule verification receipt");
-  }
-
-  const seenInputs = new Set();
-  for (const record of referenceRecords) {
-    requireObject(record, "reference row");
-    const inputs = record.inputs;
-    const outputs = record.outputs;
-    if (
-      !Array.isArray(inputs) || inputs.length !== model.inputWidth ||
-      inputs.some((value) => value !== 0 && value !== 1) ||
-      !Array.isArray(outputs) || outputs.length !== model.outputWidth ||
-      outputs.some((value) => value !== 0 && value !== 1)
-    ) {
-      fail("independent reference row is outside the declared Boolean interface");
-    }
-    const key = inputs.join("");
-    if (seenInputs.has(key)) fail("independent reference repeats an input assignment");
-    seenInputs.add(key);
-    const actual = predictSparse(model, inputs);
-    if (JSON.stringify(actual) !== JSON.stringify(outputs)) {
-      fail("decoded row-mask realization disagrees with independent scalar reference");
-    }
-  }
-  if (seenInputs.size !== 2 ** model.inputWidth) {
-    fail("independent reference omits one or more Boolean input assignments");
-  }
-  return {
-    valid: true,
-    capsule_sha256: verified.capsule_sha256,
-    payload_sha256: verified.payload_sha256,
-    sparse_model_sha256: model.sparseModelDigest,
-    codec: "rowmask_binary",
-    input_rows_replayed: seenInputs.size,
-    semantic_comparisons: seenInputs.size,
-    stored_parameter_count: model.storedParameterCount,
-  };
-}
-
-
 /**
  * Independently decode and replay an adaptive hybrid-binary capsule.
  *
  * The finite reference covers every Boolean input row. Optional trajectories
  * add a complete product of initial counter states and control sequences.
  */
-export function replayHybridCapsule(capsule, referenceRecords, trajectories = []) {
+export function replayBinaryCapsule(capsule, referenceRecords, trajectories = [], expectedCodec = null) {
   const verified = verifyCapsule(capsule);
   const capsuleHeaderSize = capsule.readUInt32LE(10);
   const capsuleHeader = JSON.parse(
@@ -862,11 +1016,19 @@ export function replayHybridCapsule(capsule, referenceRecords, trajectories = []
       capsule.subarray(PREFIX_BYTES, PREFIX_BYTES + capsuleHeaderSize)
     )
   );
-  if (capsuleHeader.codec.name !== "hybrid_binary") {
-    fail("semantic replay currently supports hybrid_binary only");
+  const codec = capsuleHeader.codec.name;
+  if (!["rowmask_binary", "csr_binary", "hybrid_binary"].includes(codec)) {
+    fail("semantic replay supports rowmask_binary, csr_binary, and hybrid_binary only");
+  }
+  if (expectedCodec !== null && codec !== expectedCodec) {
+    fail("capsule codec does not match the requested decoder");
   }
   const payload = capsule.subarray(PREFIX_BYTES + capsuleHeaderSize);
-  const model = decodeHybridBinary(payload, capsuleHeader);
+  const model = codec === "rowmask_binary"
+    ? decodeRowmaskBinary(payload, capsuleHeader)
+    : codec === "csr_binary"
+      ? decodeCsrBinary(payload, capsuleHeader)
+      : decodeHybridBinary(payload, capsuleHeader);
   const expectedRows = requireInteger(
     capsuleHeader.verification.input_row_count,
     "verification.input_row_count"
@@ -899,7 +1061,7 @@ export function replayHybridCapsule(capsule, referenceRecords, trajectories = []
     seenInputs.add(key);
     const actual = predictSparse(model, inputs);
     if (JSON.stringify(actual) !== JSON.stringify(outputs)) {
-      fail("decoded hybrid realization disagrees with independent scalar reference");
+      fail("decoded sparse realization disagrees with independent scalar reference");
     }
   }
   if (seenInputs.size !== 2 ** model.inputWidth) {
@@ -968,7 +1130,7 @@ export function replayHybridCapsule(capsule, referenceRecords, trajectories = []
         const actual = predictSparse(model, inputs);
         const expected = expectedStates[step];
         if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-          fail("decoded hybrid realization disagrees with recurrent trajectory reference");
+          fail("decoded sparse realization disagrees with recurrent trajectory reference");
         }
         state = actual;
         trajectoryStepCount += 1;
@@ -985,15 +1147,28 @@ export function replayHybridCapsule(capsule, referenceRecords, trajectories = []
     capsule_sha256: verified.capsule_sha256,
     payload_sha256: verified.payload_sha256,
     sparse_model_sha256: model.sparseModelDigest,
-    codec: "hybrid_binary",
+    codec,
     input_rows_replayed: seenInputs.size,
     semantic_comparisons: seenInputs.size,
     stored_parameter_count: model.storedParameterCount,
-    sparse_row_count: model.sparseRowCount,
-    dense_row_count: model.denseRowCount,
+    sparse_row_count: model.sparseRowCount ?? null,
+    dense_row_count: model.denseRowCount ?? null,
     trajectory_count: trajectoryCount,
     trajectory_steps: trajectoryStepCount,
   };
+}
+
+
+export function replayRowmaskCapsule(capsule, referenceRecords, trajectories = []) {
+  return replayBinaryCapsule(capsule, referenceRecords, trajectories, "rowmask_binary");
+}
+
+export function replayCsrCapsule(capsule, referenceRecords, trajectories = []) {
+  return replayBinaryCapsule(capsule, referenceRecords, trajectories, "csr_binary");
+}
+
+export function replayHybridCapsule(capsule, referenceRecords, trajectories = []) {
+  return replayBinaryCapsule(capsule, referenceRecords, trajectories, "hybrid_binary");
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
@@ -1013,21 +1188,19 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
         )
       );
       const references = JSON.parse(readFileSync(referencePath, "utf8"));
-      if (capsuleHeader.codec.name === "hybrid_binary") {
-        const trajectoriesFlag = process.argv.indexOf("--trajectories");
-        let trajectories = [];
-        if (trajectoriesFlag >= 0) {
-          const trajectoriesPath = process.argv[trajectoriesFlag + 1];
-          if (!trajectoriesPath) fail("--trajectories requires a JSON file path");
-          trajectories = JSON.parse(readFileSync(trajectoriesPath, "utf8"));
-        }
-        report = replayHybridCapsule(capsuleBytes, references, trajectories);
-      } else {
-        if (process.argv.includes("--trajectories")) {
-          fail("--trajectories is currently supported only for hybrid_binary");
-        }
-        report = replayRowmaskCapsule(capsuleBytes, references);
+      const trajectoriesFlag = process.argv.indexOf("--trajectories");
+      let trajectories = [];
+      if (trajectoriesFlag >= 0) {
+        const trajectoriesPath = process.argv[trajectoriesFlag + 1];
+        if (!trajectoriesPath) fail("--trajectories requires a JSON file path");
+        trajectories = JSON.parse(readFileSync(trajectoriesPath, "utf8"));
       }
+      report = replayBinaryCapsule(
+        capsuleBytes,
+        references,
+        trajectories,
+        capsuleHeader.codec.name
+      );
     } else {
       report = { valid: true, ...verifyCapsule(readFileSync(file)) };
     }
