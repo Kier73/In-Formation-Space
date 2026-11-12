@@ -87,6 +87,24 @@ All 30 late proposals were rejected by consensus after finalization. Twelve part
 
 This run is a finite state-contract experiment using synthetic resolver values, one logical event time, four source identities, fixed quorum two, and one local durable mailbox. It establishes the observed behavior of the pinned E-CPU implementation for these cases, not the safety of strict=false in a deployed system and not a universal theorem about all evidence configurations.
 
+## Exhaustive finite policy-space comparison
+
+The separate policy-space enumerator examines every four-source evidence state in which each source is absent, reports HIT, or reports MISS: 3^4 = 81 configurations. It assigns no probability to any configuration. Its output is a complete state-space comparison, not a sample of expected operating frequency.
+
+Eight rules are compared:
+
+- the pinned E-CPU strict and permissive rules;
+- observed-source unanimity with quorum;
+- unique plurality with quorum (ties abstain);
+- strict majority of received evidence;
+- majority of the configured roster;
+- a minimum two-source plurality margin;
+- complete-roster coverage with a unique quorum plurality.
+
+The candidate rules expose different tradeoffs between coverage, dissent tolerance, and tie handling. A rule that authorizes more states is not inherently better: the counts say which finite configurations it accepts, not whether its selected value is true. They are useful for locating disagreement between policies and selecting cases for domain-specific calibration.
+
+The current enumeration includes only absent/HIT/MISS per source. It does not yet include same-source equivocation, dependence between sources, source reliability priors, changing evidence over logical time, or appeal/supersession. Those should be added as separate dimensions, not hidden inside a scalar confidence value. CI uploads the complete per-pattern decision table and a digest-checked summary as the ecpu-epistemic-policy-space artifact.
+
 ## Retained artifacts
 
 CI uploads:
