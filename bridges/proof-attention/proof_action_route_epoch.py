@@ -1129,6 +1129,105 @@ def bind_existing_proof_action_route_epoch(
     _attach_route_guard(host, worker, ledger, epoch_id, owner_id, claimed["details"]["owner_generation"])
 
 
+def restore_proof_action_route_handoff(
+    close_event: Mapping[str, Any],
+    ledger: ProofActionRouteEpochLedger,
+    proof_ground: Any,
+    *,
+    restore_transport: Any,
+    owner_id: str | None = None,
+) -> tuple[Transport, ProofActionReliableHost, ProofActionReliableWorker]:
+    """Recover the authorized successor after a crash immediately following handoff commit.
+
+    The close event contains both the old transport checkpoint and the validated
+    post-close ProofAttentionSession snapshot. This function restores the
+    transport/session, verifies that the successor epoch is still the active
+    authorized route, then claims it under a fresh owner generation.
+    """
+    if not isinstance(ledger, ProofActionRouteEpochLedger):
+        raise ProofActionRouteEpochError("ledger must be a ProofActionRouteEpochLedger")
+    if not callable(restore_transport):
+        raise ProofActionRouteEpochError("restore_transport must be callable")
+    if not isinstance(close_event, Mapping):
+        raise ProofActionRouteEpochError("close event must be an object")
+    supplied = _copy(dict(close_event))
+    matches = [
+        entry for entry in ledger.entries
+        if entry["event_digest"] == supplied.get("event_digest")
+    ]
+    if len(matches) != 1 or matches[0] != supplied or supplied.get("event_type") != "closed":
+        raise ProofActionRouteEpochError("close event is not an exact verified ledger record")
+
+    details = supplied["details"]
+    successor_epoch_id = _text(details.get("successor_epoch_id"), "successor_epoch_id")
+    successor_route = _validate_route(details.get("successor_route"))
+    active = ledger.active_epoch
+    if (
+        active is None
+        or active["epoch_id"] != successor_epoch_id
+        or active["route"] != successor_route
+    ):
+        raise ProofActionRouteEpochError(
+            "handoff successor is no longer the active route epoch"
+        )
+
+    session_snapshot = _validate_postclose_session_snapshot(
+        details.get("postclose_session_snapshot"),
+        expected_session_digest=details["postclose_session_digest"],
+    )
+    try:
+        session = ProofAttentionSession.from_snapshot(
+            session_snapshot,
+            proof_ground,
+        )
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ProofActionRouteEpochError(
+            f"post-close proof session could not be restored against the supplied ProofGround: {exc}"
+        ) from exc
+    if session.to_dict()["session_digest"] != details["postclose_session_digest"]:
+        raise ProofActionRouteEpochError("restored successor session digest differs from close event")
+
+    pair_checkpoint = details["pair_checkpoint"]
+    transport_snapshot = pair_checkpoint.get("transport")
+    if not isinstance(transport_snapshot, Mapping):
+        raise ProofActionRouteEpochError("closed route lacks its transport checkpoint")
+    try:
+        transport = restore_transport(_copy(dict(transport_snapshot)))
+    except Exception as exc:
+        raise ProofActionRouteEpochError(f"handoff transport restoration failed: {exc}") from exc
+
+    policy = ReliabilityPolicy(**successor_route["policy"])
+    host = ProofActionReliableHost(
+        session,
+        proof_ground,
+        transport,
+        host_id=successor_route["host_id"],
+        worker_id=successor_route["worker_id"],
+        request_channel=successor_route["request_channel"],
+        result_channel=successor_route["result_channel"],
+        policy=policy,
+    )
+    worker = ProofActionReliableWorker(
+        transport,
+        worker_id=successor_route["worker_id"],
+        host_id=successor_route["host_id"],
+        request_channel=successor_route["request_channel"],
+        result_channel=successor_route["result_channel"],
+        policy=policy,
+    )
+    new_owner_id = owner_id or f"owner-{uuid.uuid4().hex}"
+    claimed = ledger.claim_epoch(successor_epoch_id, owner_id=new_owner_id)
+    _attach_route_guard(
+        host,
+        worker,
+        ledger,
+        successor_epoch_id,
+        new_owner_id,
+        claimed["details"]["owner_generation"],
+    )
+    return transport, host, worker
+
+
 def handoff_proof_action_route_epoch(
     host: ProofActionReliableHost,
     worker: ProofActionReliableWorker,
@@ -1223,6 +1322,7 @@ def handoff_proof_action_route_epoch(
             pair_checkpoint=preclose_checkpoint,
             preclose_session_digest=preclose_session_digest,
             postclose_session_digest=postclose_session_digest,
+            postclose_session_snapshot=successor_session.to_dict(),
             uncertainty=uncertainty,
             successor_epoch_id=successor_epoch_id,
             successor_owner_id=successor_owner_id,
@@ -1281,5 +1381,6 @@ __all__ = [
     "ProofActionRouteHandoff",
     "open_proof_action_route_epoch",
     "bind_existing_proof_action_route_epoch",
+    "restore_proof_action_route_handoff",
     "handoff_proof_action_route_epoch",
 ]
