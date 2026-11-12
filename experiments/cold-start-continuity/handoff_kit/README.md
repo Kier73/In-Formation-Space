@@ -26,7 +26,7 @@ python experiments/cold-start-continuity/handoff_kit/handoff_kit.py manifest \
 
 The command writes `manifest.json` in the run directory and records:
 
-- the packet and template paths and their SHA-256 hashes (LF-normalized);
+- the supplied packet and template filenames, paths, and SHA-256 hashes (LF-normalized);
 - the declared isolation level;
 - the declared tool policy and whether tool use was instrumented;
 - whether the workspace was isolated;
@@ -94,6 +94,8 @@ A manifest can be incomplete or deliberately false. The audit can only catch rec
 ```
 
 `tool_policy` is one of `unknown`, `available`, `prohibited-by-instruction`, `disabled`, or `instrumented`. L2/L3 require `workspace_isolation: true` and either `tool_instrumentation: true` or `tool_policy: "disabled"`.
+
+`supplied_material` uses the actual packet and template filenames, so a variant such as `packet-rev2-field-note.md` is recorded directly rather than being normalized to `packet.md`.
 
 ## Boundaries
 

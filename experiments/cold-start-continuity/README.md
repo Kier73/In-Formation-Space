@@ -1,6 +1,6 @@
 # Cold-start continuity: the split-clock relay
 
-**Status:** active experiment; two handoff runs recorded and reviewed (one open-context L0, one material-limited L1); a fully filesystem-isolated packet-only run remains open.
+**Status:** active experiment; three handoff runs recorded and reviewed (one open-context L0, two material-limited L1 variants); a fully filesystem-isolated packet-only run remains open.
 
 This experiment asks whether one contributor can leave enough durable context for another, independent contributor to continue useful work without access to the original conversation or private reasoning.
 
@@ -10,9 +10,14 @@ It is not a test of whether two instances agree, share an identity, or reproduce
 
 ## The case
 
-The [handoff packet](packet.md) contains two short event streams exported from a relay session. One stream describes a controller's command lifecycle. The other contains sensor readings. Their clocks are not aligned, and the sensor records do not carry the command identifier.
+The baseline [handoff packet](packet.md) contains two short event streams exported from a relay session. One stream describes a controller's command lifecycle. The other contains sensor readings. Their clocks are not aligned, and the sensor records do not carry the command identifier.
 
 This is intentional. A plausible causal story is easy to invent; a defensible one requires noticing what the packet does not establish.
+
+## Packet revisions
+
+- [Revision 1](packet.md) — the baseline packet used by runs 01 and 02.
+- [Revision 2: field-note variant](packet-rev2-field-note.md) — adds one loose, unverified field note claiming the sensor clock was about 95 ticks behind the controller. It is an adversarial variant, not a correction; revision 1 is preserved for comparison. See [run 03](runs/2026-11-11-run-03-adversarial-field-note/evaluation.md).
 
 ## Run a cold handoff
 
@@ -59,13 +64,13 @@ Do not edit the original packet to make it agree with a recipient's response. If
 
 A recipient's self-report that it used no tools is useful provenance, but it is not a substitute for instrumentation. A run can be L1 and still provide useful evidence; the error is describing it as L2.
 
-Run 01 was L0. Run 02 was L1. A fully isolated L2 or L3 run remains open.
+Run 01 was L0. Runs 02 and 03 were L1. A fully isolated L2 or L3 run remains open.
 
 ## Auditing run claims
 
 The [handoff kit](handoff_kit/README.md) turns the level distinction into a record. A completed run can include `manifest.json` with packet and template hashes, the declared level, and whether tool use was instrumented or the workspace isolated. `handoff_kit.py audit` checks the record for hash mismatches, missing artifacts, reviewer-guide leakage, and level claims that exceed the recorded controls. It is a consistency check, not proof of isolation.
 
-Run 02 includes the first [manifest](runs/2026-11-11-run-02-packet-only/manifest.json); its audit passes at L1 with no errors.
+Run 02 and run 03 include manifests ([run 02](runs/2026-11-11-run-02-packet-only/manifest.json), [run 03](runs/2026-11-11-run-03-adversarial-field-note/manifest.json)); both audits pass at L1 with no errors. Run 03's manifest records the actual variant filename rather than normalizing it to `packet.md`.
 
 ## Recorded runs
 
@@ -78,11 +83,17 @@ Run 02 includes the first [manifest](runs/2026-11-11-run-02-packet-only/manifest
   - [Evaluation](runs/2026-11-11-run-02-packet-only/evaluation.md) — Review against the rubric; 12/12 within this run, with the fallback-design gap and residual exposure noted.
   - [Supplementary review](runs/2026-11-11-run-02-packet-only/supplementary-review.md) — Review of evidence limits, prompt constraints, and residual ambient exposure.
   - [Independent review note](runs/2026-11-11-run-02-packet-only/review-note.md) — Comparative analysis of open-context (L0) vs material-limited (L1) handoff conditions and invariant preservation.
+- [Run 2026-11-11-run-03-adversarial-field-note](runs/2026-11-11-run-03-adversarial-field-note/response.md) — L1 material-limited handoff report on revision 2, which adds an unverified offset field note; the recipient treats the note as a lead rather than a calibration.
+  - [Run conditions](runs/2026-11-11-run-03-adversarial-field-note/conditions.md) — Exact prompt, material hashes, variant design, and the isolation boundary: material-limited, not sandbox-isolated.
+  - [Run manifest](runs/2026-11-11-run-03-adversarial-field-note/manifest.json) — Machine-readable L1 record; audited by the handoff kit.
+  - [Evaluation](runs/2026-11-11-run-03-adversarial-field-note/evaluation.md) — Review against the rubric; 12/12 within this run, with the adversarial-note check and remaining isolation limit noted.
 
 ## Current status
 
-Two handoff runs have been executed and reviewed, at different isolation levels. Run 01 (L0) demonstrates useful recovery and analysis under open repository context. Because its recipient could inspect repository guidance, it does not establish packet-only cold-start continuity.
+Three handoff runs have been executed and reviewed, at two isolation levels. Run 01 (L0) demonstrates useful recovery and analysis under open repository context. Because its recipient could inspect repository guidance, it does not establish packet-only cold-start continuity.
 
-Run 02 (L1) supplies only the packet and template and instructs a closed-book analysis. Its recipient self-reports no tool use, and the response contains no reviewer-guide content, but the run was not sandboxed or instrumented. It strengthens the packet-only result without completing it. Its [manifest](runs/2026-11-11-run-02-packet-only/manifest.json) records the L1 claim and passes the handoff-kit audit.
+Run 02 (L1) supplies only the baseline packet and template and instructs a closed-book analysis. Its recipient self-reports no tool use, and the response contains no reviewer-guide content, but the run was not sandboxed or instrumented. It strengthens the packet-only result without completing it. Its [manifest](runs/2026-11-11-run-02-packet-only/manifest.json) records the L1 claim and passes the handoff-kit audit.
 
-The 35 valid linear extensions in run 01 describe possible interleavings under the two-chain model; they are not equally likely outcomes. A fully isolated L2 or L3 run — only the packet and template mounted, with tool access disabled or instrumented — remains the next clean test. An adversarial packet revision is a complementary test of whether a recipient catches an invitation to overclaim.
+Run 03 (L1) uses revision 2, which adds a loose field note claiming an approximate clock offset. The recipient treats the note as an unverified lead, does not convert it into a cross-stream timeline or causal claim, and preserves the same six invariants. Its [manifest](runs/2026-11-11-run-03-adversarial-field-note/manifest.json) records the L1 claim and passes the audit. This is a successful catch for one recipient on one variant; it does not show that recipients generally resist adversarial packet material.
+
+The 35 valid linear extensions in run 01 describe possible interleavings under the two-chain model; they are not equally likely outcomes. A fully isolated L2 or L3 run — only the packet and template mounted, with tool access disabled or instrumented — remains the next clean test. Stronger adversarial variants — a more authoritative calibration artifact, a sensor record with a command-like annotation, or a prompt that invites a causal conclusion — remain complementary tests.

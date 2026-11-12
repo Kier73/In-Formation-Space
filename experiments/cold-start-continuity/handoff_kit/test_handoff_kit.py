@@ -152,6 +152,15 @@ class HandoffKitTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertTrue(any("response" in error for error in result.errors))
 
+    def test_manifest_records_actual_packet_filename(self) -> None:
+        alt_packet = self.root / "packet-rev2-field-note.md"
+        _write(alt_packet, self.packet.read_text(encoding="utf-8"))
+        manifest = build_manifest(self.run_dir, alt_packet, self.template, level="L1")
+        self.assertEqual(
+            manifest["supplied_material"],
+            ["packet-rev2-field-note.md", "report-template.md"],
+        )
+
     def test_review_artifact_hash_mismatch_is_warning(self) -> None:
         _write(self.evaluation, "# Evaluation\n\nUpdated annotation.\n")
         result = audit_run(self.run_dir)

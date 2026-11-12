@@ -141,7 +141,7 @@ def build_manifest(
             "path": _display_path(template, run_dir),
             "sha256_lf": sha256_lf(template),
         },
-        "supplied_material": ["packet.md", "report-template.md"],
+        "supplied_material": [packet.name, template.name],
         "tool_policy": tool_policy,
         "tool_instrumentation": bool(tool_instrumentation),
         "workspace_isolation": bool(workspace_isolation),

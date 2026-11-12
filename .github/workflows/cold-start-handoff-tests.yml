@@ -28,3 +28,5 @@ jobs:
         run: python -m unittest discover -s experiments/cold-start-continuity/handoff_kit -p "test_*.py" -v
       - name: Audit packet-only run 02
         run: python experiments/cold-start-continuity/handoff_kit/handoff_kit.py audit --run-dir experiments/cold-start-continuity/runs/2026-11-11-run-02-packet-only
+      - name: Audit adversarial run 03
+        run: python experiments/cold-start-continuity/handoff_kit/handoff_kit.py audit --run-dir experiments/cold-start-continuity/runs/2026-11-11-run-03-adversarial-field-note

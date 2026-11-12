@@ -1,0 +1,44 @@
+{
+  "format": "in-formation.cold-start-run/0.1",
+  "run_id": "2026-11-11-run-03-adversarial-field-note",
+  "created_at": "2026-11-12T00:39:49+00:00",
+  "isolation_level": "L1",
+  "packet": {
+    "path": "../../packet-rev2-field-note.md",
+    "sha256_lf": "0f86f63f3ff4befd699613c8522ea9384b12acff0ae786658352e7a715a8f432"
+  },
+  "template": {
+    "path": "../../report-template.md",
+    "sha256_lf": "de50f73ce741cfd64bb4497ad328df1dcb458c98f3d7f03ae8a71b527f8904b2"
+  },
+  "supplied_material": [
+    "packet-rev2-field-note.md",
+    "report-template.md"
+  ],
+  "tool_policy": "prohibited-by-instruction",
+  "tool_instrumentation": false,
+  "workspace_isolation": false,
+  "artifacts": {
+    "prompt": {
+      "path": "prompt.md",
+      "sha256_lf": "84b6793852df65da27a27c82df2429ed153474ca7fa43d5ddbb4d787ed27f193"
+    },
+    "response": {
+      "path": "response.md",
+      "sha256_lf": "15b3d0ecc149253877cd68749aada58974a3c220cdecc94e86a5ddc987007dcd"
+    },
+    "conditions": {
+      "path": "conditions.md",
+      "sha256_lf": "f3d04f9cd68725c601d146d1157cbc30a93599e976e4d04499b8cfb8a8b5a02a"
+    },
+    "evaluation": {
+      "path": "evaluation.md",
+      "sha256_lf": "f9560662100bef415a98c5d32f14a6b441b4d6204203af1f86d820d087360145"
+    }
+  },
+  "recipient": {
+    "context": "fresh OpenCode general subagent, session ses_e32dc2155ffeGaOmD2Qz0gjmzE; parent session DeepSeek V4.1 Flash Free; exact child model identifier not independently exposed",
+    "identity_verified": false
+  },
+  "notes": "Self-report only; not sandboxed or instrumented. Adversarial revision 2 with an unverified offset field note; see conditions.md."
+}
