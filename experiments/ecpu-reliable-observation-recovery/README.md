@@ -82,4 +82,18 @@ The median sequential recovery overhead was 0.41083 ms for data loss (retry tick
 
 The commit medians by quorum were 34.61916 ms (`q=1`), 32.20302 ms (`q=2`), and 31.83495 ms (`q=4`). Interpret these cautiously: strict authority required every configured source to be present, so quorum changed the threshold but not the number of sources collected or consumed. This experiment does not measure partial-quorum early stop. The observed source-count contrast is a same-run descriptive association, not a universal scaling law.
 
-Run 293 used one GitHub-hosted Linux x86_64 runner and one process-local clock segment. Three repetitions per cell are enough for the pilot's minimum descriptive profiles, not confidence intervals or stable tail estimates. The experiment does not test independent-host repeatability, conflicting evidence, source dissent, refusal, or crash recovery across processes. Cost remains separate from information, and no adaptive policy was changed.
+## Repeat-run comparison
+
+Two subsequent CI runs repeated the same 24-cell workload with the same E-CPU commit and the same attempt-results JSON digest. Their timing spans came from separate process clock segments. The comparison is recorded in [run 299's summary receipt](results/ci-run-299-summary.json).
+
+| CI run | 4-source commit median | 8-source commit median | 8:4 ratio |
+| --- | ---: | ---: | ---: |
+| [283](https://github.com/Kier73/In-Formation-Space/actions/runs/43133109710) | 32.89 ms | 62.83 ms | 1.91× |
+| [293](https://github.com/Kier73/In-Formation-Space/actions/runs/43133401914) | 22.63 ms | 42.04 ms | 1.86× |
+| [299](https://github.com/Kier73/In-Formation-Space/actions/runs/43133648218) | 33.46 ms | 63.60 ms | 1.90× |
+
+The first run used the earlier combined profile layout, but `commit_event()` has exactly one outer span per attempt, so its source-count comparison is not affected by the later phase split. Runs 293 and 299 use the phase-separated profile format. All three attempts artifacts contain the identical `attempt-results.json` SHA-256 `a967472b49a09cb1cf9cdf7fe0b2e3c308a87cdbc63a9e305585e6bae9886b02`, confirming the same deterministic outcome records; the elapsed spans differ.
+
+The median data-recovery versus ACK-recovery path costs were 0.56/1.75 ms in run 283, 0.41/1.30 ms in run 293, and 0.59/1.84 ms in run 299. ACK recovery was about 3.1–3.2× the data-recovery path in these runs. Those paths contain different work: ACK recovery includes duplicate cleanup and replacement-ACK processing, so this ratio is a workload-path comparison, not a normalized per-message efficiency metric.
+
+The 4-to-8 source commit ratio stayed within 1.86–1.91×, while absolute times shifted materially between clock segments. The available runner metadata does not establish host identity or hardware equivalence, so these repeated runs support a descriptive scaling observation but not a hardware-independent benchmark claim.
