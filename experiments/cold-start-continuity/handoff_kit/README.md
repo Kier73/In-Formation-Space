@@ -9,6 +9,7 @@ The experiment distinguishes four isolation levels (L0–L3). A level is a claim
 - [handoff_kit.py](handoff_kit.py) — manifest builder and run auditor.
 - [test_handoff_kit.py](test_handoff_kit.py) — standard-library tests.
 - [Run 02 manifest](../runs/2026-11-11-run-02-packet-only/manifest.json) — machine-readable L1 record for the recorded packet-only run.
+- [Run 03 manifest](../runs/2026-11-11-run-03-adversarial-field-note/manifest.json) — machine-readable L1 record for the field-note variant.
 
 ## Record a completed run
 
