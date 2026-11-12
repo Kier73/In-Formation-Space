@@ -49,6 +49,9 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Check independent Node receiver syntax
+        run: node --check experiments/portable-realization-capsule/verify_capsule.mjs
+
       - name: Install test runner
         run: python -m pip install --disable-pip-version-check pytest
 
