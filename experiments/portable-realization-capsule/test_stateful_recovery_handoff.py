@@ -297,3 +297,82 @@ def test_wrong_target_and_conflicting_completion_are_rejected(tmp_path: Path) ->
             result_digest=hashlib.sha256(b"different-checkpoint").hexdigest(),
             child_receipt_digest=result.receipt_sha256,
         )
+
+
+def test_completed_claim_reconstructs_missing_outbox_result_and_rejects_conflicting_replay(
+    tmp_path: Path,
+) -> None:
+    store, coordinator = _store(tmp_path)
+    moved = _reassign_to_b(store, _source_envelope(store))
+
+    original = resume_on_recovery_host(
+        store,
+        moved,
+        owner_peer_id="peer-b",
+        owner_host_id="logical-host-b",
+        implementation_fingerprint=IMPL_B,
+        next_resume_controls={"advance": 0, "reset": 0},
+    )
+    assert original.recovered_from_completed_claim is False
+
+    # Simulate a crash after quorum completion and successor creation but
+    # before any worker outbox exists. A replacement replays the same pure
+    # transition, checks the result/receipt against the completed claim, and
+    # discovers the already-created successor idempotently.
+    recovered = resume_on_recovery_host(
+        store,
+        moved,
+        owner_peer_id="peer-b",
+        owner_host_id="logical-host-b",
+        implementation_fingerprint=IMPL_B,
+        next_resume_controls={"advance": 0, "reset": 0},
+    )
+    assert recovered.recovered_from_completed_claim is True
+    assert recovered.completed_ticket.claim.result_digest == original.next_envelope.checkpoint_sha256
+    assert recovered.completed_ticket.claim.child_receipt_digest == original.receipt_sha256
+    assert recovered.receipt == original.receipt
+    assert recovered.next_envelope.checkpoint_sha256 == original.next_envelope.checkpoint_sha256
+    assert recovered.next_envelope.claim_id == original.next_envelope.claim_id
+
+    # A different successor policy cannot be smuggled in during recovery:
+    # deterministic replay must reproduce the exact quorum-committed receipt.
+    with pytest.raises(StatefulRuntimeRehomeError, match="does not reproduce"):
+        resume_on_recovery_host(
+            store,
+            moved,
+            owner_peer_id="peer-b",
+            owner_host_id="logical-host-b",
+            implementation_fingerprint=IMPL_B,
+            next_resume_controls={"advance": 1, "reset": 0},
+        )
+
+
+def test_worker_refreshes_claim_proof_after_unrelated_ledger_generation(tmp_path: Path) -> None:
+    store, _coordinator = _store(tmp_path)
+    moved = _reassign_to_b(store, _source_envelope(store))
+
+    # A separate claim advances the global quorum root after the work ticket
+    # was issued. The worker refreshes this claim by stable claim identity
+    # rather than requiring its received proof to remain the global high-water.
+    runtime, capsules = _checkpoint_fixture()
+    issue_stateful_recovery_envelope(
+        store,
+        session_id="unrelated-counter-session",
+        runtime=runtime,
+        realization_capsules=capsules,
+        resume_controls={"advance": 0, "reset": 1},
+        owner_peer_id="peer-unrelated",
+        owner_host_id="logical-host-unrelated",
+        implementation_fingerprint=IMPL_C,
+    )
+
+    result = resume_on_recovery_host(
+        store,
+        moved,
+        owner_peer_id="peer-b",
+        owner_host_id="logical-host-b",
+        implementation_fingerprint=IMPL_B,
+        next_resume_controls={"advance": 0, "reset": 0},
+    )
+    assert result.receipt["state_after"] == [1, 1]
+    assert result.recovered_from_completed_claim is False

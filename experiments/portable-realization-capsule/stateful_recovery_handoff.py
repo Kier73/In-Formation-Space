@@ -13,7 +13,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from mailcpu.transferable_execution_claim import (
     ExecutionClaimStatus,
@@ -252,6 +252,7 @@ class StatefulRuntimeRehomeResult:
     receipt: Mapping[str, Any]
     receipt_sha256: str
     next_envelope: StatefulRuntimeRecoveryEnvelope
+    recovered_from_completed_claim: bool = False
 
 
 def _issue_for_checkpoint(
@@ -338,10 +339,7 @@ def reassign_after_source_loss(
             ticket,
         )
     except TransferableExecutionClaimError as exc:
-        raise StatefulRuntimeRehomeError(f"quorum reassignment was refused: {exc}") from exc
-
-
-def resume_on_recovery_host(
+        raise StatefulRuntimeRehomeError(f"quodef resume_on_recovery_host(
     store: TransferableExecutionClaimStore,
     envelope: StatefulRuntimeRecoveryEnvelope,
     *,
@@ -349,8 +347,10 @@ def resume_on_recovery_host(
     owner_host_id: str,
     implementation_fingerprint: str,
     next_resume_controls: Mapping[str, int],
+    after_claim_complete: Callable[[PortableExecutionClaimBundle], None] | None = None,
+    after_successor_claim: Callable[[StatefulRuntimeRecoveryEnvelope], None] | None = None,
 ) -> StatefulRuntimeRehomeResult:
-    """Verify the live owner epoch, replay PSC, commit one continuation, and issue its successor claim."""
+    """Continue an assigned claim or reconstruct a quorum-completed result after worker loss."""
     if not isinstance(store, TransferableExecutionClaimStore):
         raise StatefulRuntimeRehomeError("recovery handoff requires a TransferableExecutionClaimStore")
     if not isinstance(envelope, StatefulRuntimeRecoveryEnvelope):
@@ -359,13 +359,46 @@ def resume_on_recovery_host(
 
     try:
         semantics = _claim_specification(envelope.session_id, envelope.checkpoint)
-        envelope.ticket.verify_for_target(
-            store.coordinator,
-            **semantics,
-            owner_peer_id=owner_peer_id,
-            owner_host_id=owner_host_id,
-            implementation_fingerprint=implementation_fingerprint,
-        )
+        current_ticket = store.get(envelope.claim_id)
+        claim = current_ticket.claim
+        if claim.claim_id != envelope.ticket.claim.claim_id:
+            raise StatefulRuntimeRehomeError("live claim identity differs from the received recovery envelope")
+
+        assignment = claim.current_assignment
+        if claim.status is ExecutionClaimStatus.ASSIGNED:
+            current_ticket.verify_for_target(
+                store.coordinator,
+                **semantics,
+                owner_peer_id=owner_peer_id,
+                owner_host_id=owner_host_id,
+                implementation_fingerprint=implementation_fingerprint,
+            )
+        elif claim.status is ExecutionClaimStatus.COMPLETED:
+            # A previous worker may have quorum-committed the deterministic
+            # result and died before its outbox was fsynced. The completed
+            # claim is the durable result commitment; replay must reproduce
+            # both its output checkpoint and its continuation receipt.
+            current_ticket.verify_current(store.coordinator)
+            expected_semantics = (
+                claim.parent_request_digest == semantics["parent_request_digest"]
+                and claim.child_request_digest == semantics["child_request_digest"]
+                and claim.address_digest == semantics["address_digest"]
+                and claim.operator_spec.to_dict() == semantics["operator_spec"].to_dict()
+                and claim.computational_ground_fingerprint
+                == semantics["computational_ground_fingerprint"]
+            )
+            expected_owner = (
+                assignment.owner_peer_id == owner_peer_id
+                and assignment.owner_host_id == owner_host_id
+                and assignment.implementation_fingerprint == implementation_fingerprint
+            )
+            if not expected_semantics or not expected_owner:
+                raise StatefulRuntimeRehomeError(
+                    "completed claim is not bound to this checkpoint, session, target, and implementation"
+                )
+        else:
+            raise StatefulRuntimeRehomeError("recovery claim has an unsupported terminal status")
+
         runtime = restore_runtime(envelope.checkpoint)
         header = decode_checkpoint(envelope.checkpoint)
         before = runtime.snapshot()
@@ -379,6 +412,28 @@ def resume_on_recovery_host(
             realization_capsules,
             next_resume_controls,
         )
+        receipt_core = {
+            "schema": "ifs.stateful-runtime-rehome-receipt.v1",
+            "session_id": envelope.session_id,
+            "input_checkpoint_sha256": envelope.checkpoint_sha256,
+            "input_claim_id": envelope.claim_id,
+            "assignment_epoch": assignment.epoch,
+            "owner_peer_id": owner_peer_id,
+            "owner_host_id": owner_host_id,
+            "implementation_fingerprint": implementation_fingerprint,
+            "tick_before": before["tick"],
+            "tick_after": runtime.tick,
+            "state_before": list(before["state"]),
+            "state_after": list(runtime.state),
+            "revision": runtime.revision,
+            "program_digest": runtime.program_digest,
+            "model_digest": runtime.model_digest,
+            "transition_event_digest": runtime.chain_head_digest,
+            "output_checkpoint_sha256": _bytes_digest(next_checkpoint),
+            "output_checkpoint_bytes": len(next_checkpoint),
+        }
+        receipt_digest = _digest(receipt_core)
+        output_digest = _bytes_digest(next_checkpoint)
     except (
         PortableStatefulCheckpointError,
         TransferableExecutionClaimError,
@@ -388,41 +443,35 @@ def resume_on_recovery_host(
         ValueError,
         binascii.Error,
     ) as exc:
-        raise StatefulRuntimeRehomeError(f"recovery target could not admit or resume the checkpoint: {exc}") from exc
+        raise StatefulRuntimeRehomeError(f"recovery target could not admit or replay the checkpoint: {exc}") from exc
 
-    receipt_core = {
-        "schema": "ifs.stateful-runtime-rehome-receipt.v1",
-        "session_id": envelope.session_id,
-        "input_checkpoint_sha256": envelope.checkpoint_sha256,
-        "input_claim_id": envelope.claim_id,
-        "assignment_epoch": envelope.ticket.claim.current_assignment.epoch,
-        "owner_peer_id": owner_peer_id,
-        "owner_host_id": owner_host_id,
-        "implementation_fingerprint": implementation_fingerprint,
-        "tick_before": before["tick"],
-        "tick_after": runtime.tick,
-        "state_before": list(before["state"]),
-        "state_after": list(runtime.state),
-        "revision": runtime.revision,
-        "program_digest": runtime.program_digest,
-        "model_digest": runtime.model_digest,
-        "transition_event_digest": runtime.chain_head_digest,
-        "output_checkpoint_sha256": _bytes_digest(next_checkpoint),
-        "output_checkpoint_bytes": len(next_checkpoint),
-    }
-    receipt_digest = _digest(receipt_core)
-
-    assignment = envelope.ticket.claim.current_assignment
+    recovered_from_completed_claim = claim.status is ExecutionClaimStatus.COMPLETED
     try:
-        store.complete(
-            envelope.claim_id,
-            expected_epoch=assignment.epoch,
-            owner_peer_id=owner_peer_id,
-            owner_host_id=owner_host_id,
-            implementation_fingerprint=implementation_fingerprint,
-            result_digest=_bytes_digest(next_checkpoint),
-            child_receipt_digest=receipt_digest,
-        )
+        if recovered_from_completed_claim:
+            if (
+                claim.result_digest != output_digest
+                or claim.child_receipt_digest != receipt_digest
+            ):
+                raise StatefulRuntimeRehomeError(
+                    "deterministic replay does not reproduce the quorum-committed result and receipt"
+                )
+            completed_ticket = current_ticket
+        else:
+            completed_ticket = store.complete(
+                envelope.claim_id,
+                expected_epoch=assignment.epoch,
+                owner_peer_id=owner_peer_id,
+                owner_host_id=owner_host_id,
+                implementation_fingerprint=implementation_fingerprint,
+                result_digest=output_digest,
+                child_receipt_digest=receipt_digest,
+            )
+            if after_claim_complete is not None:
+                after_claim_complete(completed_ticket)
+
+        # Claim creation is content-addressed. If a previous worker created
+        # this exact successor before dying, create() returns that same
+        # assignment; if it died before that point, this creates it now.
         next_envelope = _issue_for_checkpoint(
             store,
             envelope.session_id,
@@ -431,12 +480,16 @@ def resume_on_recovery_host(
             owner_host_id=owner_host_id,
             implementation_fingerprint=implementation_fingerprint,
         )
-        # Refresh the completed ticket under the latest root after the successor
-        # assignment was published. The older completion proof remains in the
-        # authority lineage but its former root is no longer the live high-water.
+        if after_successor_claim is not None:
+            after_successor_claim(next_envelope)
+
+        # The successor publication advances the global ledger root; refresh
+        # the completed input ticket so its proof is current at the new root.
         completed_ticket = store.get(envelope.claim_id)
-    except TransferableExecutionClaimError as exc:
-        raise StatefulRuntimeRehomeError(f"recovery result did not commit at the current quorum epoch: {exc}") from exc
+    except (TransferableExecutionClaimError, StatefulRuntimeRehomeError) as exc:
+        raise StatefulRuntimeRehomeError(
+            f"recovery result did not match or commit at the current quorum epoch: {exc}"
+        ) from exc
 
     receipt = {**receipt_core, "receipt_sha256": receipt_digest}
     return StatefulRuntimeRehomeResult(
@@ -444,4 +497,5 @@ def resume_on_recovery_host(
         receipt=json.loads(_canonical(receipt).decode("utf-8")),
         receipt_sha256=receipt_digest,
         next_envelope=next_envelope,
+        recovered_from_completed_claim=recovered_from_completed_claim,
     )

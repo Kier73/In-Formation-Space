@@ -142,6 +142,7 @@ def _result_payload(result: Any) -> dict[str, Any]:
         "receipt": dict(result.receipt),
         "receipt_sha256": result.receipt_sha256,
         "next_envelope": result.next_envelope.to_dict(),
+        "recovered_from_completed_claim": result.recovered_from_completed_claim,
     }
 
 
@@ -159,6 +160,7 @@ def _resume_once(
     owner_host_id: str,
     implementation_fingerprint: str,
     next_resume_controls: Mapping[str, int],
+    crash_mode: str,
 ) -> dict[str, Any]:
     peer_b = RecoveryLineagePeerClient.connect(
         membership,
@@ -191,6 +193,14 @@ def _resume_once(
             },
         )
         store = TransferableExecutionClaimStore(claim_store_directory, coordinator)
+        def crash_after_claim_complete(_ticket: Any) -> None:
+            if crash_mode == "after-claim-complete":
+                os._exit(92)
+
+        def crash_after_successor_claim(_next_envelope: Any) -> None:
+            if crash_mode == "after-successor-claim":
+                os._exit(93)
+
         result = resume_on_recovery_host(
             store,
             envelope,
@@ -198,6 +208,8 @@ def _resume_once(
             owner_host_id=owner_host_id,
             implementation_fingerprint=implementation_fingerprint,
             next_resume_controls=next_resume_controls,
+            after_claim_complete=crash_after_claim_complete,
+            after_successor_claim=crash_after_successor_claim,
         )
         return _result_payload(result)
     finally:
@@ -282,6 +294,7 @@ def _run(arguments: list[str]) -> int:
                 "schema": "ifs.psc.stateful-recovery-worker-response.v1",
                 "result": stored["result"],
                 "replayed_from_durable_outbox": True,
+                "recovered_from_completed_claim": stored["result"].get("recovered_from_completed_claim", False),
             }
             return
 
@@ -298,6 +311,7 @@ def _run(arguments: list[str]) -> int:
             owner_host_id=owner_host_id,
             implementation_fingerprint=implementation_fingerprint,
             next_resume_controls=next_resume_controls,
+            crash_mode=crash_mode,
         )
         _write_outbox(
             outbox_path,
@@ -313,6 +327,7 @@ def _run(arguments: list[str]) -> int:
             "schema": "ifs.psc.stateful-recovery-worker-response.v1",
             "result": result,
             "replayed_from_durable_outbox": False,
+            "recovered_from_completed_claim": result.get("recovered_from_completed_claim", False),
         }
 
     deadline = time.monotonic() + 30.0

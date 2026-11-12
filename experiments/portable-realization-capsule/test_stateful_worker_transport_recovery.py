@@ -5,6 +5,7 @@ import importlib.util
 import json
 import os
 import subprocess
+import pytest
 import sys
 import time
 from pathlib import Path
@@ -156,8 +157,20 @@ def _stop(process: subprocess.Popen[str] | None) -> None:
     process.communicate(timeout=5)
 
 
-def test_checkpoint_crosses_reliable_channel_and_replays_durable_outbox_after_worker_kill(
+@pytest.mark.parametrize(
+    ("crash_mode", "expected_exit", "expect_cached_outbox", "expect_completed_claim_recovery"),
+    (
+        ("after-outbox-fsync", 91, True, False),
+        ("after-claim-complete", 92, False, True),
+        ("after-successor-claim", 93, False, True),
+    ),
+)
+def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
     tmp_path: Path,
+    crash_mode: str,
+    expected_exit: int,
+    expect_cached_outbox: bool,
+    expect_completed_claim_recovery: bool,
 ) -> None:
     membership = _membership()
     authority_root = tmp_path / "authorities"
@@ -234,7 +247,7 @@ def test_checkpoint_crosses_reliable_channel_and_replays_durable_outbox_after_wo
 
         first_worker, first_port = _start_worker(
             repository_root,
-            common_arguments + ["after-outbox-fsync"],
+            common_arguments + [crash_mode],
         )
         first_transport = SocketTransport.connect(
             "127.0.0.1",
@@ -262,30 +275,37 @@ def test_checkpoint_crosses_reliable_channel_and_replays_durable_outbox_after_wo
         request_snapshot = request_sender.snapshot()
         response_snapshot = response_receiver.snapshot()
 
-        # The receiver completed the pure continuation, committed the result
-        # and successor claim, and fsynced its outbox. It dies before
-        # ReliableChannel can consume the request or send its acknowledgement.
+        # Exercise one of three cuts: after the outbox fsync, after quorum
+        # completion but before successor creation, or after successor
+        # creation but before the first outbox write.
         first_worker.wait(timeout=20)
-        assert first_worker.returncode == 91
-        assert outbox_path.is_file()
+        assert first_worker.returncode == expected_exit
+        assert outbox_path.is_file() is expect_cached_outbox
         assert request_sender.pending_sequences() == (1,)
         first_transport.close()
         first_transport = None
 
-        record = json.loads(outbox_path.read_text(encoding="utf-8"))
-        record_core = {key: value for key, value in record.items() if key != "result_sha256"}
-        assert record["result_sha256"] == hashlib.sha256(_canonical(record_core)).hexdigest()
-        assert record["input_claim_id"] == assigned.claim_id
-        assert record["input_envelope_sha256"] == assigned.envelope_sha256
-        assert record["request_sequence"] == 1
+        # The authority peer processes may have observed the worker's abrupt
+        # disconnect. Restart them from their durable journals so the second
+        # worker is admitted against a fresh process set at the committed
+        # quorum high-water.
+        _stop(process_b)
+        _stop(process_c)
+        process_b, port_b = _start_authority_process(authority_root, membership, "authority-b")
+        process_c, port_c = _start_authority_process(authority_root, membership, "authority-c")
+        replacement_arguments = list(common_arguments)
+        replacement_arguments[4] = str(port_b)
+        replacement_arguments[6] = str(port_c)
 
         # A replacement worker binds a fresh TCP stream. The requester restores
-        # its exact pending reliable frame and retransmits sequence 1. The
-        # worker recognizes the persisted outbox and returns it without
-        # executing the transition or attempting a second claim completion.
+        # its exact pending reliable frame and retransmits sequence 1. If the
+        # outbox exists it is replayed; if the crash preceded that write, the
+        # completed quorum claim is replayed and checked against the exact
+        # output checkpoint and receipt before the missing successor/outbox
+        # are reconstructed.
         retry_worker, retry_port = _start_worker(
             repository_root,
-            common_arguments + ["none"],
+            replacement_arguments + ["none"],
         )
         retry_transport = SocketTransport.connect(
             "127.0.0.1",
@@ -318,7 +338,9 @@ def test_checkpoint_crosses_reliable_channel_and_replays_durable_outbox_after_wo
         assert response_packet[0] == 1
         response = response_packet[1]
         assert response["schema"] == "ifs.psc.stateful-recovery-worker-response.v1"
-        assert response["replayed_from_durable_outbox"] is True
+        assert response["replayed_from_durable_outbox"] is expect_cached_outbox
+        assert response["recovered_from_completed_claim"] is expect_completed_claim_recovery
+        assert response["result"]["recovered_from_completed_claim"] is expect_completed_claim_recovery
         assert response["result"]["receipt"]["state_before"] == [1, 0]
         assert response["result"]["receipt"]["state_after"] == [1, 1]
         assert response["result"]["receipt"]["tick_before"] == 3
@@ -335,6 +357,12 @@ def test_checkpoint_crosses_reliable_channel_and_replays_durable_outbox_after_wo
         retry_transport.close()
         retry_transport = None
 
+        record = json.loads(outbox_path.read_text(encoding="utf-8"))
+        record_core = {key: value for key, value in record.items() if key != "result_sha256"}
+        assert record["result_sha256"] == hashlib.sha256(_canonical(record_core)).hexdigest()
+        assert record["input_claim_id"] == assigned.claim_id
+        assert record["input_envelope_sha256"] == assigned.envelope_sha256
+        assert record["request_sequence"] == 1
         next_envelope = StatefulRuntimeRecoveryEnvelope.from_dict(
             response["result"]["next_envelope"]
         )
