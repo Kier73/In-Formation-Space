@@ -84,6 +84,50 @@ The policy evaluator is a frozen, versioned application contract, not a proof th
 
 For interoperable signatures, the next layer should use a standard canonicalization and credential/signature format rather than treating the current Python JSON serializer as a cross-language signing specification. See [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html) and the [W3C Verifiable Credentials Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/). Those standards inform future work; this iteration does not claim conformance.
 
+## Signed reviewer receipts (DSSE / Ed25519)
+
+`signed_review_receipts.py` adds an optional signature envelope for each vote receipt in a deterministic review certificate. This is a detached bundle: it binds signatures to the certificate without changing the authority-lineage ledger format or requiring every consumer to use the same key provider.
+
+The signed payload contains the exact vote fields:
+
+- assigned reviewer seat and reviewer reference;
+- APPROVE, REJECT, or ABSTAIN;
+- rationale;
+- review-artifact reference and its claimed SHA-256 digest.
+
+Each receipt is serialized to UTF-8 JSON bytes and wrapped in a DSSE envelope. The implementation signs DSSE's pre-authentication encoding:
+
+    PAE(type, payload) =
+      "DSSEv1" + SP + LEN(UTF8(type)) + SP + UTF8(type)
+      + SP + LEN(payload) + SP + payload
+
+The UTF-8 byte lengths matter. The payload type is included in the signed PAE, so changing the declared interpretation of the payload invalidates the signature. Each vote currently has exactly one Ed25519 signature and an envelope-local key ID. Per DSSE, a key ID is only an unauthenticated lookup hint; verification uses the actual public key selected from the supplied trust store.
+
+### Verification flow
+
+- `build_trust_store()` creates a portable map from a reviewer seat and principal label to an Ed25519 public key. The key ID is the SHA-256 fingerprint of the raw 32-byte public key.
+- `sign_review_vote()` signs the serialized vote payload and returns a DSSE envelope containing base64 payload and signature bytes.
+- `verify_signed_review_vote()` checks the envelope, DSSE PAE signature, public-key fingerprint, assigned seat, and principal reference.
+- `build_signed_review_bundle()` requires one valid signed envelope for every vote already present in the authority review certificate. It rejects extra, duplicate, missing, or altered receipts.
+- `validate_signed_review_bundle()` reconstructs the bundle against the certificate and supplied trust store. The bundle records the digest of that exact trust-store version.
+- When the caller supplies the referenced review-artifact bytes, artifact digests are checked too. Without those bytes, `review_artifacts_verified` is false; a signature over a claimed digest is not a fetch or verification of the artifact.
+
+The trust store is supplied separately to the verifier. Its digest pins the version used for a bundle, but does not establish who approved or distributed that trust store. A deployment must obtain and pin the trust store through its own independent governance or configuration channel. Key creation, enrollment, rotation, revocation, expiration, compromised-key response, and multi-organization delegation are not implemented here.
+
+### Reproduce
+
+    python -m pip install "cryptography>=42,<50"
+    python -m unittest discover -s bridges/authority-lineage -p 'test_*.py' -v
+    python bridges/authority-lineage/signed_review_demo.py --output results/signed-review-example.json
+
+The demonstration generates ephemeral keys, signs both reviewer receipts, validates the signatures and the supplied review-artifact bytes, and writes a self-contained example with public keys only. The private keys are never included. Its successful verification proves possession of those ephemeral keys within that one run; it is not proof of persistent or externally authenticated agent identities.
+
+### Standards and compatibility boundary
+
+The implementation follows the DSSE envelope/PAE model described in the [DSSE specification repository](https://github.com/secure-systems-lab/dsse) and uses Ed25519 as specified by [RFC 8032](https://www.rfc-editor.org/rfc/rfc8032.html). DSSE signs both the payload and its payload type; the DSSE specification treats `keyid` as an unauthenticated hint, not as the source of trust. Ed25519 supplies a public-key signature check, but the trust relationship still comes from the verifier's provisioned public-key mapping.
+
+This implementation signs the exact serialized payload bytes carried in the DSSE envelope. Its deterministic Python JSON serialization is not claimed to be RFC 8785/JCS, a cross-language signing canonicalization, a W3C Verifiable Credential, or a full in-toto attestation. A verifier must check the original envelope bytes rather than reserialize an equivalent JSON object before signature verification.
+  
 ## Observation evidence adapter
 
 The companion observation_adapter.py connects the existing evidence-gated observation records to this lineage ledger without changing E-CPU.
