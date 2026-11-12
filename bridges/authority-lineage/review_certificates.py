@@ -246,7 +246,7 @@ def validate_review_certificate(
     allow_recorded: bool = False,
 ) -> None:
     """Independently reconstruct the certificate's binding and policy result."""
-    validate_ledger(ledger)
+    validate_ledger(ledger, validate_embedded_certificates=False)
     if not isinstance(certificate, Mapping) or set(certificate) != _CERTIFICATE_FIELDS:
         raise ReviewCertificateError("certificate has missing or unrecognized fields")
     cert = dict(certificate)
@@ -341,9 +341,14 @@ def record_review_certificate(
     return updated
 
 
-def validate_review_certificates_in_ledger(ledger: Mapping[str, Any]) -> None:
+def validate_review_certificates_in_ledger(
+    ledger: Mapping[str, Any],
+    *,
+    validate_core: bool = True,
+) -> None:
     """Validate each embedded certificate against its proposal and vote policy."""
-    validate_ledger(ledger)
+    if validate_core:
+        validate_ledger(ledger, validate_embedded_certificates=False)
     for entry in ledger["entries"]:
         if entry["entry_type"] == "proposal_review_certified":
             payload = entry["payload"]
