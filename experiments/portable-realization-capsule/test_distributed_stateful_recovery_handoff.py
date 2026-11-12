@@ -6,7 +6,6 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
 
 from mailcpu import (
     DistributedRecoveryLineageCoordinator,
@@ -17,7 +16,6 @@ from mailcpu import (
 )
 
 from stateful_recovery_handoff import (
-    StatefulRuntimeRecoveryEnvelope,
     issue_stateful_recovery_envelope,
     reassign_after_source_loss,
     resume_on_recovery_host,
@@ -199,8 +197,8 @@ def test_psc_rehome_uses_remote_quorum_authorities_and_recovers_their_journals(t
         # remote decision state after this point.
         coordinator.close()
         coordinator = None
-        _stop_remote_authority(process_b, peer_b)
-        _stop_remote_authority(process_c, peer_c)
+        _stop_remote_authority(process_b, None)
+        _stop_remote_authority(process_c, None)
         process_b = process_c = None
         peer_b = peer_c = None
 
@@ -214,11 +212,7 @@ def test_psc_rehome_uses_remote_quorum_authorities_and_recovers_their_journals(t
             peer_b,
             peer_c,
         )
-        try:
-            assert restored_coordinator.high_water() == coordinator_high_water
-        except NameError:
-            # Capture the exact quorum coordinate across process shutdown.
-            raise AssertionError("test did not preserve its expected quorum coordinate")
+        assert restored_coordinator.high_water() == coordinator_high_water
         restored_completed = restored_store.get(source.claim_id)
         assert restored_completed.claim.status.value == "completed"
         assert restored_completed.claim.result_digest == resumed.next_envelope.checkpoint_sha256
@@ -240,5 +234,6 @@ def test_psc_rehome_uses_remote_quorum_authorities_and_recovers_their_journals(t
     finally:
         if coordinator is not None:
             coordinator.close()
+            peer_b = peer_c = None
         _stop_remote_authority(process_b, peer_b)
         _stop_remote_authority(process_c, peer_c)
