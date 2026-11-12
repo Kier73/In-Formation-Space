@@ -235,6 +235,15 @@ jobs:
           name: authority-review-trust-manifest
           path: ${{ runner.temp }}/review-trust-manifest-example.json
           if-no-files-found: warn
+      - name: Generate dual-authorized root rotation example
+        run: python bridges/authority-lineage/review_root_rotation_demo.py --output "${{ runner.temp }}/review-root-rotation-example.json"
+      - name: Upload dual-authorized root rotation example
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authority-review-root-rotation
+          path: ${{ runner.temp }}/review-root-rotation-example.json
+          if-no-files-found: warn
       - name: Run append-only hypothesis revision tests
         run: python -m unittest discover -s bridges/hypothesis-revision -p "test_*.py" -v
       - name: Run Poset Interleaver property tests

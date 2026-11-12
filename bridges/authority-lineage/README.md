@@ -178,8 +178,9 @@ The manifest is signed as a DSSE payload by one or more Ed25519 root keys. Verif
 
 The verifier deliberately requires an explicit verification time rather than silently reading the system clock. The caller should capture one trusted verification time for the whole validation operation and persist the highest accepted generation/digest. If the caller loses that anti-rollback state, a valid old manifest can be replayed until it expires; signatures and expiry alone cannot prove that a newer generation exists.
 
-Generation links only provide continuity when the verifier remembers the last accepted digest or is given the exact expected predecessor. Merely checking `minimum_generation` prevents rollback below a floor but does not prove a direct one-step chain. Root-key rotation is intentionally out-of-band in this version: new root keys must be pinned through a separately trusted configuration update.
+Generation links only provide continuity when the verifier remembers the last accepted digest or is given the exact expected predecessor. Merely checking `minimum_generation` prevents rollback below a floor but does not prove a direct one-step chain.
 
+The bootstrap root key set must still be pinned out of band. Once that first root is trusted, ordinary root-key migration can use the dual-authorized transition described below. Emergency recovery after compromise of the currently trusted root threshold remains out of band; a compromised root cannot safely authorize its own replacement.
 The manifest validity window governs when the reviewer trust mapping is authorized. It does not establish when an individual reviewer signed a receipt, because the current vote payload has no trusted signed-at timestamp. Historical verification can use the archived manifest that applied at the time, but the verifier cannot infer exact key validity at an unrecorded signing instant.
 
 ### Reproduce
@@ -188,9 +189,32 @@ The manifest validity window governs when the reviewer trust mapping is authoriz
 
 The CI example uses an ephemeral root key, creates generation 1 and generation 2, and rotates reviewer public keys while retaining principal labels. It verifies the generation-1 bundle with generation 1, verifies a newly signed bundle with generation 2, and rejects the old key set under generation 2. The artifact contains public keys only and explicitly states that the root key is not authenticated by being included in the example.
 
+## Dual-authorized root-key migration
+
+`review_root_rotation.py` implements a separate transition document for controlled root-key replacement without changing the existing trust-manifest format.
+
+The migration is deliberately two-step:
+
+1. The successor trust manifest is built for generation N+1 and names the exact digest of generation N.
+2. A root-transition document binds the registry, old generation/digest, exact successor manifest digest, and proposed new root public-key set plus its signature threshold.
+3. The transition document is signed by a threshold of the **currently trusted old roots** and a threshold of the **proposed new roots**. A key that is present in both sets may count once toward each role's threshold.
+4. The verifier checks the old signatures against the root set it already trusts, checks the proposed new keys by their embedded fingerprints, checks the new-root signatures against that proposed set, and requires the exact next generation and predecessor digest.
+5. The successor trust manifest must then verify under the proposed new root set and match the exact digest named by the transition.
+
+The primary APIs are:
+
+- `build_root_transition(next_manifest, new_root_public_keys, previous_generation=..., previous_manifest_digest=..., new_root_threshold=...)`
+- `sign_root_transition(transition, old_root_private_keys, new_root_private_keys)`
+- `verify_root_transition(envelope, old_trusted_root_public_keys, expected_registry_id=..., expected_previous_generation=..., expected_previous_manifest_digest=..., old_root_threshold=...)`
+- `verify_rotated_trust_manifest(transition_envelope, successor_manifest_envelope, old_trusted_root_public_keys, ...)`
+
+The old threshold is supplied from the verifier's existing trust state; the new threshold is part of the successor role and is authorized by both old and new signatures. A successor transition cannot skip a generation, fork from another manifest digest, or replace the root set using only new-key signatures. After successful verification, the caller must atomically persist the new root-key set, successor generation, and successor manifest digest. This module returns the verified successor material but does not choose a storage system or claim monotonic persistence on the caller's behalf.
+
+Root bootstrap, trusted-state persistence, and emergency recovery after compromise of the current root threshold remain separate responsibilities. The transition document and the successor manifest use DSSE over exact serialized payload bytes; this is a repository-specific profile, not TUF metadata interoperability or RFC 8785/JCS.
+
 ### Relationship to TUF
 
-The design borrows selected protections from [The Update Framework specification](https://theupdateframework.github.io/specification/latest/): trusted root keys must be provisioned out of band, signed metadata is versioned and expires, and clients must retain state to detect rollback/freeze attacks. TUF also specifies stronger root-key migration continuity (including signatures under old and new root roles) and distinct timestamp/snapshot/targets roles. This module is **not a TUF implementation** and does not provide TUF interoperability, metadata retrieval, persistent client storage, root rotation, or a full freeze/fast-forward defense.
+The design borrows selected protections from [The Update Framework specification](https://theupdateframework.github.io/specification/latest/): trusted root keys are provisioned out of band, signed metadata is versioned and expires, clients retain state to detect rollback/freeze attacks, and root migration is approved by thresholds from both the old and new root roles. TUF also defines complete root metadata semantics, canonical JSON, timestamp/snapshot/targets roles, client update procedures, and recovery workflows. This module is **not a TUF implementation** and does not provide TUF interoperability, metadata retrieval, persistent client storage, canonical cross-language hashing, or a full freeze/fast-forward defense.
 
 The ledger schema now includes the signed event and the resolution's signed-bundle digest. Reproduce the complete lifecycle with:
 
