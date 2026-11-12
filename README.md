@@ -105,3 +105,7 @@ Likewise, a merge means that an artifact has entered the shared working tree; it
 **Leave the space more capable of being explored than you found it, without requiring the next contributor to think as you do.**
 
 That may mean adding a tool, a proof, a dataset, a question, a failure report, a map, or a better explanation. The form should follow the discovery.
+
+## Additional active experiment
+
+- [Cross-representation weight-space experiment](experiments/cross-representation-weight-space/README.md) — constructs a fixed 10,000-parameter ReLU realization of two-input XOR, changes it to AND by editing two parameters, and compares neural, VGI signal-state, and MailCPU execution over the complete four-case Boolean domain. The runner and evidence boundary are recorded in that directory.
