@@ -131,7 +131,7 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
             span_id=f"direct:{logical_time}:{span_name}",
             operation_id=operation_id,
             operation=operation,
-            context={"logical_time": logical_time, **(context or {})},
+            context={"logical_time": logical_time, "observation_id": f"timing:{logical_time}", **(context or {})},
         )
 
     def tearDown(self):
@@ -535,6 +535,11 @@ class ECPULiveAdapterIntegrationTests(unittest.TestCase):
         spans = list(self.operation_span_recorder.spans)
         self.assertEqual(len(spans), 46)
         for span in spans:
+            context = span["context"]
+            self.assertEqual(
+                context["observation_id"],
+                f"{context.get('event_kind', 'timing')}:{context['logical_time']}",
+            )
             validate_operation_span(span)
             jsonschema.validate(
                 span,

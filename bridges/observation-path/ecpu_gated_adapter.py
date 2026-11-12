@@ -145,6 +145,7 @@ class ECPUGatedObservationAdapter:
             context={
                 "event_kind": kind,
                 "logical_time": logical_time,
+                "observation_id": f"{kind}:{logical_time}",
                 "attempt_id": path.intent.attempt_id,
                 "boundary": span_name,
             },

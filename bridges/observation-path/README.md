@@ -84,6 +84,31 @@ The live integration now instruments the actual calls to `ReliableChannel.send()
 
 The live CI probe now executes five additional authorized paths in the same pinned E-CPU process, alongside the primary success and conflict cases. It emits 46 spans: 14 sends, seven receiver-intake calls, seven finalizations, six VM commits, six additional checkpoint saves, and six sender ACK polls. With a five-sample threshold, every operation partition reaches `descriptive_only`. The raw spans and independently reconstructed cost profile are uploaded as the `live-ecpu-operation-spans` artifact on the workflow run. These are repeated samples under one controlled CI workload and clock segment, not a stable production benchmark or an adaptive policy input.
 
+
+## Observation outcomes and information value
+
+The companion [observation-outcome implementation](observation_outcomes.py) records what a candidate observation was expected to distinguish and what outcome was actually observed. It is deliberately separate from the operation-span cost profiler.
+
+A record is keyed by the attempt identity and an explicit observation identity. Its evidence reference/digest and exact prior model are retained. Each hypothesis supplies a prior probability, the outcome predicted by this deterministic observation model, and optionally the Boolean value of one query. The builder independently derives prior entropy, expected posterior entropy, expected information gain (mutual information averaged over every predicted outcome), probability that the observation is expected to resolve the supplied Boolean query, probability and posterior for the one observed outcome, and the signed entropy change on that realized branch.
+
+**Expected information gain is not the same as the entropy change on one realized branch.** A particular outcome can leave a more uncertain posterior than the prior even while the observation has positive expected information gain. The ledger preserves both quantities rather than forcing every individual outcome to appear informative.
+
+A result not predicted by the model is retained as model_mismatch; the builder does not fabricate a posterior or reinterpret it as zero information. Model predictions and query labels remain supplied assumptions, not independently established facts. Evidence references and digests are preserved but are not fetched or authenticated here. This first version handles deterministic partitions; noisy likelihood models and cost-weighted policy selection are intentionally out of scope.
+
+### Build and verify an outcome record
+
+Create a JSON request containing attempt_id, observation_id, evidence_ref, evidence_digest (lowercase SHA-256), model_ref, prior_hypotheses, and observed_outcome, then run:
+
+```bash
+python bridges/observation-path/observation_outcomes.py \
+  --input observation-request.json \
+  --output observation-outcome.json
+```
+
+Every hypothesis needs hypothesis_id, prior_probability, and predicted_outcome. Add query_value to every hypothesis to evaluate one Boolean query, or omit it from every hypothesis. The module's validate_observation_outcome() rebuilds all derived values and both digests. The companion JSON Schema checks the portable document shape. Tests include a counterexample where expected information gain is positive while the realized branch increases entropy.
+
+The live E-CPU spans now carry the same explicit observation_id convention in their context in addition to attempt identity. This establishes a correlation field; it does not invent a prior model for E-CPU timing symbols or claim that informational outcomes have already been measured on the live path. A domain-specific hypothesis model must be independently specified before such outcomes can be attached.
+
 ## Evidence and clocks
 
 Dispatch, receiver admission, raw return, evidence authorization/refusal, optional receiver-state application, interpretation, and query-resolution events can each reference their own receipt or artifact. A returned payload must reference an Encounter Envelope and include its encounter ID, payload digest, and declared canonicalization. The path ledger records those declarations; it does not fetch or authenticate the referenced artifact. The Encounter Envelope validator remains responsible for validating the referenced envelope when it is available.
