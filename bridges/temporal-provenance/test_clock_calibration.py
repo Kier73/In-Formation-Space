@@ -96,6 +96,24 @@ class CalibrationConstructionTests(unittest.TestCase):
         with self.assertRaises(InfeasibleCalibrationError):
             calibration(anchors=anchors)
 
+    def test_exact_anchors_recover_a_unique_affine_mapping(self):
+        item = calibration(anchors=[
+            anchor("origin", 0, 100.0, 100.0),
+            anchor("later", 100, 300.0, 300.0),
+        ])
+        self.assertEqual(len(item["feasible_region"]), 1)
+        self.assertAlmostEqual(item["feasible_region"][0]["scale"], 2.0)
+        self.assertAlmostEqual(item["feasible_region"][0]["offset"], 100.0)
+
+    def test_monotone_but_non_affine_exact_anchors_are_rejected(self):
+        anchors = [
+            anchor("early", 0, 100.0, 100.0),
+            anchor("middle", 100, 300.0, 300.0),
+            anchor("late", 200, 450.0, 450.0),
+        ]
+        with self.assertRaises(InfeasibleCalibrationError):
+            calibration(anchors=anchors)
+
     def test_anchors_must_span_two_source_coordinates(self):
         anchors = [
             anchor("a", 10, 20.0, 20.1),
