@@ -1,0 +1,75 @@
+name: Sparse transition execution SRE-001
+
+on:
+  push:
+    paths:
+      - "experiments/sparse-transition-execution/README.md"
+      - "experiments/sparse-transition-execution/PLAN.md"
+      - "experiments/sparse-transition-execution/run_experiment.py"
+      - ".github/workflows/sparse-transition-execution.yml"
+  pull_request:
+    paths:
+      - "experiments/sparse-transition-execution/README.md"
+      - "experiments/sparse-transition-execution/PLAN.md"
+      - "experiments/sparse-transition-execution/run_experiment.py"
+      - ".github/workflows/sparse-transition-execution.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sre-001-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  sparse-transition-execution:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out experiment workspace
+        uses: actions/checkout@v4
+
+      - name: Check out pinned E-CPU implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: eae74b84204aa6b8632d2aed73bf2617f6d904e2
+          path: external/E-CPU
+
+      - name: Check out pinned VGI reference
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Run sparse transition equivalence and integrity regressions
+        env:
+          PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: python -m pytest external/E-CPU/tests/test_transition_space.py -q
+
+      - name: Execute dense versus sparse workload corpus
+        env:
+          PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+          ECPU_REVISION: eae74b84204aa6b8632d2aed73bf2617f6d904e2
+          VGI_REVISION: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          IFS_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: >-
+          python experiments/sparse-transition-execution/run_experiment.py
+          --output experiments/sparse-transition-execution/results/ci-result.json
+
+      - name: Upload SRE-001 measurements and case evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparse-transition-execution-sre-001
+          path: experiments/sparse-transition-execution/results/ci-result.json
+          if-no-files-found: warn

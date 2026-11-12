@@ -139,3 +139,22 @@ A typed computational description may admit several exact realizations. The smal
 5. How should navigation combine deterministic structural estimates with separately measured host and transport costs without silently converting one into the other?
 
 The initial finite corpus is [RCN-001](../experiments/realization-cost-navigation/README.md). It reports architecture-derived costs and explicitly does not claim physical latency or a universally best compiler.
+
+
+---
+
+## 7. Sparse Realization and Executed Cost
+
+### The Problem
+
+RCN-001 showed that liveness-compacted models can contain far fewer nonzero parameters than their dense tensor representation. However, a dense forward path still traverses zero coefficients. A sparse representation can remove those products, but sparse indexing, object overhead, activation materialization, and runtime dispatch can offset the expected savings.
+
+### Questions
+
+1. For the same exact finite transition Ground, how do dense and sparse representations compare in stored scalar values and canonical serialized bytes?
+2. Does skipping zero weights reduce measured inference time in the actual execution path, or does Python-level sparse indexing cost more than the avoided arithmetic?
+3. How much conversion cost is required to obtain a sparse representation, and under what reuse count is that cost amortized?
+4. Would sparse activation vectors, packed Boolean operations, or bitset layers improve the result beyond sparse weights alone?
+5. How do these costs change when the model is hosted through E-CPU's execution/fabric path, where communication, admission, and provenance costs remain separate?
+
+The initial finite-domain comparison is [SRE-001](../experiments/sparse-transition-execution/README.md). It explicitly separates structural operation counts, serialized size, conversion cost, and measured Python inference time. Its [first corrected evidence record](../experiments/sparse-transition-execution/results/ci-run-43302944580.md) shows why sparse parameter count, JSON payload size, and runtime must remain distinct: the minterm sparse JSON was larger even though the sparse operation path used fewer multiply slots.

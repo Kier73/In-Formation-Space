@@ -128,3 +128,13 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Realization cost and navigation
 
 - [RCN-001: Compiler-cost landscape across finite Boolean workloads](experiments/realization-cost-navigation/README.md) — **verified across 16 complete finite Boolean workloads** (1,364 input rows and 4,092 neural/reference comparisons). It compares minterm, direct-DAG, and liveness-compacted realizations, preserves Pareto-incomparable routes, and keeps nonzero sparsity separate from current dense forward cost. Pinned evidence and measurements are retained in [the RCN-001 run record](experiments/realization-cost-navigation/results/ci-run-43300255809.md).
+
+
+## Sparse transition execution
+
+- [SRE-001: Sparse finite-transition execution](experiments/sparse-transition-execution/README.md) — compares each RCN-001 dense compiler realization with a digest-bound sparse execution model, checking the complete finite Boolean domains and recording nonzero storage, canonical snapshot size, operation counts, conversion time, and repeated Python inference timing separately.
+
+
+## Sparse transition execution
+
+- [SRE-001: Sparse finite-transition execution](experiments/sparse-transition-execution/README.md) — **verified across the complete 16-workload RCN-001 corpus** (1,364 input rows, 4,092 dense-to-sparse semantic comparisons). It measures nonzero storage, canonical snapshot bytes, operation counts, conversion, and seven-sample Python inference timings separately. The [corrected evidence record](experiments/sparse-transition-execution/results/ci-run-43302944580.md) preserves the compiler-specific storage trade-offs and one-host timing limits.
