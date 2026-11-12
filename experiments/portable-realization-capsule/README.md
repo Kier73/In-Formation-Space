@@ -115,3 +115,33 @@ This is a first semantic interoperability result for one codec and one small
 finite Ground. It does not yet establish interoperability for the other five
 encodings, arbitrary coefficient formats, or an independently implemented
 typed-Ground parser/compiler.
+
+
+
+## Independent hybrid decoding and stateful transition replay
+
+The Node.js receiver now independently decodes SRE-002 `hybrid_binary`.
+For each layer it reads the little-endian row-mode bitmask, then decodes each
+output row using either its exact dense scalar vector or its sparse input mask
+and nonzero scalar stream. Biases independently select dense or sparse form.
+It validates the inner envelope digests, layer dimensions, mode counts, exact
+stored-parameter count, source/model/interface identity, and reconstructed
+E-CPU sparse-model digest.
+
+The integration test uses E-CPU's typed reset-dominant two-bit counter
+(`state_1`, `state_0`, `advance`, `reset` → two next-state bits) and the
+live compositional compiler. Python constructs the capsule and a separately
+written scalar transition oracle; Node decodes the hybrid payload and checks
+all 16 one-step Boolean assignments.
+
+The test then has Node replay a complete recurrent corpus: all four initial
+states and every length-four sequence over the four advance/reset control
+pairs. This is 1,024 trajectories and 4,096 transition steps. The reference
+trajectory file is independently derived from the scalar transition rule,
+not from the compiled neural model. A deliberately altered recurrent output
+must be rejected.
+
+This extends semantic interoperability to a second binary codec and a
+stateful feedback system. It still does not establish arbitrary typed-Ground
+parsing, general compiler interoperability, concurrent or distributed
+runtime execution, or hardware performance.
