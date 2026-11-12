@@ -154,3 +154,9 @@ The stateful runtime's committed step/revision events now export through E-CPU's
 The [v7 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43233742488) passed the full 128-case matrix, 2,048 recurrent trajectories, the stateful lifecycle, six trajectory bridge tests, all other focused E-CPU suites and both VGI suites. See the [v7 result note](results/ci-run-43233742488.md) and [summary](results/ci-run-43233742488-summary.json).
 
 The key time-navigation result is that events have logical times `[1,1,2]` for `step → revision → step`. Seeking tick 1 returns the revision frame (trajectory index 1, runtime event sequence 2); seeking tick 2 returns the next step and state `10`. This makes a model revision discoverable at the same logical time coordinate without artificially incrementing the machine's tick.
+
+## V8: sparse-index same-tick revision seek
+
+The trajectory test now uses the default sparse index stride of 64, rather than indexing every event. The sequence still has logical times `[1,1,2]`; the revision event at tick 1 is not itself an index entry. The seek helper first uses the sparse index, then scans forward through equal-tick frames so it returns the last event at that logical time. The IFS runtime scenario now runs with stride 64 and records that setting explicitly.
+
+The updated v8 workflow verifies that seeking tick 1 returns the revision event (trajectory frame 1, runtime event 2) and seeking tick 2 returns the next step at state `10`. The E-CPU trajectory unit test covers both strides 1 and 64.
