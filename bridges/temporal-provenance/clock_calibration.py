@@ -330,10 +330,17 @@ def validate_calibration(calibration: Mapping[str, Any]) -> dict[str, Any]:
 
 def map_source_interval(
     calibration: Mapping[str, Any],
+    *,
+    source_clock_id: str,
     source_coordinate: int,
+    source_unit: str,
 ) -> dict[str, Any]:
-    """Return the target-coordinate envelope across every feasible affine mapping."""
+    """Return the target-coordinate envelope after checking clock identity and unit."""
     calibration = validate_calibration(calibration)
+    if _text(source_clock_id, "source_clock_id") != calibration["source_clock_id"]:
+        raise ClockCalibrationError("source_clock_id does not match the calibration")
+    if _text(source_unit, "source_unit") != calibration["source_unit"]:
+        raise ClockCalibrationError("source_unit does not match the calibration")
     source = _integer(source_coordinate, "source_coordinate", minimum=-(2**63))
     if not (
         calibration["validity_source_min"]
@@ -366,10 +373,14 @@ def compare_cross_clock_intervals(
     calibration: Mapping[str, Any],
     *,
     source_event_id: str,
+    source_clock_id: str,
     source_coordinate: int,
+    source_unit: str,
     target_event_id: str,
+    target_clock_id: str,
     target_lower: float,
     target_upper: float,
+    target_unit: str,
 ) -> dict[str, Any]:
     """Compare mapped source-event bounds to a target event's explicit interval.
 
@@ -380,11 +391,21 @@ def compare_cross_clock_intervals(
     target_id = _text(target_event_id, "target_event_id")
     if source_id == target_id:
         raise ClockCalibrationError("cross-clock comparison requires distinct event IDs")
+    calibration = validate_calibration(calibration)
+    if _text(target_clock_id, "target_clock_id") != calibration["target_clock_id"]:
+        raise ClockCalibrationError("target_clock_id does not match the calibration")
+    if _text(target_unit, "target_unit") != calibration["target_unit"]:
+        raise ClockCalibrationError("target_unit does not match the calibration")
     target_low = _finite(target_lower, "target_lower")
     target_high = _finite(target_upper, "target_upper")
     if target_low > target_high:
         raise ClockCalibrationError("target_lower must not exceed target_upper")
-    mapped = map_source_interval(calibration, source_coordinate)
+    mapped = map_source_interval(
+        calibration,
+        source_clock_id=source_clock_id,
+        source_coordinate=source_coordinate,
+        source_unit=source_unit,
+    )
 
     if mapped["target_upper"] < target_low:
         relation = "before"
