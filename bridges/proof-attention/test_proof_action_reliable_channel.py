@@ -282,15 +282,18 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         late_attempt = host.active_attempt
         host.mark_no_result("host deadline elapsed")
 
-        worker.send_result(make_proof_action_result(
+        late_result = make_proof_action_result(
             received.request,
             return_evidence=return_evidence(late_attempt),
             proof_trace=add_result_payload(source_trace, late_attempt, result_status="timeout"),
-        ))
+        )
+        worker.send_result(late_result)
         self.assertIsNone(host.receive_result())
         self.assertEqual(late_attempt.status, "no_result")
         self.assertEqual(len(host.quarantined_results), 1)
         self.assertEqual(host.quarantined_results[0]["attempt_id"], late_attempt.attempt_id)
+        self.assertEqual(host.quarantined_results[0]["payload"], late_result)
+        self.assertEqual(host.quarantined_results[0]["canonicalization"], "canonical-json-v1")
         self.assertIn("closed", host.quarantined_results[0]["reason"])
         self.assertEqual(worker.process_result_acknowledgements(), (1,))
 
@@ -313,16 +316,18 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         self.assertEqual(second_attempt.status, "admitted")
 
         # The worker's delayed first response arrives while attempt two is active.
-        worker.send_result(make_proof_action_result(
+        first_late_result = make_proof_action_result(
             first_request.request,
             return_evidence=return_evidence(first_attempt),
             proof_trace=add_result_payload(source_trace, first_attempt, result_status="timeout"),
-        ))
+        )
+        worker.send_result(first_late_result)
         self.assertIsNone(host.receive_result())
         self.assertEqual(second_attempt.status, "admitted")
         self.assertEqual(first_attempt.status, "no_result")
         self.assertEqual(len(host.quarantined_results), 1)
         self.assertEqual(host.quarantined_results[0]["attempt_id"], first_dispatch.attempt_id)
+        self.assertEqual(host.quarantined_results[0]["payload"], first_late_result)
         self.assertEqual(worker.process_result_acknowledgements(), (1,))
 
         worker.send_result(make_proof_action_result(
