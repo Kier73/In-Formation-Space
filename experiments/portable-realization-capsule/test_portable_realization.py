@@ -489,7 +489,33 @@ def test_independent_node_receiver_decodes_hybrid_binary_and_replays_stateful_co
     input_rows = [tuple(row.inputs) for row in table.rows]
     expected_records = prc._expected_records(workload, table, input_rows)
 
-    dense = compile_live_compositional_transition_program(program)
+    compiled_dense = compile_live_compositional_transition_program(program)
+
+    # Add one output-disconnected dense ReLU feature as a codec branch probe.
+    # Its outgoing column is exactly zero, so the transition function is unchanged.
+    weights = [
+        [list(row) for row in layer]
+        for layer in compiled_dense.weights
+    ]
+    biases = [list(layer) for layer in compiled_dense.biases]
+    weights[0].append([1.0] * compiled_dense.architecture[0])
+    biases[0].append(0.0)
+    for row in weights[1]:
+        row.append(0.0)
+    architecture = (
+        compiled_dense.architecture[0],
+        compiled_dense.architecture[1] + 1,
+        *compiled_dense.architecture[2:],
+    )
+    dense = type(compiled_dense)(
+        weights,
+        biases,
+        program_digest=program.digest,
+        input_names=table.input_names,
+        output_names=table.output_names,
+        architecture=architecture,
+    )
+
     sparse = SparseTransitionReLUNetwork.from_dense(dense)
     payload = sre.encode_hybrid_binary(sparse)
     inner_header_length = int.from_bytes(payload[:4], "little")
