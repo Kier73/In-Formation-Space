@@ -58,8 +58,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install optional schema checker
-        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Install schema and signature dependencies
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5" "cryptography>=42,<50"
       - name: Run envelope tests
         run: python -m unittest discover -s formats/encounter-envelope -p "test_*.py" -v
       - name: Validate illustrative envelope
@@ -207,6 +207,15 @@ jobs:
         with:
           name: authority-review-certificate-example
           path: ${{ runner.temp }}/authority-review-certificate-example.json
+          if-no-files-found: warn
+      - name: Generate signed authority review receipt example
+        run: python bridges/authority-lineage/signed_review_demo.py --output "${{ runner.temp }}/signed-authority-review-example.json"
+      - name: Upload signed authority review receipt example
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authority-signed-review-receipts
+          path: ${{ runner.temp }}/signed-authority-review-example.json
           if-no-files-found: warn
       - name: Run append-only hypothesis revision tests
         run: python -m unittest discover -s bridges/hypothesis-revision -p "test_*.py" -v

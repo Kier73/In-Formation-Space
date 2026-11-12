@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://in-formation-space.invalid/schemas/signed-authority-review-vote-0.2.json",
+  "title": "Context-bound signed authority review vote payload",
+  "type": "object",
+  "required": [
+    "format",
+    "schema",
+    "certificate_digest",
+    "proposal_id",
+    "proposal_digest",
+    "event_key",
+    "base_decision_ids",
+    "base_decision_digests",
+    "policy_digest",
+    "vote"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.signed-authority-review-vote"
+    },
+    "schema": {
+      "const": "in-formation.signed-authority-review-vote/0.2"
+    },
+    "certificate_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "proposal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposal_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "event_key": {
+      "type": "object",
+      "required": [
+        "kind",
+        "logical_time"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "logical_time": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "base_decision_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "base_decision_digests": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "vote": {
+      "type": "object",
+      "required": [
+        "seat",
+        "reviewer_ref",
+        "vote",
+        "rationale",
+        "review_ref",
+        "review_sha256"
+      ],
+      "properties": {
+        "seat": {
+          "enum": [
+            "R00",
+            "R01",
+            "R02"
+          ]
+        },
+        "reviewer_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vote": {
+          "enum": [
+            "APPROVE",
+            "REJECT",
+            "ABSTAIN"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
