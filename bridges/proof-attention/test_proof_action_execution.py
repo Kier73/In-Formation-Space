@@ -42,7 +42,7 @@ def trace(*, environment=None, transitions=None, extra_obligations=()):
                 "tactic": "simp",
                 "subgoals": [],
                 "attempt_status": "candidate",
-                "evidence_ref": "candidate:simp",
+                "evidence_ref": "candidate:zz-simp",
             },
         ],
     }
