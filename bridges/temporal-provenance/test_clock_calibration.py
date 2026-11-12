@@ -210,7 +210,9 @@ class CalibrationMappingTests(unittest.TestCase):
 
     def test_touching_intervals_remain_unresolved(self):
         item = calibration()
-        mapped = map_source_interval(item, 50)
+        mapped = map_source_interval(
+            item, source_clock_id="controller:C", source_coordinate=50, source_unit="tick"
+        )
         result = compare_cross_clock_intervals(
             item,
             source_event_id="source",
@@ -224,6 +226,48 @@ class CalibrationMappingTests(unittest.TestCase):
             target_unit="tick",
         )
         self.assertEqual(result["relation"], "overlap_unresolved")
+
+    def test_mapping_refuses_wrong_clock_identity_or_unit(self):
+        item = calibration()
+        with self.assertRaises(ClockCalibrationError):
+            map_source_interval(
+                item, source_clock_id="controller:other-segment",
+                source_coordinate=50, source_unit="tick",
+            )
+        with self.assertRaises(ClockCalibrationError):
+            map_source_interval(
+                item, source_clock_id="controller:C",
+                source_coordinate=50, source_unit="millisecond",
+            )
+
+    def test_cross_clock_comparison_refuses_wrong_target_clock_or_unit(self):
+        item = calibration()
+        with self.assertRaises(ClockCalibrationError):
+            compare_cross_clock_intervals(
+                item,
+                source_event_id="source",
+                source_clock_id="controller:C",
+                source_coordinate=50,
+                source_unit="tick",
+                target_event_id="target",
+                target_clock_id="sensor:wrong",
+                target_lower=200,
+                target_upper=201,
+                target_unit="tick",
+            )
+        with self.assertRaises(ClockCalibrationError):
+            compare_cross_clock_intervals(
+                item,
+                source_event_id="source",
+                source_clock_id="controller:C",
+                source_coordinate=50,
+                source_unit="tick",
+                target_event_id="target",
+                target_clock_id="sensor:S",
+                target_lower=200,
+                target_upper=201,
+                target_unit="nanosecond",
+            )
 
     def test_target_interval_must_be_well_formed(self):
         item = calibration()
@@ -247,10 +291,14 @@ class CalibrationMappingTests(unittest.TestCase):
             compare_cross_clock_intervals(
                 item,
                 source_event_id="same",
+                source_clock_id="controller:C",
                 source_coordinate=10,
+                source_unit="tick",
                 target_event_id="same",
+                target_clock_id="sensor:S",
                 target_lower=1,
                 target_upper=2,
+                target_unit="tick",
             )
 
 
