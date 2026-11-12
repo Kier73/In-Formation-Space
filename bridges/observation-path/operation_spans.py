@@ -401,7 +401,7 @@ def main(argv: list[str] | None = None) -> int:
             minimum_samples=args.minimum_samples,
         )
         validate_operation_cost_profiles(report, spans)
-        rendered = json.dumps(report, sort_keys=True, indent=2, ensure_ascii=False) + "\\n"
+        rendered = json.dumps(report, sort_keys=True, indent=2, ensure_ascii=False) + "\n"
         if args.output:
             destination = Path(args.output)
             destination.parent.mkdir(parents=True, exist_ok=True)
