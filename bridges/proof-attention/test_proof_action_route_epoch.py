@@ -121,6 +121,56 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         self.assertEqual(restored_ledger.active_epoch["epoch_id"], "epoch-2")
         self.assertEqual(transport.pending() > 0, True)
 
+    def test_crash_restore_keeps_planned_attempt_for_exact_successor_dispatch(self):
+        session, source_trace, _root_id = make_session()
+        proof_ground = ground(source_trace)
+        planned = session.begin_next()
+        _session, _trace, _pg, _transport, host, worker = make_endpoints(
+            session_override=session,
+            proof_ground_override=proof_ground,
+        )
+        store = InMemoryRouteEpochLedgerStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="planned-crash-epoch"
+        )
+
+        handoff = handoff_proof_action_route_epoch(
+            host,
+            worker,
+            ledger,
+            epoch_id="planned-crash-epoch",
+            reason_code="planned_migration",
+            reason="move a planned action before it enters the old route",
+            successor_epoch_id="planned-crash-epoch-next",
+            successor_host_id="planned-crash-host-next",
+            successor_worker_id="planned-crash-worker-next",
+            successor_request_channel="planned-crash-request-next",
+            successor_result_channel="planned-crash-result-next",
+        )
+        self.assertEqual(
+            handoff.closed_epoch["details"]["preclose_session_digest"],
+            handoff.closed_epoch["details"]["postclose_session_digest"],
+        )
+
+        recovered_ledger = ProofActionRouteEpochLedger.from_dict(
+            store.load(), store=store
+        )
+        _transport, recovered_host, recovered_worker = restore_proof_action_route_handoff(
+            handoff.closed_epoch,
+            recovered_ledger,
+            proof_ground,
+            restore_transport=InMemoryTransport.from_snapshot,
+            owner_id="planned-crash-recovery-owner",
+        )
+        self.assertEqual(recovered_host.active_attempt.status, "planned")
+        self.assertEqual(recovered_host.active_attempt.attempt_id, planned.attempt_id)
+        dispatch = recovered_host.dispatch_next()
+        self.assertEqual(dispatch.attempt_id, planned.attempt_id)
+        received = recovered_worker.receive_request()
+        self.assertEqual(received.request, dispatch.request)
+        self.assertTrue(recovered_host.observe_request_admission())
+
     def test_interpreted_attempt_remains_interpreted_across_route_handoff(self):
         _session, source_trace, _proof_ground, _transport, host, worker = make_endpoints()
         ledger = ProofActionRouteEpochLedger()
