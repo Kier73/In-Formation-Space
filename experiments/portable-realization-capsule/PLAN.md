@@ -34,3 +34,8 @@ The pinned [PRC-001 workflow](https://github.com/Kier73/In-Formation-Space/actio
 ## Follow-on research question
 
 The first result shows that the repeated header/receipt averages approximately 2.5 KB per capsule. For compact inner payloads, metadata dominates the full representation. A next experiment should compare compressed standalone headers with a bundle-level shared provenance manifest, preserving an independently verifiable capsule identity and payload binding.
+
+
+## Final PR-head acceptance
+
+The final pinned [PRC-001 workflow run](https://github.com/Kier73/In-Formation-Space/actions/runs/43317477207) passed syntax, capsule and E-CPU sparse regression tests, complete corpus replay, tamper rejection, and artifact upload. The [final-head evidence record](results/ci-run-43317477207.md) records 288 capsules and 49,104 pre/post-package semantic comparisons.
