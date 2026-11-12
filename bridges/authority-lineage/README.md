@@ -57,6 +57,17 @@ The Python API is in authority_lineage.py:
 
 The JSON Schema defines the portable envelope. The Python validator adds cross-entry rules that JSON Schema alone cannot establish, including parent existence, proposal acceptance order, same-event ancestry, generation calculation, and frontier consistency.
 
+## Observation evidence adapter
+
+The companion observation_adapter.py connects the existing evidence-gated observation records to this lineage ledger without changing E-CPU.
+
+- issue_initial_decision_from_attempt() accepts a finalized attempt and its retained evidence records. It checks attempt/observation identity, event identity, source-set equality, evidence count, payload digests, and the representative before issuing the first authority decision. Its evidence-set digest is rebuilt from the exact source/channel/sequence/payload identities.
+- propose_revision_from_new_evidence() binds a later evidence set to the complete current decision frontier and requires the known evidence records to reconstruct the prior decision's evidence-set digest. A genuinely new source becomes a revision proposal, not an authority mutation.
+- An exact repeat from an already represented source raises DuplicateObservationEvidenceError. A changed payload from that source raises SourceEquivocationError. The adapter never turns same-source equivocation into an ordinary new-source proposal.
+- The adapter currently requires a single current decision frontier. If the generic lineage ledger exposes competing tips, they must be reconciled through an explicit multi-parent merge before this strict observation adapter can propose another source-based revision.
+
+The adapter still does not fetch/authenticate source artifacts, authenticate actors, or verify external policy correctness. It checks the supplied evidence references and binds their digests to the decision history.
+
 ## Reproduce
 
     python -m unittest discover -s bridges/authority-lineage -p 'test_*.py' -v
