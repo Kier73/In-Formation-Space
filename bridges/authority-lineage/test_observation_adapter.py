@@ -214,6 +214,53 @@ class ObservationAdapterTests(unittest.TestCase):
                 issued_by="authority", rationale="Count mismatch must not be accepted.",
             )
 
+    def test_empty_evidence_refusal_requires_an_explicit_event_key(self):
+        ledger = create_ledger("adapter-empty", created_by="test-suite")
+        attempt = {
+            "attempt_id": "attempt-empty",
+            "observation_id": "observation-empty",
+            "final_status": "REFUSED",
+            "evidence_received_sources": [],
+            "evidence_received_count": 0,
+            "representative_source": None,
+            "evidence_partition": {
+                "observed_sources": [],
+                "source_count": 0,
+                "winner_sources": [],
+                "dissenting_sources": [],
+                "missing_sources": ["S00", "S01", "S02", "S03"],
+            },
+        }
+        with self.assertRaisesRegex(ObservationEvidenceError, "explicit event key"):
+            issue_initial_decision_from_attempt(
+                ledger, attempt, [], policy_digest=POLICY_DIGEST,
+                issued_by="authority", rationale="Empty evidence requires event coordinates.",
+            )
+        updated, decision_id, receipt = issue_initial_decision_from_attempt(
+            ledger, attempt, [], event_key=EVENT, policy_digest=POLICY_DIGEST,
+            issued_by="authority", rationale="No observation evidence arrived before finalization.",
+        )
+        decision = decision_history(updated, EVENT)[0]
+        self.assertEqual(decision["decision_id"], decision_id)
+        self.assertEqual(decision["status"], "REFUSED")
+        self.assertIsNone(decision["representative_ref"])
+        self.assertEqual(receipt["evidence_record_count"], 0)
+
+    def test_authorized_representative_must_belong_to_winning_group(self):
+        ledger = create_ledger("adapter-winner", created_by="test-suite")
+        attempt = dict(authorized_attempt())
+        attempt["evidence_partition"] = {
+            **attempt["evidence_partition"],
+            "winner_sources": ["S01"],
+        }
+        with self.assertRaisesRegex(ObservationEvidenceError, "winning evidence group"):
+            issue_initial_decision_from_attempt(
+                ledger, attempt,
+                [evidence("S00", "a" * 64), evidence("S01", "b" * 64)],
+                policy_digest=POLICY_DIGEST, issued_by="authority",
+                rationale="Representative outside winner must be rejected.",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
