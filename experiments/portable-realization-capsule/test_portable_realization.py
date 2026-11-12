@@ -1,6 +1,11 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -151,3 +156,83 @@ def test_capsule_requires_digest_bound_nonempty_payload():
 
     with pytest.raises(PortableRealizationError, match="non-empty"):
         encode_capsule(b"", **arguments)
+
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda args: args["verification"].__setitem__("measurement", 1.5),
+        lambda args: args["verification"].__setitem__("unexpected_κ", "value"),
+    ],
+    ids=["floating-point-metadata", "non-ascii-object-key"],
+)
+def test_v1_canonical_metadata_rejects_nonportable_values(mutation):
+    payload, arguments = _arguments()
+    mutation(arguments)
+
+    with pytest.raises(PortableRealizationError, match="canonical metadata v1"):
+        encode_capsule(payload, **arguments)
+
+
+def test_boolean_is_not_accepted_as_an_integer_field():
+    payload, arguments = _arguments()
+    arguments["interface"]["input_names"] = ["input_a"]
+    arguments["interface"]["architecture"] = [1, 2, 1]
+    arguments["interface"]["domain"]["input_width"] = True
+    arguments["verification"]["input_row_count"] = 2
+
+    with pytest.raises(
+        PortableRealizationError,
+        match="input_width must be an interoperable safe integer",
+    ):
+        encode_capsule(payload, **arguments)
+
+    payload, arguments = _arguments()
+    arguments["interface"]["input_names"] = ["input_a"]
+    arguments["interface"]["architecture"] = [1, 2, 1]
+    arguments["interface"]["domain"]["input_width"] = 1
+    arguments["verification"]["input_row_count"] = True
+
+    with pytest.raises(
+        PortableRealizationError,
+        match="input_row_count must be an interoperable safe integer",
+    ):
+        encode_capsule(payload, **arguments)
+
+
+def test_independent_node_receiver_verifies_python_capsule_and_unicode_values():
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is required for the independent implementation check")
+
+    payload, arguments = _arguments()
+    arguments["verification"]["workload_id"] = "ground — λ\\nline\\u2028separator"
+    capsule = encode_capsule(payload, **arguments)
+    script = Path(__file__).with_name("verify_capsule.mjs")
+
+    with tempfile.TemporaryDirectory() as directory:
+        capsule_path = Path(directory) / "portable-realization.bin"
+        capsule_path.write_bytes(capsule)
+        result = subprocess.run(
+            [node, str(script), str(capsule_path)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        report = json.loads(result.stdout)
+        assert report["valid"] is True
+        assert report["capsule_sha256"] == decode_capsule(capsule)[0]["capsule_sha256"]
+        assert report["payload_sha256"] == _sha(payload)
+        assert report["codec"] == "rowmask_binary"
+
+        capsule_path.write_bytes(capsule[:-1] + bytes([capsule[-1] ^ 1]))
+        tampered = subprocess.run(
+            [node, str(script), str(capsule_path)],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert tampered.returncode != 0
+        assert "payload SHA-256 mismatch" in tampered.stderr
