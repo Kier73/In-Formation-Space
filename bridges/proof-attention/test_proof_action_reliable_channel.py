@@ -372,7 +372,7 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         session, source_trace, _pg, _transport, host, worker = make_endpoints()
         dispatched, received = deliver_request_and_admit(host, worker)
         attempt = host.active_attempt
-        original_ground_fingerprint = host.proof_ground.fingerprint
+        original_ground_digest = session.plan["proof_ground_digest"]
         bad_trace = add_result_payload(
             source_trace,
             attempt,
@@ -387,7 +387,7 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         with self.assertRaisesRegex(ProofActionReliableChannelError, "does not match the active action"):
             host.receive_result()
         self.assertEqual(session.attempts[0].status, "interpretation_failed")
-        self.assertEqual(host.proof_ground.fingerprint, original_ground_fingerprint)
+        self.assertEqual(session.plan["proof_ground_digest"], original_ground_digest)
 
     def test_unidentifiable_response_is_quarantined_without_closing_active_attempt(self):
         session, _source_trace, _pg, _transport, host, worker = make_endpoints()
