@@ -58,4 +58,28 @@ CI uploads run-manifest.json, attempt-results.json, operation-spans.json, and op
     python experiments/ecpu-reliable-observation-recovery/run_recovery_matrix.py --output-dir results
     python -m unittest discover -s experiments/ecpu-reliable-observation-recovery -p 'test_*.py' -v
 
-The runner rejects any E-CPU checkout whose Git revision differs from the pinned commit. The initial live numbers and exact artifact digests should be added here only after the CI artifact has been inspected and independently summarized.
+The runner rejects any E-CPU checkout whose Git revision differs from the pinned commit.
+
+## First live CI result
+
+The first phase-separated live matrix completed in [GitHub Actions run 293](https://github.com/Kier73/In-Formation-Space/actions/runs/43133401914). The digest-checked [summary receipt](results/ci-run-293-summary.json) records the run, E-CPU revision, artifact ZIP digest, source-artifact digests, profile-matrix digest, and descriptive contrasts.
+
+**Observed coverage:** 24 conditions × 3 repetitions = 72 attempts; 1,980 raw operation spans; 204 workload-condition/phase profiles. All 72 attempts were authorized, all 72 VM applications occurred exactly once, all sender pending sets were empty at completion, and all 72 durable mailbox logs passed hash-chain replay verification. The injected workload produced 36 data retransmissions, 36 ACK retries, and 36 duplicate-cleanup intakes.
+
+The following entries are medians of per-condition, phase-specific operation medians. Condition cells receive equal weight, and phases are not pooled. Values are milliseconds.
+
+| Operation phase | 4 sources | 8 sources |
+| --- | ---: | ---: |
+| `commit_event()` | 22.63492 | 42.04360 |
+| initial `ingest_available()` | 0.07289 | 0.13534 |
+| initial `process_acks()` | 1.11077 | 2.27354 |
+| `finalize_event()` | 0.02594 | 0.02921 |
+| individual `save_checkpoint()` call | 1.70963 | 1.82370 |
+
+The source-count contrast is consistent with more configured channels being consumed and checkpointed: the coordinator made 11 checkpoint-save calls per four-source attempt and 19 per eight-source attempt. Median total time across those nested checkpoint-save spans was 19.35571 ms and 35.26211 ms respectively. These nested checkpoint spans are already included in the outer `commit_event()` span and must not be added to it.
+
+The median sequential recovery overhead was 0.41083 ms for data loss (retry tick plus recovery intake) and 1.30323 ms for ACK loss (retry tick, duplicate cleanup intake, and recovery ACK processing). The latter is the additional path after the receiver has already applied and consumed the original event.
+
+The commit medians by quorum were 34.61916 ms (`q=1`), 32.20302 ms (`q=2`), and 31.83495 ms (`q=4`). Interpret these cautiously: strict authority required every configured source to be present, so quorum changed the threshold but not the number of sources collected or consumed. This experiment does not measure partial-quorum early stop. The observed source-count contrast is a same-run descriptive association, not a universal scaling law.
+
+Run 293 used one GitHub-hosted Linux x86_64 runner and one process-local clock segment. Three repetitions per cell are enough for the pilot's minimum descriptive profiles, not confidence intervals or stable tail estimates. The experiment does not test independent-host repeatability, conflicting evidence, source dissent, refusal, or crash recovery across processes. Cost remains separate from information, and no adaptive policy was changed.
