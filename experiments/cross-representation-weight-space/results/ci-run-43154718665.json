@@ -1,0 +1,125 @@
+{
+  "active_parameters": {
+    "and": 8,
+    "xor": 9
+  },
+  "architecture": [
+    2,
+    85,
+    112,
+    1
+  ],
+  "case_count": 8,
+  "cases": [
+    {
+      "expected": 0,
+      "gate": "xor",
+      "input": [0, 0],
+      "mailcpu_queue": 0,
+      "mailcpu_reference": 0,
+      "neural_weights": 0,
+      "translation_contract_digest": "3bbb5eb5bbb7110c40e3fda930fb820867368131b31b75ce39125090c17cd30c",
+      "translation_equivalent": true,
+      "vgi_signal8": 0
+    },
+    {
+      "expected": 1,
+      "gate": "xor",
+      "input": [0, 1],
+      "mailcpu_queue": 1,
+      "mailcpu_reference": 1,
+      "neural_weights": 1,
+      "translation_contract_digest": "35c3f73dcb37fc080be8b3db5905ca7633cbb38842be1d2c92f5533814a6bf36",
+      "translation_equivalent": true,
+      "vgi_signal8": 1
+    },
+    {
+      "expected": 1,
+      "gate": "xor",
+      "input": [1, 0],
+      "mailcpu_queue": 1,
+      "mailcpu_reference": 1,
+      "neural_weights": 1,
+      "translation_contract_digest": "931798cfc2638a221964aae8d6a5620f71aa5ec455e98204c3f25dda4f377251",
+      "translation_equivalent": true,
+      "vgi_signal8": 1
+    },
+    {
+      "expected": 0,
+      "gate": "xor",
+      "input": [1, 1],
+      "mailcpu_queue": 0,
+      "mailcpu_reference": 0,
+      "neural_weights": 0,
+      "translation_contract_digest": "f9f0861e44927c0559c099f883dc64f2acfa93a5135a12a0b036c9147ea2c177",
+      "translation_equivalent": true,
+      "vgi_signal8": 0
+    },
+    {
+      "expected": 0,
+      "gate": "and",
+      "input": [0, 0],
+      "mailcpu_queue": 0,
+      "mailcpu_reference": 0,
+      "neural_weights": 0,
+      "translation_contract_digest": "b8ef0c47a567fd060a246b2d8fa0af01530bec6c2f229c1e20fda77dda3a9561",
+      "translation_equivalent": true,
+      "vgi_signal8": 0
+    },
+    {
+      "expected": 0,
+      "gate": "and",
+      "input": [0, 1],
+      "mailcpu_queue": 0,
+      "mailcpu_reference": 0,
+      "neural_weights": 0,
+      "translation_contract_digest": "2eeef1df573700854b90c5af80ee182e71474448584c27bc4aab5898fdf178ad",
+      "translation_equivalent": true,
+      "vgi_signal8": 0
+    },
+    {
+      "expected": 0,
+      "gate": "and",
+      "input": [1, 0],
+      "mailcpu_queue": 0,
+      "mailcpu_reference": 0,
+      "neural_weights": 0,
+      "translation_contract_digest": "f764559ce257dfeb72703f2e626fcc0c4a5a6c5a0565af5479bcb5b0950e8b20",
+      "translation_equivalent": true,
+      "vgi_signal8": 0
+    },
+    {
+      "expected": 1,
+      "gate": "and",
+      "input": [1, 1],
+      "mailcpu_queue": 1,
+      "mailcpu_reference": 1,
+      "neural_weights": 1,
+      "translation_contract_digest": "c0325a9ef09b2654a6dfaab17c8ff7bc3b025284f1b5ba99b8d9b37077ca7edb",
+      "translation_equivalent": true,
+      "vgi_signal8": 1
+    }
+  ],
+  "domain": [[0, 0], [0, 1], [1, 0], [1, 1]],
+  "final_and_model_digest": "0fe19e8263d396aa68bf52a4cecf077bd6b6305569c20486f947c4ae6b2f70f6",
+  "initial_xor_model_digest": "554b8f66ff6119c586ebf7407ba96403968725c6709cf2c712a797f4474f2964",
+  "intervention": {
+    "changed_parameters": 2,
+    "coordinates": [
+      {"input_index": 0, "layer_index": 2, "output_index": 0},
+      {"input_index": 1, "layer_index": 2, "output_index": 0}
+    ],
+    "source_digest": "554b8f66ff6119c586ebf7407ba96403968725c6709cf2c712a797f4474f2964",
+    "target_digest": "0fe19e8263d396aa68bf52a4cecf077bd6b6305569c20486f947c4ae6b2f70f6"
+  },
+  "limitations": [
+    "This is a hand-constructed finite Boolean example, not general neural synthesis.",
+    "The 10,000 parameter count includes zero-valued weights and biases.",
+    "The network is sparse in active values despite its dense declared architecture.",
+    "No training, generalization, robustness outside binary inputs, or hardware performance is tested."
+  ],
+  "parameter_count": 10000,
+  "schema": "in-formation-space.cross-representation-weight-space.v1",
+  "status": "verified-within-declared-finite-domain",
+  "verification_scope": "Exact equality on all four binary input pairs for the VGI signal realization, MailCPU reference interpreter, MailCPU queue interpreter, and the constructed 2-85-112-1 ReLU network. Per-case semantic translation checks compare MailCPU reference outputs to neural outputs."
+}
