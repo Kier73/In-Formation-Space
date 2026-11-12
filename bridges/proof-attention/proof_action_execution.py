@@ -702,6 +702,13 @@ class ProofAttentionSession:
             raise ProofActionExecutionError("active session snapshot must contain an active attempt")
         if status == "active" and attempts[-1].status in ("continued", "query_determined", "unresolved"):
             raise ProofActionExecutionError("active session snapshot ends in a closed attempt")
+        if status == "active" and attempts[-1].status != "interpreted":
+            active_transition_id = attempts[-1].action["transition_id"]
+            if not any(
+                action["transition_id"] == active_transition_id
+                for action in restored._plan["candidate_actions"]
+            ):
+                raise ProofActionExecutionError("active attempt is not present in the current candidate frontier")
         roots_accepted = all(
             proof_ground.kernel_status(root) == "kernel_accepted" for root in roots
         )
