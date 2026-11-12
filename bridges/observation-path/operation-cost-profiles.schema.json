@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/operation-cost-profiles.schema.json",
+  "title": "Descriptive operation cost profiles",
+  "description": "Empirical operation-span distributions partitioned by operation, clock actor, clock segment, and outcome. Profiles have no automatic policy effect.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "minimum_samples",
+    "profiles",
+    "source_span_digests",
+    "policy_effect",
+    "measurement_scope",
+    "interpretation_limits",
+    "profile_digest"
+  ],
+  "properties": {
+    "schema": {
+      "const": "in-formation.operation-cost-profiles/0.1"
+    },
+    "minimum_samples": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operation_id",
+          "clock_actor_id",
+          "clock_segment_id",
+          "outcome",
+          "span_count",
+          "measured_sample_count",
+          "clock_regressed_count",
+          "median_ns",
+          "p90_ns",
+          "p95_ns",
+          "minimum_ns",
+          "maximum_ns",
+          "readiness"
+        ],
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "clock_actor_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "clock_segment_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "outcome": {
+            "enum": [
+              "succeeded",
+              "raised"
+            ]
+          },
+          "span_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "measured_sample_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "clock_regressed_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "median_ns": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "number",
+                "minimum": 0
+              }
+            ]
+          },
+          "p90_ns": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              }
+            ]
+          },
+          "p95_ns": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              }
+            ]
+          },
+          "minimum_ns": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              }
+            ]
+          },
+          "maximum_ns": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "integer",
+                "minimum": 0
+              }
+            ]
+          },
+          "readiness": {
+            "enum": [
+              "insufficient_samples",
+              "descriptive_only"
+            ]
+          }
+        }
+      }
+    },
+    "source_span_digests": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "policy_effect": {
+      "const": "none"
+    },
+    "measurement_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "profile_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
