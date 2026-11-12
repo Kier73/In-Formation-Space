@@ -168,3 +168,48 @@ This is a coordinator and receipt ledger, not a tactic runner. It does not launc
 A proof action deliberately has a proof-specific lifecycle rather than being forced into the ordinary partial-transition probe interface: a tactic result is a hyper-transition with AND subgoals and OR alternatives, not a single state/action outcome that directly revises a transition Ground.
 
 Focused tests cover stage ordering, return/admission gates, attempt correlation, environment and obligation continuity, timeout/rejection handling, frontier exhaustion, receipt-gated completion, and deterministic event-chain export. The existing \`.github/workflows/proof-attention.yml\` discovers both proof-attention test modules against the pinned VGI revision.
+
+
+## E-CPU trajectory persistence
+
+The [trajectory adapter](proof_attention_trajectory.py) persists the current proof-attention session into E-CPU's existing indexed binary trajectory and EventJournal formats:
+
+\`\`\`python
+from proof_attention_trajectory import (
+    export_proof_attention_trajectory,
+    restore_proof_attention_trajectory,
+)
+
+manifest = export_proof_attention_trajectory(
+    session,
+    proof_ground,
+    "proof-session.mtrj",
+    "proof-session.mtrj.idx",
+    "proof-session.manifest.json",
+    stride=64,
+)
+
+restored = restore_proof_attention_trajectory(
+    "proof-session.manifest.json",
+    "proof-session.mtrj",
+    "proof-session.mtrj.idx",
+    freshly_imported_proof_ground,
+)
+\`\`\`
+
+The adapter reuses E-CPU's \`TrajectoryWriter\`, \`TrajectoryReader\`, and \`EventJournal\`; it does not fork or reimplement those formats. Every attempt event becomes one trajectory frame. Frames carry the original session snapshot digest, global event sequence, attempt sequence/ID, attempt-local event sequence/digest, and the complete attempt event.
+
+Two independently reconstructed integrity views accompany the portable session manifest:
+
+1. The binary trajectory receipt chain covers ordered frame payloads and local event coordinates.
+2. The EventJournal projection covers the same ordered attempt events, with attempt IDs, local sequence numbers, event actors, evidence references, details, and original event-chain links.
+
+The manifest contains attempt headers plus the session core, so the full event stream is reconstructed from the binary trajectory rather than duplicated into the manifest. Restore verifies the manifest digest, trajectory header/stride, all frame identities, contiguous per-attempt sequences, attempt-group ordering, trajectory receipt head, EventJournal projection head, and the reconstructed session digest. It then delegates session and action-event validation to \`ProofAttentionSession.from_snapshot\` against a caller-supplied fresh VGI ProofGround.
+
+### Time and trust boundaries
+
+The trajectory logical time is the one-based append order of session events. It is a deterministic coordinate for seeking and replay—not elapsed time, proof-assistant time, scheduler time, or a cross-process clock measurement. E-CPU's trajectory layer preserves this order; it does not align it to other time domains.
+
+The data stream, sparse index, and manifest are separate files, not a transactional distributed store. SHA-256 chains and manifest digests detect inconsistent modification relative to a trusted head; they are not signatures or external authentication. The restored session is only as trustworthy as the supplied proof trace and upstream evidence/kernel-receipt validation. The trajectory adapter preserves and cross-checks those records; it does not authenticate a previous worker or execute Lean.
+
+The workflow pins E-CPU to \`c82d795e6b7602cc3d6e8c41e8622820914f5cbf\` and runs the trajectory tests alongside the planner and proof-action lifecycle suites.
