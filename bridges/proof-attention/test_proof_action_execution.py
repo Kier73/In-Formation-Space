@@ -376,6 +376,120 @@ class ProofActionExecutionTests(unittest.TestCase):
         for prior, following in zip(attempt.events, attempt.events[1:]):
             self.assertEqual(following["previous_event_digest"], prior["event_digest"])
 
+
+    def test_active_session_snapshot_restores_same_ground_and_pending_action(self):
+        session, payload, _ = make_session()
+        attempt = session.begin_next()
+        snapshot = session.to_dict()
+
+        restored = ProofAttentionSession.from_snapshot(
+            snapshot,
+            ground(payload),
+        )
+        self.assertEqual(restored.to_dict(), snapshot)
+        self.assertEqual(restored.status, "active")
+        self.assertEqual(restored.active_attempt.attempt_id, attempt.attempt_id)
+        self.assertEqual(restored.active_attempt.status, "planned")
+
+    def test_restored_returned_attempt_can_be_interpreted_and_replanned(self):
+        session, payload, _ = make_session()
+        first = session.begin_next()
+        execute_to_return(first)
+        snapshot = session.to_dict()
+
+        restored = ProofAttentionSession.from_snapshot(snapshot, ground(payload))
+        restored_first = restored.active_attempt
+        self.assertEqual(restored_first.status, "returned")
+        updated = add_result(payload, restored_first, result_status="timeout")
+        restored.interpret_result(
+            updated,
+            actor="restored-trace-adapter",
+            interpretation_ref=f"interpretation://{restored_first.attempt_id}",
+        )
+        second = restored.begin_next()
+        self.assertEqual(second.action["tactic"], "simp")
+        self.assertEqual(restored_first.status, "continued")
+
+    def test_interpreted_session_snapshot_restores_replanning_position(self):
+        session, payload, _ = make_session()
+        first = session.begin_next()
+        execute_to_return(first)
+        updated = add_result(payload, first, result_status="elaborated")
+        session.interpret_result(
+            updated,
+            actor="adapter",
+            interpretation_ref=f"interpretation://{first.attempt_id}",
+        )
+        snapshot = session.to_dict()
+
+        restored = ProofAttentionSession.from_snapshot(snapshot, updated)
+        self.assertEqual(restored.to_dict(), snapshot)
+        second = restored.begin_next()
+        self.assertEqual(second.action["tactic"], "simp")
+        self.assertEqual(restored.attempts[0].status, "continued")
+
+    def test_complete_session_snapshot_requires_and_restores_root_receipt(self):
+        session, payload, _ = make_session()
+        first = session.begin_next()
+        execute_to_return(first)
+        updated = add_result(payload, first, include_receipt=True)
+        session.interpret_result(
+            updated,
+            actor="adapter",
+            interpretation_ref=f"interpretation://{first.attempt_id}",
+        )
+        self.assertIsNone(session.begin_next())
+        snapshot = session.to_dict()
+        restored = ProofAttentionSession.from_snapshot(snapshot, updated)
+        self.assertEqual(restored.status, "complete")
+        self.assertEqual(restored.to_dict(), snapshot)
+
+    def test_snapshot_restore_rejects_tampered_event_chain_even_with_rehashed_session(self):
+        session, payload, _ = make_session()
+        attempt = session.begin_next()
+        snapshot = session.to_dict()
+        snapshot["attempts"][0]["events"][0]["details"]["tactic"] = "forged"
+        core = {key: value for key, value in snapshot.items() if key != "session_digest"}
+        snapshot["session_digest"] = hashlib.sha256(
+            __import__("json").dumps(
+                core, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        with self.assertRaisesRegex(ProofActionExecutionError, "attempt snapshot digest"):
+            ProofAttentionSession.from_snapshot(snapshot, ground(payload))
+
+    def test_snapshot_restore_rejects_a_different_current_ground(self):
+        session, payload, _ = make_session()
+        session.begin_next()
+        snapshot = session.to_dict()
+        changed = copy.deepcopy(payload)
+        changed["transitions"].append({
+            "source": "root", "tactic": "rfl", "subgoals": [],
+            "attempt_status": "candidate", "evidence_ref": "candidate:rfl",
+        })
+        with self.assertRaisesRegex(ProofActionExecutionError, "does not reproduce"):
+            ProofAttentionSession.from_snapshot(snapshot, ground(changed))
+
+    def test_exhausted_session_snapshot_restores_without_retrying_attempted_action(self):
+        only = [{
+            "source": "root", "tactic": "induction", "subgoals": ["child"],
+            "attempt_status": "candidate", "evidence_ref": "candidate:only",
+        }]
+        session, payload, _ = make_session(transitions=only)
+        first = session.begin_next()
+        execute_to_return(first)
+        updated = add_result(payload, first, result_status="timeout")
+        session.interpret_result(
+            updated, actor="adapter", interpretation_ref="interpretation://timeout"
+        )
+        self.assertIsNone(session.begin_next())
+        snapshot = session.to_dict()
+        restored = ProofAttentionSession.from_snapshot(snapshot, updated)
+        self.assertEqual(restored.status, "exhausted")
+        self.assertIsNone(restored.begin_next())
+        self.assertEqual(restored.to_dict(), snapshot)
+
     def test_json_roundtrip_contains_no_runtime_objects(self):
         session, _, _ = make_session()
         attempt = session.begin_next()
