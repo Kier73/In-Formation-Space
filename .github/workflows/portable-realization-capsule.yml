@@ -61,6 +61,7 @@ jobs:
           experiments/portable-realization-capsule/portable_realization.py
           experiments/portable-realization-capsule/run_experiment.py
           experiments/portable-realization-capsule/portable_stateful_checkpoint.py
+          experiments/portable-realization-capsule/stateful_recovery_handoff.py
 
       - name: Run capsule and E-CPU sparse transition regressions
         env:
@@ -69,6 +70,7 @@ jobs:
           python -m pytest
           experiments/portable-realization-capsule/test_portable_realization.py
           experiments/portable-realization-capsule/test_portable_stateful_checkpoint.py
+          experiments/portable-realization-capsule/test_stateful_recovery_handoff.py
           external/E-CPU/tests/test_transition_space.py -q
 
       - name: Execute portable realization capsule corpus
