@@ -198,7 +198,7 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         send_result(host, worker, source_trace, first_request)
         imported = host.receive_result()
         self.assertIsNotNone(imported)
-        self.assertEqual(session.attempts[0].events[-2]["stage"], "interpreted")
+        self.assertEqual(session.attempts[0].events[-1]["stage"], "interpreted")
         self.assertIsNone(host.receive_result())  # Duplicate old sequence is only ACKed.
         self.assertEqual(worker.process_result_acknowledgements(), (1,))
         self.assertEqual(worker.pending_result_sequences, ())
