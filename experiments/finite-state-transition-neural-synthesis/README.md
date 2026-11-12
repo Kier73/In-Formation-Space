@@ -143,3 +143,6 @@ The E-CPU transition compiler tests include 24 seeded, structurally varied Boole
 E-CPU also records explicit N-7…N-12 invariant entries for finite table completeness, neural equivalence, commit-on-match stepping, state/time-preserving model revisions, snapshot replay/tamper rejection, and the governing mathematics annotations required on all neural modules.
 
 The updated IFS workflow pins E-CPU at `5a3b97cba802889976c815421e4ffffac7e4bdcc`. The [latest run](https://github.com/Kier73/In-Formation-Space/actions/runs/43229568660) passed the 128-case transition experiment, 2,048 recurrent trajectories, the stateful runtime lifecycle, 21 transition compiler tests (including the generated corpus), 8 Boolean weight-space tests, 11 stateful runtime/registry tests, and both VGI reference suites. See the [provenance summary](results/ci-run-43229568660-summary.json) and [result note](results/ci-run-43229568660.md).
+## Module-resolved neural invariants
+
+The E-CPU invariant verifier now resolves the neural modules to their concrete public symbols, and the registry uses one module per annotation invariant (N-12 for `weight_space`, N-13 for `transition_space`, N-14 for `stateful_transition`). The IFS workflow is pinned to E-CPU revision `5ccf9f87c3169d23cf3b01fe8b1c85bf69f6b60a`, which includes that stricter registry resolution and its dedicated regression test.
