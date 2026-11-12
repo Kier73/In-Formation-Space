@@ -52,12 +52,12 @@ def _load_prc_runner():
     return module
 
 
-def _realization_capsule(program):
+def _realization_capsule(program, reference_fn=None):
     prc = _load_prc_runner()
     workload = SimpleNamespace(
         name=program.name,
         program=program,
-        reference=_scalar_counter,
+        reference=reference_fn or _scalar_counter,
     )
     table = program.to_table()
     inputs = [tuple(row.inputs) for row in table.rows]
@@ -152,8 +152,15 @@ def _build_runtime_and_capsules():
     assert third.state == (1, 0)
     assert runtime.tick == 3 and runtime.revision == 1
 
+    def revised_scalar_counter(inputs):
+        if tuple(inputs) == (0, 1, 1, 1):
+            return (1, 0)
+        return _scalar_counter(inputs)
+
     initial_capsule, initial_dense, initial_sparse = _realization_capsule(baseline)
-    revised_capsule, revised_dense, revised_sparse = _realization_capsule(revised)
+    revised_capsule, revised_dense, revised_sparse = _realization_capsule(
+        revised, revised_scalar_counter
+    )
     assert runtime.model_digest == revised_dense.digest
     assert runtime.program_digest == revised.digest
     assert initial_sparse.source_digest == baseline.digest
