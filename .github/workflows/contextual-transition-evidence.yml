@@ -1,0 +1,43 @@
+name: Contextual transition evidence
+
+on:
+  push:
+    paths:
+      - "bridges/observation-path/transition_context.py"
+      - "bridges/observation-path/test_transition_context.py"
+      - "bridges/observation-path/transition-context-analysis.schema.json"
+      - "bridges/observation-path/transition_conformance.py"
+      - "experiments/description-to-realization/trials/trial-08-intervention-aware-attention/intervention_attention.py"
+      - ".github/workflows/contextual-transition-evidence.yml"
+  pull_request:
+    paths:
+      - "bridges/observation-path/transition_context.py"
+      - "bridges/observation-path/test_transition_context.py"
+      - "bridges/observation-path/transition-context-analysis.schema.json"
+      - "bridges/observation-path/transition_conformance.py"
+      - "experiments/description-to-realization/trials/trial-08-intervention-aware-attention/intervention_attention.py"
+      - ".github/workflows/contextual-transition-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contextual-transition-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile transition-context modules
+        run: |
+          python -m py_compile experiments/description-to-realization/trials/trial-08-intervention-aware-attention/intervention_attention.py
+          python -m py_compile bridges/observation-path/transition_conformance.py
+          python -m py_compile bridges/observation-path/transition_context.py
+      - name: Validate context-analysis schema
+        run: |
+          python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+          python -c "import json, jsonschema; p='bridges/observation-path/transition-context-analysis.schema.json'; s=json.load(open(p, encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s)"
+      - name: Run focused context-analysis tests
+        run: python -m unittest discover -s bridges/observation-path -p 'test_transition_context.py' -v
