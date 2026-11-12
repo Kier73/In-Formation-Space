@@ -83,13 +83,19 @@ def _start_remote_authority(
     ready = json.loads(ready_line)
     assert ready["member_id"] == member_id
     assert ready["pid"] == process.pid
-    peer = RecoveryLineagePeerClient.connect(
-        membership,
-        member_id,
-        "127.0.0.1",
-        int(ready["port"]),
-        timeout=2.0,
-    )
+    try:
+        peer = RecoveryLineagePeerClient.connect(
+            membership,
+            member_id,
+            "127.0.0.1",
+            int(ready["port"]),
+            timeout=2.0,
+        )
+    except BaseException:
+        if process.poll() is None:
+            process.kill()
+        process.communicate(timeout=5)
+        raise
     return process, peer
 
 
@@ -97,12 +103,14 @@ def _stop_remote_authority(
     process: subprocess.Popen[str] | None,
     peer: RecoveryLineagePeerClient | None,
 ) -> None:
-    if peer is not None:
-        peer.close()
-    if process is not None:
-        if process.poll() is None:
-            process.kill()
-        process.communicate(timeout=5)
+    try:
+        if peer is not None:
+            peer.close()
+    finally:
+        if process is not None:
+            if process.poll() is None:
+                process.kill()
+            process.communicate(timeout=5)
 
 
 def _psc_fixture():
@@ -231,6 +239,7 @@ def test_psc_rehome_uses_remote_quorum_authorities_and_recovers_their_journals(t
             implementation_fingerprint=RECOVERY_IMPL,
         )
         restored_coordinator.close()
+        peer_b = peer_c = None
     finally:
         if coordinator is not None:
             coordinator.close()
