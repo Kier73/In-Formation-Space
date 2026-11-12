@@ -1,5 +1,9 @@
 import copy
+import json
 import unittest
+from pathlib import Path
+
+import jsonschema
 
 from authority_lineage import (
     DECISION_STATUSES,
@@ -282,6 +286,19 @@ class AuthorityLineageTests(unittest.TestCase):
             {item["entry_type"] for item in event_entries(other_ledger, OTHER_EVENT)},
             {"decision_issued"},
         )
+
+    def test_portable_json_schema_accepts_a_valid_ledger(self):
+        ledger, _ = initial_ledger()
+        schema_path = Path(__file__).with_name("authority-lineage.schema.json")
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        jsonschema.validate(ledger, schema)
+
+    def test_decision_frontier_validates_the_hash_chain(self):
+        ledger, _ = initial_ledger()
+        altered = copy.deepcopy(ledger)
+        altered["entries"][1]["payload"]["status"] = "REFUSED"
+        with self.assertRaisesRegex(ValueError, "entry digest"):
+            decision_frontier(altered, EVENT)
 
 
 if __name__ == "__main__":
