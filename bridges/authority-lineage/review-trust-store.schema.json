@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://in-formation-space.invalid/schemas/review-trust-store-0.1.json",
+  "title": "Provisioned Ed25519 reviewer trust store",
+  "type": "object",
+  "required": [
+    "format",
+    "schema",
+    "keys"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.review-trust-store"
+    },
+    "schema": {
+      "const": "in-formation.review-trust-store/0.1"
+    },
+    "keys": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "keyid",
+          "principal",
+          "seat",
+          "public_key"
+        ],
+        "properties": {
+          "keyid": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "principal": {
+            "type": "string",
+            "minLength": 1
+          },
+          "seat": {
+            "enum": [
+              "R00",
+              "R01",
+              "R02"
+            ]
+          },
+          "public_key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]{43}=$",
+            "contentEncoding": "base64"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
