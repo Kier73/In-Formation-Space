@@ -503,24 +503,68 @@ def build_cost_profile_matrix(
     *,
     minimum_samples: int,
 ) -> dict[str, Any]:
-    condition_profiles = []
+    """Build independently reconstructible operation profiles per condition and phase.
+
+    Intake, data recovery, duplicate cleanup, initial ACK handling, and recovery
+    ACK handling are distinct workloads. They must not be blended into one
+    operation distribution merely because they call the same method.
+    """
+    if isinstance(minimum_samples, bool) or not isinstance(minimum_samples, int) or minimum_samples < 1:
+        raise ValueError("minimum_samples must be a positive integer")
+    validated_spans = [validate_operation_span(span) for span in spans]
+    phase_profiles = []
+    matched_span_ids: set[tuple[str, str]] = set()
     for condition in conditions:
         selected = [
-            span for span in spans
+            span for span in validated_spans
             if all(span["context"].get(key) == value for key, value in condition.items())
         ]
-        profile = build_operation_cost_profiles(
-            selected, minimum_samples=minimum_samples
-        )
-        validate_operation_cost_profiles(profile, selected)
-        condition_profiles.append({"condition": condition, "profile": profile})
+        if not selected:
+            raise ValueError("condition has no matching operation spans")
+        phases = sorted({
+            span["context"].get("phase")
+            for span in selected
+        })
+        for phase in phases:
+            if not isinstance(phase, str) or not phase:
+                raise ValueError("every recovery span must declare a non-empty phase")
+            phase_spans = [
+                span for span in selected
+                if span["context"].get("phase") == phase
+            ]
+            if len(phase_spans) < minimum_samples:
+                raise ValueError(
+                    f"condition phase {phase!r} has fewer than {minimum_samples} samples"
+                )
+            profile = build_operation_cost_profiles(
+                phase_spans, minimum_samples=minimum_samples
+            )
+            validate_operation_cost_profiles(profile, phase_spans)
+            phase_profiles.append({
+                "condition": condition,
+                "phase": phase,
+                "span_count": len(phase_spans),
+                "profile": profile,
+            })
+            matched_span_ids.update(
+                (span["attempt_id"], span["span_id"]) for span in phase_spans
+            )
+    expected_span_ids = {
+        (span["attempt_id"], span["span_id"]) for span in validated_spans
+    }
+    if matched_span_ids != expected_span_ids:
+        raise ValueError("phase profiles do not partition the complete source-span set")
     core = {
         "format": "in-formation.ecpu-reliable-observation-recovery-cost-matrix",
         "schema": EXPERIMENT_SCHEMA,
         "minimum_samples": minimum_samples,
-        "condition_profiles": condition_profiles,
+        "phase_profiles": phase_profiles,
         "policy_effect": "none",
-        "interpretation": "Per-condition operation spans; no cross-condition pooling.",
+        "interpretation": (
+            "Profiles are partitioned by workload condition and explicit call phase; "
+            "initial intake, data recovery, duplicate cleanup, initial ACK processing, "
+            "and recovery ACK processing are never pooled."
+        ),
     }
     return {**core, "profile_matrix_digest": digest(core)}
 
@@ -728,6 +772,7 @@ def run_matrix(output_dir: str | Path, *, replicates: int = DEFAULT_REPLICATES) 
             record["durable_log_verified"] for record in records
         ),
         "profile_matrix_digest": profile_matrix["profile_matrix_digest"],
+        "phase_profile_count": len(profile_matrix["phase_profiles"]),
         "minimum_profile_samples": MINIMUM_PROFILE_SAMPLES,
         "interpretation_limits": list(INTERPRETATION_LIMITS),
     }
