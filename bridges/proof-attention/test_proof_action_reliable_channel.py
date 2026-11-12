@@ -110,7 +110,7 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         received = worker.receive_request()
         self.assertIsNotNone(received)
         self.assertEqual(received.request_sequence, dispatched.request_sequence)
-        self.assertEqual(received.request_digest if hasattr(received, "request_digest") else received.request["request_digest"], dispatched.request_digest)
+        self.assertEqual(received.request["request_digest"], dispatched.request_digest)
         self.assertTrue(host.observe_request_admission())
         self.assertEqual(host.active_attempt.status, "admitted")
 
@@ -219,7 +219,9 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         attempt = session.attempts[0]
         self.assertEqual(attempt.status, "no_result")
         self.assertNotIn("interpreted", [event["stage"] for event in attempt.events])
-        self.assertIsNone(host.dispatch_next())
+        next_action = host.dispatch_next()
+        self.assertIsNotNone(next_action)
+        self.assertEqual(next_action.request["candidate_transition"]["tactic"], "simp")
 
     def test_malformed_result_is_retained_as_raw_return_then_interpretation_failed(self):
         session, _trace, _pg, _transport, host, worker = make_endpoints()
@@ -261,6 +263,7 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         session, source_trace, _pg, _transport, host, worker = make_endpoints()
         dispatched, received = deliver_request_and_admit(host, worker)
         attempt = host.active_attempt
+        original_ground_fingerprint = host.proof_ground.fingerprint
         bad_trace = add_result_payload(
             source_trace,
             attempt,
@@ -275,7 +278,7 @@ class ProofActionReliableChannelTests(unittest.TestCase):
         with self.assertRaisesRegex(ProofActionReliableChannelError, "does not match the active action"):
             host.receive_result()
         self.assertEqual(session.attempts[0].status, "interpretation_failed")
-        self.assertNotEqual(host.proof_ground.fingerprint, "changed")
+        self.assertEqual(host.proof_ground.fingerprint, original_ground_fingerprint)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
