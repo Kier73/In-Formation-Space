@@ -466,7 +466,7 @@ class PartialAttentionNavigator:
                 f"cannot resume after mismatch while navigator is {self._status}"
             )
         if not callable(probe_factory):
-            raise TypeError("probe_factory must be callable")
+            raise PartialAttentionNavigationError("probe_factory must be callable")
         self._probe_factory = probe_factory
         self._status = "ready"
 
