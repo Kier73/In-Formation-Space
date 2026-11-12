@@ -199,6 +199,15 @@ jobs:
           name: authority-lineage-fork-merge-example
           path: ${{ runner.temp }}/authority-lineage-example.json
           if-no-files-found: warn
+      - name: Generate certificate-backed authority review example
+        run: python bridges/authority-lineage/review_certificate_demo.py --output "${{ runner.temp }}/authority-review-certificate-example.json"
+      - name: Upload authority review certificate example
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authority-review-certificate-example
+          path: ${{ runner.temp }}/authority-review-certificate-example.json
+          if-no-files-found: warn
       - name: Run append-only hypothesis revision tests
         run: python -m unittest discover -s bridges/hypothesis-revision -p "test_*.py" -v
       - name: Run Poset Interleaver property tests
