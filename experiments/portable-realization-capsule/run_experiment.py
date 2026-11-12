@@ -58,7 +58,7 @@ def verify_capsule_tampering(capsule: bytes) -> dict[str, bool]:
 
     # Change a source revision within the header without recomputing its digest.
     needle = b'"repository":"Kier73/In-Formation-Space"'
-    replacement = b'"repository":"Kier73/Altered-Information-Space"'
+    replacement = b'"repository":"Kier73/No-Formation-Space"'
     if needle not in header_bytes:
         raise AssertionError("capsule header source repository anchor missing")
     altered_header = bytes(header_bytes).replace(needle, replacement, 1)
@@ -250,6 +250,8 @@ def _verify_decoded_capsule(
         })
 
     evidence_digest = digest(case_records)
+    if digest(expected_records) != header["verification"]["reference_outputs_sha256"]:
+        raise AssertionError("capsule verification receipt reference digest mismatch")
     if evidence_digest != header["verification"]["case_evidence_sha256"]:
         raise AssertionError("capsule verification receipt evidence digest mismatch")
     if digest(contract_digests) != header["verification"]["translation_contracts_sha256"]:
@@ -322,7 +324,7 @@ def verify_workload(
                     "row_index": row_index,
                     "inputs": list(inputs_tuple),
                     "outputs": list(expected),
-                    "sparse_outputs": list(sparse_output),
+                    "restored_outputs": list(sparse_output),
                     "translation_contract_digest": comparison.contract_digest,
                 })
 
