@@ -434,3 +434,30 @@ Export refuses a trajectory manifest whose session digest differs from the host'
 The bundle does not embed or replace the trajectory files. Keep the manifest, binary stream, sparse index and paired checkpoint together as one application-level persistence unit. A later session event requires a newly exported trajectory cut and a newly bound bundle; a bundle is not a moving pointer to a future trajectory suffix.
 
 This makes the history/runtime relationship inspectable, not magically transactional. The caller must still create a quiescent cut and persist all components atomically. Receipt and manifest digests detect inconsistency relative to a trusted head; they are not signatures or worker authentication. The trajectory and live transport retain their own semantics and trust boundaries.
+
+## Restart one endpoint while its peer remains live
+
+The host and worker checkpoint functions can also be used independently when only one process is replaced and the existing transport service plus peer endpoint remain available:
+
+```python
+from proof_action_checkpoint import (
+    snapshot_proof_action_host, restore_proof_action_host,
+    snapshot_proof_action_worker, restore_proof_action_worker,
+)
+
+host_state = snapshot_proof_action_host(host)
+# Stop/fence the old host process, then restore the replacement:
+host = restore_proof_action_host(
+    host_state, freshly_imported_proof_ground, existing_transport
+)
+
+worker_state = snapshot_proof_action_worker(worker)
+# Stop/fence the old worker process, then restore the replacement:
+worker = restore_proof_action_worker(worker_state, existing_transport)
+```
+
+The focused restart tests exercise four cuts: a pending request while the worker stays live; a worker restart after request admission; a worker restart with a result still awaiting host intake/ACK; and a host restart with the result still waiting in its mailbox. They check that the same reliable sequence is resumed, application-level request identity is not admitted twice, results are interpreted once, and the surviving peer can complete ACK processing.
+
+These are process-replacement tests over the same in-memory transport instance. A production deployment must preserve the actual mailbox substrate (or restore it through the backend's own durable mechanism). Only one process may own a given endpoint identity at a time: terminate or externally fence the old process before activating its replacement, otherwise two senders/receivers can create a split-brain endpoint. The paired checkpoint remains the appropriate atomic artifact when both sides and the transport are being restored together.
+
+Standalone restore is for continuation of the same route epoch. It does not clear an endpoint that was fenced after ambiguous sequence exhaustion; such a route requires a fresh epoch rather than reusing uncertain sequence state.
