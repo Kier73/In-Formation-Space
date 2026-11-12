@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import hashlib
 import json
-from typing import Any
+from typing import Any, Callable
 
 from mailcpu.reliability import (
     ReliabilityPolicy,
@@ -71,6 +71,14 @@ class ReceivedProofActionRequest:
     route_owner_generation: int | None = None
 
 
+@dataclass(frozen=True)
+class ProofActionExecutionDispatch:
+    """Result of handing an idempotent execution ticket to an external runner."""
+
+    execution_id: str
+    outcome: Any
+
+
 class ProofActionReliableWorker:
     """Worker-side reliable endpoints; tactic execution remains an injected host concern."""
 
@@ -122,6 +130,7 @@ class ProofActionReliableWorker:
         self._route_owner_generation: int | None = None
         self._route_guard = None
         self._route_admission_commit = None
+        self._route_execution_authorization = None
 
     def _assert_route_active(self) -> None:
         if self._route_guard is not None:
@@ -232,6 +241,54 @@ class ProofActionReliableWorker:
                 "received request belongs to a different route-owner generation"
             )
         self._assert_route_active()
+
+    def execute_request(
+        self,
+        received: ReceivedProofActionRequest,
+        *,
+        runner_id: str,
+        runner: Callable[[str, Mapping[str, Any]], Any],
+    ) -> ProofActionExecutionDispatch | None:
+        """Authorize and invoke an idempotent external runner for an admitted request.
+
+        The route authority appends an execution-authorization event before the
+        callback is invoked. A competing route claim and this event are ordered
+        by the same CAS. The stable execution ID is passed to the runner, which
+        must use it as an idempotency key and resume/deduplicate after restarts.
+
+        Returns None if the request's route-owner generation is no longer active.
+        A runner exception leaves the authorization event intact; retrying with
+        the same ID is safe only when the external runner honors its idempotency
+        contract.
+        """
+        self.assert_request_current(received)
+        if type(runner_id) is not str or not runner_id.strip():
+            raise ProofActionReliableChannelError("runner_id must be non-empty text")
+        if not callable(runner):
+            raise ProofActionReliableChannelError("runner must be callable")
+        if self._route_execution_authorization is None:
+            raise ProofActionReliableChannelError(
+                "execution authorization requires an active proof-action route epoch"
+            )
+        try:
+            execution_id = self._route_execution_authorization(
+                received.request,
+                runner_id,
+            )
+        except Exception as exc:
+            raise ProofActionReliableChannelError(
+                f"route execution authorization failed before runner invocation: {exc}"
+            ) from exc
+        if execution_id is None:
+            return None
+        # The ticket CAS is the logical execution-admission point. If route
+        # ownership changes after this point, the runner still receives the
+        # same stable ticket; handoff/late-result policy governs its outcome.
+        outcome = runner(execution_id, received.request)
+        return ProofActionExecutionDispatch(
+            execution_id=execution_id,
+            outcome=outcome,
+        )
 
     def send_result(self, result_document: Mapping[str, Any]) -> int:
         """Send one portable result envelope over the reliable response channel."""
@@ -694,6 +751,7 @@ __all__ = [
     "ProofActionReliableChannelError",
     "DispatchedProofAction",
     "ReceivedProofActionRequest",
+    "ProofActionExecutionDispatch",
     "ProofActionReliableWorker",
     "ProofActionReliableHost",
 ]
