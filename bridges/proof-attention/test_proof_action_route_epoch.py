@@ -121,6 +121,56 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         self.assertEqual(restored_ledger.active_epoch["epoch_id"], "epoch-2")
         self.assertEqual(transport.pending() > 0, True)
 
+    def test_crash_restore_keeps_planned_attempt_for_exact_successor_dispatch(self):
+        session, source_trace, _root_id = make_session()
+        proof_ground = ground(source_trace)
+        planned = session.begin_next()
+        _session, _trace, _pg, _transport, host, worker = make_endpoints(
+            session_override=session,
+            proof_ground_override=proof_ground,
+        )
+        store = InMemoryRouteEpochLedgerStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="planned-crash-epoch"
+        )
+
+        handoff = handoff_proof_action_route_epoch(
+            host,
+            worker,
+            ledger,
+            epoch_id="planned-crash-epoch",
+            reason_code="planned_migration",
+            reason="move a planned action before it enters the old route",
+            successor_epoch_id="planned-crash-epoch-next",
+            successor_host_id="planned-crash-host-next",
+            successor_worker_id="planned-crash-worker-next",
+            successor_request_channel="planned-crash-request-next",
+            successor_result_channel="planned-crash-result-next",
+        )
+        self.assertEqual(
+            handoff.closed_epoch["details"]["preclose_session_digest"],
+            handoff.closed_epoch["details"]["postclose_session_digest"],
+        )
+
+        recovered_ledger = ProofActionRouteEpochLedger.from_dict(
+            store.load(), store=store
+        )
+        _transport, recovered_host, recovered_worker = restore_proof_action_route_handoff(
+            handoff.closed_epoch,
+            recovered_ledger,
+            proof_ground,
+            restore_transport=InMemoryTransport.from_snapshot,
+            owner_id="planned-crash-recovery-owner",
+        )
+        self.assertEqual(recovered_host.active_attempt.status, "planned")
+        self.assertEqual(recovered_host.active_attempt.attempt_id, planned.attempt_id)
+        dispatch = recovered_host.dispatch_next()
+        self.assertEqual(dispatch.attempt_id, planned.attempt_id)
+        received = recovered_worker.receive_request()
+        self.assertEqual(received.request, dispatch.request)
+        self.assertTrue(recovered_host.observe_request_admission())
+
     def test_interpreted_attempt_remains_interpreted_across_route_handoff(self):
         _session, source_trace, _proof_ground, _transport, host, worker = make_endpoints()
         ledger = ProofActionRouteEpochLedger()
@@ -362,7 +412,13 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         stale_document = store.load()
         stale_digest = stale_document["ledger_digest"]
 
-        ledger.claim_epoch("cas-epoch", owner_id="cas-owner-2")
+        current = ledger.active_epoch
+        ledger.claim_epoch(
+            "cas-epoch",
+            owner_id="cas-owner-2",
+            expected_owner_id=current["owner_id"],
+            expected_owner_generation=current["owner_generation"],
+        )
         current_document = store.load()
         self.assertNotEqual(current_document["ledger_digest"], stale_digest)
         self.assertFalse(
@@ -508,8 +564,12 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         replacement_ledger = ProofActionRouteEpochLedger.from_dict(
             store.load(), store=store
         )
+        current_owner = replacement_ledger.active_epoch
         replacement_ledger.claim_epoch(
-            "stale-close-epoch", owner_id="replacement-close-owner"
+            "stale-close-epoch",
+            owner_id="replacement-close-owner",
+            expected_owner_id=current_owner["owner_id"],
+            expected_owner_generation=current_owner["owner_generation"],
         )
         successor = {
             "host_id": "stale-close-host-next",
@@ -661,6 +721,160 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         next_request = recovered_worker.receive_request()
         self.assertEqual(next_request.request, next_dispatch.request)
         self.assertTrue(recovered_host.observe_request_admission())
+
+    def test_restore_rejects_rehashed_postclose_snapshot_not_derived_from_preclose(self):
+        _session, _trace, proof_ground, _transport, host, worker = make_endpoints()
+        store = InMemoryRouteEpochLedgerStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="derived-snapshot-epoch"
+        )
+        host.dispatch_next()
+        handoff = handoff_proof_action_route_epoch(
+            host,
+            worker,
+            ledger,
+            epoch_id="derived-snapshot-epoch",
+            reason_code="operator_rotation",
+            reason="prepare a semantically invalid but rehashed snapshot",
+            successor_epoch_id="derived-snapshot-epoch-next",
+            successor_host_id="derived-snapshot-host-next",
+            successor_worker_id="derived-snapshot-worker-next",
+            successor_request_channel="derived-snapshot-request-next",
+            successor_result_channel="derived-snapshot-result-next",
+        )
+
+        forged = ledger.to_dict()
+        close = forged["entries"][-2]
+        opened = forged["entries"][-1]
+        postclose = close["details"]["postclose_session_snapshot"]
+        postclose["query_label"] = "a different intention not produced by this handoff"
+        postclose_core = {
+            key: value for key, value in postclose.items()
+            if key != "session_digest"
+        }
+        forged_session_digest = hashlib.sha256(
+            json.dumps(
+                postclose_core, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+        postclose["session_digest"] = forged_session_digest
+        close["details"]["postclose_session_digest"] = forged_session_digest
+
+        def reseal(event):
+            core = {key: value for key, value in event.items() if key != "event_digest"}
+            event["event_digest"] = hashlib.sha256(
+                json.dumps(
+                    core, sort_keys=True, separators=(",", ":"),
+                    ensure_ascii=False, allow_nan=False,
+                ).encode("utf-8")
+            ).hexdigest()
+
+        reseal(close)
+        opened["previous_event_digest"] = close["event_digest"]
+        opened["details"]["predecessor_close_digest"] = close["event_digest"]
+        reseal(opened)
+        ledger_core = {
+            "format": forged["format"],
+            "entries": forged["entries"],
+        }
+        forged["ledger_digest"] = hashlib.sha256(
+            json.dumps(
+                ledger_core, sort_keys=True, separators=(",", ":"),
+                ensure_ascii=False, allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest()
+
+        # All public hashes are internally consistent. Restoration must still
+        # reject the snapshot because it cannot be derived from the old session
+        # plus the recorded route_closed transition.
+        forged_ledger = ProofActionRouteEpochLedger.from_dict(forged)
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError,
+            "not the exact lifecycle transition",
+        ):
+            restore_proof_action_route_handoff(
+                forged_ledger.entries[-2],
+                forged_ledger,
+                proof_ground,
+                restore_transport=InMemoryTransport.from_snapshot,
+            )
+        self.assertEqual(
+            handoff.closed_epoch["details"]["postclose_session_snapshot"]["attempts"][0]["status"],
+            "route_closed",
+        )
+
+    def test_claim_epoch_never_reuses_a_historical_owner_id(self):
+        _session, _trace, _pg, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="owner-reuse-epoch", owner_id="owner-first"
+        )
+        ledger.claim_epoch(
+            "owner-reuse-epoch",
+            owner_id="owner-second",
+            expected_owner_id="owner-first",
+            expected_owner_generation=1,
+        )
+        with self.assertRaisesRegex(ProofActionRouteEpochError, "already used"):
+            ledger.claim_epoch(
+                "owner-reuse-epoch",
+                owner_id="owner-first",
+                expected_owner_id="owner-second",
+                expected_owner_generation=2,
+            )
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError, "expected owner does not match"
+        ):
+            ledger.claim_epoch(
+                "owner-reuse-epoch",
+                owner_id="owner-third",
+                expected_owner_id="owner-first",
+                expected_owner_generation=1,
+            )
+
+    def test_handoff_recovery_cannot_preempt_a_successor_already_claimed(self):
+        _session, _trace, proof_ground, _transport, host, worker = make_endpoints()
+        store = InMemoryRouteEpochLedgerStore()
+        ledger = ProofActionRouteEpochLedger(store=store)
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="preempt-recovery-epoch"
+        )
+        handoff = handoff_proof_action_route_epoch(
+            host,
+            worker,
+            ledger,
+            epoch_id="preempt-recovery-epoch",
+            reason_code="operator_rotation",
+            reason="activate successor before competing recovery",
+            successor_epoch_id="preempt-recovery-epoch-next",
+            successor_host_id="preempt-recovery-host-next",
+            successor_worker_id="preempt-recovery-worker-next",
+            successor_request_channel="preempt-recovery-request-next",
+            successor_result_channel="preempt-recovery-result-next",
+        )
+        active = ledger.active_epoch
+        ledger.claim_epoch(
+            active["epoch_id"],
+            owner_id="first-successor-process",
+            expected_owner_id=active["owner_id"],
+            expected_owner_generation=active["owner_generation"],
+        )
+        with self.assertRaisesRegex(
+            ProofActionRouteEpochError, "expected owner does not match"
+        ):
+            restore_proof_action_route_handoff(
+                handoff.closed_epoch,
+                ledger,
+                proof_ground,
+                restore_transport=InMemoryTransport.from_snapshot,
+                owner_id="competing-recovery-process",
+            )
+        self.assertEqual(
+            ledger.active_epoch["owner_id"],
+            "first-successor-process",
+        )
 
     def test_invalid_successor_is_rejected_before_closing_current_epoch(self):
         _session, _trace, _pg, _transport, host, worker = make_endpoints()

@@ -530,6 +530,9 @@ class ProofActionRouteEpochLedger:
             next_entries = [*self._entries, *events]
             next_core = {"format": LEDGER_FORMAT, "entries": next_entries}
             replacement = {**next_core, "ledger_digest": _digest(next_core)}
+            # Validate the complete replay semantics before asking the backing
+            # authority to publish the new revision.
+            type(self).from_dict(replacement)
             if not self._store.compare_and_swap(
                 expected_digest, replacement, actor_id=actor_id
             ):
@@ -619,15 +622,40 @@ class ProofActionRouteEpochLedger:
             actor_id=owner_id,
         )
 
-    def claim_epoch(self, epoch_id: str, *, owner_id: str) -> dict[str, Any]:
-        """Transfer ownership to a new process generation on the same route."""
+    def claim_epoch(
+        self,
+        epoch_id: str,
+        *,
+        owner_id: str,
+        expected_owner_id: str,
+        expected_owner_generation: int,
+    ) -> dict[str, Any]:
+        """Transfer ownership only from the exact owner generation being replaced."""
         self.refresh()
         active = self.active_epoch
         owner_id = _text(owner_id, "owner_id")
+        expected_owner_id = _text(expected_owner_id, "expected_owner_id")
+        if type(expected_owner_generation) is not int or expected_owner_generation <= 0:
+            raise ProofActionRouteEpochError(
+                "expected_owner_generation must be a positive integer"
+            )
         if active is None or active["epoch_id"] != epoch_id:
             raise ProofActionRouteEpochError("only the active route epoch can be claimed")
+        if (
+            active["owner_id"] != expected_owner_id
+            or active["owner_generation"] != expected_owner_generation
+        ):
+            raise ProofActionRouteEpochError(
+                "route claim expected owner does not match the active owner generation"
+            )
         if owner_id == active["owner_id"]:
             raise ProofActionRouteEpochError("new owner ID must differ from the current owner")
+        if any(
+            (entry["event_type"] == "opened" and entry["details"]["owner_id"] == owner_id)
+            or (entry["event_type"] == "claimed" and entry["details"]["owner_id"] == owner_id)
+            for entry in self._entries
+        ):
+            raise ProofActionRouteEpochError("route owner ID was already used")
         return self._append(
             "claimed", epoch_id, active["epoch_number"], active["route"],
             {"owner_generation": active["owner_generation"] + 1, "previous_owner_id": active["owner_id"], "owner_id": owner_id},
@@ -1128,7 +1156,12 @@ def bind_existing_proof_action_route_epoch(
     owner_id = _text(
         owner_id or f"owner-{uuid.uuid4().hex}", "replacement_owner_id"
     )
-    claimed = ledger.claim_epoch(epoch_id, owner_id=owner_id)
+    claimed = ledger.claim_epoch(
+        epoch_id,
+        owner_id=owner_id,
+        expected_owner_id=active["owner_id"],
+        expected_owner_generation=active["owner_generation"],
+    )
     _attach_route_guard(host, worker, ledger, epoch_id, owner_id, claimed["details"]["owner_generation"])
 
 
@@ -1179,6 +1212,80 @@ def restore_proof_action_route_handoff(
         details.get("postclose_session_snapshot"),
         expected_session_digest=details["postclose_session_digest"],
     )
+    # Reconstruct the post-close session from the pre-close checkpoint and the
+    # declared lifecycle transition. This proves the snapshot is not merely a
+    # self-consistent replacement document with a freshly recomputed digest.
+    preclose_snapshot = details["pair_checkpoint"]["host"]["session"]
+    try:
+        expected_postclose_session = ProofAttentionSession.from_snapshot(
+            preclose_snapshot,
+            proof_ground,
+            cost_model=cost_model,
+        )
+        active_attempt = expected_postclose_session.active_attempt
+        uncertainty_digest = details["uncertainty"]["uncertainty_digest"]
+        if active_attempt is not None and active_attempt.status in (
+            "dispatched", "admitted", "returned"
+        ):
+            active_attempt.mark_failure(
+                "route_closed",
+                supplied["route"]["host_id"],
+                f"route epoch {supplied['epoch_id']} closed while action was at stage {active_attempt.status}: {details['reason']}",
+                evidence_ref=f"urn:sha256:{uncertainty_digest}",
+            )
+        # Canonical JSON normalizes tuple-backed event sequences to the
+        # portable list representation stored in the ledger snapshot.
+        expected_document = _copy(expected_postclose_session.to_dict())
+        if expected_document != session_snapshot:
+            differing_fields = [
+                key for key in expected_document
+                if expected_document.get(key) != session_snapshot.get(key)
+            ]
+            attempt_diffs = []
+            expected_attempts = expected_document.get("attempts", [])
+            supplied_attempts = session_snapshot.get("attempts", [])
+            for index, (expected_attempt, supplied_attempt) in enumerate(
+                zip(expected_attempts, supplied_attempts)
+            ):
+                differing = [
+                    key for key in expected_attempt
+                    if expected_attempt.get(key) != supplied_attempt.get(key)
+                ]
+                event_diffs = []
+                for event_index, (expected_event, supplied_event) in enumerate(
+                    zip(expected_attempt.get("events", []), supplied_attempt.get("events", []))
+                ):
+                    event_fields = [
+                        key for key in expected_event
+                        if expected_event.get(key) != supplied_event.get(key)
+                    ]
+                    if event_fields:
+                        event_diffs.append({
+                            "event_index": event_index,
+                            "fields": event_fields,
+                            "expected": expected_event,
+                            "supplied": supplied_event,
+                        })
+                if differing:
+                    attempt_diffs.append({
+                        "index": index,
+                        "fields": differing,
+                        "event_diffs": event_diffs,
+                        "expected_event_count": len(expected_attempt.get("events", [])),
+                        "supplied_event_count": len(supplied_attempt.get("events", [])),
+                    })
+            raise ProofActionRouteEpochError(
+                "post-close session snapshot is not the exact lifecycle transition "
+                f"from the preserved pre-close session; session_fields={differing_fields}, "
+                f"attempt_diffs={attempt_diffs}"
+            )
+    except ProofActionRouteEpochError:
+        raise
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ProofActionRouteEpochError(
+            f"pre-close proof session could not be reconstructed: {exc}"
+        ) from exc
+
     try:
         session = ProofAttentionSession.from_snapshot(
             session_snapshot,
@@ -1221,7 +1328,12 @@ def restore_proof_action_route_handoff(
         policy=policy,
     )
     new_owner_id = owner_id or f"owner-{uuid.uuid4().hex}"
-    claimed = ledger.claim_epoch(successor_epoch_id, owner_id=new_owner_id)
+    claimed = ledger.claim_epoch(
+        successor_epoch_id,
+        owner_id=new_owner_id,
+        expected_owner_id=_text(details.get("successor_owner_id"), "successor_owner_id"),
+        expected_owner_generation=1,
+    )
     _attach_route_guard(
         host,
         worker,
