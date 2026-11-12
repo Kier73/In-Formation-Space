@@ -28,6 +28,8 @@ def make_endpoints(
     result_channel="proof-action-result",
     session_override=None,
     proof_ground_override=None,
+    host_id=HOST_ID,
+    worker_id=WORKER_ID,
 ):
     if session_override is None:
         session, source_trace, _ = make_session()
@@ -40,8 +42,8 @@ def make_endpoints(
         session,
         proof_ground,
         transport,
-        host_id=HOST_ID,
-        worker_id=WORKER_ID,
+        host_id=host_id,
+        worker_id=worker_id,
         request_channel=request_channel,
         result_channel=result_channel,
         policy=policy,
@@ -181,6 +183,8 @@ class ProofActionReliableChannelTests(unittest.TestCase):
             policy=ReliabilityPolicy(lease_ticks=1, max_attempts=2),
             request_channel="proof-action-request-epoch-2",
             result_channel="proof-action-result-epoch-2",
+            host_id=f"{HOST_ID}-epoch-2",
+            worker_id=f"{WORKER_ID}-epoch-2",
             session_override=session,
             proof_ground_override=host.proof_ground,
         )
@@ -224,6 +228,8 @@ class ProofActionReliableChannelTests(unittest.TestCase):
             policy=ReliabilityPolicy(lease_ticks=1, max_attempts=2),
             request_channel="proof-action-request-epoch-2",
             result_channel="proof-action-result-epoch-2",
+            host_id=f"{HOST_ID}-epoch-2",
+            worker_id=f"{WORKER_ID}-epoch-2",
             session_override=_session,
             proof_ground_override=host.proof_ground,
         )
