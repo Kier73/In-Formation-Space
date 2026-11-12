@@ -29,3 +29,8 @@ This is a finite benchmark of the 16 selected workloads. Zlib byte streams may v
 The pinned [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43319093051) passed all focused tests, pre/post-compression semantic replay, per-encoding bundle reconstruction, global bundle reconstruction, and tamper rejection. It covered 16 workloads, 1,364 input rows, 288 capsules, and 49,104 pre/post-compression semantic comparisons. See the [retained measurement record](results/ci-run-43319093051.md).
 
 The current shared-manifest bundle remains larger than header-compressed standalone capsules because local entry headers are still verbose JSON. CPB-002 should compare packed/compressed local entry metadata with a shared manifest and preserve random access.
+
+
+## Final PR-head acceptance
+
+The final pinned [CPB-001 workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/43319482543) passed capsule/bundle/E-CPU tests, 49,104 pre/post-compression semantic comparisons, exact standalone reconstruction for all 288 bundle entries, and nested tamper rejection. See the [final-head evidence record](results/ci-run-43319482543.md).
