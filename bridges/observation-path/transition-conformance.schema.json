@@ -19,6 +19,7 @@
     "observed_transition",
     "conformance_status",
     "state_evidence",
+    "source_observation_path",
     "source_evidence",
     "operation_timing",
     "interpretation_limits",
@@ -285,6 +286,116 @@
     "conformance_digest": {
       "type": "string",
       "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_observation_path": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "intent",
+        "status",
+        "terminal",
+        "events"
+      ],
+      "properties": {
+        "attempt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intent": {
+          "type": "object",
+          "required": [
+            "candidate_name",
+            "query",
+            "hypothesis_set_digest",
+            "estimated_cost",
+            "plan_ref"
+          ],
+          "properties": {
+            "candidate_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "query": {
+              "type": "string",
+              "minLength": 1
+            },
+            "hypothesis_set_digest": {
+              "type": "string",
+              "minLength": 1
+            },
+            "estimated_cost": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "plan_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "authority_required": {
+              "type": "boolean"
+            },
+            "application_required": {
+              "type": "boolean"
+            },
+            "sender_ack_required": {
+              "type": "boolean"
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "terminal": {
+          "type": "boolean"
+        },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "stage",
+              "actor",
+              "clock_value",
+              "clock_domain",
+              "evidence_ref",
+              "details"
+            ],
+            "properties": {
+              "stage": {
+                "type": "string",
+                "minLength": 1
+              },
+              "actor": {
+                "type": "string",
+                "minLength": 1
+              },
+              "clock_value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "clock_domain": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "evidence_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "details": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "$defs": {
