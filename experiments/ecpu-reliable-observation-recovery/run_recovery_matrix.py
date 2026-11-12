@@ -546,8 +546,21 @@ def validate_attempt_result(record: Mapping[str, Any]) -> dict[str, Any]:
     source_count = record["source_count"]
     drop_data = record["drop_first_data_frame"]
     drop_ack = record["drop_first_ack"]
+    if type(source_count) is not int or source_count not in SOURCE_COUNTS:
+        raise ValueError("attempt source_count is outside the declared factor levels")
+    if type(drop_data) is not bool or type(drop_ack) is not bool:
+        raise ValueError("attempt fault flags must be Boolean")
+    sources = [f"S{index:02d}" for index in range(source_count)]
+    target = sources[0]
+    if record["source_ids"] != sources:
+        raise ValueError("attempt source identity list is not canonical")
+    expected_initial = [source for source in sources if not (drop_data and source == target)]
+    if record["initial_admitted_sources"] != expected_initial:
+        raise ValueError("initial admitted source set does not match injected data loss")
     if record["authorization_status"] != "AUTHORIZED":
         raise ValueError("attempt is not authorized")
+    if record["authorization_quorum"] != record["quorum"]:
+        raise ValueError("recorded authorization quorum differs from configured quorum")
     if record["admitted_source_count_after_recovery"] != source_count:
         raise ValueError("attempt evidence source coverage is incomplete")
     if record["data_retry_count"] != int(drop_data):
@@ -558,12 +571,52 @@ def validate_attempt_result(record: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("ACK retry count does not match injected ACK loss")
     if record["duplicate_cleanup_count"] != int(drop_ack):
         raise ValueError("duplicate cleanup count does not match injected ACK loss")
+
+    expected_initial_acks = {
+        source: ([] if source == target and drop_ack else [1])
+        for source in sources
+    }
+    if record["initial_acknowledged"] != expected_initial_acks:
+        raise ValueError("initial sender ACK receipts do not match the injected ACK schedule")
+    expected_pending = {
+        source: ([1] if source == target and drop_ack else [])
+        for source in sources
+    }
+    if record["pending_after_initial_acks"] != expected_pending:
+        raise ValueError("initial sender pending state does not match the ACK-loss schedule")
+    expected_recovery_acks = {
+        source: ([1] if source == target and drop_ack else [])
+        for source in sources
+    }
+    if record["recovery_acknowledged"] != expected_recovery_acks:
+        raise ValueError("recovery ACK receipts do not match the injected ACK schedule")
+    if record["final_pending_sequences"] != {source: [] for source in sources}:
+        raise ValueError("final sender pending sets are not all empty")
+
+    expected_drops = [
+        {"source": target, "send_index": index}
+        for index in sorted(fault_drop_indices(
+            target,
+            target,
+            drop_first_data_frame=drop_data,
+            drop_first_ack=drop_ack,
+        ))
+    ]
+    if record["injected_drops"] != expected_drops:
+        raise ValueError("recorded injected drops differ from the declared fault schedule")
     if record["application_count"] != 1 or record["register_readback"] != 1:
         raise ValueError("logical observation was not applied exactly once")
+    if record["checkpoint_call_count"] != 2 * source_count + 3:
+        raise ValueError("checkpoint count does not match the coordinator's ordered consume/apply protocol")
+    if len(record["checkpoint_digests"]) != record["checkpoint_call_count"]:
+        raise ValueError("checkpoint digest count differs from measured checkpoint calls")
     if not record["checkpoint_digest_reconstructed"] or not record["durable_log_verified"]:
         raise ValueError("durable recovery evidence did not verify")
-    if any(record["final_pending_sequences"].values()):
-        raise ValueError("some sender sequences remain pending")
+    if type(record["durable_log_sequence"]) is not int or record["durable_log_sequence"] <= 0:
+        raise ValueError("durable mailbox log sequence is invalid")
+    head = record["durable_log_head"]
+    if type(head) is not str or len(head) != 64 or any(c not in "0123456789abcdef" for c in head):
+        raise ValueError("durable mailbox hash-chain head is invalid")
     return dict(record)
 
 
@@ -679,6 +732,21 @@ def run_matrix(output_dir: str | Path, *, replicates: int = DEFAULT_REPLICATES) 
         "interpretation_limits": list(INTERPRETATION_LIMITS),
     }
     report = {**report_core, "report_digest": digest(report_core)}
+    try:
+        import jsonschema
+    except ImportError:
+        jsonschema = None
+    if jsonschema is not None:
+        schema_path = Path(__file__).with_name("run-manifest.schema.json")
+        schema_document = json.loads(schema_path.read_text(encoding="utf-8"))
+        jsonschema.validate(report, schema_document)
+    if not all((
+        report["all_attempts_authorized"],
+        report["all_applications_exactly_once"],
+        report["all_senders_acknowledged"],
+        report["all_durable_logs_verified"],
+    )):
+        raise AssertionError("one or more recovery-matrix invariants failed")
 
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
