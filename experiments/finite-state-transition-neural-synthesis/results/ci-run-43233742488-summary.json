@@ -1,0 +1,100 @@
+{
+  "schema": "in-formation-space.finite-state-transition-neural-synthesis.v7",
+  "status": "verified-within-complete-finite-domain",
+  "workflow_run_id": 43233742488,
+  "workflow_url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43233742488",
+  "workflow_head": "66b258955ba6b7bbc592312101556136e8aa00aa",
+  "dependency_revisions": {
+    "E-CPU": "b471b68e5deca28950d5375c3bde06283a5584a9",
+    "Virtual-Ground-Interpreter": "b3a9de5b0c0a9d75228cf83aaf21e1ba960e8a555"
+  },
+  "artifact_zip_sha256": "d4700a1864a186753933a66ff1da8ce79dfe704ed4cd113b26ca184d74ee18d3",
+  "artifact_json_sha256": "108864b625dc625336004be6ece9138b68cb4f82aa31a5a1ec8eeb030b2b4734",
+  "finite_transition_verification": {
+    "one_step_cases": 128,
+    "semantic_translation_equivalent": 128,
+    "all_outputs_match": true,
+    "rollout_horizon": 3,
+    "model_phase_count": 8,
+    "recurrent_trajectories": 2048,
+    "recurrent_transition_steps": 6144,
+    "all_trajectories_match": true
+  },
+  "generated_transition_program_corpus": {
+    "program_count": 24,
+    "inputs_per_program": 3,
+    "rows_per_program": 8,
+    "compiler_routes": [
+      "truth-table minterm",
+      "direct expression DAG",
+      "liveness-compacted expression DAG"
+    ],
+    "all_outputs_match": true
+  },
+  "focused_test_results": {
+    "E-CPU transition compiler": {"passed": 21},
+    "E-CPU Boolean weight-space": {"passed": 8},
+    "E-CPU stateful runtime and invariant registry": {"passed": 11, "warnings": 3},
+    "E-CPU stateful transition trajectory": {"passed": 6},
+    "VGI finite transition reference": {"passed": true},
+    "VGI Boolean subgroup": {"passed": true}
+  },
+  "new_invariant_registry_entries": [
+    "N-7", "N-8", "N-9", "N-10", "N-11", "N-12", "N-13", "N-14",
+    "N-15", "N-16", "N-17"
+  ],
+  "stateful_runtime": {
+    "schema": "mailcpu.stateful-transition-runtime.v1",
+    "verified": true,
+    "initial_state": [0, 1],
+    "final_state": [1, 0],
+    "tick": 2,
+    "revision": 1,
+    "event_count": 3,
+    "event_kinds": ["step", "revision", "step"],
+    "source_program_digest": "311348e8c24e6c2c24aa29a582e12c397f25115b8747c47c0f0f629a60220cac",
+    "target_program_digest": "2e6342e728fe1added1fa16845987d560e1ef189ef786af2d0d464e594b1aba9",
+    "source_model_digest": "625b8bd5300239de55775afcaaeb16bb670e28ecf97a232c2653c0befeb66b25",
+    "target_model_digest": "b2e2cbc1e653d309d23b40c3f03e45e23125795fbb5ef63c293d9a6a28211a16",
+    "revision_preserved_tick": 1,
+    "revision_preserved_state": [0, 1],
+    "edited_transition_inputs": [0, 1, 1, 1],
+    "edited_transition_outputs": [1, 0],
+    "mailcpu_reference_outputs": [1, 0],
+    "mailcpu_queue_outputs": [1, 0],
+    "vgi_outputs": [1, 0],
+    "snapshot_replay_equal": true,
+    "tampered_event_rejected": true,
+    "genesis_digest": "dad95155b7ed8e89d196956c966e32b66c569e2002518a2d57272aa7ba333f19",
+    "chain_head_digest": "41443d7bcfa6d804c2e375b46f9b58d6b9763c4ced73e574afa0f157422ce645"
+  },
+  "stateful_trajectory": {
+    "schema": "mailcpu.stateful-transition-trajectory-manifest.v1",
+    "event_count": 3,
+    "logical_times": [1, 1, 2],
+    "event_kinds": ["step", "revision", "step"],
+    "runtime_event_sequence": [1, 2, 3],
+    "trajectory_frame_sequence": [0, 1, 2],
+    "runtime_restored_equal": true,
+    "journal_head_digest": "a89f87a56c9071617d6b3ea5ed419760af13f2ca9b39c513e9e13ce0c3e84181",
+    "trajectory_receipt_head": "0244151812c64df3282e8758eb476ba51b00bcb053b89393c3b53be039fc14eb",
+    "manifest_digest": "402c6d3ef591ccd9fa58ffb061509ee7e425996980c61ddb9b5a77d124ea38e7",
+    "seek_tick_1": {
+      "event_kind": "revision",
+      "trajectory_frame_sequence": 1,
+      "runtime_event_sequence": 2
+    },
+    "seek_tick_2": {
+      "event_kind": "step",
+      "state_after": [1, 0]
+    }
+  },
+  "limitations": [
+    "The 24 generated source programs form a deterministic finite corpus, not all possible Boolean expression trees.",
+    "Counter correctness is exhaustive over its 16-row Boolean domain; recurrent coverage exhausts three-step control sequences.",
+    "The stateful patch lifecycle is one explicit execution scenario.",
+    "The trajectory export uses E-CPU's indexed binary stream and EventJournal projection; data/index/manifest are separate files and not an atomic distributed store.",
+    "All SHA-256 heads require an independently trusted manifest/head; they are integrity chains, not signatures or external trust anchors.",
+    "The ReLU models are exact deterministic constructions, not learned models; no arbitrary real-valued generalization, quantization tolerance, or hardware performance is claimed."
+  ]
+}
