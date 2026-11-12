@@ -1,0 +1,105 @@
+# Finite-state transition neural synthesis
+
+**Status:** experiment branch; deterministic compiler and integration runner implemented.
+
+This experiment moves from isolated Boolean gates to a finite-state transition relation with interacting state, control, and priority conditions.
+
+## Transition ground
+
+The source machine is a reset-dominant two-bit counter. Its input tuple is ordered:
+
+[
+(state_1,state_0,advance,reset)
+]
+
+Its output tuple is:
+
+[
+(next_state_1,next_state_0)
+]
+
+The transition law is:
+
+[
+s' =
+egin{cases}
+0 & reset=1 \\
+(s+1)\bmod 4 & reset=0\land advance=1 \\
+s & reset=0\land advance=0
+end{cases}
+]
+
+The complete input domain contains (2^4=16) rows. The full truth table is retained in the experiment JSON.
+
+## Direct neural realization
+
+E-CPU compiles each table row (r) into a hidden ReLU minterm:
+
+[
+h_r(x)=\operatorname{ReLU}
+\left(
+\sum_i
+\begin{cases}
+x_i & r_i=1 \\
+1-x_i & r_i=0
+\end{cases}
+-(n-1)
+\right)
+]
+
+For a Boolean input (x), this hidden value equals one precisely when (x=r), and zero for all other table rows. The output layer sums the minterms whose declared output bit is one.
+
+Two layouts are tested:
+
+| Architecture | Total parameters | Hidden representation |
+|---|---:|---|
+| (4-16-2) | 114 | 16 row-minterm units |
+| (4-16-16-2) | 386 | 16 row-minterm units plus one identity-copy layer |
+
+The second architecture retains the first layer's row identity through an additional hidden layer. Neither network is trained.
+
+## Local semantic intervention
+
+The baseline table gives reset priority. One row is then changed:
+
+[
+(0,1,1,1): (0,0)\longrightarrow(1,0)
+]
+
+This means that when the machine is in state (01) and both `advance` and `reset` are asserted, the edited model increments to (10) instead of resetting to (00).
+
+Because the hidden layer has one unit for each complete input row, this semantic change can be realized by changing exactly one final-layer weight. The model records both table digests, both model digests, and the precise output-weight coordinate. All other table rows must remain unchanged.
+
+## Three executable representations
+
+- **VGI:** the existing typed task DSL expresses the transition table as nested equality/conditional expressions. Signal8 maps Boolean bits to the subgroup ({0,4}).
+- **E-CPU reference program:** the table compiler builds a MailCPU program by forming the conjunction of input literals for every row and branching to that row's output block.
+- **Neural realization:** E-CPU directly constructs the ReLU weights from the same total table.
+
+The integration runner checks both the baseline and edited transition tables through all four execution paths: VGI, MailCPU reference, MailCPU queue, and both neural architectures. Each source/target comparison is bound by a semantic `TranslationContract`.
+
+## Reproduction
+
+The focused integration workflow pins exact E-CPU and VGI revisions, runs the cross-representation experiment, runs E-CPU's dedicated transition/weight-space tests, runs VGI's Boolean and finite-transition tests, and uploads deterministic JSON evidence.
+
+Locally, with both packages importable:
+
+```bash
+PYTHONPATH=/path/to/E-CPU:/path/to/Virtual-Ground-Interpreter/virtual_ground_interpreter \
+  python experiments/finite-state-transition-neural-synthesis/run_experiment.py \
+  --output experiments/finite-state-transition-neural-synthesis/results/local-run.json
+```
+
+Focused tests:
+
+```bash
+(cd /path/to/E-CPU && python -m pytest tests/test_transition_space.py -q)
+(cd /path/to/Virtual-Ground-Interpreter/virtual_ground_interpreter && \
+  python -m unittest discover -s tests -p 'test_finite_state_transition.py' -v)
+```
+
+## Evidence boundary
+
+The experiment targets a complete finite Boolean domain, not continuous state or arbitrary algorithms. The truth-table compiler scales exponentially with input width because it allocates one minterm unit per input row. The model's behavior outside the declared Boolean input domain is not part of the proof. No generalization, stochastic robustness, quantization tolerance, training, or hardware performance is claimed.
+
+The next useful difficulty increase is to remove the explicit complete truth table from the compiler input and derive the state rows from a typed transition program or a compositional decision graph, while retaining exact independent execution and provenance.
