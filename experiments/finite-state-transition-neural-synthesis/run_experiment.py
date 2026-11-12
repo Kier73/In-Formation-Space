@@ -14,6 +14,13 @@ from mailcpu.stateful_transition import (
     StatefulTransitionError,
     StatefulTransitionRuntime,
 )
+from mailcpu.stateful_transition_trajectory import (
+    MANIFEST_SCHEMA,
+    export_stateful_transition_trajectory,
+    restore_stateful_transition_trajectory,
+    seek_stateful_transition_event,
+)
+import tempfile
 from mailcpu.semantic_translation import (
     EffectClass,
     ObservationContract,
@@ -346,6 +353,49 @@ def _verify_stateful_runtime_revision(
     if runtime.chain_head_digest != events[-1]["event_digest"]:
         raise AssertionError("runtime chain head does not match the final event")
 
+    with tempfile.TemporaryDirectory(prefix="stateful-transition-trajectory-") as temporary:
+        directory = Path(temporary)
+        data_path = directory / "runtime.mtrj"
+        index_path = directory / "runtime.mtrj.idx"
+        manifest_path = directory / "runtime.manifest.json"
+        manifest = export_stateful_transition_trajectory(
+            runtime,
+            data_path,
+            index_path,
+            manifest_path,
+            stride=64,
+        )
+        trajectory_restored = restore_stateful_transition_trajectory(
+            manifest_path,
+            data_path,
+            index_path,
+        )
+        if trajectory_restored.snapshot() != snapshot:
+            raise AssertionError("trajectory restore changed the runtime snapshot")
+
+        at_revision = seek_stateful_transition_event(
+            data_path,
+            index_path,
+            tick_before_revision,
+        )
+        after_revision = seek_stateful_transition_event(
+            data_path,
+            index_path,
+            runtime.tick,
+        )
+        if (
+            at_revision is None
+            or at_revision["logical_time"] != tick_before_revision
+            or at_revision["runtime_event"]["kind"] != "revision"
+            or at_revision["runtime_event"]["revision_after"] != 1
+            or after_revision is None
+            or after_revision["logical_time"] != runtime.tick
+            or after_revision["runtime_event"]["kind"] != "step"
+            or after_revision["runtime_event"]["state_after"] != [1, 0]
+        ):
+            raise AssertionError("trajectory logical-time seek did not locate the expected events")
+
+    trajectory_metadata = manifest["trajectory"]
     return {
         "schema": "mailcpu.stateful-transition-runtime.v1",
         "verified": True,
@@ -371,6 +421,17 @@ def _verify_stateful_runtime_revision(
         "genesis_digest": snapshot["genesis_digest"],
         "chain_head_digest": runtime.chain_head_digest,
         "event_digests": [event["event_digest"] for event in events],
+        "trajectory_schema": MANIFEST_SCHEMA,
+        "trajectory_event_count": trajectory_metadata["event_count"],
+        "trajectory_stride": trajectory_metadata["stride"],
+        "trajectory_receipt_head": trajectory_metadata["receipt_head"],
+        "trajectory_journal_head_digest": trajectory_metadata["journal_head_digest"],
+        "trajectory_manifest_digest": manifest["manifest_digest"],
+        "trajectory_restored_equal": trajectory_restored.snapshot() == snapshot,
+        "trajectory_seek_tick_1_kind": at_revision["runtime_event"]["kind"],
+        "trajectory_seek_tick_1_sequence": at_revision["trajectory_sequence"],
+        "trajectory_seek_tick_2_kind": after_revision["runtime_event"]["kind"],
+        "trajectory_seek_tick_2_state": after_revision["runtime_event"]["state_after"],
     }
 
 
@@ -811,7 +872,7 @@ def run_experiment() -> dict[str, Any]:
     all_cases.extend(live_target_cases)
 
     return {
-        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v6",
+        "schema": "in-formation-space.finite-state-transition-neural-synthesis.v8",
         "status": "verified-within-complete-finite-domain",
         "typed_transition_program": source_specification.to_dict(),
         "typed_transition_program_digest": source_specification.digest,
@@ -846,6 +907,19 @@ def run_experiment() -> dict[str, Any]:
         "architectures": architecture_results,
         "cases": all_cases,
         "stateful_runtime_verification": stateful_runtime_result,
+        "stateful_trajectory_verification": {
+            "schema": stateful_runtime_result["trajectory_schema"],
+            "event_count": stateful_runtime_result["trajectory_event_count"],
+            "stride": stateful_runtime_result["trajectory_stride"],
+            "receipt_head": stateful_runtime_result["trajectory_receipt_head"],
+            "journal_head_digest": stateful_runtime_result["trajectory_journal_head_digest"],
+            "manifest_digest": stateful_runtime_result["trajectory_manifest_digest"],
+            "restored_equal": stateful_runtime_result["trajectory_restored_equal"],
+            "seek_tick_1_kind": stateful_runtime_result["trajectory_seek_tick_1_kind"],
+            "seek_tick_1_sequence": stateful_runtime_result["trajectory_seek_tick_1_sequence"],
+            "seek_tick_2_kind": stateful_runtime_result["trajectory_seek_tick_2_kind"],
+            "seek_tick_2_state": stateful_runtime_result["trajectory_seek_tick_2_state"],
+        },
         "recurrent_rollout_verification": {
             "horizon": 3,
             "model_phase_count": len(rollout_results),

@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Kier73/E-CPU
-          ref: 5ccf9f87c3169d23cf3b01fe8b1c85bf69f6b60a
+          ref: e7ebf1a796b3921e808046e18a864db2e6e5b07d
           path: external/E-CPU
 
       - name: Check out VGI transition reference
@@ -43,7 +43,7 @@ jobs:
       - name: Install test runner
         run: python -m pip install --disable-pip-version-check pytest
 
-      - name: Run 128-case, 2,048-trajectory, and stateful-revision experiment
+      - name: Run 128-case, 2,048-trajectory, and sparse-index stateful trajectory experiment
         env:
           PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
         run: >-
@@ -64,6 +64,11 @@ jobs:
         env:
           PYTHONPATH: external/E-CPU
         run: python -m pytest external/E-CPU/tests/test_stateful_transition.py -q
+
+      - name: Run E-CPU stateful transition trajectory tests
+        env:
+          PYTHONPATH: external/E-CPU
+        run: python -m pytest external/E-CPU/tests/test_stateful_transition_trajectory.py -q
 
       - name: Run VGI finite transition reference tests
         env:
