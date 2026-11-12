@@ -8,6 +8,7 @@ scheduler order, and wall/calendar time.
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import math
 from pathlib import Path
@@ -201,6 +202,49 @@ def validate_observation(record: Mapping[str, Any]) -> dict[str, Any]:
         "local_counter": normalized_counter,
         "temporal_frame": normalized_frame,
     }
+
+
+def attach_to_encounter_envelope(
+    envelope: Mapping[str, Any],
+    observation: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Return a copied encounter envelope with one namespaced temporal extension."""
+    if not isinstance(envelope, Mapping):
+        raise TypeError("envelope must be a mapping")
+    if envelope.get("format") != "in-formation.encounter/0.1":
+        raise TemporalProvenanceError("unsupported encounter envelope format")
+    envelope_id = _text(envelope.get("id"), "encounter.id")
+    normalized = validate_observation(observation)
+    if normalized["event_id"] != envelope_id:
+        raise TemporalProvenanceError("temporal event_id must match the encounter id")
+    extensions = envelope.get("extensions", {})
+    if not isinstance(extensions, Mapping):
+        raise TemporalProvenanceError("encounter.extensions must be an object")
+    updated_extensions = copy.deepcopy(dict(extensions))
+    if FORMAT in updated_extensions:
+        raise TemporalProvenanceError("encounter already contains this temporal extension")
+    updated_extensions[FORMAT] = normalized
+    updated = copy.deepcopy(dict(envelope))
+    updated["extensions"] = updated_extensions
+    return updated
+
+
+def extract_from_encounter_envelope(
+    envelope: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Validate and return the namespaced temporal observation from an encounter."""
+    if not isinstance(envelope, Mapping):
+        raise TypeError("envelope must be a mapping")
+    if envelope.get("format") != "in-formation.encounter/0.1":
+        raise TemporalProvenanceError("unsupported encounter envelope format")
+    envelope_id = _text(envelope.get("id"), "encounter.id")
+    extensions = envelope.get("extensions")
+    if not isinstance(extensions, Mapping) or FORMAT not in extensions:
+        raise TemporalProvenanceError("encounter has no temporal-provenance extension")
+    normalized = validate_observation(extensions[FORMAT])
+    if normalized["event_id"] != envelope_id:
+        raise TemporalProvenanceError("temporal event_id does not match encounter id")
+    return normalized
 
 
 def _ordered(left: int, right: int) -> str:
