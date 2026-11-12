@@ -62,10 +62,13 @@ class DispatchedProofAction:
 
 @dataclass(frozen=True)
 class ReceivedProofActionRequest:
-    """Worker-visible request received and acknowledged by ReliableChannel."""
+    """Worker-visible request admitted under one exact route-owner generation."""
 
     request_sequence: int
     request: dict[str, Any]
+    route_epoch_id: str | None = None
+    route_owner_id: str | None = None
+    route_owner_generation: int | None = None
 
 
 class ProofActionReliableWorker:
@@ -115,7 +118,10 @@ class ProofActionReliableWorker:
         self._request_channel_failed = False
         self._result_channel_failed = False
         self._route_epoch_id: str | None = None
+        self._route_owner_id: str | None = None
+        self._route_owner_generation: int | None = None
         self._route_guard = None
+        self._route_admission_commit = None
 
     def _assert_route_active(self) -> None:
         if self._route_guard is not None:
@@ -142,6 +148,7 @@ class ProofActionReliableWorker:
             )
         validated_payload: dict[str, Any] = {}
         duplicate_attempt = [False]
+        stale_route = [False]
 
         def validate_before_ack(sequence: int, payload: Any) -> None:
             if not isinstance(payload, Mapping):
@@ -161,12 +168,28 @@ class ProofActionReliableWorker:
                 raise ProofActionReliableChannelError(
                     "one worker attempt ID was admitted with conflicting request digests"
                 )
+
+            # The route ledger commits the admission event through the same
+            # authority CAS used by owner claims and handoffs. If a replacement
+            # wins the CAS first, consume+ACK this stale in-order frame without
+            # exposing it to the tactic runner.
+            if self._route_admission_commit is not None:
+                try:
+                    route_admitted = self._route_admission_commit(sequence, validated)
+                except Exception as exc:
+                    raise ProofActionReliableChannelError(
+                        f"route-owner admission commit failed before ACK: {exc}"
+                    ) from exc
+                if not route_admitted:
+                    stale_route[0] = True
+                    return
+
             if previous is not None:
                 # A new reliable sequence can replay the same application attempt.
                 # ACK it at the transport layer, but do not redeliver it to the runner.
                 duplicate_attempt[0] = True
             else:
-                # Commit the worker's application-level admission before
+                # Commit the worker's application-level identity before
                 # ReliableChannel consumes the frame and emits its ACK.
                 self._admitted_requests[attempt_id] = request_digest
             validated_payload.update(validated)
@@ -178,10 +201,37 @@ class ProofActionReliableWorker:
             # advance this receiver past a frame that was not admitted/ACKed.
             self._request_channel_failed = True
             raise
-        if received is None or duplicate_attempt[0]:
+        if received is None or duplicate_attempt[0] or stale_route[0]:
             return None
         sequence, _payload = received
-        return ReceivedProofActionRequest(sequence, validated_payload)
+        return ReceivedProofActionRequest(
+            request_sequence=sequence,
+            request=validated_payload,
+            route_epoch_id=self._route_epoch_id,
+            route_owner_id=self._route_owner_id,
+            route_owner_generation=self._route_owner_generation,
+        )
+
+    def assert_request_current(self, received: ReceivedProofActionRequest) -> None:
+        """Recheck the exact owner token immediately before dispatching a tactic.
+
+        Workers should call this at their own execution-admission point. The
+        transport receive callback already linearizes message admission against
+        route claims; this later check also declines work superseded after ACK.
+        """
+        if not isinstance(received, ReceivedProofActionRequest):
+            raise ProofActionReliableChannelError(
+                "received must be a ReceivedProofActionRequest"
+            )
+        if (
+            received.route_epoch_id != self._route_epoch_id
+            or received.route_owner_id != self._route_owner_id
+            or received.route_owner_generation != self._route_owner_generation
+        ):
+            raise ProofActionReliableChannelError(
+                "received request belongs to a different route-owner generation"
+            )
+        self._assert_route_active()
 
     def send_result(self, result_document: Mapping[str, Any]) -> int:
         """Send one portable result envelope over the reliable response channel."""
