@@ -103,7 +103,7 @@ Eight rules are compared:
 
 The candidate rules expose different tradeoffs between coverage, dissent tolerance, and tie handling. A rule that authorizes more states is not inherently better: the counts say which finite configurations it accepts, not whether its selected value is true. They are useful for locating disagreement between policies and selecting cases for domain-specific calibration.
 
-The current enumeration includes only absent/HIT/MISS per source. It does not yet include same-source equivocation, dependence between sources, source reliability priors, changing evidence over logical time, or appeal/supersession. Those should be added as separate dimensions, not hidden inside a scalar confidence value. CI uploads the complete per-pattern decision table and a digest-checked summary as the ecpu-epistemic-policy-space artifact.
+The finite policy enumerator includes absent/HIT/MISS per source. Same-source equivocation is deliberately tested in a separate live consensus probe, because a source that changes its own report is not merely a fourth outcome group. Dependence between sources, source reliability priors, changing evidence over logical time, and appeal/supersession remain open dimensions. They should be added separately, not hidden inside a scalar confidence value. CI uploads the complete per-pattern decision table and a digest-checked summary as the ecpu-epistemic-policy-space artifact.
 
 ### First exhaustive run
 
@@ -128,6 +128,14 @@ Three deductions are useful, but bounded:
 
 These are exhaustive decision-space counts, not pattern probabilities. The enumerator deliberately does not rank policies by number of accepted states. The application domain must supply source trust assumptions, outcome calibration, and the cost of false authorization versus refusal before a policy can be selected.
 
+## Same-source equivocation probe
+
+In addition to cross-source evidence patterns, the live E-CPU run performs six consensus-level probes: three repetitions under each strictness mode. S00 first reports HIT, S01 reports HIT, and then S00 submits MISS for the same logical event.
+
+This is not treated like S00 versus S01 disagreement. The pinned ObservationConsensus raises ObservationConflictError, records S00 in the event's explicit conflict-source set, and changes the event status to CONFLICT under both strict and permissive policy modes. Finalization preserves the conflict. The test then restores the consensus snapshot, attempts a new source after finalization, attempts a changed value from S01, and replays the exact original S00 observation. New/changed proposals must be rejected while the exact prior observation remains idempotent and the conflict snapshot stays unchanged.
+
+These probes exercise the consensus layer directly, not the reliable transport path: the transport's per-source FIFO and evidence-link constraints make a same-event second payload from one source a separate integration problem. The distinction is recorded rather than bypassed.
+
 ## Retained artifacts
 
 CI uploads:
@@ -136,6 +144,7 @@ CI uploads:
 - attempt-results.json — one complete transition receipt per condition/repetition;
 - evidence-ledger.json — explicit source/channel/sequence and payload digests;
 - transition-trace.json — evidence, status, finalization, realization, checkpoint, and late-evidence references.
+- source-equivocation-probes.json — same-source conflict, snapshot restoration, post-finalization rejection, and idempotent exact replay.
 
 No information-per-cost ratio is calculated and no adaptive policy is updated.
 
