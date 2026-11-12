@@ -149,6 +149,10 @@ jobs:
         env:
           PYTHONPATH: external/Virtual-Ground-Interpreter-context-policy/virtual_ground_interpreter
         run: python -m unittest discover -s bridges/observation-path -p "test_context_attention.py" -v
+      - name: Run authorized context-measurement evidence tests
+        env:
+          PYTHONPATH: external/Virtual-Ground-Interpreter-context-policy/virtual_ground_interpreter
+        run: python -m unittest discover -s bridges/observation-path -p "test_context_measurement.py" -v
       - name: Run VGI partial-probe evidence-path interoperability tests
         env:
           PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter:bridges/hypothesis-revision
