@@ -1,0 +1,88 @@
+name: Verified weight-space realization WSP-002
+
+on:
+  push:
+    paths:
+      - "experiments/verified-weight-space-realization/**"
+      - ".github/workflows/verified-weight-space-realization.yml"
+  pull_request:
+    paths:
+      - "experiments/verified-weight-space-realization/**"
+      - ".github/workflows/verified-weight-space-realization.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wsp-002:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out experiment workspace
+        uses: actions/checkout@v4
+
+      - name: Check out pinned E-CPU implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+
+      - name: Check out pinned VGI reference
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Execute WSP-002 exhaustive compiler, equivalence, and stateful checks
+        env:
+          PYTHONPATH: external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+          ECPU_REVISION: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          VGI_REVISION: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          IFS_REVISION: $GITHUB_SHA
+        run: >-
+          python experiments/verified-weight-space-realization/run_experiment.py
+          --output "$RUNNER_TEMP/wsp-002-result.json"
+
+      - name: Run E-CPU transition compiler tests
+        env:
+          PYTHONPATH: external/E-CPU
+        run: python -m pytest external/E-CPU/tests/test_transition_space.py -q
+
+      - name: Run E-CPU weight-space tests
+        env:
+          PYTHONPATH: external/E-CPU
+        run: python -m pytest external/E-CPU/tests/test_weight_space.py -q
+
+      - name: Run E-CPU stateful runtime and trajectory tests
+        env:
+          PYTHONPATH: external/E-CPU
+        run: >-
+          python -m pytest
+          external/E-CPU/tests/test_stateful_transition.py
+          external/E-CPU/tests/test_stateful_transition_trajectory.py
+          -q
+
+      - name: Run VGI finite transition and Boolean subgroup tests
+        env:
+          PYTHONPATH: external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          python -m unittest discover -s external/Virtual-Ground-Interpreter/virtual_ground_interpreter/tests -p "test_finite_state_transition.py" -v
+          python -m unittest discover -s external/Virtual-Ground-Interpreter/virtual_ground_interpreter/tests -p "test_boolean_subgroup.py" -v
+
+      - name: Upload deterministic WSP-002 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wsp-002-verified-weight-space-realization
+          path: $RUNNER_TEMP/wsp-002-result.json
+          if-no-files-found: warn
