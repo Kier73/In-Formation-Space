@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 from vgi import GroundTransitionSystem, ObserverContext, TransitionObservation, TransitionOutcome
 from vgi.partial_attention import ProbeScenario, TransitionProbe, score_partial_probe
+from hypothesis_revision import HypothesisDefinition, HypothesisRevisionLedger
 
 from partial_probe_execution import (
     HISTORY_KEY,
@@ -268,6 +269,91 @@ class PartialProbeExecutionTests(unittest.TestCase):
         self.assertEqual(system.status("b", "Y"), "unknown")
         with self.assertRaises(PartialProbeExecutionError):
             attempt.build_ground_revision(system)
+
+    def test_unmodeled_probe_can_seed_only_a_proposed_hypothesis_revision(self):
+        system = make_ground()
+        attempt = make_attempt(system)
+        record_return(attempt)
+        authorize(attempt)
+        result = attempt.interpret(
+            TransitionOutcome("b", (2,)),
+            actor="vgi-interpreter",
+            interpretation_ref="interpretation://unexpected",
+        )
+        self.assertEqual(result["status"], "unmodeled_outcome")
+
+        ledger = HypothesisRevisionLedger((
+            HypothesisDefinition("H1", "The prior model's existing explanation."),
+        ))
+        candidate = attempt.propose_hypothesis_revision(
+            ledger,
+            "H2",
+            "The Y transition from b can produce an outcome absent from the proposed scenario set.",
+            proposal_method="counterexample-guided-vgi-partial-probe-v1",
+            proposer="vgi-partial-probe-bridge",
+        )
+        self.assertEqual(candidate.source_attempt_id, "probe-attempt-0001")
+        self.assertEqual(candidate.encounter_ref, "encounter://probe-return-1")
+        self.assertEqual(candidate.source_encounter_id, "encounter-probe-1")
+        self.assertEqual(candidate.source_payload_digest, "a" * 64)
+        self.assertEqual(candidate.source_canonicalization, "canonical-json-v1")
+        self.assertEqual(candidate.interpretation_ref, "interpretation://unexpected")
+        self.assertEqual(candidate.validation_result, None)
+        self.assertEqual(
+            tuple(item.hypothesis_id for item in ledger.current_revision.hypotheses),
+            ("H1",),
+        )
+        self.assertEqual(ledger.events[-1].event_type, "hypothesis_proposed")
+        self.assertEqual(system.status("b", "Y"), "unknown")
+
+    def test_hypothesis_handoff_rejects_a_return_bound_to_another_plan(self):
+        system = make_ground()
+        attempt = make_attempt(system)
+        attempt.mark_dispatched("probe-sender", "dispatch-receipt")
+        attempt.mark_admitted("probe-receiver", "admission-receipt")
+        attempt.path.append(
+            "returned",
+            "probe-receiver",
+            evidence_ref="encounter://cross-attempt",
+            details={
+                "encounter_id": "encounter-cross-attempt",
+                "payload_digest": "c" * 64,
+                "canonicalization": "canonical-json-v1",
+                "plan_digest": "another-plan",
+                "scenario_digest": attempt.scenario_digest,
+            },
+        )
+        authorize(attempt)
+        attempt.interpret(
+            TransitionOutcome("b", (2,)),
+            actor="vgi-interpreter",
+            interpretation_ref="interpretation://cross-attempt",
+        )
+        ledger = HypothesisRevisionLedger((
+            HypothesisDefinition("H1", "The prior model's existing explanation."),
+        ))
+        with self.assertRaisesRegex(PartialProbeExecutionError, "not bound to this probe plan"):
+            attempt.propose_hypothesis_revision(
+                ledger,
+                "H2",
+                "A mismatching return from a different plan.",
+            )
+        self.assertEqual(len(ledger.candidates), 0)
+
+    def test_matched_probe_cannot_create_a_hypothesis_revision(self):
+        system = make_ground()
+        attempt = make_attempt(system)
+        finish_authorized_attempt(attempt, TransitionOutcome("a", (0,)))
+        ledger = HypothesisRevisionLedger((
+            HypothesisDefinition("H1", "The prior model's existing explanation."),
+        ))
+        with self.assertRaises(PartialProbeExecutionError):
+            attempt.propose_hypothesis_revision(
+                ledger,
+                "H2",
+                "This should not be proposed from a matched scenario.",
+            )
+        self.assertEqual(len(ledger.candidates), 0)
 
     def test_unauthorized_path_can_be_interpreted_but_cannot_change_ground(self):
         system = make_ground()

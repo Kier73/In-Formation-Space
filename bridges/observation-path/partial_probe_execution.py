@@ -494,6 +494,98 @@ class PartialProbeExecution:
             return {**interpretation, "status": "unmodeled_outcome"}
         return {**interpretation, "status": "scenario_matched_not_yet_adjudicated"}
 
+    def propose_hypothesis_revision(
+        self,
+        ledger: object,
+        hypothesis_id: str,
+        description: str,
+        *,
+        proposal_method: str = "vgi-partial-probe-mismatch-v1",
+        proposer: str = "vgi-partial-probe-bridge",
+    ):
+        """Pass a genuine out-of-scenario return to the append-only revision ledger.
+
+        This only creates a proposed candidate. It does not validate or activate
+        a hypothesis and does not revise the VGI Ground. The mismatch must be
+        this attempt's own terminal unresolved result, with a dispatched,
+        admitted, returned, and interpreted path.
+        """
+        if self.path.status != "unresolved":
+            raise PartialProbeExecutionError(
+                "hypothesis proposals require this attempt to terminate unresolved"
+            )
+        if self._interpretation is None or self._interpretation["scenario_match"]:
+            raise PartialProbeExecutionError(
+                "only an interpreted outcome outside the proposal scenarios can seed a hypothesis"
+            )
+        unresolved = _event(self.path, "unresolved")
+        if unresolved.details.get("reason") != "observed_outcome_outside_proposed_scenario_set":
+            raise PartialProbeExecutionError(
+                "unresolved reason is not a VGI partial-probe scenario mismatch"
+            )
+        for stage in ("dispatched", "admitted", "returned", "interpreted"):
+            _event(self.path, stage)
+
+        returned = _event(self.path, "returned")
+        interpreted = _event(self.path, "interpreted")
+        returned_details = returned.details
+        interpreted_details = interpreted.details
+        for label, details in (
+            ("returned", returned_details),
+            ("interpreted", interpreted_details),
+            ("unresolved", unresolved.details),
+        ):
+            if details.get("plan_digest") != self.plan_digest:
+                raise PartialProbeExecutionError(
+                    f"{label} event is not bound to this probe plan"
+                )
+            if details.get("scenario_digest") != self.scenario_digest:
+                raise PartialProbeExecutionError(
+                    f"{label} event is not bound to this scenario set"
+                )
+        if interpreted_details.get("scenario_match") is not False:
+            raise PartialProbeExecutionError(
+                "interpreted event must explicitly record a scenario mismatch"
+            )
+        if interpreted_details.get("outcome_digest") != self._interpretation["outcome_digest"]:
+            raise PartialProbeExecutionError(
+                "interpreted event outcome digest does not match the recorded mismatch"
+            )
+        if unresolved.details.get("outcome_digest") != self._interpretation["outcome_digest"]:
+            raise PartialProbeExecutionError(
+                "unresolved event outcome digest does not match the recorded mismatch"
+            )
+        encounter_ref = _nonempty(returned.evidence_ref, "returned.evidence_ref")
+        encounter_id = _nonempty(
+            returned_details.get("encounter_id"), "returned.encounter_id"
+        )
+        payload_digest = _nonempty(
+            returned_details.get("payload_digest"), "returned.payload_digest"
+        )
+        canonicalization = _nonempty(
+            returned_details.get("canonicalization"), "returned.canonicalization"
+        )
+        interpretation_ref = _nonempty(
+            interpreted.evidence_ref, "interpreted.evidence_ref"
+        )
+        propose = getattr(ledger, "propose", None)
+        if not callable(propose):
+            raise PartialProbeExecutionError(
+                "ledger must expose the append-only propose() interface"
+            )
+        return propose(
+            hypothesis_id,
+            description,
+            source_attempt_id=self.path.intent.attempt_id,
+            encounter_ref=encounter_ref,
+            interpretation_ref=interpretation_ref,
+            proposal_method=_nonempty(proposal_method, "proposal_method"),
+            proposer=_nonempty(proposer, "proposer"),
+            source_encounter_id=encounter_id,
+            source_payload_digest=payload_digest,
+            source_canonicalization=canonicalization,
+        )
+
     def build_ground_revision(self, current_system: object) -> GroundRevision:
         """Apply an authorized actual outcome to a new Ground value.
 
