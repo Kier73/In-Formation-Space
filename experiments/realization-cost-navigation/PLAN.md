@@ -27,3 +27,8 @@ The workflow pins exact E-CPU, VGI, and In-Formation-Space revisions. It retains
 ## Limitations
 
 This is a finite benchmark corpus, not a proof over all Boolean programs. Its cost vectors are architecture-derived. Sparse execution, numerical formats, measured host latency, distributed realization, and arbitrary trained-network interpretation require separate experiments.
+
+
+## First verification record
+
+The pinned [RCN-001 CI run](https://github.com/Kier73/In-Formation-Space/actions/runs/43299824228) passed the Pareto/budget policy tests, complete cross-runtime workload matrix, E-CPU finite-transition compiler tests, and VGI finite-transition / Boolean-subgroup tests. The [retained evidence note](results/ci-run-43299824228.md) records exact source revisions, all 1,364 input rows, 4,092 semantic comparisons, cost observations, and the finite-domain verification boundary.
