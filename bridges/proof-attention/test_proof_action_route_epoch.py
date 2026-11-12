@@ -8,6 +8,7 @@ import unittest
 from mailcpu.reliability import ReliabilityPolicy
 from mailcpu.transport import InMemoryTransport
 
+from proof_action_protocol import make_proof_action_result
 from proof_action_checkpoint import (
     export_proof_action_checkpoint,
     restore_proof_action_host,
@@ -29,8 +30,9 @@ from proof_action_route_epoch import (
     restore_proof_action_route_handoff,
     _uncertainty_projection,
 )
-from test_proof_action_execution import make_session, ground
-from test_proof_action_reliable_channel import make_endpoints
+from test_proof_action_execution import add_result_payload, make_session, ground
+from test_proof_action_protocol import return_evidence
+from test_proof_action_reliable_channel import deliver_request_and_admit, make_endpoints
 
 
 class ProofActionRouteEpochTests(unittest.TestCase):
@@ -118,6 +120,49 @@ class ProofActionRouteEpochTests(unittest.TestCase):
         restored_ledger = ProofActionRouteEpochLedger.from_dict(ledger.to_dict())
         self.assertEqual(restored_ledger.active_epoch["epoch_id"], "epoch-2")
         self.assertEqual(transport.pending() > 0, True)
+
+    def test_interpreted_attempt_remains_interpreted_across_route_handoff(self):
+        _session, source_trace, _proof_ground, _transport, host, worker = make_endpoints()
+        ledger = ProofActionRouteEpochLedger()
+        open_proof_action_route_epoch(
+            host, worker, ledger, epoch_id="interpreted-route-epoch"
+        )
+        _dispatch, received = deliver_request_and_admit(host, worker)
+        interpreted_attempt = host.active_attempt
+        result = make_proof_action_result(
+            received.request,
+            return_evidence=return_evidence(interpreted_attempt),
+            proof_trace=add_result_payload(source_trace, interpreted_attempt),
+        )
+        self.assertIsNotNone(host.receive_result())
+        self.assertEqual(interpreted_attempt.status, "interpreted")
+
+        handoff = handoff_proof_action_route_epoch(
+            host,
+            worker,
+            ledger,
+            epoch_id="interpreted-route-epoch",
+            reason_code="operator_rotation",
+            reason="rotate after the returned result was already interpreted",
+            successor_epoch_id="interpreted-route-epoch-next",
+            successor_host_id="interpreted-host-next",
+            successor_worker_id="interpreted-worker-next",
+            successor_request_channel="interpreted-request-next",
+            successor_result_channel="interpreted-result-next",
+        )
+        self.assertEqual(handoff.host.session.attempts[0].status, "interpreted")
+        self.assertEqual(
+            handoff.closed_epoch["details"]["preclose_session_digest"],
+            handoff.closed_epoch["details"]["postclose_session_digest"],
+        )
+
+        next_dispatch = handoff.host.dispatch_next()
+        self.assertIsNotNone(next_dispatch)
+        self.assertNotEqual(next_dispatch.attempt_id, interpreted_attempt.attempt_id)
+        self.assertEqual(handoff.host.active_attempt.status, "dispatched")
+        next_request = handoff.worker.receive_request()
+        self.assertEqual(next_request.request, next_dispatch.request)
+        self.assertTrue(handoff.host.observe_request_admission())
 
     def test_planned_action_moves_to_successor_without_being_reselected_or_lost(self):
         session, source_trace, _root_id = make_session()
