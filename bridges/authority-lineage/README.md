@@ -133,6 +133,39 @@ The implementation follows the DSSE envelope/PAE model described in the [DSSE sp
 
 This implementation signs the exact serialized payload bytes carried in the DSSE envelope. Its deterministic Python JSON serialization is not claimed to be RFC 8785/JCS, a cross-language signing canonicalization, a W3C Verifiable Credential, or a full in-toto attestation. A verifier must check the original envelope bytes rather than reserialize an equivalent JSON object before signature verification.
 
+## Anchoring signed receipts in the authority ledger
+
+`record_signed_review_bundle()` appends a new immutable `proposal_review_signed` event after the `proposal_review_certified` event and before proposal resolution. The new event contains the complete DSSE bundle, its digest, the certificate digest, and the public trust-store snapshot used to verify the envelope signatures. It does not store private keys.
+
+The lifecycle is now explicitly ordered:
+
+    revision_proposed
+      -> proposal_review_certified
+      -> proposal_review_signed
+      -> proposal_resolved
+      -> decision_issued
+
+The signed event is part of the authority-lineage hash chain and is returned by `event_entries()`. Ordinary `validate_ledger()` reconstructs embedded review certificates and verifies the signed envelopes against the embedded public-key snapshot. If the entire ledger and its hashes are recomputed after changing a signature, validation still fails.
+
+A resolution for a proposal with a recorded signed bundle must include both:
+
+- `review_certificate_digest`, identifying the deterministic policy evaluation and receipt set;
+- `signed_review_bundle_digest`, identifying the cryptographic envelope set and trust-store version.
+
+Calling the ordinary `resolve_proposal()` without the exact signed-bundle digest is rejected once a signed event exists. Use `resolve_signed_reviewed_proposal()` with the independently supplied `trusted_trust_store`; this compares its digest to the snapshot in the ledger before resolving. When a frontier changes after the signed event but before resolution, the original signed review is retained and the proposal resolves as STALE.
+
+### Trust-store boundary in a ledger
+
+The ledger retains a public trust-store snapshot so signature verification is reproducible. The snapshot is not a root of trust. Ordinary ledger validation proves that the private keys corresponding to the embedded public keys signed the contextual review payloads; it does not prove that those keys belong to the named agents or were approved by the right authority.
+
+A production caller should use `validate_signed_review_bundles_in_ledger(..., trusted_store_digests=...)` or `resolve_signed_reviewed_proposal(..., trusted_trust_store=...)` with a digest/key map provisioned independently from the ledger. Trust-store enrollment, organizational delegation, key rotation, expiry, revocation, and recovery remain out of scope. When the bundle states that review-artifact bytes were checked at creation, a later verifier can repeat that check only by supplying those bytes through `review_artifacts_by_proposal`; signature verification alone does not fetch them.
+
+The ledger schema now includes the signed event and the resolution's signed-bundle digest. Reproduce the complete lifecycle with:
+
+    python bridges/authority-lineage/signed_review_ledger_demo.py --output results/signed-review-ledger-example.json
+
+The example uses ephemeral keys, includes public keys only, records the signed event, resolves against the caller-supplied trust store, and issues a successor decision. It proves the mechanics of the workflow, not persistent agent identity.
+
 ## Observation evidence adapter
 
 The companion observation_adapter.py connects the existing evidence-gated observation records to this lineage ledger without changing E-CPU.

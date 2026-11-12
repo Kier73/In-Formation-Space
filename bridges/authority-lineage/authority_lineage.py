@@ -239,6 +239,7 @@ def resolve_proposal(
     outcome: str,
     rationale: str,
     resolved_by: str,
+    signed_review_bundle_digest: str | None = None,
 ) -> dict[str, Any]:
     """Append an explicit review outcome; a stale proposal cannot be accepted."""
     validate_ledger(ledger)
@@ -283,6 +284,26 @@ def resolve_proposal(
             )
         certificate_digest = certificate_payload["certificate_digest"]
 
+    signed_entries = [
+        entry for entry in _entries_of_type(ledger, "proposal_review_signed")
+        if entry["payload"]["proposal_id"] == proposal_id
+    ]
+    if len(signed_entries) > 1:
+        raise ValueError("proposal has more than one immutable signed review bundle")
+    resolved_signed_digest = None
+    if signed_entries:
+        if certificate_digest is None:
+            raise ValueError("signed review bundle requires a recorded review certificate")
+        expected_signed_digest = signed_entries[0]["payload"]["bundle_digest"]
+        supplied_signed_digest = _sha256(
+            signed_review_bundle_digest, "signed_review_bundle_digest"
+        )
+        if supplied_signed_digest != expected_signed_digest:
+            raise ValueError("resolution must cite the exact recorded signed review bundle")
+        resolved_signed_digest = expected_signed_digest
+    elif signed_review_bundle_digest is not None:
+        raise ValueError("resolution references an unrecorded signed review bundle")
+
     payload = {
         "proposal_id": proposal_id,
         "outcome": outcome,
@@ -292,6 +313,8 @@ def resolve_proposal(
     }
     if certificate_digest is not None:
         payload["review_certificate_digest"] = certificate_digest
+    if resolved_signed_digest is not None:
+        payload["signed_review_bundle_digest"] = resolved_signed_digest
     return _append_entry(
         ledger, "proposal_resolved", _nonempty(resolved_by, "resolved_by"), payload
     )
@@ -396,6 +419,7 @@ def validate_ledger(
     ledger: Mapping[str, Any],
     *,
     validate_embedded_certificates: bool = True,
+    validate_embedded_signatures: bool = True,
 ) -> None:
     """Rebuild the entire append-only hash chain and all lineage constraints."""
     if not isinstance(ledger, Mapping):
@@ -414,6 +438,7 @@ def validate_ledger(
     decisions: dict[str, dict[str, Any]] = {}
     decision_proposals: set[str] = set()
     review_certificates: dict[str, dict[str, Any]] = {}
+    review_signature_bundles: dict[str, dict[str, Any]] = {}
     previous = ZERO_DIGEST
 
     def frontier_at(event: Mapping[str, Any]) -> list[str]:
@@ -559,6 +584,61 @@ def validate_ledger(
                 "certificate_digest": certificate_digest,
                 "certificate": dict(certificate),
             }
+        elif entry_type == "proposal_review_signed":
+            proposal_id = _nonempty(payload.get("proposal_id"), "proposal_id")
+            if proposal_id not in proposals:
+                raise ValueError("signed review bundle precedes its proposal")
+            if proposal_id not in review_certificates:
+                raise ValueError("signed review bundle requires a recorded review certificate")
+            if proposal_id in review_signature_bundles:
+                raise ValueError("proposal has more than one immutable signed review bundle")
+            if proposal_id in resolutions:
+                raise ValueError("signed review bundle cannot follow proposal resolution")
+            expected_payload_fields = {
+                "proposal_id", "event_key", "certificate_digest",
+                "bundle_digest", "trust_store_digest", "bundle", "trust_store",
+            }
+            if set(payload) != expected_payload_fields:
+                raise ValueError("signed review bundle ledger entry has invalid fields")
+            proposal = proposals[proposal_id]
+            event = _event_key(payload.get("event_key"))
+            if not _event_equal(event, proposal["event_key"]):
+                raise ValueError("signed review bundle event differs from its proposal")
+            if frontier_at(event) != proposal["base_decision_ids"]:
+                raise ValueError("signed review bundle cannot be recorded against a stale frontier")
+            certificate_record = review_certificates[proposal_id]
+            certificate_digest = _sha256(
+                payload.get("certificate_digest"), "signed review certificate digest"
+            )
+            if certificate_digest != certificate_record["certificate_digest"]:
+                raise ValueError("signed review bundle cites a different certificate")
+            bundle = payload.get("bundle")
+            trust_store = payload.get("trust_store")
+            if not isinstance(bundle, Mapping) or not isinstance(trust_store, Mapping):
+                raise TypeError("signed review bundle and trust store must be mappings")
+            bundle_digest = _sha256(payload.get("bundle_digest"), "signed review bundle digest")
+            bundle_core = {
+                key: value for key, value in bundle.items()
+                if key != "bundle_digest"
+            }
+            if bundle.get("bundle_digest") != bundle_digest or digest(bundle_core) != bundle_digest:
+                raise ValueError("embedded signed review bundle digest mismatch")
+            trust_store_digest = _sha256(
+                payload.get("trust_store_digest"), "signed review trust-store digest"
+            )
+            if digest(trust_store) != trust_store_digest:
+                raise ValueError("embedded trust store digest mismatch")
+            if bundle.get("certificate_digest") != certificate_digest:
+                raise ValueError("signed review bundle cites a different certificate")
+            if bundle.get("trust_store_digest") != trust_store_digest:
+                raise ValueError("signed review bundle cites a different trust store")
+            review_signature_bundles[proposal_id] = {
+                "bundle_digest": bundle_digest,
+                "certificate_digest": certificate_digest,
+                "trust_store_digest": trust_store_digest,
+                "bundle": dict(bundle),
+                "trust_store": dict(trust_store),
+            }
         elif entry_type == "proposal_resolved":
             proposal_id = _nonempty(payload.get("proposal_id"), "proposal_id")
             if proposal_id not in proposals:
@@ -592,6 +672,13 @@ def validate_ledger(
                     raise ValueError("proposal resolution differs from its review certificate")
                 if payload.get("review_certificate_digest") != certificate_record["certificate_digest"]:
                     raise ValueError("proposal resolution review certificate digest mismatch")
+            signature_record = review_signature_bundles.get(proposal_id)
+            if signature_record is None:
+                if "signed_review_bundle_digest" in payload:
+                    raise ValueError("resolution references an unrecorded signed review bundle")
+            else:
+                if payload.get("signed_review_bundle_digest") != signature_record["bundle_digest"]:
+                    raise ValueError("proposal resolution must cite its recorded signed review bundle")
             _nonempty(payload.get("rationale"), "proposal resolution rationale")
             resolutions[proposal_id] = dict(payload)
         elif entry_type == "decision_issued":
@@ -664,6 +751,17 @@ def validate_ledger(
                 "review certificate validator is required to validate this ledger"
             ) from exc
         validate_review_certificates_in_ledger(ledger, validate_core=False)
+    if validate_embedded_signatures and any(
+        entry["entry_type"] == "proposal_review_signed"
+        for entry in entries
+    ):
+        try:
+            from signed_review_receipts import validate_signed_review_bundles_in_ledger
+        except ImportError as exc:
+            raise ValueError(
+                "signed review receipt validator is required to validate this ledger"
+            ) from exc
+        validate_signed_review_bundles_in_ledger(ledger, validate_core=False)
 
 
 def _frontier_decisions(
