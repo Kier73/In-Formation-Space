@@ -152,8 +152,6 @@ def _validate_route(route: Any) -> dict[str, Any]:
         raise ProofActionRouteEpochError("route reliability policy is invalid")
     if any(type(policy[key]) is not int or policy[key] <= 0 for key in policy):
         raise ProofActionRouteEpochError("route reliability policy values must be positive integers")
-    _sha256(copied["session_digest"], "route.session_digest")
-    _sha256(copied["proof_ground_digest"], "route.proof_ground_digest")
     return copied
 
 
