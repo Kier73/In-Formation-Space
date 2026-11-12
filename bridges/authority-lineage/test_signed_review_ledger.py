@@ -12,6 +12,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from authority_lineage import (
     create_ledger,
     digest,
+    event_entries,
     issue_decision,
     propose_revision,
     resolve_proposal,
@@ -152,6 +153,14 @@ class SignedReviewLedgerTests(unittest.TestCase):
         self.assertEqual(
             resolution["review_certificate_digest"], certificate["certificate_digest"]
         )
+        timeline = event_entries(ledger, EVENT)
+        timeline_types = [entry["entry_type"] for entry in timeline]
+        self.assertIn("proposal_review_signed", timeline_types)
+        self.assertLess(
+            timeline_types.index("proposal_review_signed"),
+            timeline_types.index("proposal_resolved"),
+        )
+        jsonschema.validate(instance=ledger, schema=schema)
         self.assertEqual(
             resolution["signed_review_bundle_digest"], bundle["bundle_digest"]
         )
