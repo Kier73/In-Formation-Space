@@ -64,3 +64,7 @@ A successful run would establish equivalence only for these two functions on the
 The model is dense in its declared architecture and sparse in its active values. The 10,000 count includes zero-valued weights and biases; the active count is reported separately. The two-weight edit is an exact property of this chosen parameterization, not a general lower bound for XOR-to-AND interventions.
 
 This work should be read as an executable seed for weight-space programming. The next discriminating experiment is to compile a less hand-shaped function into a distributed representation, then test whether the compiler can still produce a compact, inspectable intervention while maintaining independent semantic checks.
+
+## Recorded run
+
+The first two pinned GitHub Actions runs passed and produced byte-identical result JSON. See [the retained result](results/ci-run-43154718665.json) and [the provenance/evaluation note](results/ci-run-43154718665.md), including exact dependency revisions, model digests, intervention coordinates, and the bounded verification claim.
