@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/operation-span.schema.json",
+  "title": "Observation operation span",
+  "description": "A monotonic time interval around one synchronous callable invocation, separate from stage-to-stage temporal checkpoints.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "attempt_id",
+    "span_id",
+    "operation_id",
+    "clock_actor_id",
+    "clock_segment_id",
+    "monotonic_start_ns",
+    "monotonic_end_ns",
+    "elapsed_ns",
+    "clock_status",
+    "outcome",
+    "exception_type",
+    "context",
+    "measurement_scope",
+    "span_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.operation-span"
+    },
+    "schema": {
+      "const": "in-formation.operation-span/0.1"
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "span_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clock_actor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clock_segment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "monotonic_start_ns": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "monotonic_end_ns": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "elapsed_ns": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "integer",
+          "minimum": 0
+        }
+      ]
+    },
+    "clock_status": {
+      "enum": [
+        "measured",
+        "regressed"
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "succeeded",
+        "raised"
+      ]
+    },
+    "exception_type": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ]
+    },
+    "context": {
+      "type": "object"
+    },
+    "measurement_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "span_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "clock_status": {
+            "const": "measured"
+          }
+        },
+        "required": [
+          "clock_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "monotonic_end_ns": {
+            "minimum": 0
+          },
+          "elapsed_ns": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "clock_status": {
+            "const": "regressed"
+          }
+        },
+        "required": [
+          "clock_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "elapsed_ns": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "succeeded"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "exception_type": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "raised"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "exception_type": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}
