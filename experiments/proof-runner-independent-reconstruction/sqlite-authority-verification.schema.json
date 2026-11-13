@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kier73.github.io/in-formation-space/sqlite-authority-verification/0.1",
+  "title": "Independent SQLite authority reopen verification",
+  "type": "object",
+  "required": [
+    "verified", "store_type", "ledger_digest", "revision_count",
+    "active_epoch_id", "active_owner_id", "active_owner_generation",
+    "history_digest"
+  ],
+  "properties": {
+    "verified": { "const": true },
+    "store_type": { "const": "sqlite-local-file" },
+    "ledger_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "revision_count": { "type": "integer", "minimum": 4 },
+    "active_epoch_id": { "type": "string", "minLength": 1 },
+    "active_owner_id": { "type": "string", "minLength": 1 },
+    "active_owner_generation": { "const": 2 },
+    "history_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "additionalProperties": false
+}
