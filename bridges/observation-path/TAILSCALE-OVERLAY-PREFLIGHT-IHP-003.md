@@ -21,7 +21,7 @@ Three independent GitHub-hosted runner jobs participate:
 
 1. client_host joins the tailnet as an ephemeral node tagged tag:ihp003-ci, records its Tailscale IPv4 address, and attests its address document.
 2. server_host independently joins the same tailnet with the same tag, records and attests its own address document.
-3. Each producer downloads the other host's address artifact, verifies the GitHub artifact attestation against the exact file digest and pinned signer workflow, then runs tailscale ping --c 8 <peer-overlay-ip>. It stores the complete output and classifies the observed route.
+3. Each producer downloads the other host's address artifact, verifies the GitHub artifact attestation against the exact file digest and pinned signer workflow, then runs tailscale ping --c 8 --timeout=3s --until-direct=false <peer-overlay-ip>. It stores the complete output and classifies the observed route. The explicit until-direct=false setting is important: it preserves a successful DERP or peer-relay result instead of treating "no direct path" as total failure.
 4. verifier_host downloads both address documents and both route records. It independently verifies the four producer attestations, checks that each route record pins the peer's exact attested address-file digest, reconstructs the shared run/actor identities, and signs a report describing both observations.
 
 The semantic application-payload path is not exercised in IHP-003. This is intentional: the goal here is to establish the underlying network route before re-running E-CPU mTLS over it in IHP-004.
@@ -32,14 +32,53 @@ The workflow is designed to use Tailscale workload-identity federation with GitH
 
 Before enabling the overlay:
 1. Create the Tailscale tag tag:ihp003-ci. Tailscale requires tags used by its GitHub Action to exist already; the tag's access permissions are applied to each ephemeral runner node.
-2. Create a Tailscale federated OIDC identity for GitHub Actions. Select the auth_keys scope (shown in the admin console as Auth Keys > Write). Restrict the identity to the Kier73/In-Formation-Space repository and the protected refs/heads/main workflow as tightly as the federation claim controls permit.
+2. Create a Tailscale federated OIDC identity for GitHub Actions. Set issuer to https://token.actions.githubusercontent.com, select the auth_keys scope (shown in the admin console as Auth Keys > Write), and assign only tag:ihp003-ci. Restrict the identity to the exact repository, main ref, and workflow claims below. Tailscale's workload-identity configuration can match the subject and custom JWT claims; use the exact claim names and values shown in the GitHub OIDC token for this repository.
 3. Add the federated identity's Client ID as the GitHub repository secret TS_OAUTH_CLIENT_ID.
 4. Add its Audience as the GitHub repository secret TS_AUDIENCE.
 5. Review the tailnet access policy for tag:ihp003-ci. For the next E-CPU transport experiment, grant only the required client-to-server TCP port (IHP-002 used 41763) between these tagged peers.
 
+A minimal tag owner entry is:
+
+\`\`\`json
+"tagOwners": {
+  "tag:ihp003-ci": []
+}
+\`\`\`
+
+An example federated identity claim restriction is:
+
+\`\`\`json
+{
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:Kier73/In-Formation-Space:ref:refs/heads/main",
+  "scopes": ["auth_keys"],
+  "tags": ["tag:ihp003-ci"],
+  "customClaimRules": {
+    "repository": "Kier73/In-Formation-Space",
+    "workflow_ref": "Kier73/In-Formation-Space/.github/workflows/tailscale-overlay-preflight.yml@refs/heads/main"
+  }
+}
+\`\`\`
+
+The exact claim-rule support and claim names should be checked in the Tailscale federated-identity editor against the GitHub OIDC token claims. The repository, ref subject, and workflow claim are intended to narrow issuance to this one main-branch workflow. The workflow independently checks its GitHub runner identity before accepting evidence.
+
+For IHP-004, after the overlay preflight succeeds, the narrow data-plane grant for the E-CPU listener can be:
+
+\`\`\`json
+"grants": [
+  {
+    "src": ["tag:ihp003-ci"],
+    "dst": ["tag:ihp003-ci"],
+    "ip": ["tcp:41763"]
+  }
+]
+\`\`\`
+
+This TCP grant is not required by the IHP-003 discovery-ping-only probe; it is the proposed minimum permission for the next E-CPU mTLS step. Do not widen the rule to all ports merely to make the preflight pass.
+
 The Client ID and Audience are federation identifiers rather than long-lived secret credentials, but this workflow reads them from repository secrets for convenient configuration. No reusable auth key or OAuth client secret is used.
 
-The workflow has id-token: write, required for GitHub to issue an OIDC token. Tailscale's GitHub Action creates an ephemeral node and logs it out when the CI workflow completes; the coordination server then automatically removes that node from the tailnet. New workflow runs receive new ephemeral nodes.
+The workflow has id-token: write, required for GitHub to issue an OIDC token. Tailscale's GitHub Action is pinned to commit 064b10558093f38325e838ddea35486bdc6b1d5c and CLI version 1.104.5. It creates an ephemeral node and logs it out when the CI job completes; the coordination server then automatically removes that node from the tailnet. New workflow runs receive new ephemeral nodes.
 
 If TS_OAUTH_CLIENT_ID or TS_AUDIENCE is absent, both jobs produce explicit credentials_missing address records and the third verifier attests a report with status overlay_credentials_missing. The workflow does not invent overlay addresses or route observations in that case.
 
@@ -55,7 +94,7 @@ The probe uses the documented tailscale ping output to distinguish:
 | reachable_unclassified | A successful pong without a recognized route marker | Reachability is observed, but this parser cannot classify the path |
 | unreachable | No successful pong within the bounded probe | No usable peer route was observed |
 
-tailscale ping may show an initial relay response followed by a direct response. The parser gives the direct route classification priority when it appears, because a direct path was successfully established during that probe. The report retains the complete output so an independent reviewer can inspect the route progression.
+tailscale ping may show an initial relay response followed by a direct response. The probe runs with --until-direct=false so all bounded replies are retained. The parser gives the direct route classification priority when it appears, because a direct path was successfully established during that probe; otherwise it prefers peer-relay and then DERP. The report retains the complete output so an independent reviewer can inspect the route progression. The command's successful DISCO ping is a tailnet peer-path observation, not proof that an arbitrary TCP application port is allowed by the tailnet policy or host firewall.
 
 A relay result is not a plaintext fallback. Tailscale's WireGuard traffic remains end-to-end encrypted; the report separately identifies whether packets traversed a DERP or peer relay.
 
@@ -95,7 +134,7 @@ Workflow: .github/workflows/tailscale-overlay-preflight.yml
 Probe implementation: bridges/observation-path/tailscale_overlay_probe.py
 
 - create-address: records the current host identity and (when configured) its Tailscale IPv4 address.
-- probe: downloads and verifies the peer address artifact and uses tailscale ping --c 8 to classify the overlay route.
+- probe: downloads and verifies the peer address artifact and uses tailscale ping --c 8 --timeout=3s --until-direct=false to classify the overlay route, preserving relayed observations as well as any direct route discovered.
 - verify: checks both address and route-record attestations and reconstructs the two-sided route report on a third host.
 - write-report-predicate: binds the report to the verifier identity and exact report bytes.
 
@@ -105,5 +144,6 @@ Regression tests cover direct/DERP/peer-relay classification, address tampering,
 
 - Tailscale GitHub Action: https://tailscale.com/docs/integrations/github/github-action
 - Tailscale workload identity federation: https://tailscale.com/docs/features/workload-identity-federation
+- Tailscale grants syntax: https://tailscale.com/docs/reference/syntax/grants
 - Tailscale CLI ping: https://tailscale.com/docs/reference/tailscale-cli
 - Tailscale ping path types: https://tailscale.com/docs/reference/ping-types
