@@ -66,8 +66,8 @@ def run(output: Path, nsd_output: Path | None = None) -> dict:
         nsd_output.parent.mkdir(parents=True, exist_ok=True)
         nsd_rendered = json.dumps(
             nsd, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False
-        ) + "\\n"
-        nsd_output.write_text(nsd_rendered, encoding="utf-8", newline="\\n")
+        ) + "\n"
+        nsd_output.write_text(nsd_rendered, encoding="utf-8", newline="\n")
 
     summary = {
         "repository": REPOSITORY,
