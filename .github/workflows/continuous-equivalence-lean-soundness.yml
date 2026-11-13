@@ -45,9 +45,11 @@ jobs:
         working-directory: experiments/continuous-observation-equivalence/lean
         run: |
           lake env lean COERationalRoot.lean | tee rational-root-proof-output.txt
-          grep -q "COERationalRoot.sign_stable_of_excluded_root" rational-root-proof-output.txt
+          grep -Fq "'COERationalRoot.sign_stable_of_excluded_root' depends on axioms: [propext, Classical.choice, Quot.sound]" rational-root-proof-output.txt
+          grep -q "COERationalRoot.constant_slope_stable" rational-root-proof-output.txt
+          grep -Fq "'COERationalRoot.selected_relu_sound_on_root_free_cell' depends on axioms: [propext, Classical.choice, Quot.sound]" rational-root-proof-output.txt
           grep -q "COERationalRoot.selected_at_root_zero" rational-root-proof-output.txt
-          if grep -Eq 'sorryAx|Classical.choice|Quot.sound' rational-root-proof-output.txt; then
+          if grep -Eq 'sorryAx' rational-root-proof-output.txt; then
             cat rational-root-proof-output.txt
             exit 1
           fi
@@ -60,6 +62,15 @@ jobs:
             exit 1
           fi
           grep -Eq 'error:|unsolved goals' invalid-proof-rejection.txt
+      - name: Require rejection of an omitted-root-exclusion counterexample
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          if lake env lean COERootInvalid.lean > invalid-root-proof-rejection.txt 2>&1; then
+            cat invalid-root-proof-rejection.txt
+            echo "A false sign-stability result compiled without the root-exclusion premise."
+            exit 1
+          fi
+          grep -Eq 'error:|unsolved goals' invalid-root-proof-rejection.txt
       - name: Retain Lean positive and negative proof observations
         uses: actions/upload-artifact@v4
         with:
@@ -67,5 +78,6 @@ jobs:
           path: |
             experiments/continuous-observation-equivalence/lean/proof-output.txt
             experiments/continuous-observation-equivalence/lean/rational-root-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/invalid-root-proof-rejection.txt
             experiments/continuous-observation-equivalence/lean/invalid-proof-rejection.txt
           if-no-files-found: error
