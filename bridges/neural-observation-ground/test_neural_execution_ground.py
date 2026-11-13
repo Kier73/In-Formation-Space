@@ -128,6 +128,20 @@ class ExecutableNeuralGroundTests(unittest.TestCase):
         with self.assertRaisesRegex(NeuralExecutionGroundError, "budget"):
             ExecutableNeuralGround(graph, max_elements=10)
 
+    def test_rejects_large_runtime_activations_before_any_allocation(self):
+        graph = self.graph(layers=1)
+        with self.assertRaisesRegex(NeuralExecutionGroundError, "activations=.*budget"):
+            ExecutableNeuralGround(graph, batch=50_000, sequence=2, max_elements=120_000)
+
+    def test_attention_scratch_is_counted_in_preflight(self):
+        graph = self.graph(layers=1)
+        # The tiny graph's parameters fit this budget, but its attention
+        # activation scratch must still be accounted for.
+        full = ExecutableNeuralGround(graph, batch=1, sequence=2, max_elements=120_000)
+        self.assertEqual(full.status, "ready")
+        with self.assertRaisesRegex(NeuralExecutionGroundError, "attention_scratch="):
+            ExecutableNeuralGround(graph, batch=2_000, sequence=8, max_elements=120_000)
+
     def test_rejects_tampered_graph_before_any_synthetic_execution(self):
         graph = self.graph(layers=1)
         damaged = copy.deepcopy(graph)
