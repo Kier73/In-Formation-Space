@@ -449,7 +449,8 @@ class MinimaxPartialProbeExecution:
             "policy_node_ground_fingerprint": self._node.ground_fingerprint,
             "frontier_ground_evidence_refs": list(self._active_frontier_refs),
             "selected_probe": _probe_record(self._active_probe),
-            "plan_digest": self._policy_digest, "scenario_digest": execution.scenario_digest,
+            "plan_digest": self._policy_digest, "probe_plan_digest": execution.plan_digest,
+            "scenario_digest": execution.scenario_digest,
             "path": path, "interpretation": interpretation, "decision": decision,
             "ground_revision": ground_revision, "updated_ground_evidence_refs": updated_refs,
         })
@@ -488,7 +489,8 @@ class MinimaxPartialProbeExecution:
             "policy_node_ground_fingerprint": self._node.ground_fingerprint,
             "frontier_ground_evidence_refs": list(self._active_frontier_refs),
             "selected_probe": _probe_record(self._active_probe),
-            "plan_digest": self._policy_digest, "scenario_digest": execution.scenario_digest,
+            "plan_digest": self._policy_digest, "probe_plan_digest": execution.plan_digest,
+            "scenario_digest": execution.scenario_digest,
             "path": execution.path.to_dict(), "interpretation": None,
             "decision": None, "ground_revision": None, "terminal_status": terminal,
         })
