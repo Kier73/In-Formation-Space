@@ -61,7 +61,6 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         {
             "format": "in-formation.duplicated-mtls-authority-state/0.1",
             "machine_id": membership.system_id,
-            "cluster_id": args.cluster_id,
             "state_label": args.state_label,
         }
     )
