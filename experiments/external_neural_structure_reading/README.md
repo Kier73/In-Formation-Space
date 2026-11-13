@@ -90,6 +90,16 @@ The current remote path does not fetch model cards, tokenizer files, processor c
 
 The offline Hub tests inject a deterministic HTTP opener. They verify revision matching, indexed multi-shard reading, exact range intervals, schema validity, and fail-closed behavior when a server ignores or misreports range requests. They do not depend on live network availability.
 
+## Live reference observation
+
+A separate [live-reference workflow](../../../.github/workflows/hfr-001-live-reference.yml) exercises the public Hub/CDN path against one pinned GPT-2 revision:
+
+- Repository: `openai-community/gpt2`
+- Revision: `607a30d783dfa663caf39e06633721c8d4cfcd7e`
+- Expected configuration: `model_type=gpt2`, architecture `GPT2LMHeadModel`
+
+The workflow writes `results/gpt2-nsd.json` and uploads it as the `hfr-001-gpt2-nsd` artifact. It also reports total Safetensors shard bytes (from validated Content-Range totals) alongside the bytes of Safetensors prefixes and headers actually requested. This is a metadata/header observation, not a model download or functional reconstruction. The exact run and artifact are the evidence; the pinned model's card and license should be rechecked before making any derivative.
+
 ## Fail-closed checks
 
 The reader rejects duplicate JSON keys, non-finite JSON constants, oversized JSON/header regions, non-commit revision labels, invalid tensor entries, negative dimensions or offsets, offsets beyond the data section, overlapping tensor ranges, symbolic links, path traversal, duplicate tensor names across shards, and any mismatch between a shard index and observed headers.
