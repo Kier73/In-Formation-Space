@@ -191,7 +191,7 @@ The report includes an iid-per-round baseline with the same marginal first-round
 
 For stationary initialisation, this is also the marginal loss probability on each circulation. The baseline removes temporal and cross-packet state correlation. It is a controlled comparison, not a claim that one model is the true channel.
 
-The Gilbert-Elliott channel changes state only at circulation boundaries, so this extension defines half-life as the **first integer circulation** at which retention is at or below \(1/2\). It does not interpolate a fractional crossing. A result marked **not_reached_within_horizon** is right-censored at the scan horizon, not evidence of infinite retention. **no_finite_half_life** is emitted only for a detected loss-free absorbing-good-state case.
+The Gilbert-Elliott channel changes state only at circulation boundaries, so this extension defines half-life as the **first integer circulation** at which retention is at or below \(1/2\). It does not interpolate a fractional crossing. A result marked **not_reached_within_horizon** is right-censored at the scan horizon, not evidence of infinite retention. **no_finite_half_life** is emitted only when a loss-free absorbing-good-state regime has an analytically reconstructed limiting retention strictly above one half. The calculation includes packets/blocks that survive a transient bad state long enough to enter the absorbing good state; exact limiting equality is conservatively not labelled infinite.
 
 ### 9.3 Illustrative scan
 
@@ -216,7 +216,7 @@ python experiments/in-transit-memory/burst_loss.py --scan --max-rounds 500 --jso
 python experiments/in-transit-memory/burst_loss.py --scan --max-rounds 500 --simulate --trials 2000 --seed 20261112 --json --output experiments/in-transit-memory/results/burst-loss-scan.json
 ~~~
 
-The 19 focused tests include reductions to the original iid expression when \(p_G=p_B\), explicit enumeration of short Markov state paths, monotonic retention, single-packet equivalence, common-mode counterexamples, integer half-life and censoring behavior, seeded Monte Carlo agreement, parameter validation, and CLI output.
+The 22 focused tests include absorbing-state limiting-retention reconstruction (including recovery from a transient bad state), reductions to the original iid expression when \(p_G=p_B\), explicit enumeration of short Markov state paths, monotonic retention, single-packet equivalence, common-mode counterexamples, integer half-life and censoring behavior, seeded Monte Carlo agreement, parameter validation, and CLI output.
 
 ### 9.5 Interpretation limits and next step
 
