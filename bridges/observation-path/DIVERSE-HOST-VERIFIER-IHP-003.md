@@ -1,7 +1,7 @@
 # IHP-003: Diverse implementation reconstruction of independent host evidence
 
 **Experiment:** IHP-003  
-**Status:** implementation and focused tests added; hosted four-job execution pending the first main-branch run  
+**Status:** implemented; first live four-job main-branch execution passed on 2026-11-13T03:45:05Z  
 **Format:** diverse host reconstruction report v0.1
 
 ## Question
@@ -74,6 +74,48 @@ A passing fourth-job run would show that:
 - the independent report can be tied to the exact report bytes and the fourth workflow job.
 
 This is stronger than replaying the same validator in a new process, but narrower than independent confirmation of the underlying physical operation.
+
+
+## First live execution
+
+The first main-branch run completed successfully:
+
+- **Run:** [Independent hosted-VM operation path #43360810370](https://github.com/Kier73/In-Formation-Space/actions/runs/43360810370)
+- **Commit:** \`ed85cc131e1c9e3bf3251766f8feafe0693a091e\`
+- **Workflow conclusion:** success
+- **Source host:** success; produced, attested, and uploaded its operation record.
+- **Receiver host:** success; verified the source attestation, merged the sender causal stamp, produced and attested its successor record, and uploaded it.
+- **Primary verifier:** success; verified both source and receiver artifact attestations, reconstructed the causal path, validated and attested its report.
+- **Diverse verifier:** success; reconstructed from the same downloaded records using the independent standard-library implementation, validated and attested its report.
+
+The two reports were downloaded from the run's preserved artifacts and compared. They agree on the exact source and receiver span digests, the exact handoff digest, sender and receiver actor identities, and the single directed causal edge:
+
+| Evidence | Primary verifier | Diverse verifier |
+|---|---|---|
+| Source span digest | \`b1fbc7473a468d15af044500784e6552f98779e20c0dc32c82956191aab49d0e\` | same |
+| Receiver span digest | \`63f665ec0a4a9e53ecb08b86fbddecb9b83bfad21655d812d76aa726b1c196e3\` | same |
+| Handoff digest | \`1a7155a5450d7ba07a783f54db3639ec7d451b6712419ebd5403dec251697e7e\` | same |
+| Causal edge count | 1 | 1 |
+| Sender Lamport | 1 | 1 |
+| Receiver Lamport | 2 | 2 |
+| Sender vector | \`{source: 1}\` | \`{source: 1}\` |
+| Receiver vector | \`{source: 1, receiver: 1}\` | \`{source: 1, receiver: 1}\` |
+| Relation | before | before |
+
+The primary verifier's source and receiver attestations both report a verified signature certificate, one verified timestamp, the exact subject digest, and the pinned main-branch workflow as signer. The diverse report separately attests its own exact report bytes; it does not claim to verify the input signatures.
+
+The measured local synchronous-call durations in this run were:
+
+- source host: **224,958 ns** (approximately 0.225 ms);
+- receiver host: **273,071 ns** (approximately 0.273 ms).
+
+The two values belong to different monotonic clock domains. Both reports therefore retain \`combined_cross_host_elapsed_ns: null\`. They are not transport latency, CPU time, or an end-to-end duration.
+
+The source and receiver artifacts are preserved as \`source-host-evidence\` and \`receiver-host-evidence\`; the two reports are preserved as \`independent-host-reconstruction-report\` and \`diverse-host-reconstruction-report\`.
+
+This live result supports one specific conclusion: two separately scheduled verifier jobs, one using the primary implementation and one using a diverse standard-library implementation, reconstructed the same causal edge from the same byte-identical host records, while the primary verifier additionally authenticated the input artifact attestations.
+
+It does not eliminate common-mode errors in the format specification, prove physical execution, or establish independent physical infrastructure. The jobs still share GitHub's workflow control plane and artifact service, and the records remain participant-produced claims.
 
 ## What it would not establish
 
