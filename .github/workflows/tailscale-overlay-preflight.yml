@@ -1,0 +1,349 @@
+name: IHP-003 Tailscale overlay peer-route preflight
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "bridges/observation-path/tailscale_overlay_probe.py"
+      - "bridges/observation-path/test_tailscale_overlay_probe.py"
+      - "bridges/observation-path/ihp003-overlay-*.schema.json"
+      - ".github/workflows/tailscale-overlay-preflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  client_host:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Check whether Tailscale federated identity is configured
+        id: tailnet_config
+        shell: bash
+        env:
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_AUDIENCE: ${{ secrets.TS_AUDIENCE }}
+        run: |
+          if [[ -n "$TS_OAUTH_CLIENT_ID" && -n "$TS_AUDIENCE" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "IHP-003: Tailscale OIDC credentials are not configured; recording this explicitly."
+          fi
+      - name: Join ephemeral Tailscale node
+        if: steps.tailnet_config.outputs.enabled == 'true'
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tags: tag:ihp003-ci
+          version: 1.104.5
+      - name: Create and bind client overlay address
+        env:
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+          IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
+        run: |
+          mkdir -p evidence/client
+          python bridges/observation-path/tailscale_overlay_probe.py create-address \
+            --role client_host --output-dir evidence/client \
+            --enabled "$IHP003_TAILSCALE_ENABLED"
+      - name: Attest client overlay address
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/client/address.json
+          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-address/v1
+          predicate-path: evidence/client/address.predicate.json
+      - name: Publish client address bootstrap
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp003-client-address
+          path: |
+            evidence/client/address.json
+            evidence/client/address.predicate.json
+          retention-days: 14
+      - name: Probe server peer route
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+          IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
+        run: |
+          python bridges/observation-path/tailscale_overlay_probe.py probe \
+            --role client_host --output-dir evidence/client \
+            --peer-artifact ihp003-server-address
+      - name: Create client record attestation predicate
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          path = Path("evidence/client/record.json")
+          record = json.loads(path.read_text(encoding="utf-8"))
+          predicate = {
+              "schema": "in-formation.ihp003-overlay-probe-record-predicate/0.1",
+              "role": "client_host",
+              "host": record["host"],
+              "record_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+              "record_digest": record["record_digest"],
+              "status": record["status"],
+              "route_type": record["route_type"],
+          }
+          Path("evidence/client/record.predicate.json").write_text(
+              json.dumps(predicate, sort_keys=True, separators=(",", ":")) + "\n",
+              encoding="utf-8",
+          )
+          PY
+      - name: Attest client route record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/client/record.json
+          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-probe-record/v1
+          predicate-path: evidence/client/record.predicate.json
+      - name: Preserve client route evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp003-client-result
+          path: |
+            evidence/client/record.json
+            evidence/client/record.predicate.json
+          retention-days: 90
+
+  server_host:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Check whether Tailscale federated identity is configured
+        id: tailnet_config
+        shell: bash
+        env:
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_AUDIENCE: ${{ secrets.TS_AUDIENCE }}
+        run: |
+          if [[ -n "$TS_OAUTH_CLIENT_ID" && -n "$TS_AUDIENCE" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "IHP-003: Tailscale OIDC credentials are not configured; recording this explicitly."
+          fi
+      - name: Join ephemeral Tailscale node
+        if: steps.tailnet_config.outputs.enabled == 'true'
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tags: tag:ihp003-ci
+          version: 1.104.5
+      - name: Create and bind server overlay address
+        env:
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+          IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
+        run: |
+          mkdir -p evidence/server
+          python bridges/observation-path/tailscale_overlay_probe.py create-address \
+            --role server_host --output-dir evidence/server \
+            --enabled "$IHP003_TAILSCALE_ENABLED"
+      - name: Attest server overlay address
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/server/address.json
+          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-address/v1
+          predicate-path: evidence/server/address.predicate.json
+      - name: Publish server address bootstrap
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp003-server-address
+          path: |
+            evidence/server/address.json
+            evidence/server/address.predicate.json
+          retention-days: 14
+      - name: Probe client peer route
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+          IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
+        run: |
+          python bridges/observation-path/tailscale_overlay_probe.py probe \
+            --role server_host --output-dir evidence/server \
+            --peer-artifact ihp003-client-address
+      - name: Create server record attestation predicate
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          path = Path("evidence/server/record.json")
+          record = json.loads(path.read_text(encoding="utf-8"))
+          predicate = {
+              "schema": "in-formation.ihp003-overlay-probe-record-predicate/0.1",
+              "role": "server_host",
+              "host": record["host"],
+              "record_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+              "record_digest": record["record_digest"],
+              "status": record["status"],
+              "route_type": record["route_type"],
+          }
+          Path("evidence/server/record.predicate.json").write_text(
+              json.dumps(predicate, sort_keys=True, separators=(",", ":")) + "\n",
+              encoding="utf-8",
+          )
+          PY
+      - name: Attest server route record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/server/record.json
+          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-probe-record/v1
+          predicate-path: evidence/server/record.predicate.json
+      - name: Preserve server route evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp003-server-result
+          path: |
+            evidence/server/record.json
+            evidence/server/record.predicate.json
+          retention-days: 90
+
+  verifier_host:
+    needs: [client_host, server_host]
+    if: needs.client_host.result == 'success' && needs.server_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install report schema dependency
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Install GitHub CLI
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Download client address document
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp003-client-address
+          path: evidence/client
+      - name: Download server address document
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp003-server-address
+          path: evidence/server
+      - name: Download client route record
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp003-client-result
+          path: evidence/client-result
+      - name: Download server route record
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp003-server-result
+          path: evidence/server-result
+      - name: Place route records beside their address documents
+        run: |
+          cp evidence/client-result/record.json evidence/client/record.json
+          cp evidence/client-result/record.predicate.json evidence/client/record.predicate.json
+          cp evidence/server-result/record.json evidence/server/record.json
+          cp evidence/server-result/record.predicate.json evidence/server/record.predicate.json
+      - name: Independently verify peer routes and all four producer attestations
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/tailscale_overlay_probe.py verify \
+            --directory evidence \
+            --output evidence/ihp003-overlay-report.json
+      - name: Bind verifier identity and exact report bytes
+        env:
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/tailscale_overlay_probe.py write-report-predicate \
+            --report evidence/ihp003-overlay-report.json \
+            --output evidence/ihp003-overlay-report.predicate.json
+      - name: Validate IHP-003 schemas and instances
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+          cases = (
+              ("bridges/observation-path/ihp003-overlay-address.schema.json", "evidence/client/address.json"),
+              ("bridges/observation-path/ihp003-overlay-address.schema.json", "evidence/server/address.json"),
+              ("bridges/observation-path/ihp003-overlay-address-predicate.schema.json", "evidence/client/address.predicate.json"),
+              ("bridges/observation-path/ihp003-overlay-address-predicate.schema.json", "evidence/server/address.predicate.json"),
+              ("bridges/observation-path/ihp003-overlay-probe-record.schema.json", "evidence/client/record.json"),
+              ("bridges/observation-path/ihp003-overlay-probe-record.schema.json", "evidence/server/record.json"),
+              ("bridges/observation-path/ihp003-overlay-probe-record-predicate.schema.json", "evidence/client/record.predicate.json"),
+              ("bridges/observation-path/ihp003-overlay-probe-record-predicate.schema.json", "evidence/server/record.predicate.json"),
+              ("bridges/observation-path/ihp003-overlay-report.schema.json", "evidence/ihp003-overlay-report.json"),
+              ("bridges/observation-path/ihp003-overlay-report-predicate.schema.json", "evidence/ihp003-overlay-report.predicate.json"),
+          )
+          for schema_path, instance_path in cases:
+              schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
+              instance = json.loads(Path(instance_path).read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              Draft202012Validator(schema).validate(instance)
+              print(f"valid: {instance_path}")
+          PY
+      - name: Attest the third-host overlay route report
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/ihp003-overlay-report.json
+          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-report/v1
+          predicate-path: evidence/ihp003-overlay-report.predicate.json
+      - name: Preserve the IHP-003 route report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp003-overlay-route-report
+          path: evidence/ihp003-overlay-report.json
+          retention-days: 90

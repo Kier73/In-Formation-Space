@@ -1,0 +1,40 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/ihp003-overlay-report.schema.json",
+  "title":"IHP-003 third-host Tailscale overlay route report",
+  "type":"object","additionalProperties":false,
+  "required":["schema","path_id","repository","run_id","run_attempt","client","server","verifier","status","path_semantics","limitations","report_digest"],
+  "properties":{
+    "schema":{"const":"in-formation.ihp003-overlay-report/0.1"},
+    "path_id":{"type":"string","minLength":1},
+    "repository":{"const":"Kier73/In-Formation-Space"},"run_id":{"type":"string"},"run_attempt":{"type":"string"},
+    "client":{"$ref":"#/$defs/hostReport"},"server":{"$ref":"#/$defs/hostReport"},
+    "verifier":{"type":"object"},
+    "status":{"enum":["direct_peer_to_peer","overlay_reachable_with_relay_or_asymmetry","overlay_path_unavailable","overlay_credentials_missing","overlay_peer_not_configured"]},
+    "path_semantics":{"type":"object","required":["probe","direct_means","derp_relay_means","peer_relay_means","application_payload_sent","next_step"],"properties":{
+      "probe":{"const":"tailscale ping"},"direct_means":{"type":"string"},"derp_relay_means":{"type":"string"},
+      "peer_relay_means":{"type":"string"},"application_payload_sent":{"const":false},"next_step":{"type":"string"}
+    }},
+    "limitations":{"type":"array","minItems":1,"items":{"type":"string"}},
+    "report_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}
+  },
+  "$defs":{
+    "attestation":{"type":"object","required":["verified","subject_sha256","predicate_type","signer_workflow","source_ref","self_hosted_runners_denied"],"properties":{
+      "verified":{"const":true},"subject_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+      "predicate_type":{"type":"string"},"signer_workflow":{"type":"string"},
+      "source_ref":{"type":"string"},"self_hosted_runners_denied":{"const":true}
+    }},
+    "hostReport":{"type":"object","additionalProperties":false,"required":["host","status","overlay_ipv4","route_type","peer_overlay_ipv4","address_digest","record_digest","address_attestation","record_attestation","ping_exit_code","ping_output"],"properties":{
+      "host":{"type":"object"},
+      "status":{"enum":["route_observed","route_unavailable","credentials_missing","peer_overlay_not_configured"]},
+      "overlay_ipv4":{"type":["string","null"],"format":"ipv4"},
+      "route_type":{"enum":["direct","derp_relay","peer_relay","reachable_unclassified","unreachable","not_attempted"]},
+      "peer_overlay_ipv4":{"type":["string","null"],"format":"ipv4"},
+      "address_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+      "record_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+      "address_attestation":{"$ref":"#/$defs/attestation"},
+      "record_attestation":{"$ref":"#/$defs/attestation"},
+      "ping_exit_code":{"type":["integer","null"]},"ping_output":{"type":"string"}
+    }}
+  }
+}
