@@ -29,7 +29,7 @@ class TermReceiptTests(unittest.TestCase):
         self.signed = t.recheck(self.runner, self.checker, self.key)
 
     def test_accepts_only_trusted_signature_and_exact_binding(self):
-        receipt = t.admit(self.runner, self.signed, self.key.public_key())
+        receipt = t.admit(self.runner, self.checker, self.signed, self.key.public_key())
         self.assertEqual(receipt.result, "accepted")
         self.assertEqual(receipt.obligation_id, self.runner["obligation_id"])
         self.assertEqual(receipt.proof_term_fingerprint, self.runner["proof_term_fingerprint"])
@@ -59,10 +59,10 @@ class TermReceiptTests(unittest.TestCase):
         signed["payload"]["checker_observation_digest"] = "f" * 64
         signed["document_digest"] = t.digest({k: v for k, v in signed.items() if k != "document_digest"})
         with self.assertRaisesRegex(t.TermReceiptError, "signature"):
-            t.admit(self.runner, signed, self.key.public_key())
+            t.admit(self.runner, self.checker, signed, self.key.public_key())
         other = Ed25519PrivateKey.generate()
         with self.assertRaises(t.TermReceiptError):
-            t.admit(self.runner, self.signed, other.public_key())
+            t.admit(self.runner, self.checker, self.signed, other.public_key())
 
     def test_rejects_proof_term_and_runner_replacement(self):
         runner = copy.deepcopy(self.runner)
@@ -70,22 +70,34 @@ class TermReceiptTests(unittest.TestCase):
         runner["proof_term_fingerprint"] = t.digest({"format": t.TERM_FORMAT, "proof": runner["export"]["proof"]})
         runner["document_digest"] = t.digest({k: v for k, v in runner.items() if k != "document_digest"})
         with self.assertRaises(t.TermReceiptError):
-            t.admit(runner, self.signed, self.key.public_key())
+            t.admit(runner, self.checker, self.signed, self.key.public_key())
         runner = copy.deepcopy(self.runner)
         runner["kernel_case_observation_digest"] = "c" * 64
         runner["document_digest"] = t.digest({k: v for k, v in runner.items() if k != "document_digest"})
         with self.assertRaises(t.TermReceiptError):
-            t.admit(runner, self.signed, self.key.public_key())
+            t.admit(runner, self.checker, self.signed, self.key.public_key())
+
+    def test_rejects_altered_or_substituted_checker_observation(self):
+        checker = copy.deepcopy(self.checker)
+        checker["kernel_case_observation_digest"] = "e" * 64
+        checker["document_digest"] = t.digest({k: v for k, v in checker.items() if k != "document_digest"})
+        with self.assertRaisesRegex(t.TermReceiptError, "checker observation substitution"):
+            t.admit(self.runner, checker, self.signed, self.key.public_key())
+        checker = copy.deepcopy(self.checker)
+        checker["host"]["run_id"] = "different-run"
+        checker["document_digest"] = t.digest({k: v for k, v in checker.items() if k != "document_digest"})
+        with self.assertRaisesRegex(t.TermReceiptError, "different provenance"):
+            t.admit(self.runner, checker, self.signed, self.key.public_key())
 
     def test_rejects_unknown_checker_and_rejected_result(self):
         with self.assertRaises(t.TermReceiptError):
-            t.admit(self.runner, self.signed, self.key.public_key(),
+            t.admit(self.runner, self.checker, self.signed, self.key.public_key(),
                     expected_checker_id="different-trusted-checker")
         signed = copy.deepcopy(self.signed)
         signed["payload"]["result"] = "rejected"
         signed["document_digest"] = t.digest({k: v for k, v in signed.items() if k != "document_digest"})
         with self.assertRaises(t.TermReceiptError):
-            t.admit(self.runner, signed, self.key.public_key())
+            t.admit(self.runner, self.checker, signed, self.key.public_key())
 
     def test_rejects_same_job_and_cross_run(self):
         checker = copy.deepcopy(self.checker)
