@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kier73.github.io/in-formation-space/proof-runner-completion-receipt/0.1",
+  "title": "Proof Runner Completion Receipt v0.1",
+  "description": "Runner-signed statement binding one route-authorized execution ticket to one exact proof-action result envelope.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "signature_algorithm",
+    "authorization_event_digest",
+    "route_epoch_id",
+    "execution_id",
+    "attempt_id",
+    "request_digest",
+    "runner_id",
+    "runner_key_id",
+    "completion_status",
+    "result_format",
+    "result_digest",
+    "return_evidence_digest",
+    "proof_trace_digest",
+    "receipt_digest",
+    "signature"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.proof-runner-completion-receipt/0.1"
+    },
+    "signature_algorithm": {
+      "const": "Ed25519"
+    },
+    "authorization_event_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "route_epoch_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_id": {
+      "type": "string",
+      "pattern": "^urn:sha256:[0-9a-f]{64}$"
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "runner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runner_key_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "completion_status": {
+      "const": "result_produced"
+    },
+    "result_format": {
+      "const": "in-formation.proof-action-result/0.1"
+    },
+    "result_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "return_evidence_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "proof_trace_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "receipt_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{128}$"
+    }
+  }
+}
