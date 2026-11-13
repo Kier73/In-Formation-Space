@@ -35,10 +35,18 @@ jobs:
           repository: Kier73/E-CPU
           ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
           path: external/E-CPU
+      - name: Check out pinned Virtual Ground Interpreter runtime dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 43289a54c3e881ba70bf64924c71aa30e680b6d2
+          path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install pinned Virtual Ground Interpreter dependency
+        run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
       - name: Install Python test dependencies
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
       - name: Run producer, restart, and authority-check tests
@@ -115,10 +123,18 @@ jobs:
           repository: Kier73/E-CPU
           ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
           path: external/E-CPU
+      - name: Check out pinned Virtual Ground Interpreter runtime dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 43289a54c3e881ba70bf64924c71aa30e680b6d2
+          path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install pinned Virtual Ground Interpreter dependency
+        run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
       - name: Install signing dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
       - name: Produce route-authority checkpoint and ephemeral public identity
@@ -153,10 +169,18 @@ jobs:
     steps:
       - name: Check out In-Formation-Space
         uses: actions/checkout@v4
+      - name: Check out pinned Virtual Ground Interpreter runtime dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 43289a54c3e881ba70bf64924c71aa30e680b6d2
+          path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install pinned Virtual Ground Interpreter dependency
+        run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
       - name: Install signing dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
       - name: Install current signed GitHub CLI package
@@ -224,10 +248,18 @@ jobs:
           repository: Kier73/E-CPU
           ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
           path: external/E-CPU
+      - name: Check out pinned Virtual Ground Interpreter runtime dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 43289a54c3e881ba70bf64924c71aa30e680b6d2
+          path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install pinned Virtual Ground Interpreter dependency
+        run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
       - name: Install key-attestation verifier dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
       - name: Install current signed GitHub CLI package
