@@ -108,6 +108,7 @@ class IndependentHostOperationPathTests(unittest.TestCase):
                 source_attestation=source_attestation,
                 receiver_attestation=receiver_attestation,
                 receiver_artifact_sha256=path.sha256_file(self.receiver_path),
+                verifier_host=self.verifier_host,
             )
 
     def test_rehashed_source_payload_forgery_is_rejected(self) -> None:
@@ -131,6 +132,7 @@ class IndependentHostOperationPathTests(unittest.TestCase):
                 source_attestation=source_attestation,
                 receiver_attestation=receiver_attestation,
                 receiver_artifact_sha256=path.sha256_file(self.receiver_path),
+                verifier_host=self.verifier_host,
             )
 
     def test_concurrent_vector_stamps_do_not_establish_precedence(self) -> None:
@@ -162,6 +164,7 @@ class IndependentHostOperationPathTests(unittest.TestCase):
                 source_attestation=source_attestation,
                 receiver_attestation=receiver_attestation,
                 receiver_artifact_sha256=path.sha256_file(self.receiver_path),
+                verifier_host=self.verifier_host,
             )
 
     def test_self_hosted_or_non_main_runner_context_is_refused(self) -> None:
