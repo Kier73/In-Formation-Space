@@ -273,3 +273,48 @@ lake env lean GeneratedCertificateProofs.lean
 The expanded continuous-observation-equivalence workflow performs the same steps on the *unmodified producer artifact*, runs the three negative Lean controls, and retains the checked manifest and evidence.
 
 The next frontier is a theorem relating the Lean verifier's Boolean result to a universally quantified rational-network evaluation statement, followed by a formal rational-to-real continuity extension. This would remove another remaining distinction between a checked finite proof object and the mathematical observation it denotes.
+
+
+## COE-008 — Refinement from executable certificate checks to rational network meaning
+
+**Question:** When the independent Lean certificate checker accepts a proposed source network and activation-cell atlas, does its acceptance force the atlas to agree with actual network evaluation, rather than simply asserting self-consistent symbolic data?
+
+The answer is formally established for each **open activation cell and every rational input inside that cell**, in the pinned Lean 4.24 environment.
+
+### Two distinct interpretations
+
+The existing checker (COEWireCheck.lean) constructs a symbolic affine law within each cell and computes its Boolean acceptance result. COE008Evaluation.lean adds a **separate numeric source evaluator**, with an ordinary list-dot-product at each neuron, layerwise ReLU evaluation, and no reference to the certificate's proposed cells.
+
+The refinement proof connects these meanings in stages:
+
+1. root_guard_implies_sign_stable: the **actual Boolean root-exclusion guard** entails a stable ReLU sign for any two rational points inside a proposed cell, including unbounded ends. The executable root computation and exact-zero test are not assumed correct as a separate axiom.
+2. weightedAt: evaluating a propagated symbolic affine dot product at a point is equal to an independently defined numeric row dot product at that same point.
+3. advanceSound: if one propagation step is accepted, it agrees with numeric evaluation of that layer at **every rational point in the cell**.
+4. foldSound: the accepted sequence of propagation steps agrees with applying all original source layers numerically at the same input. This is proved by induction over an arbitrary list of layers, not simply by enumerating five known model fixtures.
+5. verifiedCertificateSound: for an arbitrary certificate, accepted by COEWireCheck.verify, any member of its proposed activation cells, and any rational interior point x, **the certified affine output equals the direct network evaluation at x**. No additional trusted mathematical-soundness premise is passed to this theorem.
+
+The checker also now explicitly requires that its selected rational probe lies strictly inside the proposed open interval. This is a fail-closed strengthening of the executable verifier, not a relaxation of the proof obligations.
+
+### Formal theorem (mathematical meaning)
+
+The main result is universally quantified: for any certificate C, cell c, and rational x,
+
+- if the Lean verifier accepts C;
+- c is an element of C's certified cell list; and
+- x lies in the **open** interval of c,
+
+then evaluating c's stated affine output at x produces exactly the same vector as directly evaluating C's source network numerically at x.
+
+The proof is checked by Lean's kernel with no admitted proof holes. Its arithmetic reasoning uses the explicitly reported Lean foundational axioms propext, Classical.choice, and Quot.sound.
+
+### Boundaries kept explicit
+
+This proof is **not yet a theorem for every rational x on the entire number line**, because the checker represents intervals as **open** cells: the exact rational cutpoints between adjacent cells do not belong to either interior. Although the executable verifier checks agreement of neighboring affine outputs at those cutpoints, turning that observation into a full mechanized endpoint theorem still requires an explicit formal continuity argument for the direct ReLU network. A rational-to-real extension is likewise not yet formalized.
+
+The certificate JSON-to-Lean translator is unverified Python. The Python/Go checkers independently validate canonical bytes, network identities, complete original certificates, and semantic hashes; the Lean theorem concerns the **typed data after translation**. This experiment does not provide authenticated producer authority, E-CPU Ground admission, GPU arithmetic proofs, or general network architecture support.
+
+### Verification and next frontier
+
+The pinned Lean workflow compiles COE008Soundness.lean and COE008Evaluation.lean, checks the new universal theorem's axiom audit, and preserves the COE-005/006 negative controls. The existing seven-job COE workflow independently checks the original Python-produced certificates and three malicious certificate mutations using Python, Go and Lean.
+
+Next: formally prove that accepted adjacent piecewise-affine observations agree with direct evaluation **at rational cutpoints**, using the continuity of each affine and ReLU layer; then investigate the rational-to-real completion. Only after those steps can a fully quantified *all-real-input* Lean soundness claim be made.
