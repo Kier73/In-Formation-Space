@@ -1,0 +1,63 @@
+name: HFR-001 selected weight geometry
+
+on:
+  push:
+    paths:
+      - "experiments/external_neural_structure_reading/hub.py"
+      - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/weight_geometry.py"
+      - "experiments/external_neural_structure_reading/weight-geometry.schema.json"
+      - "experiments/external_neural_structure_reading/test_*.py"
+      - "experiments/external_neural_structure_reading/live_reference/run_weight_geometry.py"
+      - ".github/workflows/hfr-001-weight-geometry.yml"
+  pull_request:
+    paths:
+      - "experiments/external_neural_structure_reading/hub.py"
+      - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/weight_geometry.py"
+      - "experiments/external_neural_structure_reading/weight-geometry.schema.json"
+      - "experiments/external_neural_structure_reading/test_*.py"
+      - "experiments/external_neural_structure_reading/live_reference/run_weight_geometry.py"
+      - ".github/workflows/hfr-001-weight-geometry.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  weight-geometry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out experiment workspace
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install observer and geometry dependencies
+        run: python -m pip install --disable-pip-version-check jsonschema numpy
+
+      - name: Compile HFR-001
+        run: python -m compileall -q experiments/external_neural_structure_reading
+
+      - name: Run all offline HFR-001 tests
+        run: >-
+          python -m unittest discover
+          -s experiments/external_neural_structure_reading
+          -p 'test_*.py'
+          -v
+
+      - name: Read selected GPT-2 matrices and calculate geometry
+        run: >-
+          python -m experiments.external_neural_structure_reading.live_reference.run_weight_geometry
+          --output experiments/external_neural_structure_reading/results/gpt2-weight-geometry.json
+
+      - name: Upload selected-weight geometry evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hfr-001-gpt2-weight-geometry
+          path: experiments/external_neural_structure_reading/results/gpt2-weight-geometry.json
+          if-no-files-found: warn
