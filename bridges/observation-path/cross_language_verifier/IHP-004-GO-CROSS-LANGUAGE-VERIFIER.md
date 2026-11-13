@@ -26,21 +26,23 @@ The experiment deliberately does not hide an unresolved numeric-serialization pr
 
 ## Portable canonical JSON profile used by IHP-004
 
-The current IHP-001 records in the preserved live run contain only integer-valued JSON numbers. IHP-004 implements the following restricted profile for this observed record domain:
+IHP-004 adopts the same restricted data model now being exercised by the parallel PRC-001 cross-language receiver work in [Canonical Metadata Profile v1](https://github.com/Kier73/In-Formation-Space/blob/research/prc-cross-language-verifier/experiments/portable-realization-capsule/CANONICAL-METADATA-V1.md):
 
-- JSON objects are serialized with keys in ascending string order.
+- Values may be null, booleans, Unicode strings containing only valid Unicode scalar values, integers, arrays, and objects.
+- Integers must be in the interoperable safe range from -(2^53 - 1) through +(2^53 - 1). Floating-point values are not part of the profile.
+- Object keys must be ASCII strings and are sorted in ascending ASCII/byte order.
 - Insignificant whitespace is omitted.
-- Strings are encoded as UTF-8; non-ASCII characters remain UTF-8 rather than being converted to Unicode escape sequences.
-- HTML-sensitive characters such as less-than, greater-than, and ampersand are not escaped.
+- String values are encoded as UTF-8; non-ASCII characters remain UTF-8 rather than being converted to Unicode escape sequences.
+- Standard JSON escaping is used for quotation marks, reverse solidus, and control characters. HTML-sensitive characters are not specially escaped.
 - U+2028 and U+2029 remain literal UTF-8 code points.
-- Numeric JSON tokens must be canonical base-10 integers. Decimal, exponent-form, and negative-zero tokens are rejected.
+- Duplicate object keys and values outside the data model are rejected.
 - A file artifact is the canonical JSON bytes followed by exactly one LF byte. Object digests are SHA-256 over canonical JSON bytes without that trailing LF. Artifact-subject digests are SHA-256 over the exact file bytes, including the LF.
 
-The Go parser uses json.Decoder.UseNumber() so numeric tokens are not first converted through binary floating point. It then rejects number forms outside the integer-only profile rather than silently normalizing them differently from Python.
+The Go parser uses json.Decoder.UseNumber() so numeric tokens are not first converted through binary floating point. It validates the safe-integer range, ASCII object keys, and Unicode scalar strings before encoding. Decimal, exponent-form, negative-zero, unsafe-integer, non-ASCII-key, or invalid-Unicode inputs are rejected rather than silently normalized differently from Python or JavaScript.
 
-**Important scope of this profile:** the existing IHP-001 v0.1 JSON Schema allows decimal numbers in optional temporal fields such as chronon_phase and chemical_tau. The current Go implementation rejects those values anywhere in a record. It therefore verifies the observed integer-valued IHP-001 records, not every theoretically schema-valid v0.1 record. This is an explicit fail-closed subset, not a claim that the v0.1 format already has a complete cross-language number specification.
+**Important scope of this profile:** the existing IHP-001 v0.1 JSON Schema allows decimal numbers in optional temporal fields such as chronon_phase and chemical_tau. The current Go implementation rejects those values anywhere in a record. It therefore verifies the observed safe-integer IHP-001 records, not every theoretically schema-valid v0.1 record. This is an explicit fail-closed subset, not a claim that the v0.1 format already has a complete cross-language number specification.
 
-A future format revision should choose and test one normative numeric profile. JSON Canonicalization Scheme (JCS / RFC 8785), an integer-only data model, or a typed decimal representation are possible choices; silently switching the digest algorithm for already-issued records is not.
+The parallel PRC-001 work has already formalized the same restrictions for its v1 metadata. The useful next step is to consolidate this common profile into one repository-level normative specification that IHP and PRC can both reference, rather than fork two canonicalization rules.
 
 ## Implementation and topology
 
