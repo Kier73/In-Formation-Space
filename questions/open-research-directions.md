@@ -252,3 +252,22 @@ Information content alone does not say whether a distinction helps a system acco
 4. How should this finite, task-relative quantity be related—without conflating them—to semantic information, causal emergence, and algorithmic description?
 
 The initial operational baseline is [RIV-001](../experiments/task-relative-representation-relevance/README.md). It enumerates finite stationary deterministic observation-based controllers and measures exact survival loss after a declared state distinction is ablated. The result is explicitly model-, task-, and controller-class-relative, not an intrinsic measure of meaning.
+
+
+---
+
+## 13. When does observation history become useful memory?
+
+### The question
+
+RIV-001 shows when a distinction in a current representation improves a finite task. RIV-002 adds a second possibility: an earlier observation may remain useful after the current observation no longer exposes the distinction. How much of the resulting gain comes from knowing time, and how much requires retaining history?
+
+### Questions
+
+1. Which task-relevant distinctions disappear from current observations but remain recoverable from observation history?
+2. How do stationary, time-aware reactive, and history-dependent policy values differ under controlled representation ablations?
+3. What is the smallest finite-state memory that preserves the history-dependent policy's value, rather than storing the complete observation trace?
+4. When can a compact belief state or sufficient statistic replace raw history without reducing task value?
+5. How should memory capacity, update cost, and observation cost be included in the same navigation objective?
+
+The operational baseline is [RIV-002](../experiments/history-dependent-representation-relevance/README.md). It exactly compares three deterministic controller classes on finite supplied models. The next step is to compress its successful history policies into bounded finite-state memories and measure the value/cost trade-off.
