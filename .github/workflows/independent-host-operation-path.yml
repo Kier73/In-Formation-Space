@@ -14,12 +14,71 @@ on:
       - "bridges/observation-path/diverse-host-operation-*.schema.json"
       - "bridges/temporal-provenance/temporal_provenance.py"
       - ".github/workflows/independent-host-operation-path.yml"
+  pull_request:
+    paths:
+      - "bridges/observation-path/diverse_host_verifier.py"
+      - "bridges/observation-path/test_diverse_host_verifier.py"
+      - "bridges/observation-path/diverse-host-operation-*.schema.json"
+      - ".github/workflows/independent-host-operation-path.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+
+  diverse_verifier_tests:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out proposed changes
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile and run focused standard-library tests
+        run: |
+          python -m py_compile \
+            bridges/observation-path/diverse_host_verifier.py \
+            bridges/observation-path/test_diverse_host_verifier.py
+          python -m unittest discover \
+            -s bridges/observation-path \
+            -p 'test_diverse_host_verifier.py' -v
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate schemas and a reconstructed fixture
+        env:
+          PYTHONPATH: bridges/observation-path
+        run: |
+          python - <<'PY'
+          import json
+          import tempfile
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+          from diverse_host_verifier import reconstruct, write_json, write_report_predicate
+          from test_diverse_host_verifier import make_pair, verifier_env
+
+          source, source_bytes, receiver, receiver_bytes, verifier = make_pair()
+          report = reconstruct(source, source_bytes, receiver, receiver_bytes, verifier)
+          with tempfile.TemporaryDirectory() as directory:
+              report_path = Path(directory) / "report.json"
+              predicate_path = Path(directory) / "predicate.json"
+              write_json(report_path, report)
+              predicate = write_report_predicate(
+                  report_path, predicate_path, verifier_env(verifier)
+              )
+              cases = (
+                  ("bridges/observation-path/diverse-host-operation-report.schema.json", report),
+                  ("bridges/observation-path/diverse-host-operation-report-predicate.schema.json", predicate),
+              )
+              for schema_path, instance in cases:
+                  schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
+                  Draft202012Validator.check_schema(schema)
+                  Draft202012Validator(schema).validate(instance)
+                  print(f"valid: {schema_path}")
+          PY
+
   source_host:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
