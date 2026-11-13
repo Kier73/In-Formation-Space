@@ -76,3 +76,32 @@ jobs:
           name: coe002-independent-checker-report
           path: experiments/continuous-observation-equivalence/independent-certificate-report.json
           if-no-files-found: error
+
+  go-certificate-checker:
+    needs: certificate-producer
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Download Python-produced certificates
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Test Go verifier with adversarial mutations of Python certificates
+        working-directory: experiments/continuous-observation-equivalence
+        env:
+          COE_CERT_DIR: ${{ github.workspace }}/experiments/continuous-observation-equivalence/received-certificates
+        run: go test -v go_checker/main.go go_checker/main_test.go
+      - name: Independently check exact rational cover, source and semantic digests in Go
+        working-directory: experiments/continuous-observation-equivalence
+        run: go run go_checker/main.go received-certificates > go-independent-check-report.json
+      - name: Retain independent Go verification receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe003-go-independent-checker-report
+          path: experiments/continuous-observation-equivalence/go-independent-check-report.json
+          if-no-files-found: error

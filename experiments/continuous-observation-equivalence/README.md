@@ -92,3 +92,38 @@ The [COE-001 GitHub Actions workflow](../../.github/workflows/continuous-observa
 - **Formal strength:** this is an independently implemented, finite-certificate arithmetic checker with a mathematical justification for all-real coverage. It has not been checked in Lean, Coq, or another proof assistant.
 
 A useful next step is a small **Go or proof-assistant-based checker** for the same exact serialized certificate, reducing common-mode Python implementation risk; another is a trust-qualified bridge from E-CPU model/Ground identities to this rational certificate profile.
+
+
+## COE-003 — Cross-language independent certificate verifier (Go)
+
+COE-002 established that a second *Python* implementation can verify a submitted activation-cell proof without importing its constructor. COE-003 tests whether the exact same Python-produced certificate bytes can also be reconstructed and validated in a **different language**.
+
+The standalone go_checker/main.go implementation uses only Go's standard library (math/big.Rat, encoding/json, crypto/sha256). It does not call Python, reuse the Python verifier, discover breakpoints using the COE-001 atlas builder, or accept the producer's output digest as authority.
+
+For every submitted cell, Go:
+
+1. Checks exact rational token grammar, matrix dimensions and independently pinned model SHA-256.
+2. Checks the supplied intervals form an ordered, nonoverlapping, exhaustive partition of the entire real line.
+3. Recomputes every layer's affine preactivations using big.Rat, proving no hidden ReLU activation root is strictly inside a claimed cell, and checks its output law and continuity at finite breakpoints.
+4. Merges adjacent equal-output cells into a canonical maximal atlas, recomputes the semantic digest and requires exact equality with the submitted atlas and digest.
+5. Confirms observational equivalence for x versus ReLU(x)-ReLU(-x) and for positive rescaling of a triangular-bump hidden neuron, while rejecting identity between the zero network and that bump.
+
+The Go parser additionally reserializes the strictly restricted ASCII-token JSON profile and requires a byte-for-byte match, including exactly one final LF. This rejects noncanonical bytes and duplicate-key encodings. The six Go tests mutate Python-produced artifacts, requiring rejection of incorrect affine laws, concealed hidden transitions, mismatched expected network identities, altered source bytes, altered semantic digests and incomplete covers. The implementation is not a generic JSON canonicalization library.
+
+### Reproduce across Python and Go
+
+From this experiment directory, with Python 3.11+ and Go 1.23+:
+
+~~~bash
+python produce_certificates.py certificate-artifacts
+COE_CERT_DIR=certificate-artifacts go test -v go_checker/main.go go_checker/main_test.go
+go run go_checker/main.go certificate-artifacts > go-independent-check-report.json
+~~~
+
+The GitHub workflow has a dedicated **Go verifier job**. It downloads the exact artifact produced by the Python job, tests its own verifier implementation, and retains a separate machine-readable verification report. The Go verifier independently recovers network, semantic and certificate SHA-256 identities for all five declared fixtures.
+
+### What this establishes—and does not
+
+Agreement between independently implemented Python and Go checkers reduces common-mode implementation risk. The exact semantic statement is still restricted to **scalar real inputs and rational affine/ReLU feed-forward networks under ideal real arithmetic**, with explicit computational budgets. Identical SHA-256 digests identify identical canonical descriptions under this declared profile; the tests do not establish collision resistance by themselves or authenticate an author.
+
+Both tools and their checked-in source pins still execute within one repository's GitHub CI trust context. Separate jobs and programming languages are **not hardware attestation, separate organizations, a verified mathematical kernel or a remote deployment**. The next useful step is proof-assistant formalization of the cell-checking lemma or integration with a separately trusted model/Ground identity.
