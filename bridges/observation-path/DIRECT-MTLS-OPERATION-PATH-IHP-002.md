@@ -1,8 +1,50 @@
 # Direct peer-authenticated operation path
 
 **Experiment:** IHP-002  
-**Status:** implementation and regression tests prepared; hosted-runner network experiment pending  
+**Status:** completed; direct hosted-runner probe and third-host negative-result attestation passed (run 4)  
 **Format:** direct mTLS handoff, receiver receipt, and independent reconstruction v0.1
+
+## Observed end-to-end result
+
+**Successful verification run:** [IHP-002 run 4](https://github.com/Kier73/In-Formation-Space/actions/runs/43359031129)  
+**Commit:** 9c0d8f63142a43bf14284131a25994e3d5462331  
+**Workflow outcome:** all three jobs and the independent report attestation passed.
+
+The successful verifier run is a successful negative-path experiment: the hosts could not establish direct TCP/mTLS, and the third host verified that result without creating a causal edge.
+
+| Role | Worker ID | Cloud | Region | Result |
+|---|---|---|---|---|
+| Client host | 53e0310c-fa64-414a-ba13-91ddb9b2066a | Azure | westus3 | Published attested certificate; direct connection attempt timed out; attested unavailable record |
+| Server host | 66a2a243-42ef-437c-bc3e-15f848b8b8bc | AWS | us-west-2 | Verified client certificate; published signed endpoint; accepted no inbound connection before timeout; attested unavailable record |
+| Verifier host | 62becda1-8ffb-4e4f-b012-faa71aa5d882 | Azure | westus3 | Verified all four host certificate/record attestations, validated records and report, and attested the final report |
+
+The client and server were not just separate VMs: they were scheduled on different cloud providers. The client reported:
+
+MutualTLSTransportError: mutually authenticated TLS connection failed: timed out
+
+The server reported:
+
+MutualTLSTransportError: mutually authenticated TLS accept failed: timed out
+
+The report records:
+- Overall status: direct_transport_unavailable.
+- Client and server record status: direct_tcp_unavailable.
+- Causal reconstruction: not_established, with zero edges.
+- Combined cross-host duration: null.
+- Semantic operation relayed through the artifact store: false.
+
+This distinguishes a network-reachability failure from a failure of certificate bootstrap, attestation, message signing, or report reconstruction. Both host certificates were attested, both host records were attested, and the third host successfully verified all four artifact attestations and signed the report. The direct TLS peer identity and ReliableChannel receipt could not be tested because no TCP session was established.
+
+**Report artifact:** direct-mtls-operation-path-report in [run 4](https://github.com/Kier73/In-Formation-Space/actions/runs/43359031129).  
+**Report-file SHA-256:** 7a8a06ecf179f3d0bbceed49ab89b99d4d0a2de7fa9c3789b1744acdc4714bb8  
+**Canonical report digest:** 11e7f66443eaa485bc717f258ba79d22d220c4797f3eaa34bb83e13bdaf24023
+
+The PR's focused CI passed the existing 13 operation-span tests, 13 DOP tests, 10 IHP-001 tests, 7 direct-mTLS tests, and all 10 direct/operation-path schemas. The wider In-Formation-Space integration had passed 95/95 steps before merge.
+
+Two verifier issues were exposed and corrected during the experiment:
+1. The client initially committed the digest of the endpoint payload core while the server committed the digest of the signed endpoint envelope. Both now commit the exact signed envelope digest, with a dedicated regression test.
+2. The direct host-record schema initially depended on a remote operation-span schema URI. The span definition is now embedded, allowing the third verifier to validate records entirely offline.
+
 
 ## Question
 
@@ -52,7 +94,7 @@ No common physical clock is assumed. The source and receiver use their own E-CPU
 
 ## Network reachability is a measured outcome
 
-Standard GitHub-hosted runners may not accept unsolicited inbound traffic. The workflow therefore attempts a real connection rather than presuming that a public egress IP is a reachable ingress address.
+Standard GitHub-hosted runners may not accept unsolicited inbound traffic. The workflow therefore attempts a real connection rather than presuming that a public egress IP is a reachable ingress address. In run 4, the cross-cloud client-to-server attempt timed out at both the client connection and server accept stages, despite successful public-certificate bootstrap and endpoint attestation. The verifier attested the resulting unavailable-path report.
 
 The server binds to 0.0.0.0 on a fixed run-scoped test port and advertises the public IPv4 address observed from its own runner. The client retries the signed endpoint until its bounded connection deadline. The server accept step has a slightly longer deadline. If the TCP path is blocked, the workflow should still produce attested direct_tcp_unavailable records and a verifier report explicitly saying that causal reconstruction was not established over direct mTLS. A successful TLS socket and authenticated ReliableChannel receipt are required for direct_mtls_verified.
 
@@ -67,6 +109,7 @@ This negative result is useful: it separates transport capability from cryptogra
 - Distinct runner worker IDs and regions can be recorded, but the jobs still share GitHub's control plane and cloud-provider trust.
 - Operation spans measure synchronous callables, not CPU time.
 - Combined cross-host elapsed time remains uncomputed without an explicitly attested clock calibration model.
+- Run 4 did not establish a direct TLS session, so the signed sender envelope, ReliableChannel delivery/ACK, receiver-signed receipt, and cross-host causal edge remain implemented and locally tested, but not yet observed between independent hosted VMs.
 - This is one client, one server, one operation, and one receipt. It does not yet test multi-hop routing, retries across session reconnection, process restart after receipt creation, key revocation, or multi-party quorum verification.
 
 ## Reproduction
