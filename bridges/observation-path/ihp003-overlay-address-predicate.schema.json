@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/ihp003-overlay-address-predicate.schema.json",
+  "title":"IHP-003 address attestation predicate",
+  "type":"object","additionalProperties":false,
+  "required":["schema","role","host","address_sha256","address_digest","status","overlay_ipv4"],
+  "properties":{
+    "schema":{"const":"in-formation.ihp003-overlay-address-predicate/0.1"},
+    "role":{"enum":["client_host","server_host"]},
+    "host":{"type":"object"},
+    "address_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "address_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "status":{"enum":["ready","credentials_missing"]},
+    "overlay_ipv4":{"type":["string","null"],"format":"ipv4"}
+  }
+}
