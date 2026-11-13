@@ -1,0 +1,44 @@
+name: HFR-001 live pinned Hub reference
+
+on:
+  push:
+    paths:
+      - "experiments/external_neural_structure_reading/hub.py"
+      - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/live_reference/**"
+      - ".github/workflows/hfr-001-live-reference.yml"
+  pull_request:
+    paths:
+      - "experiments/external_neural_structure_reading/hub.py"
+      - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/live_reference/**"
+      - ".github/workflows/hfr-001-live-reference.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-pinned-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out experiment workspace
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Observe pinned public GPT-2 metadata and Safetensors headers
+        run: >-
+          python -m experiments.external_neural_structure_reading.live_reference.run_gpt2
+          --output experiments/external_neural_structure_reading/results/gpt2-nsd.json
+
+      - name: Upload pinned GPT-2 NSD
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hfr-001-gpt2-nsd
+          path: experiments/external_neural_structure_reading/results/gpt2-nsd.json
+          if-no-files-found: warn
