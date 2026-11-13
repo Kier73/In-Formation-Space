@@ -150,4 +150,76 @@ Files:
 
 ## 8. Relationship to existing work
 
-This is the first experiment in the repository focused on retention in a delay loop. The [Encounter Envelope](../../formats/encounter-envelope/README.md) and [Poset Causal Interleaver](../description-to-realization/trials/trial-01-poset-interleaver/brief.md) work concerns ordering and causal reconstruction, not packet retention. [Finite Description, Unbounded Space](../description-to-realization/trials/trial-02-finite-description-unbounded-space/README.md) concerns finite descriptions of unbounded state spaces, not lossy transport. The [Observation Equivalence bridge](../../bridges/observation-equivalence/README.md) concerns quotienting states by observations. None of those experiments supplies the retention calculation developed here.
+This is the repository's initial experiment focused on retention in a delay loop; the BTL-001 extension above adds two explicitly different correlated-loss structures without replacing the iid baseline. The [Encounter Envelope](../../formats/encounter-envelope/README.md) and [Poset Causal Interleaver](../description-to-realization/trials/trial-01-poset-interleaver/brief.md) work concerns ordering and causal reconstruction, not packet retention. [Finite Description, Unbounded Space](../description-to-realization/trials/trial-02-finite-description-unbounded-space/README.md) concerns finite descriptions of unbounded state spaces, not lossy transport. The [Observation Equivalence bridge](../../bridges/observation-equivalence/README.md) concerns quotienting states by observations. None of those experiments supplies the retention calculation developed here.
+
+
+## 9. Correlated-loss extension: BTL-001
+
+The base experiment asks what happens when each packet is independently lost on every circulation. Its open questions explicitly call for burst or correlated loss. This extension tests two different ways that a two-state Gilbert-Elliott channel can change the result. It does not modify the independent-loss baseline.
+
+### 9.1 Two different correlation structures
+
+Let G and B denote good and bad channel states. In state G, a packet is lost with probability \(p_G\); in state B, it is lost with probability \(p_B\), with \(0 \le p_G \le p_B \le 1\). At the end of each circulation, the state transitions according to:
+
+- \(\alpha = P(G \rightarrow B)\)
+- \(\beta = P(B \rightarrow G)\)
+
+The state active at the start of a circulation controls that circulation's losses; the transition happens afterward. The initial bad-state probability \(\pi_B\) is an explicit input. The scan uses the stationary value \(\pi_B=\alpha/(\alpha+\beta)\); custom runs may use another initial distribution.
+
+**Per-packet Markov states.** Every packet has its own independent G/B Markov chain. Losses are correlated over time for one packet, but packet state paths are independent of one another. If \(g_r\) and \(b_r\) are the probabilities that one packet is alive and in G or B after \(r\) circulations, respectively, then:
+
+\[
+\begin{bmatrix}g_{r+1} & b_{r+1}\end{bmatrix}
+=
+\begin{bmatrix}g_r(1-p_G) & b_r(1-p_B)\end{bmatrix}
+\begin{bmatrix}1-\alpha & \alpha\\ \beta & 1-\beta\end{bmatrix}.
+\]
+
+The single-packet survival probability is \(q_r=g_r+b_r\). Since packet chains are independent, the number of survivors is binomial at a fixed horizon and retention is \(\Pr(\operatorname{Binomial}(n,q_r)\ge k)\).
+
+**Shared channel state.** All packets share one G/B channel state per circulation. Conditional on that shared state, packet losses are independent; across circulations and across the block, however, the common environment correlates the outcomes. A dynamic programme tracks \(D_r(m,s)\), the probability that \(m\) packets remain and the next circulation begins in state \(s\). The transition thins \(m\) packets using the current state's binomial loss law, then advances the shared channel state. States with fewer than \(k\) survivors are discarded because this model has no repair. Retention is the sum of \(D_r(m,s)\) over both channel states and all \(m \ge k\).
+
+These are not interchangeable interpretations of “burst loss.” The first represents packet-specific temporal persistence; the second represents a common environmental condition affecting the whole block. The comparison keeps both visible.
+
+### 9.2 Matched iid comparison and half-life definition
+
+The report includes an iid-per-round baseline with the same marginal first-round loss probability:
+
+\[
+\bar p=(1-\pi_B)p_G+\pi_B p_B.
+\]
+
+For stationary initialisation, this is also the marginal loss probability on each circulation. The baseline removes temporal and cross-packet state correlation. It is a controlled comparison, not a claim that one model is the true channel.
+
+The Gilbert-Elliott channel changes state only at circulation boundaries, so this extension defines half-life as the **first integer circulation** at which retention is at or below \(1/2\). It does not interpolate a fractional crossing. A result marked **not_reached_within_horizon** is right-censored at the scan horizon, not evidence of infinite retention. **no_finite_half_life** is emitted only for a detected loss-free absorbing-good-state case.
+
+### 9.3 Illustrative scan
+
+The checked-in scan uses four deliberately varied fixtures. The first three share \(p_G=0.001\), \(p_B=0.35\), \(\alpha=0.025\), \(\beta=0.20\), and stationary \(\pi_B=1/9\). The fourth uses a much more damaging but less frequent bad state.
+
+| Word | Marginal loss | iid-average | Per-packet Markov | Shared channel |
+| --- | ---: | ---: | ---: | ---: |
+| 32-of-32 intact | 3.98% | 1 | 1 | 11 |
+| 32-of-64 threshold | 3.98% | 18 | 35 | 32 |
+| 1-of-64 replication | 3.98% | 112 | 235 | 110 |
+| 24-of-32, persistent bad state | 15.04% | 2 | 14 | 52 |
+
+Values are first integer crossings in circulations, not measured elapsed time. The same marginal loss rate does not determine the k-of-n retention curve: the correlation structure and recovery threshold interact. In the shared-state model, common good periods can preserve many packets together, while common bad periods can damage many together. Whether that helps or hurts depends on the threshold. The table is an illustration of model sensitivity, not a universal ordering between burst and iid channels.
+
+A seeded 2,000-trial Monte Carlo check accompanies each reported crossing in [the scan receipt](results/burst-loss-scan.json). The simulation is a numerical implementation check against the finite-state calculations; it is not an empirical observation of a network.
+
+### 9.4 Reproduction
+
+~~~bash
+python -m unittest discover -s experiments/in-transit-memory -p "test_*.py" -v
+python experiments/in-transit-memory/burst_loss.py --scan --max-rounds 500 --json
+python experiments/in-transit-memory/burst_loss.py --scan --max-rounds 500 --simulate --trials 2000 --seed 20261112 --json --output experiments/in-transit-memory/results/burst-loss-scan.json
+~~~
+
+The 19 focused tests include reductions to the original iid expression when \(p_G=p_B\), explicit enumeration of short Markov state paths, monotonic retention, single-packet equivalence, common-mode counterexamples, integer half-life and censoring behavior, seeded Monte Carlo agreement, parameter validation, and CLI output.
+
+### 9.5 Interpretation limits and next step
+
+This is a two-state, finite-horizon mathematical model. It does not estimate \(p_G\), \(p_B\), \(\alpha\), or \(\beta\) from link traces. It does not inspect or claim to reproduce E-CPU's DelayLoopEngine, RRNS implementation, or any deployed channel. Packet drops are conditionally independent within a state; the shared-state variant is the only one here with cross-packet dependence. There is no repair, retransmission, reordering, finite readout window, decode failure, or repair latency. The base experiment's iid repair-epoch calculation has not yet been combined with these Markov models.
+
+The next discriminating experiment would add a repair/rewrite operation at a declared interval and make repair success depend on whether at least \(k\) packets survive to the repair boundary. A later implementation comparison would need actual packet traces or operation evidence, independently documented state classification, and a declared clock/measurement scope before any fitted model could be treated as descriptive evidence about a real path.
