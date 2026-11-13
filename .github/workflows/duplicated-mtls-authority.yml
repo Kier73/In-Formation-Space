@@ -41,3 +41,27 @@ jobs:
         run: |
           python -m py_compile clone_mtls.py clone_owner_worker.py tls_authority_worker.py test_clone_mtls.py
           python -m pytest -q test_clone_mtls.py
+      - name: Produce retained cloned-identity reconstruction report
+        working-directory: experiments/duplicated-mtls-authority
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: |
+          python clone_mtls.py --out-dir ../../evidence/duplicated-mtls-authority
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          schema = json.loads(Path("mtls-cloned-authority-report.schema.json").read_text(encoding="utf-8"))
+          report = json.loads(Path("../../evidence/duplicated-mtls-authority/report.json").read_text(encoding="utf-8"))
+          Draft202012Validator.check_schema(schema)
+          Draft202012Validator(schema).validate(report)
+          print("valid: retained cloned-mTLS authority report")
+          PY
+      - name: Preserve the local-process authority report
+        uses: actions/upload-artifact@v4
+        with:
+          name: duplicated-mtls-authority-identity-report
+          path: evidence/duplicated-mtls-authority/
+          if-no-files-found: error
+          retention-days: 90
