@@ -117,3 +117,8 @@ The implementation uses only the Python standard library and exact Fraction arit
 ## Follow-on question
 
 The next useful bridge is not to presume that the hidden regime can be read directly. It is to ask whether an explicitly authorized context measurement—planned through VGI attention and recorded through the ObservationPath—can improve the joint posterior enough to change a declared decision, and at what observation cost. That requires a model linking context-capture actions to regime observations; this experiment does not invent that link.
+
+
+## Related fixed-calibration experiment
+
+[RIV-007: Calibration-aware joint evidence](../calibration-aware-joint-evidence/README.md) studies a different latent-context contract: the calibration profile is drawn once for the session and does not transition. RIV-006 instead models a persistent operating regime that changes according to a Markov transition matrix. Keeping these cases separate makes fixed calibration uncertainty distinguishable from temporal context drift.

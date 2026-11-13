@@ -78,3 +78,8 @@ The implementation uses only the Python standard library and exact rational arit
 ## Follow-on experiment
 
 [RIV-006: Context-switching evidence accumulation](../context-switching-evidence-accumulator/README.md) relaxes the conditional-iid structure further by adding a persistent hidden Markov operating regime. RIV-005's scalar hypothesis posterior remains sufficient when the known sensor schedule is conditionally independent given H. RIV-006 shows why a joint posterior over H and the next regime is needed when hidden context persists and creates hypothesis-context correlation.
+
+
+## Related calibration-state experiment
+
+[RIV-007: Calibration-aware joint evidence](../calibration-aware-joint-evidence/README.md) models a latent calibration profile drawn once and retained across the session. This complements RIV-006's evolving Markov operating regime: RIV-007 isolates uncertainty over a fixed profile, while RIV-006 models a regime that can change between observations.

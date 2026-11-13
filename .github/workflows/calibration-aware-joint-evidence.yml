@@ -1,0 +1,30 @@
+name: Calibration-aware joint evidence RIV-006
+
+on:
+  push:
+    paths:
+      - "experiments/calibration-aware-joint-evidence/**"
+      - ".github/workflows/calibration-aware-joint-evidence.yml"
+  pull_request:
+    paths:
+      - "experiments/calibration-aware-joint-evidence/**"
+      - ".github/workflows/calibration-aware-joint-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  riv-006:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile
+        run: python -m py_compile experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py experiments/calibration-aware-joint-evidence/example.py
+      - name: Run focused tests
+        run: python -m unittest discover -s experiments/calibration-aware-joint-evidence -p 'test_*.py' -v
+      - name: Reproduce example
+        run: python experiments/calibration-aware-joint-evidence/example.py
