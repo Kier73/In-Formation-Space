@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/multi-observer-causal-reconstruction/mor002-source-followup.schema.json",
+  "title": "MOR-002 signed source-local A2 follow-up",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["core", "signature", "signed_digest"],
+  "properties": {
+    "core": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "event_id", "predecessor_event_id", "path_id", "attempt_id", "host", "predecessor_span_digest", "predecessor_frame", "handoff_envelope_digest", "operation_span", "temporal_frame", "transferred_in_handoff"],
+      "properties": {
+        "schema": {"const": "in-formation.mor002-source-followup/0.1"},
+        "event_id": {"const": "A2"},
+        "predecessor_event_id": {"const": "A1"},
+        "path_id": {"type": "string", "minLength": 1},
+        "attempt_id": {"type": "string", "minLength": 1},
+        "host": {"type": "object"},
+        "predecessor_span_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "predecessor_frame": {"type": "object"},
+        "handoff_envelope_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "operation_span": {"type": "object"},
+        "temporal_frame": {"type": "object"},
+        "transferred_in_handoff": {"const": false}
+      }
+    },
+    "signature": {"type": "string", "minLength": 1},
+    "signed_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

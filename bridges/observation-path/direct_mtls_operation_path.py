@@ -51,7 +51,9 @@ from mailcpu.temporal import (
 REPOSITORY = "Kier73/In-Formation-Space"
 WORKFLOW_PATH = ".github/workflows/direct-mtls-operation-path.yml"
 TAILSCALE_WORKFLOW_PATH = ".github/workflows/tailscale-mtls-operation-path.yml"
-ALLOWED_WORKFLOW_PATHS = frozenset({WORKFLOW_PATH, TAILSCALE_WORKFLOW_PATH})
+MOR002_WORKFLOW_PATH = ".github/workflows/mor002-tailscale-causal-reconstruction.yml"
+OVERLAY_WORKFLOW_PATHS = frozenset({TAILSCALE_WORKFLOW_PATH, MOR002_WORKFLOW_PATH})
+ALLOWED_WORKFLOW_PATHS = frozenset({WORKFLOW_PATH, *OVERLAY_WORKFLOW_PATHS})
 SIGNER_WORKFLOW = f"{REPOSITORY}/{WORKFLOW_PATH}"
 SOURCE_REF = "refs/heads/main"
 CERT_PREDICATE_TYPE = (
@@ -154,7 +156,7 @@ def _signer_workflow_from_environment() -> str:
 
 def host_metadata(role: str, env: Mapping[str, str] | None = None) -> dict[str, str]:
     selected = os.environ if env is None else env
-    if role not in {"client_host", "server_host", "verifier_host"}:
+    if role not in {"client_host", "server_host", "observer_host", "verifier_host"}:
         raise DirectMTLSError("unsupported direct-mTLS host role")
     fields = {
         "role": role,
@@ -811,6 +813,53 @@ def _local_work(label: str) -> str:
     return value.hex()
 
 
+def _write_mor002_source_followup(
+    directory: Path,
+    *,
+    host: Mapping[str, Any],
+    context: TemporalContext,
+    recorder: OperationSpanRecorder,
+    attempt_id: str,
+    predecessor_span: Mapping[str, Any],
+    predecessor_frame: Mapping[str, Any],
+    signed_envelope: Mapping[str, Any],
+    private_key_path: Path,
+) -> dict[str, Any]:
+    """Record A2 locally after A1; deliberately keep it outside the handoff envelope."""
+    recorder.measure(
+        attempt_id=attempt_id,
+        span_id="mor002-source-followup",
+        operation_id="mor002.source.A2",
+        operation=lambda: _local_work("mor002-source-event-A2"),
+        context={
+            "event_id": "A2",
+            "role": "client_host",
+            "predecessor_event_id": "A1",
+            "transferred": False,
+        },
+    )
+    followup_span = recorder.spans[-1]
+    context.emit_causal_stamp()
+    followup_frame = context.observe().to_dict()
+    core = {
+        "schema": "in-formation.mor002-source-followup/0.1",
+        "event_id": "A2",
+        "predecessor_event_id": "A1",
+        "path_id": str(signed_envelope["core"]["path_id"]),
+        "attempt_id": attempt_id,
+        "host": dict(host),
+        "predecessor_span_digest": str(predecessor_span["span_digest"]),
+        "predecessor_frame": dict(predecessor_frame),
+        "handoff_envelope_digest": str(signed_envelope["signed_digest"]),
+        "operation_span": followup_span,
+        "temporal_frame": followup_frame,
+        "transferred_in_handoff": False,
+    }
+    signed = _signed_document(core, private_key_path)
+    write_json(directory / "mor002-source-followup.json", signed)
+    return signed
+
+
 def _server_context(cert_path: Path, key_path: Path, peer_cert_path: Path) -> ssl.SSLContext:
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.minimum_version = ssl.TLSVersion.TLSv1_2
@@ -897,7 +946,7 @@ def _verify_endpoint_advertisement(
     if set(core) != expected or core["schema"] != ENDPOINT_SCHEMA:
         raise DirectMTLSError("server endpoint advertisement fields or schema are invalid")
     host = _validate_host_metadata(core["server_host"], "server_host")
-    if _workflow_path(host["workflow_ref"]) == TAILSCALE_WORKFLOW_PATH:
+    if _workflow_path(host["workflow_ref"]) in OVERLAY_WORKFLOW_PATHS:
         _validate_tailscale_ipv4(core.get("host"))
     if (
         core["run_id"] != host["run_id"]
@@ -951,7 +1000,7 @@ def prepare_server(
 ) -> dict[str, Any]:
     host = host_metadata("server_host")
     workflow_path = _workflow_path(host["workflow_ref"])
-    if workflow_path == TAILSCALE_WORKFLOW_PATH and advertise_host is None:
+    if workflow_path in OVERLAY_WORKFLOW_PATHS and advertise_host is None:
         raise DirectMTLSError(
             "IHP-006 requires an explicit Tailscale overlay address; public-IP fallback is disabled"
         )
@@ -1062,7 +1111,7 @@ def serve(
 ) -> dict[str, Any]:
     host = host_metadata("server_host")
     workflow_path = _workflow_path(host["workflow_ref"])
-    if workflow_path == TAILSCALE_WORKFLOW_PATH:
+    if workflow_path in OVERLAY_WORKFLOW_PATHS:
         if bind_host is None:
             raise DirectMTLSError(
                 "IHP-006 requires an explicit Tailscale bind address; wildcard binding is disabled"
@@ -1113,7 +1162,7 @@ def serve(
             raise DirectMTLSError("TLS peer certificate differs from the attested client bootstrap certificate")
 
         peer_route_observation = None
-        if workflow_path == TAILSCALE_WORKFLOW_PATH:
+        if workflow_path in OVERLAY_WORKFLOW_PATHS:
             peer_route_observation = _observe_tailscale_peer_route(transport, "server_host")
             if peer_route_observation["local_overlay_ipv4"] != _validate_tailscale_ipv4(endpoint_core["host"]):
                 raise DirectMTLSError("observed server socket address differs from the signed Tailscale endpoint")
@@ -1357,6 +1406,7 @@ def connect_and_send(
     source_span: dict[str, Any] | None = None
     sender_frame: dict[str, Any] | None = None
     signed_envelope: dict[str, Any] | None = None
+    mor002_followup_written = False
     deadline = time.monotonic() + connect_timeout_seconds
     transport: SocketTransport | None = None
     last_error = "connection has not been attempted"
@@ -1379,6 +1429,14 @@ def connect_and_send(
 
     if transport is None:
         source_span, sender_frame, _, signed_envelope = prepare_operation_handoff()
+        if _workflow_path(host["workflow_ref"]) == MOR002_WORKFLOW_PATH:
+            _write_mor002_source_followup(
+                directory, host=host, context=context, recorder=recorder,
+                attempt_id=attempt_id, predecessor_span=source_span,
+                predecessor_frame=sender_frame, signed_envelope=signed_envelope,
+                private_key_path=own_key_path,
+            )
+            mor002_followup_written = True
         record = _make_record(
             role="client_host",
             host=host,
@@ -1398,7 +1456,7 @@ def connect_and_send(
         if peer_sha != endpoint["server_cert_sha256"] or peer_sha != certificate_sha256(server_cert_path):
             raise DirectMTLSError("TLS server peer does not match the attested server certificate")
         route_observation = None
-        if _workflow_path(host["workflow_ref"]) == TAILSCALE_WORKFLOW_PATH:
+        if _workflow_path(host["workflow_ref"]) in OVERLAY_WORKFLOW_PATHS:
             route_observation = _observe_tailscale_peer_route(transport, "client_host")
             if route_observation["peer_overlay_ipv4"] != _validate_tailscale_ipv4(endpoint["host"]):
                 raise DirectMTLSError("observed Tailscale peer address differs from the signed server endpoint")
@@ -1413,6 +1471,16 @@ def connect_and_send(
         sequence = sender_channel.send(signed_envelope)
         if sequence != 1:
             raise DirectMTLSError("first direct operation did not use ReliableChannel sequence one")
+        # A2 is emitted only after the A1 payload has entered the peer channel.
+        # It is not part of the already-signed A1 envelope and is not sent to B.
+        if _workflow_path(host["workflow_ref"]) == MOR002_WORKFLOW_PATH:
+            _write_mor002_source_followup(
+                directory, host=host, context=context, recorder=recorder,
+                attempt_id=attempt_id, predecessor_span=source_span,
+                predecessor_frame=sender_frame, signed_envelope=signed_envelope,
+                private_key_path=own_key_path,
+            )
+            mor002_followup_written = True
         _wait_for_ack(sender_channel, (sequence,), timeout_seconds=15.0)
 
         receipt_receiver = ReliableChannel(
@@ -1481,6 +1549,16 @@ def connect_and_send(
             "receipt_sequence": receipt_sequence,
         }
     except Exception as error:
+        if _workflow_path(host["workflow_ref"]) == MOR002_WORKFLOW_PATH and not mor002_followup_written:
+            if source_span is None or sender_frame is None or signed_envelope is None:
+                source_span, sender_frame, _, signed_envelope = prepare_operation_handoff()
+            _write_mor002_source_followup(
+                directory, host=host, context=context, recorder=recorder,
+                attempt_id=attempt_id, predecessor_span=source_span,
+                predecessor_frame=sender_frame, signed_envelope=signed_envelope,
+                private_key_path=own_key_path,
+            )
+            mor002_followup_written = True
         record = _make_record(
             role="client_host",
             host=host,
@@ -1558,7 +1636,7 @@ def _validate_record(record: Mapping[str, Any], role: str) -> dict[str, Any]:
         operation_context = record["operation_span"].get("context")
         if not isinstance(operation_context, Mapping):
             raise DirectMTLSError(f"{role} operation span context is invalid")
-        if workflow_path == TAILSCALE_WORKFLOW_PATH:
+        if workflow_path in OVERLAY_WORKFLOW_PATHS:
             _validate_peer_route_observation(
                 operation_context.get("peer_route_observation"),
                 expected_role=role,
@@ -1611,7 +1689,7 @@ def build_report(
         raise DirectMTLSError("host records do not bind the same signed endpoint advertisement")
     peer_route_pair = None
     if (
-        _workflow_path(client["host"]["workflow_ref"]) == TAILSCALE_WORKFLOW_PATH
+        _workflow_path(client["host"]["workflow_ref"]) in OVERLAY_WORKFLOW_PATHS
         and client_status == "direct_mtls_verified"
         and server_status == "direct_mtls_verified"
     ):

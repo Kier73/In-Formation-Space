@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MOR-002 independent verifier report predicate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "repository", "run_id", "run_attempt", "workflow_ref", "workflow_sha", "git_ref", "git_sha", "job", "actor_id", "report_sha256", "report_digest", "path_id", "direct_transport_report_digest"],
+  "properties": {
+    "schema": {"const": "in-formation.mor002-overlay-report-predicate/0.1"},
+    "repository": {"const": "Kier73/In-Formation-Space"},
+    "run_id": {"type": "string"},
+    "run_attempt": {"type": "string"},
+    "workflow_ref": {"type": "string"},
+    "workflow_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_ref": {"const": "refs/heads/main"},
+    "git_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "job": {"const": "verifier_host"},
+    "actor_id": {"type": "string"},
+    "report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "path_id": {"type": ["string", "null"]},
+    "direct_transport_report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

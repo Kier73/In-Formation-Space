@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MOR-002 independent observer attestation predicate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "role", "event_id", "repository", "run_id", "run_attempt", "workflow_ref", "workflow_sha", "git_ref", "git_sha", "job", "actor_id", "record_sha256", "record_digest", "causal_stamp_present"],
+  "properties": {
+    "schema": {"const": "in-formation.mor002-event-predicate/0.1"},
+    "role": {"const": "observer_host"},
+    "event_id": {"const": "C1"},
+    "repository": {"const": "Kier73/In-Formation-Space"},
+    "run_id": {"type": "string"},
+    "run_attempt": {"type": "string"},
+    "workflow_ref": {"type": "string"},
+    "workflow_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_ref": {"const": "refs/heads/main"},
+    "git_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "job": {"const": "observer_host"},
+    "actor_id": {"type": "string"},
+    "record_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "record_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "causal_stamp_present": {"const": false}
+  }
+}

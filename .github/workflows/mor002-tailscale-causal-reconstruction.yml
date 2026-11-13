@@ -1,0 +1,504 @@
+name: MOR-002 Tailscale causal reconstruction
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "bridges/observation-path/direct_mtls_operation_path.py"
+      - "experiments/multi-observer-causal-reconstruction/mor002*"
+      - "experiments/multi-observer-causal-reconstruction/test_mor002_overlay.py"
+      - ".github/workflows/mor002-tailscale-causal-reconstruction.yml"
+  pull_request:
+    paths:
+      - "bridges/observation-path/direct_mtls_operation_path.py"
+      - "experiments/multi-observer-causal-reconstruction/mor002*"
+      - "experiments/multi-observer-causal-reconstruction/test_mor002_overlay.py"
+      - ".github/workflows/mor002-tailscale-causal-reconstruction.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal and reliable-channel implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test and schema dependencies
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5" "PyYAML>=6,<7"
+      - name: Compile MOR-002 and direct mTLS implementation
+        env:
+          PYTHONPATH: external/E-CPU:bridges/observation-path
+        run: |
+          python -m py_compile \
+            bridges/observation-path/direct_mtls_operation_path.py \
+            experiments/multi-observer-causal-reconstruction/mor002_overlay.py \
+            experiments/multi-observer-causal-reconstruction/test_mor002_overlay.py
+      - name: Run MOR-002 source, observer, and causal reconstruction tests
+        env:
+          PYTHONPATH: external/E-CPU:bridges/observation-path:experiments/multi-observer-causal-reconstruction
+        run: |
+          python -m unittest discover \
+            -s experiments/multi-observer-causal-reconstruction \
+            -p 'test_mor002_*.py' -v
+      - name: Run existing IHP-002/IHP-006 protocol regression tests
+        env:
+          PYTHONPATH: external/E-CPU:bridges/observation-path
+        run: |
+          python -m unittest discover \
+            -s bridges/observation-path -p 'test_direct_mtls_operation_path.py' -v
+      - name: Validate MOR-002 JSON Schemas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/multi-observer-causal-reconstruction")
+          for path in sorted(root.glob("mor002-*.schema.json")):
+              schema = json.loads(path.read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              print(f"valid Draft 2020-12 schema: {path}")
+          PY
+
+  client_host:
+    needs: tests
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install protocol dependencies
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/githubcli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Require the dedicated MOR-002 federation identity
+        shell: bash
+        env:
+          MOR002_TS_OAUTH_CLIENT_ID: ${{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
+          MOR002_TS_AUDIENCE: ${{ secrets.MOR002_TS_AUDIENCE }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$MOR002_TS_OAUTH_CLIENT_ID" || -z "$MOR002_TS_AUDIENCE" ]]; then
+            echo "MOR-002 requires MOR002_TS_OAUTH_CLIENT_ID and MOR002_TS_AUDIENCE; refusing to borrow IHP-006 credentials or fall back to public networking."
+            exit 1
+          fi
+      - name: Join the dedicated ephemeral MOR-002 tailnet
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          oauth-client-id: ${{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.MOR002_TS_AUDIENCE }}
+          tags: tag:mor002-mtls-ci
+          version: 1.104.6
+      - name: Confirm client is joined to the overlay
+        run: |
+          set -euo pipefail
+          test -n "$(tailscale ip -4)"
+          tailscale status
+      - name: Generate the ephemeral client certificate
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence/client-host
+          python bridges/observation-path/direct_mtls_operation_path.py prepare-client --directory evidence/client-host
+      - name: Attest the client public certificate
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/client-host/client-cert.pem
+          predicate-type: https://kier73.github.io/in-formation-space/direct-mtls-host-certificate/v1
+          predicate-path: evidence/client-host/client-cert.predicate.json
+      - name: Publish public client bootstrap
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp002-client-bootstrap
+          path: |
+            evidence/client-host/client-cert.pem
+            evidence/client-host/client-cert.predicate.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Send A1 over E-CPU ReliableChannel on Tailscale mTLS and record local A2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py connect \
+            --directory evidence/client-host --connect-timeout 150
+      - name: Bind client operation-record predicate
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py write-record-predicate \
+            --record evidence/client-host/client_host-record.json \
+            --role client_host --output evidence/client-host/client_host-record.predicate.json
+      - name: Attest client operation record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/client-host/client_host-record.json
+          predicate-type: https://kier73.github.io/in-formation-space/direct-mtls-host-operation-record/v1
+          predicate-path: evidence/client-host/client_host-record.predicate.json
+      - name: Bind source-local A2 follow-up predicate
+        run: |
+          python experiments/multi-observer-causal-reconstruction/mor002_overlay.py \
+            write-followup-predicate \
+            --record evidence/client-host/mor002-source-followup.json \
+            --output evidence/client-host/mor002-source-followup.predicate.json
+      - name: Attest source-local A2 follow-up
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/client-host/mor002-source-followup.json
+          predicate-type: https://kier73.github.io/in-formation-space/mor002-source-followup/v1
+          predicate-path: evidence/client-host/mor002-source-followup.predicate.json
+      - name: Publish client result record
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp002-client-result
+          path: |
+            evidence/client-host/client_host-record.json
+            evidence/client-host/client_host-record.predicate.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Preserve the independently attested A2 sidecar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mor002-source-followup
+          path: |
+            evidence/client-host/mor002-source-followup.json
+            evidence/client-host/mor002-source-followup.predicate.json
+          if-no-files-found: error
+          retention-days: 90
+
+  server_host:
+    needs: tests
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install protocol dependencies
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/githubcli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Require the dedicated MOR-002 federation identity
+        shell: bash
+        env:
+          MOR002_TS_OAUTH_CLIENT_ID: ${{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
+          MOR002_TS_AUDIENCE: ${{ secrets.MOR002_TS_AUDIENCE }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$MOR002_TS_OAUTH_CLIENT_ID" || -z "$MOR002_TS_AUDIENCE" ]]; then
+            echo "MOR-002 requires MOR002_TS_OAUTH_CLIENT_ID and MOR002_TS_AUDIENCE; refusing to borrow IHP-006 credentials or fall back to public networking."
+            exit 1
+          fi
+      - name: Join the dedicated ephemeral MOR-002 tailnet
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          oauth-client-id: ${{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.MOR002_TS_AUDIENCE }}
+          tags: tag:mor002-mtls-ci
+          version: 1.104.6
+      - name: Confirm server is joined and advertise only its overlay address
+        id: overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          overlay_ip="$(tailscale ip -4)"
+          python - "$overlay_ip" <<'PY'
+          import ipaddress, sys
+          address = ipaddress.ip_address(sys.argv[1])
+          if address.version != 4 or address not in ipaddress.ip_network("100.64.0.0/10"):
+              raise SystemExit("Tailscale did not provide a valid 100.64.0.0/10 endpoint")
+          print(f"server overlay address: {address}")
+          PY
+          echo "ip=$overlay_ip" >> "$GITHUB_OUTPUT"
+          tailscale status
+      - name: Verify client certificate and create signed overlay endpoint
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence/server-host
+          python bridges/observation-path/direct_mtls_operation_path.py prepare-server \
+            --directory evidence/server-host --bootstrap-timeout 180 \
+            --advertise-host "${{ steps.overlay.outputs.ip }}"
+      - name: Attest the server public certificate
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/server-host/server-cert.pem
+          predicate-type: https://kier73.github.io/in-formation-space/direct-mtls-host-certificate/v1
+          predicate-path: evidence/server-host/server-cert.predicate.json
+      - name: Publish public server bootstrap and endpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp002-server-bootstrap
+          path: |
+            evidence/server-host/server-cert.pem
+            evidence/server-host/server-cert.predicate.json
+            evidence/server-host/server-endpoint.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Accept the E-CPU A1 operation over Tailscale mTLS
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py serve \
+            --directory evidence/server-host --accept-timeout 165 \
+            --bind-host "${{ steps.overlay.outputs.ip }}"
+      - name: Bind server operation-record predicate
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py write-record-predicate \
+            --record evidence/server-host/server_host-record.json \
+            --role server_host --output evidence/server-host/server_host-record.predicate.json
+      - name: Attest server operation record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/server-host/server_host-record.json
+          predicate-type: https://kier73.github.io/in-formation-space/direct-mtls-host-operation-record/v1
+          predicate-path: evidence/server-host/server_host-record.predicate.json
+      - name: Publish server result record
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp002-server-result
+          path: |
+            evidence/server-host/server_host-record.json
+            evidence/server-host/server_host-record.predicate.json
+          if-no-files-found: error
+          retention-days: 90
+
+  observer_host:
+    needs: tests
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install observer dependencies
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
+      - name: Produce C1 without a causal clock
+        env:
+          PYTHONPATH: external/E-CPU:bridges/observation-path
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence/observer
+          python experiments/multi-observer-causal-reconstruction/mor002_overlay.py \
+            produce-observer --output evidence/observer/observer.json
+          python experiments/multi-observer-causal-reconstruction/mor002_overlay.py \
+            write-observer-predicate --record evidence/observer/observer.json \
+            --output evidence/observer/observer.predicate.json
+      - name: Attest the independent observer record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/observer/observer.json
+          predicate-type: https://kier73.github.io/in-formation-space/mor002-event-record/v1
+          predicate-path: evidence/observer/observer.predicate.json
+      - name: Publish C1 record and predicate
+        uses: actions/upload-artifact@v4
+        with:
+          name: mor002-independent-observer
+          path: |
+            evidence/observer/observer.json
+            evidence/observer/observer.predicate.json
+          if-no-files-found: error
+          retention-days: 90
+
+  verifier_host:
+    needs: [tests, client_host, server_host, observer_host]
+    if: needs.tests.result == 'success' && needs.client_host.result == 'success' && needs.server_host.result == 'success' && needs.observer_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal and reliable-channel implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install verifier dependencies
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/githubcli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Download public client bootstrap
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp002-client-bootstrap
+          path: evidence/client-bootstrap
+      - name: Download public server bootstrap and signed endpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp002-server-bootstrap
+          path: evidence/server-bootstrap
+      - name: Download client operation record
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp002-client-result
+          path: evidence/client-result
+      - name: Download server operation record
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp002-server-result
+          path: evidence/server-result
+      - name: Download source-local A2 follow-up
+        uses: actions/download-artifact@v4
+        with:
+          name: mor002-source-followup
+          path: evidence/source-followup
+      - name: Download independent observer C1
+        uses: actions/download-artifact@v4
+        with:
+          name: mor002-independent-observer
+          path: evidence/observer
+      - name: Independently verify mTLS receipt and reconstruct A1/A2/B1/C1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU:bridges/observation-path:experiments/multi-observer-causal-reconstruction
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence/report
+          python experiments/multi-observer-causal-reconstruction/mor002_overlay.py \
+            verify --directory evidence --output evidence/report/mor002-report.json
+      - name: Bind verifier identity to report bytes
+        env:
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python experiments/multi-observer-causal-reconstruction/mor002_overlay.py \
+            write-report-predicate --report evidence/report/mor002-report.json \
+            --output evidence/report/mor002-report.predicate.json
+      - name: Validate all MOR-002 records, report, and predicates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/multi-observer-causal-reconstruction")
+          cases = (
+              ("mor002-event-record.schema.json", "evidence/observer/observer.json"),
+              ("mor002-source-followup.schema.json", "evidence/source-followup/mor002-source-followup.json"),
+              ("mor002-event-predicate.schema.json", "evidence/observer/observer.predicate.json"),
+              ("mor002-followup-predicate.schema.json", "evidence/source-followup/mor002-source-followup.predicate.json"),
+              ("mor002-overlay-report.schema.json", "evidence/report/mor002-report.json"),
+              ("mor002-overlay-report-predicate.schema.json", "evidence/report/mor002-report.predicate.json"),
+          )
+          for schema_name, instance_name in cases:
+              schema = json.loads((root / schema_name).read_text(encoding="utf-8"))
+              instance = json.loads(Path(instance_name).read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              Draft202012Validator(schema).validate(instance)
+              print(f"valid: {instance_name}")
+          PY
+      - name: Attest independent MOR-002 reconstruction report
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/report/mor002-report.json
+          predicate-type: https://kier73.github.io/in-formation-space/mor002-overlay-causal-report/v1
+          predicate-path: evidence/report/mor002-report.predicate.json
+      - name: Preserve independent MOR-002 reconstruction
+        uses: actions/upload-artifact@v4
+        with:
+          name: mor002-tailscale-causal-reconstruction-report
+          path: |
+            evidence/report/mor002-report.json
+            evidence/report/mor002-report.predicate.json
+          if-no-files-found: error
+          retention-days: 90
