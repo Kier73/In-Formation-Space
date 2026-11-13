@@ -133,7 +133,7 @@ def _check_compiler_observation(
     if exit_code != 0:
         return False
     output = stdout + "\n" + stderr
-    if re.search(r"\b(sorryAx|sorry|admit|error:|warning:)\b", output, re.IGNORECASE):
+    if re.search(r"\b(?:sorryAx|sorry|admit)\b|\b(?:error|warning):", output, re.IGNORECASE):
         return False
     # Requiring the exact theorem name prevents accepting an unrelated no-axioms
     # banner or a successful compilation of another source.
