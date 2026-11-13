@@ -5,7 +5,7 @@ COE-007: an independent, bounded exact-rational certificate checker in Lean.
 
 GeneratedCertificateProofs.lean supplies only literal network/cell data.
 This module checks network dimensions, full ordered rational interval
-coverage, continuity of claimed output at every finite join, exact
+coverage, continuity of claimed output evaluateAt every finite join, exact
 symbolic affine propagation, and exclusion of every interior ReLU root.
 
 Closed certificate facts are checked with Lean's by decide in generated proofs,
@@ -38,7 +38,7 @@ structure Cert where
   cells : List Cell
   deriving Repr
 
-def at (a : Affine) (x : Rat) : Rat := a.slope * x + a.offset
+def evaluateAt (a : Affine) (x : Rat) : Rat := a.slope * x + a.offset
 
 def inside (c : Cell) (x : Rat) : Bool :=
   (match c.left with
@@ -75,7 +75,7 @@ def rootExcluded (c : Cell) (pre : Affine) : Bool :=
   if pre.slope = 0 then true
   else
     let root := -pre.offset / pre.slope
-    decide (at pre root = 0) && !(inside c root)
+    decide (evaluateAt pre root = 0) && !(inside c root)
 
 /-- The output affine law and root checks are recomputed from layer weights.
     The claimed output and the previous layer's active forms are not used
@@ -92,7 +92,7 @@ def advance (cell : Cell) (state : Bool × List Affine) (layer : Layer) :
   let rootsOK := if layer.relu then pres.all (rootExcluded cell) else true
   let p := probe cell
   let next := if layer.relu
-              then pres.map (fun a => if 0 < at a p then a else zeroAffine)
+              then pres.map (fun a => if 0 < evaluateAt a p then a else zeroAffine)
               else pres
   (state.1 && shape && rootsOK, next)
 
@@ -109,8 +109,8 @@ def joinVerified (first second : Cell) : Bool :=
   match first.right, second.left with
   | some x, some y =>
       decide (x = y) &&
-      decide (first.output.map (fun a => at a x) =
-              second.output.map (fun a => at a x))
+      decide (first.output.map (fun a => evaluateAt a x) =
+              second.output.map (fun a => evaluateAt a x))
   | _, _ => false
 
 def coverVerified (cells : List Cell) : Bool :=
