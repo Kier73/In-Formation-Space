@@ -174,7 +174,7 @@ A natural subsequent frontier is formalizing a small certificate soundness lemma
 
 **Question:** Which mathematically critical implications in COE-002/003 can we have checked by an independent proof kernel rather than just reproduced in Python/Go?
 
-The pinned Lean 4.15 project in the lean/ subdirectory proves two intentionally small rules without mathematical libraries, hidden axioms, or admitted proof holes:
+The pinned Lean 4.15 project in the lean/ subdirectory proves two intentionally small rules without mathematical libraries or admitted proof holes. The branch theorem depends on Lean's foundational propext axiom (as reported by the kernel); the cover theorem depends on no axioms:
 
 1. **Selected branch soundness:** For any value type, any Boolean activation predicate and any function, if the activation decision at an arbitrary x is the same as the decision at the selected probe, the piecewise chosen branch produces exactly the same result as the pointwise rectifying operator at x. This is independent of a particular ReLU numeric implementation.
 2. **Complete observation cover transfer:** For any coordinate type X and any output type Y, if every x lies in at least one certified cell and two realizations equal the same claimed observation in each cell, they are equivalent at **every coordinate of X**. This is a universal quantified theorem; it does not rely on enumerating coordinates.
@@ -189,6 +189,6 @@ lake build
 lake env lean COECellSoundness.lean
 ~~~
 
-The COE-005 workflow installs the pinned Lean compiler, checks the theorem statements in the kernel, retains the axiom-dependency report, and requires an intentionally false theorem in COECellInvalid.lean to fail. The negative control ensures this CI route does not accidentally accept a failed proof file.
+The COE-005 workflow installs the pinned Lean compiler, checks the theorem statements in the kernel, retains the exact foundational-axiom report (allowing only the explicitly documented propext dependency for the branch theorem), and requires an intentionally false theorem in COECellInvalid.lean to fail. The negative control ensures this CI route does not accidentally accept a failed proof file.
 
 The next formalization target is to prove the arithmetic bridge from a rational affine expression's root exclusion on a claimed interval to *sign stability* (with equality correctly handled at endpoints), then to connect that lemma to the verified symbolic layer evaluator. That step would discharge a substantive premise currently supplied only by the executable verifier.
