@@ -1,0 +1,54 @@
+name: Robust policy evidence execution RIV-017
+
+on:
+  push:
+    paths:
+      - "experiments/robust-likelihood-acquisition/robust_policy_execution.py"
+      - "experiments/robust-likelihood-acquisition/test_robust_policy_execution.py"
+      - "experiments/robust-likelihood-acquisition/robust-policy-execution.schema.json"
+      - "experiments/robust-likelihood-acquisition/robust_policy_execution_example.py"
+      - "experiments/robust-likelihood-acquisition/RIV-017-README.md"
+      - ".github/workflows/robust-policy-evidence-execution.yml"
+      - "experiments/robust-likelihood-acquisition/robust_sequential_acquisition.py"
+      - "experiments/robust-likelihood-acquisition/robust_likelihood_acquisition.py"
+      - "bridges/observation-path/observation_path.py"
+  pull_request:
+    paths:
+      - "experiments/robust-likelihood-acquisition/robust_policy_execution.py"
+      - "experiments/robust-likelihood-acquisition/test_robust_policy_execution.py"
+      - "experiments/robust-likelihood-acquisition/robust-policy-execution.schema.json"
+      - "experiments/robust-likelihood-acquisition/robust_policy_execution_example.py"
+      - "experiments/robust-likelihood-acquisition/RIV-017-README.md"
+      - ".github/workflows/robust-policy-evidence-execution.yml"
+      - "experiments/robust-likelihood-acquisition/robust_sequential_acquisition.py"
+      - "experiments/robust-likelihood-acquisition/robust_likelihood_acquisition.py"
+      - "bridges/observation-path/observation_path.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  robust-policy-evidence-execution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema dependency
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate execution record schema
+        run: |
+          python -c "import json, jsonschema; p='experiments/robust-likelihood-acquisition/robust-policy-execution.schema.json'; s=json.load(open(p, encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s)"
+      - name: Compile robust policy and execution modules
+        run: |
+          python -m py_compile bridges/observation-path/observation_path.py
+          python -m py_compile experiments/robust-likelihood-acquisition/robust_likelihood_acquisition.py
+          python -m py_compile experiments/robust-likelihood-acquisition/robust_sequential_acquisition.py
+          python -m py_compile experiments/robust-likelihood-acquisition/robust_policy_execution.py
+          python -m py_compile experiments/robust-likelihood-acquisition/robust_policy_execution_example.py
+      - name: Run evidence-gated policy prefix tests
+        run: python -m unittest discover -s experiments/robust-likelihood-acquisition -p "test_robust_policy_execution.py" -v
+      - name: Run planned-only example
+        run: python experiments/robust-likelihood-acquisition/robust_policy_execution_example.py
