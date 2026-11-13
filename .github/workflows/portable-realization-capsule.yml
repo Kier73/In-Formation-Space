@@ -65,6 +65,8 @@ jobs:
           experiments/portable-realization-capsule/portable_stateful_checkpoint.py
           experiments/portable-realization-capsule/stateful_recovery_handoff.py
           experiments/portable-realization-capsule/stateful_recovery_worker.py
+          experiments/portable-realization-capsule/prepared_result_validation.py
+          experiments/portable-realization-capsule/remote_validator_test_support.py
 
       - name: Run capsule and E-CPU sparse transition regressions
         env:
