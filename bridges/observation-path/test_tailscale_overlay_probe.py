@@ -197,7 +197,7 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
         record = self.record(
             client_address, "client_host", route="direct", status="route_observed", peer=None
         )
-        with self.assertRaisesRegex(overlay.OverlayProbeError, "both peer address commitments"):
+        with self.assertRaisesRegex(overlay.OverlayProbeError, "both attested peer address commitments"):
             overlay._validate_record(
                 record, "client_host",
                 expected_run_id="789012345", expected_attempt="1",
