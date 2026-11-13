@@ -19,11 +19,11 @@ unit event count only; no repair duration or physical channel is measured.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import math
 import random
-import sys
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
@@ -34,12 +34,8 @@ from burst_loss import (
 )
 
 MODELS = ("iid_marginal", "per_packet_markov", "shared_channel")
-MODEL_NAMES = {
-    "iid_marginal": "iid_marginal",
-    "per_packet_markov": "per_packet_markov",
-    "shared_channel": "shared_channel",
-}
 MAX_SLOTS = 64
+MAX_TOTAL_ROUNDS = 20000
 
 
 class RepairEpochError(ValueError):
@@ -469,6 +465,11 @@ def _policy_model_report(
     transition: Sequence[Sequence[float]],
     max_epochs: int,
     no_repair_curve: Sequence[float],
+    good_loss_probability: float,
+    bad_loss_probability: float,
+    good_to_bad_probability: float,
+    bad_to_good_probability: float,
+    initial_bad_probability: float,
     simulation_trials: Optional[int],
     simulation_seed: int,
 ) -> Dict[str, Any]:
@@ -535,19 +536,16 @@ def _policy_model_report(
             slots=slots,
             required=required,
             interval_rounds=interval_rounds,
-            good_loss_probability=_CURRENT_PARAMETERS["good_loss_probability"],
-            bad_loss_probability=_CURRENT_PARAMETERS["bad_loss_probability"],
-            good_to_bad_probability=_CURRENT_PARAMETERS["good_to_bad_probability"],
-            bad_to_good_probability=_CURRENT_PARAMETERS["bad_to_good_probability"],
-            initial_bad_probability=_CURRENT_PARAMETERS["initial_bad_probability"],
+            good_loss_probability=good_loss_probability,
+            bad_loss_probability=bad_loss_probability,
+            good_to_bad_probability=good_to_bad_probability,
+            bad_to_good_probability=bad_to_good_probability,
+            initial_bad_probability=initial_bad_probability,
             max_epochs=max_epochs,
             trials=simulation_trials,
             seed=simulation_seed,
         )
     return result
-
-
-_CURRENT_PARAMETERS: Dict[str, float] = {}
 
 
 def _dominates(left: Mapping[str, Any], right: Mapping[str, Any]) -> bool:
@@ -595,13 +593,10 @@ def build_repair_sweep(
 
     average_loss = (1.0 - initial_bad) * p_good + initial_bad * p_bad
     max_total_rounds = max(intervals) * max_epochs
-    no_repair_curves = {
-        "iid_marginal": [
-            binomial_tail_probability(slots, required, (1.0 - average_loss) ** rounds)
-            for required in range(1, slots + 1)
-            for rounds in ()
-        ]
-    }
+    if max_total_rounds > MAX_TOTAL_ROUNDS:
+        raise RepairEpochError(
+            f"max(interval_rounds) * max_epochs must be <= {MAX_TOTAL_ROUNDS}"
+        )
     # Cache the original no-repair curves once per recovery threshold/model.
     no_repair_by_threshold: Dict[int, Dict[str, List[float]]] = {}
     for required in thresholds:
@@ -620,15 +615,6 @@ def build_repair_sweep(
 
     policies: List[Dict[str, Any]] = []
     flattened: Dict[str, List[Dict[str, Any]]] = {model: [] for model in MODELS}
-    global _CURRENT_PARAMETERS
-    _CURRENT_PARAMETERS = {
-        "good_loss_probability": p_good,
-        "bad_loss_probability": p_bad,
-        "good_to_bad_probability": alpha,
-        "bad_to_good_probability": beta,
-        "initial_bad_probability": initial_bad,
-    }
-
     for required in thresholds:
         for interval in intervals:
             iid_success = binomial_tail_probability(slots, required, (1.0 - average_loss) ** interval)
@@ -657,6 +643,11 @@ def build_repair_sweep(
                     initial_distribution=initial_distributions[model],
                     transition=matrices[model], max_epochs=max_epochs,
                     no_repair_curve=no_repair_by_threshold[required][model],
+                    good_loss_probability=p_good,
+                    bad_loss_probability=p_bad,
+                    good_to_bad_probability=alpha,
+                    bad_to_good_probability=beta,
+                    initial_bad_probability=initial_bad,
                     simulation_trials=simulation_trials,
                     simulation_seed=simulation_seed + required * 1000 + interval * 10 + model_index,
                 )
@@ -739,7 +730,7 @@ def build_repair_sweep(
 def validate_repair_sweep(report: Mapping[str, Any]) -> Dict[str, Any]:
     if not isinstance(report, Mapping):
         raise RepairEpochError("report must be a mapping")
-    supplied = dict(report)
+    supplied = copy.deepcopy(dict(report))
     digest_value = supplied.pop("report_digest", None)
     if digest_value != _digest(supplied):
         raise RepairEpochError("repair sweep report digest mismatch")
