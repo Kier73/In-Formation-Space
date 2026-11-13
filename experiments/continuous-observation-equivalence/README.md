@@ -318,3 +318,56 @@ The certificate JSON-to-Lean translator is unverified Python. The Python/Go chec
 The pinned Lean workflow compiles COE008Soundness.lean and COE008Evaluation.lean, checks the new universal theorem's axiom audit, and preserves the COE-005/006 negative controls. The existing seven-job COE workflow independently checks the original Python-produced certificates and three malicious certificate mutations using Python, Go and Lean.
 
 Next: formally prove that accepted adjacent piecewise-affine observations agree with direct evaluation **at rational cutpoints**, using the continuity of each affine and ReLU layer; then investigate the rational-to-real completion. Only after those steps can a fully quantified *all-real-input* Lean soundness claim be made.
+
+
+## COE-009 — Complete rational-domain semantic correctness, including cutpoints
+
+COE-008 connected the executable Lean certificate verifier to independent numeric network evaluation, but only at points **strictly inside** each open activation cell. A finite cutpoint can be an exact ReLU zero and does not belong to either adjacent open interval, even though both certified affine descriptions should evaluate correctly there.
+
+COE-009 resolves the rational endpoint and total-coverage obligations with a kernel-checked proof under the pinned Lean 4.24 toolchain. It does **not** introduce an unproved continuity assumption.
+
+### Endpoint correctness (COE009Endpoint.lean)
+
+A point in a cell's **closure** may equal a finite left or right endpoint. The certificate's selected ReLU branch can have a different Boolean activation decision from the value exactly at that endpoint; at a ReLU zero, both branches still yield zero.
+
+The theorem selectedAtClosed takes the *actual* rootExcluded Boolean guard from COEWireCheck, an interior probe, and any rational point in the corresponding closed interval. It proves that the probe-selected affine expression equals pointwise ReLU evaluation. Its key mathematical argument is that a strictly opposite-sign endpoint would force the affine preactivation root into the open interior, contradicting the verified exclusion. Equality at the zero root is handled explicitly. It covers positive, negative and zero slopes, bounded intervals, and one-sided unbounded cells.
+
+### Entire network evaluation at endpoints (COE009Evaluation.lean)
+
+The file retains the independent direct source interpreter COE008Evaluation.evalNetwork: list-dot-products, layerwise ReLU, no certificate cells. It extends the earlier proof by induction through every network layer:
+
+- advanceClosedSound: one accepted symbolic layer agrees with direct rational layer evaluation throughout a **closed** activation cell.
+- foldClosedSound: every accepted prefix and the complete network agree with independent direct evaluation throughout that same closed cell.
+- verifiedCertificateClosedSound: if the Lean verifier accepts a certificate, then for every declared cell and every rational x in its *closed* interval, the claimed affine output equals the direct network's output at x.
+
+These statements quantify over arbitrary typed certificates, layers and rational values, not only the five concrete fixtures.
+
+### Complete coverage of the rational line (COE009Coverage.lean)
+
+The executable checker now uses structurally recursive forms of its established endpoint and adjacency tests, lastUnbounded and joinedChain. This makes the verification evidence available for a terminating list induction. Acceptance still requires an unbounded first and last cell, nonempty/proper intervals, and exact equality of adjacent cutpoints and output values.
+
+- verifiedCoverCoversRationals: for every rational coordinate x and every accepted certificate, there is at least one member of the declared activation-cell list whose **closed interval contains x**.
+- verifiedCertificateAllRationals: combining that complete coverage with closed-cell network soundness proves that, at **every rational x**, at least one claimed certificate affine observation equals the independent numeric evaluation of the source network. This includes all finite rational breakpoints.
+
+The theorem yields a **witness cell and its verified observation** for each rational input, without finite sampling or any fixed limit on network depth/number of cells in its statement.
+
+### What the proof does not yet establish
+
+- **All-real quantification is still open.** Rational coordinates are dense, and the represented affine/ReLU networks are mathematically continuous, but Lean has not yet formalized the rational-to-real extension of this verifier's semantics.
+- The Python JSON-to-Lean literal translator is **not verified by Lean**. The source network SHA-256 pins, canonical JSON and semantic atlas remain separately verified by the Python and Go checkers, with distinct trust assumptions.
+- The proof is about exact rational parameters and ideal rational pointwise evaluation, not actual floating-point/GPU execution, remote authentication, or E-CPU Ground admission.
+- The printed foundational Lean axiom dependencies are propext, Classical.choice, and Quot.sound. The workflow rejects sorryAx and retains its negative controls.
+
+### Reproduction and verification
+
+~~~bash
+cd experiments/continuous-observation-equivalence/lean
+lake build
+lake env lean COE009Endpoint.lean
+lake env lean COE009Evaluation.lean
+lake env lean COE009Coverage.lean
+~~~
+
+A separate GitHub Actions job still consumes unmodified COE-002 producer artifacts, independently checks the original certificates in Python and Go, reconstructs E-CPU candidate Ground identities under pinned policies, executes the five concrete Lean certificate proofs, and rejects adversarial certificate mutations.
+
+The most significant next frontier is the **formal real-number semantic extension** from the established all-rational pointwise result: define the ideal real-input interpretation of exact rational affine and ReLU layers, establish their continuity, and show that agreement on the dense rational domain extends uniquely to every real coordinate. Only then can the Lean model establish the same complete continuous real-domain result claimed by the existing algorithm.
