@@ -43,7 +43,7 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
         with patch.object(overlay, "_tailscale_ip", return_value=ip or "100.64.0.10"):
             return overlay.create_address(role, output, enabled=ip is not None, env=env), output
 
-    def record(self, address: dict, role: str, *, route: str, status: str, peer: dict | None):
+    def record(self, address: dict, role: str, *, route: str, status: str, peer: dict | None, peer_attestation: dict | None = None):
         core = {
             "schema": overlay.RECORD_SCHEMA,
             "role": role,
@@ -56,7 +56,7 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
             "peer_address_digest": None if peer is None else peer["address_digest"],
             "peer_role": "server_host" if role == "client_host" else "client_host",
             "peer_overlay_ipv4": None if peer is None else peer["overlay_ipv4"],
-            "peer_address_attestation": None,
+            "peer_address_attestation": peer_attestation,
             "route_type": route,
             "ping_count": 0 if route == "not_attempted" else overlay.PING_COUNT,
             "ping_exit_code": None if route == "not_attempted" else (0 if status == "route_observed" else 1),
@@ -124,14 +124,16 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
     def test_report_reconstructs_direct_peer_route_from_two_distinct_host_records(self) -> None:
         client_address, _ = self.address("client_host", self.client_env, "100.64.0.11")
         server_address, _ = self.address("server_host", self.server_env, "100.64.0.22")
+        attestation = {"verified": True, "subject_sha256": "a" * 64}
         client_record = self.record(
-            client_address, "client_host", route="direct", status="route_observed", peer=server_address
+            client_address, "client_host", route="direct", status="route_observed",
+            peer=server_address, peer_attestation=attestation,
         )
         server_record = self.record(
-            server_address, "server_host", route="direct", status="route_observed", peer=client_address
+            server_address, "server_host", route="direct", status="route_observed",
+            peer=client_address, peer_attestation=attestation,
         )
         verifier = overlay.host_metadata("verifier_host", self.verifier_env)
-        attestation = {"verified": True, "subject_sha256": "a" * 64}
         report = overlay.build_report(
             client_record, server_record,
             attestation, attestation, attestation, attestation, verifier,
@@ -144,13 +146,15 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
     def test_report_distinguishes_relayed_overlay_from_direct_path(self) -> None:
         client_address, _ = self.address("client_host", self.client_env, "100.64.0.11")
         server_address, _ = self.address("server_host", self.server_env, "100.64.0.22")
+        attestation = {"verified": True, "subject_sha256": "b" * 64}
         client_record = self.record(
-            client_address, "client_host", route="derp_relay", status="route_observed", peer=server_address
+            client_address, "client_host", route="derp_relay", status="route_observed",
+            peer=server_address, peer_attestation=attestation,
         )
         server_record = self.record(
-            server_address, "server_host", route="direct", status="route_observed", peer=client_address
+            server_address, "server_host", route="direct", status="route_observed",
+            peer=client_address, peer_attestation=attestation,
         )
-        attestation = {"verified": True, "subject_sha256": "b" * 64}
         report = overlay.build_report(
             client_record, server_record,
             attestation, attestation, attestation, attestation,
