@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"os"
+	"strings"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -25,10 +26,15 @@ func fixturePaths(t *testing.T) Paths {
 		Request: filepath.Join(root, "authority", "request.json"),
 		AuthorityAttestation: filepath.Join(root, "authority", "authority-attestation.json"),
 		AuthorityKey: filepath.Join(root, "authority", "authority-public-key.json"),
+		AuthorityHistory: filepath.Join(root, "authority", "store-history.json"),
+		AuthorityStore: filepath.Join(root, "authority", "authority-store-fixture.bin"),
+		ProcessEvidence: filepath.Join(root, "authority", "process-evidence.json"),
+		StaleOwnerAttempt: filepath.Join(root, "authority", "stale-owner-attempt.json"),
 		Result: filepath.Join(root, "runner", "result.json"),
 		Receipt: filepath.Join(root, "runner", "completion-receipt.json"),
 		RunnerKey: filepath.Join(root, "runner", "runner-public-key.json"),
 		VerifierHost: filepath.Join(root, "verifier-host.json"),
+		SQLiteStoreReopenedVerified: false,
 	}
 }
 
@@ -90,6 +96,49 @@ func TestThreeHostFixtureReconstructsInGo(t *testing.T) {
 	}
 }
 
+func TestRejectsTamperedSQLiteIntermediateRevision(t *testing.T) {
+	paths := fixturePaths(t)
+	historyDocument := readMutable(t, paths.AuthorityHistory)
+	rows := historyDocument["entries"].([]any)
+	second := rows[1].(map[string]any)
+	second["ledger_digest"] = strings.Repeat("0", 64)
+	third := rows[2].(map[string]any)
+	third["previous_ledger_digest"] = strings.Repeat("0", 64)
+	writeMutable(t, paths.AuthorityHistory, historyDocument)
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("altered intermediate SQLite revision was accepted")
+	}
+}
+
+func TestRejectsTamperedStaleOwnerProcessEvidence(t *testing.T) {
+	paths := fixturePaths(t)
+	process := readMutable(t, paths.ProcessEvidence)
+	phases := process["phases"].([]any)
+	stale := phases[2].(map[string]any)
+	stale["accepted"] = true
+	writeMutable(t, paths.ProcessEvidence, process)
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("process evidence claiming stale-owner acceptance was accepted")
+	}
+}
+
+func TestRejectsTamperedSQLiteDatabaseBytes(t *testing.T) {
+	paths := fixturePaths(t)
+	file, err := os.OpenFile(paths.AuthorityStore, os.O_APPEND|os.O_WRONLY, 0)
+	if err != nil {
+		t.Fatalf("open SQLite fixture bytes: %v", err)
+	}
+	if _, err := file.Write([]byte("tamper")); err != nil {
+		t.Fatalf("tamper SQLite fixture bytes: %v", err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatalf("close tampered SQLite fixture: %v", err)
+	}
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("tampered SQLite authority database bytes were accepted")
+	}
+}
+
 func TestRejectsChangedRunnerSignature(t *testing.T) {
 	paths := fixturePaths(t)
 	receipt := readMutable(t, paths.Receipt)
@@ -125,12 +174,12 @@ func TestRejectsRehashedButSemanticallyBrokenAdmissionChain(t *testing.T) {
 	paths := fixturePaths(t)
 	ledger := readMutable(t, paths.Ledger)
 	entries := ledger["entries"].([]any)
-	admission := entries[1].(map[string]any)
+	admission := entries[2].(map[string]any)
 	admissionDetails := admission["details"].(map[string]any)
 	admissionDetails["request_sequence"] = json.Number("2")
 	rehashEvent(t, admission)
 
-	authorization := entries[2].(map[string]any)
+	authorization := entries[3].(map[string]any)
 	authorization["previous_event_digest"] = admission["event_digest"]
 	rehashEvent(t, authorization)
 	rehashLedger(t, ledger)
