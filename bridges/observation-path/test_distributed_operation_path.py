@@ -266,7 +266,7 @@ class DistributedOperationPathTests(unittest.TestCase):
             frame("host-b", 0, 30, 2, {"host-a": 0, "host-b": 1}),
         )
         cal = calibration("host-a", 0, "host-b", 0)
-        with self.assertRaisesRegex(DistributedOperationPathError, "strictly follows"):
+        with self.assertRaisesRegex(DistributedOperationPathError, "strictly follow"):
             build_trace([a, b], "host-b", 0, handoffs=[handoff], calibrations=[cal])
 
     def test_sender_frame_must_follow_predecessor_completion(self):
