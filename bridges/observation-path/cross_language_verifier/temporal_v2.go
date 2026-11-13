@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"math"
 	"math/big"
 	"regexp"
@@ -383,6 +382,9 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 	required := []string{"format", "schema", "numeric_profile", "actor_id", "monotonic", "wall", "causal", "scheduler", "event_lambda", "chronon_phase", "chemical_tau"}
 	raw, err := exactFields(value, required, "temporal frame v0.2")
 	if err != nil {
+		return nil, err
+	}
+	if _, err := CanonicalBytes(raw); err != nil {
 		return nil, err
 	}
 	if raw["format"] != TemporalFrameFormat || raw["schema"] != TemporalFrameSchema || raw["numeric_profile"] != TemporalNumericSchema {
