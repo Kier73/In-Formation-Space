@@ -1,6 +1,6 @@
 name = "coe_cell_soundness"
 version = "0.1.0"
-defaultTargets = ["COECellSoundness", "COERationalRoot", "COEWireCheck", "COE008Soundness", "COE008Evaluation"]
+defaultTargets = ["COECellSoundness", "COERationalRoot", "COEWireCheck", "COE008Soundness", "COE008Evaluation", "COE009Endpoint", "COE009Evaluation", "COE009Coverage"]
 
 [[lean_lib]]
 name = "COECellSoundness"
@@ -16,3 +16,12 @@ name = "COE008Soundness"
 
 [[lean_lib]]
 name = "COE008Evaluation"
+
+[[lean_lib]]
+name = "COE009Endpoint"
+
+[[lean_lib]]
+name = "COE009Evaluation"
+
+[[lean_lib]]
+name = "COE009Coverage"

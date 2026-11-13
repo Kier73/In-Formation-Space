@@ -72,7 +72,7 @@ theorem weightedAt (row : List Rat) (prev : List Affine)
   simp only [evaluateAt]
   rw [hz]
 
-private theorem preactivationsAt (layer : Layer) (prev : List Affine)
+theorem preactivationsAt (layer : Layer) (prev : List Affine)
     (x : Rat) :
     (List.zipWith (fun row bias => weighted row prev bias)
       layer.weights layer.bias).map (fun a => evaluateAt a x) =
@@ -160,7 +160,7 @@ theorem advanceSound (cell : Cell) (state : Bool × List Affine)
 
 /-- Because every step can only preserve or clear the accumulated validity
     flag, a successful fold entails success of every prefix. -/
-private theorem foldSuccessPrefix (cell : Cell)
+theorem foldSuccessPrefix (cell : Cell)
     (layers : List Layer) (state : Bool × List Affine)
     (h : (layers.foldl (advance cell) state).1 = true) :
     state.1 = true := by
