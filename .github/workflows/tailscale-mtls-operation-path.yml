@@ -217,7 +217,8 @@ jobs:
           RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           python bridges/observation-path/direct_mtls_operation_path.py serve \
-            --directory evidence/server-host --accept-timeout 165
+            --directory evidence/server-host --accept-timeout 165 \
+            --bind-host "${{ steps.overlay.outputs.ip }}"
       - name: Bind server record predicate
         env:
           PYTHONPATH: external/E-CPU
