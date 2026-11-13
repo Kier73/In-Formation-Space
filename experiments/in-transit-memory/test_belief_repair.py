@@ -130,7 +130,14 @@ class BeliefRepairTests(unittest.TestCase):
         self.assertEqual(sweep["sweep_digest_sha256"], _digest(core))
         receipt_path = Path(__file__).with_name("results") / "belief-repair-scan-summary.json"
         receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-        self.assertEqual(receipt, summarize_default_sweep(sweep))
+        expected_receipt = summarize_default_sweep(sweep)
+        self.assertEqual(set(receipt), set(expected_receipt))
+        for field in sorted(expected_receipt):
+            self.assertEqual(
+                receipt[field],
+                expected_receipt[field],
+                msg=f"checked-in receipt differs from reconstructed field: {field}",
+            )
         for spec, report, summary in zip(DEFAULT_SCENARIOS, sweep["reports"], sweep["summary"]):
             self.assertEqual(validate_belief_repair_report(report), report)
             self.assertEqual(report["scenario_name"], spec["scenario_name"])
