@@ -193,7 +193,7 @@ func checkTemporalPhase(real, imaginary float64) error {
 	if math.IsNaN(real) || math.IsNaN(imaginary) || math.IsInf(real, 0) || math.IsInf(imaginary, 0) {
 		return fail("chronon_phase must contain finite binary64 values")
 	}
-	if !math.IsClose(math.Hypot(real, imaginary), 1.0, 1e-9) {
+	if math.Abs(math.Hypot(real, imaginary)-1.0) > 1e-9 {
 		return fail("chronon_phase must lie on the unit circle")
 	}
 	return nil
