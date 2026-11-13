@@ -114,6 +114,15 @@ func textValue(value any, label string) (string, error) {
 	return result, nil
 }
 
+func validGitSHA(value any) bool {
+	s, ok := value.(string)
+	if !ok || len(s) != 40 || strings.ToLower(s) != s {
+		return false
+	}
+	_, err := hex.DecodeString(s)
+	return err == nil
+}
+
 func integerValue(value any, label string, minimum int64) (int64, error) {
 	number, ok := value.(json.Number)
 	if !ok {
@@ -491,8 +500,13 @@ func verifyParticipantKey(document object, expectedRole string) (participant, er
 		return participant{}, fail("participant host identity fields are invalid: %v", err)
 	}
 	if host["repository"] != "Kier73/In-Formation-Space" || host["job"] != expectedRole ||
-		host["git_ref"] != "refs/heads/main" || host["runner_environment"] != "github-hosted" {
+		host["git_ref"] != "refs/heads/main" ||
+		host["workflow_ref"] != "Kier73/In-Formation-Space/.github/workflows/proof-runner-three-host-reconstruction.yml@refs/heads/main" ||
+		host["runner_environment"] != "github-hosted" {
 		return participant{}, fail("participant host identity does not match the protected hosted role")
+	}
+	if !validGitSHA(host["workflow_sha"]) || !validGitSHA(host["git_sha"]) {
+		return participant{}, fail("participant host commit identities must be 40-character lowercase Git object IDs")
 	}
 	for _, field := range []string{"run_id", "run_attempt", "run_number", "workflow_ref", "workflow_sha", "git_sha", "runner_name", "runner_os", "runner_arch", "actor_id"} {
 		if _, err := textValue(host[field], "host."+field); err != nil { return participant{}, err }
@@ -648,8 +662,12 @@ func verifyVerifierHost(value object, authority, runner participant) (object, er
 	if host["repository"] != "Kier73/In-Formation-Space" ||
 		host["job"] != "independent_verifier_host" ||
 		host["git_ref"] != "refs/heads/main" ||
+		host["workflow_ref"] != "Kier73/In-Formation-Space/.github/workflows/proof-runner-three-host-reconstruction.yml@refs/heads/main" ||
 		host["runner_environment"] != "github-hosted" {
 		return nil, fail("verifier identity does not match the protected hosted verifier job")
+	}
+	if !validGitSHA(host["workflow_sha"]) || !validGitSHA(host["git_sha"]) {
+		return nil, fail("verifier host commit identities must be 40-character lowercase Git object IDs")
 	}
 	for _, field := range []string{"run_id", "run_attempt", "workflow_ref", "workflow_sha", "git_sha", "runner_name", "actor_id"} {
 		if _, err := textValue(host[field], "verifier.host."+field); err != nil { return nil, err }
@@ -774,7 +792,7 @@ func Verify(paths Paths) (object, error) {
 			"three distinct GitHub-hosted workflow job identities in one run",
 		},
 		"not_established": []any{
-			"linearizability or honesty of the external CAS authority; the signature authenticates its checkpoint claim",
+			"external shared-CAS linearizability or the live state at admission; this experiment uses an authority-signed synthetic ledger checkpoint",
 			"honest computation, actual Lean execution, or theorem correctness",
 			"VGI kernel acceptance; that remains a separate VerifiedKernelReceipt boundary",
 			"direct peer-to-peer transport; these records travel through GitHub Actions artifacts",
