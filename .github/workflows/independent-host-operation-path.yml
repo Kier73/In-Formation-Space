@@ -337,7 +337,7 @@ jobs:
           path: received-receiver
       - name: Reconstruct evidence with a separate standard-library implementation
         env:
-          RUNNER_ENVIRONMENT: \${{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           mkdir -p evidence
           python bridges/observation-path/diverse_host_verifier.py verify \
@@ -346,7 +346,7 @@ jobs:
             --output evidence/diverse-report.json
       - name: Bind the fourth-job identity to the exact report bytes
         env:
-          RUNNER_ENVIRONMENT: \${{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           python bridges/observation-path/diverse_host_verifier.py write-report-predicate \
             --report evidence/diverse-report.json \
