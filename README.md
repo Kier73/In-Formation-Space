@@ -173,3 +173,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## History-dependent representation relevance
 
 - [RIV-002: History-dependent representation relevance](experiments/history-dependent-representation-relevance/README.md) — extends RIV-001 by separating stationary reactive, time-aware reactive, and finite-history controllers. It measures whether remembered observations preserve task value after hidden states become observationally identical, with exact reachable-history policy enumeration and an explicit exponential search cap.
+
+## Bounded-memory representation relevance
+
+- [RIV-003: Bounded-memory realization of useful history](experiments/bounded-memory-representation-relevance/README.md) — synthesizes exact deterministic finite-state observation controllers and finds the smallest tested memory size that preserves the full-history task value. Its RIV-002 fixture needs two memory states to retain the initial distinction; the coarsened observer cannot recover it by adding memory after the signal is removed.
