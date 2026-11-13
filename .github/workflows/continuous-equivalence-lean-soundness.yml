@@ -89,6 +89,14 @@ jobs:
             exit 1
           fi
           grep -Eq 'error:|unsolved goals' invalid-root-proof-rejection.txt
+      - name: Require rejection of forged network semantics without a valid certificate
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          if lake env lean COE008Invalid.lean > invalid-semantic-claim.txt 2>&1; then
+            echo "ERROR: Lean accepted a forged certificate for an identity network."
+            exit 1
+          fi
+          grep -Fq 'Tactic `decide` failed for proposition' invalid-semantic-claim.txt
       - name: Retain Lean positive and negative proof observations
         uses: actions/upload-artifact@v4
         with:
@@ -98,6 +106,7 @@ jobs:
             experiments/continuous-observation-equivalence/lean/rational-root-proof-output.txt
             experiments/continuous-observation-equivalence/lean/root-guard-soundness.txt
             experiments/continuous-observation-equivalence/lean/evaluator-soundness.txt
+            experiments/continuous-observation-equivalence/lean/invalid-semantic-claim.txt
             experiments/continuous-observation-equivalence/lean/invalid-root-proof-rejection.txt
             experiments/continuous-observation-equivalence/lean/invalid-proof-rejection.txt
           if-no-files-found: error
