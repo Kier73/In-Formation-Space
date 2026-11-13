@@ -126,7 +126,7 @@ export function decodeCanonicalMetadataDocument(rawBytes) {
     fail(`canonical metadata artifact is not valid UTF-8 JSON: ${error.message}`);
   }
   requireObject(document, "canonical metadata root");
-  const expected = Buffer.concat([canonicalMetadataBytes(document), Buffer.from("\\n")]);
+  const expected = Buffer.concat([canonicalMetadataBytes(document), Buffer.from("\n")]);
   if (!bytes.equals(expected)) {
     fail("artifact is not canonical JSON followed by exactly one LF");
   }
