@@ -6,6 +6,7 @@ on:
     paths:
       - "experiments/proof-runner-independent-reconstruction/**"
       - "experiments/proof-runner-completion-receipts/**"
+      - "bridges/proof-attention/**"
       - "formats/canonical_metadata_v1.py"
       - "bridges/observation-path/cross_language_verifier/**"
       - ".github/workflows/proof-runner-three-host-reconstruction.yml"
@@ -13,6 +14,7 @@ on:
     paths:
       - "experiments/proof-runner-independent-reconstruction/**"
       - "experiments/proof-runner-completion-receipts/**"
+      - "bridges/proof-attention/**"
       - "formats/canonical_metadata_v1.py"
       - "bridges/observation-path/cross_language_verifier/**"
       - ".github/workflows/proof-runner-three-host-reconstruction.yml"
@@ -276,6 +278,20 @@ jobs:
             verify-sqlite-authority \
             --authority-dir received-authority \
             --output evidence/sqlite-authority-verification.json
+      - name: Validate independent SQLite reopen evidence schema
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/proof-runner-independent-reconstruction")
+          schema = json.loads((root / "sqlite-authority-verification.schema.json").read_text(encoding="utf-8"))
+          evidence = json.loads(Path("evidence/sqlite-authority-verification.json").read_text(encoding="utf-8"))
+          Draft202012Validator.check_schema(schema)
+          Draft202012Validator(schema).validate(evidence)
+          print("valid: third-host SQLite authority reopen evidence")
+          PY
       - name: Record the third-host identity
         run: |
           python experiments/proof-runner-independent-reconstruction/host_evidence.py \
@@ -326,6 +342,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: proof-runner-independent-reconstruction-report
-          path: evidence/reconstruction-report.json
+          path: |
+            evidence/reconstruction-report.json
+            evidence/sqlite-authority-verification.json
           if-no-files-found: error
           retention-days: 90
