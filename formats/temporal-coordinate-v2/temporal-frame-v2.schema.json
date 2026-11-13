@@ -192,5 +192,65 @@
         }
       ]
     }
+  },
+  "$defs": {
+    "integer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "schema",
+        "kind",
+        "encoding",
+        "value"
+      ],
+      "properties": {
+        "format": {
+          "const": "in-formation.temporal-numeric"
+        },
+        "schema": {
+          "const": "in-formation.temporal-numeric/2.0"
+        },
+        "kind": {
+          "const": "integer"
+        },
+        "encoding": {
+          "const": "canonical-decimal-string"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^(0|-?[1-9][0-9]*)$"
+        }
+      }
+    },
+    "binary64": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "schema",
+        "kind",
+        "encoding",
+        "value"
+      ],
+      "properties": {
+        "format": {
+          "const": "in-formation.temporal-numeric"
+        },
+        "schema": {
+          "const": "in-formation.temporal-numeric/2.0"
+        },
+        "kind": {
+          "const": "binary64"
+        },
+        "encoding": {
+          "const": "ieee754-binary64-be-hex"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{16}$"
+        }
+      }
+    }
   }
 }
