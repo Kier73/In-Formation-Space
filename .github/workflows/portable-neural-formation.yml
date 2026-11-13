@@ -1,0 +1,101 @@
+name: PNF-002 portable neural receiver verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/procedural_neural_formation/**'
+      - '.github/workflows/portable-neural-formation.yml'
+  pull_request:
+    paths:
+      - 'experiments/procedural_neural_formation/**'
+      - '.github/workflows/portable-neural-formation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  receiver-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/Virtual-Ground-Interpreter
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - run: python -m pip install numpy jsonschema
+      - name: Test PNF-001 and portable capsule/receiver contracts
+        env:
+          PYTHONPATH: 'external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+        run: >-
+          python -m unittest experiments.procedural_neural_formation.test_formation
+          experiments.procedural_neural_formation.test_capsule
+          experiments.procedural_neural_formation.test_transfer -v
+      - name: Execute two procedural transfers and export a reusable capsule
+        env:
+          PYTHONPATH: 'external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+        run: >-
+          python -m experiments.procedural_neural_formation.run_transfer
+          --output pnf-portable-procedural.json --capsule-output pnf-procedural.pnf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 'pnf-portable-procedural-${{ matrix.python }}'
+          path: |
+            pnf-portable-procedural.json
+            pnf-procedural.pnf
+            pnf-procedural.policy.json
+          if-no-files-found: error
+
+  observed-transfer:
+    needs: receiver-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/Virtual-Ground-Interpreter
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install numpy jsonschema
+      - name: Observe, construct, transmit and independently evaluate the parameter pair
+        env:
+          PYTHONPATH: 'external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+          OPENBLAS_NUM_THREADS: '1'
+        run: >-
+          python -m experiments.procedural_neural_formation.run_transfer --live
+          --output pnf-observed-transfer.json --capsule-output pnf-observed.pnf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnf-observed-portable-realization
+          path: |
+            pnf-observed-transfer.json
+            pnf-observed.pnf
+            pnf-observed.policy.json
+          if-no-files-found: error

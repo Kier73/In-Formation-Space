@@ -1,5 +1,9 @@
 # PNF-001: procedural neural formation from observed or generated blocks
 
+Continuation: [PNF-002 portable generated models and separate receiver verification](PORTABLE-RECEIVER-002.md)
+exports actual parameter bytes and checks their relationship after an E-CPU mTLS
+transfer into a fresh process.
+
 Question: can the same construction system form a new neural architecture from
 either explicit procedural coefficients or a bounded external-model observation,
 while retaining a checkable relationship to its starting function?
