@@ -127,3 +127,44 @@ The GitHub workflow has a dedicated **Go verifier job**. It downloads the exact 
 Agreement between independently implemented Python and Go checkers reduces common-mode implementation risk. The exact semantic statement is still restricted to **scalar real inputs and rational affine/ReLU feed-forward networks under ideal real arithmetic**, with explicit computational budgets. Identical SHA-256 digests identify identical canonical descriptions under this declared profile; the tests do not establish collision resistance by themselves or authenticate an author.
 
 Both tools and their checked-in source pins still execute within one repository's GitHub CI trust context. Separate jobs and programming languages are **not hardware attestation, separate organizations, a verified mathematical kernel or a remote deployment**. The next useful step is proof-assistant formalization of the cell-checking lemma or integration with a separately trusted model/Ground identity.
+
+
+## COE-004 — Link exact semantic certificates to E-CPU computational Ground identities
+
+**Question:** Can the exact all-real observations certified by COE-001–003 be named inside E-CPU's actual representation/observation/translation identity model without granting an unauthorized or unverified Ground admission?
+
+This is an **integration with the existing E-CPU Python contracts** (pinned to revision 3b57adcc2baaaa7e56e4bab943946f4e87e95c65), not a competing identity class.
+
+- E-CPU RepresentationRef.from_payload() names the authored *candidate computational Ground profile*, the exact rational source network description, the verified maximal output atlas, and the certificate-verification mapping. Its content digest uses E-CPU's canonical_value_digest.
+- E-CPU ObservationContract.from_definition() identifies the fixed output-atlas observer projection and its complete-domain meaning. Its comparison remains the existing E-CPU v1 canonical-json-exact comparison for serialized atlases; the **mathematical completeness** of the atlas is provided separately by the COE-002/003 activation-cell proof, not by an E-CPU object.
+- E-CPU TranslationContract constructs the typed, immutable source-to-semantic-atlas reference, with mapping and observation identities, Ground/observer context digest, revision, effect class and replay class. Its digest distinguishes different source realizations even when their semantic outputs agree.
+- The candidate Ground identity is the RepresentationRef for the immutable ground_profile.json description and is shared by all five tested models. It is not a registered StructuralMemorySpec or an admitted E-CPU Ground. Its profile declares language, arithmetic, all-real scalar domain, output arity, transformations, observer, and explicit non-admission.
+- An independent receiver rebuilds all references and the TranslationContract using E-CPU at the same exact source revision. It verifies the raw mathematical certificate, requires the original source digest to match its **own pinned source policy**, matches the complete link, and retains ground_admitted=false and authority_granted=false in the output.
+- Two representations of f(x)=x (linear and ReLU) give different source refs but identical semantic-atlas refs. Positive hidden-neuron rescaling also preserves semantic-atlas identity. A zero function and a triangular bump remain distinct even though both agree at Boolean inputs 0 and 1.
+
+### Retained artifact roles
+
+1. ground_profile.json is an explicitly authored, versioned candidate Ground description, **not authority**.
+2. expected_ground_sources.json lives in the verifier checkout, pinning the E-CPU commit and five expected original network digests. It is **not copied from the producer artifact**. If repository policy can be maliciously changed, this experiment cannot defend against that administrative change.
+3. ground_binding_producer.py constructs link artifacts from canonical COE-002 certificates after verifying the proof and checking the exact E-CPU Git checkout revision.
+4. ground_binding_verifier.py receives both certificate bytes and untrusted link bytes, independently verifies the proof and rebuilds E-CPU identities. It rejects inconsistent context, source, observer, certificate, translation, revision or Ground-admission claims.
+5. The extended workflow runs link production and verification in two separately scheduled jobs, each with its own pinned E-CPU source checkout, retaining link files and a machine-readable verification report.
+
+### Run
+
+Using a pinned E-CPU clone at repository-root external/E-CPU:
+
+~~~bash
+export PYTHONPATH="$PWD/external/E-CPU"
+cd experiments/continuous-observation-equivalence
+python produce_certificates.py certificates
+python ground_binding_producer.py certificates links --ecpu-dir ../../external/E-CPU
+python ground_binding_verifier.py certificates links --ecpu-dir ../../external/E-CPU --output independent-ground-link-report.json
+python -m unittest discover -s . -p 'test_ground_binding.py' -v
+~~~
+
+### Verification versus authority
+
+The mathematical claim is complete **only for the exact scalar rational affine/ReLU language and observer profile**, under ideal real arithmetic and bounded certificate-processing resources. E-CPU's RepresentationRef and TranslationContract are immutable *descriptions and identities*: they do not register a Structural Memory revision, approve a new Ground, issue a host capability, run a model, verify external provenance, or grant Hypervisor access. Production integration would need an explicit admission policy and receiver capability check from E-CPU's existing Ground/Hypervisor architecture, plus independently authenticated source evidence.
+
+A natural subsequent frontier is formalizing a small certificate soundness lemma in Lean, while keeping separate the code-verification obligation that every serialized interval and each affine ReLU root is checked correctly.
