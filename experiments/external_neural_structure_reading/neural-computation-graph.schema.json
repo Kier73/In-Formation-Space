@@ -1,0 +1,372 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/external_neural_structure_reading/neural-computation-graph.schema.json",
+  "title": "Neural Computation Graph IR v0.1",
+  "description": "Architecture-independent typed computation graph with explicit tensor catalog, operation ports, directed edges, and evidence provenance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "ir_version",
+    "source_observation",
+    "model_family_adapter",
+    "dimension_symbols",
+    "inputs",
+    "outputs",
+    "tensors",
+    "operations",
+    "edges",
+    "completeness",
+    "verification",
+    "evidence_policy",
+    "assumptions_and_unresolved"
+  ],
+  "properties": {
+    "schema": {"const": "in-formation-space.neural-computation-graph.v0.1"},
+    "ir_version": {"type": "string", "minLength": 1},
+    "source_observation": {"$ref": "#/$defs/source-observation"},
+    "model_family_adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "family", "reference", "status"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "family": {"type": "string", "minLength": 1},
+        "reference": {"type": "string", "format": "uri"},
+        "status": {"const": "family-interpreted"}
+      }
+    },
+    "dimension_symbols": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "value", "minimum"],
+            "properties": {
+              "kind": {"const": "runtime"},
+              "value": {"type": "null"},
+              "minimum": {"type": "integer", "minimum": 0},
+              "maximum": {"type": "integer", "minimum": 0}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "value"],
+            "properties": {
+              "kind": {"const": "fixed"},
+              "value": {"type": "integer", "minimum": 0}
+            }
+          }
+        ]
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/interface-port"}
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/interface-port"}
+    },
+    "tensors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/tensor"}
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/operation"}
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/edge"}
+    },
+    "completeness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "observed_tensor_count",
+        "classified_tensor_count",
+        "bound_tensor_count",
+        "unclassified_tensors",
+        "unused_tensors",
+        "unsupported_components",
+        "missing_expected_components"
+      ],
+      "properties": {
+        "status": {"enum": ["pending-verification", "complete-for-supported-family-template", "incomplete"]},
+        "observed_tensor_count": {"type": "integer", "minimum": 0},
+        "classified_tensor_count": {"type": "integer", "minimum": 0},
+        "bound_tensor_count": {"type": "integer", "minimum": 0},
+        "unclassified_tensors": {"type": "array", "items": {"type": "string"}},
+        "unused_tensors": {"type": "array", "items": {"type": "string"}},
+        "unsupported_components": {"type": "array", "items": {"type": "string"}},
+        "missing_expected_components": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "passed_check_count",
+        "failed_check_count",
+        "operation_count",
+        "edge_count",
+        "input_port_count",
+        "output_port_count",
+        "checks"
+      ],
+      "properties": {
+        "status": {"enum": ["pending", "passed", "failed"]},
+        "passed_check_count": {"type": "integer", "minimum": 0},
+        "failed_check_count": {"type": "integer", "minimum": 0},
+        "operation_count": {"type": "integer", "minimum": 0},
+        "edge_count": {"type": "integer", "minimum": 0},
+        "input_port_count": {"type": "integer", "minimum": 0},
+        "output_port_count": {"type": "integer", "minimum": 0},
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "detail"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "status": {"enum": ["passed", "failed"]},
+              "detail": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    "evidence_policy": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "assumptions_and_unresolved": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "$defs": {
+    "shape": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {"type": "integer", "minimum": 0},
+          {"type": "string", "minLength": 1}
+        ]
+      }
+    },
+    "interface-port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "dtype", "shape", "semantic_role"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "dtype": {"type": "string", "minLength": 1},
+        "shape": {"$ref": "#/$defs/shape"},
+        "semantic_role": {"type": "string", "minLength": 1}
+      }
+    },
+    "source-observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision", "license_id", "nsd_schema", "source_files"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "license_id": {"type": ["string", "null"]},
+        "nsd_schema": {"type": "string", "minLength": 1},
+        "source_files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "role", "sha256", "sha256_scope", "size_bytes"],
+            "properties": {
+              "path": {"type": "string", "minLength": 1},
+              "role": {"type": "string", "minLength": 1},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "sha256_scope": {"type": "string", "minLength": 1},
+              "size_bytes": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
+    "tensor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "dtype", "shape", "source", "classification"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "dtype": {"type": "string", "minLength": 1},
+        "shape": {"type": "array", "items": {"type": "integer", "minimum": 0}},
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file", "data_offsets", "data_bytes", "header_sha256", "header_hash_scope"],
+          "properties": {
+            "file": {"type": "string", "minLength": 1},
+            "data_offsets": {
+              "type": "array",
+              "prefixItems": [
+                {"type": "integer", "minimum": 0},
+                {"type": "integer", "minimum": 0}
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "data_bytes": {"type": "integer", "minimum": 0},
+            "header_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "header_hash_scope": {"type": "string", "minLength": 1}
+          }
+        },
+        "classification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["role", "status", "evidence"],
+          "properties": {
+            "role": {"type": "string", "minLength": 1},
+            "status": {"const": "family-interpreted"},
+            "evidence": {
+              "type": "array",
+              "minItems": 1,
+              "items": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    "port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "dtype", "shape"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "dtype": {"type": "string", "minLength": 1},
+        "shape": {"$ref": "#/$defs/shape"}
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "operator", "inputs", "outputs", "attributes", "provenance"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "operator": {"type": "string", "minLength": 1},
+        "inputs": {"type": "array", "items": {"$ref": "#/$defs/port"}},
+        "outputs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/port"}},
+        "attributes": {"type": "object"},
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["operator_semantics", "port_shapes"],
+          "properties": {
+            "operator_semantics": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["status", "basis", "reference"],
+              "properties": {
+                "status": {"const": "family-interpreted"},
+                "basis": {"type": "string", "minLength": 1},
+                "reference": {"type": "string", "format": "uri"}
+              }
+            },
+            "port_shapes": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["status", "basis"],
+              "properties": {
+                "status": {"const": "dimensionally-derived"},
+                "basis": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        }
+      }
+    },
+    "endpoint": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "name"],
+          "properties": {
+            "kind": {"const": "graph_input"},
+            "name": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "name"],
+          "properties": {
+            "kind": {"const": "graph_output"},
+            "name": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "name"],
+          "properties": {
+            "kind": {"const": "tensor"},
+            "name": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "operation", "port"],
+          "properties": {
+            "kind": {"const": "operation_input"},
+            "operation": {"type": "string", "minLength": 1},
+            "port": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "operation", "port"],
+          "properties": {
+            "kind": {"const": "operation_output"},
+            "operation": {"type": "string", "minLength": 1},
+            "port": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "target", "provenance"],
+      "properties": {
+        "source": {"$ref": "#/$defs/endpoint"},
+        "target": {"$ref": "#/$defs/endpoint"},
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "basis"],
+          "properties": {
+            "status": {"const": "inferred-connection"},
+            "basis": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  }
+}

@@ -119,6 +119,61 @@ The resulting graph expands each block into typed nodes for normalization, fused
 
 The public Transformers documentation describes GPT-2 as causal attention, documents the configuration dimensions and defaults, and identifies `GPT2LMHeadModel` as using a language-model head tied to input embeddings. The adapter keeps those framework-level semantics in the interpretation layer rather than attributing them to tensor headers alone: [GPT-2 documentation](https://huggingface.co/docs/transformers/main/model_doc/gpt2).
 
+## HFR-002 — Structural interpretation and typed topology reconstruction
+
+HFR-002 turns the pinned HFR-001 observation into a **framework-independent typed computation graph**. The GPT-2 adapter remains family-specific, but the graph representation does not use GPT-2 tensor names as its operation vocabulary and does not depend on PyTorch, Transformers, or a particular runtime.
+
+The compiler is `neural_graph_ir.py`; its contract is `neural-computation-graph.schema.json`. The live run is `live_reference/run_gpt2_topology.py`, with workflow [HFR-002 typed neural topology](../../../.github/workflows/hfr-002-topology.yml).
+
+### What the graph contains
+
+| Representation | Contents |
+| --- | --- |
+| Source observation | Repository, immutable revision, source file hashes and hash scopes |
+| Dimension symbols | Fixed dimensions plus runtime dimensions such as batch and sequence |
+| Graph interface | Typed token-id and position-id inputs; typed vocabulary-logit output |
+| Tensor catalog | Every observed tensor's name, dtype, shape, shard, offsets, header digest and interpreted role |
+| Operations | Canonical operators such as `embedding.lookup`, `linear.affine`, `normalization.layer_norm`, `attention.causal_scaled_dot_product`, `activation.gelu_tanh`, `regularization.dropout`, and `tensor.add` |
+| Ports | Named, typed input and output values with explicit shapes |
+| Edges | Directed connections between graph inputs, tensor sources, operation outputs, operation inputs and graph outputs |
+| Completeness | Unclassified, unused, unsupported and missing components |
+| Verification | Edge/type/shape, operator dimension, inventory and DAG checks |
+
+Every operation input has exactly one producer. Operation outputs may fan out, which is necessary for residual paths. The graph validator checks dtype/shape equality across each edge, local contracts for the supported operator vocabulary, acyclicity, full input/output connectivity, and a one-to-one classification of observed tensor names.
+
+### Evidence is not collapsed
+
+HFR-002 maintains these separate evidence levels:
+
+- **Observed:** source identity, file/header hashes, tensor names, dtypes, shapes and data offsets from the NSD.
+- **Interpreted:** tensor roles and operator meaning supplied by the GPT-2 family adapter.
+- **Inferred:** the directed connections, port shapes and dimensional compatibility derived from the supported family contract and checked against the observations.
+- **Generated:** no alternate parameters or replacement architecture are generated in this stage.
+
+For example, the causal role of `h.i.attn.bias` is inferred from the GPT-2 family contract and its structural position. The numeric contents of that buffer are not read. Similarly, tied use of `wte.weight` for the output vocabulary projection is explicitly labelled as family-contract evidence where there is no separate `lm_head.weight` entry.
+
+### First complete GPT-2 topology
+
+For the pinned observation, the intended live verification is:
+
+- 160/160 tensor entries classified and connected to operation inputs
+- 150 operations across the 12 transformer blocks and surrounding embedding/output path
+- 337 directed typed edges
+- Runtime batch/sequence dimensions, with sequence bounded by the configured 1,024 positions
+- Six primitive operator families represented through the canonical vocabulary, including separate dropout and residual operations
+- Zero tensor payload bytes read
+
+The graph makes the GPT-2 structure inspectable without being a GPT-2-specific graph format. A future family adapter can map another architecture into the same operator, port, tensor and edge contract. HFR-002 does **not** yet prove that the graph's inferred semantics reproduce numerical forward behavior; that requires a separate interpreter and differential execution experiment.
+
+Run the live zero-payload reconstruction with:
+
+```bash
+python -m experiments.external_neural_structure_reading.live_reference.run_gpt2_topology \
+  --output experiments/external_neural_structure_reading/results/gpt2-typed-topology.json
+```
+
+The workflow uploads the resulting topology as `hfr-002-gpt2-typed-topology`. The complete offline test suite also exercises missing tensors, invalid edges, bad dimensions, cycles, unsupported families, tied and untied output heads, and provenance separation.
+
 ## Selected weight geometry: first and last GPT-2 blocks
 
 The next stage, `weight_geometry.py`, performs an explicit, byte-budgeted numerical observation of two matching fused QKV matrices:
@@ -237,11 +292,11 @@ It does not validate architecture semantics, tensor element counts against dtype
 
 ## Next discriminating stages
 
-1. Use the five-point profile to identify whether spectral structure is depth-stationary, smoothly varying, or grouped by Q/K/V role.
-2. Repeat a compact profile on a second GPT-2 scale or model family to distinguish architecture regularities from this checkpoint's particular training result.
-3. Investigate matrix-factorization or low-rank procedural parameterizations that preserve selected spectral properties without copying original tensor values.
-4. Compare architecture-only initialization with spectrum-informed generated parameters on a fixed task and explicit input domain.
-5. Add an independently implemented forward reference for a supported operation-graph subset and compare numerical behavior with stated error tolerances.
+1. Add a second architecture-family adapter that targets this same canonical graph IR; verify that the graph vocabulary is not accidentally encoding GPT-2 assumptions.
+2. Add an independently implemented small-subgraph interpreter and compare its outputs against a trusted reference under explicit numerical tolerances. The graph schema and operator contracts should exist before this execution work.
+3. Prove selected dimensional and topology obligations independently (for example with Lean or another proof kernel), retaining exact source tensor and operation provenance.
+4. Explore whether the same graph IR can represent non-neural systems such as signal-processing pipelines, state machines and conventional algorithms without changing its core port/edge semantics.
+5. Treat numerical weight geometry and procedural parameterization as separate follow-on evidence. Acquire parameter data only when a named structural question cannot be answered from the config and headers.
 
 ## Repository responsibilities
 
