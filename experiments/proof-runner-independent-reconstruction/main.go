@@ -1193,7 +1193,7 @@ func mustEventObject(value any, index int) any {
 
 func main() {
 	if len(os.Args) < 2 || os.Args[1] != "verify" {
-		fmt.Fprintln(os.Stderr, "usage: go run . verify --ledger ... --request ... --authority-attestation ... --authority-key ... --authority-history ... --authority-store ... --process-evidence ... --stale-owner-attempt ... --result ... --receipt ... --runner-key ... --verifier-host ... [--key-attestations-verified] [--sqlite-store-reopened-verified]")
+		fmt.Fprintln(os.Stderr, "usage: go run . verify --ledger ... --request ... --authority-attestation ... --authority-key ... --authority-history ... --authority-store ... --process-evidence ... --stale-owner-attempt ... --sqlite-authority-report ... --result ... --receipt ... --runner-key ... --verifier-host ... [--key-attestations-verified]")
 		os.Exit(2)
 	}
 	flags := flag.NewFlagSet("verify", flag.ExitOnError)
