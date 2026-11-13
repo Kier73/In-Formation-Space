@@ -544,7 +544,7 @@ func verifyAuthorityAttestation(
 		"authority_id": authority.ID,
 		"authority_key_id": authority.KeyID,
 		"ledger_digest": ledgerDigest,
-		"ledger_sequence": ledgerSequence,
+		"ledger_sequence": json.Number(strconv.FormatInt(ledgerSequence, 10)),
 		"authorization_event_digest": event["event_digest"],
 		"execution_id": details["execution_id"],
 		"attempt_id": attemptID,
@@ -674,7 +674,7 @@ func verifyVerifierHost(value object, authority, runner participant) (object, er
 	}
 	participants := []participant{authority, runner}
 	for _, p := range participants {
-		for _, field := range []string{"repository", "run_id", "run_attempt", "workflow_ref", "workflow_sha", "git_ref", "git_sha"} {
+		for _, field := range []string{"repository", "run_id", "run_attempt", "run_number", "workflow_ref", "workflow_sha", "git_ref", "git_sha"} {
 			if host[field] != p.Host[field] {
 				return nil, fail("verifier and %s host differ in %s", p.Role, field)
 			}
