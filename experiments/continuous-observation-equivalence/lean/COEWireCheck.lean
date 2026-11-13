@@ -98,7 +98,9 @@ def advance (cell : Cell) (state : Bool × List Affine) (layer : Layer) :
 
 def cellVerified (layers : List Layer) (cell : Cell) : Bool :=
   let result := layers.foldl (advance cell) (true, [⟨1, 0⟩])
-  result.1 &&
+  -- Witness must actually lie in the claimed open cell.
+  inside cell (probe cell) &&
+    result.1 &&
     !cell.output.isEmpty &&
     decide (result.2 = cell.output)
 
