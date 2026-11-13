@@ -18,8 +18,16 @@ for import_root in (
 
 from mailcpu.temporal import CausalStamp, ClockDomain, TemporalContext, TemporalProfile
 
-import direct_mtls_operation_path as direct
-import mor002_overlay as mor002
+MOR002_IMPORT_ERROR: ModuleNotFoundError | None = None
+try:
+    import direct_mtls_operation_path as direct
+    import mor002_overlay as mor002
+except ModuleNotFoundError as error:
+    if error.name != "cryptography":
+        raise
+    MOR002_IMPORT_ERROR = error
+    direct = None
+    mor002 = None
 
 
 def runner_env(role: str, runner: str = "runner-linux", system: str = "Linux") -> dict[str, str]:
@@ -40,6 +48,10 @@ def runner_env(role: str, runner: str = "runner-linux", system: str = "Linux") -
     }
 
 
+@unittest.skipIf(
+    MOR002_IMPORT_ERROR is not None,
+    "MOR-002 test dependencies are installed in the MOR-002 workflow, not the MOR-001 baseline",
+)
 class MOR002OverlayTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
