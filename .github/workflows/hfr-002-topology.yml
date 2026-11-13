@@ -17,6 +17,8 @@ on:
     paths:
       - "experiments/external_neural_structure_reading/gpt2_adapter.py"
       - "experiments/external_neural_structure_reading/neural_graph_ir.py"
+      - "experiments/external_neural_structure_reading/independent_verifier/**"
+      - "experiments/external_neural_structure_reading/test_independent_graph_verifier.py"
       - "experiments/external_neural_structure_reading/neural-computation-graph.schema.json"
       - "experiments/external_neural_structure_reading/nsd.py"
       - "experiments/external_neural_structure_reading/hub.py"
