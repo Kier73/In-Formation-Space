@@ -92,3 +92,8 @@ The implementation uses only the Python standard library. Probabilities are exac
 - test_history_dependent_relevance.py — ten tests for memory retention, time-awareness, policy-class nesting, viability, rational inputs, bounds, partitions, and tamper rejection.
 - example.py — runnable two-step example.
 - README.md — model, equations, literature context, interpretation, and evidence scope.
+
+
+## Follow-on experiment
+
+[RIV-003: Bounded-memory realization of useful history](../bounded-memory-representation-relevance/README.md) synthesizes deterministic finite-state controllers and measures the smallest tested memory size that preserves the full-history optimum from this experiment.

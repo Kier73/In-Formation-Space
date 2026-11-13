@@ -1,0 +1,30 @@
+name: Bounded-memory representation relevance RIV-003
+
+on:
+  push:
+    paths:
+      - "experiments/bounded-memory-representation-relevance/**"
+      - ".github/workflows/bounded-memory-representation-relevance.yml"
+  pull_request:
+    paths:
+      - "experiments/bounded-memory-representation-relevance/**"
+      - ".github/workflows/bounded-memory-representation-relevance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  riv-003:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile
+        run: python -m py_compile experiments/bounded-memory-representation-relevance/bounded_memory_relevance.py experiments/bounded-memory-representation-relevance/example.py
+      - name: Run focused tests
+        run: python -m unittest discover -s experiments/bounded-memory-representation-relevance -p 'test_*.py' -v
+      - name: Reproduce example
+        run: python experiments/bounded-memory-representation-relevance/example.py

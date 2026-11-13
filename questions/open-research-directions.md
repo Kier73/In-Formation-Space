@@ -271,3 +271,22 @@ RIV-001 shows when a distinction in a current representation improves a finite t
 5. How should memory capacity, update cost, and observation cost be included in the same navigation objective?
 
 The operational baseline is [RIV-002](../experiments/history-dependent-representation-relevance/README.md). It exactly compares three deterministic controller classes on finite supplied models. The next step is to compress its successful history policies into bounded finite-state memories and measure the value/cost trade-off.
+
+
+---
+
+## 14. How much memory is sufficient to preserve a useful distinction?
+
+### The question
+
+RIV-002 shows that full observation history can retain a distinction after current observations converge. RIV-003 asks whether the trace can be compressed into a finite controller without losing the task value.
+
+### Questions
+
+1. What is the smallest finite-state controller that achieves the full-history value for a given task and observation representation?
+2. How does this memory requirement change when a distinction is coarsened or removed from the representation?
+3. Can controller memory be interpreted as a compact sufficient statistic of the observation history for a specified task and horizon?
+4. How should memory-state count, controller-description size, update cost, and observation cost be compared as independent resources?
+5. When does a controller that is optimal for one finite task generalize to a family of tasks or transition models?
+
+The operational baseline is [RIV-003](../experiments/bounded-memory-representation-relevance/README.md). It exhaustively synthesizes deterministic finite-state observation controllers for small supplied models, compares them with an exact full-history target, and reports the minimum among explicitly tested memory sizes. The next step is to study controller compression and task-family reuse without assuming that the same memory state has universal meaning.
