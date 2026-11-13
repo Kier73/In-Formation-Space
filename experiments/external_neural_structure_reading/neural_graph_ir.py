@@ -864,6 +864,12 @@ def _operation_contract(operation: dict[str, Any]) -> list[str]:
         if set(inputs) == {"value"} and set(outputs) == {"output"}:
             require(inputs["value"]["shape"] == outputs["output"]["shape"], "tanh must preserve shape")
             require(inputs["value"]["dtype"] == outputs["output"]["dtype"], "tanh must preserve dtype")
+    elif operator == "activation.gelu_erf":
+        require(set(inputs) == {"value"} and set(outputs) == {"output"}, "exact GELU port signature is invalid")
+        if set(inputs) == {"value"} and set(outputs) == {"output"}:
+            require(inputs["value"]["shape"] == outputs["output"]["shape"], "exact GELU must preserve shape")
+            require(inputs["value"]["dtype"] == outputs["output"]["dtype"], "exact GELU must preserve dtype")
+        require(attributes.get("form") == "erf", "exact GELU must declare erf form (not tanh approximation)")
     elif operator == "activation.gelu_tanh":
         require(set(inputs) == {"value"} and set(outputs) == {"output"}, "GELU port signature is invalid")
         if inputs and outputs:
