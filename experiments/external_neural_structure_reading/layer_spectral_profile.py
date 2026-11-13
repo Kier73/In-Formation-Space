@@ -167,10 +167,16 @@ def analyze_gpt2_layer_spectral_profile(
                     "stable_rank_change": (
                         layer_spectra[second][role]["stable_rank"]
                         - layer_spectra[first][role]["stable_rank"]
+                        if layer_spectra[second][role]["stable_rank"] is not None
+                        and layer_spectra[first][role]["stable_rank"] is not None
+                        else None
                     ),
                     "entropy_effective_rank_change": (
                         layer_spectra[second][role]["entropy_effective_rank"]
                         - layer_spectra[first][role]["entropy_effective_rank"]
+                        if layer_spectra[second][role]["entropy_effective_rank"] is not None
+                        and layer_spectra[first][role]["entropy_effective_rank"] is not None
+                        else None
                     ),
                 }
             )
