@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/multi-observer-causal-reconstruction/mor002-event-record.schema.json",
+  "title": "MOR-002 independent observer event record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "role", "event_id", "host", "temporal_frame", "operation_span", "record_digest"],
+  "properties": {
+    "schema": {"const": "in-formation.mor002-event-record/0.1"},
+    "role": {"const": "observer_host"},
+    "event_id": {"const": "C1"},
+    "host": {"type": "object", "required": ["role", "repository", "run_id", "run_attempt", "workflow_ref", "actor_id", "job", "runner_name", "runner_environment"]},
+    "temporal_frame": {
+      "type": "object",
+      "required": ["actor_id", "monotonic", "wall", "causal", "scheduler", "event_lambda", "chronon_phase", "chemical_tau"],
+      "properties": {
+        "actor_id": {"type": "string", "minLength": 1},
+        "monotonic": {"type": "object", "required": ["actor_id", "segment", "elapsed_ns"]},
+        "causal": {"type": "null"},
+        "wall": {"type": "null"}
+      },
+      "additionalProperties": true
+    },
+    "operation_span": {
+      "type": "object",
+      "required": ["attempt_id", "span_id", "operation_id", "clock_actor_id", "monotonic_start_ns", "monotonic_end_ns", "elapsed_ns", "span_digest"]
+    },
+    "record_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
