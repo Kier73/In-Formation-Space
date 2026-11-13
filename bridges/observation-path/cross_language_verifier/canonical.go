@@ -75,15 +75,11 @@ func DecodeObject(raw []byte) (Object, error) {
 	return obj, nil
 }
 
-// CanonicalBytes reproduces the IHP-001 Python canonical-JSON profile for the
-// integer-valued evidence domain. Object keys are sorted, whitespace is omitted,
-// UTF-8 is retained, and HTML characters are not escaped. Floating-point and
-// exponent-form JSON number tokens are rejected rather than silently normalized
-// differently by two runtimes.
-// CanonicalBytes implements Canonical Metadata Profile v1 directly. Encoding
-// strings rune-by-rune avoids post-processing \u2028/\u2029 byte sequences,
-// which could otherwise corrupt an ordinary literal string containing those
-// six characters after a backslash.
+// CanonicalBytes implements the repository's shared Canonical Metadata
+// Profile v1. It validates the restricted safe-integer data model, sorts ASCII
+// object keys, emits UTF-8 without HTML or non-ASCII escaping, and encodes
+// strings rune-by-rune so literal backslash-u text cannot be confused with
+// U+2028 or U+2029 during byte construction.
 func CanonicalBytes(value any) ([]byte, error) {
 	if err := validateIntegerNumberDomain(value, "$"); err != nil {
 		return nil, err
