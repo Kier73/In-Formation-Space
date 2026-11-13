@@ -1,0 +1,231 @@
+name: Duplicated authority-domain fork detection
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/duplicated-authority-domain/**"
+      - ".github/workflows/duplicated-authority-domain.yml"
+  pull_request:
+    paths:
+      - "experiments/duplicated-authority-domain/**"
+      - ".github/workflows/duplicated-authority-domain.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out proposed source
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU recovery-lineage implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check "pytest>=8,<9" "jsonschema>=4,<5"
+      - name: Run cloned-authority tests
+        working-directory: experiments/duplicated-authority-domain
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: |
+          python -m py_compile fork_detection.py test_fork_detection.py
+          python -m pytest -q test_fork_detection.py
+
+  authority_cluster_left:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU recovery-lineage implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Produce isolated left authority domain
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: |
+          python experiments/duplicated-authority-domain/fork_detection.py \
+            produce \
+            --cluster-id left \
+            --state-label left-authoritative-state \
+            --out-dir evidence/authority-cluster-left
+      - name: Attest exact left-cluster evidence bundle
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/authority-cluster-left/bundle.json
+      - name: Preserve the left authority-domain journals
+        uses: actions/upload-artifact@v4
+        with:
+          name: duplicated-authority-cluster-left
+          path: evidence/authority-cluster-left/
+          if-no-files-found: error
+          retention-days: 14
+
+  authority_cluster_right:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU recovery-lineage implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Produce isolated right authority domain
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: |
+          python experiments/duplicated-authority-domain/fork_detection.py \
+            produce \
+            --cluster-id right \
+            --state-label right-authoritative-state \
+            --out-dir evidence/authority-cluster-right
+      - name: Attest exact right-cluster evidence bundle
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/authority-cluster-right/bundle.json
+      - name: Preserve the right authority-domain journals
+        uses: actions/upload-artifact@v4
+        with:
+          name: duplicated-authority-cluster-right
+          path: evidence/authority-cluster-right/
+          if-no-files-found: error
+          retention-days: 14
+
+  independent_fork_observer:
+    needs: [authority_cluster_left, authority_cluster_right]
+    if: needs.authority_cluster_left.result == 'success' && needs.authority_cluster_right.result == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU recovery-lineage implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema and provenance dependencies
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Install current signed GitHub CLI package
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes gh
+          gh --version
+      - name: Receive the left authority-domain evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: duplicated-authority-cluster-left
+          path: received-left
+      - name: Receive the right authority-domain evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: duplicated-authority-cluster-right
+          path: received-right
+      - name: Verify left producer bundle provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh attestation verify received-left/bundle.json \
+            --repo Kier73/In-Formation-Space \
+            --signer-workflow Kier73/In-Formation-Space/.github/workflows/duplicated-authority-domain.yml \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners
+      - name: Verify right producer bundle provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh attestation verify received-right/bundle.json \
+            --repo Kier73/In-Formation-Space \
+            --signer-workflow Kier73/In-Formation-Space/.github/workflows/duplicated-authority-domain.yml \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners
+      - name: Reopen all six journals and detect authority-domain conflict
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: |
+          python experiments/duplicated-authority-domain/fork_detection.py \
+            observe \
+            --left-dir received-left \
+            --right-dir received-right \
+            --producer-attestations-verified \
+            --output evidence/duplicated-authority-domain-report.json
+      - name: Validate the no-winner fork observation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/duplicated-authority-domain")
+          schema = json.loads((root / "fork-detection-report.schema.json").read_text(encoding="utf-8"))
+          report = json.loads(Path("evidence/duplicated-authority-domain-report.json").read_text(encoding="utf-8"))
+          Draft202012Validator.check_schema(schema)
+          Draft202012Validator(schema).validate(report)
+          assert report["classification"] == "cloned_membership_split_brain"
+          assert report["winner"] is None
+          assert report["left_rejects_right_manifest"] is True
+          assert report["right_rejects_left_manifest"] is True
+          print("verified: both isolated quorums are valid and conflict; no winner selected")
+          PY
+      - name: Attest exact independent fork-observation report
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/duplicated-authority-domain-report.json
+      - name: Preserve the independent fork-observation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: duplicated-authority-domain-observation
+          path: evidence/duplicated-authority-domain-report.json
+          if-no-files-found: error
+          retention-days: 90
