@@ -25,6 +25,12 @@
       "input_json": "[null,true,false]",
       "canonical_utf8": "[null,true,false]",
       "sha256": "37257214f22b92121c5ff4d7e29ed2d31b3f1129ee698e96e581ec05cb2e3cf7"
+    },
+    {
+      "name": "literal-backslash-u2028-u2029-and-nul",
+      "input_json": "{\"slash2028\":\"\\\\u2028\",\"slash2029\":\"\\\\u2029\",\"nul\":\"\\u0000\"}",
+      "canonical_utf8": "{\"nul\":\"\\u0000\",\"slash2028\":\"\\\\u2028\",\"slash2029\":\"\\\\u2029\"}",
+      "sha256": "c644fb1fd3474c48de57ec6105d5fbf1b6f54720b194330aeaef6e4ad37c6bfb"
     }
   ],
   "invalid_values": [
