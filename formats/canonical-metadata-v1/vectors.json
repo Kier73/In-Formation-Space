@@ -1,0 +1,169 @@
+{
+  "schema": "in-formation.canonical-metadata-conformance-vectors/1",
+  "profile": "canonical-metadata-v1",
+  "vectors": [
+    {
+      "id": "empty-object",
+      "input_json": "{}",
+      "line_ending": "lf",
+      "accept": true
+    },
+    {
+      "id": "nested-safe-integers-and-types",
+      "input_json": "{\"a\":null,\"b\":true,\"n\":[0,-1,9007199254740991,-9007199254740991],\"z\":{\"A\":\"x\",\"a\":\"y\"}}",
+      "line_ending": "lf",
+      "accept": true
+    },
+    {
+      "id": "utf8-control-and-html-values",
+      "input_json": "{\"astral\":\"🚀\",\"cafe\":\"café\",\"html\":\"<>&\",\"line\":\"a\\nb\",\"slash\":\"a/b\"}",
+      "line_ending": "lf",
+      "accept": true
+    },
+    {
+      "id": "nested-arrays-and-ascii-key-order",
+      "input_json": "{\"0\":\"zero\",\"00\":\"double-zero\",\"1\":\"one\",\"list\":[true,false,null,{\"a\":1,\"b\":2}]}",
+      "line_ending": "lf",
+      "accept": true
+    },
+    {
+      "id": "unicode-line-and-paragraph-separators",
+      "input_json": "{\"line\":\"left right\",\"paragraph\":\"left right\"}",
+      "line_ending": "lf",
+      "accept": true
+    },
+    {
+      "id": "fractional-number",
+      "input_json": "{\"value\":0.5}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "integral-decimal-token",
+      "input_json": "{\"value\":1.0}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "exponent-token",
+      "input_json": "{\"value\":1e0}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "negative-zero-token",
+      "input_json": "{\"value\":-0}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "unsafe-positive-integer",
+      "input_json": "{\"value\":9007199254740992}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "unsafe-negative-integer",
+      "input_json": "{\"value\":-9007199254740992}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "non-ascii-object-key",
+      "input_json": "{\"κ\":\"value\"}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "nested-non-ascii-object-key",
+      "input_json": "{\"outer\":{\"κ\":\"value\"}}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "lone-surrogate-escape",
+      "input_json": "{\"value\":\"\\ud800\"}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "duplicate-object-key",
+      "input_json": "{\"value\":1,\"value\":2}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "duplicate-nested-object-key",
+      "input_json": "{\"outer\":{\"x\":0,\"x\":1}}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "unsorted-object-keys",
+      "input_json": "{\"z\":0,\"a\":1}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "insignificant-whitespace",
+      "input_json": "{ \"a\":1}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "alternative-unicode-escape",
+      "input_json": "{\"value\":\"\\u0061\"}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "escaped-solidus",
+      "input_json": "{\"value\":\"a\\/b\"}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "non-finite-json-number",
+      "input_json": "{\"value\":NaN}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "multiple-json-values",
+      "input_json": "{\"a\":1}{\"b\":2}",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "non-object-root",
+      "input_json": "[]",
+      "line_ending": "lf",
+      "accept": false
+    },
+    {
+      "id": "missing-final-lf",
+      "input_json": "{}",
+      "line_ending": "none",
+      "accept": false
+    },
+    {
+      "id": "double-final-lf",
+      "input_json": "{}",
+      "line_ending": "double_lf",
+      "accept": false
+    },
+    {
+      "id": "crlf-instead-of-lf",
+      "input_json": "{}",
+      "line_ending": "crlf",
+      "accept": false
+    },
+    {
+      "id": "utf8-bom",
+      "input_json": "{}",
+      "line_ending": "lf",
+      "prefix_bom": true,
+      "accept": false
+    }
+  ]
+}
