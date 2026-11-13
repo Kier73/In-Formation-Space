@@ -68,7 +68,9 @@ theorem weightedAt (row : List Rat) (prev : List Affine)
   rw [affineFoldAt]
   rw [zipMap]
   simp only [List.foldl_map]
-  simp [evaluateAt, addAffine]
+  have hz : (0 : Rat) * x + bias = bias := by grind
+  simp only [evaluateAt]
+  rw [hz]
 
 private theorem preactivationsAt (layer : Layer) (prev : List Affine)
     (x : Rat) :
@@ -77,13 +79,15 @@ private theorem preactivationsAt (layer : Layer) (prev : List Affine)
     List.zipWith (fun row bias =>
       evalRow row (prev.map (fun a => evaluateAt a x)) bias)
       layer.weights layer.bias := by
-  induction layer.weights generalizing layer.bias with
-  | nil => cases layer.bias <;> rfl
-  | cons row rows ih =>
-      cases layer.bias with
-      | nil => rfl
-      | cons bias biases =>
-          simp [List.zipWith, weightedAt, ih]
+  cases layer with
+  | mk weights bias relu =>
+      induction weights generalizing bias with
+      | nil => cases bias <;> rfl
+      | cons row rows ih =>
+          cases bias with
+          | nil => rfl
+          | cons b bs =>
+              simp [List.zipWith, weightedAt, ih]
 
 private theorem allRootGuardsSound (cell : Cell) (as : List Affine)
     (p x : Rat) (hp : inside cell p = true)
@@ -103,15 +107,14 @@ private theorem allRootGuardsSound (cell : Cell) (as : List Affine)
           (if 0 < evaluateAt a x then evaluateAt a x else 0) := by
         by_cases hpos : 0 < evaluateAt a p
         · have hxpos : 0 < evaluateAt a x := by
-            have heq : decide (0 < evaluateAt a x) = true := by
-              simpa [hpos] using hstable.symm
-            exact of_decide_true heq
+            by_contra hxneg
+            have : False := by simpa [hpos, hxneg] using hstable
+            exact this
           simp [hpos, hxpos]
         · have hxneg : ¬ 0 < evaluateAt a x := by
             intro hxx
-            have heq : decide (0 < evaluateAt a p) = true := by
-              simpa [hxx] using hstable
-            exact hpos (of_decide_true heq)
+            have : False := by simpa [hpos, hxx] using hstable
+            exact this
           simp [hpos, hxneg, zeroAffine, evaluateAt]
       simp only [List.map_cons]
       rw [hbranch, ih hguard.2]
@@ -133,14 +136,23 @@ theorem advanceSound (cell : Cell) (state : Bool × List Affine)
     grind
   cases hmode : layer.relu with
   | false =>
-      simp [advance, evalLayer, pre, hmode] at *
+      change (pre.map (fun a => evaluateAt a x)) =
+        List.zipWith (fun row bias =>
+          evalRow row (state.2.map (fun a => evaluateAt a x)) bias)
+          layer.weights layer.bias
       exact hpre
   | true =>
       have hguard : pre.all (rootExcluded cell) = true := by
         simpa [hmode] using hroot
       have hcorrect := allRootGuardsSound cell pre (probe cell) x hp hx hguard
-      simp [advance, evalLayer, pre, hmode] at *
-      rw [hcorrect, hpre]
+      change (pre.map (fun a => if 0 < evaluateAt a (probe cell) then a else zeroAffine)).map
+          (fun a => evaluateAt a x) =
+        (List.zipWith (fun row bias =>
+          evalRow row (state.2.map (fun a => evaluateAt a x)) bias)
+          layer.weights layer.bias).map (fun v => if 0 < v then v else 0)
+      rw [hcorrect]
+      simp only [List.map_map]
+      rw [hpre]
 
 /-- Because every step can only preserve or clear the accumulated validity
     flag, a successful fold entails success of every prefix. -/
