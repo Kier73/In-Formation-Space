@@ -96,8 +96,10 @@ class VirtualHostProvisioningTests(unittest.TestCase):
         alias = self.root / "alias"
         alias.symlink_to(self.subjects["signed"])
         self.subjects["signed"] = alias
+        second_workspace = self.root / "second-provisioner"
+        second_workspace.mkdir()
         with self.assertRaisesRegex(isolation.IsolatedHostFailure, "regular file"):
-            isolation._provision(self.root, self.subjects, self.intent)
+            isolation._provision(second_workspace, self.subjects, self.intent)
 
     def test_bounded_test_fault_prefix_requires_incomplete_manifest(self):
         for invalid in (-1, 0, False, 10_000):
