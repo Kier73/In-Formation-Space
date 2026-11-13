@@ -31,14 +31,13 @@ func v2Fail(format string, args ...any) error {
 }
 
 func v2AsObject(value any) (Object, bool) {
-	switch object := value.(type) {
-	case Object:
-		return object, true
-	case map[string]any:
+	if object, ok := value.(map[string]any); ok {
 		return Object(object), true
-	default:
-		return nil, false
 	}
+	if object, ok := value.(Object); ok {
+		return object, true
+	}
+	return nil, false
 }
 
 func v2ExactFields(value any, expected []string, label string) (Object, error) {
