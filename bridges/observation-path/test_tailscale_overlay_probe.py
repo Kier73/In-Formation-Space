@@ -72,6 +72,15 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
         }
         return {**core, "record_digest": overlay.digest_object(core)}
 
+    def test_ping_command_preserves_relay_observations_before_direct_route_discovery(self) -> None:
+        command = overlay.tailscale_ping_command("100.73.20.11")
+        self.assertEqual(command[:3], ["tailscale", "ping", "--c"])
+        self.assertEqual(command[3], str(overlay.PING_COUNT))
+        self.assertIn("--until-direct=false", command)
+        self.assertEqual(command[-1], "100.73.20.11")
+        with self.assertRaisesRegex(overlay.OverlayProbeError, "100.64.0.0/10"):
+            overlay.tailscale_ping_command("203.0.113.4")
+
     def test_tailscale_route_classification_distinguishes_direct_derp_peer_relay_and_unreachable(self) -> None:
         self.assertEqual(
             overlay.classify_route("pong from node (100.64.0.2) via 198.51.100.5:41641 in 20ms", 0),
