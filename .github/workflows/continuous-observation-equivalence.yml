@@ -175,3 +175,72 @@ jobs:
           name: coe004-ground-link-verifier-report
           path: experiments/continuous-observation-equivalence/independent-ground-link-report.json
           if-no-files-found: error
+
+  lean-certificate-replay:
+    needs: certificate-producer
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build independently checked Lean source with pinned toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/continuous-observation-equivalence/lean
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - name: Receive exact Python producer certificates for Lean replay
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Verify canonical transport, source manifest and adversarial generator
+        working-directory: experiments/continuous-observation-equivalence
+        run: python -m unittest test_lean_certificate_bridge -v
+      - name: Translate only pinned certificate bytes into literal Lean inputs
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python emit_lean_certificates.py received-certificates lean/GeneratedCertificateProofs.lean --manifest lean/lean-replay-manifest.json
+      - name: Kernel-reduce all five exact rational source certificates
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean GeneratedCertificateProofs.lean | tee lean-certificates-proof-output.txt
+          for name in identity relu_identity zero triangular_bump rescaled_bump; do
+            grep -Fq "theorem $name""_arith_verified" GeneratedCertificateProofs.lean
+          done
+          if grep -Eq 'sorryAx|error:' lean-certificates-proof-output.txt; then
+            cat lean-certificates-proof-output.txt
+            exit 1
+          fi
+      - name: Construct negative certificates without altering source network hashes
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python make_lean_negative_certificates.py received-certificates lean-negative-artifacts
+          for case in hidden-root wrong-slope cover-gap; do
+            python emit_lean_certificates.py "lean-negative-artifacts/$case" "lean/Negative-$case.lean"
+          done
+      - name: Require Lean kernel rejection of all three corrupt certificate claims
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          for case in hidden-root wrong-slope cover-gap; do
+            if lake env lean "Negative-$case.lean" > "negative-$case-rejection.txt" 2>&1; then
+              echo "ERROR: Lean accepted corrupted $case certificate."
+              exit 1
+            fi
+            grep -Eq 'error:|unsolved goals' "negative-$case-rejection.txt"
+          done
+      - name: Retain transported source identities and independent Lean results
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe007-lean-certificate-replay
+          path: |
+            experiments/continuous-observation-equivalence/lean/lean-replay-manifest.json
+            experiments/continuous-observation-equivalence/lean/GeneratedCertificateProofs.lean
+            experiments/continuous-observation-equivalence/lean/lean-certificates-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/negative-*-rejection.txt
+          if-no-files-found: error
