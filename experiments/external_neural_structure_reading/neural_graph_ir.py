@@ -15,7 +15,10 @@ import re
 from collections import defaultdict, deque
 from typing import Any
 
-from .gpt2_adapter import GPT2InterpretationError, interpret_gpt2
+try:
+    from .gpt2_adapter import GPT2InterpretationError, interpret_gpt2
+except ImportError:  # direct unittest discovery from this directory
+    from gpt2_adapter import GPT2InterpretationError, interpret_gpt2
 
 GRAPH_SCHEMA = "in-formation-space.neural-computation-graph.v0.1"
 GRAPH_IR_VERSION = "0.1.0"
