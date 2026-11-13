@@ -336,7 +336,7 @@ class RepairEpochTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "digest mismatch"):
             validate_repair_sweep(changed)
 
-    def test_repair_sweep_rejects_a_self-consistent_but_nonreconstructed_matrix(self):
+    def test_repair_sweep_rejects_a_self_consistent_but_nonreconstructed_matrix(self):
         params = self.parameters()
         report = build_repair_sweep(
             scenario_name="tamper",
