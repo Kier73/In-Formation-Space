@@ -28,3 +28,5 @@ jobs:
         run: python -m unittest discover -s experiments/in-transit-memory -p "test_*.py" -v
       - name: Exercise the scan and simulation CLI
         run: python experiments/in-transit-memory/delay_loop.py --scan --simulate --trials 2000 --seed 20261111 --json > /dev/null
+      - name: Exercise the burst-loss scan and simulation CLI
+        run: python experiments/in-transit-memory/burst_loss.py --scan --max-rounds 300 --simulate --trials 500 --seed 20261112 --json > /dev/null
