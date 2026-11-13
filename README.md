@@ -210,3 +210,8 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Reference acquisition by downstream decision value
 
 - [RIV-010: Reference acquisition by downstream decision value](experiments/reference-calibrated-evidence/RIV-010-README.md) — selects a known-standard measurement by its one-step expected value to a later target decision, contrasting RIV-008's immediate EVSI with downstream calibration value. Its evidence-gated ObservationPath handoff creates a RIV-009 reference observation only after return, authorization, and interpretation.
+
+
+## Finite-horizon reference acquisition
+
+- [RIV-011: Finite-horizon reference acquisition](experiments/reference-calibrated-evidence/RIV-011-README.md) — compares an exact finite-horizon adaptive reference policy with repeated RIV-010 greedy re-selection under the same per-path budget. It retains a policy tree whose next reference may depend on the preceding signal, with exact rational values and a fail-closed policy-state cap.
