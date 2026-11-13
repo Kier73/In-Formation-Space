@@ -145,6 +145,12 @@ def validate_observation(report: dict) -> ProofObligation:
         raise TermReceiptError("VGI obligation fingerprint mismatch")
     if not isinstance(report["kernel_case_observation_digest"], str) or len(report["kernel_case_observation_digest"]) != 64:
         raise TermReceiptError("missing Lean process evidence")
+    if report["environment"] != make_environment().to_dict():
+        raise TermReceiptError("report environment differs from the pinned fixture sources")
+    if report["host"].get("role") not in ("proof_runner", "independent_checker"):
+        raise TermReceiptError("unexpected observing host role")
+    if report["host"].get("job") != report["host"].get("role"):
+        raise TermReceiptError("host job and role do not agree")
     return obligation
 
 
@@ -154,7 +160,7 @@ def _run(*args: str) -> None:
         raise TermReceiptError(f"{args[0]} failed: {process.stderr[-2000:]} {process.stdout[-1000:]}")
 
 
-def observe() -> dict:
+def observe(role: str = "proof_runner") -> dict:
     _run("lake", "build")
     _run("lake", "env", "lean", "TermIdentity.lean")
     export = _read(ROOT / "term-identity.json")
@@ -168,7 +174,7 @@ def observe() -> dict:
         item["status"] != "not_established" for item in checked["cases"][1:]
     ):
         raise TermReceiptError("Lean controls or no-axioms observation failed")
-    host = kernel_evidence._host("proof_runner")
+    host = kernel_evidence._host(role)
     return make_observation(export, case_digest=positive["document_digest"],
                             host=host, environment=make_environment())
 
@@ -211,9 +217,20 @@ def recheck(runner: dict, fresh: dict, private_key: Ed25519PrivateKey) -> dict:
     return {**envelope, "document_digest": digest(envelope)}
 
 
-def admit(runner: dict, signed: dict, trusted_key: Ed25519PublicKey, *,
+def admit(runner: dict, checker: dict, signed: dict, trusted_key: Ed25519PublicKey, *,
           expected_checker_id: str = "lean-4.15-term-checker-fixture") -> VerifiedKernelReceipt:
     obligation = validate_observation(runner)
+    validate_observation(checker)
+    if runner["host"]["role"] != "proof_runner" or checker["host"]["role"] != "independent_checker":
+        raise TermReceiptError("checker/runner role mismatch")
+    for key in ("repository", "git_sha", "run_id", "run_attempt"):
+        if runner["host"].get(key) != checker["host"].get(key):
+            raise TermReceiptError(f"checker/runner different provenance: {key}")
+    if runner["host"]["job"] == checker["host"]["job"]:
+        raise TermReceiptError("same-job execution cannot be independent recheck")
+    for key in ("export", "type_fingerprint", "proof_term_fingerprint", "obligation_id", "environment"):
+        if runner[key] != checker[key]:
+            raise TermReceiptError(f"checker structural observation differs: {key}")
     _fields(signed, {"format", "payload", "signature_algorithm",
                      "signature_base64", "document_digest"}, "signed receipt")
     _bind_digest(signed, "signed receipt")
@@ -235,8 +252,8 @@ def admit(runner: dict, signed: dict, trusted_key: Ed25519PublicKey, *,
         raise TermReceiptError("signed checker environment mismatch")
     if payload["runner_observation_digest"] != runner["document_digest"]:
         raise TermReceiptError("runner observation substitution")
-    if not isinstance(payload["checker_observation_digest"], str) or len(payload["checker_observation_digest"]) != 64:
-        raise TermReceiptError("missing checker evidence digest")
+    if payload["checker_observation_digest"] != checker["document_digest"]:
+        raise TermReceiptError("independent checker observation substitution")
     try:
         raw_signature = base64.b64decode(signed["signature_base64"], validate=True)
         trusted_key.verify(raw_signature, canonical(payload))
@@ -277,9 +294,11 @@ def main() -> None:
     p = sub.add_parser("recheck")
     p.add_argument("--runner", type=Path, required=True)
     p.add_argument("--private", type=Path, required=True)
+    p.add_argument("--checker-output", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
     p = sub.add_parser("admit")
     p.add_argument("--runner", type=Path, required=True)
+    p.add_argument("--checker", type=Path, required=True)
     p.add_argument("--signed", type=Path, required=True)
     p.add_argument("--trusted-public", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
@@ -291,10 +310,7 @@ def main() -> None:
             _write(args.output, observe())
         elif args.command == "recheck":
             runner = _read(args.runner)
-            fresh = observe()
-            fresh["host"]["role"] = "independent_checker"
-            fresh["host"]["job"] = "independent_checker"
-            fresh["document_digest"] = digest({k: v for k, v in fresh.items() if k != "document_digest"})
+            fresh = observe("independent_checker")
             # Do not misrepresent the original process evidence: only the
             # workflow's actual independent checker job may issue a receipt.
             if os.environ.get("GITHUB_JOB") != "independent_checker" or os.environ.get("GITHUB_ACTIONS") != "true":
@@ -302,12 +318,13 @@ def main() -> None:
             private = serialization.load_pem_private_key(args.private.read_bytes(), password=None)
             if not isinstance(private, Ed25519PrivateKey):
                 raise TermReceiptError("unsupported private-key algorithm")
+            _write(args.checker_output, fresh)
             _write(args.output, recheck(runner, fresh, private))
         elif args.command == "admit":
             public = serialization.load_pem_public_key(args.trusted_public.read_bytes())
             if not isinstance(public, Ed25519PublicKey):
                 raise TermReceiptError("unsupported public-key algorithm")
-            receipt = admit(_read(args.runner), _read(args.signed), public)
+            receipt = admit(_read(args.runner), _read(args.checker), _read(args.signed), public)
             _write(args.output, {
                 "format": "in-formation.vgi-admission-observation/0.1",
                 "obligation_id": receipt.obligation_id,
