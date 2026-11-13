@@ -1068,6 +1068,10 @@ def main() -> None:
     verifier.add_argument("--output", type=Path, required=True)
     verifier.add_argument("--fixture", action="store_true", help="write deterministic test identity")
 
+    verify_sqlite = sub.add_parser("verify-sqlite-authority", help="reopen and verify transferred SQLite authority evidence")
+    verify_sqlite.add_argument("--authority-dir", type=Path, required=True)
+    verify_sqlite.add_argument("--output", type=Path, required=True)
+
     args = parser.parse_args()
     try:
         if args.command == "fixture":
@@ -1081,6 +1085,8 @@ def main() -> None:
             print(json.dumps(result, sort_keys=True))
         elif args.command == "verifier-host":
             write_verifier_host(args.output, fixture=args.fixture)
+        elif args.command == "verify-sqlite-authority":
+            verify_sqlite_authority(args.authority_dir, args.output)
     except (EvidenceError, CompletionReceiptError, OSError, ValueError) as exc:
         parser.exit(1, f"proof-runner reconstruction: {exc}\n")
 
