@@ -349,3 +349,28 @@ The schema validates structure. The Python state machine and tests validate lega
 
     python bridges/observation-path/validate_observation_path.py bridges/observation-path/examples/happy-path.json
     python -m unittest discover -s bridges/observation-path -p 'test_*.py' -v
+
+## Causal operation-path criticality
+
+The new operation_path_criticality.py analyzer works over the existing operation-span format. It addresses a different question from per-operation cost profiles: within one observed synchronous root call, how much measured invocation duration lies on the longest caller-declared and time-validated dependency chain, how much additional call duration was recorded elsewhere, and how much root time remains outside that chain?
+
+A digest-bound operation-path trace names one root span, the exact operation spans in the path, and explicit must-complete-before edges. The analyzer requires every span to belong to the same attempt, clock actor, and clock segment; the root interval must enclose each operation interval; every edge must be consistent with the local monotonic coordinates; and the dependency graph must be acyclic. It rejects cross-clock or cross-segment aggregation rather than silently comparing unrelated coordinates.
+
+The report keeps these quantities separate:
+
+- root_elapsed_ns: measured duration of the observed root callable.
+- aggregate_operation_ns: sum of the included operation-call durations. This can exceed root elapsed time when calls overlap.
+- known_dependency_path_ns: the maximum sum of operation durations along the explicitly declared dependency DAG.
+- noncritical_aggregate_ns: aggregate operation duration outside that one longest declared chain.
+- root_slack_ns: root elapsed time minus the known dependency-chain duration.
+
+The dependency graph is supplied by the caller. Timestamp order alone does not create an edge or establish causality. The chain is only as complete as the declared prerequisites; omitted edges can make it shorter than the actual dependency critical path. Root slack is not automatically transport, scheduler, admission, or verification overhead. These are synchronous elapsed-call spans, not CPU time, and nested instrumentation can count overlapping work more than once.
+
+Reproduce the focused checks with:
+
+    python -m py_compile bridges/observation-path/operation_spans.py bridges/observation-path/operation_path_criticality.py
+    python -m unittest discover -s bridges/observation-path -p 'test_operation_path_criticality.py' -v
+
+The test fixtures cover a serial path, a parallel fork/join, independent operations with ordered timestamps but no declared dependency, invalid dependency timing, cross-clock and cross-segment refusal, root containment, unmeasured spans, cycles, unexpected source spans, and digest/reconstruction tampering. The trace schema and report schema describe the portable artifacts.
+
+This is a same-clock v0.1 analysis. A future cross-host extension would need explicit clock calibration and a stronger causal-link contract; it must not infer causality from calibrated timestamps alone.

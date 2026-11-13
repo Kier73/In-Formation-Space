@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/operation-path.schema.json",
+  "title": "Declared operation path",
+  "description": "Digest-bound root and operation span references with caller-declared completion dependencies.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "schema", "path_id", "attempt_id", "root_span_digest", "operation_span_digests", "must_complete_before", "measurement_scope", "trace_digest"],
+  "properties": {
+    "format": {"const": "in-formation.operation-path"},
+    "schema": {"const": "in-formation.operation-path/0.1"},
+    "path_id": {"type": "string", "minLength": 1},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "root_span_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "operation_span_digests": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+    "must_complete_before": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["predecessor_span_digest", "successor_span_digest"],
+        "properties": {
+          "predecessor_span_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "successor_span_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "measurement_scope": {"type": "string", "minLength": 1},
+    "trace_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

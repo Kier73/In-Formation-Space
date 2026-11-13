@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/operation-path-criticality.schema.json",
+  "title": "Operation path criticality report",
+  "description": "Source-reconstructed aggregate operation work, longest declared dependency chain, and root slack for one same-clock path.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "path_id", "attempt_id", "clock_actor_id", "clock_segment_id", "root_span_digest", "root_span_id", "root_elapsed_ns", "operation_count", "dependency_count", "aggregate_operation_ns", "known_dependency_path_ns", "known_dependency_path_span_digests", "known_dependency_path_span_ids", "noncritical_aggregate_ns", "root_slack_ns", "operation_totals", "source_span_digests", "trace_digest", "interpretation_limits", "report_digest"],
+  "properties": {
+    "schema": {"const": "in-formation.operation-path-criticality/0.1"},
+    "path_id": {"type": "string", "minLength": 1},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "clock_actor_id": {"type": "string", "minLength": 1},
+    "clock_segment_id": {"type": "string", "minLength": 1},
+    "root_span_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "root_span_id": {"type": "string", "minLength": 1},
+    "root_elapsed_ns": {"type": "integer", "minimum": 0},
+    "operation_count": {"type": "integer", "minimum": 1},
+    "dependency_count": {"type": "integer", "minimum": 0},
+    "aggregate_operation_ns": {"type": "integer", "minimum": 0},
+    "known_dependency_path_ns": {"type": "integer", "minimum": 0},
+    "known_dependency_path_span_digests": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+    "known_dependency_path_span_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "noncritical_aggregate_ns": {"type": "integer", "minimum": 0},
+    "root_slack_ns": {"type": "integer", "minimum": 0},
+    "operation_totals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["operation_id", "outcome", "span_count", "aggregate_elapsed_ns"],
+        "properties": {
+          "operation_id": {"type": "string", "minLength": 1},
+          "outcome": {"enum": ["succeeded", "raised"]},
+          "span_count": {"type": "integer", "minimum": 1},
+          "aggregate_elapsed_ns": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "source_span_digests": {"type": "array", "minItems": 2, "items": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+    "trace_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "interpretation_limits": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
