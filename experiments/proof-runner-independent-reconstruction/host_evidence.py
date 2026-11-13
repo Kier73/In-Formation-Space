@@ -979,8 +979,8 @@ def produce_runner(authority_dir: Path, out_dir: Path) -> None:
     process_evidence = _read(authority_dir / "process-evidence.json")
     stale_attempt = _read(authority_dir / "stale-owner-attempt.json")
     database_path = authority_dir / "authority-store.sqlite3"
-    if not database_path.exists():
-        database_path = authority_dir / "authority-store-fixture.bin"
+    if not database_path.is_file():
+        raise EvidenceError("runner host requires the real transferred SQLite authority database")
     runner_key = Ed25519PrivateKey.generate()
     result, receipt, runner_key_doc = _build_runner_material(
         runner_key,
