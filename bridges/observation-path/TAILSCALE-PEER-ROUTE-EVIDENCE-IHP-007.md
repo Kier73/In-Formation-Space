@@ -37,6 +37,7 @@ Each host's operation-span context contains one `peer_route_observation` with:
 - local and peer Tailscale IPv4 addresses from the live TLS socket;
 - status state and normalized route type;
 - command name, exit code, local elapsed nanoseconds;
+- a local monotonic coordinate and elapsed nanoseconds for the status observation;
 - a SHA-256 digest of the complete `tailscale status` stdout;
 - a short error marker when the status command could not be completed.
 
