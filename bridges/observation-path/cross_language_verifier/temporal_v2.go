@@ -552,7 +552,7 @@ func EncodeOperationSpanV2(span Object) (Object, error) {
 	if err != nil {
 		return nil, err
 	}
-	if raw["format"] != TemporalSpanFormat || (raw["schema"] != SpanSchema && raw["schema"] != TemporalSpanSchema) {
+	if raw["format"] != TemporalSpanFormat || (raw["schema"] != "in-formation.operation-span/0.1" && raw["schema"] != TemporalSpanSchema) {
 		return nil, fail("operation span format/source schema mismatch")
 	}
 	if _, ok := raw["context"].(map[string]any); !ok {
