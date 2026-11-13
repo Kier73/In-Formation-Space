@@ -233,7 +233,7 @@ class IndependentHostOperationPathTests(unittest.TestCase):
     def test_old_github_cli_is_rejected_before_attestation_verification(self) -> None:
         with patch.object(path, "_gh_version", return_value=(2, 101, 0)):
             with patch.object(path.subprocess, "run") as run:
-                with self.assertRaisesRegex(path.EvidenceError, "2.104.0 or newer"):
+                with self.assertRaisesRegex(path.EvidenceError, "2.103.3 or newer"):
                     path.verify_artifact_attestation(
                         self.source_path, self.source, "source_host"
                     )
