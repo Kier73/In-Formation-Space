@@ -50,10 +50,10 @@
       "minLength": 1
     },
     "monotonic_start_ns": {
-      "$ref": "temporal-numeric-v2.schema.json"
+      "$ref": "#/$defs/integer"
     },
     "monotonic_end_ns": {
-      "$ref": "temporal-numeric-v2.schema.json"
+      "$ref": "#/$defs/integer"
     },
     "elapsed_ns": {
       "oneOf": [
@@ -61,7 +61,7 @@
           "type": "null"
         },
         {
-          "$ref": "temporal-numeric-v2.schema.json"
+          "$ref": "#/$defs/integer"
         }
       ]
     },
@@ -151,6 +151,68 @@
           "pattern": "^[0-9a-f]{16}$"
         }
       }
+    },
+    "numeric": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "format",
+            "schema",
+            "kind",
+            "encoding",
+            "value"
+          ],
+          "properties": {
+            "format": {
+              "const": "in-formation.temporal-numeric"
+            },
+            "schema": {
+              "const": "in-formation.temporal-numeric/2.0"
+            },
+            "kind": {
+              "const": "integer"
+            },
+            "encoding": {
+              "const": "canonical-decimal-string"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "format",
+            "schema",
+            "kind",
+            "encoding",
+            "value"
+          ],
+          "properties": {
+            "format": {
+              "const": "in-formation.temporal-numeric"
+            },
+            "schema": {
+              "const": "in-formation.temporal-numeric/2.0"
+            },
+            "kind": {
+              "const": "binary64"
+            },
+            "encoding": {
+              "const": "ieee754-binary64-be-hex"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{16}$"
+            }
+          }
+        }
+      ]
     }
   }
 }
