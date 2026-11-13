@@ -103,6 +103,36 @@ function canonical(value, field = "$") {
   fail(`${field} contains a value unsupported by canonical metadata v1`);
 }
 
+/** Canonical Metadata Profile v1 bytes, shared with IHP and PRC corpus tests. */
+export function canonicalMetadataBytes(value) {
+  return Buffer.from(canonical(value), "utf8");
+}
+
+/** Parse and require one canonical JSON object followed by exactly one LF. */
+export function decodeCanonicalMetadataDocument(rawBytes) {
+  const bytes = Buffer.isBuffer(rawBytes) ? rawBytes : Buffer.from(rawBytes);
+  if (
+    bytes.length < 2 ||
+    bytes[bytes.length - 1] !== 0x0a ||
+    (bytes.length >= 2 && bytes[bytes.length - 2] === 0x0a)
+  ) {
+    fail("canonical metadata artifact must end in exactly one LF byte");
+  }
+  let document;
+  try {
+    const source = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    document = JSON.parse(source);
+  } catch (error) {
+    fail(`canonical metadata artifact is not valid UTF-8 JSON: ${error.message}`);
+  }
+  requireObject(document, "canonical metadata root");
+  const expected = Buffer.concat([canonicalMetadataBytes(document), Buffer.from("\\n")]);
+  if (!bytes.equals(expected)) {
+    fail("artifact is not canonical JSON followed by exactly one LF");
+  }
+  return document;
+}
+
 function validateCore(core, payload) {
   requireObject(core, "capsule core");
   const expectedFields = [
