@@ -127,16 +127,18 @@ class AdaptiveRepairTests(unittest.TestCase):
     def test_report_digest_detects_decision_table_tampering(self):
         report = build_adaptive_repair_report(**self.parameters())
         changed = copy.deepcopy(report)
-        changed["adaptive_policy"]["decision_table"][0]["selected_action"] = "repair"
+        changed["adaptive_policy"]["decision_table"][0]["value"] += 0.01
         with self.assertRaisesRegex(ValueError, "digest mismatch"):
             validate_adaptive_repair_report(changed)
 
     def test_sweep_reconstructs_and_preserves_each_observation_policy(self):
-        spec = DEFAULT_SCENARIOS[0]
+        spec = {
+            **DEFAULT_SCENARIOS[0],
+            "recovery_thresholds": (1, 4, 8),
+            "repair_costs": (0.0, 0.1, 1.0),
+        }
         sweep = build_adaptive_repair_sweep(
             **spec,
-            recovery_thresholds=(1, 4, 8),
-            repair_costs=(0.0, 0.1, 1.0),
             simulation_trials=500,
             simulation_seed=11,
         )
@@ -148,12 +150,12 @@ class AdaptiveRepairTests(unittest.TestCase):
         ))
 
     def test_sweep_digest_detects_mutated_fixed_schedule_comparison(self):
-        spec = DEFAULT_SCENARIOS[0]
-        sweep = build_adaptive_repair_sweep(
-            **spec,
-            recovery_thresholds=(4,),
-            repair_costs=(0.1,),
-        )
+        spec = {
+            **DEFAULT_SCENARIOS[0],
+            "recovery_thresholds": (4,),
+            "repair_costs": (0.1,),
+        }
+        sweep = build_adaptive_repair_sweep(**spec)
         changed = copy.deepcopy(sweep)
         changed["policies"][0]["fixed_schedule_comparisons"][0]["expected_utility"] += 0.01
         with self.assertRaisesRegex(ValueError, "digest mismatch"):
@@ -177,7 +179,7 @@ class AdaptiveRepairTests(unittest.TestCase):
     def test_report_declares_free_exact_observation_assumption(self):
         report = build_adaptive_repair_report(**self.parameters(repair_cost=1.0))
         self.assertTrue(any(
-            "exact survivor count" in limit and "zero sensing cost" in limit
+            "exact survivor count" in limit and "sensing and telemetry are assumed instantaneous and free" in limit.lower()
             for limit in report["interpretation_limits"]
         ))
         self.assertEqual(
