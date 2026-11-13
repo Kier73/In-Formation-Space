@@ -989,15 +989,15 @@ def verify_typed_graph(graph: dict[str, Any], nsd: dict[str, Any]) -> dict[str, 
 
     expected_targets = len(input_ports) + len(graph_outputs)
     incoming_once = all(value == 1 for value in edge_targets.values()) and len(edge_targets) == expected_targets
-    outgoing_once = (
+    outgoing_valid = (
         all(edge_sources.get(("graph_input", name, ""), 0) == 1 for name in graph_inputs)
-        and all(edge_sources.get(("operation_output", op_id, port_name), 0) == 1 for op_id, port_name in output_ports)
+        and all(edge_sources.get(("operation_output", op_id, port_name), 0) >= 1 for op_id, port_name in output_ports)
     )
     every_tensor_used = set(used_tensors) == set(tensor_by_name)
     edges_valid = not edge_failures
     check("edge-endpoint-and-type-integrity", edges_valid, f"{len(graph.get('edges', []))} edges; failures={edge_failures[:5]}")
     check("single-producer-input-ports", incoming_once, f"each of {expected_targets} operation/graph-output input ports has exactly one source")
-    check("single-consumer-operation-outputs", outgoing_once, "every graph input and operation output has exactly one consumer")
+    check("complete-output-connectivity", outgoing_valid, "every graph input has one consumer and every operation output has at least one consumer; residual values may fan out")
     check("complete-tensor-usage", every_tensor_used, f"used={len(used_tensors)}, catalog={len(tensor_by_name)}, unused={sorted(set(tensor_by_name)-set(used_tensors))[:5]}")
 
     local_failures: list[str] = []
