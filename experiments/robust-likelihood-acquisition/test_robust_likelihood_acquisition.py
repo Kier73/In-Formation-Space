@@ -2,6 +2,9 @@ import copy
 import hashlib
 import json
 import unittest
+from pathlib import Path
+
+import jsonschema
 from fractions import Fraction
 
 from robust_likelihood_acquisition import (
@@ -313,6 +316,15 @@ class RobustLikelihoodAcquisitionTests(unittest.TestCase):
         ] = 0.9
         with self.assertRaises(RobustAcquisitionError):
             self.build(model_scenarios=broken)
+
+    def test_published_schema_accepts_reconstructed_report(self):
+        report = self.build()
+        schema_path = Path(__file__).with_name(
+            "robust-likelihood-acquisition.schema.json"
+        )
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator.check_schema(schema)
+        jsonschema.validate(report, schema)
 
     def test_report_reconstruction_rejects_tampering(self):
         report = self.build()
