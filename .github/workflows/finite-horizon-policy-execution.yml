@@ -1,0 +1,53 @@
+name: Finite-horizon policy execution RIV-012
+
+on:
+  push:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/finite-horizon-policy-execution.yml"
+      - "bridges/observation-path/observation_path.py"
+      - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - "experiments/reference-calibrated-evidence/finite_horizon_reference_policy.py"
+      - "experiments/reference-calibrated-evidence/reference_calibrated_evidence.py"
+  pull_request:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/finite-horizon-policy-execution.yml"
+      - "bridges/observation-path/observation_path.py"
+      - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - "experiments/reference-calibrated-evidence/finite_horizon_reference_policy.py"
+      - "experiments/reference-calibrated-evidence/reference_calibrated_evidence.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  finite-horizon-policy-execution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate policy execution schema
+        run: |
+          python -c "import json, jsonschema; p='experiments/reference-calibrated-evidence/finite-horizon-policy-execution.schema.json'; s=json.load(open(p, encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s)"
+      - name: Compile lifecycle and policy modules
+        run: |
+          python -m py_compile bridges/observation-path/observation_path.py
+          python -m py_compile experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py
+          python -m py_compile experiments/reference-calibrated-evidence/reference_calibrated_evidence.py
+          python -m py_compile experiments/reference-calibrated-evidence/finite_horizon_reference_policy.py
+          python -m py_compile experiments/reference-calibrated-evidence/finite_horizon_policy_execution.py
+          python -m py_compile experiments/reference-calibrated-evidence/finite_horizon_policy_execution_example.py
+      - name: Run exact adaptive policy execution tests
+        env:
+          PYTHONPATH: bridges/observation-path:experiments/reference-calibrated-evidence
+        run: python -m unittest discover -s experiments/reference-calibrated-evidence -p "test_finite_horizon_policy_execution.py" -v
+      - name: Run synthetic policy-prefix example
+        env:
+          PYTHONPATH: bridges/observation-path:experiments/reference-calibrated-evidence
+        run: python experiments/reference-calibrated-evidence/finite_horizon_policy_execution_example.py

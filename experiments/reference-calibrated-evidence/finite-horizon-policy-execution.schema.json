@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/reference-calibrated-evidence/finite-horizon-policy-execution.schema.json",
+  "title": "RIV-012 Finite-Horizon Policy Execution Record",
+  "type": "object",
+  "required": ["format", "schema", "policy_report", "policy_report_digest", "observation_paths", "observation_path_digests", "signal_history", "reference_observations", "measurement_manifests", "current_policy_state", "updated_riv009_report", "execution_status", "belief_effect", "ground_effect", "sensor_model_effect", "interpretation_limits", "record_digest"],
+  "additionalProperties": false,
+  "properties": {
+    "format": {"const": "in-formation.finite-horizon-policy-execution/0.1"},
+    "schema": {"const": "in-formation.finite-horizon-policy-execution/0.1"},
+    "policy_report": {"type": "object"},
+    "policy_report_digest": {"$ref": "#/$defs/sha256"},
+    "observation_paths": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["attempt_id", "intent", "status", "terminal", "events"],
+        "properties": {
+          "attempt_id": {"type": "string", "minLength": 1},
+          "intent": {"type": "object"},
+          "status": {"const": "interpreted"},
+          "terminal": {"const": false},
+          "events": {"type": "array", "minItems": 6}
+        },
+        "additionalProperties": true
+      }
+    },
+    "observation_path_digests": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/sha256"}},
+    "signal_history": {"type": "array", "minItems": 1, "items": {"enum": ["A", "B"]}},
+    "reference_observations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["observation_id", "sensor_id", "known_hypothesis", "signal", "reference_standard_ref", "reference_standard_sha256", "observation_ref", "observation_sha256", "cost"],
+        "properties": {
+          "observation_id": {"type": "string", "minLength": 1},
+          "sensor_id": {"type": "string", "minLength": 1},
+          "known_hypothesis": {"enum": ["A", "B"]},
+          "signal": {"enum": ["A", "B"]},
+          "reference_standard_ref": {"type": "string"},
+          "reference_standard_sha256": {"$ref": "#/$defs/sha256"},
+          "observation_ref": {"type": "string"},
+          "observation_sha256": {"$ref": "#/$defs/sha256"},
+          "cost": {"$ref": "#/$defs/fraction"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "measurement_manifests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["attempt_id", "policy_node_digest", "policy_state_digest", "candidate_id", "sensor_id", "known_hypothesis", "signal", "predictive_probability", "posterior_calibration_probabilities", "dispatch_evidence_ref", "admission_evidence_ref", "return_evidence_ref", "authority_evidence_ref", "authority_decision_digest", "interpretation_evidence_ref", "observation_path_digest", "reference_observation_digest"],
+        "properties": {
+          "attempt_id": {"type": "string"},
+          "policy_node_digest": {"$ref": "#/$defs/sha256"},
+          "policy_state_digest": {"$ref": "#/$defs/sha256"},
+          "candidate_id": {"type": "string"},
+          "sensor_id": {"type": "string"},
+          "known_hypothesis": {"enum": ["A", "B"]},
+          "signal": {"enum": ["A", "B"]},
+          "predictive_probability": {"$ref": "#/$defs/fraction"},
+          "posterior_calibration_probabilities": {"type": "array", "items": {"$ref": "#/$defs/profileProbability"}},
+          "dispatch_evidence_ref": {"type": "string"},
+          "admission_evidence_ref": {"type": "string"},
+          "return_evidence_ref": {"type": "string"},
+          "authority_evidence_ref": {"type": "string"},
+          "authority_decision_digest": {"type": "string"},
+          "interpretation_evidence_ref": {"type": "string"},
+          "observation_path_digest": {"$ref": "#/$defs/sha256"},
+          "reference_observation_digest": {"$ref": "#/$defs/sha256"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "current_policy_state": {
+      "type": "object",
+      "required": ["policy_node_digest", "next_action", "stop_reason", "remaining_reference_steps", "remaining_cost_budget", "calibration_posterior", "target_map_accuracy"],
+      "properties": {
+        "policy_node_digest": {"$ref": "#/$defs/sha256"},
+        "next_action": {"oneOf": [{"type": "null"}, {"type": "string"}]},
+        "stop_reason": {"oneOf": [{"type": "null"}, {"type": "string"}]},
+        "remaining_reference_steps": {"type": "integer", "minimum": 0},
+        "remaining_cost_budget": {"$ref": "#/$defs/fraction"},
+        "calibration_posterior": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/profileProbability"}},
+        "target_map_accuracy": {"$ref": "#/$defs/fraction"}
+      },
+      "additionalProperties": false
+    },
+    "updated_riv009_report": {"type": "object"},
+    "execution_status": {"const": "authorized_interpreted_policy_prefix"},
+    "belief_effect": {"const": "cumulative_reference_conditioned_calibration_posterior"},
+    "ground_effect": {"const": "none"},
+    "sensor_model_effect": {"const": "none"},
+    "interpretation_limits": {"type": "array", "items": {"type": "string"}},
+    "record_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "fraction": {
+      "type": "object",
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer"},
+        "denominator": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "profileProbability": {
+      "type": "object",
+      "required": ["calibration_id", "probability"],
+      "properties": {
+        "calibration_id": {"type": "string"},
+        "probability": {"$ref": "#/$defs/fraction"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -426,3 +426,22 @@ RIV-010 values one reference measurement against a fixed future target schedule.
 5. How should an optimal action tree be executed through the append-only ObservationPath, with a fresh plan/report binding at each state and RIV-009 updating the shared calibration posterior only after authorized interpretation?
 
 The initial finite comparator is [RIV-011](../experiments/reference-calibrated-evidence/RIV-011-README.md). It compares an exact finite-horizon dynamic programme with repeated RIV-010 one-step selection under the same pathwise budget and includes a signal-dependent next-action counterexample. It is not a universal optimality claim beyond its finite supplied model and action set.
+
+
+---
+
+## 22. How should an adaptive reference policy advance only on admitted evidence?
+
+### The question
+
+RIV-011 returns an optimal finite policy tree, but the next action is meaningful only after the selected reference's outcome has actually been received, admitted, authorized and interpreted. How should a multi-step policy bind each attempt to its current node and posterior, reject stale or mismatched returns, and preserve a cumulative calibration record?
+
+### Questions
+
+1. How should a policy node be bound to its report digest, exact calibration posterior, prior signal prefix and remaining pathwise budget?
+2. How can an append-only ObservationPath advance exactly one reachable child only after an AUTHORIZED interpreted result?
+3. How should the full reference history reconstruct the same posterior through RIV-009 from the original calibration prior?
+4. How should stale paths, delayed results, impossible branches, duplicate attempt IDs and altered standard identity be rejected?
+5. When should the policy be reoptimized after an authorized outcome because the live evidence or available resources differ from the original tree?
+
+The initial execution bridge is [RIV-012](../experiments/reference-calibrated-evidence/RIV-012-README.md). It creates node-bound planned paths, replays an authorized interpreted prefix, advances through the RIV-011 policy tree, and rebuilds one cumulative RIV-009 calibration report. External artifact authentication and live transport integration remain distinct responsibilities.
