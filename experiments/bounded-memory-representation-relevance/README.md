@@ -86,3 +86,8 @@ The implementation uses only the Python standard library. Probabilities are exac
 - test_bounded_memory_relevance.py — ten tests for memory compression, policy nesting, exact inputs, explicit bounds, partition order, and tamper rejection.
 - example.py — runnable RIV-002 continuation.
 - README.md — controller equations, results, reproduction, and evidence scope.
+
+
+## Follow-on experiment
+
+[RIV-004: Evidence accumulation as a sufficient statistic](../evidence-accumulation-sufficient-statistic/README.md) changes the observation model from deterministic signals to conditionally iid noisy observations. It verifies when a compact count accumulator preserves the exact MAP decision that would be made from the full ordered history.
