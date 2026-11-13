@@ -104,6 +104,15 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
             "direct",
         )
 
+    def test_tailscale_route_classification_recognizes_direct_ipv6_endpoints(self) -> None:
+        self.assertEqual(
+            overlay.classify_route(
+                "pong from node (100.64.0.2) via [2001:db8::5]:41641 in 18ms",
+                0,
+            ),
+            "direct",
+        )
+
     def test_address_document_is_role_run_tag_and_ip_bound(self) -> None:
         with patch.object(overlay, "_tailscale_ip", return_value="100.73.20.11"):
             address = overlay.create_address(
