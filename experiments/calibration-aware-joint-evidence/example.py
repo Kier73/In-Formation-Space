@@ -1,4 +1,4 @@
-"""RIV-006: maintain joint uncertainty over a hidden state and shared calibration."""
+"""RIV-007: maintain joint uncertainty over a hidden state and shared calibration."""
 import json
 from calibration_aware_evidence import build_report
 
