@@ -8,6 +8,8 @@ on:
       - ".github/workflows/decision-value-context-acquisition.yml"
       - "experiments/context-switching-evidence-accumulator/context_switching_evidence.py"
       - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - "experiments/reference-calibrated-evidence/reference_calibrated_evidence.py"
+      - "experiments/reference-calibrated-evidence/test_reference_calibrated_evidence.py"
       - ".github/workflows/decision-value-context-acquisition.yml"
   pull_request:
     paths:
@@ -16,6 +18,8 @@ on:
       - ".github/workflows/decision-value-context-acquisition.yml"
       - "experiments/context-switching-evidence-accumulator/context_switching_evidence.py"
       - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - "experiments/reference-calibrated-evidence/reference_calibrated_evidence.py"
+      - "experiments/reference-calibrated-evidence/test_reference_calibrated_evidence.py"
       - ".github/workflows/decision-value-context-acquisition.yml"
   workflow_dispatch:
 
@@ -43,6 +47,7 @@ jobs:
           python -m py_compile experiments/decision-value-context-acquisition/example.py
           python -m py_compile experiments/context-switching-evidence-accumulator/context_switching_evidence.py
           python -m py_compile experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py
+          python -m py_compile experiments/reference-calibrated-evidence/reference_calibrated_evidence.py
       - name: Run exact decision-value and evidence-gated execution tests
         env:
           PYTHONPATH: bridges/observation-path:experiments/decision-value-context-acquisition
