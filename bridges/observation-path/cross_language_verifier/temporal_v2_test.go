@@ -263,7 +263,7 @@ func TestTemporalFrameV2RejectsMissingCausalSelfEntryAndActorMismatch(t *testing
 	if _, err := EncodeTemporalFrameV2(frame); err == nil || !strings.Contains(err.Error(), "include its own actor") {
 		t.Fatalf("expected missing self actor rejection, got %v", err)
 	}
-	frame["causal"].(map[string]any)["vector"].(map[string]any)["host-a"] = json.Number("1")
+	frame["causal"].(Object)["vector"].(Object)["host-a"] = json.Number("1")
 	frame["monotonic"] = Object{"actor_id": "other", "segment": json.Number("0"), "elapsed_ns": json.Number("0")}
 	if _, err := EncodeTemporalFrameV2(frame); err == nil {
 		t.Fatal("accepted monotonic actor mismatch")
