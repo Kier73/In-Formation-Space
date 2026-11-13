@@ -1,0 +1,910 @@
+{
+  "format": "in-formation.in-transit-repair-scan-summary",
+  "schema": "in-formation.in-transit-repair-scan-summary/0.1",
+  "source_commit": "1cfb056b84e36d60e27fbb872807416a9783fc81",
+  "workflow_run_id": 43366801290,
+  "workflow_run_url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43366801290",
+  "horizon_epochs": 100,
+  "repair_policy_dimensions": [
+    "recovery_threshold",
+    "interval_rounds"
+  ],
+  "model_labels": [
+    "iid_marginal",
+    "per_packet_markov",
+    "shared_channel"
+  ],
+  "scenarios": [
+    {
+      "name": "stationary_moderate_bursts",
+      "policies": [
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 1,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 586597151073.9819,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.99999999982953,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 1,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 586573964668.4132,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.99999999982951,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 1,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 245875.5043977737,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.99959329010734,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 1,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 545516193.4835358,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 49.999999816687385,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 1,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 1794088577.598899,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 49.99999994426139,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 1,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 2330.3331650639234,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 49.95708768106673,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 1,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 931636.0809562155,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 24.99989266195026,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 1,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 10396638.495949993,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 24.999990381506482,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 1,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 174.12496812185958,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 24.425699823071803,
+          "median_failure_epoch": 30,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 1,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 4817.2403293528605,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 12.47924122668519,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 1,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 88802.2462362123,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 12.498873902359025,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 1,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 74.36456458234646,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 11.155273508805843,
+          "median_failure_epoch": 7,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 6,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 14919.322960944037,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.99329728297579,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 6,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 14992.41798813396,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.99332996184611,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 6,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 32.417260175278145,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 96.9152235735128,
+          "median_failure_epoch": 22,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 6,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 541.4249253479586,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 49.815302186289756,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 6,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 1010.735121105779,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 49.901062110228644,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 6,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 18.929314027243556,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 44.71718838537532,
+          "median_failure_epoch": 6,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 6,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 42.89365603563167,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 22.668652914152847,
+          "median_failure_epoch": 8,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 6,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 126.4581167283403,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 24.209224345679434,
+          "median_failure_epoch": 22,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 6,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 17.97010754305865,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 19.43520303034429,
+          "median_failure_epoch": 3,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 6,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 12.714070735299066,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 4.634698470540815,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 6,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 29.372367908756498,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 9.09543962166605,
+          "median_failure_epoch": 3,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 6,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 19.24734127548675,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 7.304477222661442,
+          "median_failure_epoch": 2,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 12,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 1.361989874786663,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 26.57801511508033,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 12,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 1.4245723788632692,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 29.803496485173657,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 12,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 4.641636078554572,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 78.45587238904338,
+          "median_failure_epoch": 3,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 12,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 2.1520164833496387,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 3.5319544372871916,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 12,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 2.2257370802400276,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 5.07106347474976,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 12,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 5.271352116702782,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 31.029535157945443,
+          "median_failure_epoch": 2,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 12,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 4.020059618541914,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 0.12474702147072932,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 12,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 4.065972365676374,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 0.4056370760982748,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 12,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 6.613329163067367,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 9.87902272300954,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 12,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 8.000199196247653,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 0.00031123638731787244,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 12,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 8.00491005631383,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 0.007667257157308561,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 12,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 9.602885792710797,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 2.086463677834596,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        }
+      ],
+      "pareto_frontier": {
+        "iid_marginal": [
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 1,
+            "expected_lifetime_rounds": 586597151073.9819,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 99.99999999982953
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 2,
+            "expected_lifetime_rounds": 545516193.4835358,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 49.999999816687385
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 4,
+            "expected_lifetime_rounds": 931636.0809562155,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 24.99989266195026
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 4817.2403293528605,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 12.47924122668519
+          },
+          {
+            "recovery_threshold": 6,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 12.714070735299066,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 4.634698470540815
+          },
+          {
+            "recovery_threshold": 12,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 8.000199196247653,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 0.00031123638731787244
+          }
+        ],
+        "per_packet_markov": [
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 1,
+            "expected_lifetime_rounds": 586573964668.4132,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 99.99999999982951
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 2,
+            "expected_lifetime_rounds": 1794088577.598899,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 49.99999994426139
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 4,
+            "expected_lifetime_rounds": 10396638.495949993,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 24.999990381506482
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 88802.2462362123,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 12.498873902359025
+          },
+          {
+            "recovery_threshold": 6,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 29.372367908756498,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 9.09543962166605
+          },
+          {
+            "recovery_threshold": 12,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 8.00491005631383,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 0.007667257157308561
+          }
+        ],
+        "shared_channel": [
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 1,
+            "expected_lifetime_rounds": 245875.5043977737,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 99.99959329010734
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 2,
+            "expected_lifetime_rounds": 2330.3331650639234,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 49.95708768106673
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 4,
+            "expected_lifetime_rounds": 174.12496812185958,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 24.425699823071803
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 74.36456458234646,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 11.155273508805843
+          },
+          {
+            "recovery_threshold": 6,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 19.24734127548675,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 7.304477222661442
+          },
+          {
+            "recovery_threshold": 12,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 9.602885792710797,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 2.086463677834596
+          }
+        ]
+      }
+    },
+    {
+      "name": "rare_persistent_bad_bursts",
+      "policies": [
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 1,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 16472837436.499489,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.9999999939294,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 1,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 16600138211.576876,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.99999999397595,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 1,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 397.23807904504315,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.74826179745808,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 1,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 19314559.57445769,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 49.99999482255862,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 1,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 869493889.1374483,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 49.999999884990565,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 1,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 70.99932942823136,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 48.59153599329295,
+          "median_failure_epoch": 24,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 1,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 50774.30436732965,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 24.99803049985133,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 1,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 142275686.28562012,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 24.99999929713922,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 1,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 57.01074167920029,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 23.245944587728737,
+          "median_failure_epoch": 9,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 1,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 549.0531834338981,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 12.317868281220813,
+          "median_failure_epoch": 48,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 1,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 17420363.641356006,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 12.499994259591702,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 1,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 57.33290411686895,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 10.755800895831872,
+          "median_failure_epoch": 5,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 6,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 2213.914723197063,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.95483114188988,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 6,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 3067.520086218547,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 99.96740037646396,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 6,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 41.667962196811715,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 97.6000746202162,
+          "median_failure_epoch": 25,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 6,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 108.47065415564462,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 49.078091666557945,
+          "median_failure_epoch": 38,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 6,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 1107.2755683928772,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 49.9096882448647,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 6,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 42.18912664355171,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 47.6297210216063,
+          "median_failure_epoch": 13,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 6,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 14.681655033832403,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 18.188778801193735,
+          "median_failure_epoch": 3,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 6,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 588.9770178049948,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 24.83021408819536,
+          "median_failure_epoch": null,
+          "median_status": "not_reached_within_100_epochs"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 6,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 43.36970035732443,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 22.694242773731506,
+          "median_failure_epoch": 7,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 6,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 9.02068286834624,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 1.4143647482717705,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 6,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 284.9646352805965,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 12.14907926240906,
+          "median_failure_epoch": 25,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 6,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 45.78073523841504,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 10.315675098286995,
+          "median_failure_epoch": 4,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 12,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 1.193113682987754,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 16.185690076419657,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 12,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 1.4741601155594735,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 32.16476355280581,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 12,
+          "interval_rounds": 1,
+          "expected_lifetime_rounds": 25.93892791635244,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 96.144790551002,
+          "median_failure_epoch": 16,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 12,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 2.053804874254306,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 1.3098828162495535,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 12,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 2.3598492376210873,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 7.624411591306645,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 12,
+          "interval_rounds": 2,
+          "expected_lifetime_rounds": 26.537337191320216,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 46.23172440855491,
+          "median_failure_epoch": 8,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 12,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 4.002747154206864,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 0.01715792992306047,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 12,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 4.253614564342935,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 1.490582659210163,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 12,
+          "interval_rounds": 4,
+          "expected_lifetime_rounds": 27.747294381319254,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 21.39604501160572,
+          "median_failure_epoch": 4,
+          "median_status": "crossed"
+        },
+        {
+          "model": "iid_marginal",
+          "recovery_threshold": 12,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 8.000003768252133,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 0.000005887891185118219,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "per_packet_markov",
+          "recovery_threshold": 12,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 8.136657564481272,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 0.20994118807122272,
+          "median_failure_epoch": 1,
+          "median_status": "crossed"
+        },
+        {
+          "model": "shared_channel",
+          "recovery_threshold": 12,
+          "interval_rounds": 8,
+          "expected_lifetime_rounds": 30.219667356613012,
+          "expected_repairs_per_100_lifetime_rounds_ratio": 9.19089673225285,
+          "median_failure_epoch": 2,
+          "median_status": "crossed"
+        }
+      ],
+      "pareto_frontier": {
+        "iid_marginal": [
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 1,
+            "expected_lifetime_rounds": 16472837436.499489,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 99.9999999939294
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 2,
+            "expected_lifetime_rounds": 19314559.57445769,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 49.99999482255862
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 4,
+            "expected_lifetime_rounds": 50774.30436732965,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 24.99803049985133
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 549.0531834338981,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 12.317868281220813
+          },
+          {
+            "recovery_threshold": 6,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 9.02068286834624,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 1.4143647482717705
+          },
+          {
+            "recovery_threshold": 12,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 8.000003768252133,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 0.000005887891185118219
+          }
+        ],
+        "per_packet_markov": [
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 1,
+            "expected_lifetime_rounds": 16600138211.576876,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 99.99999999397595
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 2,
+            "expected_lifetime_rounds": 869493889.1374483,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 49.999999884990565
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 4,
+            "expected_lifetime_rounds": 142275686.28562012,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 24.99999929713922
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 17420363.641356006,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 12.499994259591702
+          },
+          {
+            "recovery_threshold": 6,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 284.9646352805965,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 12.14907926240906
+          },
+          {
+            "recovery_threshold": 12,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 8.136657564481272,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 0.20994118807122272
+          }
+        ],
+        "shared_channel": [
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 1,
+            "expected_lifetime_rounds": 397.23807904504315,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 99.74826179745808
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 2,
+            "expected_lifetime_rounds": 70.99932942823136,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 48.59153599329295
+          },
+          {
+            "recovery_threshold": 1,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 57.33290411686895,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 10.755800895831872
+          },
+          {
+            "recovery_threshold": 6,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 45.78073523841504,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 10.315675098286995
+          },
+          {
+            "recovery_threshold": 12,
+            "interval_rounds": 8,
+            "expected_lifetime_rounds": 30.219667356613012,
+            "expected_repairs_per_100_lifetime_rounds_ratio": 9.19089673225285
+          }
+        ]
+      }
+    }
+  ],
+  "interpretation_limits": [
+    "The sweep uses declared synthetic parameters; none are fitted from packet traces or deployed channel measurements.",
+    "Expected lifetime is computed from the successful-epoch fundamental matrix and includes the final failed interval.",
+    "Median failure epochs not crossed within 100 intervals are right-censored, not infinite.",
+    "The expected repair rate is a ratio of expected successful repairs to expected lifetime rounds, not the expected sample-path rate.",
+    "The Pareto frontier only compares expected lifetime and repair-event rate; no monetary, energy, redundancy, or decoder-cost objective is assigned."
+  ]
+}
