@@ -1,0 +1,64 @@
+name: Decision-time evidence frontier
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/decision-time-evidence-frontier/**"
+      - ".github/workflows/decision-time-evidence-frontier.yml"
+  pull_request:
+    paths:
+      - "experiments/decision-time-evidence-frontier/**"
+      - ".github/workflows/decision-time-evidence-frontier.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Compile experiment
+        run: |
+          python -m py_compile \
+            experiments/decision-time-evidence-frontier/frontier.py \
+            experiments/decision-time-evidence-frontier/test_frontier.py
+      - name: Run decision-time frontier tests
+        run: |
+          python -m unittest discover \
+            -s experiments/decision-time-evidence-frontier \
+            -p 'test_*.py' -v
+      - name: Validate complete and incomplete reports against Draft 2020-12
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/decision-time-evidence-frontier")
+          sys.path.insert(0, str(root))
+          import frontier
+
+          schema = json.loads((root / "frontier.schema.json").read_text(encoding="utf-8"))
+          Draft202012Validator.check_schema(schema)
+          validator = Draft202012Validator(schema)
+          for bundle in (frontier.build_fixture(), frontier.build_fixture(omit_receiver_event=1)):
+              report = frontier.build_report(bundle)
+              frontier.validate_report(report)
+              validator.validate(report)
+              print("valid report:", report["decision_assessments"][0]["frontier_status"])
+          PY
+      - name: Print reproducible complete report
+        run: python experiments/decision-time-evidence-frontier/frontier.py --compact
+      - name: Print missing-prefix report
+        run: python experiments/decision-time-evidence-frontier/frontier.py --drop-receiver-event 1 --compact
