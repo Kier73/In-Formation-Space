@@ -56,6 +56,7 @@ class DecisionTimeEvidenceFrontierTests(unittest.TestCase):
         altered = copy.deepcopy(self.bundle)
         decision = altered["receiver_events"][1]
         decision["available_message_ids"] = []
+        decision["used_message_ids"] = []
         core = {key: value for key, value in decision.items() if key != "event_digest"}
         decision["event_digest"] = frontier.digest(core)
         following = altered["receiver_events"][2]
