@@ -4,6 +4,8 @@
 **Status:** normative for PRC v1 metadata  
 **Purpose:** byte-identical header reconstruction by independent implementations.
 
+The repository-wide profile and executable cross-language vectors now live in [formats/canonical-metadata-v1](../../formats/canonical-metadata-v1/README.md). This document records PRC v1's adoption of that shared profile. Implementations should use the shared vector corpus at `formats/canonical-metadata-v1/test-vectors.json`; do not create PRC-only variants of the canonical byte rules.
+
 ## Data model
 
 A v1 metadata value is one of:

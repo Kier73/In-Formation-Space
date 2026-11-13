@@ -1,0 +1,90 @@
+{
+  "schema": "in-formation-space.canonical-metadata-v1-test-vectors/0.1",
+  "profile": "in-formation-space.canonical-metadata.v1",
+  "valid": [
+    {
+      "name": "mixed-nested-safe-integer-and-sorted-keys",
+      "input_json": "{\"z\":[false,null,0,1,-9007199254740991,9007199254740991],\"a\":{\"Z\":2,\"A\":1}}",
+      "canonical_utf8": "{\"a\":{\"A\":1,\"Z\":2},\"z\":[false,null,0,1,-9007199254740991,9007199254740991]}",
+      "sha256": "35bed453288e1df4cf86afc84240fb2f04005903e67b858ca20e9beab125bf3c"
+    },
+    {
+      "name": "unicode-control-characters-and-line-separators",
+      "input_json": "{\"unicode\":\"café λ 🙂\",\"separator\":\"left\\u2028right\\u2029end\",\"html\":\"<>& /\",\"line\":\"a\\nb\\t\\u0001\"}",
+      "canonical_utf8": "{\"html\":\"<>& /\",\"line\":\"a\\nb\\t\\u0001\",\"separator\":\"left right end\",\"unicode\":\"café λ 🙂\"}",
+      "sha256": "e2dfa350dbf2ae10604bd90430132a5de4f6fbde9ad558eb1e5108fe5fcfb6be"
+    },
+    {
+      "name": "empty-containers",
+      "input_json": "{\"object\":{},\"array\":[]}",
+      "canonical_utf8": "{\"array\":[],\"object\":{}}",
+      "sha256": "13b38aeab2e18a2c62de2945db9600720801b483e41936f5a154dbda7261be70"
+    },
+    {
+      "name": "boolean-null-root-array",
+      "input_json": "[null,true,false]",
+      "canonical_utf8": "[null,true,false]",
+      "sha256": "37257214f22b92121c5ff4d7e29ed2d31b3f1129ee698e96e581ec05cb2e3cf7"
+    }
+  ],
+  "invalid_values": [
+    {
+      "name": "fractional-number",
+      "input_json": "{\"value\":1.25}",
+      "reason": "floating-point values are outside the data model"
+    },
+    {
+      "name": "unsafe-integer",
+      "input_json": "{\"value\":9007199254740992}",
+      "reason": "integer exceeds the interoperable safe range"
+    },
+    {
+      "name": "non-ascii-object-key",
+      "input_json": "{\"κ\":\"value\"}",
+      "reason": "object keys must be ASCII"
+    },
+    {
+      "name": "invalid-unicode-surrogate",
+      "input_json": "{\"value\":\"\\ud800\"}",
+      "reason": "strings must contain valid Unicode scalar values"
+    }
+  ],
+  "noncanonical_documents": [
+    {
+      "name": "duplicate-object-key",
+      "input_json": "{\"value\":1,\"value\":2}",
+      "canonical_utf8": "{\"value\":2}",
+      "reason": "duplicate keys cannot survive parse-and-canonical-reencode byte equality"
+    },
+    {
+      "name": "insignificant-whitespace",
+      "input_json": "{ \"a\" : 1 }",
+      "canonical_utf8": "{\"a\":1}",
+      "reason": "canonical documents omit insignificant whitespace"
+    },
+    {
+      "name": "exponent-number",
+      "input_json": "{\"value\":1e0}",
+      "canonical_utf8": "{\"value\":1}",
+      "reason": "exponent notation is not a canonical safe-integer token"
+    },
+    {
+      "name": "negative-zero",
+      "input_json": "{\"value\":-0}",
+      "canonical_utf8": "{\"value\":0}",
+      "reason": "negative zero is not a canonical safe-integer token"
+    },
+    {
+      "name": "unicode-escape-alternative",
+      "input_json": "{\"value\":\"\\u03bb\"}",
+      "canonical_utf8": "{\"value\":\"λ\"}",
+      "reason": "non-ASCII string values are emitted as UTF-8 rather than Unicode escapes"
+    },
+    {
+      "name": "escaped-solidus-alternative",
+      "input_json": "{\"value\":\"\\/\"}",
+      "canonical_utf8": "{\"value\":\"/\"}",
+      "reason": "solidus is not escaped"
+    }
+  ]
+}

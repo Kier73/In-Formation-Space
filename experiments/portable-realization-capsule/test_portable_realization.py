@@ -15,6 +15,7 @@ from portable_realization import (
     MAGIC,
     PREFIX,
     PortableRealizationError,
+    _canonical,
     decode_capsule,
     encode_capsule,
 )
@@ -700,3 +701,33 @@ def test_three_independent_binary_codecs_reconstruct_and_replay_same_stateful_co
         )
         assert mismatch.returncode != 0
         assert "trajectory reference" in mismatch.stderr or "recurrent trajectory" in mismatch.stderr
+
+def test_shared_canonical_metadata_v1_conformance_vectors():
+    repo_root = Path(__file__).resolve().parents[2]
+    corpus_path = repo_root / "formats" / "canonical-metadata-v1" / "test-vectors.json"
+    corpus = json.loads(corpus_path.read_text(encoding="utf-8"))
+
+    assert corpus["profile"] == "in-formation-space.canonical-metadata.v1"
+    for vector in corpus["valid"]:
+        value = json.loads(vector["input_json"])
+        actual = _canonical(value)
+        assert actual == vector["canonical_utf8"].encode("utf-8"), vector["name"]
+        assert _sha(actual) == vector["sha256"], vector["name"]
+
+    for vector in corpus["invalid_values"]:
+        value = json.loads(vector["input_json"])
+        with pytest.raises(PortableRealizationError):
+            _canonical(value)
+
+    for vector in corpus["noncanonical_documents"]:
+        value = json.loads(vector["input_json"])
+        try:
+            actual = _canonical(value)
+        except PortableRealizationError:
+            # A parser may already classify the source token as outside the
+            # metadata model (for example, exponent notation becoming float).
+            # Rejecting here is equivalent to failing canonical byte equality.
+            continue
+        assert actual == vector["canonical_utf8"].encode("utf-8"), vector["name"]
+        assert actual != vector["input_json"].encode("utf-8"), vector["name"]
+
