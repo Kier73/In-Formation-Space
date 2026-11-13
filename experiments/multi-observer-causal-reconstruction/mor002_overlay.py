@@ -207,8 +207,9 @@ def _vector(frame: Mapping[str, Any], actor_ids: set[str], event_id: str) -> dic
         raise MOR002Error(f"{event_id} must carry a complete causal stamp")
     stamp = direct.CausalStamp.from_dict(causal)
     vector = stamp.vector_map()
-    if set(vector) != actor_ids:
-        raise MOR002Error(f"{event_id} vector actor roster is incomplete or unexpected")
+    if not set(vector).issubset(actor_ids) or stamp.actor_id != frame["actor_id"]:
+        raise MOR002Error(f"{event_id} vector contains an unknown actor or mismatched stamp identity")
+    # E-CPU uses sparse vector clocks: an actor not yet observed is represented by zero.
     return vector
 
 
@@ -276,7 +277,7 @@ def build_report(
     if followup_core["transferred_in_handoff"] is not False:
         raise MOR002Error("A2 must not be transferred in the semantic A1 envelope")
     if direct_report.get("status") != "direct_mtls_verified":
-        return {
+        unavailable_core = {
             "schema": REPORT_SCHEMA,
             "status": "direct_transport_unavailable",
             "path_id": direct_report.get("path_id"),
@@ -301,6 +302,7 @@ def build_report(
                 "GitHub-hosted runner identity does not prove distinct physical servers or independent failure domains.",
             ],
         }
+        return {**unavailable_core, "report_digest": direct.digest_object(unavailable_core)}
 
     if not isinstance(client.get("handoff_envelope"), Mapping):
         raise MOR002Error("verified client record is missing the signed A1 envelope")
