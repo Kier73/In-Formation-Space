@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -428,7 +427,7 @@ func verify(nsd, graph object) report {
 	if asString(graph["schema"]) != "in-formation-space.neural-computation-graph.v0.1" {
 		v.add("graph-schema", false, "unsupported Neural Computation Graph schema")
 	}
-	if asString(nsd["source"].(map[string]any)["repository"]) != asString(asObject(graph["source_observation"])["repository"]) ||
+	if asString(source["repository"]) != asString(asObject(graph["source_observation"])["repository"]) ||
 		asString(source["revision"]) != asString(asObject(graph["source_observation"])["revision"]) {
 		v.add("source-identity", false, "graph source repository/revision differs from the NSD")
 	} else {
