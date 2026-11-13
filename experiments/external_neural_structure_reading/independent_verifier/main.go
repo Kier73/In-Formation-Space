@@ -1059,8 +1059,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "encode verification report:", err)
 		os.Exit(2)
 	}
-	encoded = append(encoded, '
-')
+	encoded = append(encoded, '\n')
 	if *reportPath != "" {
 		if err := os.WriteFile(*reportPath, encoded, 0o644); err != nil {
 			fmt.Fprintln(os.Stderr, "write verification report:", err)
