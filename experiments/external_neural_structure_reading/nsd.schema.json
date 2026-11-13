@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/external_neural_structure_reading/nsd.schema.json",
+  "title": "Neural Structure Description v0.1",
+  "description": "A provenance-bound observation of a model configuration and Safetensors tensor inventory. It does not claim inferred execution semantics or generated neural behavior.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "source", "observed", "inferred", "generated"],
+  "properties": {
+    "schema": {
+      "const": "in-formation-space.neural-structure-description.v0.1"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision", "license_id"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "license_id": {
+          "type": ["string", "null"],
+          "minLength": 1
+        }
+      }
+    },
+    "observed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configuration", "files", "weight_map", "tensor_manifest"],
+      "properties": {
+        "configuration": {
+          "type": "object",
+          "description": "Parsed config.json as observed; its values are not independently interpreted."
+        },
+        "files": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/file"
+          }
+        },
+        "weight_map": {
+          "oneOf": [
+            {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tensor_manifest": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/tensor"
+          }
+        }
+      }
+    },
+    "inferred": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tensor_count", "shard_count", "dtypes", "tensor_name_roots"],
+      "properties": {
+        "tensor_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "shard_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dtypes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "tensor_name_roots": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "generated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["architecture_graph", "parameter_rules"],
+      "properties": {
+        "architecture_graph": {
+          "type": ["object", "null"]
+        },
+        "parameter_rules": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role", "size_bytes", "sha256", "sha256_scope"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "enum": ["configuration", "tensor-index", "safetensors-shard"]
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "sha256_scope": {
+          "enum": ["entire-file", "8-byte-prefix-and-header-only"]
+        },
+        "header_bytes": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "data_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tensor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "dtype", "shape", "shard", "data_offsets", "data_bytes"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dtype": {
+          "type": "string",
+          "minLength": 1
+        },
+        "shape": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "shard": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data_offsets": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "data_bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
