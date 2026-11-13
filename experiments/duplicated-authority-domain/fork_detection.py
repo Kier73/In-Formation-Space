@@ -137,7 +137,6 @@ def produce_cluster(
     state_payload = canonical_bytes(
         {
             "format": "in-formation.duplicated-authority-domain-state/0.1",
-            "cluster_id": cluster_id,
             "state_label": state_label,
             "machine_id": membership.system_id,
         }
@@ -229,21 +228,30 @@ def _verify_one_cluster(bundle_dir: Path) -> dict[str, Any]:
     except (KeyError, TypeError, ValueError) as exc:
         raise ForkDetectionError(f"cluster protocol documents failed reconstruction: {exc}") from exc
 
+    expected_bundle_fields = {
+        "format", "cluster_id", "membership", "membership_digest", "manifest",
+        "manifest_digest", "proof", "proof_digest", "state_payload",
+        "journal_evidence", "producer_identity", "local_verification",
+        "bundle_digest",
+    }
+    if set(bundle) != expected_bundle_fields:
+        raise ForkDetectionError("cluster bundle fields are invalid")
+    proposal = proof.proposal
     if (
         membership.digest != bundle.get("membership_digest")
         or manifest.digest != bundle.get("manifest_digest")
         or digest(proof.snapshot()) != bundle.get("proof_digest")
-        or proof.proposal.digest != RecoveryLineageCoordinator(
-            membership,
-            {
-                member_id: RecoveryLineageAuthority(
-                    membership,
-                    member_id,
-                    bundle_dir / "authorities" / f"{member_id}.jsonl",
-                )
-                for member_id in membership.member_ids
-            },
-        ).proposal_for(manifest).digest
+        or proposal.membership_digest != membership.digest
+        or proposal.system_id != membership.system_id
+        or proposal.incarnation != membership.incarnation
+        or proposal.owner_id != membership.owner_id
+        or proposal.owner_term != membership.owner_term
+        or proposal.slot != manifest.generation
+        or proposal.predecessor_state_digest != manifest.predecessor_digest
+        or proposal.request_fingerprint != manifest.request_fingerprint
+        or proposal.result_state_digest != manifest.digest
+        or proof.certificate.membership_digest != membership.digest
+        or proof.certificate.proposal_digest != proposal.digest
     ):
         raise ForkDetectionError("cluster bundle membership, manifest, or proof binding mismatch")
 
@@ -361,7 +369,11 @@ def observe_two_clusters(
         left["generation"] == right["generation"]
         and left["predecessor_digest"] == right["predecessor_digest"]
     )
-    divergent_root = left["root_digest"] != right["root_digest"]
+    divergent_root = (
+        shared_configuration
+        and same_predecessor
+        and left["root_digest"] != right["root_digest"]
+    )
     left_rejects_right = False
     right_rejects_left = False
     left_error = None
