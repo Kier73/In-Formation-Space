@@ -223,8 +223,8 @@ def generate_identity(role: str, directory: Path, env: Mapping[str, str] | None 
                 key_agreement=False,
                 key_cert_sign=True,
                 crl_sign=True,
-                encipher_only=False,
-                decipher_only=False,
+                encipher_only=None,
+                decipher_only=None,
             ),
             critical=True,
         )
