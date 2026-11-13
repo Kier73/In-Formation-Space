@@ -4,7 +4,7 @@
   "title": "Independent hosted-host operation-path reconstruction report",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "path_id", "attempt_id", "repository", "run_id", "run_attempt", "workflow_ref", "workflow_sha", "source", "receiver", "host_separation", "causal_reconstruction", "duration", "limitations", "report_digest"],
+  "required": ["schema", "path_id", "attempt_id", "repository", "run_id", "run_attempt", "workflow_ref", "workflow_sha", "source", "receiver", "verifier", "host_separation", "causal_reconstruction", "duration", "limitations", "report_digest"],
   "properties": {
     "schema": {"const": "in-formation.independent-host-operation-report/0.1"},
     "path_id": {"type": "string", "minLength": 1},
@@ -16,6 +16,12 @@
     "workflow_sha": {"type": "string"},
     "source": {"$ref": "#/$defs/hostReport"},
     "receiver": {"$ref": "#/$defs/hostReport"},
+    "verifier": {"type": "object", "additionalProperties": false, "required": ["role", "job", "actor_id", "runner_name", "runner_os", "runner_arch", "runner_environment"], "properties": {
+      "role": {"const": "verifier_host"}, "job": {"const": "verifier_host"},
+      "actor_id": {"type": "string"}, "runner_name": {"type": "string"},
+      "runner_os": {"type": "string"}, "runner_arch": {"type": "string"},
+      "runner_environment": {"const": "github-hosted"}
+    }},
     "host_separation": {
       "type": "object", "additionalProperties": false,
       "required": ["distinct_jobs", "distinct_temporal_actors", "both_github_hosted", "verification_host_is_third_job", "cross_os", "artifact_relay", "relay_channel_id"],
