@@ -689,11 +689,22 @@ def _build_runner_material(
     authority_attestation: Mapping[str, Any],
     authority_key_doc: Mapping[str, Any],
     *,
+    history: list[Mapping[str, Any]],
+    process_evidence: Mapping[str, Any],
+    stale_attempt: Mapping[str, Any],
+    database_path: Path,
     fixture: bool,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     _check_key_doc(authority_key_doc, "authority_host", "authority_host")
     event = _verify_authority_material(
-        ledger, request, authority_attestation, authority_key_doc
+        ledger,
+        request,
+        authority_attestation,
+        authority_key_doc,
+        history=history,
+        process_evidence=process_evidence,
+        stale_attempt=stale_attempt,
+        database_path=database_path,
     )
     runner_host_identity = _host_identity("runner_host", fixture=fixture)
     authority_host_identity = authority_key_doc["host"]
@@ -707,8 +718,7 @@ def _build_runner_material(
         result,
         private_key=runner_key,
     )
-    runner_host = _host_identity("runner_host", fixture=fixture)
-    run_id = runner_host["run_id"]
+    run_id = runner_host_identity["run_id"]
     runner_id = "lean-worker-fixture" if fixture else f"lean-worker-{run_id}"
     if receipt["runner_id"] != runner_id:
         raise EvidenceError("runner public identity differs from route authorization")
@@ -862,20 +872,23 @@ def verify_key_attestation(path: Path, expected_role: str, expected_job: str) ->
 
 
 def build_fixture(out_dir: Path) -> None:
-    """Build deterministic non-secret test artifacts; never use these keys live."""
+    """Build deterministic test artifacts; the store bytes are not a live SQLite database."""
     authority_key = Ed25519PrivateKey.from_private_bytes(bytes.fromhex("11" * 32))
     runner_key = Ed25519PrivateKey.from_private_bytes(bytes.fromhex("22" * 32))
-    ledger, request, attestation, authority_key_doc = _build_authority_material(
-        authority_key, fixture=True
-    )
-    result, receipt, runner_key_doc = _build_runner_material(
-        runner_key, ledger, request, attestation, authority_key_doc, fixture=True
-    )
+    (
+        ledger, request, attestation, authority_key_doc,
+        history, database_bytes, process_evidence, stale_attempt,
+    ) = _build_authority_material(authority_key, fixture=True)
     authority_dir = out_dir / "authority"
     runner_dir = out_dir / "runner"
     _write(authority_dir / "route-ledger.json", ledger)
     _write(authority_dir / "request.json", request)
     _write(authority_dir / "authority-attestation.json", attestation)
+    _write(authority_dir / "store-history.json", {"entries": history})
+    _write(authority_dir / "process-evidence.json", process_evidence)
+    _write(authority_dir / "stale-owner-attempt.json", stale_attempt)
+    database_path = authority_dir / "authority-store-fixture.bin"
+    database_path.write_bytes(database_bytes)
     authority_key_path = authority_dir / "authority-public-key.json"
     _write(authority_key_path, authority_key_doc)
     write_key_predicate(
@@ -883,6 +896,18 @@ def build_fixture(out_dir: Path) -> None:
         authority_dir / "authority-public-key.predicate.json",
         "authority_host",
         "authority_host",
+    )
+    result, receipt, runner_key_doc = _build_runner_material(
+        runner_key,
+        ledger,
+        request,
+        attestation,
+        authority_key_doc,
+        history=history,
+        process_evidence=process_evidence,
+        stale_attempt=stale_attempt,
+        database_path=database_path,
+        fixture=True,
     )
     _write(runner_dir / "result.json", result)
     _write(runner_dir / "completion-receipt.json", receipt)
@@ -902,10 +927,37 @@ def build_fixture(out_dir: Path) -> None:
 
 
 def produce_authority(out_dir: Path) -> None:
-    key = Ed25519PrivateKey.generate()
-    ledger, request, attestation, key_doc = _build_authority_material(key, fixture=False)
-    _write(out_dir / "route-ledger.json", ledger)
-    _write(out_dir / "request.json", request)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    from durable_authority import build_sqlite_authority_bundle
+
+    host = _host_identity("authority_host", fixture=False)
+    run_id = host["run_id"]
+    runner_id = f"lean-worker-{run_id}"
+    bundle = build_sqlite_authority_bundle(
+        out_dir,
+        run_id=run_id,
+        runner_id=runner_id,
+    )
+    authority_key = Ed25519PrivateKey.generate()
+    authority_id = f"route-authority-{run_id}"
+    core = _authority_attestation_core(
+        authority_key,
+        authority_id=authority_id,
+        runner_id=runner_id,
+        ledger=bundle["ledger"],
+        request=bundle["request"],
+        history=bundle["history"],
+        process_evidence=bundle["process_evidence"],
+        stale_attempt=bundle["stale_owner_attempt"],
+        database_path_or_bytes=bundle["database_path"],
+    )
+    attestation = _sign_authority_attestation(authority_key, core)
+    key_doc = _participant_key_document(
+        authority_key,
+        authority_id,
+        "authority_host",
+        fixture=False,
+    )
     _write(out_dir / "authority-attestation.json", attestation)
     key_path = out_dir / "authority-public-key.json"
     _write(key_path, key_doc)
@@ -922,9 +974,25 @@ def produce_runner(authority_dir: Path, out_dir: Path) -> None:
     request = _read(authority_dir / "request.json")
     attestation = _read(authority_dir / "authority-attestation.json")
     authority_key_doc = _read(authority_dir / "authority-public-key.json")
+    history_doc = _read(authority_dir / "store-history.json")
+    history = history_doc.get("entries")
+    process_evidence = _read(authority_dir / "process-evidence.json")
+    stale_attempt = _read(authority_dir / "stale-owner-attempt.json")
+    database_path = authority_dir / "authority-store.sqlite3"
+    if not database_path.exists():
+        database_path = authority_dir / "authority-store-fixture.bin"
     runner_key = Ed25519PrivateKey.generate()
     result, receipt, runner_key_doc = _build_runner_material(
-        runner_key, ledger, request, attestation, authority_key_doc, fixture=False
+        runner_key,
+        ledger,
+        request,
+        attestation,
+        authority_key_doc,
+        history=history,
+        process_evidence=process_evidence,
+        stale_attempt=stale_attempt,
+        database_path=database_path,
+        fixture=False,
     )
     _write(out_dir / "result.json", result)
     _write(out_dir / "completion-receipt.json", receipt)
@@ -936,6 +1004,37 @@ def produce_runner(authority_dir: Path, out_dir: Path) -> None:
         "runner_host",
         "runner_host",
     )
+
+
+def verify_sqlite_authority(authority_dir: Path, output_path: Path) -> None:
+    ledger = _read(authority_dir / "route-ledger.json")
+    request = _read(authority_dir / "request.json")
+    attestation = _read(authority_dir / "authority-attestation.json")
+    key_doc = _read(authority_dir / "authority-public-key.json")
+    history_doc = _read(authority_dir / "store-history.json")
+    history = history_doc.get("entries")
+    process_evidence = _read(authority_dir / "process-evidence.json")
+    stale_attempt = _read(authority_dir / "stale-owner-attempt.json")
+    database_path = authority_dir / "authority-store.sqlite3"
+    if not database_path.exists():
+        raise EvidenceError("independent verifier requires the transferred SQLite database")
+    _verify_authority_material(
+        ledger,
+        request,
+        attestation,
+        key_doc,
+        history=history,
+        process_evidence=process_evidence,
+        stale_attempt=stale_attempt,
+        database_path=database_path,
+    )
+    from durable_authority import verify_sqlite_authority_bundle
+    result = verify_sqlite_authority_bundle(
+        database_path,
+        expected_ledger=ledger,
+        expected_history=history,
+    )
+    _write(output_path, result)
 
 
 def write_verifier_host(output_path: Path, *, fixture: bool = False) -> None:
