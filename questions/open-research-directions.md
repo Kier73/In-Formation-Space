@@ -347,3 +347,25 @@ RIV-004 and RIV-005 model noisy observations using known likelihoods. In a real 
 5. What practical evidence distinguishes a shared session calibration, independent per-reading calibration, and a time-varying calibration process?
 
 The initial operational baseline is [RIV-007](../experiments/calibration-aware-joint-evidence/README.md). It contrasts a discrete session-shared calibration profile with an independent-redraw comparator and gives a same-marginal/different-joint-belief counterexample. The next step is to compare static calibration uncertainty with an explicit drift process.
+
+
+---
+
+## 18. How should an observer choose which context measurement to acquire?
+
+### The question
+
+RIV-006 and RIV-007 show why a joint posterior over target hypothesis and latent context may be needed to preserve future evidence updates. But retaining a richer belief does not, by itself, tell an observer which context observation is worth acquiring next. A measurement can reduce uncertainty without changing the decision, or change a decision at a cost that outweighs its benefit.
+
+How should an observer compare candidate context readers when their outcomes have different likelihoods and costs, and when the task assigns different losses to different decisions?
+
+### Questions
+
+1. When does expected Bayes decision-risk reduction per measurement cost select a different sensor from worst-case unresolved-pair minimax attention?
+2. How should a declared loss matrix change the preferred sensor when the same joint posterior is used for different downstream tasks?
+3. How should sensor-model uncertainty, model misspecification, and low-probability high-consequence outcomes be represented in an acquisition objective?
+4. When is a one-step value-of-information score adequate, and when must the observer plan a sequential measurement policy over multiple future belief states?
+5. How should an estimated observation cost be reconciled with measured dispatch, admission, transport, authority, interpretation, and latency costs without collapsing those different quantities?
+6. How can a selected candidate be carried through an append-only ObservationPath, independently authorized, interpreted, and added to a new immutable joint-belief revision without treating a proposal as an observation?
+
+The initial operational baseline is [RIV-008](../experiments/decision-value-context-acquisition/README.md). It accepts an exact joint posterior, candidate outcome likelihoods, a task loss matrix, and rational costs. It computes one-step expected Bayes risk reduction, value per cost, and a Pareto frontier. Its output is a proposal only; the next step is to bind the selected sensor to the existing evidence-gated context-measurement lifecycle and to investigate robust or sequential objectives when the declared likelihood model is uncertain or the one-step horizon is inadequate.

@@ -111,3 +111,8 @@ The implementation uses only the Python standard library and exact rational arit
 - test_calibration_aware_evidence.py — thirteen tests for same-marginal/different-joint-state behavior, cross-model decision differences, exact probabilities, deterministic channels, unreachable histories, and tamper rejection.
 - example.py — runnable three-sensor calibration-profile experiment.
 - README.md — latent model, update equation, numerical results, literature context, and evidence scope.
+
+
+## Decision-value follow-on
+
+[RIV-008: Decision-value context acquisition](../decision-value-context-acquisition/README.md) accepts a joint posterior over hypothesis and calibration profile, including beliefs produced by this session-shared calibration model. It scores declared calibration/context readers by exact expected Bayes decision-loss reduction per cost; the measurement remains a proposal until a separate evidence-gated execution path is used.

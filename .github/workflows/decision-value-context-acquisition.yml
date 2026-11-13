@@ -1,0 +1,45 @@
+name: Decision-value context acquisition RIV-008
+
+on:
+  push:
+    paths:
+      - "experiments/decision-value-context-acquisition/**"
+      - ".github/workflows/decision-value-context-acquisition.yml"
+      - "experiments/context-switching-evidence-accumulator/context_switching_evidence.py"
+      - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - ".github/workflows/decision-value-context-acquisition.yml"
+  pull_request:
+    paths:
+      - "experiments/decision-value-context-acquisition/**"
+      - ".github/workflows/decision-value-context-acquisition.yml"
+      - "experiments/context-switching-evidence-accumulator/context_switching_evidence.py"
+      - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - ".github/workflows/decision-value-context-acquisition.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  decision-value-context-acquisition:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate decision-value report schema
+        run: |
+          python -c "import json, jsonschema; p='experiments/decision-value-context-acquisition/decision-value-acquisition.schema.json'; s=json.load(open(p, encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s)"
+      - name: Compile decision-value implementation and example
+        run: |
+          python -m py_compile experiments/decision-value-context-acquisition/decision_value_acquisition.py
+          python -m py_compile experiments/decision-value-context-acquisition/example.py
+          python -m py_compile experiments/context-switching-evidence-accumulator/context_switching_evidence.py
+          python -m py_compile experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py
+      - name: Run exact decision-value tests
+        run: python -m unittest discover -s experiments/decision-value-context-acquisition -p "test_*.py" -v
+      - name: Run reproducible context-acquisition example
+        run: python experiments/decision-value-context-acquisition/example.py
