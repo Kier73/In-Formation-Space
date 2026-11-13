@@ -319,7 +319,7 @@ class HubRangeObserverTests(unittest.TestCase):
         fake = FakeHub({"model.safetensors": safetensors_bytes(selected_name, values=2)})
         nsd = self.make_observer(fake)
         tensor = nsd["observed"]["tensor_manifest"][0]
-        tensor["dtype"] = "F16"  # shape and byte span remain self-consistent, but header says F32
+        tensor["shape"] = [1, 2]  # same element count, but not the recorded header shape [2]
         fake.requests.clear()
         with self.assertRaisesRegex(NSDError, "differs from the NSD header record"):
             fetch_selected_tensor_payloads(
