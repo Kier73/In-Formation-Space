@@ -1,0 +1,155 @@
+name: Lean term identity and VGI admission experiment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/lean-kernel-independent-recheck/**"
+      - ".github/workflows/lean-term-receipt.yml"
+  pull_request:
+    paths:
+      - "experiments/lean-kernel-independent-recheck/**"
+      - ".github/workflows/lean-term-receipt.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof_runner:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin VGI implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - name: Install pinned Lean 4.15.0
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - name: Test receipt validation against synthetic adversarial evidence
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: python -m unittest discover -s experiments/lean-kernel-independent-recheck -p "test_term_receipt.py" -v
+      - name: Observe elaborated theorem and original Lean controls
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: python experiments/lean-kernel-independent-recheck/term_receipt.py produce --output evidence/term-runner.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: term-identity-runner
+          path: evidence/term-runner.json
+          if-no-files-found: error
+          retention-days: 30
+
+  independent_checker:
+    needs: [proof_runner]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: term-identity-runner
+          path: received-runner
+      - name: Re-extract independently and sign evidence with ephemeral fixture key
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          mkdir -p evidence
+          python experiments/lean-kernel-independent-recheck/term_receipt.py keys --private evidence/fixture-private.pem --public evidence/fixture-public.pem
+          python experiments/lean-kernel-independent-recheck/term_receipt.py recheck \
+            --runner received-runner/term-runner.json \
+            --private evidence/fixture-private.pem \
+            --checker-output evidence/term-independent-observation.json \
+            --output evidence/term-signed-recheck.json
+          rm evidence/fixture-private.pem
+      - name: Attest demonstration checker report and key on main
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            evidence/term-signed-recheck.json
+            evidence/term-independent-observation.json
+            evidence/fixture-public.pem
+      - uses: actions/upload-artifact@v4
+        with:
+          name: term-checker-fixture
+          path: |
+            evidence/term-signed-recheck.json
+            evidence/term-independent-observation.json
+            evidence/fixture-public.pem
+          if-no-files-found: error
+          retention-days: 30
+
+  vgi_admission:
+    needs: [independent_checker]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - uses: actions/download-artifact@v4
+        with:
+          name: term-identity-runner
+          path: received-runner
+      - uses: actions/download-artifact@v4
+        with:
+          name: term-checker-fixture
+          path: received-checker
+      - name: Verify signature and exact VGI obligation before issuing receipt
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          python experiments/lean-kernel-independent-recheck/term_receipt.py admit \
+            --runner received-runner/term-runner.json \
+            --checker received-checker/term-independent-observation.json \
+            --signed received-checker/term-signed-recheck.json \
+            --trusted-public received-checker/fixture-public.pem \
+            --output evidence/vgi-admission-observation.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: term-vgi-admission-observation
+          path: evidence/vgi-admission-observation.json
+          if-no-files-found: error
+          retention-days: 30
