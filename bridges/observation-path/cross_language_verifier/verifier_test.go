@@ -131,8 +131,32 @@ func TestDecimalJSONNumberIsRejectedUntilPortableNumberProfileExists(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := CanonicalBytes(value); err == nil || !strings.Contains(err.Error(), "integer JSON numbers only") {
+	if _, err := CanonicalBytes(value); err == nil || !strings.Contains(err.Error(), "canonical safe-integer token") {
 		t.Fatalf("expected an explicit unsupported-number error, got %v", err)
+	}
+}
+
+func TestUnsafeIntegerIsRejectedByPortableMetadataProfile(t *testing.T) {
+	value, err := DecodeObject([]byte("{\"value\":9007199254740992}"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := CanonicalBytes(value); err == nil || !strings.Contains(err.Error(), "safe-integer range") {
+		t.Fatalf("expected an unsafe-integer rejection, got %v", err)
+	}
+}
+
+func TestNonASCIIMetadataObjectKeyIsRejected(t *testing.T) {
+	value := Object{"κ": "value"}
+	if _, err := CanonicalBytes(value); err == nil || !strings.Contains(err.Error(), "object keys must be ASCII") {
+		t.Fatalf("expected a non-ASCII object-key rejection, got %v", err)
+	}
+}
+
+func TestInvalidUTF8StringIsRejected(t *testing.T) {
+	value := Object{"value": string([]byte{0xed, 0xa0, 0x80})}
+	if _, err := CanonicalBytes(value); err == nil || !strings.Contains(err.Error(), "invalid Unicode scalar") {
+		t.Fatalf("expected invalid Unicode rejection, got %v", err)
 	}
 }
 
