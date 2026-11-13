@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kier73.github.io/in-formation-space/proof-runner-independent-reconstruction-report/0.1",
+  "title": "Independent proof-runner reconstruction report",
+  "type": "object",
+  "required": [
+    "schema", "status", "route_epoch_id", "route_ledger_digest",
+    "route_ledger_sequence", "authorization_event_digest", "execution_id",
+    "attempt_id", "request_digest", "authority", "runner", "verifier",
+    "host_separation", "result_digest", "return_evidence_digest",
+    "proof_trace_digest", "completion_receipt_digest",
+    "key_provenance_verified_by_github", "verified_layers", "not_established"
+  ],
+  "properties": {
+    "schema": {
+      "const": "in-formation.proof-runner-independent-reconstruction-report/0.1"
+    },
+    "status": { "const": "verified" },
+    "route_epoch_id": { "type": "string", "minLength": 1 },
+    "route_ledger_digest": { "$ref": "#/$defs/digest" },
+    "route_ledger_sequence": { "type": "integer", "minimum": 3 },
+    "authorization_event_digest": { "$ref": "#/$defs/digest" },
+    "execution_id": { "type": "string", "pattern": "^urn:sha256:[0-9a-f]{64}$" },
+    "attempt_id": { "type": "string", "minLength": 1 },
+    "request_digest": { "$ref": "#/$defs/digest" },
+    "authority": { "$ref": "#/$defs/participant" },
+    "runner": {
+      "allOf": [
+        { "$ref": "#/$defs/participant" },
+        {
+          "type": "object",
+          "required": ["completion_status"],
+          "properties": { "completion_status": { "const": "result_produced" } }
+        }
+      ]
+    },
+    "verifier": {
+      "type": "object",
+      "required": ["job", "actor_id", "runner_name"],
+      "properties": {
+        "job": { "const": "independent_verifier_host" },
+        "actor_id": { "type": "string", "minLength": 1 },
+        "runner_name": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "host_separation": {
+      "type": "object",
+      "required": [
+        "distinct_jobs", "distinct_actor_ids", "all_github_hosted",
+        "same_workflow_run", "artifact_relay", "combined_cross_host_elapsed_ns"
+      ],
+      "properties": {
+        "distinct_jobs": { "const": true },
+        "distinct_actor_ids": { "const": true },
+        "all_github_hosted": { "const": true },
+        "same_workflow_run": { "const": true },
+        "artifact_relay": { "const": "GitHub Actions artifact storage" },
+        "combined_cross_host_elapsed_ns": { "type": ["integer", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "result_digest": { "$ref": "#/$defs/digest" },
+    "return_evidence_digest": { "$ref": "#/$defs/digest" },
+    "proof_trace_digest": { "$ref": "#/$defs/digest" },
+    "completion_receipt_digest": { "$ref": "#/$defs/digest" },
+    "key_provenance_verified_by_github": { "type": "boolean" },
+    "verified_layers": { "type": "array", "minItems": 7, "items": { "type": "string" } },
+    "not_established": { "type": "array", "minItems": 6, "items": { "type": "string" } }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "participant": {
+      "type": "object",
+      "required": ["participant_id", "role", "key_id", "job", "actor_id"],
+      "properties": {
+        "participant_id": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "key_id": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "job": { "type": "string", "minLength": 1 },
+        "actor_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
