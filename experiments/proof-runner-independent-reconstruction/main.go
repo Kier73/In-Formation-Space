@@ -999,6 +999,8 @@ func Verify(paths Paths) (object, error) {
 	if err != nil { return nil, fmt.Errorf("read authority process evidence: %w", err) }
 	staleAttempt, err := readObject(paths.StaleOwnerAttempt)
 	if err != nil { return nil, fmt.Errorf("read stale-owner attempt evidence: %w", err) }
+	sqliteAuthorityReport, err := readObject(paths.SQLiteAuthorityReport)
+	if err != nil { return nil, fmt.Errorf("read SQLite authority reopen report: %w", err) }
 	databaseBytes, err := os.ReadFile(paths.AuthorityStore)
 	if err != nil { return nil, fmt.Errorf("read transferred SQLite authority database: %w", err) }
 	result, err := readObject(paths.Result)
@@ -1030,6 +1032,12 @@ func Verify(paths Paths) (object, error) {
 
 	historyRows, historyDigest, err := verifyStoreHistory(historyDocument, ledger)
 	if err != nil { return nil, fmt.Errorf("SQLite revision reconstruction: %w", err) }
+	sqliteReopenedVerified, sqliteReopenEvidenceDigest, err := verifySQLiteAuthorityReport(
+		sqliteAuthorityReport,
+		ledger,
+		historyDigest,
+	)
+	if err != nil { return nil, fmt.Errorf("SQLite adapter reopen evidence: %w", err) }
 	processEvidenceDigest, err := verifyAuthorityProcessEvidence(
 		processEvidence, staleAttempt, ledger, historyRows, attemptID,
 	)
@@ -1092,6 +1100,7 @@ func Verify(paths Paths) (object, error) {
 		"stale_owner_attempt_id": staleAttempt["stale_attempt_id"],
 		"owner_generation_after_restart": claimDetails["owner_generation"],
 		"storage_scope": "single-host-local-filesystem",
+		"sqlite_reopen_evidence_digest": sqliteReopenEvidenceDigest,
 	}
 	return object{
 		"schema": reportFormat,
@@ -1125,7 +1134,8 @@ func Verify(paths Paths) (object, error) {
 			"artifact_relay": "GitHub Actions artifact storage",
 			"combined_cross_host_elapsed_ns": nil,
 		},
-		"sqlite_store_reopened_verified": paths.SQLiteStoreReopenedVerified,
+		"sqlite_store_reopened_verified": sqliteReopenedVerified,
+		"sqlite_reopen_evidence_digest": sqliteReopenEvidenceDigest,
 		"result_digest": resultDigest,
 		"return_evidence_digest": evidenceDigest,
 		"proof_trace_digest": traceDigest,
@@ -1181,12 +1191,12 @@ func main() {
 	flags.StringVar(&paths.AuthorityStore, "authority-store", "", "transferred SQLite authority database bytes")
 	flags.StringVar(&paths.ProcessEvidence, "process-evidence", "", "authority process restart evidence")
 	flags.StringVar(&paths.StaleOwnerAttempt, "stale-owner-attempt", "", "rejected stale-generation admission attempt")
+	flags.StringVar(&paths.SQLiteAuthorityReport, "sqlite-authority-report", "", "third-host SQLite adapter reopen evidence")
 	flags.StringVar(&paths.Result, "result", "", "canonical proof-action result")
 	flags.StringVar(&paths.Receipt, "receipt", "", "runner-signed completion receipt")
 	flags.StringVar(&paths.RunnerKey, "runner-key", "", "separately attested runner public-key document")
 	flags.StringVar(&paths.VerifierHost, "verifier-host", "", "third-host identity document")
 	flags.BoolVar(&paths.KeyAttestationsVerified, "key-attestations-verified", false, "caller has verified both key-document GitHub attestations")
-	flags.BoolVar(&paths.SQLiteStoreReopenedVerified, "sqlite-store-reopened-verified", false, "caller has reopened and validated the transferred SQLite store using the repository adapter")
 	if err := flags.Parse(os.Args[2:]); err != nil { os.Exit(2) }
 	for name, path := range map[string]string{
 		"ledger": paths.Ledger,
@@ -1197,6 +1207,7 @@ func main() {
 		"authority-store": paths.AuthorityStore,
 		"process-evidence": paths.ProcessEvidence,
 		"stale-owner-attempt": paths.StaleOwnerAttempt,
+		"sqlite-authority-report": paths.SQLiteAuthorityReport,
 		"result": paths.Result,
 		"receipt": paths.Receipt,
 		"runner-key": paths.RunnerKey,
