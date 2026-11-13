@@ -24,7 +24,8 @@
     "key_provenance_verified_by_github",
     "verified_layers",
     "not_established",
-    "sqlite_store_reopened_verified"
+    "sqlite_store_reopened_verified",
+    "sqlite_reopen_evidence_digest"
   ],
   "properties": {
     "schema": {
@@ -76,7 +77,8 @@
             "process_evidence_digest",
             "process_instances",
             "stale_owner_attempt_id",
-            "storage_scope"
+            "storage_scope",
+            "sqlite_reopen_evidence_digest"
           ],
           "properties": {
             "store_type": {
@@ -148,6 +150,9 @@
             },
             "storage_scope": {
               "const": "single-host-local-filesystem"
+            },
+            "sqlite_reopen_evidence_digest": {
+              "$ref": "#/$defs/digest"
             }
           },
           "additionalProperties": true
@@ -260,6 +265,9 @@
     },
     "sqlite_store_reopened_verified": {
       "type": "boolean"
+    },
+    "sqlite_reopen_evidence_digest": {
+      "$ref": "#/$defs/digest"
     }
   },
   "$defs": {
