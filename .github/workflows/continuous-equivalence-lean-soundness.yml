@@ -1,0 +1,58 @@
+name: COE-005 Lean cell soundness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/continuous-observation-equivalence/lean/**"
+      - ".github/workflows/continuous-equivalence-lean-soundness.yml"
+  pull_request:
+    paths:
+      - "experiments/continuous-observation-equivalence/lean/**"
+      - ".github/workflows/continuous-equivalence-lean-soundness.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean_branch_soundness:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile checked branch and coverage theorems with pinned Lean
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/continuous-observation-equivalence/lean
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - name: Capture kernel axiom-dependency report for positive theorems
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean COECellSoundness.lean | tee proof-output.txt
+          grep -q "selected_sound_of_stable_decision" proof-output.txt
+          grep -q "observation_equivalence_of_complete_cover" proof-output.txt
+          if grep -Eq 'depends on axioms:|sorryAx' proof-output.txt; then
+            cat proof-output.txt
+            exit 1
+          fi
+      - name: Prove intentionally false control is rejected
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          if lake env lean COECellInvalid.lean > invalid-proof-rejection.txt 2>&1; then
+            cat invalid-proof-rejection.txt
+            echo "Invalid false theorem compiled unexpectedly."
+            exit 1
+          fi
+          grep -Eq 'error:|unsolved goals' invalid-proof-rejection.txt
+      - name: Retain Lean positive and negative proof observations
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe005-lean-kernel-cell-soundness
+          path: |
+            experiments/continuous-observation-equivalence/lean/proof-output.txt
+            experiments/continuous-observation-equivalence/lean/invalid-proof-rejection.txt
+          if-no-files-found: error
