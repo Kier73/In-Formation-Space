@@ -2,6 +2,7 @@ import copy
 import hashlib
 import json
 import unittest
+from pathlib import Path
 from fractions import Fraction
 
 from delayed_evidence import (
@@ -13,6 +14,7 @@ from delayed_evidence import (
     _marginal_bad_probability,
     build_default_sweep,
     build_delayed_evidence_report,
+    summarize_default_sweep,
     validate_delayed_evidence_report,
 )
 
@@ -220,6 +222,9 @@ class DelayedEvidenceTests(unittest.TestCase):
         summary = sweep["summary"]
         self.assertGreater(float(summary[2]["expected_out_of_order_delivery_count"]), 0)
         self.assertGreater(float(summary[3]["expected_timeout_report_count"]), 0)
+        receipt_path = Path(__file__).with_name("results") / "delayed-evidence-scan-summary.json"
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        self.assertEqual(receipt, summarize_default_sweep(sweep))
 
     def test_report_reconstruction_detects_policy_or_evidence_tampering(self):
         report = build_delayed_evidence_report(**DEFAULT_SCENARIOS[2])
