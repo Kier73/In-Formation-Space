@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import tempfile
 import unittest
 from pathlib import Path
 
 from host_evidence import (
     EvidenceError,
+    KEY_PREDICATE_SCHEMA,
     _read,
     _verify_authority_material,
     build_fixture,
@@ -36,6 +38,19 @@ class HostEvidenceTests(unittest.TestCase):
         self.assertTrue((self.root / "runner" / "completion-receipt.json").is_file())
         self.assertTrue((self.root / "verifier-host.json").is_file())
 
+    def test_participant_attestation_predicate_binds_exact_key_and_host_role(self) -> None:
+        key_path = self.root / "authority" / "authority-public-key.json"
+        predicate = _read(self.root / "authority" / "authority-public-key.predicate.json")
+        self.assertEqual(predicate["schema"], KEY_PREDICATE_SCHEMA)
+        self.assertEqual(
+            predicate["subject_sha256"],
+            hashlib.sha256(key_path.read_bytes()).hexdigest(),
+        )
+        self.assertEqual(predicate["participant"]["participant_id"], self.authority_key["participant_id"])
+        self.assertEqual(predicate["participant"]["role"], "authority_host")
+        self.assertEqual(predicate["participant"]["key_id"], self.authority_key["key_id"])
+        self.assertEqual(predicate["participant"]["host"], self.authority_key["host"])
+
     def test_authority_signature_tampering_is_rejected(self) -> None:
         altered = copy.deepcopy(self.attestation)
         signature = altered["signature"]
@@ -61,9 +76,11 @@ class HostEvidenceTests(unittest.TestCase):
             "authority/request.json",
             "authority/authority-attestation.json",
             "authority/authority-public-key.json",
+            "authority/authority-public-key.predicate.json",
             "runner/result.json",
             "runner/completion-receipt.json",
             "runner/runner-public-key.json",
+            "runner/runner-public-key.predicate.json",
             "verifier-host.json",
         ):
             self.assertEqual(
