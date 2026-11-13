@@ -138,8 +138,8 @@ class IndependentGoTopologyVerifierTests(unittest.TestCase):
         failed_ids = {
             item["id"] for item in report["checks"] if item["status"] == "failed"
         }
-        self.assertIn("nsd-gpt2-tensor-template", failed_ids)
         self.assertIn("nsd-tensor-shapes-and-shards", failed_ids)
+        self.assertIn("graph-tensor-catalog", failed_ids)
 
 
 if __name__ == "__main__":
