@@ -115,6 +115,7 @@ private theorem allRootGuardsSound (cell : Cell) (as : List Affine)
             exact False.elim hf
           · simp only [if_neg hpos, if_neg hxpos]
             simp [zeroAffine, evaluateAt]
+            grind
       simp only [List.map_cons]
       rw [hbranch]
       exact congrArg (List.cons _) (ih hguard.2)
@@ -152,6 +153,7 @@ theorem advanceSound (cell : Cell) (state : Bool × List Affine)
         _ = (pre.map (fun a => evaluateAt a x)).map
             (fun v => if 0 < v then v else 0) := by
               simp only [List.map_map]
+              rfl
         _ = evalLayer layer (state.2.map (fun a => evaluateAt a x)) := by
               rw [hpre]
               simp [evalLayer, hmode]
