@@ -95,7 +95,7 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
             ),
             ("peer_not_found", "reachable_unclassified", None),
         )
-        duplicate_rows = "\\n".join((
+        duplicate_rows = chr(10).join((
             f"{peer} client-a owner-a linux active; direct 198.51.100.4:41641",
             f"{peer} client-b owner-b linux active; relay sea",
         ))
