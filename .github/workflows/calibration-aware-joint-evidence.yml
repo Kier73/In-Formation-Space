@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  riv-006:
+  riv-007:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
