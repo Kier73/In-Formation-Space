@@ -176,7 +176,7 @@ def _groups(path: Mapping[str, Any]) -> dict[str, list[Mapping[str, Any]]]:
     return result
 
 
-def _validate_path(path: Mapping[str, Any], attempt_id: str, plan_digest: str,
+def _validate_path(path: Mapping[str, Any], attempt_id: str, probe_plan_digest: str,
                    scenario_digest: str, matched: bool) -> None:
     if path.get("attempt_id") != attempt_id:
         raise MinimaxPolicyExecutionError("path attempt identity differs")
@@ -202,9 +202,9 @@ def _validate_path(path: Mapping[str, Any], attempt_id: str, plan_digest: str,
     grouped = _groups(path)
     returned = grouped["returned"][0]["details"]
     interpreted = grouped["interpreted"][0]["details"]
-    if returned.get("plan_digest") != plan_digest or returned.get("scenario_digest") != scenario_digest:
+    if returned.get("plan_digest") != probe_plan_digest or returned.get("scenario_digest") != scenario_digest:
         raise MinimaxPolicyExecutionError("raw return is not bound to this policy and scenario set")
-    if interpreted.get("plan_digest") != plan_digest or interpreted.get("scenario_digest") != scenario_digest:
+    if interpreted.get("plan_digest") != probe_plan_digest or interpreted.get("scenario_digest") != scenario_digest:
         raise MinimaxPolicyExecutionError("interpretation is not bound to this policy and scenario set")
     payload_digest = _text(returned.get("payload_digest"), "returned.payload_digest")
     if len(payload_digest) != 64 or any(c not in "0123456789abcdef" for c in payload_digest):
@@ -300,6 +300,11 @@ class MinimaxPartialProbeExecution:
     def plan_digest(self) -> str:
         return self._policy_digest
 
+    @property
+    def history(self) -> tuple[dict[str, Any], ...]:
+        """Completed attempts in controller order, copied as JSON data."""
+        return tuple(json.loads(_json(self._history)))
+
     def begin_next(self) -> Optional[PartialProbeExecution]:
         """Create the next single-attempt ObservationPath for the selected policy node."""
         if self._status != "ready":
@@ -384,7 +389,8 @@ class MinimaxPartialProbeExecution:
                 "policy_node_ground_fingerprint": self._node.ground_fingerprint,
                 "frontier_ground_evidence_refs": list(self._active_frontier_refs),
                 "selected_probe": _probe_record(self._active_probe),
-                "plan_digest": self._policy_digest, "scenario_digest": execution.scenario_digest,
+                "plan_digest": self._policy_digest, "probe_plan_digest": execution.plan_digest,
+                "scenario_digest": execution.scenario_digest,
                 "path": path, "interpretation": interpretation, "decision": decision,
                 "ground_revision": None,
             })
@@ -582,7 +588,7 @@ def _rebuild_receipt(execution: Mapping[str, Any], policy: Mapping[str, Any]):
         matched = interpretation.get("scenario_match")
         if not isinstance(matched, bool):
             raise MinimaxPolicyExecutionError("scenario_match must be boolean")
-        _validate_path(path, attempt_id, policy["policy_digest"],
+        _validate_path(path, attempt_id, _text(item.get("probe_plan_digest"), "probe_plan_digest"),
                        _text(item.get("scenario_digest"), "scenario_digest"), matched)
         outcome = interpretation.get("outcome")
         if not isinstance(outcome, Mapping) or _digest(outcome) != interpretation.get("outcome_digest"):
@@ -640,7 +646,7 @@ def _rebuild_receipt(execution: Mapping[str, Any], policy: Mapping[str, Any]):
             revision = item.get("ground_revision")
             if not isinstance(revision, Mapping):
                 raise MinimaxPolicyExecutionError("matched observation lacks a Ground revision")
-            if revision.get("prior_fingerprint") != actual_fp or revision.get("plan_digest") != policy["policy_digest"]:
+            if revision.get("prior_fingerprint") != actual_fp or revision.get("plan_digest") != item.get("probe_plan_digest"):
                 raise MinimaxPolicyExecutionError("Ground revision identity or policy binding differs")
             if revision.get("observed_outcome_digest") != interpretation["outcome_digest"]:
                 raise MinimaxPolicyExecutionError("Ground revision is not bound to actual outcome")
