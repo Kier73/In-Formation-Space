@@ -157,7 +157,7 @@ For example, the causal role of `h.i.attn.bias` is inferred from the GPT-2 famil
 For the pinned observation, the intended live verification is:
 
 - 160/160 tensor entries classified and connected to operation inputs
-- 149 operations across the 12 transformer blocks and surrounding embedding/output path
+- 150 operations across the 12 transformer blocks and surrounding embedding/output path
 - 337 directed typed edges
 - Runtime batch/sequence dimensions, with sequence bounded by the configured 1,024 positions
 - Six primitive operator families represented through the canonical vocabulary, including separate dropout and residual operations
