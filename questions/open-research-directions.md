@@ -407,3 +407,22 @@ RIV-008 values observations by the current Bayes decision. A known calibration s
 5. When should multiple reference observations be planned jointly with a finite-horizon policy rather than greedily recomputed after each admitted result?
 
 The initial exact bridge is [RIV-010](../experiments/reference-calibrated-evidence/RIV-010-README.md). It evaluates one candidate reference followed by a fixed RIV-007 target schedule, shows a zero-immediate-EVSI/nonzero-downstream-value example against RIV-008, then converts an authorized interpreted ObservationPath into an RIV-009 reference update. Standard truth, physical source authentication, measured execution cost, and multi-reference optimality remain outside this finite experiment.
+
+
+---
+
+## 21. When is sequential reference acquisition better planned as a finite-horizon policy?
+
+### The question
+
+RIV-010 values one reference measurement against a fixed future target schedule. Re-running that one-step rule after each authorized outcome is a practical greedy heuristic, but it need not optimize the complete multi-reference policy under a fixed budget. When should the observer plan the reference sequence jointly, and when is greedy re-selection good enough?
+
+### Questions
+
+1. Under which finite calibration models, target schedules, and budgets does a finite-horizon policy choose a different next reference after different earlier outcomes?
+2. How much expected target decision value can be lost by repeatedly applying one-step value-per-cost selection?
+3. How should expected cost, worst-case path cost, reference count, and terminal target accuracy be represented as separate policy dimensions?
+4. How can exact policy-tree enumeration be bounded without silently substituting an approximation?
+5. How should an optimal action tree be executed through the append-only ObservationPath, with a fresh plan/report binding at each state and RIV-009 updating the shared calibration posterior only after authorized interpretation?
+
+The initial finite comparator is [RIV-011](../experiments/reference-calibrated-evidence/RIV-011-README.md). It compares an exact finite-horizon dynamic programme with repeated RIV-010 one-step selection under the same pathwise budget and includes a signal-dependent next-action counterexample. It is not a universal optimality claim beyond its finite supplied model and action set.
