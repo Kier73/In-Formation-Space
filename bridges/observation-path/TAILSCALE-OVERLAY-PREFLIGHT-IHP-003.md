@@ -50,17 +50,19 @@ An example federated identity claim restriction is:
 \`\`\`json
 {
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:Kier73/In-Formation-Space:ref:refs/heads/main",
+  "subject": "repo:Kier73@29310272/In-Formation-Space@1454466415:ref:refs/heads/main",
   "scopes": ["auth_keys"],
   "tags": ["tag:ihp003-ci"],
   "customClaimRules": {
     "repository": "Kier73/In-Formation-Space",
+    "repository_id": "1454466415",
+    "ref": "refs/heads/main",
     "workflow_ref": "Kier73/In-Formation-Space/.github/workflows/tailscale-overlay-preflight.yml@refs/heads/main"
   }
 }
 \`\`\`
 
-The exact claim-rule support and claim names should be checked in the Tailscale federated-identity editor against the GitHub OIDC token claims. The repository, ref subject, and workflow claim are intended to narrow issuance to this one main-branch workflow. The workflow independently checks its GitHub runner identity before accepting evidence.
+The repository was created on November 11, 2026, after GitHub's July 15, 2026 immutable-subject change. The example therefore uses the immutable subject with owner ID 29310272 and repository ID 1454466415. GitHub repositories created before that change retain the older name-only format unless they opt in; do not copy this subject format into another repository without checking that repository's actual token claims. The exact claim-rule support and claim names should be checked in the Tailscale federated-identity editor against the GitHub OIDC token claims. The repository, immutable subject, main ref, and workflow claim are intended to narrow issuance to this one workflow. The workflow independently checks its GitHub runner identity before accepting evidence.
 
 For IHP-004, after the overlay preflight succeeds, the narrow data-plane grant for the E-CPU listener can be:
 
