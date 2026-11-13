@@ -1,6 +1,6 @@
 # Three-host independent proof-runner reconstruction
 
-**Status:** protocol experiment; live multi-host workflow is defined separately from the offline fixture suite.  
+**Status:** live three-job workflow with a single-host SQLite authority and a separate independent verifier; offline fixtures are test-only.  
 **Question:** can a third, separately scheduled verifier reconstruct the chain from a route-authority checkpoint to an exact proof-action result using only retained artifacts and independently authenticated public keys?
 
 ## Why this follows the signed receipt experiment
@@ -42,7 +42,9 @@ Independent verifier host
   emits a reconstruction report
 \`\`\`
 
-The workflow uses three separate GitHub-hosted jobs in one run. GitHub Actions artifacts are the transfer mechanism. This does not claim direct E-CPU transport, separate cloud providers, independently attested physical machines, or independent administrative fault domains.
+The workflow uses three separate GitHub-hosted jobs in one run. The authority job itself runs three sequential, separately launched Python processes against one SQLite database on that job's local runner: one process opens the route, a second process reopens the database and claims/admit/authorizes, and a third process reopens it and demonstrates that the old owner-generation token is rejected. A separate process-level test launches two OS processes that race the same expected SQLite revision; exactly one CAS should win.
+
+GitHub Actions artifacts transfer the database and retained evidence to the runner and verifier jobs. This does not claim that the three authority processes are three hosts, that SQLite is a multi-host consensus service, or that E-CPU ReliableChannel transported the artifacts. The third workflow job independently reads the transferred database; it is not the authority's transaction coordinator.
 
 ## Durable local authority profile
 
@@ -94,7 +96,8 @@ The output preserves cross-host elapsed duration as unknown. No duration is infe
 
 Even a successful live run does not establish:
 
-- that the external production CAS authority was linearizable, or that the synthetic authority producer represented a live CAS commit;
+- multi-host consensus or linearizability; the live authority is SQLite on one GitHub-hosted machine, not a multi-host store adapter;
+- that the authority host was uncompromised when the database and checkpoint were created; a privileged host actor could rewrite them before signing;
 - that the authority or runner behaved honestly or was uncompromised;
 - that a Lean process actually ran, or that the returned tactic/proof trace is semantically valid;
 - that theorem acceptance occurred; VGI's \`VerifiedKernelReceipt\` remains a separate trust boundary;
@@ -109,16 +112,19 @@ A runner signature proves key possession and commitment to exact bytes. It does 
 
 From the repository root:
 
-\`\`\`bash
-python -m pip install "cryptography>=42,<47"
-python -m unittest discover \\
-  -s experiments/proof-runner-independent-reconstruction \\
-  -p 'test_host_evidence.py' -v
+```bash
+mkdir -p external
+git clone https://github.com/Kier73/E-CPU external/E-CPU
+git -C external/E-CPU checkout c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+python -m pip install "cryptography>=42,<47" "jsonschema>=4,<5"
+export PYTHONPATH="bridges/proof-attention:external/E-CPU:."
+python -m unittest discover \
+  -s experiments/proof-runner-independent-reconstruction \
+  -p 'test_*.py' -v
 
 cd experiments/proof-runner-independent-reconstruction
 go test -count=1 -v ./...
-\`\`\`
+```
 
-The Go tests create their own deterministic Python fixture and verify it without importing the Python receipt verifier. Adversarial cases include changed runner signatures, replaced runner keys, semantically broken but fully re-hashed admission chains, self-consistent result replacement, authority signature tampering, changed requests, and third-host identity reuse.
-
+The tests use a deterministic, explicitly non-secret fixture for offline cross-language signature checks; its database bytes are a named stand-in, not a real SQLite file. Separate Python tests create a real temporary SQLite database, launch OS processes for restart and stale-owner replay, reopen the database, and race two OS-process CAS writers. Go adversarial cases include changed runner signatures, replaced runner keys, semantically broken but fully re-hashed admission chains, altered SQLite intermediate revisions, stale-owner process-evidence tampering, database-byte substitution, self-consistent result replacement, authority signature tampering, changed requests, and third-host identity reuse.
 The live workflow file is \`.github/workflows/proof-runner-three-host-reconstruction.yml\`. The exact command and artifact names are recorded in that workflow.
