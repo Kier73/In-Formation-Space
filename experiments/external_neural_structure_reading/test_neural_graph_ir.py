@@ -27,9 +27,26 @@ except ImportError:
     from test_gpt2_adapter import make_nsd
 
 
+def make_topology_nsd(*, layers: int = 1, tie: bool | None = None) -> dict:
+    nsd = make_nsd(layers=layers, tie=tie)
+    nsd["observed"]["files"] = [
+        {
+            "path": "model.safetensors",
+            "role": "safetensors-shard",
+            "size_bytes": 0,
+            "sha256": "a" * 64,
+            "sha256_scope": "8-byte-prefix-and-header-only",
+            "header_bytes": 2,
+            "data_bytes": 0,
+            "metadata": {},
+        }
+    ]
+    return nsd
+
+
 class NeuralGraphIRTests(unittest.TestCase):
     def test_compiles_small_gpt2_into_schema_valid_architecture_independent_graph(self):
-        nsd = make_nsd(layers=2)
+        nsd = make_topology_nsd(layers=2)
         graph = compile_gpt2_topology(nsd)
 
         self.assertEqual(graph["schema"], GRAPH_SCHEMA)
@@ -67,7 +84,7 @@ class NeuralGraphIRTests(unittest.TestCase):
         Draft202012Validator(schema).validate(graph)
 
     def test_every_observed_tensor_is_classified_and_used(self):
-        nsd = make_nsd(layers=2)
+        nsd = make_topology_nsd(layers=2)
         graph = compile_gpt2_topology(nsd)
         observed = {item["name"] for item in nsd["observed"]["tensor_manifest"]}
         classified = {item["name"] for item in graph["tensors"]}
@@ -88,7 +105,7 @@ class NeuralGraphIRTests(unittest.TestCase):
         self.assertEqual(head["attributes"]["binding_status"], "family-contract-tied")
 
     def test_untied_output_head_is_classified_as_an_observed_tensor(self):
-        nsd = make_nsd(tie=False)
+        nsd = make_topology_nsd(tie=False)
         graph = compile_gpt2_topology(nsd)
         roles = {item["name"]: item["classification"]["role"] for item in graph["tensors"]}
         self.assertEqual(roles["lm_head.weight"], "language_model_head.weight")
@@ -103,7 +120,7 @@ class NeuralGraphIRTests(unittest.TestCase):
         self.assertEqual(head_edge["source"], {"kind": "tensor", "name": "lm_head.weight"})
 
     def test_completeness_fails_when_a_tensor_classification_is_removed(self):
-        nsd = make_nsd(layers=1)
+        nsd = make_topology_nsd(layers=1)
         graph = compile_gpt2_topology(nsd)
         graph["tensors"] = [
             item for item in graph["tensors"] if item["name"] != "h.0.attn.c_attn.weight"
@@ -114,7 +131,7 @@ class NeuralGraphIRTests(unittest.TestCase):
         self.assertEqual(result["verification"]["status"], "failed")
 
     def test_incompatible_edge_type_or_shape_is_rejected(self):
-        nsd = make_nsd(layers=1)
+        nsd = make_topology_nsd(layers=1)
         graph = compile_gpt2_topology(nsd)
         damaged = copy.deepcopy(graph)
         tensor_edge = next(
@@ -135,7 +152,7 @@ class NeuralGraphIRTests(unittest.TestCase):
         self.assertEqual(check["status"], "failed")
 
     def test_directed_cycle_and_duplicate_producer_are_rejected(self):
-        nsd = make_nsd(layers=1)
+        nsd = make_topology_nsd(layers=1)
         graph = compile_gpt2_topology(nsd)
         damaged = copy.deepcopy(graph)
         damaged["edges"].append(
@@ -165,13 +182,13 @@ class NeuralGraphIRTests(unittest.TestCase):
         self.assertEqual(check["status"], "failed")
 
     def test_unsupported_family_is_rejected_instead_of_coerced(self):
-        nsd = make_nsd(layers=1)
+        nsd = make_topology_nsd(layers=1)
         nsd["observed"]["configuration"]["model_type"] = "unknown-family"
         with self.assertRaisesRegex(TopologyError, "family interpretation failed"):
             compile_gpt2_topology(nsd)
 
     def test_graph_records_observation_interpretation_and_inference_separately(self):
-        nsd = make_nsd(layers=1)
+        nsd = make_topology_nsd(layers=1)
         graph = compile_gpt2_topology(nsd)
         self.assertEqual(
             graph["evidence_policy"]["tensor_identity_dtype_shape_offsets"],
@@ -197,7 +214,7 @@ class NeuralGraphIRTests(unittest.TestCase):
         ))
 
     def test_graph_does_not_retain_or_claim_tensor_payload_values(self):
-        graph = compile_gpt2_topology(make_nsd(layers=1))
+        graph = compile_gpt2_topology(make_topology_nsd(layers=1))
         rendered = json.dumps(graph)
         self.assertNotIn("payload_values", rendered)
         self.assertNotIn("raw_weights", rendered)
