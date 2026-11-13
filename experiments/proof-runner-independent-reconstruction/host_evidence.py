@@ -45,6 +45,7 @@ AUTHORITY_ATTESTATION_FORMAT = "in-formation.proof-action-route-ledger-attestati
 KEY_FORMAT = "in-formation.proof-runner-participant-key/0.1"
 BUNDLE_FORMAT = "in-formation.proof-runner-reconstruction-input/0.1"
 PREDICATE_TYPE = "https://kier73.github.io/in-formation-space/proof-runner-participant-key/v1"
+KEY_PREDICATE_SCHEMA = "in-formation.proof-runner-participant-key-predicate/0.1"
 GH_MIN_VERSION = (2, 103, 3)
 
 
@@ -469,6 +470,33 @@ def _check_key_doc(document: Mapping[str, Any], expected_role: str, expected_job
         raise EvidenceError("participant public-key fingerprint mismatch")
 
 
+def _participant_key_predicate(document: Mapping[str, Any], subject_sha256: str) -> dict[str, Any]:
+    """Bind the participant role and host identity to these exact public-key bytes."""
+    return {
+        "schema": KEY_PREDICATE_SCHEMA,
+        "subject_sha256": subject_sha256,
+        "participant": {
+            "participant_id": document["participant_id"],
+            "role": document["role"],
+            "key_algorithm": document["key_algorithm"],
+            "key_id": document["key_id"],
+            "host": dict(document["host"]),
+        },
+    }
+
+
+def write_key_predicate(
+    key_path: Path,
+    output_path: Path,
+    expected_role: str,
+    expected_job: str,
+) -> None:
+    document = _read(key_path)
+    _check_key_doc(document, expected_role, expected_job)
+    subject_digest = hashlib.sha256(key_path.read_bytes()).hexdigest()
+    _write(output_path, _participant_key_predicate(document, subject_digest))
+
+
 def _gh_version() -> tuple[int, int, int]:
     completed = subprocess.run(["gh", "--version"], check=True, capture_output=True, text=True)
     import re
@@ -489,6 +517,7 @@ def verify_key_attestation(path: Path, expected_role: str, expected_job: str) ->
         "--repo", REPOSITORY,
         "--signer-workflow", SIGNER_WORKFLOW,
         "--source-ref", SOURCE_REF,
+        "--predicate-type", PREDICATE_TYPE,
         "--deny-self-hosted-runners",
         "--format", "json",
     ]
@@ -531,6 +560,9 @@ def verify_key_attestation(path: Path, expected_role: str, expected_job: str) ->
     if not matches:
         raise EvidenceError("no verified GitHub attestation binds the exact public-key file bytes")
     statement, result = matches[0]
+    expected_predicate = _participant_key_predicate(document, target_digest)
+    if statement.get("predicateType") != PREDICATE_TYPE or statement.get("predicate") != expected_predicate:
+        raise EvidenceError("verified GitHub attestation predicate does not bind the participant role and host identity")
     signature = result.get("signature")
     if not isinstance(signature, Mapping) or not isinstance(signature.get("certificate"), Mapping):
         raise EvidenceError("verified key attestation is missing its signing certificate")
@@ -560,10 +592,24 @@ def build_fixture(out_dir: Path) -> None:
     _write(authority_dir / "route-ledger.json", ledger)
     _write(authority_dir / "request.json", request)
     _write(authority_dir / "authority-attestation.json", attestation)
-    _write(authority_dir / "authority-public-key.json", authority_key_doc)
+    authority_key_path = authority_dir / "authority-public-key.json"
+    _write(authority_key_path, authority_key_doc)
+    write_key_predicate(
+        authority_key_path,
+        authority_dir / "authority-public-key.predicate.json",
+        "authority_host",
+        "authority_host",
+    )
     _write(runner_dir / "result.json", result)
     _write(runner_dir / "completion-receipt.json", receipt)
-    _write(runner_dir / "runner-public-key.json", runner_key_doc)
+    runner_key_path = runner_dir / "runner-public-key.json"
+    _write(runner_key_path, runner_key_doc)
+    write_key_predicate(
+        runner_key_path,
+        runner_dir / "runner-public-key.predicate.json",
+        "runner_host",
+        "runner_host",
+    )
     verifier_host = {
         "format": "in-formation.proof-runner-verifier-host/0.1",
         "host": _host_identity("independent_verifier_host", fixture=True),
@@ -577,7 +623,14 @@ def produce_authority(out_dir: Path) -> None:
     _write(out_dir / "route-ledger.json", ledger)
     _write(out_dir / "request.json", request)
     _write(out_dir / "authority-attestation.json", attestation)
-    _write(out_dir / "authority-public-key.json", key_doc)
+    key_path = out_dir / "authority-public-key.json"
+    _write(key_path, key_doc)
+    write_key_predicate(
+        key_path,
+        out_dir / "authority-public-key.predicate.json",
+        "authority_host",
+        "authority_host",
+    )
 
 
 def produce_runner(authority_dir: Path, out_dir: Path) -> None:
@@ -591,7 +644,14 @@ def produce_runner(authority_dir: Path, out_dir: Path) -> None:
     )
     _write(out_dir / "result.json", result)
     _write(out_dir / "completion-receipt.json", receipt)
-    _write(out_dir / "runner-public-key.json", runner_key_doc)
+    runner_key_path = out_dir / "runner-public-key.json"
+    _write(runner_key_path, runner_key_doc)
+    write_key_predicate(
+        runner_key_path,
+        out_dir / "runner-public-key.predicate.json",
+        "runner_host",
+        "runner_host",
+    )
 
 
 def write_verifier_host(output_path: Path, *, fixture: bool = False) -> None:
