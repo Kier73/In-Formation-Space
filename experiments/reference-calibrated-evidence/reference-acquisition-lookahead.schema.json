@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/reference-calibrated-evidence/reference-acquisition-lookahead.schema.json",
+  "title": "RIV-010 Reference Acquisition Lookahead Report",
+  "type": "object",
+  "required": ["format", "model", "baseline_target_filter_report", "baseline_target_map_accuracy", "candidate_evaluations", "pareto_frontier_candidate_ids", "selection", "objective_boundary", "interpretation_limits", "report_digest"],
+  "additionalProperties": false,
+  "properties": {
+    "format": {"const": "in-formation.reference-acquisition-lookahead/0.1"},
+    "model": {
+      "type": "object",
+      "required": ["target_prior_hypothesis_a", "calibrations_with_current_prior", "target_sensor_schedule", "source_reference_report_digest", "max_histories", "calibration_scope", "reference_observation_model", "target_hypothesis_prior_independent_of_current_calibration_profile"],
+      "properties": {
+        "target_prior_hypothesis_a": {"$ref": "#/$defs/fraction"},
+        "calibrations_with_current_prior": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+        "target_sensor_schedule": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "source_reference_report_digest": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]},
+        "max_histories": {"type": "integer", "minimum": 1},
+        "calibration_scope": {"type": "string", "minLength": 1},
+        "reference_observation_model": {"type": "string", "minLength": 1},
+        "target_hypothesis_prior_independent_of_current_calibration_profile": {"const": true}
+      },
+      "additionalProperties": false
+    },
+    "baseline_target_filter_report": {"type": "object"},
+    "baseline_target_map_accuracy": {"$ref": "#/$defs/fraction"},
+    "candidate_evaluations": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/candidateEvaluation"}},
+    "pareto_frontier_candidate_ids": {"type": "array", "items": {"type": "string"}},
+    "selection": {
+      "type": "object",
+      "required": ["status", "objective", "cost_budget", "eligible_candidate_ids", "selected_candidate_id"],
+      "properties": {
+        "status": {"enum": ["selected", "no_positive_value_candidate_within_cost_budget", "no_candidate_within_cost_budget"]},
+        "objective": {"type": "string", "minLength": 1},
+        "cost_budget": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/fraction"}]},
+        "eligible_candidate_ids": {"type": "array", "items": {"type": "string"}},
+        "selected_candidate_id": {"oneOf": [{"type": "null"}, {"type": "string"}]}
+      },
+      "additionalProperties": false
+    },
+    "objective_boundary": {
+      "type": "object",
+      "required": ["current_target_myopic_evsi", "lookahead_value", "horizon", "not_claimed"],
+      "properties": {
+        "current_target_myopic_evsi": {"type": "string"},
+        "lookahead_value": {"type": "string"},
+        "horizon": {"type": "string"},
+        "not_claimed": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "interpretation_limits": {"type": "array", "items": {"type": "string"}},
+    "report_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "fraction": {
+      "type": "object",
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer"},
+        "denominator": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "candidateEvaluation": {
+      "type": "object",
+      "required": ["candidate_id", "sensor_id", "known_hypothesis", "reference_standard_ref", "reference_standard_sha256", "cost", "outcomes", "branches", "baseline_target_map_accuracy", "expected_target_map_accuracy", "expected_downstream_decision_value", "expected_downstream_decision_value_per_cost", "myopic_riv008_comparator"],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "sensor_id": {"type": "string", "minLength": 1},
+        "known_hypothesis": {"enum": ["A", "B"]},
+        "reference_standard_ref": {"type": "string", "minLength": 1},
+        "reference_standard_sha256": {"$ref": "#/$defs/sha256"},
+        "cost": {"$ref": "#/$defs/fraction"},
+        "outcomes": {"const": ["A", "B"]},
+        "branches": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["signal", "predictive_probability", "reachable", "posterior_calibration_probabilities", "target_map_accuracy", "target_filter_report"],
+            "properties": {
+              "signal": {"enum": ["A", "B"]},
+              "predictive_probability": {"$ref": "#/$defs/fraction"},
+              "reachable": {"type": "boolean"},
+              "posterior_calibration_probabilities": {"oneOf": [{"type": "null"}, {"type": "array", "items": {"type": "object"}}]},
+              "target_map_accuracy": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/fraction"}]},
+              "target_filter_report": {"oneOf": [{"type": "null"}, {"type": "object"}]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "baseline_target_map_accuracy": {"$ref": "#/$defs/fraction"},
+        "expected_target_map_accuracy": {"$ref": "#/$defs/fraction"},
+        "expected_downstream_decision_value": {"$ref": "#/$defs/fraction"},
+        "expected_downstream_decision_value_per_cost": {"$ref": "#/$defs/fraction"},
+        "myopic_riv008_comparator": {
+          "type": "object",
+          "required": ["objective", "expected_bayes_risk_reduction", "expected_value_per_cost", "selection_status", "reason", "report_digest"],
+          "properties": {
+            "objective": {"type": "string"},
+            "expected_bayes_risk_reduction": {"$ref": "#/$defs/fraction"},
+            "expected_value_per_cost": {"$ref": "#/$defs/fraction"},
+            "selection_status": {"type": "string"},
+            "reason": {"type": "string"},
+            "report_digest": {"$ref": "#/$defs/sha256"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

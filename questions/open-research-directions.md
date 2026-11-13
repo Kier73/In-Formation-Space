@@ -388,3 +388,22 @@ RIV-007 preserves uncertainty about a session-shared calibration profile, and RI
 5. How should calibration drift, uncertain standard labels, sensor-specific reference channels, and sequential reference selection extend the fixed-profile model?
 
 The initial finite bridge is [RIV-009](../experiments/reference-calibrated-evidence/README.md). It applies exact reference likelihood updates to a discrete session-shared calibration prior, reuses RIV-007 for target inference, and compares three target policies under one reference-conditioned evaluation world. It treats standard labels and costs as supplied assumptions; reference dispatch, independent authorization, unknown standards, drift, and empirical sensor validation remain separate work.
+
+
+---
+
+## 20. How should reference acquisition account for future target decisions?
+
+### The question
+
+RIV-008 values observations by the current Bayes decision. A known calibration standard can update a latent calibration profile without changing the current decision about an unobserved target. How should the observer value that reference in terms of the later target inference it enables, and how should the selected reading become authorized calibration evidence?
+
+### Questions
+
+1. When does immediate EVSI assign zero value to a reference reading whose likelihood depends on calibration but not the current target hypothesis?
+2. How does one-step lookahead to a fixed future target schedule rank candidate standards and sensor channels by expected downstream decision improvement per cost?
+3. How should that selection compare with worst-case distinguishability and immediate decision-loss objectives without pretending they are the same quantity?
+4. How should the selected reference be bound to a planned ObservationPath, returned Encounter, explicit authority decision, and exact interpretation before updating a shared calibration posterior?
+5. When should multiple reference observations be planned jointly with a finite-horizon policy rather than greedily recomputed after each admitted result?
+
+The initial exact bridge is [RIV-010](../experiments/reference-calibrated-evidence/RIV-010-README.md). It evaluates one candidate reference followed by a fixed RIV-007 target schedule, shows a zero-immediate-EVSI/nonzero-downstream-value example against RIV-008, then converts an authorized interpreted ObservationPath into an RIV-009 reference update. Standard truth, physical source authentication, measured execution cost, and multi-reference optimality remain outside this finite experiment.

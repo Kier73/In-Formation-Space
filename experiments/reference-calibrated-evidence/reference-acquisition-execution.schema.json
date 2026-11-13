@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/reference-calibrated-evidence/reference-acquisition-execution.schema.json",
+  "title": "RIV-010 Authorized Reference Acquisition Execution Record",
+  "type": "object",
+  "required": ["format", "schema", "reference_acquisition_report", "reference_acquisition_report_digest", "observation_path", "observation_path_digest", "reference_observation", "measurement_manifest", "updated_riv009_report", "measurement_status", "belief_effect", "ground_effect", "sensor_model_effect", "interpretation_limits", "record_digest"],
+  "additionalProperties": false,
+  "properties": {
+    "format": {"const": "in-formation.reference-acquisition-execution/0.1"},
+    "schema": {"const": "in-formation.reference-acquisition-execution/0.1"},
+    "reference_acquisition_report": {"type": "object"},
+    "reference_acquisition_report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "observation_path": {
+      "type": "object",
+      "required": ["attempt_id", "intent", "status", "terminal", "events"],
+      "properties": {
+        "attempt_id": {"type": "string"},
+        "intent": {"type": "object"},
+        "status": {"const": "interpreted"},
+        "terminal": {"const": false},
+        "events": {"type": "array", "minItems": 6}
+      },
+      "additionalProperties": true
+    },
+    "observation_path_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "reference_observation": {
+      "type": "object",
+      "required": ["observation_id", "sensor_id", "known_hypothesis", "signal", "reference_standard_ref", "reference_standard_sha256", "observation_ref", "observation_sha256", "cost"],
+      "properties": {
+        "observation_id": {"type": "string"},
+        "sensor_id": {"type": "string"},
+        "known_hypothesis": {"enum": ["A", "B"]},
+        "signal": {"enum": ["A", "B"]},
+        "reference_standard_ref": {"type": "string"},
+        "reference_standard_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "observation_ref": {"type": "string"},
+        "observation_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "cost": {"$ref": "#/$defs/fraction"}
+      },
+      "additionalProperties": false
+    },
+    "measurement_manifest": {
+      "type": "object",
+      "required": ["format", "schema", "reference_acquisition_report_digest", "attempt_id", "candidate_id", "sensor_id", "known_hypothesis", "reference_standard_ref", "reference_standard_sha256", "signal", "cost", "predictive_probability", "observation_path_digest", "dispatch_evidence_ref", "admission_evidence_ref", "return_evidence_ref", "encounter_id", "payload_digest", "canonicalization", "authority_evidence_ref", "authority_decision_status", "authority_policy_digest", "authority_decision_digest", "authority_quorum", "authority_strict", "authority_observed_sources", "authority_dissenting_sources", "authority_missing_sources", "authority_representative_source", "interpretation_evidence_ref", "interpretation_method", "source_reference_report_digest", "resulting_riv009_report_digest", "measurement_manifest_digest"],
+      "properties": {
+        "format": {"const": "in-formation.reference-acquisition-measurement-manifest"},
+        "schema": {"const": "in-formation.reference-acquisition-measurement-manifest/0.1"},
+        "reference_acquisition_report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "attempt_id": {"type": "string"},
+        "candidate_id": {"type": "string"},
+        "sensor_id": {"type": "string"},
+        "known_hypothesis": {"enum": ["A", "B"]},
+        "reference_standard_ref": {"type": "string"},
+        "reference_standard_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "signal": {"enum": ["A", "B"]},
+        "cost": {"$ref": "#/$defs/fraction"},
+        "predictive_probability": {"$ref": "#/$defs/fraction"},
+        "observation_path_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "dispatch_evidence_ref": {"type": "string"},
+        "admission_evidence_ref": {"type": "string"},
+        "return_evidence_ref": {"type": "string"},
+        "encounter_id": {"type": "string"},
+        "payload_digest": {"type": "string", "minLength": 1},
+        "canonicalization": {"type": "string"},
+        "authority_evidence_ref": {"type": "string"},
+        "authority_decision_status": {"const": "AUTHORIZED"},
+        "authority_policy_digest": {"type": "string"},
+        "authority_decision_digest": {"type": "string"},
+        "authority_quorum": {"type": "integer", "minimum": 1},
+        "authority_strict": {"type": "boolean"},
+        "authority_observed_sources": {"type": "array", "items": {"type": "string"}},
+        "authority_dissenting_sources": {"type": "array", "items": {"type": "string"}},
+        "authority_missing_sources": {"type": "array", "items": {"type": "string"}},
+        "authority_representative_source": {"type": "string"},
+        "interpretation_evidence_ref": {"type": "string"},
+        "interpretation_method": {"const": "exact-calibration-reference-outcome-v1"},
+        "source_reference_report_digest": {"oneOf": [{"type": "null"}, {"type": "string", "pattern": "^[0-9a-f]{64}$"}]},
+        "resulting_riv009_report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "measurement_manifest_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "updated_riv009_report": {"type": "object"},
+    "measurement_status": {"const": "interpreted_authorized_reference_observation"},
+    "belief_effect": {"const": "new_reference_conditioned_calibration_report"},
+    "ground_effect": {"const": "none"},
+    "sensor_model_effect": {"const": "none"},
+    "interpretation_limits": {"type": "array", "items": {"type": "string"}},
+    "record_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "fraction": {"type": "object", "required": ["numerator", "denominator"], "properties": {"numerator": {"type": "integer"}, "denominator": {"type": "integer", "minimum": 1}}, "additionalProperties": false}
+  }
+}
