@@ -115,12 +115,12 @@ A2 and B1 being concurrent means neither recorded vector stamp is componentwise 
 
 ## MOR-002: causal reconstruction over the Tailscale E-CPU channel
 
-**Status:** implementation committed on the MOR-002 branch; CI validation and a hosted tailnet run are pending. A live MOR-002 success has not yet been observed.  
+**Status:** merged to `main` as `aa5cc63c6936ce1ac69d8c1c76ab19e007e8d257`; PR CI passed. The first main-branch run completed its tests and attested the independent C1 observer, but both peer jobs failed closed because the dedicated MOR-002 Tailscale secrets were absent. No MOR-002 tailnet join or E-CPU socket exchange has yet been observed.  
 **Workflow:** [MOR-002 Tailscale causal reconstruction](../../.github/workflows/mor002-tailscale-causal-reconstruction.yml)  
 **Transport implementation:** [IHP-006 direct mTLS operation path](../../bridges/observation-path/TAILSCALE-MTLS-OPERATION-PATH-IHP-006.md)  
-**Pinned E-CPU revision:** \`c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65\`
+**Pinned E-CPU revision:** `c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65`
 
-MOR-002 asks whether MOR-001's causal reconstruction survives when the A1-to-B1 semantic message uses the actual E-CPU peer channel instead of GitHub Actions artifact storage. It reuses IHP-006's \`SocketTransport\`, mutually authenticated TLS, \`ReliableChannel\`, sequence-one delivery, ACK, sender-verifiable signed receiver receipt, certificate pins, signed endpoint advertisement, and reciprocal peer-route observations. It does not implement a second transport.
+MOR-002 asks whether MOR-001's causal reconstruction survives when the A1-to-B1 semantic message uses the actual E-CPU peer channel instead of GitHub Actions artifact storage. It reuses IHP-006's `SocketTransport`, mutually authenticated TLS, `ReliableChannel`, sequence-one delivery, ACK, sender-verifiable signed receiver receipt, certificate pins, signed endpoint advertisement, and reciprocal peer-route observations. It does not implement a second transport.
 
 ### Event placement is part of the experiment
 
@@ -128,15 +128,15 @@ MOR-002 asks whether MOR-001's causal reconstruction survives when the A1-to-B1 
 |---|---|---|---|
 | A1 | Client/source | Source operation completion, before the signed envelope is sent | E-CPU causal stamp included in the signed envelope |
 | B1 | Server/receiver | Receiver operation start after merging A1, inside the ReliableChannel commit path | E-CPU causal stamp included in the signed receiver receipt |
-| A2 | Client/source | Immediately after \`ReliableChannel.send(A1)\` returns, before the client processes the ACK or receipt | Later source-local stamp in a separately signed and attested sidecar; not included in A1 |
+| A2 | Client/source | Immediately after `ReliableChannel.send(A1)` returns, before the client processes the ACK or receipt | Later source-local stamp in a separately signed and attested sidecar; not included in A1 |
 | C1 | Independent observer | Separate job with no causal-domain clock | No causal stamp |
 | Verifier | Fourth job | After receiving all evidence artifacts | Independently validates and reconstructs the relation matrix; does not join the tailnet |
 
-This timing is intentional. E-CPU's \`ReliableChannel.send()\` hands A1 to the transport before returning. On the receiving side, the commit callback validates and records B1 before the channel emits its ACK. The client records A2 after A1 has entered the transport, but before it processes any ACK or receiver receipt. Therefore the source has not learned B1's existence when it emits A2. A2's signed sidecar commits to the exact A1 frame, operation span, and envelope digest, while explicitly declaring \`transferred_in_handoff: false\`.
+This timing is intentional. E-CPU's `ReliableChannel.send()` hands A1 to the transport before returning. On the receiving side, the commit callback validates and records B1 before the channel emits its ACK. The client records A2 after A1 has entered the transport, but before it processes any ACK or receiver receipt. Therefore the source has not learned B1's existence when it emits A2. A2's signed sidecar commits to the exact A1 frame, operation span, and envelope digest, while explicitly declaring `transferred_in_handoff: false`.
 
 This avoids a subtle false-concurrency test: A2 must not be emitted before A1 is sent. If it were, a stale A1 envelope could omit later source state and make two stamps appear incomparable even though the sender's actual program order placed A2 before the handoff. The implementation and a regression test assert the ordering of send, A2 capture, and ACK processing.
 
-MOR-002 uses E-CPU's native **sparse** vector clocks. Actors absent from a vector have counter zero; the experiment does not inject an artificial complete actor roster into the runtime. With A1 = \`{A:1}\`, A2 = \`{A:2}\`, and B1 = \`{A:1,B:1}\`, the expected matrix is:
+MOR-002 uses E-CPU's native **sparse** vector clocks. Actors absent from a vector have counter zero; the experiment does not inject an artificial complete actor roster into the runtime. With A1 = `{A:1}`, A2 = `{A:2}`, and B1 = `{A:1,B:1}`, the expected matrix is:
 
 | Pair | Expected result | Basis |
 |---|---|---|
@@ -159,13 +159,13 @@ The client and server take local Tailscale route observations adjacent to their 
 
 MOR-002 intentionally does not borrow IHP-006's federation credentials. A live hosted run requires:
 
-1. A separate Tailscale Workload Identity Federation/OAuth configuration restricted to this repository, the MOR-002 workflow, and the protected \`refs/heads/main\` workflow context.
-2. The Tailscale tag \`tag:mor002-mtls-ci\`, with a narrowly scoped policy permitting TCP port \`41763\` between the tagged client and server. The verifier and observer do not join this tailnet.
-3. Repository Actions secrets \`MOR002_TS_OAUTH_CLIENT_ID\` and \`MOR002_TS_AUDIENCE\`, populated from that dedicated Tailscale configuration.
+1. A separate Tailscale Workload Identity Federation/OAuth configuration restricted to this repository, the MOR-002 workflow, and the protected `refs/heads/main` workflow context.
+2. The Tailscale tag `tag:mor002-mtls-ci`, with a narrowly scoped policy permitting TCP port `41763` between the tagged client and server. The verifier and observer do not join this tailnet.
+3. Repository Actions secrets `MOR002_TS_OAUTH_CLIENT_ID` and `MOR002_TS_AUDIENCE`, populated from that dedicated Tailscale configuration.
 
-The workflow fails closed if either secret is absent. It does not fall back to public IP networking or to IHP-006's existing identity. The Tailscale action is pinned to commit \`064b10558093f38325e838ddea35486bdc6b1d5c\` and version \`1.104.6\`; the listener binds only to the server's validated Tailscale IPv4 address on the existing IHP-006 port.
+The workflow fails closed if either secret is absent. It does not fall back to public IP networking or to IHP-006's existing identity. The Tailscale action is pinned to commit `064b10558093f38325e838ddea35486bdc6b1d5c` and version `1.104.6`; the listener binds only to the server's validated Tailscale IPv4 address on the existing IHP-006 port.
 
-A transport failure produces an explicit \`direct_transport_unavailable\` report with no causal-success matrix. It is not converted into an artifact-relayed success. A missing federation secret fails the peer job's preflight; it is a configuration prerequisite, not evidence that the transport itself failed.
+A transport failure produces an explicit `direct_transport_unavailable` report with no causal-success matrix. It is not converted into an artifact-relayed success. A missing federation secret fails the peer job's preflight; it is a configuration prerequisite, not evidence that the transport itself failed. The first main-branch attempt ([run 43469165982](https://github.com/Kier73/In-Formation-Space/actions/runs/43469165982)) recorded this exact state: tests passed; the C1 observer record and attestation were produced; the client and server stopped at the dedicated-secret preflight; and the off-tailnet verifier was skipped. The run therefore provides no evidence about the MOR-002 tailnet route or peer socket.
 
 ### Reproduction and limits
 
