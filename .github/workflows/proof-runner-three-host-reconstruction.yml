@@ -1,0 +1,288 @@
+name: Proof-runner three-host independent reconstruction
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/proof-runner-independent-reconstruction/**"
+      - "experiments/proof-runner-completion-receipts/**"
+      - "formats/canonical_metadata_v1.py"
+      - "bridges/observation-path/cross_language_verifier/**"
+      - ".github/workflows/proof-runner-three-host-reconstruction.yml"
+  pull_request:
+    paths:
+      - "experiments/proof-runner-independent-reconstruction/**"
+      - "experiments/proof-runner-completion-receipts/**"
+      - "formats/canonical_metadata_v1.py"
+      - "bridges/observation-path/cross_language_verifier/**"
+      - ".github/workflows/proof-runner-three-host-reconstruction.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out proposed source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Python test dependencies
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
+      - name: Run producer and authority-check tests
+        working-directory: experiments/proof-runner-independent-reconstruction
+        run: |
+          python -m py_compile host_evidence.py test_host_evidence.py
+          python -m unittest -v test_host_evidence
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: experiments/proof-runner-independent-reconstruction/go.mod
+      - name: Run independent Go reconstruction and adversarial tests
+        working-directory: experiments/proof-runner-independent-reconstruction
+        run: go test -count=1 -v ./...
+      - name: Validate reconstruction report schema
+        run: |
+          python - <<'PY'
+          import json
+          import subprocess
+          import tempfile
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/proof-runner-independent-reconstruction")
+          with tempfile.TemporaryDirectory() as directory:
+              fixture = Path(directory)
+              subprocess.run(
+                  ["python", str(root / "host_evidence.py"), "fixture", "--out-dir", str(fixture)],
+                  check=True,
+              )
+              output = fixture / "report.json"
+              command = [
+                  "go", "run", ".",
+                  "verify",
+                  "--ledger", str(fixture / "authority" / "route-ledger.json"),
+                  "--request", str(fixture / "authority" / "request.json"),
+                  "--authority-attestation", str(fixture / "authority" / "authority-attestation.json"),
+                  "--authority-key", str(fixture / "authority" / "authority-public-key.json"),
+                  "--result", str(fixture / "runner" / "result.json"),
+                  "--receipt", str(fixture / "runner" / "completion-receipt.json"),
+                  "--runner-key", str(fixture / "runner" / "runner-public-key.json"),
+                  "--verifier-host", str(fixture / "verifier-host.json"),
+                  "--output", str(output),
+              ]
+              subprocess.run(command, cwd=root, check=True)
+              schema = json.loads((root / "reconstruction-report.schema.json").read_text(encoding="utf-8"))
+              report = json.loads(output.read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              Draft202012Validator(schema).validate(report)
+              print("valid: independent proof-runner reconstruction report schema")
+          PY
+
+  authority_host:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install signing dependency
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
+      - name: Produce route-authority checkpoint and ephemeral public identity
+        run: |
+          python experiments/proof-runner-independent-reconstruction/host_evidence.py \
+            authority --out-dir evidence/authority
+      - name: Attest exact authority public-key document bytes
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/authority/authority-public-key.json
+      - name: Transfer public authority evidence to the runner host
+        uses: actions/upload-artifact@v4
+        with:
+          name: proof-runner-authority-evidence
+          path: evidence/authority/*
+          if-no-files-found: error
+          retention-days: 14
+
+  runner_host:
+    needs: [authority_host]
+    if: needs.authority_host.result == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install signing dependency
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
+      - name: Install current signed GitHub CLI package
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes gh
+          gh --version
+      - name: Receive the authority's retained checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: proof-runner-authority-evidence
+          path: received-authority
+      - name: Verify the exact authority public-key artifact attestation
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          python experiments/proof-runner-independent-reconstruction/host_evidence.py \
+            verify-key-attestation \
+            --path received-authority/authority-public-key.json \
+            --role authority_host \
+            --job authority_host
+      - name: Produce the exact request-correlated result and runner receipt
+        run: |
+          python experiments/proof-runner-independent-reconstruction/host_evidence.py \
+            runner \
+            --authority-dir received-authority \
+            --out-dir evidence/runner
+      - name: Attest exact runner public-key document bytes
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/runner/runner-public-key.json
+      - name: Transfer result, receipt, and public runner key to the third host
+        uses: actions/upload-artifact@v4
+        with:
+          name: proof-runner-completion-evidence
+          path: evidence/runner/*
+          if-no-files-found: error
+          retention-days: 14
+
+  independent_verifier_host:
+    needs: [authority_host, runner_host]
+    if: needs.authority_host.result == 'success' && needs.runner_host.result == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install key-attestation verifier dependency
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
+      - name: Install current signed GitHub CLI package
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes gh
+          gh --version
+      - name: Receive authority checkpoint and public-key document
+        uses: actions/download-artifact@v4
+        with:
+          name: proof-runner-authority-evidence
+          path: received-authority
+      - name: Receive runner result, receipt, and public-key document
+        uses: actions/download-artifact@v4
+        with:
+          name: proof-runner-completion-evidence
+          path: received-runner
+      - name: Verify authority public-key provenance
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          python experiments/proof-runner-independent-reconstruction/host_evidence.py \
+            verify-key-attestation \
+            --path received-authority/authority-public-key.json \
+            --role authority_host \
+            --job authority_host
+      - name: Verify runner public-key provenance
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          python experiments/proof-runner-independent-reconstruction/host_evidence.py \
+            verify-key-attestation \
+            --path received-runner/runner-public-key.json \
+            --role runner_host \
+            --job runner_host
+      - name: Record the third-host identity
+        run: |
+          python experiments/proof-runner-independent-reconstruction/host_evidence.py \
+            verifier-host --output evidence/verifier-host.json
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: experiments/proof-runner-independent-reconstruction/go.mod
+      - name: Reconstruct the authorization-to-result chain in Go
+        working-directory: experiments/proof-runner-independent-reconstruction
+        run: |
+          go run . verify \
+            --ledger ../../received-authority/route-ledger.json \
+            --request ../../received-authority/request.json \
+            --authority-attestation ../../received-authority/authority-attestation.json \
+            --authority-key ../../received-authority/authority-public-key.json \
+            --result ../../received-runner/result.json \
+            --receipt ../../received-runner/completion-receipt.json \
+            --runner-key ../../received-runner/runner-public-key.json \
+            --verifier-host ../../evidence/verifier-host.json \
+            --key-attestations-verified \
+            --output ../../evidence/reconstruction-report.json
+      - name: Validate independent reconstruction report schema
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          schema_path = Path("experiments/proof-runner-independent-reconstruction/reconstruction-report.schema.json")
+          report_path = Path("evidence/reconstruction-report.json")
+          schema = json.loads(schema_path.read_text(encoding="utf-8"))
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          Draft202012Validator.check_schema(schema)
+          Draft202012Validator(schema).validate(report)
+          print("valid: independent proof-runner reconstruction report")
+          PY
+      - name: Attest the exact third-host reconstruction report
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/reconstruction-report.json
+      - name: Preserve the independently reconstructed report
+        uses: actions/upload-artifact@v4
+        with:
+          name: proof-runner-independent-reconstruction-report
+          path: evidence/reconstruction-report.json
+          if-no-files-found: error
+          retention-days: 90
