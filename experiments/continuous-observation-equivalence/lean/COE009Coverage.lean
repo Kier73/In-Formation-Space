@@ -41,9 +41,10 @@ theorem lastUnboundedEquivalent (cells : List Cell) :
       | nil => rfl
       | cons next tail =>
           change lastUnbounded (next :: tail) =
-            (match (next :: tail).reverse ++ [first] with
+            (match (first :: next :: tail).reverse with
              | [] => false
              | last :: _ => decide (last.right = none))
+          rw [List.reverse_cons]
           rw [ih]
           cases hrev : (next :: tail).reverse with
           | nil =>
