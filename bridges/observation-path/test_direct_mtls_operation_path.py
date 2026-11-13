@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import ssl
+import subprocess
 import tempfile
 import threading
 import time
@@ -59,6 +60,205 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.temp.cleanup()
+
+    def test_tailscale_status_route_parser_classifies_direct_derp_peer_relay_and_unknown(self) -> None:
+        peer = "100.71.0.2"
+        cases = (
+            (
+                f"{peer} private-host owner@example.com linux active; direct 198.51.100.4:41641, tx 9 rx 8",
+                ("active", "direct", "active; direct"),
+            ),
+            (
+                f"{peer} private-host owner@example.com linux active; relay \\"sea\\", tx 9 rx 8",
+                ("active", "derp_relay", "active; relay"),
+            ),
+            (
+                f"{peer} private-host owner@example.com linux active; peer-relay 100.71.0.9:41641, tx 9 rx 8",
+                ("active", "peer_relay", "active; peer-relay"),
+            ),
+            (
+                f"{peer} private-host owner@example.com linux active; offers exit node, tx 9 rx 8",
+                ("active", "reachable_unclassified", "active; unclassified"),
+            ),
+            (
+                f"{peer} private-host owner@example.com linux idle; tx 9 rx 8",
+                ("idle", "reachable_unclassified", "idle"),
+            ),
+        )
+        for output, expected in cases:
+            with self.subTest(output=output):
+                self.assertEqual(direct._classify_tailscale_peer_status(output, peer), expected)
+        self.assertEqual(
+            direct._classify_tailscale_peer_status(
+                "100.71.0.3 another-host owner@example.com linux active; direct 198.51.100.8:41641",
+                peer,
+            ),
+            ("peer_not_found", "reachable_unclassified", None),
+        )
+
+    def test_tailscale_status_observation_binds_live_socket_ips_and_redacts_peer_identity(self) -> None:
+        class FakeSocket:
+            def getsockname(self):
+                return ("100.71.0.1", 41763)
+
+            def getpeername(self):
+                return ("100.71.0.2", 41763)
+
+        class FakeTransport:
+            socket = FakeSocket()
+
+        output = (
+            b"100.71.0.2 private-host owner@example.com linux "
+            b"active; direct 198.51.100.4:41641, tx 9 rx 8\\n"
+        )
+        completed = subprocess.CompletedProcess(["tailscale", "status"], 0, output, b"")
+        with (
+            patch.object(direct.subprocess, "run", return_value=completed) as run,
+            patch.object(direct.time, "monotonic_ns", side_effect=[100, 125]),
+        ):
+            observation = direct._observe_tailscale_peer_route(FakeTransport(), "client_host")
+
+        run.assert_called_once_with(
+            ["tailscale", "status"],
+            capture_output=True,
+            text=False,
+            timeout=8.0,
+            check=False,
+        )
+        self.assertEqual(observation["local_overlay_ipv4"], "100.71.0.1")
+        self.assertEqual(observation["peer_overlay_ipv4"], "100.71.0.2")
+        self.assertEqual(observation["route_state"], "active")
+        self.assertEqual(observation["route_type"], "direct")
+        self.assertEqual(observation["matched_peer_status"], "active; direct")
+        self.assertEqual(observation["elapsed_ns"], 25)
+        self.assertEqual(observation["status_output_sha256"], direct.digest_bytes(output))
+        self.assertNotIn("private-host", repr(observation))
+        self.assertNotIn("owner@example.com", repr(observation))
+        self.assertNotIn("198.51.100.4", repr(observation))
+
+    def test_tailscale_peer_route_pair_requires_reciprocal_socket_addresses(self) -> None:
+        def observation(role: str, local_ip: str, peer_ip: str, route_type: str):
+            marker = {
+                "direct": "active; direct",
+                "derp_relay": "active; relay",
+                "peer_relay": "active; peer-relay",
+                "reachable_unclassified": "active; unclassified",
+            }[route_type]
+            return {
+                "schema": direct.PEER_ROUTE_OBSERVATION_SCHEMA,
+                "observer_role": role,
+                "local_overlay_ipv4": local_ip,
+                "peer_overlay_ipv4": peer_ip,
+                "route_state": "active",
+                "route_type": route_type,
+                "command": "tailscale status",
+                "exit_code": 0,
+                "elapsed_ns": 10,
+                "matched_peer_status": marker,
+                "status_output_sha256": "a" * 64,
+                "error": None,
+            }
+
+        client = {
+            "operation_span": {
+                "context": {
+                    "peer_route_observation": observation(
+                        "client_host", "100.71.0.1", "100.71.0.2", "direct"
+                    )
+                }
+            }
+        }
+        server = {
+            "operation_span": {
+                "context": {
+                    "peer_route_observation": observation(
+                        "server_host", "100.71.0.2", "100.71.0.1", "derp_relay"
+                    )
+                }
+            }
+        }
+        pair = direct._peer_route_pair_from_records(client, server, "100.71.0.2")
+        self.assertEqual(pair["client"]["route_type"], "direct")
+        self.assertEqual(pair["server"]["route_type"], "derp_relay")
+        self.assertTrue(pair["asymmetric"])
+
+        server["operation_span"]["context"]["peer_route_observation"]["peer_overlay_ipv4"] = "100.71.0.99"
+        with self.assertRaisesRegex(direct.DirectMTLSError, "reciprocal TLS socket endpoints"):
+            direct._peer_route_pair_from_records(client, server, "100.71.0.2")
+
+    def test_ihp006_verified_host_record_requires_attested_route_observation_in_its_span(self) -> None:
+        env = runner_env(
+            "client_host", "client-vm", workflow_path=direct.TAILSCALE_WORKFLOW_PATH
+        )
+        host = direct.host_metadata("client_host", env)
+        context = TemporalContext(
+            host["actor_id"],
+            TemporalProfile(frozenset({ClockDomain.MONOTONIC, ClockDomain.CAUSAL})),
+            segment=0,
+        )
+        context.emit_causal_stamp()
+        recorder = direct._recorder(host, context)
+        recorder.measure(
+            attempt_id="run-123456789-attempt-1",
+            span_id="client-operation",
+            operation_id="client.prepare",
+            operation=lambda: "payload",
+            context={"role": "client_host", "channel": direct.DATA_CHANNEL},
+        )
+        span = recorder.spans[-1]
+        frame = context.observe().to_dict()
+        record = direct._make_record(
+            role="client_host",
+            host=host,
+            status="direct_mtls_verified",
+            certificate_sha256_value="a" * 64,
+            operation_span=span,
+            temporal_frame=frame,
+            peer_certificate_sha256="b" * 64,
+        )
+        with self.assertRaisesRegex(direct.DirectMTLSError, "peer-route observation"):
+            direct._validate_record(record, "client_host")
+
+        route_observation = {
+            "schema": direct.PEER_ROUTE_OBSERVATION_SCHEMA,
+            "observer_role": "client_host",
+            "local_overlay_ipv4": "100.71.0.1",
+            "peer_overlay_ipv4": "100.71.0.2",
+            "route_state": "active",
+            "route_type": "reachable_unclassified",
+            "command": "tailscale status",
+            "exit_code": 0,
+            "elapsed_ns": 10,
+            "matched_peer_status": "active; unclassified",
+            "status_output_sha256": "a" * 64,
+            "error": None,
+        }
+        recorder_with_route = direct._recorder(host, context)
+        recorder_with_route.measure(
+            attempt_id="run-123456789-attempt-1",
+            span_id="client-operation-with-route",
+            operation_id="client.prepare",
+            operation=lambda: "payload",
+            context={
+                "role": "client_host",
+                "channel": direct.DATA_CHANNEL,
+                "peer_route_observation": route_observation,
+            },
+        )
+        span_with_route = recorder_with_route.spans[-1]
+        valid_record = direct._make_record(
+            role="client_host",
+            host=host,
+            status="direct_mtls_verified",
+            certificate_sha256_value="a" * 64,
+            operation_span=span_with_route,
+            temporal_frame=frame,
+            peer_certificate_sha256="b" * 64,
+        )
+        self.assertEqual(
+            direct._validate_record(valid_record, "client_host")["operation_span"]["context"]["peer_route_observation"]["route_type"],
+            "reachable_unclassified",
+        )
 
     def test_ihp006_workflow_identity_is_allowlisted_but_other_workflows_are_rejected(self) -> None:
         env = runner_env(
