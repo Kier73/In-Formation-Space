@@ -465,6 +465,9 @@ def _replay_prefix(
                 raise RobustPolicyExecutionMismatch(
                     f"returned.details.{field} differs from the active policy node or prefix"
                 )
+        _text(returned_details.get("encounter_id"), "returned.details.encounter_id")
+        _sha256(returned_details.get("payload_digest"), "returned.details.payload_digest")
+        _text(returned_details.get("canonicalization"), "returned.details.canonicalization")
         if authority_details.get("decision_status") != "AUTHORIZED":
             raise RobustPolicyExecutionMismatch(
                 "policy execution advances only after an explicit AUTHORIZED decision"
