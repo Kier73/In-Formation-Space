@@ -406,18 +406,18 @@ def observe_two_clusters(
 
     left_job = left["producer_identity"].get("job")
     right_job = right["producer_identity"].get("job")
-    workflow_run_match = (
-        distinct_jobs
-        and left["producer_identity"].get("repository") == right["producer_identity"].get("repository")
-        and left["producer_identity"].get("run_id") == right["producer_identity"].get("run_id")
-        and left["producer_identity"].get("run_id") != "local-test"
-    )
     distinct_jobs = (
         isinstance(left_job, str)
         and isinstance(right_job, str)
         and left_job != right_job
         and left_job in {"authority_cluster_left", "authority_cluster_right"}
         and right_job in {"authority_cluster_left", "authority_cluster_right"}
+    )
+    workflow_run_match = (
+        distinct_jobs
+        and left["producer_identity"].get("repository") == right["producer_identity"].get("repository")
+        and left["producer_identity"].get("run_id") == right["producer_identity"].get("run_id")
+        and left["producer_identity"].get("run_id") != "local-test"
     )
     if shared_configuration and same_predecessor and divergent_root:
         classification = "cloned_membership_split_brain"
