@@ -12,6 +12,7 @@ on:
       - "bridges/observation-path/test_direct_mtls_operation_path.py"
       - "bridges/observation-path/direct-mtls-*.schema.json"
       - ".github/workflows/direct-mtls-operation-path.yml"
+      - ".github/workflows/tailscale-mtls-operation-path.yml"
       - "bridges/observation-path/distributed_operation_path.py"
       - "bridges/observation-path/independent_host_path.py"
       - "bridges/observation-path/test_independent_host_path.py"
@@ -33,6 +34,7 @@ on:
       - "bridges/observation-path/test_direct_mtls_operation_path.py"
       - "bridges/observation-path/direct-mtls-*.schema.json"
       - ".github/workflows/direct-mtls-operation-path.yml"
+      - ".github/workflows/tailscale-mtls-operation-path.yml"
       - "bridges/observation-path/distributed_operation_path.py"
       - "bridges/observation-path/independent_host_path.py"
       - "bridges/observation-path/test_independent_host_path.py"
@@ -116,6 +118,67 @@ jobs:
               if "permissions" not in job or "steps" not in job:
                   raise SystemExit(f"job {name} is missing permissions or steps")
           print("valid IHP-005 workflow YAML; no duplicate keys")
+          PY
+      - name: Validate IHP-006 Tailscale mTLS workflow YAML
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          class UniqueKeyLoader(yaml.SafeLoader):
+              pass
+
+          def construct_mapping(loader, node, deep=False):
+              mapping = {}
+              for key_node, value_node in node.value:
+                  key = loader.construct_object(key_node, deep=deep)
+                  if key in mapping:
+                      raise ValueError(f"duplicate YAML key: {key!r}")
+                  mapping[key] = loader.construct_object(value_node, deep=deep)
+              return mapping
+
+          UniqueKeyLoader.add_constructor(
+              yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+              construct_mapping,
+          )
+          workflow = yaml.load(
+              Path(".github/workflows/tailscale-mtls-operation-path.yml").read_text(encoding="utf-8"),
+              Loader=UniqueKeyLoader,
+          )
+          if set(workflow.get("jobs", {})) != {"client_host", "server_host", "verifier_host"}:
+              raise SystemExit("IHP-006 must define client_host, server_host, and verifier_host")
+          events = workflow.get("on", workflow.get(True, {}))
+          if "workflow_dispatch" not in events:
+              raise SystemExit("IHP-006 must be manually dispatched")
+          for name, job in workflow["jobs"].items():
+              if "permissions" not in job or "steps" not in job:
+                  raise SystemExit(f"IHP-006 job {name} is missing permissions or steps")
+          action = "tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c"
+          for role in ("client_host", "server_host"):
+              job = workflow["jobs"][role]
+              if job.get("permissions", {}).get("id-token") != "write":
+                  raise SystemExit(f"IHP-006 {role} job must be allowed to request an OIDC token")
+              matching = [
+                  step for step in job["steps"]
+                  if step.get("uses") == action
+                  and step.get("with", {}).get("tags") == "tag:ihp006-mtls-ci"
+                  and str(step.get("with", {}).get("version")) == "1.104.6"
+              ]
+              if len(matching) != 1:
+                  raise SystemExit(f"IHP-006 {role} job must join the pinned dedicated tailnet once")
+              if not any(step.get("name") == "Require the dedicated IHP-006 federation identity" for step in job["steps"]):
+                  raise SystemExit(f"IHP-006 {role} job must fail closed when federation credentials are absent")
+          verifier_steps = workflow["jobs"]["verifier_host"]["steps"]
+          if any(step.get("uses") == action for step in verifier_steps):
+              raise SystemExit("IHP-006 verifier should not join the tailnet")
+          server_steps = workflow["jobs"]["server_host"]["steps"]
+          server_prepare = next((step for step in server_steps if step.get("name") == "Verify client certificate and create signed overlay endpoint"), None)
+          server_serve = next((step for step in server_steps if step.get("name") == "Accept the E-CPU operation on the Tailscale overlay"), None)
+          if server_prepare is None or "--advertise-host" not in server_prepare.get("run", ""):
+              raise SystemExit("IHP-006 server must advertise its overlay address")
+          if server_serve is None or "--bind-host" not in server_serve.get("run", ""):
+              raise SystemExit("IHP-006 server must bind only to its overlay address")
+          print("valid IHP-006 workflow YAML; no duplicate keys; overlay identities and interface binding verified")
           PY
       - name: Validate distributed path schemas
         run: |

@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import base64
 import hashlib
+import ipaddress
 import json
 import os
 import shutil
@@ -48,6 +49,8 @@ from mailcpu.temporal import (
 
 REPOSITORY = "Kier73/In-Formation-Space"
 WORKFLOW_PATH = ".github/workflows/direct-mtls-operation-path.yml"
+TAILSCALE_WORKFLOW_PATH = ".github/workflows/tailscale-mtls-operation-path.yml"
+ALLOWED_WORKFLOW_PATHS = frozenset({WORKFLOW_PATH, TAILSCALE_WORKFLOW_PATH})
 SIGNER_WORKFLOW = f"{REPOSITORY}/{WORKFLOW_PATH}"
 SOURCE_REF = "refs/heads/main"
 CERT_PREDICATE_TYPE = (
@@ -130,6 +133,23 @@ def _env(env: Mapping[str, str], name: str) -> str:
     return value.strip()
 
 
+def _workflow_path(workflow_ref: str) -> str:
+    """Return an explicitly allowed workflow path from a main-branch workflow ref."""
+    prefix = f"{REPOSITORY}/"
+    suffix = f"@{SOURCE_REF}"
+    if not isinstance(workflow_ref, str) or not workflow_ref.startswith(prefix) or not workflow_ref.endswith(suffix):
+        raise DirectMTLSError("runner workflow identity is not pinned to the repository main branch")
+    path = workflow_ref[len(prefix):-len(suffix)]
+    if path not in ALLOWED_WORKFLOW_PATHS:
+        raise DirectMTLSError("runner workflow path is not in the direct-mTLS allowlist")
+    return path
+
+
+def _signer_workflow_from_environment() -> str:
+    workflow_ref = _env(os.environ, "GITHUB_WORKFLOW_REF")
+    return f"{REPOSITORY}/{_workflow_path(workflow_ref)}"
+
+
 def host_metadata(role: str, env: Mapping[str, str] | None = None) -> dict[str, str]:
     selected = os.environ if env is None else env
     if role not in {"client_host", "server_host", "verifier_host"}:
@@ -152,8 +172,7 @@ def host_metadata(role: str, env: Mapping[str, str] | None = None) -> dict[str, 
     }
     if fields["repository"] != REPOSITORY:
         raise DirectMTLSError("runner repository does not match the pinned repository")
-    if fields["workflow_ref"] != f"{REPOSITORY}/{WORKFLOW_PATH}@{SOURCE_REF}":
-        raise DirectMTLSError("runner workflow identity is not the protected main workflow")
+    _workflow_path(fields["workflow_ref"])
     if fields["git_ref"] != SOURCE_REF:
         raise DirectMTLSError("direct-mTLS evidence must be produced from refs/heads/main")
     if fields["runner_environment"] != "github-hosted":
@@ -181,8 +200,9 @@ def _validate_host_metadata(value: object, role: str) -> dict[str, str]:
         raise DirectMTLSError(f"{role} host metadata values must be non-empty strings")
     if value["role"] != role or value["job"] != role:
         raise DirectMTLSError(f"host metadata does not identify the {role} job")
-    if value["repository"] != REPOSITORY or value["workflow_ref"] != f"{REPOSITORY}/{WORKFLOW_PATH}@{SOURCE_REF}":
-        raise DirectMTLSError("host metadata repository/workflow identity is not pinned")
+    if value["repository"] != REPOSITORY:
+        raise DirectMTLSError("host metadata repository identity is not pinned")
+    _workflow_path(value["workflow_ref"])
     if value["git_ref"] != SOURCE_REF or value["runner_environment"] != "github-hosted":
         raise DirectMTLSError("host metadata ref or runner environment is not permitted")
     return dict(value)
@@ -342,12 +362,18 @@ def _gh_version(gh: str) -> tuple[int, int, int]:
     return tuple(int(part) for part in match.groups())
 
 
-def _attestation_command(path: Path, predicate_type: str, gh: str) -> list[str]:
+def _attestation_command(
+    path: Path,
+    predicate_type: str,
+    gh: str,
+    *,
+    signer_workflow: str = SIGNER_WORKFLOW,
+) -> list[str]:
     return [
         gh, "attestation", "verify", str(path),
         "--repo", REPOSITORY,
         "--predicate-type", predicate_type,
-        "--signer-workflow", SIGNER_WORKFLOW,
+        "--signer-workflow", signer_workflow,
         "--source-ref", SOURCE_REF,
         "--deny-self-hosted-runners",
         "--format", "json",
@@ -393,9 +419,12 @@ def verify_artifact_attestation(
     if _gh_version(gh) < GH_MIN_VERSION:
         raise DirectMTLSError("GitHub CLI 2.103.3 or newer is required for signer-workflow verification")
     artifact_digest = file_digest(artifact_path)
+    signer_workflow = _signer_workflow_from_environment()
     try:
         completed = subprocess.run(
-            _attestation_command(artifact_path, predicate_type, gh),
+            _attestation_command(
+                artifact_path, predicate_type, gh, signer_workflow=signer_workflow
+            ),
             check=True,
             capture_output=True,
             text=True,
@@ -424,7 +453,7 @@ def verify_artifact_attestation(
         "verified": True,
         "subject_sha256": artifact_digest,
         "predicate_type": predicate_type,
-        "signer_workflow": SIGNER_WORKFLOW,
+        "signer_workflow": signer_workflow,
         "source_ref": SOURCE_REF,
         "self_hosted_runners_denied": True,
         "predicate": dict(predicate),
@@ -637,6 +666,8 @@ def _verify_endpoint_advertisement(
     if set(core) != expected or core["schema"] != ENDPOINT_SCHEMA:
         raise DirectMTLSError("server endpoint advertisement fields or schema are invalid")
     host = _validate_host_metadata(core["server_host"], "server_host")
+    if _workflow_path(host["workflow_ref"]) == TAILSCALE_WORKFLOW_PATH:
+        _validate_tailscale_ipv4(core.get("host"))
     if (
         core["run_id"] != host["run_id"]
         or core["run_attempt"] != host["run_attempt"]
@@ -653,6 +684,19 @@ def _verify_endpoint_advertisement(
     return dict(core)
 
 
+def _validate_tailscale_ipv4(value: object) -> str:
+    """Validate and normalize an endpoint inside Tailscale's CGNAT IPv4 range."""
+    if not isinstance(value, str) or not value:
+        raise DirectMTLSError("Tailscale overlay address must be a non-empty IPv4 string")
+    try:
+        address = ipaddress.ip_address(value)
+    except ValueError as error:
+        raise DirectMTLSError("Tailscale overlay address is not a valid IP address") from error
+    if address.version != 4 or address not in ipaddress.ip_network("100.64.0.0/10"):
+        raise DirectMTLSError("Tailscale overlay address must be inside 100.64.0.0/10")
+    return str(address)
+
+
 def prepare_client(directory: Path) -> dict[str, Any]:
     identity = generate_identity("client_host", directory)
     predicate = write_certificate_predicate(
@@ -667,8 +711,19 @@ def prepare_client(directory: Path) -> dict[str, Any]:
     }
 
 
-def prepare_server(directory: Path, *, gh: str = "gh", bootstrap_timeout: float = 180.0) -> dict[str, Any]:
+def prepare_server(
+    directory: Path,
+    *,
+    gh: str = "gh",
+    bootstrap_timeout: float = 180.0,
+    advertise_host: str | None = None,
+) -> dict[str, Any]:
     host = host_metadata("server_host")
+    workflow_path = _workflow_path(host["workflow_ref"])
+    if workflow_path == TAILSCALE_WORKFLOW_PATH and advertise_host is None:
+        raise DirectMTLSError(
+            "IHP-006 requires an explicit Tailscale overlay address; public-IP fallback is disabled"
+        )
     peer_directory = directory / "peer-client"
     _poll_download_artifact("ihp002-client-bootstrap", peer_directory, timeout_seconds=bootstrap_timeout, gh=gh)
     client_cert_path = peer_directory / "client-cert.pem"
@@ -690,13 +745,16 @@ def prepare_server(directory: Path, *, gh: str = "gh", bootstrap_timeout: float 
     cert_predicate = write_certificate_predicate(
         server_cert_path, directory / "server-cert.predicate.json", "server_host"
     )
-    try:
-        with urllib.request.urlopen("https://api4.ipify.org", timeout=8.0) as response:
-            public_ip = response.read(128).decode("ascii").strip()
-    except Exception as error:
-        raise DirectMTLSError(f"cannot discover runner public IPv4 address: {error}") from error
-    if not public_ip or any(character not in "0123456789." for character in public_ip):
-        raise DirectMTLSError("public IPv4 discovery returned an invalid address")
+    if advertise_host is not None:
+        public_ip = _validate_tailscale_ipv4(advertise_host)
+    else:
+        try:
+            with urllib.request.urlopen("https://api4.ipify.org", timeout=8.0) as response:
+                public_ip = response.read(128).decode("ascii").strip()
+        except Exception as error:
+            raise DirectMTLSError(f"cannot discover runner public IPv4 address: {error}") from error
+        if not public_ip or any(character not in "0123456789." for character in public_ip):
+            raise DirectMTLSError("public IPv4 discovery returned an invalid address")
 
     endpoint_core = {
         "schema": ENDPOINT_SCHEMA,
@@ -765,14 +823,30 @@ def _write_record(directory: Path, record: Mapping[str, Any]) -> Path:
     return path
 
 
-def serve(directory: Path, *, accept_timeout: float = 120.0) -> dict[str, Any]:
+def serve(
+    directory: Path,
+    *,
+    accept_timeout: float = 120.0,
+    bind_host: str | None = None,
+) -> dict[str, Any]:
     host = host_metadata("server_host")
+    workflow_path = _workflow_path(host["workflow_ref"])
+    if workflow_path == TAILSCALE_WORKFLOW_PATH:
+        if bind_host is None:
+            raise DirectMTLSError(
+                "IHP-006 requires an explicit Tailscale bind address; wildcard binding is disabled"
+            )
+        listener_host = _validate_tailscale_ipv4(bind_host)
+    else:
+        if bind_host is not None:
+            raise DirectMTLSError("custom bind addresses are reserved for the IHP-006 overlay workflow")
+        listener_host = "0.0.0.0"
     client_cert_path = directory / "peer-client" / "client-cert.pem"
     server_cert_path = directory / "server-cert.pem"
     server_key_path = directory / "server-key.pem"
     endpoint = read_json(directory / "server-endpoint.json")
     endpoint_core = _verify_endpoint_advertisement(endpoint, server_cert_path)
-    listener = SocketTransport.listen("0.0.0.0", LISTEN_PORT)
+    listener = SocketTransport.listen(listener_host, LISTEN_PORT)
     listener.settimeout(accept_timeout)
     transport: SocketTransport | None = None
 
@@ -1486,10 +1560,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     server_parser.add_argument("--directory", type=Path, required=True)
     server_parser.add_argument("--gh", default="gh")
     server_parser.add_argument("--bootstrap-timeout", type=float, default=180.0)
+    server_parser.add_argument(
+        "--advertise-host",
+        help="explicit Tailscale overlay IPv4 endpoint (required by the IHP-006 workflow)",
+    )
 
     serve_parser = commands.add_parser("serve")
     serve_parser.add_argument("--directory", type=Path, required=True)
     serve_parser.add_argument("--accept-timeout", type=float, default=120.0)
+    serve_parser.add_argument(
+        "--bind-host",
+        help="explicit Tailscale overlay IPv4 listener address (required by IHP-006)",
+    )
 
     connect_parser = commands.add_parser("connect")
     connect_parser.add_argument("--directory", type=Path, required=True)
@@ -1516,10 +1598,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = prepare_client(args.directory)
             print(json.dumps(result, sort_keys=True))
         elif args.command == "prepare-server":
-            result = prepare_server(args.directory, gh=args.gh, bootstrap_timeout=args.bootstrap_timeout)
+            result = prepare_server(
+                args.directory,
+                gh=args.gh,
+                bootstrap_timeout=args.bootstrap_timeout,
+                advertise_host=args.advertise_host,
+            )
             print(json.dumps(result, sort_keys=True))
         elif args.command == "serve":
-            result = serve(args.directory, accept_timeout=args.accept_timeout)
+            result = serve(
+                args.directory,
+                accept_timeout=args.accept_timeout,
+                bind_host=args.bind_host,
+            )
             print(json.dumps(result, sort_keys=True))
         elif args.command == "connect":
             result = connect_and_send(args.directory, connect_timeout_seconds=args.connect_timeout, gh=args.gh)
