@@ -47,6 +47,8 @@ theorem increasing (m b x y : Rat) (hm : 0 < m) (hxy : x < y) :
 /-- Negative slope implies strictly decreasing affine output. -/
 theorem decreasing (m b x y : Rat) (hm : m < 0) (hxy : x < y) :
     affine m b y < affine m b x := by
+  have hpositive : 0 < -m := by grind
+  have hmul : (-m) * x < (-m) * y := (Rat.mul_lt_mul_left hpositive).mpr hxy
   unfold affine
   grind
 
