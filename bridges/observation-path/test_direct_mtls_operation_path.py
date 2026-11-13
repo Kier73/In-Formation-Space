@@ -94,6 +94,17 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
             with self.assertRaisesRegex(direct.DirectMTLSError, "public-IP fallback is disabled"):
                 direct.prepare_server(self.root / "no-bootstrap")
 
+    def test_ihp006_server_cannot_bind_wildcard_or_public_interfaces(self) -> None:
+        env = runner_env(
+            "server_host", "server-vm", workflow_path=direct.TAILSCALE_WORKFLOW_PATH
+        )
+        host = direct.host_metadata("server_host", env)
+        with patch.object(direct, "host_metadata", return_value=host):
+            with self.assertRaisesRegex(direct.DirectMTLSError, "wildcard binding is disabled"):
+                direct.serve(self.root / "no-server-state")
+            with self.assertRaisesRegex(direct.DirectMTLSError, "100.64.0.0/10"):
+                direct.serve(self.root / "no-server-state", bind_host="203.0.113.8")
+
     def test_ephemeral_certificates_are_role_and_run_bound(self) -> None:
         self.assertNotEqual(
             self.client["certificate_sha256"],
