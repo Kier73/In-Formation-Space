@@ -1,0 +1,106 @@
+name: Independent serialized Lean kernel term recheck
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/lean-kernel-independent-recheck/**"
+      - ".github/workflows/lean-serialized-kernel-recheck.yml"
+  pull_request:
+    paths:
+      - "experiments/lean-kernel-independent-recheck/**"
+      - ".github/workflows/lean-serialized-kernel-recheck.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof_runner:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - name: Offline fail-closed serialized-checker contract tests
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: python -m unittest discover -s experiments/lean-kernel-independent-recheck -p "test_serialized_kernel_evidence.py" -v
+      - name: Export Lean elaborated term and source checks
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          python experiments/lean-kernel-independent-recheck/term_receipt.py produce \
+            --output evidence/serialized-runner-observation.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: serialized-runner-observation
+          path: evidence/serialized-runner-observation.json
+          if-no-files-found: error
+          retention-days: 30
+
+  serialized_kernel_checker:
+    needs: [proof_runner]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - name: Install pinned Lean without rebuilding source theorem
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: serialized-runner-observation
+          path: received-runner
+      - name: Kernel-check decoded term plus three adversarial controls
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          python experiments/lean-kernel-independent-recheck/serialized_kernel_evidence.py \
+            --runner received-runner/serialized-runner-observation.json \
+            --output evidence/serialized-kernel-report.json
+      - name: Attest the independent serialized kernel report on main
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/serialized-kernel-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: serialized-kernel-independent-report
+          path: evidence/serialized-kernel-report.json
+          if-no-files-found: error
+          retention-days: 90
