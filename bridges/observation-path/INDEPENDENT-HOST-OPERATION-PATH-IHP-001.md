@@ -22,7 +22,7 @@ Source job / VM A produces the operation and handoff payload. Its file is attest
 
 Receiver job / VM B verifies the source file's attestation before consuming it. It merges the source E-CPU causal stamp into a separate TemporalContext, records its own operation, and attests the successor evidence.
 
-Verifier job / VM C downloads both files independently, verifies both attestations against their exact bytes and the pinned workflow identity, reconstructs the DOP-001 causal edge, and attests the resulting report.
+Verifier job / VM C downloads both files independently, verifies both attestations against their exact bytes and the pinned workflow identity, reconstructs the DOP-001 causal edge, and attests the resulting report with a custom predicate binding the verifier job identity and exact report bytes.
 
 The workflow runs only for main pushes or a manual dispatch targeting main. Attestation verification pins the repository, signer workflow path, source ref, and custom predicate type. It also rejects self-hosted runners. GitHub CLI 2.103.3 or newer is required because the signer-workflow matching behavior was corrected in 2.102.0.
 
@@ -34,7 +34,7 @@ The receiver first verifies the source file's signed GitHub artifact attestation
 
 The third job downloads the two files independently. It verifies each file's attestation against the actual SHA-256 bytes, checks the exact signer workflow/source-ref policy, checks that both records belong to the same run and attempt but distinct jobs/actors, and calls the existing DOP-001 causal handoff validator. It does not use the worker's or receiver's process memory, local files, or code-generated in-memory object references.
 
-The verifier also attests the final reconstruction report, so the report itself has a provenance record that can be checked later.
+The verifier also creates a report-specific attestation predicate binding the third job identity, exact report-file SHA-256, source and receiver artifact digests, path ID, and causal handoff digest. The final reconstruction report is attested against that predicate, so a later verifier can check not only the report bytes but also which protected workflow job produced it.
 
 ## Evidence classes
 
@@ -85,7 +85,7 @@ The CLI is bridges/observation-path/independent_host_path.py:
 - write-predicate prepares the custom attestation predicate for one record.
 - verify verifies both attestations and writes the third-host reconstruction report.
 
-The report is validated against independent-host-operation-report.schema.json and preserved as the independent-host-reconstruction-report workflow artifact. A Sigstore attestation is also generated for the report.
+The report is validated against independent-host-operation-report.schema.json, and its custom verifier predicate is validated against independent-host-operation-report-predicate.schema.json. Both the report and predicate are preserved in the runner workspace; the report is preserved as the independent-host-reconstruction-report workflow artifact and receives a Sigstore attestation that signs the exact report bytes and predicate.
 
 ## Next discriminating experiment
 
