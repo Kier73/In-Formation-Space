@@ -1,0 +1,37 @@
+name: Robust likelihood acquisition RIV-015
+
+on:
+  push:
+    paths:
+      - "experiments/robust-likelihood-acquisition/**"
+      - ".github/workflows/robust-likelihood-acquisition.yml"
+  pull_request:
+    paths:
+      - "experiments/robust-likelihood-acquisition/**"
+      - ".github/workflows/robust-likelihood-acquisition.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  robust-likelihood-acquisition:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema test dependency
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate report schema
+        run: |
+          python -c "import json, jsonschema; p='experiments/robust-likelihood-acquisition/robust-likelihood-acquisition.schema.json'; s=json.load(open(p, encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s)"
+      - name: Compile implementation and example
+        run: |
+          python -m py_compile experiments/robust-likelihood-acquisition/robust_likelihood_acquisition.py
+          python -m py_compile experiments/robust-likelihood-acquisition/example.py
+      - name: Run exact robust acquisition tests
+        run: python -m unittest discover -s experiments/robust-likelihood-acquisition -p "test_*.py" -v
+      - name: Run reproducible ambiguity example
+        run: python experiments/robust-likelihood-acquisition/example.py
