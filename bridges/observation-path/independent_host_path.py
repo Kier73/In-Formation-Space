@@ -40,6 +40,10 @@ PREDICATE_TYPE = (
     "https://kier73.github.io/in-formation-space/"
     "independent-host-operation-path/v1"
 )
+REPORT_PREDICATE_TYPE = (
+    "https://kier73.github.io/in-formation-space/"
+    "independent-host-operation-report/v1"
+)
 RECORD_FORMAT = "in-formation.independent-host-operation-record"
 RECORD_SCHEMA = "in-formation.independent-host-operation-record/0.1"
 PREDICATE_SCHEMA = "in-formation.independent-host-operation-predicate/0.1"
@@ -714,6 +718,57 @@ def build_report(
     return {**report_core, "report_digest": digest_object(report_core)}
 
 
+def write_report_predicate(
+    report_path: Path,
+    predicate_path: Path,
+    env: Mapping[str, str] | None = None,
+) -> dict[str, Any]:
+    """Bind the third verifier's signed report predicate to the exact report bytes."""
+    report_bytes = report_path.read_bytes()
+    report = read_json(report_path)
+    if report.get("schema") != REPORT_SCHEMA:
+        raise EvidenceError("unsupported independent reconstruction report")
+    report_core = {key: value for key, value in report.items() if key != "report_digest"}
+    if report.get("report_digest") != digest_object(report_core):
+        raise EvidenceError("independent reconstruction report digest is invalid")
+    verifier = host_metadata("verifier_host", env)
+    expected_verifier = {
+        "role": verifier["role"],
+        "job": verifier["job"],
+        "actor_id": verifier["actor_id"],
+        "runner_name": verifier["runner_name"],
+        "runner_os": verifier["runner_os"],
+        "runner_arch": verifier["runner_arch"],
+        "runner_environment": verifier["runner_environment"],
+    }
+    if report.get("verifier") != expected_verifier:
+        raise EvidenceError("report verifier identity does not match the current verifier job")
+    predicate = {
+        "schema": "in-formation.independent-host-report-predicate/0.1",
+        "repository": verifier["repository"],
+        "run_id": verifier["run_id"],
+        "run_attempt": verifier["run_attempt"],
+        "workflow_ref": verifier["workflow_ref"],
+        "workflow_sha": verifier["workflow_sha"],
+        "git_ref": verifier["git_ref"],
+        "git_sha": verifier["git_sha"],
+        "job": verifier["job"],
+        "runner_name": verifier["runner_name"],
+        "runner_os": verifier["runner_os"],
+        "runner_arch": verifier["runner_arch"],
+        "runner_environment": verifier["runner_environment"],
+        "actor_id": verifier["actor_id"],
+        "report_sha256": digest_bytes(report_bytes),
+        "report_digest": report["report_digest"],
+        "source_record_sha256": report["source"]["attestation"]["subject_sha256"],
+        "receiver_record_sha256": report["receiver"]["attestation"]["subject_sha256"],
+        "path_id": report["path_id"],
+        "causal_handoff_digest": report["causal_reconstruction"]["handoff_digest"],
+    }
+    write_json(predicate_path, predicate)
+    return predicate
+
+
 def verify_to_report(
     source_path: Path,
     receiver_path: Path,
@@ -766,6 +821,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     verify_parser.add_argument("--output", type=Path, required=True)
     verify_parser.add_argument("--gh", default="gh")
 
+    report_predicate_parser = commands.add_parser("write-report-predicate")
+    report_predicate_parser.add_argument("--report", type=Path, required=True)
+    report_predicate_parser.add_argument("--output", type=Path, required=True)
+
     args = parser.parse_args(argv)
     try:
         if args.command == "produce-source":
@@ -776,6 +835,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             write_predicate(args.record, args.output, args.role)
         elif args.command == "verify":
             verify_to_report(args.source, args.receiver, args.output, gh=args.gh)
+        elif args.command == "write-report-predicate":
+            write_report_predicate(args.report, args.output)
     except (EvidenceError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
         print(f"independent-host-path: {error}", file=sys.stderr)
         return 2
