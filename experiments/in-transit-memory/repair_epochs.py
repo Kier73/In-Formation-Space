@@ -515,6 +515,7 @@ def _policy_model_report(
         },
         "expected_attempted_epochs_including_failure": expected_epochs,
         "expected_successful_repairs_before_failure": expected_repairs,
+        "expected_lifetime_rounds": expected_lifetime_rounds,
         "expected_lifetime_rounds_including_failed_epoch": expected_lifetime_rounds,
         "expected_repairs_per_100_lifetime_rounds_ratio": repair_rate,
         "expectation_status": expectation_status,
