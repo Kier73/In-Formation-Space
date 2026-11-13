@@ -227,6 +227,8 @@ def encode_temporal_frame(frame: Mapping[str, Any]) -> dict[str, Any]:
     else:
         if not isinstance(phase, (list, tuple)) or len(phase) != 2:
             raise TemporalCoordinateError("chronon_phase must be a real/imaginary pair")
+        if any(isinstance(item, bool) or not isinstance(item, (int, float)) for item in phase):
+            raise TemporalCoordinateError("chronon_phase components must be numeric, not Boolean")
         phase_values = [float(phase[0]), float(phase[1])]
         _check_phase(phase_values)
         wire["chronon_phase"] = [encode_binary64(phase_values[0]), encode_binary64(phase_values[1])]
@@ -235,6 +237,8 @@ def encode_temporal_frame(frame: Mapping[str, Any]) -> dict[str, Any]:
     if tau is None:
         wire["chemical_tau"] = None
     else:
+        if isinstance(tau, bool) or not isinstance(tau, (int, float)):
+            raise TemporalCoordinateError("chemical_tau must be numeric, not Boolean")
         tau_float = float(tau)
         if not math.isfinite(tau_float) or tau_float < 0.0:
             raise TemporalCoordinateError("chemical_tau must be finite and non-negative")
@@ -382,7 +386,7 @@ def encode_operation_span_v2(span: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def decode_operation_span_v2(span: Mapping[str, Any]) -> dict[str, Any]:
-    """Verify span v0.2 digest, then return the v0.1-shaped logical integer values."""
+    """Verify span v0.2 digest, then return an exact logical integer projection."""
     fields = {
         "format", "schema", "attempt_id", "span_id", "operation_id", "clock_actor_id",
         "clock_segment_id", "monotonic_start_ns", "monotonic_end_ns", "elapsed_ns",
@@ -407,7 +411,7 @@ def decode_operation_span_v2(span: Mapping[str, Any]) -> dict[str, Any]:
     else:
         raise TemporalCoordinateError("unsupported span clock status")
     result = dict(raw)
-    result["schema"] = "in-formation.operation-span/0.1"
+    result["schema"] = SPAN_SCHEMA
     result["monotonic_start_ns"] = start
     result["monotonic_end_ns"] = end
     result["elapsed_ns"] = elapsed
