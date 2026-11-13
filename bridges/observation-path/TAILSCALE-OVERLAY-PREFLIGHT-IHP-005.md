@@ -84,6 +84,34 @@ The workflow has id-token: write, required for GitHub to issue an OIDC token. Ta
 
 If TS_OAUTH_CLIENT_ID or TS_AUDIENCE is absent, both jobs produce explicit credentials_missing address records and the third verifier attests a report with status overlay_credentials_missing. The workflow does not invent overlay addresses or route observations in that case.
 
+## Observed hosted-runner result
+
+**Verified run:** [IHP-005 run 2](https://github.com/Kier73/In-Formation-Space/actions/runs/43364200636)  
+**Commit:** 2d21289eacaf01e73c46204528661b6fcdfb54fd  
+**Workflow outcome:** all three jobs passed, the report passed all ten schemas, and the third-host report attestation was published.
+
+| Role | Worker ID | Cloud | Region | Result |
+|---|---|---|---|---|
+| Client host | 498f748e-980e-4d81-b5d8-98466fbd70d6 | AWS | us-east-1 | Tailscale federation values absent; attested credentials-missing address and route records |
+| Server host | 96cbae37-eb15-48e7-9220-1e9dbf19ebd7 | Azure | northcentralus | Tailscale federation values absent; attested credentials-missing address and route records |
+| Verifier host | 37268111-d884-4b58-a690-8bc2f95445dc | Azure | northcentralus | Verified all four producer attestations, validated the report and predicate schemas, and attested the final report |
+
+The report's outcome is deliberately non-committal about connectivity:
+- Overall status: overlay_credentials_missing.
+- Both peer statuses: credentials_missing.
+- Both overlay IPs: null.
+- Both route classifications: not_attempted.
+- No ping command was run.
+- No E-CPU application payload was sent.
+
+This is a successful negative-configuration result, not a network failure. The workflow proves that the evidence/attestation path is operational even when the Tailscale federation client ID and audience are not configured. It does not establish whether a tailnet route will be direct, DERP-relayed, peer-relayed, or unavailable.
+
+**Report artifact:** ihp005-overlay-route-report in [run 2](https://github.com/Kier73/In-Formation-Space/actions/runs/43364200636).  
+**Report-file SHA-256:** 6ee85eeb3e4a98951f2871fa3a4330fcc1c3bb26f43a05dd1a5442d5daba0630  
+**Canonical report digest:** 74173dc0586831080cf7e16ee722e6b315a685a29284d372b11f0a716c13d0ea
+
+The PR-focused route and schema workflow passed 17/17 steps. The post-merge distributed operation-path workflow also passed 17/17 steps on the run's code commit.
+
 ## Route classifications
 
 The probe uses the documented tailscale ping output to distinguish:
