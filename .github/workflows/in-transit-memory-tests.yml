@@ -1,0 +1,30 @@
+name: In-transit memory tests
+
+on:
+  push:
+    paths:
+      - "experiments/in-transit-memory/**"
+      - ".github/workflows/in-transit-memory-tests.yml"
+  pull_request:
+    paths:
+      - "experiments/in-transit-memory/**"
+      - ".github/workflows/in-transit-memory-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run delay-loop tests
+        run: python -m unittest discover -s experiments/in-transit-memory -p "test_*.py" -v
+      - name: Exercise the scan and simulation CLI
+        run: python experiments/in-transit-memory/delay_loop.py --scan --simulate --trials 2000 --seed 20261111 --json > /dev/null

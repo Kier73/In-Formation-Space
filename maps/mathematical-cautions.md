@@ -140,6 +140,16 @@ The expression
 
 is the probability of at least one error across \(k\) independent opportunities, each with error probability \(\epsilon\). It is a useful baseline, but an agent-to-agent error cascade is unlikely to satisfy independence automatically. Shared assumptions, copying, correction, and correlated failures change the result. A cascade model should specify the dependency structure rather than infer it from this expression.
 
+## 9. Retention formulas carry a loss and recovery model
+
+The delay-loop expression
+
+\[
+t_{1/2} = \frac{\tau \ln 2}{M p}
+\]
+
+is not a universal persistence law. It approximates the intact-block case when every one of \(M\) packets must survive and \(p\) is small. The exact intact-block expression uses \(-\ln(1-p)\) rather than \(p\), and a \(k\)-of-\(n\) recovery threshold produces a different half-life. Without repair or renewal, every finite \(k\)-of-\(n\) configuration still decays. The [in-transit memory experiment](../experiments/in-transit-memory/README.md) records exact calculations, a seeded simulation, and the repair-epoch trade-off.
+
 ## Working rule
 
 Keep equations. Keep speculative models. Keep ambitious intuitions. But attach the conditions under which each expression is meaningful, and record when a formula is only an analogy or a proposed scaling law. A model becomes more useful—not less adventurous—when another contributor can tell what would make it fail.
