@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 import select
 import shutil
-import socket
 import ssl
 import subprocess
 import sys
@@ -29,7 +28,6 @@ from mailcpu import (
     RecoveryLineagePeerClient,
     RecoveryStateManifest,
     SeedCommitMembership,
-    SeedCommitCertificate,
 )
 
 
