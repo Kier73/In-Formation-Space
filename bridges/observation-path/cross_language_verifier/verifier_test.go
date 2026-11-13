@@ -179,7 +179,7 @@ func TestPayloadDigestMutationIsRejectedAfterRecordReseal(t *testing.T) {
 	reseal(t, changed["handoff_payload"].(map[string]any), "payload_digest")
 	reseal(t, changed, "record_digest")
 	_, err := Reconstruct(changed, artifactBytes(t, changed), receiver, receiverBytes, testIdentity(t, source))
-	if err == nil || !strings.Contains(err.Error(), "predecessor span") && !strings.Contains(err.Error(), "attempt") {
+	if err == nil || (!strings.Contains(err.Error(), "predecessor span") && !strings.Contains(err.Error(), "attempt") && !strings.Contains(err.Error(), "path/attempt")) {
 		t.Fatalf("expected altered payload binding to be rejected, got %v", err)
 	}
 }
