@@ -1,0 +1,48 @@
+name: Finite-horizon reference acquisition RIV-011
+
+on:
+  push:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/finite-horizon-reference-acquisition.yml"
+      - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - "experiments/reference-calibrated-evidence/reference_acquisition_lookahead.py"
+  pull_request:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/finite-horizon-reference-acquisition.yml"
+      - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - "experiments/reference-calibrated-evidence/reference_acquisition_lookahead.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  finite-horizon-reference-acquisition:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate finite-horizon policy schema
+        run: |
+          python -c "import json, jsonschema; p='experiments/reference-calibrated-evidence/finite-horizon-reference-policy.schema.json'; s=json.load(open(p, encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s)"
+      - name: Compile RIV-011 and upstream reference filters
+        run: |
+          python -m py_compile experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py
+          python -m py_compile experiments/reference-calibrated-evidence/reference_calibrated_evidence.py
+          python -m py_compile experiments/reference-calibrated-evidence/reference_acquisition_lookahead.py
+          python -m py_compile experiments/reference-calibrated-evidence/finite_horizon_reference_policy.py
+          python -m py_compile experiments/reference-calibrated-evidence/finite_horizon_reference_policy_example.py
+      - name: Run finite-horizon and brute-force policy tests
+        env:
+          PYTHONPATH: experiments/reference-calibrated-evidence
+        run: python -m unittest discover -s experiments/reference-calibrated-evidence -p "test_finite_horizon_reference_policy.py" -v
+      - name: Run reproducible policy example
+        env:
+          PYTHONPATH: experiments/reference-calibrated-evidence
+        run: python experiments/reference-calibrated-evidence/finite_horizon_reference_policy_example.py
