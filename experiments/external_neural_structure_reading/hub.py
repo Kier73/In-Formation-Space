@@ -17,16 +17,28 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
-from .nsd import (
-    MAX_HEADER_BYTES,
-    MAX_JSON_BYTES,
-    NSD_SCHEMA,
-    NSDError,
-    _REPOSITORY_RE,
-    _REVISION_RE,
-    _parse_json,
-    parse_safetensors_header_bytes,
-)
+try:
+    from .nsd import (
+        MAX_HEADER_BYTES,
+        MAX_JSON_BYTES,
+        NSD_SCHEMA,
+        NSDError,
+        _REPOSITORY_RE,
+        _REVISION_RE,
+        _parse_json,
+        parse_safetensors_header_bytes,
+    )
+except ImportError:  # direct unittest discovery from this directory
+    from nsd import (
+        MAX_HEADER_BYTES,
+        MAX_JSON_BYTES,
+        NSD_SCHEMA,
+        NSDError,
+        _REPOSITORY_RE,
+        _REVISION_RE,
+        _parse_json,
+        parse_safetensors_header_bytes,
+    )
 
 DEFAULT_ENDPOINT = "https://huggingface.co"
 _USER_AGENT = "In-Formation-Space-HFR-001/0.1"
