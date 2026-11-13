@@ -54,7 +54,7 @@ def _observe(export: dict, case: str, *, run=subprocess.run) -> dict:
                 "error:" not in combined.lower() and "warning:" not in combined.lower())
     return {
         "case": case,
-        "input_sha256": _sha(t.canonical(export)),
+        "input_sha256": _sha(SERIALIZED.read_bytes()),
         "process_exit_code": completed.returncode,
         "stdout_sha256": _sha(completed.stdout.encode("utf-8")),
         "stderr_sha256": _sha(completed.stderr.encode("utf-8")),
