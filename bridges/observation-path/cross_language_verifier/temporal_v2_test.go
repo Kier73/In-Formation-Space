@@ -182,7 +182,7 @@ func TestTemporalV2ChrononPhaseValidation(t *testing.T) {
 		t.Run(vector.Name, func(t *testing.T) {
 			real := floatFromTemporalHex(t, vector.RealBEHex)
 			imaginary := floatFromTemporalHex(t, vector.ImagBEHex)
-			err := checkTemporalPhase(real, imaginary)
+			err := v2CheckTemporalPhase(real, imaginary)
 			if vector.Accepted && err != nil {
 				t.Fatalf("valid phase rejected: %v", err)
 			}
