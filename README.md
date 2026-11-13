@@ -215,3 +215,8 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Finite-horizon reference acquisition
 
 - [RIV-011: Finite-horizon reference acquisition](experiments/reference-calibrated-evidence/RIV-011-README.md) — compares an exact finite-horizon adaptive reference policy with repeated RIV-010 greedy re-selection under the same per-path budget. It retains a policy tree whose next reference may depend on the preceding signal, with exact rational values and a fail-closed policy-state cap.
+
+
+## Evidence-gated execution of finite-horizon reference policies
+
+- [RIV-012: Evidence-gated execution of finite-horizon reference policies](experiments/reference-calibrated-evidence/RIV-012-README.md) — binds each adaptive policy action to the current RIV-011 node, exact posterior, signal prefix and remaining budget; only an authorized interpreted ObservationPath advances the policy and contributes to a cumulative RIV-009 report rebuilt from the original calibration prior.
