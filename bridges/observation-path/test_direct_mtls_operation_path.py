@@ -69,7 +69,7 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
                 ("active", "direct", "active; direct"),
             ),
             (
-                f"{peer} private-host owner@example.com linux active; relay \\"sea\\", tx 9 rx 8",
+                f"{peer} private-host owner@example.com linux active; relay sea, tx 9 rx 8",
                 ("active", "derp_relay", "active; relay"),
             ),
             (
@@ -109,7 +109,7 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
 
         output = (
             b"100.71.0.2 private-host owner@example.com linux "
-            b"active; direct 198.51.100.4:41641, tx 9 rx 8\\n"
+            b"active; direct 198.51.100.4:41641, tx 9 rx 8\n"
         )
         completed = subprocess.CompletedProcess(["tailscale", "status"], 0, output, b"")
         with (
