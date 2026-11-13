@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MOR-002 Tailscale causal reconstruction report",
+  "type": "object",
+  "required": ["schema", "status", "path_id", "run_id", "run_attempt", "direct_transport_report_digest", "duration", "limitations", "report_digest"],
+  "properties": {
+    "schema": {"const": "in-formation.mor002-overlay-causal-report/0.1"},
+    "status": {"enum": ["direct_mtls_verified", "direct_transport_unavailable"]},
+    "path_id": {"type": ["string", "null"]},
+    "run_id": {"type": "string"},
+    "run_attempt": {"type": "string"},
+    "workflow_ref": {"type": "string"},
+    "direct_transport_report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "direct_transport_status": {"type": "string"},
+    "hosts": {"type": "object"},
+    "transport": {"type": "object"},
+    "events": {"type": "array"},
+    "event_observations": {"type": "object"},
+    "pairwise_relations": {"type": "array", "minItems": 6, "maxItems": 6},
+    "causal_reconstruction": {"type": ["object", "null"]},
+    "causal_summary": {"type": "object"},
+    "handoff": {"type": "object"},
+    "duration": {
+      "type": "object",
+      "required": ["combined_cross_host_elapsed_ns", "status"],
+      "properties": {
+        "combined_cross_host_elapsed_ns": {"type": "null"},
+        "status": {"const": "not_computed_independent_unaligned_clock_domains"}
+      }
+    },
+    "wall_clock": {"type": "object"},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "direct_mtls_verified"}}, "required": ["status"]},
+      "then": {
+        "required": ["hosts", "transport", "events", "pairwise_relations", "causal_summary", "handoff", "wall_clock"],
+        "properties": {
+          "transport": {
+            "required": ["substrate", "semantic_payload_relayed_by_artifact_store", "peer_route_observations"],
+            "properties": {"semantic_payload_relayed_by_artifact_store": {"const": false}}
+          },
+          "pairwise_relations": {"minItems": 6, "maxItems": 6},
+          "causal_summary": {
+            "required": ["strict_before_pairs", "concurrent_pairs", "unobserved_pairs", "pair_status_counts", "global_total_order"],
+            "properties": {"global_total_order": {"type": "null"}}
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "direct_transport_unavailable"}}, "required": ["status"]},
+      "then": {
+        "required": ["direct_transport_status", "event_observations", "causal_reconstruction"],
+        "properties": {"causal_reconstruction": {"type": "null"}}
+      }
+    }
+  ],
+  "additionalProperties": true
+}
