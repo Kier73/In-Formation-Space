@@ -1401,23 +1401,12 @@ def connect_and_send(
             "handoff_payload": handoff_payload,
         }
         signed_envelope = _signed_document(envelope_core, own_key_path)
-        if _workflow_path(host["workflow_ref"]) == MOR002_WORKFLOW_PATH:
-            _write_mor002_source_followup(
-                directory,
-                host=host,
-                context=context,
-                recorder=recorder,
-                attempt_id=attempt_id,
-                predecessor_span=source_span,
-                predecessor_frame=sender_frame,
-                signed_envelope=signed_envelope,
-                private_key_path=own_key_path,
-            )
         return source_span, sender_frame, handoff_payload, signed_envelope
 
     source_span: dict[str, Any] | None = None
     sender_frame: dict[str, Any] | None = None
     signed_envelope: dict[str, Any] | None = None
+    mor002_followup_written = False
     deadline = time.monotonic() + connect_timeout_seconds
     transport: SocketTransport | None = None
     last_error = "connection has not been attempted"
@@ -1440,6 +1429,14 @@ def connect_and_send(
 
     if transport is None:
         source_span, sender_frame, _, signed_envelope = prepare_operation_handoff()
+        if _workflow_path(host["workflow_ref"]) == MOR002_WORKFLOW_PATH:
+            _write_mor002_source_followup(
+                directory, host=host, context=context, recorder=recorder,
+                attempt_id=attempt_id, predecessor_span=source_span,
+                predecessor_frame=sender_frame, signed_envelope=signed_envelope,
+                private_key_path=own_key_path,
+            )
+            mor002_followup_written = True
         record = _make_record(
             role="client_host",
             host=host,
@@ -1474,6 +1471,16 @@ def connect_and_send(
         sequence = sender_channel.send(signed_envelope)
         if sequence != 1:
             raise DirectMTLSError("first direct operation did not use ReliableChannel sequence one")
+        # A2 is emitted only after the A1 payload has entered the peer channel.
+        # It is not part of the already-signed A1 envelope and is not sent to B.
+        if _workflow_path(host["workflow_ref"]) == MOR002_WORKFLOW_PATH:
+            _write_mor002_source_followup(
+                directory, host=host, context=context, recorder=recorder,
+                attempt_id=attempt_id, predecessor_span=source_span,
+                predecessor_frame=sender_frame, signed_envelope=signed_envelope,
+                private_key_path=own_key_path,
+            )
+            mor002_followup_written = True
         _wait_for_ack(sender_channel, (sequence,), timeout_seconds=15.0)
 
         receipt_receiver = ReliableChannel(
@@ -1542,6 +1549,16 @@ def connect_and_send(
             "receipt_sequence": receipt_sequence,
         }
     except Exception as error:
+        if _workflow_path(host["workflow_ref"]) == MOR002_WORKFLOW_PATH and not mor002_followup_written:
+            if source_span is None or sender_frame is None or signed_envelope is None:
+                source_span, sender_frame, _, signed_envelope = prepare_operation_handoff()
+            _write_mor002_source_followup(
+                directory, host=host, context=context, recorder=recorder,
+                attempt_id=attempt_id, predecessor_span=source_span,
+                predecessor_frame=sender_frame, signed_envelope=signed_envelope,
+                private_key_path=own_key_path,
+            )
+            mor002_followup_written = True
         record = _make_record(
             role="client_host",
             host=host,
