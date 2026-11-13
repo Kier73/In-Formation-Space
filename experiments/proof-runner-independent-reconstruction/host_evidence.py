@@ -889,6 +889,19 @@ def build_fixture(out_dir: Path) -> None:
     _write(authority_dir / "stale-owner-attempt.json", stale_attempt)
     database_path = authority_dir / "authority-store-fixture.bin"
     database_path.write_bytes(database_bytes)
+    _write(
+        out_dir / "authority" / "sqlite-authority-verification-fixture.json",
+        {
+            "verified": False,
+            "store_type": "sqlite-local-file",
+            "ledger_digest": ledger["ledger_digest"],
+            "revision_count": len(history),
+            "active_epoch_id": ledger["entries"][-1]["epoch_id"],
+            "active_owner_id": ledger["entries"][1]["details"]["owner_id"],
+            "active_owner_generation": 2,
+            "history_digest": _digest(history),
+        },
+    )
     authority_key_path = authority_dir / "authority-public-key.json"
     _write(authority_key_path, authority_key_doc)
     write_key_predicate(
