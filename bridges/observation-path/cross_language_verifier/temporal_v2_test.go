@@ -219,13 +219,13 @@ func TestTemporalFrameV2RoundtripWithWideCountersAndBinary64Domains(t *testing.T
 	if err != nil {
 		t.Fatal(err)
 	}
-	mono := restored["monotonic"].(map[string]any)
+	mono := restored["monotonic"].(Object)
 	elapsed := mono["elapsed_ns"].(*big.Int)
 	wantElapsed, _ := new(big.Int).SetString("18446744073709551616000", 10)
 	if elapsed.Cmp(wantElapsed) != 0 {
 		t.Fatalf("elapsed_ns=%s, want %s", elapsed, wantElapsed)
 	}
-	wall := restored["wall"].(map[string]any)
+	wall := restored["wall"].(Object)
 	utc := wall["utc_ns"].(*big.Int)
 	wantUTC := big.NewInt(-9223372036854775808)
 	if utc.Cmp(wantUTC) != 0 {
