@@ -102,7 +102,6 @@ def producer_identity() -> dict[str, Any]:
 def _manifest_for(
     membership: SeedCommitMembership,
     *,
-    cluster_id: str,
     state_payload: bytes,
 ) -> RecoveryStateManifest:
     return RecoveryStateManifest(
@@ -144,7 +143,6 @@ def produce_cluster(
     (out_dir / "state.bin").write_bytes(state_payload)
     manifest = _manifest_for(
         membership,
-        cluster_id=cluster_id,
         state_payload=state_payload,
     )
 
@@ -236,6 +234,20 @@ def _verify_one_cluster(bundle_dir: Path) -> dict[str, Any]:
     }
     if set(bundle) != expected_bundle_fields:
         raise ForkDetectionError("cluster bundle fields are invalid")
+    expected_membership = configured_membership()
+    producer = bundle.get("producer_identity")
+    producer_fields = {
+        "repository", "run_id", "run_attempt", "run_number",
+        "workflow_ref", "workflow_sha", "git_sha", "job",
+        "runner_name", "runner_environment",
+    }
+    if (
+        membership.snapshot() != expected_membership.snapshot()
+        or not isinstance(producer, Mapping)
+        or set(producer) != producer_fields
+        or any(not isinstance(value, str) or not value for value in producer.values())
+    ):
+        raise ForkDetectionError("cluster bundle does not use the declared fixed membership or producer identity")
     proposal = proof.proposal
     if (
         membership.digest != bundle.get("membership_digest")
@@ -360,6 +372,8 @@ def observe_two_clusters(
 ) -> dict[str, Any]:
     left = _verify_one_cluster(left_dir)
     right = _verify_one_cluster(right_dir)
+    if left["cluster_id"] != "left" or right["cluster_id"] != "right":
+        raise ForkDetectionError("left/right evidence directories contain swapped or mislabeled cluster bundles")
 
     shared_configuration = (
         left["membership_digest"] == right["membership_digest"]
