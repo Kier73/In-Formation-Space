@@ -406,9 +406,15 @@ def _build_runner_material(
     *,
     fixture: bool,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    _check_key_doc(authority_key_doc, "authority_host", "authority_host")
     event = _verify_authority_material(
         ledger, request, authority_attestation, authority_key_doc
     )
+    runner_host_identity = _host_identity("runner_host", fixture=fixture)
+    authority_host_identity = authority_key_doc["host"]
+    for field in ("repository", "run_id", "run_attempt", "run_number", "workflow_ref", "workflow_sha", "git_ref", "git_sha"):
+        if authority_host_identity[field] != runner_host_identity[field]:
+            raise EvidenceError(f"authority and runner host differ in {field}")
     result = _build_result(request)
     receipt = create_completion_receipt(
         event,
@@ -447,6 +453,7 @@ def _check_key_doc(document: Mapping[str, Any], expected_role: str, expected_job
         host["repository"] != REPOSITORY
         or host["job"] != expected_job
         or host["git_ref"] != SOURCE_REF
+        or host["workflow_ref"] != f"{REPOSITORY}/{WORKFLOW_PATH}@{SOURCE_REF}"
         or host["runner_environment"] != "github-hosted"
         or not isinstance(host["runner_name"], str)
         or not host["runner_name"]
@@ -557,6 +564,11 @@ def build_fixture(out_dir: Path) -> None:
     _write(runner_dir / "result.json", result)
     _write(runner_dir / "completion-receipt.json", receipt)
     _write(runner_dir / "runner-public-key.json", runner_key_doc)
+    verifier_host = {
+        "format": "in-formation.proof-runner-verifier-host/0.1",
+        "host": _host_identity("independent_verifier_host", fixture=True),
+    }
+    _write(out_dir / "verifier-host.json", verifier_host)
 
 
 def produce_authority(out_dir: Path) -> None:
@@ -582,6 +594,14 @@ def produce_runner(authority_dir: Path, out_dir: Path) -> None:
     _write(out_dir / "runner-public-key.json", runner_key_doc)
 
 
+def write_verifier_host(output_path: Path, *, fixture: bool = False) -> None:
+    document = {
+        "format": "in-formation.proof-runner-verifier-host/0.1",
+        "host": _host_identity("independent_verifier_host", fixture=fixture),
+    }
+    _write(output_path, document)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -601,6 +621,10 @@ def main() -> None:
     verify.add_argument("--role", choices=("authority_host", "runner_host"), required=True)
     verify.add_argument("--job", choices=("authority_host", "runner_host"), required=True)
 
+    verifier = sub.add_parser("verifier-host", help="write the independent third-host identity")
+    verifier.add_argument("--output", type=Path, required=True)
+    verifier.add_argument("--fixture", action="store_true", help="write deterministic test identity")
+
     args = parser.parse_args()
     try:
         if args.command == "fixture":
@@ -612,6 +636,8 @@ def main() -> None:
         elif args.command == "verify-key-attestation":
             result = verify_key_attestation(args.path, args.role, args.job)
             print(json.dumps(result, sort_keys=True))
+        elif args.command == "verifier-host":
+            write_verifier_host(args.output, fixture=args.fixture)
     except (EvidenceError, CompletionReceiptError, OSError, ValueError) as exc:
         parser.exit(1, f"proof-runner reconstruction: {exc}\n")
 
