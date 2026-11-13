@@ -308,3 +308,43 @@ The common channel is dramatically worse for the permissive one-packet recovery 
 The Pareto frontier keeps repair-event rate visible alongside expected lifetime. For the rare-persistent-burst shared-channel case, its nondominated policies are \(k=1,L=1\), \(k=1,L=2\), \(k=1,L=8\), \(k=6,L=8\), and \(k=12,L=8\). No one of these is declared best without a resource value or repair budget.
 
 The CI summary receipt stores the complete tested grid and the frontier entries. Reproduce the full transition matrices and reports with the CLI commands above. Results whose median is not reached by 100 repair intervals are explicitly right-censored; they are not assigned an infinite half-life.
+
+
+## 11. Observed-state adaptive repair: MRE-003
+
+MRE-002 compared fixed repair intervals. MRE-003 asks whether observing the current survivor count and shared channel state can improve repair decisions by waiting through good conditions and repairing before another risky circulation.
+
+At each circulation boundary the controller receives the exact state \((m,s)\), where \(m\) is the number of surviving data packets and \(s\in\{G,B\}\) is the shared channel state. It chooses:
+
+- **WAIT:** leave the current data packet count unchanged before the next circulation.
+- **REPAIR:** reconstruct all \(n\) data packets immediately, without resetting the channel state.
+
+The current state governs packet loss during the next circulation; the Markov transition occurs after losses. Falling below the recovery threshold \(k\) is absorbing. The horizon terminal reward is 1 if at least \(k\) packets remain, otherwise 0.
+
+### Explicit objective and exact dynamic programme
+
+The finite-horizon objective is:
+
+\[
+U=P(\text{recoverable at horizon})-c\,E[\text{number of repairs}],
+\]
+
+where \(c\ge0\) is a declared repair cost in units of terminal survival reward. It is an explicit policy input, not an implicit utility weight. The optimiser uses backward induction over \((t,m,s)\), stores both WAIT and REPAIR continuation values, and chooses WAIT on ties to avoid unnecessary repairs.
+
+A separate forward probability propagation evaluates the selected policy and reconstructs terminal survival and expected repair count. Its expected utility must equal the backward-induction initial value. The controller is compared against every declared fixed interval under the same objective, including a no-repair candidate. Consequently the adaptive policy's utility cannot be lower than the best fixed candidate in the supplied schedule set, up to numerical tolerance.
+
+### Observation assumption and evidence boundary
+
+The first version assumes that exact survivor count and exact shared channel state are observable before each action at zero sensing cost. This is deliberately strong. The report does not claim that a real receiver can infer these values, that a state label is authenticated, or that a telemetry path is free. Partial/noisy observation, sensing delay, communication overhead, and observation-path authorization remain outside MRE-003. The current controller is a finite mathematical policy, not a live E-CPU action adapter.
+
+Only the shared-channel model is controlled in MRE-003. Extending to independent per-packet channel states would require a larger observable state or a belief state over hidden per-slot channel states, and is not silently approximated here.
+
+### Reproduction
+
+~~~bash
+python -m unittest discover -s experiments/in-transit-memory -p "test_*.py" -v
+python experiments/in-transit-memory/adaptive_repair.py --scan --json
+python experiments/in-transit-memory/adaptive_repair.py --scan --simulate --trials 2000 --seed 20261112 --json
+~~~
+
+The focused tests check backward-vs-forward reconstruction, dominance over fixed schedules, the no-repair special case, repair-cost monotonicity, explicit state/action coverage, agreement with the original BTL-001 no-repair retention, report/sweep digests, and seeded simulation against exact policy metrics. The CLI prints a direct adaptive-vs-best-fixed comparison for each threshold and repair-cost pair.
