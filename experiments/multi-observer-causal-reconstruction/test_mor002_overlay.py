@@ -166,14 +166,14 @@ class MOR002OverlayTests(unittest.TestCase):
         workflow_text = workflow_path.read_text(encoding="utf-8")
         import re
 
-        jobs_match = re.search(r"(?ms)^jobs:\\n(.*?)(?=^[^ \\t]|\\Z)", workflow_text)
+        jobs_match = re.search(r"(?ms)^jobs:\n(.*?)(?=^[^ \t]|\Z)", workflow_text)
         self.assertIsNotNone(jobs_match)
         job_names = re.findall(r"(?m)^  ([a-z_]+):$", jobs_match.group(1))
         self.assertEqual(job_names, ["tests", "client_host", "server_host", "observer_host", "verifier_host"])
 
         def job_block(name: str) -> str:
             match = re.search(
-                rf"(?ms)^  {re.escape(name)}:\\n(.*?)(?=^  [a-z_]+:\\n|\\Z)",
+                rf"(?ms)^  {re.escape(name)}:\n(.*?)(?=^  [a-z_]+:\n|\Z)",
                 workflow_text,
             )
             self.assertIsNotNone(match)
