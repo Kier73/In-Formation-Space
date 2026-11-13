@@ -46,6 +46,10 @@ jobs:
         env:
           PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
         run: python -m unittest discover -s experiments/lean-kernel-independent-recheck -p "test_unified_kernel_receipt.py" -v
+      - name: Adversarial recipient verification and persistent replay tests
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: python -m unittest discover -s experiments/lean-kernel-independent-recheck -p "test_proof_receipt_receiver.py" -v
       - name: Observe fixed theorem and export elaborated term
         env:
           PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
@@ -230,5 +234,112 @@ jobs:
         with:
           name: unified-vgi-kernel-receipt
           path: evidence/unified-vgi-kernel-receipt.json
+          if-no-files-found: error
+          retention-days: 90
+
+  receipt_receiver:
+    # Separate hosted recipient process. Never admit a GitHub-authorized
+    # transferred proof on an untrusted PR or manual workflow dispatch.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [vgi_unified_admission]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - name: Install pinned Lean to independently derive the recipient's intended obligation
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-proof-runner
+          path: incoming-runner
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-source-checker
+          path: incoming-source-checker
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-serialized-kernel
+          path: incoming-serialized-kernel
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-vgi-kernel-receipt
+          path: incoming-unified-receipt
+      - name: Independently reconstruct the trusted recipient intent without sender data
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          mkdir -p evidence
+          python experiments/lean-kernel-independent-recheck/recipient_intent.py \
+            --source-sha "$GITHUB_SHA" --run-id "$GITHUB_RUN_ID" \
+            --run-attempt "$GITHUB_RUN_ATTEMPT" --scope "proof-receiver-host-B" \
+            --ttl-seconds 1200 --output evidence/recipient-intent.json
+      - name: Verify all six GitHub/Sigstore subjects and atomically admit the receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          python experiments/lean-kernel-independent-recheck/proof_receipt_receiver.py \
+            --runner incoming-runner/unified-runner.json \
+            --checker incoming-source-checker/unified-source-checker.json \
+            --signed incoming-source-checker/unified-signed-source.json \
+            --public-key incoming-source-checker/unified-ephemeral-public.pem \
+            --serialized-kernel incoming-serialized-kernel/unified-serialized-kernel.json \
+            --unified-receipt incoming-unified-receipt/unified-vgi-kernel-receipt.json \
+            --intent evidence/recipient-intent.json \
+            --ledger evidence/durable-recipient-ledger.sqlite3 \
+            --output evidence/recipient-accepted.json
+      - name: A fresh recipient process must reject replay against the same SQLite ledger
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          if python experiments/lean-kernel-independent-recheck/proof_receipt_receiver.py \
+            --runner incoming-runner/unified-runner.json \
+            --checker incoming-source-checker/unified-source-checker.json \
+            --signed incoming-source-checker/unified-signed-source.json \
+            --public-key incoming-source-checker/unified-ephemeral-public.pem \
+            --serialized-kernel incoming-serialized-kernel/unified-serialized-kernel.json \
+            --unified-receipt incoming-unified-receipt/unified-vgi-kernel-receipt.json \
+            --intent evidence/recipient-intent.json \
+            --ledger evidence/durable-recipient-ledger.sqlite3 \
+            --output evidence/recipient-replayed.json \
+            2>evidence/replay-rejection.txt; then
+            echo "ERROR: a repeated transfer was admitted" >&2
+            exit 1
+          fi
+          grep -q "replayed receipt" evidence/replay-rejection.txt
+          echo "RECIPIENT_REPLAY_REJECTED after a new process opened the durable SQLite ledger"
+      - name: Attest recipient's independently verified decision and replay ledger
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            evidence/recipient-accepted.json
+            evidence/durable-recipient-ledger.sqlite3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: independently-verified-proof-transfer
+          path: |
+            evidence/recipient-accepted.json
+            evidence/durable-recipient-ledger.sqlite3
           if-no-files-found: error
           retention-days: 90
