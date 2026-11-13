@@ -376,7 +376,21 @@ def build_distributed_operation_path_trace(
     attempt = _text(attempt_id, "attempt_id")
     spans = _span_index(span_documents, attempt)
     reference_clock = clock_domain_id(reference_clock_actor_id, reference_clock_segment_id)
-    _calibration_map, calibration_bindings = _validate_calibrations(clock_calibrations, spans, reference_clock)
+    calibration_map, calibration_bindings = _validate_calibrations(clock_calibrations, spans, reference_clock)
+    for span in spans.values():
+        domain = clock_domain_id(span["clock_actor_id"], span["clock_segment_id"])
+        if domain == reference_clock:
+            continue
+        calibration = calibration_map[domain]
+        if not (
+            calibration["validity_source_min"] <= span["monotonic_start_ns"]
+            <= calibration["validity_source_max"]
+            and calibration["validity_source_min"] <= span["monotonic_end_ns"]
+            <= calibration["validity_source_max"]
+        ):
+            raise DistributedOperationPathError(
+                "operation span lies outside its clock calibration validity interval"
+            )
 
     nodes = set(spans)
     local_edges: list[dict[str, str]] = []
@@ -398,13 +412,24 @@ def build_distributed_operation_path_trace(
     local_edges.sort(key=lambda e: (e["predecessor_span_digest"], e["successor_span_digest"]))
 
     handoffs: list[dict[str, Any]] = []
+    channel_sequences: set[tuple[str, str, int]] = set()
     for handoff in causal_handoffs:
         if not isinstance(handoff, Mapping):
             raise DistributedOperationPathError("causal_handoffs entries must be mappings")
+        if handoff.get("path_id") != path or handoff.get("attempt_id") != attempt:
+            raise DistributedOperationPathError("causal handoff path or attempt identity differs from trace")
         before = handoff.get("predecessor_span_digest")
         after = handoff.get("successor_span_digest")
         if before not in spans or after not in spans:
             raise DistributedOperationPathError("causal handoff references an unknown operation span")
+        channel_key = (
+            _text(handoff.get("sender_actor_id"), "handoff sender_actor_id"),
+            _text(handoff.get("channel_id"), "handoff channel_id"),
+            _integer(handoff.get("message_sequence"), "handoff message_sequence", 1),
+        )
+        if channel_key in channel_sequences:
+            raise DistributedOperationPathError("duplicate reliable-channel message identity in causal handoffs")
+        channel_sequences.add(channel_key)
         handoffs.append(validate_causal_handoff_witness(
             handoff, predecessor_span=spans[before], successor_span=spans[after]
         ))
