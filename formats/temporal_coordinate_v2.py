@@ -6,6 +6,7 @@ floating-point values as JSON numbers.
 """
 from __future__ import annotations
 
+import hashlib
 import math
 import re
 import struct
@@ -380,8 +381,7 @@ def encode_operation_span_v2(span: Mapping[str, Any]) -> dict[str, Any]:
     result["elapsed_ns"] = None if elapsed is None else encode_integer(elapsed)
     core = {key: value for key, value in result.items() if key != "span_digest"}
     canonical_bytes(core)
-    from formats.canonical_metadata_v1 import canonical_digest
-    result["span_digest"] = canonical_digest(core)
+    result["span_digest"] = hashlib.sha256(canonical_bytes(core)).hexdigest()
     return result
 
 
@@ -395,9 +395,8 @@ def decode_operation_span_v2(span: Mapping[str, Any]) -> dict[str, Any]:
     raw = _exact(span, fields, "operation span v0.2")
     if raw["format"] != SPAN_FORMAT or raw["schema"] != SPAN_SCHEMA:
         raise TemporalCoordinateError("operation span v2 format or schema mismatch")
-    from formats.canonical_metadata_v1 import canonical_digest
     core = {key: value for key, value in raw.items() if key != "span_digest"}
-    if canonical_digest(core) != raw["span_digest"]:
+    if hashlib.sha256(canonical_bytes(core)).hexdigest() != raw["span_digest"]:
         raise TemporalCoordinateError("operation span v2 digest mismatch")
     start = decode_integer(raw["monotonic_start_ns"], minimum=0)
     end = decode_integer(raw["monotonic_end_ns"], minimum=0)
