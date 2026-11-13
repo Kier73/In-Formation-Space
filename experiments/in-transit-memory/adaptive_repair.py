@@ -854,7 +854,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             rendered = json.dumps(reports, indent=2, sort_keys=True, allow_nan=False)
         else:
             lines = [
-                "scenario | k | repair_cost | adaptive_survival | adaptive_repairs | adaptive_utility | state_sensitive_cells | best_fixed_L | fixed_utility | utility_gain"
+                "scenario | k | repair_cost | adaptive_survival | adaptive_repairs | adaptive_utility | state_sensitive_cells | repair_state_rows | policy_sha256 | best_fixed_L | fixed_utility | utility_gain"
             ]
             for sweep in reports:
                 for report in sweep["policies"]:
@@ -865,6 +865,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         f"{report['scenario']['repair_cost']} | {adaptive['survival_probability']:.6g} | "
                         f"{adaptive['expected_repair_count']:.6g} | {adaptive['expected_utility']:.6g} | "
                         f"{adaptive['state_conditioned_decision_cells']} | "
+                        f"{adaptive['selected_repair_state_count']} | {adaptive['policy_digest']} | "
                         f"{fixed['interval_rounds']} | {fixed['expected_utility']:.6g} | "
                         f"{report['adaptive_gain_over_best_fixed']:.6g}"
                     )
