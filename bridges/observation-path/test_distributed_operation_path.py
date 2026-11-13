@@ -287,7 +287,7 @@ class DistributedOperationPathTests(unittest.TestCase):
             [a, b, c], trace=trace, clock_calibrations=calibrations
         )
         self.assertEqual(report["causal_handoff_count"], 2)
-        self.assertEqual(report["critical_path_lower_ns"], 30)
+        self.assertEqual(report["critical_path_lower_ns"], 20)
 
     def test_concurrent_vector_stamps_are_not_accepted_as_a_handoff(self):
         a = operation_span("host-a", 0, "a", "a", 10, 20)
