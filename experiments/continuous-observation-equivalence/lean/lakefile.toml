@@ -1,6 +1,9 @@
 name = "coe_cell_soundness"
 version = "0.1.0"
-defaultTargets = ["COECellSoundness"]
+defaultTargets = ["COECellSoundness", "COERationalRoot"]
 
 [[lean_lib]]
 name = "COECellSoundness"
+
+[[lean_lib]]
+name = "COERationalRoot"
