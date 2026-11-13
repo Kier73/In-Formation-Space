@@ -350,7 +350,7 @@ def resume_on_recovery_host(
     owner_host_id: str,
     implementation_fingerprint: str,
     next_resume_controls: Mapping[str, int],
-    before_claim_complete: Callable[[bytes, Mapping[str, Any], str], None] | None = None,
+    before_claim_complete: Callable[[bytes, Mapping[str, Any], str], str | None] | None = None,
     after_claim_complete: Callable[[PortableExecutionClaimBundle], None] | None = None,
     after_successor_claim: Callable[[StatefulRuntimeRecoveryEnvelope], None] | None = None,
 ) -> StatefulRuntimeRehomeResult:
@@ -443,7 +443,18 @@ def resume_on_recovery_host(
         receipt_digest = _digest(receipt_core)
         output_digest = _bytes_digest(next_checkpoint)
         if before_claim_complete is not None:
-            before_claim_complete(next_checkpoint, receipt_core, receipt_digest)
+            independent_verification_digest = before_claim_complete(
+                next_checkpoint,
+                receipt_core,
+                receipt_digest,
+            )
+            if independent_verification_digest is not None:
+                _require_digest(
+                    independent_verification_digest,
+                    "independent_verification_digest",
+                )
+                receipt_core["independent_verification_digest"] = independent_verification_digest
+                receipt_digest = _digest(receipt_core)
     except (
         PortableStatefulCheckpointError,
         TransferableExecutionClaimError,

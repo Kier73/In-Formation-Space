@@ -6,7 +6,10 @@ import base64
 import hashlib
 import json
 import os
+import shutil
+import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, Callable, Mapping
@@ -32,7 +35,7 @@ from stateful_recovery_handoff import (
 REQUEST_CHANNEL = "ifs.psc.stateful-recovery.request.v1"
 RESPONSE_CHANNEL = "ifs.psc.stateful-recovery.response.v1"
 OUTBOX_SCHEMA = "ifs.psc.stateful-recovery-worker-outbox.v1"
-PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v1"
+PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v2"
 _MAX_RECORD_BYTES = 96 * 1024 * 1024
 
 
@@ -133,6 +136,7 @@ def _read_prepared(
         "output_checkpoint_sha256",
         "receipt_core",
         "receipt_sha256",
+        "independent_verification",
         "prepared_sha256",
     }
     if not isinstance(record, Mapping) or set(record) != fields:
@@ -140,6 +144,16 @@ def _read_prepared(
     core = {key: record[key] for key in fields if key != "prepared_sha256"}
     if record["schema"] != PREPARED_SCHEMA or _digest(core) != record["prepared_sha256"]:
         raise ValueError("prepared result schema or digest is invalid")
+    verification = record["independent_verification"]
+    if verification is not None:
+        if not isinstance(verification, Mapping) or "verification_digest" not in verification:
+            raise ValueError("prepared independent-verification receipt is malformed")
+        verification_core = {
+            key: value for key, value in verification.items()
+            if key != "verification_digest"
+        }
+        if _digest(verification_core) != verification["verification_digest"]:
+            raise ValueError("prepared independent-verification receipt digest mismatch")
     if (
         record["request_sequence"] != sequence
         or record["input_claim_id"] != envelope.claim_id
@@ -203,6 +217,7 @@ def _write_prepared(
         "output_checkpoint_sha256": hashlib.sha256(output_checkpoint).hexdigest(),
         "receipt_core": dict(receipt_core),
         "receipt_sha256": receipt_sha256,
+        "independent_verification": None,
     }
     if _digest(core["receipt_core"]) != receipt_sha256:
         raise ValueError("worker attempted to persist a prepared result with an invalid receipt digest")
@@ -228,6 +243,109 @@ def _write_prepared(
             pass
         raise
     return record
+
+
+def _store_independent_verification(
+    path: Path,
+    verification: Mapping[str, Any],
+) -> dict[str, Any]:
+    record = json.loads(path.read_text(encoding="utf-8"))
+    existing = record.get("independent_verification")
+    selected = dict(verification)
+    if existing is not None and existing != selected:
+        raise ValueError("prepared independent-verification receipt changed across recovery")
+    record["independent_verification"] = selected
+    core = {key: value for key, value in record.items() if key != "prepared_sha256"}
+    record["prepared_sha256"] = _digest(core)
+    payload = _canonical(record) + b"\n"
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.verification.tmp")
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        directory_descriptor = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_descriptor)
+        finally:
+            os.close(directory_descriptor)
+    except BaseException:
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+    return record
+
+
+def _verify_prepared_with_node(
+    *,
+    envelope: StatefulRuntimeRecoveryEnvelope,
+    prepared_path: Path,
+) -> dict[str, Any]:
+    node = shutil.which("node")
+    if node is None:
+        raise RuntimeError("independent prepared-result verification requires Node.js")
+    script = Path(__file__).with_name("verify_prepared_result.mjs")
+    if not script.is_file():
+        raise RuntimeError("independent prepared-result verifier script is missing")
+
+    envelope_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=prepared_path.parent,
+            prefix=f".{envelope.claim_id}.envelope.",
+            suffix=".json",
+            delete=False,
+        ) as stream:
+            envelope_path = Path(stream.name)
+            stream.write(_canonical(envelope.to_dict()))
+            stream.flush()
+            os.fsync(stream.fileno())
+
+        completed = subprocess.run(
+            [
+                node,
+                str(script),
+                "--envelope",
+                str(envelope_path),
+                "--prepared",
+                str(prepared_path),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=90,
+            check=False,
+        )
+        if completed.returncode != 0:
+            message = completed.stderr.strip() or completed.stdout.strip() or "unknown verifier failure"
+            raise RuntimeError(f"independent Node prepared-result verifier rejected the result: {message}")
+        try:
+            report = json.loads(completed.stdout)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError("independent Node verifier returned malformed JSON") from exc
+        if (
+            not isinstance(report, Mapping)
+            or report.get("valid") is not True
+            or not isinstance(report.get("verification"), Mapping)
+            or report.get("verification_digest") != report["verification"].get("verification_digest")
+        ):
+            raise RuntimeError("independent Node verifier returned an incomplete verification receipt")
+        verification_core = {
+            key: value for key, value in report["verification"].items()
+            if key != "verification_digest"
+        }
+        if _digest(verification_core) != report["verification_digest"]:
+            raise RuntimeError("independent Node verification receipt digest mismatch")
+        return dict(report)
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError("independent Node prepared-result verification timed out") from exc
+    finally:
+        if envelope_path is not None:
+            envelope_path.unlink(missing_ok=True)
 
 
 def _write_outbox(
@@ -294,7 +412,7 @@ def _resume_once(
     implementation_fingerprint: str,
     next_resume_controls: Mapping[str, int],
     crash_mode: str,
-    before_claim_complete: Callable[[bytes, Mapping[str, Any], str], None],
+    before_claim_complete: Callable[[bytes, Mapping[str, Any], str], str],
 ) -> dict[str, Any]:
     peer_b = RecoveryLineagePeerClient.connect(
         membership,
@@ -452,7 +570,7 @@ def _run(arguments: list[str]) -> int:
             output_checkpoint: bytes,
             receipt_core: Mapping[str, Any],
             receipt_sha256: str,
-        ) -> None:
+        ) -> str:
             if prepared is not None:
                 if (
                     prepared["output_checkpoint"] != output_checkpoint
@@ -462,22 +580,35 @@ def _run(arguments: list[str]) -> int:
                     raise ValueError(
                         "deterministic replay differs from the durable prepared checkpoint or receipt"
                     )
-                return
-            _write_prepared(
-                prepared_path,
-                sequence=sequence,
+            else:
+                _write_prepared(
+                    prepared_path,
+                    sequence=sequence,
+                    envelope=envelope,
+                    output_checkpoint=output_checkpoint,
+                    receipt_core=receipt_core,
+                    receipt_sha256=receipt_sha256,
+                    owner_peer_id=owner_peer_id,
+                    owner_host_id=owner_host_id,
+                    implementation_fingerprint=implementation_fingerprint,
+                )
+                if crash_mode == "after-prepared-fsync":
+                    # The prepared result exists durably, but independent
+                    # receiver validation and quorum completion have not run.
+                    os._exit(94)
+
+            independent = _verify_prepared_with_node(
                 envelope=envelope,
-                output_checkpoint=output_checkpoint,
-                receipt_core=receipt_core,
-                receipt_sha256=receipt_sha256,
-                owner_peer_id=owner_peer_id,
-                owner_host_id=owner_host_id,
-                implementation_fingerprint=implementation_fingerprint,
+                prepared_path=prepared_path,
             )
-            if crash_mode == "after-prepared-fsync":
-                # The exact output checkpoint is durable, but quorum completion
-                # has not yet been attempted.
-                os._exit(94)
+            verification = independent["verification"]
+            if prepared is None or prepared.get("independent_verification") is None:
+                _store_independent_verification(prepared_path, verification)
+            elif prepared["independent_verification"] != verification:
+                raise ValueError(
+                    "independent prepared-result verification changed during deterministic recovery"
+                )
+            return independent["verification_digest"]
 
         result = _resume_once(
             envelope=envelope,
