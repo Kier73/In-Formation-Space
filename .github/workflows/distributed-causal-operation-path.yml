@@ -72,6 +72,7 @@ jobs:
               Path("bridges/observation-path/distributed-operation-path-report.schema.json"),
               Path("bridges/observation-path/independent-host-operation-record.schema.json"),
               Path("bridges/observation-path/independent-host-operation-report.schema.json"),
+              Path("bridges/observation-path/independent-host-operation-report-predicate.schema.json"),
           ):
               schema = json.loads(path.read_text(encoding="utf-8"))
               Draft202012Validator.check_schema(schema)
