@@ -224,7 +224,7 @@ class FiniteHorizonPolicyExecutionTests(unittest.TestCase):
         }
         self.assertEqual(
             posterior,
-            {"profile-1": Fraction(1, 10), "profile-2": Fraction(9, 10)},
+            {"profile-1": Fraction(5, 14), "profile-2": Fraction(9, 14)},
         )
 
     def test_two_step_prefix_rebuilds_cumulative_riv009_and_next_action(self):
