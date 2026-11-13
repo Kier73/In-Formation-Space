@@ -177,3 +177,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Bounded-memory representation relevance
 
 - [RIV-003: Bounded-memory realization of useful history](experiments/bounded-memory-representation-relevance/README.md) — synthesizes exact deterministic finite-state observation controllers and finds the smallest tested memory size that preserves the full-history task value. Its RIV-002 fixture needs two memory states to retain the initial distinction; the coarsened observer cannot recover it by adding memory after the signal is removed.
+
+## Evidence accumulation and sufficient statistics
+
+- [RIV-004: Evidence accumulation as a sufficient statistic](experiments/evidence-accumulation-sufficient-statistic/README.md) — compares exact Bayesian MAP decisions from every ordered history with a compact count accumulator under a binary conditionally iid noisy-sensor model. Its five-observation example preserves the exact 459/512 decision accuracy with six count states instead of 32 raw histories.
