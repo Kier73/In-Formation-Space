@@ -88,6 +88,7 @@ class DecisionTimeEvidenceFrontierTests(unittest.TestCase):
     def test_broken_contiguous_hash_link_is_rejected(self) -> None:
         altered = copy.deepcopy(self.bundle)
         altered["receiver_events"][1]["previous_digest"] = "0" * 64
+        altered["receiver_events"][1]["frontier_head_digest"] = "0" * 64
         core = {key: value for key, value in altered["receiver_events"][1].items() if key != "event_digest"}
         altered["receiver_events"][1]["event_digest"] = frontier.digest(core)
         with self.assertRaisesRegex(frontier.FrontierError, "hash-chain mismatch"):
