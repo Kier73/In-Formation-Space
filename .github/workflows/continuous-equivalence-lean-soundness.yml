@@ -66,7 +66,7 @@ jobs:
         working-directory: experiments/continuous-observation-equivalence/lean
         run: |
           lake env lean COE008Evaluation.lean | tee evaluator-soundness.txt
-          grep -Fq "COE008Evaluation.foldSound" evaluator-soundness.txt
+          grep -Fq "'COE008Evaluation.verifiedCertificateSound' depends on axioms:" evaluator-soundness.txt
           if grep -Eq 'sorryAx|error:' evaluator-soundness.txt; then
             cat evaluator-soundness.txt
             exit 1
