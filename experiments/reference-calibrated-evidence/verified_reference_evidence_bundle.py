@@ -289,7 +289,7 @@ def _validate_envelope_for_path(
         )
     records = _normalize_source_records(
         value["source_evidence_records"],
-        attempt_id=intent["attempt_id"] if isinstance(intent, Mapping) else path_snapshot["attempt_id"],
+        attempt_id=path_snapshot["attempt_id"],
         logical_time=logical_time,
     )
     evidence_summary = {
