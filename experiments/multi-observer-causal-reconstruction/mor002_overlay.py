@@ -127,6 +127,8 @@ def produce_observer(output: Path) -> dict[str, Any]:
 def write_observer_predicate(record_path: Path, predicate_path: Path) -> dict[str, Any]:
     record = _validate_event_record(_read(record_path))
     host = record["host"]
+    if host != direct.host_metadata("observer_host"):
+        raise MOR002Error("observer record identity differs from the current observer runner")
     predicate = {
         "schema": EVENT_PREDICATE_SCHEMA,
         "role": "observer_host",
@@ -553,6 +555,16 @@ def write_report_predicate(report_path: Path, predicate_path: Path) -> dict[str,
     if report.get("report_digest") != direct.digest_object(core):
         raise MOR002Error("MOR-002 report digest mismatch")
     verifier = direct.host_metadata("verifier_host")
+    if (
+        report.get("run_id") != verifier["run_id"]
+        or report.get("run_attempt") != verifier["run_attempt"]
+        or report.get("workflow_ref") != verifier["workflow_ref"]
+    ):
+        raise MOR002Error("report belongs to another verifier run or workflow")
+    if report.get("status") == "direct_mtls_verified":
+        recorded_verifier = report.get("hosts", {}).get("verifier", {})
+        if recorded_verifier.get("actor_id") != verifier["actor_id"]:
+            raise MOR002Error("successful report is not bound to the current verifier actor")
     predicate = {
         "schema": REPORT_PREDICATE_SCHEMA,
         "repository": verifier["repository"],
