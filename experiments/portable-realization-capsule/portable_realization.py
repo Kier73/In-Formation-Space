@@ -10,8 +10,20 @@ from __future__ import annotations
 import hashlib
 import json
 import struct
+import sys
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
+
+_REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPOSITORY_ROOT))
+from formats.canonical_metadata_v1 import (  # noqa: E402
+    CanonicalMetadataError,
+    MAX_SAFE_INTEGER,
+    canonical_bytes as _shared_canonical_bytes,
+    validate_value as _shared_validate_value,
+)
 
 
 MAGIC = b"IFSPRC01"
@@ -24,75 +36,25 @@ class PortableRealizationError(ValueError):
     """Raised when a portable realization capsule is invalid or altered."""
 
 
-MAX_SAFE_INTEGER = (1 << 53) - 1
-
-
 def _validate_canonical_value(
     value: Any,
     field: str = "$",
     seen: set[int] | None = None,
 ) -> None:
-    """Restrict v1 metadata to values with stable cross-language JSON bytes."""
-    if value is None or type(value) is bool:
-        return
-    if isinstance(value, str):
-        try:
-            value.encode("utf-8")
-        except UnicodeEncodeError as exc:
-            raise PortableRealizationError(f"{field} contains invalid Unicode") from exc
-        return
-    if type(value) is int:
-        if abs(value) > MAX_SAFE_INTEGER:
-            raise PortableRealizationError(
-                f"{field} integer exceeds the interoperable safe range"
-            )
-        return
-    if type(value) is float:
-        raise PortableRealizationError(
-            f"{field} floating-point values are not supported by canonical metadata v1"
-        )
-
-    if seen is None:
-        seen = set()
-    if isinstance(value, (list, tuple, Mapping)):
-        identity = id(value)
-        if identity in seen:
-            raise PortableRealizationError(f"{field} contains a recursive value")
-        seen.add(identity)
-        try:
-            if isinstance(value, Mapping):
-                for key, member in value.items():
-                    if not isinstance(key, str):
-                        raise PortableRealizationError(
-                            f"{field} object keys must be strings"
-                        )
-                    if not key.isascii():
-                        raise PortableRealizationError(
-                            f"{field} object keys must be ASCII for canonical metadata v1"
-                        )
-                    _validate_canonical_value(member, f"{field}.{key}", seen)
-            else:
-                for index, member in enumerate(value):
-                    _validate_canonical_value(member, f"{field}[{index}]", seen)
-        finally:
-            seen.remove(identity)
+    """Delegate v1 data-model restrictions to the shared profile module."""
+    try:
+        _shared_validate_value(value, field, seen)
+    except CanonicalMetadataError as exc:
+        raise PortableRealizationError(str(exc)) from exc
 
 
 def _canonical(value: Any) -> bytes:
     try:
-        _validate_canonical_value(value)
-        return json.dumps(
-            value,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=False,
-            allow_nan=False,
-        ).encode("utf-8")
-    except PortableRealizationError:
-        raise
-    except (TypeError, ValueError, UnicodeEncodeError) as exc:
-        raise PortableRealizationError("capsule metadata is not canonical JSON data") from exc
-
+        return _shared_canonical_bytes(value)
+    except CanonicalMetadataError as exc:
+        raise PortableRealizationError(
+            "capsule metadata is not canonical JSON data: " + str(exc)
+        ) from exc
 
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
