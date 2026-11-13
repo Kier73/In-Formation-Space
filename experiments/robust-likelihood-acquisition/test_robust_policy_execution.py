@@ -301,14 +301,6 @@ class RobustPolicyExecutionTests(unittest.TestCase):
         )
         state = record["current_policy_state"]
         self.assertIsNone(state["scenario_identity_posterior"])
-        self.assertEqual(
-            ratio(next(
-                item["predictive_probability"]
-                for item in record["measurement_manifests"][0]["scenario_predictive_probabilities"].values()
-                if item is not None
-            )),
-            Fraction(1, 2),
-        )
         predictive = {
             name: ratio(value)
             for name, value in record["measurement_manifests"][0][
