@@ -1,0 +1,227 @@
+{
+  "closed_model_assumption": true,
+  "equal_samples_different_hidden_events": {
+    "quiet": [
+      0,
+      0,
+      0
+    ],
+    "sample_coordinates": [
+      0,
+      2,
+      4
+    ],
+    "transient": [
+      0,
+      0,
+      0
+    ]
+  },
+  "normal_policy": {
+    "dropout_bound_assumed": 1,
+    "model_completeness_assumed": true,
+    "policy": {
+      "children": {
+        "applied": {
+          "children": {
+            "dropped:no_value": {
+              "children": {
+                "returned:0": {
+                  "kind": "identified",
+                  "survivors": [
+                    "quiet"
+                  ],
+                  "worst_actions": 0,
+                  "worst_intervention_cost": 0,
+                  "worst_observation_cost": 0
+                },
+                "returned:1": {
+                  "kind": "identified",
+                  "survivors": [
+                    "transient"
+                  ],
+                  "worst_actions": 0,
+                  "worst_intervention_cost": 0,
+                  "worst_observation_cost": 0
+                },
+                "returned:2": {
+                  "kind": "identified",
+                  "survivors": [
+                    "coupled"
+                  ],
+                  "worst_actions": 0,
+                  "worst_intervention_cost": 0,
+                  "worst_observation_cost": 0
+                }
+              },
+              "kind": "probe",
+              "probe": "resonance",
+              "worst_actions": 1,
+              "worst_intervention_cost": 0,
+              "worst_observation_cost": 1
+            },
+            "returned:0": {
+              "kind": "identified",
+              "survivors": [
+                "quiet"
+              ],
+              "worst_actions": 0,
+              "worst_intervention_cost": 0,
+              "worst_observation_cost": 0
+            },
+            "returned:1": {
+              "kind": "identified",
+              "survivors": [
+                "transient"
+              ],
+              "worst_actions": 0,
+              "worst_intervention_cost": 0,
+              "worst_observation_cost": 0
+            },
+            "returned:2": {
+              "kind": "identified",
+              "survivors": [
+                "coupled"
+              ],
+              "worst_actions": 0,
+              "worst_intervention_cost": 0,
+              "worst_observation_cost": 0
+            }
+          },
+          "kind": "probe",
+          "probe": "resonance",
+          "worst_actions": 2,
+          "worst_intervention_cost": 0,
+          "worst_observation_cost": 2
+        }
+      },
+      "kind": "probe",
+      "probe": "prime",
+      "worst_actions": 3,
+      "worst_intervention_cost": 1,
+      "worst_observation_cost": 3
+    },
+    "status": "identified_within_declared_finite_model",
+    "survivors": [
+      "coupled",
+      "quiet",
+      "transient"
+    ],
+    "worst_case_guarantee": true
+  },
+  "physical_causal_completeness_proved": false,
+  "safe_policy": {
+    "dropout_bound_assumed": 1,
+    "model_completeness_assumed": true,
+    "policy": {
+      "children": {
+        "dropped:no_value": {
+          "children": {
+            "returned:0": {
+              "kind": "identified",
+              "survivors": [
+                "quiet"
+              ],
+              "worst_actions": 0,
+              "worst_intervention_cost": 0,
+              "worst_observation_cost": 0
+            },
+            "returned:1": {
+              "kind": "identified",
+              "survivors": [
+                "transient"
+              ],
+              "worst_actions": 0,
+              "worst_intervention_cost": 0,
+              "worst_observation_cost": 0
+            },
+            "returned:2": {
+              "kind": "identified",
+              "survivors": [
+                "coupled"
+              ],
+              "worst_actions": 0,
+              "worst_intervention_cost": 0,
+              "worst_observation_cost": 0
+            }
+          },
+          "kind": "probe",
+          "probe": "deep",
+          "worst_actions": 1,
+          "worst_intervention_cost": 0,
+          "worst_observation_cost": 4
+        },
+        "returned:0": {
+          "kind": "identified",
+          "survivors": [
+            "quiet"
+          ],
+          "worst_actions": 0,
+          "worst_intervention_cost": 0,
+          "worst_observation_cost": 0
+        },
+        "returned:1": {
+          "kind": "identified",
+          "survivors": [
+            "transient"
+          ],
+          "worst_actions": 0,
+          "worst_intervention_cost": 0,
+          "worst_observation_cost": 0
+        },
+        "returned:2": {
+          "kind": "identified",
+          "survivors": [
+            "coupled"
+          ],
+          "worst_actions": 0,
+          "worst_intervention_cost": 0,
+          "worst_observation_cost": 0
+        }
+      },
+      "kind": "probe",
+      "probe": "deep",
+      "worst_actions": 2,
+      "worst_intervention_cost": 0,
+      "worst_observation_cost": 8
+    },
+    "status": "identified_within_declared_finite_model",
+    "survivors": [
+      "coupled",
+      "quiet",
+      "transient"
+    ],
+    "worst_case_guarantee": true
+  },
+  "sampling_assessment": {
+    "absence_of_unobserved_events_established": false,
+    "all_sample_values_zero": true,
+    "sampled_coordinates": [
+      0,
+      2,
+      4
+    ],
+    "unsampled_gaps": [
+      [
+        0,
+        2
+      ],
+      [
+        2,
+        4
+      ]
+    ]
+  },
+  "schema": "in-formation.response-re007/0.1",
+  "unbounded_dropout": {
+    "model_completeness_assumed": true,
+    "policy": null,
+    "status": "not_guaranteed_under_unbounded_dropout",
+    "survivors": [
+      "coupled",
+      "quiet",
+      "transient"
+    ],
+    "worst_case_guarantee": false
+  }
+}
