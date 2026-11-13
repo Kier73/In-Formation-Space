@@ -253,20 +253,66 @@ def _no_finite_half_life(
     p_good: float,
     p_bad: float,
     alpha: float,
+    beta: float,
     initial_bad: float,
 ) -> bool:
-    """Detect a loss-free absorbing good state whose mass stays >= one half."""
+    """Detect an absorbing loss-free good state with limiting retention > 1/2.
+
+    When good is loss-free and absorbing, a packet/block initially in bad may
+    survive enough bad-state circulations to transition into the good state.
+    This computes that eventual retained mass rather than counting only the
+    probability of starting in good. A limit strictly above 1/2 guarantees
+    that no finite circulation can cross the half-retention threshold.
+    Exact equality is conservatively left to the finite-horizon/censor status.
+    """
+    if model not in MODELS:
+        raise ValueError(f"unknown model: {model}")
     if p_good == 0.0 and p_bad == 0.0:
         return True
     if p_good != 0.0 or alpha != 0.0:
         return False
+
     initial_good = 1.0 - initial_bad
-    if model == "shared_channel":
-        return initial_good >= 0.5
     if model == "per_packet":
-        limiting_single_packet_survival = initial_good
-        return binomial_tail_probability(slots, required, limiting_single_packet_survival) >= 0.5
-    raise ValueError(f"unknown model: {model}")
+        if beta == 0.0:
+            bad_to_good_survival = 0.0
+        else:
+            q_bad = 1.0 - p_bad
+            bad_to_good_survival = (
+                q_bad * beta / (1.0 - q_bad * (1.0 - beta))
+            )
+        limiting_single_packet_survival = (
+            initial_good + initial_bad * bad_to_good_survival
+        )
+        limiting_retention = binomial_tail_probability(
+            slots, required, limiting_single_packet_survival
+        )
+        return limiting_retention > 0.5
+
+    # In the shared-channel model, while the channel remains bad, the block
+    # loses packets under one common state. Let f[m] be the probability that
+    # a block with m live packets in B eventually reaches absorbing G with at
+    # least 'required' packets. Condition on one bad-state thinning, then on
+    # whether the channel transitions to G. The no-loss-and-stay-B term that
+    # recurs to f[m] is moved to the left-hand side.
+    if beta == 0.0:
+        limiting_retention = initial_good
+    else:
+        q_bad = 1.0 - p_bad
+        f = [0.0] * (slots + 1)
+        for alive in range(required, slots + 1):
+            probabilities = _binomial_probability_vector(alive, q_bad)
+            no_loss_stay_bad = (1.0 - beta) * probabilities[alive]
+            denominator = 1.0 - no_loss_stay_bad
+            direct_success = beta * math.fsum(probabilities[required:])
+            continuation = (1.0 - beta) * math.fsum(
+                probabilities[remaining] * f[remaining]
+                for remaining in range(required, alive)
+            )
+            f[alive] = (direct_success + continuation) / denominator
+        limiting_retention = initial_good + initial_bad * f[slots]
+
+    return limiting_retention > 0.5
 
 
 def half_life_summary(
@@ -380,7 +426,7 @@ def summarize_scenario(
         no_finite = False
         if model != "iid_average":
             no_finite = _no_finite_half_life(
-                model, slots, required, p_good, p_bad, alpha, initial_bad
+                model, slots, required, p_good, p_bad, alpha, beta, initial_bad
             )
         half_life = half_life_summary(curves[model], no_finite_half_life=no_finite)
         samples = {
