@@ -310,7 +310,7 @@ def _classify_tailscale_peer_status(
         if columns and columns[0] == peer:
             matches.append(columns[4].strip() if len(columns) >= 5 else "")
     if len(matches) > 1:
-        raise DirectMTLSError("tailscale status contains duplicate rows for the socket peer")
+        return "ambiguous", "reachable_unclassified", None
     if not matches:
         return "peer_not_found", "reachable_unclassified", None
 
@@ -362,7 +362,7 @@ def _validate_peer_route_observation(
     if expected_peer_ipv4 is not None and peer_ipv4 != _validate_tailscale_ipv4(expected_peer_ipv4):
         raise DirectMTLSError("Tailscale route observation peer address differs from the socket")
     if value["route_state"] not in {
-        "active", "idle", "no_session", "peer_not_found", "command_failed"
+        "active", "idle", "no_session", "peer_not_found", "command_failed", "ambiguous"
     }:
         raise DirectMTLSError("Tailscale peer-route state is unsupported")
     if value["route_type"] not in {
