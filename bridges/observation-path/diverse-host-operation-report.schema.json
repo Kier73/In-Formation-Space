@@ -360,6 +360,9 @@
         },
         "artifact_sha256": {
           "$ref": "#/$defs/sha256"
+        },
+        "source_artifact_sha256": {
+          "$ref": "#/$defs/sha256"
         }
       }
     }
