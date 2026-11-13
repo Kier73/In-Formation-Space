@@ -112,12 +112,13 @@ class HostEvidenceTests(unittest.TestCase):
             )
 
     def test_process_evidence_cannot_claim_a_different_stale_owner_outcome(self) -> None:
-        altered = copy.deepcopy(self.stale_attempt)
-        altered["accepted"] = True
+        altered_process = copy.deepcopy(self.process_evidence)
+        altered_process["phases"][2]["accepted"] = True
+        altered = altered_process["phases"][2]
         with self.assertRaisesRegex(EvidenceError, "stale owner-generation attempt"):
             _validate_authority_process_evidence(
                 self.ledger,
-                self.process_evidence,
+                altered_process,
                 altered,
                 self.history,
                 self.request,
