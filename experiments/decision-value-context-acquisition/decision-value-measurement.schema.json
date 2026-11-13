@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/decision-value-context-acquisition/decision-value-measurement.schema.json",
+  "title": "Evidence-gated Decision-value Context Measurement",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "decision_value_report",
+    "decision_value_report_digest",
+    "source_joint_belief_digest",
+    "attempt_id",
+    "sensor_id",
+    "dimension",
+    "cost",
+    "observed_outcome",
+    "outcome_predictive_probability",
+    "observation_path",
+    "observation_path_digest",
+    "measurement_manifest_digest",
+    "measurement_manifest",
+    "prior_decision",
+    "posterior_decision",
+    "realized_bayes_risk_change_post_minus_pre",
+    "updated_joint_belief",
+    "measurement_status",
+    "belief_effect",
+    "ground_effect",
+    "model_effect",
+    "interpretation_limits",
+    "record_digest"
+  ],
+  "properties": {
+    "format": {"const": "in-formation.decision-value-context-measurement"},
+    "schema": {"const": "in-formation.decision-value-context-measurement/0.1"},
+    "decision_value_report": {"type": "object"},
+    "decision_value_report_digest": {"$ref": "#/$defs/digest"},
+    "source_joint_belief_digest": {"$ref": "#/$defs/digest"},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "sensor_id": {"type": "string", "minLength": 1},
+    "dimension": {"type": "string", "minLength": 1},
+    "cost": {"$ref": "#/$defs/positiveRational"},
+    "observed_outcome": {"$ref": "#/$defs/scalar"},
+    "outcome_predictive_probability": {"$ref": "#/$defs/positiveRational"},
+    "observation_path": {"$ref": "#/$defs/observationPath"},
+    "observation_path_digest": {"$ref": "#/$defs/digest"},
+    "measurement_manifest_digest": {"$ref": "#/$defs/digest"},
+    "measurement_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "schema",
+        "decision_value_report_digest",
+        "source_joint_belief_digest",
+        "source_joint_state_id",
+        "attempt_id",
+        "sensor_id",
+        "dimension",
+        "cost",
+        "observed_outcome",
+        "predictive_probability",
+        "posterior_joint_posterior_digest",
+        "observation_path_digest",
+        "dispatch_evidence_ref",
+        "admission_evidence_ref",
+        "return_evidence_ref",
+        "encounter_id",
+        "payload_digest",
+        "canonicalization",
+        "authority_evidence_ref",
+        "authority_policy_digest",
+        "authority_decision_digest",
+        "authority_decision_status",
+        "authority_quorum",
+        "authority_strict",
+        "authority_observed_sources",
+        "authority_dissenting_sources",
+        "authority_missing_sources",
+        "authority_representative_source",
+        "interpretation_evidence_ref",
+        "interpretation_method",
+        "measurement_manifest_digest"
+      ],
+      "properties": {
+        "format": {"const": "in-formation.decision-value-measurement-manifest"},
+        "schema": {"const": "in-formation.decision-value-measurement-manifest/0.1"},
+        "decision_value_report_digest": {"$ref": "#/$defs/digest"},
+        "source_joint_belief_digest": {"$ref": "#/$defs/digest"},
+        "source_joint_state_id": {"$ref": "#/$defs/digest"},
+        "attempt_id": {"type": "string", "minLength": 1},
+        "sensor_id": {"type": "string", "minLength": 1},
+        "dimension": {"type": "string", "minLength": 1},
+        "cost": {"$ref": "#/$defs/positiveRational"},
+        "observed_outcome": {"$ref": "#/$defs/scalar"},
+        "predictive_probability": {"$ref": "#/$defs/positiveRational"},
+        "posterior_joint_posterior_digest": {"$ref": "#/$defs/digest"},
+        "observation_path_digest": {"$ref": "#/$defs/digest"},
+        "dispatch_evidence_ref": {"type": "string", "minLength": 1},
+        "admission_evidence_ref": {"type": "string", "minLength": 1},
+        "return_evidence_ref": {"type": "string", "minLength": 1},
+        "encounter_id": {"type": "string", "minLength": 1},
+        "payload_digest": {"type": "string", "minLength": 1},
+        "canonicalization": {"type": "string", "minLength": 1},
+        "authority_evidence_ref": {"type": "string", "minLength": 1},
+        "authority_policy_digest": {"type": "string", "minLength": 1},
+        "authority_decision_digest": {"type": "string", "minLength": 1},
+        "authority_decision_status": {"const": "AUTHORIZED"},
+        "authority_quorum": {"type": "integer", "minimum": 1},
+        "authority_strict": {"type": "boolean"},
+        "authority_observed_sources": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "authority_dissenting_sources": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "authority_missing_sources": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "authority_representative_source": {"type": "string", "minLength": 1},
+        "interpretation_evidence_ref": {"type": "string", "minLength": 1},
+        "interpretation_method": {"const": "exact-decision-value-context-outcome-v1"},
+        "measurement_manifest_digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "prior_decision": {"$ref": "#/$defs/decision"},
+    "posterior_decision": {"$ref": "#/$defs/decision"},
+    "realized_bayes_risk_change_post_minus_pre": {"$ref": "#/$defs/signedRational"},
+    "updated_joint_belief": {
+      "type": "object",
+      "required": [
+        "format", "schema", "source_ref", "source_report_digest",
+        "source_state_id", "joint_posterior", "posterior_hypothesis_a",
+        "posterior_context_marginals", "belief_digest"
+      ],
+      "properties": {
+        "format": {"const": "in-formation.joint-context-belief/0.1"},
+        "schema": {"const": "in-formation.joint-context-belief/0.1"},
+        "source_ref": {"type": "string", "pattern": "^urn:sha256:[0-9a-f]{64}$"},
+        "source_report_digest": {"$ref": "#/$defs/digest"},
+        "source_state_id": {"$ref": "#/$defs/digest"},
+        "joint_posterior": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["hypothesis", "context_state", "probability"],
+            "properties": {
+              "hypothesis": {"enum": ["A", "B"]},
+              "context_state": {"type": "string", "minLength": 1},
+              "probability": {"$ref": "#/$defs/nonnegativeRational"}
+            }
+          }
+        },
+        "posterior_hypothesis_a": {"$ref": "#/$defs/nonnegativeRational"},
+        "posterior_context_marginals": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/nonnegativeRational"}
+        },
+        "belief_digest": {"$ref": "#/$defs/digest"}
+      },
+      "additionalProperties": true
+    },
+    "measurement_status": {"const": "interpreted_authorized_observation"},
+    "belief_effect": {"const": "new_immutable_joint_posterior_revision"},
+    "ground_effect": {"const": "none"},
+    "model_effect": {"const": "none"},
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "record_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "scalar": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "boolean"},
+        {"type": "null"}
+      ]
+    },
+    "rational": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer"},
+        "denominator": {"type": "integer", "minimum": 1}
+      }
+    },
+    "nonnegativeRational": {
+      "allOf": [
+        {"$ref": "#/$defs/rational"},
+        {"type": "object", "properties": {"numerator": {"type": "integer", "minimum": 0}}}
+      ]
+    },
+    "positiveRational": {
+      "allOf": [
+        {"$ref": "#/$defs/rational"},
+        {"type": "object", "properties": {"numerator": {"type": "integer", "minimum": 1}}}
+      ]
+    },
+    "signedRational": {"$ref": "#/$defs/rational"},
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "posterior_hypothesis_a", "posterior_hypothesis_b",
+        "expected_loss_if_decide_a", "expected_loss_if_decide_b",
+        "optimal_decision", "bayes_decision_loss"
+      ],
+      "properties": {
+        "posterior_hypothesis_a": {"$ref": "#/$defs/nonnegativeRational"},
+        "posterior_hypothesis_b": {"$ref": "#/$defs/nonnegativeRational"},
+        "expected_loss_if_decide_a": {"$ref": "#/$defs/nonnegativeRational"},
+        "expected_loss_if_decide_b": {"$ref": "#/$defs/nonnegativeRational"},
+        "optimal_decision": {"enum": ["A", "B"]},
+        "bayes_decision_loss": {"$ref": "#/$defs/nonnegativeRational"}
+      }
+    },
+    "pathEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage", "actor", "clock_value", "clock_domain", "evidence_ref", "details"
+      ],
+      "properties": {
+        "stage": {
+          "enum": [
+            "planned", "dispatched", "admitted", "returned",
+            "evidence_authorized", "interpreted"
+          ]
+        },
+        "actor": {"type": "string", "minLength": 1},
+        "clock_value": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "clock_domain": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "evidence_ref": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "details": {"type": "object"}
+      }
+    },
+    "observationPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempt_id", "intent", "status", "terminal", "events"],
+      "properties": {
+        "attempt_id": {"type": "string", "minLength": 1},
+        "intent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_name", "query", "hypothesis_set_digest",
+            "estimated_cost", "plan_ref", "authority_required",
+            "application_required", "sender_ack_required"
+          ],
+          "properties": {
+            "candidate_name": {"type": "string", "minLength": 1},
+            "query": {"type": "string", "minLength": 1},
+            "hypothesis_set_digest": {"$ref": "#/$defs/digest"},
+            "estimated_cost": {"type": "number", "exclusiveMinimum": 0},
+            "plan_ref": {"type": "string", "minLength": 1},
+            "authority_required": {"const": true},
+            "application_required": {"const": false},
+            "sender_ack_required": {"const": false}
+          }
+        },
+        "status": {"const": "interpreted"},
+        "terminal": {"const": false},
+        "events": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "prefixItems": [
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"},
+            {"$ref": "#/$defs/pathEvent"}
+          ],
+          "items": false
+        }
+      }
+    }
+  }
+}

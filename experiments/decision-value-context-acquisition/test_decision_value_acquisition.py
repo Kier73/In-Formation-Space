@@ -25,6 +25,12 @@ if str(_RIV007) not in sys.path:
     sys.path.insert(0, str(_RIV007))
 from calibration_aware_evidence import build_report as build_calibration_filter_report
 
+_RIV009 = Path(__file__).resolve().parents[1] / "reference-calibrated-evidence"
+if str(_RIV009) not in sys.path:
+    sys.path.insert(0, str(_RIV009))
+from reference_calibrated_evidence import build_report as build_reference_calibrated_report
+from test_reference_calibrated_evidence import fixture as reference_calibration_fixture
+
 
 def sha(value):
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
@@ -428,6 +434,77 @@ class DecisionValueContextAcquisitionTests(unittest.TestCase):
             ratio(report["candidate_evaluations"][0]["expected_bayes_risk_reduction"]),
             Fraction(0),
         )
+
+    def test_reference_calibrated_riv009_target_belief_uses_the_generic_joint_contract(self):
+        upstream = build_reference_calibrated_report(
+            **reference_calibration_fixture()
+        )
+        target = upstream["target_phase"]["reference_conditioned_filter_report"]
+        raw = next(
+            row for row in target["shared_calibration_full_history"]["raw_history_rows"]
+            if row["posterior_joint_latent_state"] is not None
+        )
+        joint_posterior = [
+            {
+                "hypothesis": coordinate["hypothesis"],
+                "context_state": coordinate["calibration_id"],
+                "probability": probability,
+            }
+            for coordinate, probability in zip(
+                target["latent_state_order"],
+                raw["posterior_joint_latent_state"],
+            )
+        ]
+        belief = build_joint_belief_document(
+            joint_posterior=joint_posterior,
+            source_ref="artifact://RIV-009/reference-conditioned-target",
+            source_report_digest=upstream["content_digest"],
+        )
+        likelihood_rows = [
+            {
+                "hypothesis": item["hypothesis"],
+                "context_state": item["context_state"],
+                "probability": Fraction(9, 10)
+                if item["context_state"] == "profile-1"
+                else Fraction(1, 10),
+            }
+            for item in belief["joint_posterior"]
+        ]
+        complementary_rows = [
+            {
+                "hypothesis": item["hypothesis"],
+                "context_state": item["context_state"],
+                "probability": Fraction(1, 10)
+                if item["context_state"] == "profile-1"
+                else Fraction(9, 10),
+            }
+            for item in likelihood_rows
+        ]
+        # Outcomes distinguish the two profile labels, not H; both per-state
+        # likelihood vectors normalize exactly.
+        reader = {
+            "sensor_id": "reference-calibration-profile-reader",
+            "dimension": "session-calibration-profile",
+            "cost": Fraction(1, 2),
+            "outcomes": (
+                {"outcome": "profile-1", "likelihoods": likelihood_rows},
+                {"outcome": "profile-2", "likelihoods": complementary_rows},
+            ),
+        }
+        report = build_report(
+            joint_belief=belief,
+            candidate_sensors=(reader,),
+        )
+        self.assertEqual(report["source_report_digest"], upstream["content_digest"])
+        self.assertEqual(report["joint_belief"]["source_report_digest"], upstream["content_digest"])
+        self.assertEqual(
+            sum(
+                (ratio(item["probability"]) for item in belief["joint_posterior"]),
+                Fraction(0),
+            ),
+            Fraction(1),
+        )
+        self.assertEqual(len(report["candidate_evaluations"]), 1)
 
     def test_belief_state_id_and_source_digest_are_checked(self):
         state = list(self.belief["joint_posterior"])

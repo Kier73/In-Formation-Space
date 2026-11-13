@@ -3,14 +3,15 @@
 **Status:** finite exact one-step value-of-information experiment, version 0.1.  
 **Question:** Given a joint posterior over a target hypothesis and latent context, which candidate context observation best improves a declared decision, after accounting for observation cost?
 
-## Relationship to RIV-006 and RIV-007
+## Relationship to RIV-006 through RIV-009
 
-The current shared evidence experiments construct different kinds of joint beliefs:
+The shared evidence sequence constructs several distinct joint-belief models:
 
 - [RIV-006: Context-switching evidence accumulation](../context-switching-evidence-accumulator/README.md) uses a hidden Markov operating regime that changes over time.
 - [RIV-007: Calibration-aware joint evidence](../calibration-aware-joint-evidence/README.md) uses a discrete calibration profile drawn once and shared across a session.
+- [RIV-009: Reference-calibrated evidence accumulation](../reference-calibrated-evidence/README.md) conditions the session-shared calibration prior on known reference standards before running the target filter.
 
-Both preserve a joint posterior rather than discarding the association between the hypothesis and latent context. RIV-008 is deliberately model-agnostic at that boundary: it accepts a finite exact joint belief over a binary hypothesis and any finite set of context labels.
+These models preserve a joint posterior rather than discarding the association between the hypothesis and latent context. RIV-008 is deliberately model-agnostic at that boundary: it accepts a finite exact joint belief over a binary hypothesis and any finite set of context labels. The tests now construct input beliefs from all three upstream models, including the reference-conditioned target belief nested inside the RIV-009 report.
 
 RIV-008 asks a different question from VGI's partial-probe minimax planner. VGI's planner chooses a worst-case policy to reduce unresolved attempt pairs. RIV-008 ranks one-step context-reading methods by their **expected reduction in Bayes decision loss**, using caller-supplied likelihoods, costs, and a declared task loss matrix. Neither objective is universally preferable; they answer different questions.
 
@@ -175,6 +176,19 @@ From the repository root:
 
 The implementation uses only the Python standard library and exact `Fraction` arithmetic. All probabilities, losses, and costs are validated as exact rationals; no floating-point approximation or sampling is used.
 
+## Evidence-gated measurement execution
+
+The [RIV-008 execution adapter](acquisition-execution.md) now binds the selected reader to a planned-only ObservationPath. It requires dispatch, receiver admission, return, explicit AUTHORIZED evidence, and exact interpretation before conditioning the joint posterior on the observed outcome.
+
+A returned outcome outside the candidate model, or a declared outcome with zero predictive probability under the prior joint belief, is rejected as a model mismatch. A valid outcome creates a new immutable joint-belief snapshot and a measurement manifest bound to the full ObservationPath. It does not update the source Ground, likelihood model, or active attention policy.
+
+The execution record also reports the *realized* Bayes decision-risk change for the observed branch. This is distinct from the non-negative expected value of sample information calculated before measurement: one outcome can increase the posterior decision risk even when the candidate has positive EVSI overall.
+
+- [Execution implementation](acquisition_execution.py)
+- [Execution tests](test_acquisition_execution.py)
+- [Measurement record schema](decision-value-measurement.schema.json)
+- [Execution evidence contract](acquisition-execution.md)
+
 ## Next discriminating step
 
-A later execution adapter could take the selected context reader, create a planned ObservationPath bound to the source joint-belief digest, and require the same dispatch, admission, return, authorization, and interpretation evidence used by the current context-measurement bridge. That integration would also need a declared mapping from an observed context value to the updated joint belief; RIV-008 does not invent that measurement model or update the belief itself.
+The next extension is sequential acquisition: recompute candidate value after each authorized outcome, accounting for updated belief, remaining budget, and possible context-dependent measurement cost. That should be compared against finite-horizon dynamic programming and the existing VGI worst-case minimax policy, preserving their different objectives.
