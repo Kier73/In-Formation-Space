@@ -307,3 +307,51 @@ It does not validate architecture semantics, tensor element counts against dtype
 ## Evidence boundary
 
 A valid NSD establishes that the supported metadata and header fields were parsed and cross-checked under this implementation. It does not establish that the model is safe, useful, licensed for a particular derivative, functionally understood, or reproducible from its weight payload. The source revision identifies the upstream snapshot; no original runtime dependency is introduced into an NSD consumer.
+
+
+## Independent topology reconstruction
+
+HFR-002 now has a second verifier in
+`independent_verifier/main.go`. It is written in Go using only the standard
+library. It consumes two retained JSON inputs—the original NSD and the
+framework-independent graph—and does not import, call, or share code with
+`gpt2_adapter.py`, `neural_graph_ir.py`, or the Python graph verifier.
+
+The independent implementation derives its own GPT-2 inventory and typed
+topology from the NSD configuration and tensor headers. It checks:
+
+- The immutable repository/revision and source-file hash inventory.
+- The expected GPT-2 tensor names, roles, shapes, shard membership, offsets,
+  byte spans, and header provenance.
+- Runtime/fixed dimension symbols and the token/position/logit interface.
+- Every operation identifier, operator family, input/output port, dtype, and
+  shape for the configured number of transformer blocks.
+- The exact expected directed edge set, including residual fan-out and tied
+  or separate output-head binding.
+- Edge endpoint resolution, dtype/shape equality, single input producers,
+  complete tensor use, DAG ordering, and completeness counts.
+
+The live runner can retain the NSD alongside the graph:
+
+```bash
+python -m experiments.external_neural_structure_reading.live_reference.run_gpt2_topology \
+  --output experiments/external_neural_structure_reading/results/gpt2-typed-topology.json \
+  --nsd-output experiments/external_neural_structure_reading/results/gpt2-observation.nsd.json
+GO111MODULE=off go run experiments/external_neural_structure_reading/independent_verifier/main.go \
+  --nsd experiments/external_neural_structure_reading/results/gpt2-observation.nsd.json \
+  --graph experiments/external_neural_structure_reading/results/gpt2-typed-topology.json \
+  --report experiments/external_neural_structure_reading/results/gpt2-independent-verification.json
+```
+
+The HFR-002 workflow now runs this verifier against the live pinned observation
+and retains the NSD, graph, and independent report together. Offline
+cross-language tests also verify a two-block fixture and reject deliberately
+removed edges, rebound tensor dtypes, and changed NSD tensor shapes.
+
+This is an independent implementation check, not an independent source of
+GPT-2 semantics: both implementations still rely on the declared supported
+GPT-2 family contract. It establishes that the graph conforms to a separately
+derived typed topology and the retained observation. It does not read tensor
+payloads, execute the neural network, prove the inferred family semantics
+against numerical forward behavior, authenticate the external repository, or
+prove that the observed weights implement the graph's mathematical operations.

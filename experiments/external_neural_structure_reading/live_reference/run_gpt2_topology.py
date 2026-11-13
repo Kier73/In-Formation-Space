@@ -16,7 +16,7 @@ REVISION = "607a30d783dfa663caf39e06633721c8d4cfcd7e"
 LICENSE_ID = "mit"
 
 
-def run(output: Path) -> dict:
+def run(output: Path, nsd_output: Path | None = None) -> dict:
     nsd = inspect_huggingface_model(
         REPOSITORY,
         REVISION,
@@ -61,6 +61,14 @@ def run(output: Path) -> dict:
     ) + "\n"
     output.write_text(rendered, encoding="utf-8", newline="\n")
 
+    nsd_rendered = None
+    if nsd_output is not None:
+        nsd_output.parent.mkdir(parents=True, exist_ok=True)
+        nsd_rendered = json.dumps(
+            nsd, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False
+        ) + "\n"
+        nsd_output.write_text(nsd_rendered, encoding="utf-8", newline="\n")
+
     summary = {
         "repository": REPOSITORY,
         "revision": REVISION,
@@ -75,6 +83,8 @@ def run(output: Path) -> dict:
         "failed_checks": verification["failed_check_count"],
         "graph_bytes": len(rendered.encode("utf-8")),
         "graph_path": str(output),
+        "nsd_path": None if nsd_output is None else str(nsd_output),
+        "nsd_bytes": 0 if nsd_rendered is None else len(nsd_rendered.encode("utf-8")),
         "weight_payload_bytes_read": 0,
         "completeness": graph["completeness"]["status"],
         "verification": verification["status"],
@@ -91,8 +101,13 @@ def main(argv: list[str] | None = None) -> int:
         "--output",
         default="experiments/external_neural_structure_reading/results/gpt2-typed-topology.json",
     )
+    parser.add_argument(
+        "--nsd-output",
+        default=None,
+        help="optional path to persist the zero-payload NSD JSON for independent verification",
+    )
     args = parser.parse_args(argv)
-    run(Path(args.output))
+    run(Path(args.output), None if args.nsd_output is None else Path(args.nsd_output))
     return 0
 
 

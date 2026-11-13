@@ -5,6 +5,8 @@ on:
     paths:
       - "experiments/external_neural_structure_reading/gpt2_adapter.py"
       - "experiments/external_neural_structure_reading/neural_graph_ir.py"
+      - "experiments/external_neural_structure_reading/independent_verifier/**"
+      - "experiments/external_neural_structure_reading/independent_graph_verifier_tests.py"
       - "experiments/external_neural_structure_reading/neural-computation-graph.schema.json"
       - "experiments/external_neural_structure_reading/nsd.py"
       - "experiments/external_neural_structure_reading/hub.py"
@@ -15,6 +17,8 @@ on:
     paths:
       - "experiments/external_neural_structure_reading/gpt2_adapter.py"
       - "experiments/external_neural_structure_reading/neural_graph_ir.py"
+      - "experiments/external_neural_structure_reading/independent_verifier/**"
+      - "experiments/external_neural_structure_reading/independent_graph_verifier_tests.py"
       - "experiments/external_neural_structure_reading/neural-computation-graph.schema.json"
       - "experiments/external_neural_structure_reading/nsd.py"
       - "experiments/external_neural_structure_reading/hub.py"
@@ -38,6 +42,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Set up independent Go verifier
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.x"
+
       - name: Install schema and offline test dependencies
         run: python -m pip install --disable-pip-version-check jsonschema numpy
 
@@ -51,15 +60,35 @@ jobs:
           -p 'test_*.py'
           -v
 
+      - name: Run independent Go verifier fixture tests
+        run: >-
+          python -m unittest discover
+          -s experiments/external_neural_structure_reading
+          -p 'independent_graph_verifier_tests.py'
+          -v
+
       - name: Reconstruct pinned GPT-2 graph without reading tensor payloads
         run: >-
           python -m experiments.external_neural_structure_reading.live_reference.run_gpt2_topology
           --output experiments/external_neural_structure_reading/results/gpt2-typed-topology.json
+          --nsd-output experiments/external_neural_structure_reading/results/gpt2-observation.nsd.json
+
+      - name: Independently verify NSD and typed graph in Go
+        env:
+          GO111MODULE: "off"
+        run: >-
+          go run experiments/external_neural_structure_reading/independent_verifier/main.go
+          --nsd experiments/external_neural_structure_reading/results/gpt2-observation.nsd.json
+          --graph experiments/external_neural_structure_reading/results/gpt2-typed-topology.json
+          --report experiments/external_neural_structure_reading/results/gpt2-independent-verification.json
 
       - name: Upload typed graph evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: hfr-002-gpt2-typed-topology
-          path: experiments/external_neural_structure_reading/results/gpt2-typed-topology.json
+          path: |
+            experiments/external_neural_structure_reading/results/gpt2-typed-topology.json
+            experiments/external_neural_structure_reading/results/gpt2-observation.nsd.json
+            experiments/external_neural_structure_reading/results/gpt2-independent-verification.json
           if-no-files-found: warn
