@@ -1,0 +1,352 @@
+name: IHP-006 E-CPU mTLS operation path over Tailscale
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  client_host:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install protocol dependencies
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Require the dedicated IHP-006 federation identity
+        shell: bash
+        env:
+          IHP006_TS_OAUTH_CLIENT_ID: ${{ secrets.IHP006_TS_OAUTH_CLIENT_ID }}
+          IHP006_TS_AUDIENCE: ${{ secrets.IHP006_TS_AUDIENCE }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$IHP006_TS_OAUTH_CLIENT_ID" || -z "$IHP006_TS_AUDIENCE" ]]; then
+            echo "IHP-006 requires IHP006_TS_OAUTH_CLIENT_ID and IHP006_TS_AUDIENCE; refusing to fall back to public networking."
+            exit 1
+          fi
+      - name: Join the dedicated ephemeral IHP-006 tailnet
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          oauth-client-id: ${{ secrets.IHP006_TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.IHP006_TS_AUDIENCE }}
+          tags: tag:ihp006-mtls-ci
+          version: 1.104.6
+      - name: Confirm client is joined to the overlay
+        run: |
+          set -euo pipefail
+          test -n "$(tailscale ip -4)"
+          tailscale status
+      - name: Generate the ephemeral client certificate
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence/client-host
+          python bridges/observation-path/direct_mtls_operation_path.py prepare-client --directory evidence/client-host
+      - name: Attest the client public certificate
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/client-host/client-cert.pem
+          predicate-type: https://kier73.github.io/in-formation-space/direct-mtls-host-certificate/v1
+          predicate-path: evidence/client-host/client-cert.predicate.json
+      - name: Publish public client bootstrap
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp002-client-bootstrap
+          path: |
+            evidence/client-host/client-cert.pem
+            evidence/client-host/client-cert.predicate.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Send the E-CPU operation over Tailscale mTLS
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py connect \
+            --directory evidence/client-host --connect-timeout 150
+      - name: Bind client record predicate
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py write-record-predicate \
+            --record evidence/client-host/client_host-record.json \
+            --role client_host --output evidence/client-host/client_host-record.predicate.json
+      - name: Attest client operation record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/client-host/client_host-record.json
+          predicate-type: https://kier73.github.io/in-formation-space/direct-mtls-host-operation-record/v1
+          predicate-path: evidence/client-host/client_host-record.predicate.json
+      - name: Publish client result record
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp002-client-result
+          path: |
+            evidence/client-host/client_host-record.json
+            evidence/client-host/client_host-record.predicate.json
+          if-no-files-found: error
+          retention-days: 90
+
+  server_host:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install protocol dependencies
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Require the dedicated IHP-006 federation identity
+        shell: bash
+        env:
+          IHP006_TS_OAUTH_CLIENT_ID: ${{ secrets.IHP006_TS_OAUTH_CLIENT_ID }}
+          IHP006_TS_AUDIENCE: ${{ secrets.IHP006_TS_AUDIENCE }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$IHP006_TS_OAUTH_CLIENT_ID" || -z "$IHP006_TS_AUDIENCE" ]]; then
+            echo "IHP-006 requires IHP006_TS_OAUTH_CLIENT_ID and IHP006_TS_AUDIENCE; refusing to fall back to public networking."
+            exit 1
+          fi
+      - name: Join the dedicated ephemeral IHP-006 tailnet
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          oauth-client-id: ${{ secrets.IHP006_TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.IHP006_TS_AUDIENCE }}
+          tags: tag:ihp006-mtls-ci
+          version: 1.104.6
+      - name: Confirm server is joined and advertise only its overlay address
+        id: overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          overlay_ip="$(tailscale ip -4)"
+          python - "$overlay_ip" <<'PY'
+          import ipaddress, sys
+          address = ipaddress.ip_address(sys.argv[1])
+          if address.version != 4 or address not in ipaddress.ip_network("100.64.0.0/10"):
+              raise SystemExit("Tailscale did not provide a valid 100.64.0.0/10 endpoint")
+          print(f"server overlay address: {address}")
+          PY
+          echo "ip=$overlay_ip" >> "$GITHUB_OUTPUT"
+          tailscale status
+      - name: Verify client certificate and create signed overlay endpoint
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence/server-host
+          python bridges/observation-path/direct_mtls_operation_path.py prepare-server \
+            --directory evidence/server-host --bootstrap-timeout 180 \
+            --advertise-host "${{ steps.overlay.outputs.ip }}"
+      - name: Attest the server public certificate
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/server-host/server-cert.pem
+          predicate-type: https://kier73.github.io/in-formation-space/direct-mtls-host-certificate/v1
+          predicate-path: evidence/server-host/server-cert.predicate.json
+      - name: Publish public server bootstrap and signed overlay endpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp002-server-bootstrap
+          path: |
+            evidence/server-host/server-cert.pem
+            evidence/server-host/server-cert.predicate.json
+            evidence/server-host/server-endpoint.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Accept the E-CPU operation on the Tailscale overlay
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py serve \
+            --directory evidence/server-host --accept-timeout 165
+      - name: Bind server record predicate
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py write-record-predicate \
+            --record evidence/server-host/server_host-record.json \
+            --role server_host --output evidence/server-host/server_host-record.predicate.json
+      - name: Attest server operation record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/server-host/server_host-record.json
+          predicate-type: https://kier73.github.io/in-formation-space/direct-mtls-host-operation-record/v1
+          predicate-path: evidence/server-host/server_host-record.predicate.json
+      - name: Publish server result record
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp002-server-result
+          path: |
+            evidence/server-host/server_host-record.json
+            evidence/server-host/server_host-record.predicate.json
+          if-no-files-found: error
+          retention-days: 90
+
+  verifier_host:
+    needs: [client_host, server_host]
+    if: needs.client_host.result == 'success' && needs.server_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install protocol dependencies
+        run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Download client public bootstrap
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp002-client-bootstrap
+          path: evidence/client-bootstrap
+      - name: Download server public bootstrap and overlay endpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp002-server-bootstrap
+          path: evidence/server-bootstrap
+      - name: Download client operation record
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp002-client-result
+          path: evidence/client-result
+      - name: Download server operation record
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp002-server-result
+          path: evidence/server-result
+      - name: Independently reconstruct the Tailscale mTLS operation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py verify \
+            --directory evidence --output evidence/ihp006-tailscale-mtls-report.json
+      - name: Bind verifier identity and exact report bytes
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/direct_mtls_operation_path.py write-report-predicate \
+            --report evidence/ihp006-tailscale-mtls-report.json \
+            --output evidence/ihp006-tailscale-mtls-report.predicate.json
+      - name: Validate IHP-006 evidence schemas and instances
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+          cases = (
+              ("bridges/observation-path/direct-mtls-host-certificate-predicate.schema.json", "evidence/client-bootstrap/client-cert.predicate.json"),
+              ("bridges/observation-path/direct-mtls-host-certificate-predicate.schema.json", "evidence/server-bootstrap/server-cert.predicate.json"),
+              ("bridges/observation-path/direct-mtls-host-record.schema.json", "evidence/client-result/client_host-record.json"),
+              ("bridges/observation-path/direct-mtls-host-record.schema.json", "evidence/server-result/server_host-record.json"),
+              ("bridges/observation-path/direct-mtls-endpoint-advertisement.schema.json", "evidence/server-bootstrap/server-endpoint.json"),
+              ("bridges/observation-path/direct-mtls-host-record-predicate.schema.json", "evidence/client-result/client_host-record.predicate.json"),
+              ("bridges/observation-path/direct-mtls-host-record-predicate.schema.json", "evidence/server-result/server_host-record.predicate.json"),
+              ("bridges/observation-path/direct-mtls-reconstruction-report.schema.json", "evidence/ihp006-tailscale-mtls-report.json"),
+              ("bridges/observation-path/direct-mtls-reconstruction-report-predicate.schema.json", "evidence/ihp006-tailscale-mtls-report.predicate.json"),
+          )
+          for schema_path, instance_path in cases:
+              schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
+              instance = json.loads(Path(instance_path).read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              Draft202012Validator(schema).validate(instance)
+              print(f"valid: {instance_path}")
+          PY
+      - name: Attest the independently reconstructed IHP-006 report
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/ihp006-tailscale-mtls-report.json
+          predicate-type: https://kier73.github.io/in-formation-space/direct-mtls-reconstruction-report/v1
+          predicate-path: evidence/ihp006-tailscale-mtls-report.predicate.json
+      - name: Preserve the IHP-006 Tailscale mTLS report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp006-tailscale-mtls-operation-path-report
+          path: evidence/ihp006-tailscale-mtls-report.json
+          if-no-files-found: error
+          retention-days: 90
