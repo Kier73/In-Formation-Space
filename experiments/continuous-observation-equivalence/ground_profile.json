@@ -1,0 +1,36 @@
+{
+  "schema": "in-formation-space.coe004.computational-ground-profile/0.1",
+  "language": "scalar-rational-affine-relu-feedforward",
+  "state_domain": "real-line-exact",
+  "arithmetic": "rational-parameters-ideal-real",
+  "input_schema": {
+    "ordered": [
+      "x"
+    ],
+    "value_kind": "exact-real"
+  },
+  "output_schema": {
+    "ordered": [
+      "y0"
+    ],
+    "value_kind": "exact-real"
+  },
+  "transformations": [
+    "affine",
+    "relu"
+  ],
+  "observer_definition": {
+    "schema": "in-formation-space.coe004.observer/0.1",
+    "input_domain": "all-real-scalar-input",
+    "input_order": [
+      "x"
+    ],
+    "output_order": [
+      "y0"
+    ],
+    "observation": "canonical-maximal-piecewise-affine-output-atlas",
+    "semantic_equality": "pointwise-rational-vector"
+  },
+  "admission": "candidate-unadmitted",
+  "note": "This is an authored Ground description, not an E-CPU admitted Ground or authorization."
+}

@@ -24,7 +24,7 @@ jobs:
           python-version: '3.11'
       - name: Verify exact rational atlases and adversarial controls
         working-directory: experiments/continuous-observation-equivalence
-        run: python -m unittest discover -s . -p 'test_*.py' -v
+        run: python -m unittest test_continuous_equivalence test_certificate_checker -v
       - name: Emit deterministic equivalence evidence
         working-directory: experiments/continuous-observation-equivalence
         run: python run_experiment.py > continuous-equivalence-report.json
@@ -104,4 +104,74 @@ jobs:
         with:
           name: coe003-go-independent-checker-report
           path: experiments/continuous-observation-equivalence/go-independent-check-report.json
+          if-no-files-found: error
+
+  ground-link-producer:
+    needs: certificate-producer
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Receive mathematically checkable source certificates
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Create E-CPU typed candidate Ground and observation translation references
+        working-directory: experiments/continuous-observation-equivalence
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: python ground_binding_producer.py received-certificates ground-link-artifacts --ecpu-dir "${{ github.workspace }}/external/E-CPU"
+      - name: Transfer untrusted candidate Ground links
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe004-ground-link-artifacts
+          path: experiments/continuous-observation-equivalence/ground-link-artifacts/*.json
+          if-no-files-found: error
+
+  ground-link-verifier:
+    needs: [certificate-producer, ground-link-producer]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Receive original certificates
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Receive produced Ground identity links
+        uses: actions/download-artifact@v4
+        with:
+          name: coe004-ground-link-artifacts
+          path: experiments/continuous-observation-equivalence/received-ground-links
+      - name: Independent reconstruction with pinned E-CPU contracts
+        working-directory: experiments/continuous-observation-equivalence
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: python ground_binding_verifier.py received-certificates received-ground-links --ecpu-dir "${{ github.workspace }}/external/E-CPU" --output independent-ground-link-report.json
+      - name: Adversarial Ground, observer and contract substitution tests
+        working-directory: experiments/continuous-observation-equivalence
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: python -m unittest discover -s . -p 'test_ground_binding.py' -v
+      - name: Retain independently reconstructed Ground link report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe004-ground-link-verifier-report
+          path: experiments/continuous-observation-equivalence/independent-ground-link-report.json
           if-no-files-found: error
