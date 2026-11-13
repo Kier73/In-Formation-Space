@@ -86,6 +86,7 @@ jobs:
       - name: Probe server peer route
         env:
           GH_TOKEN: ${{ github.token }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
           IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
         run: |
           python bridges/observation-path/tailscale_overlay_probe.py probe \
@@ -199,6 +200,7 @@ jobs:
       - name: Probe client peer route
         env:
           GH_TOKEN: ${{ github.token }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
           IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
         run: |
           python bridges/observation-path/tailscale_overlay_probe.py probe \
