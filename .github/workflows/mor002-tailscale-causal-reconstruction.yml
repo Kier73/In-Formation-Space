@@ -110,8 +110,8 @@ jobs:
       - name: Require the dedicated MOR-002 federation identity
         shell: bash
         env:
-          MOR002_TS_OAUTH_CLIENT_ID: ${{{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
-          MOR002_TS_AUDIENCE: ${{{ secrets.MOR002_TS_AUDIENCE }}
+          MOR002_TS_OAUTH_CLIENT_ID: ${{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
+          MOR002_TS_AUDIENCE: ${{ secrets.MOR002_TS_AUDIENCE }}
         run: |
           set -euo pipefail
           if [[ -z "$MOR002_TS_OAUTH_CLIENT_ID" || -z "$MOR002_TS_AUDIENCE" ]]; then
@@ -121,8 +121,8 @@ jobs:
       - name: Join the dedicated ephemeral MOR-002 tailnet
         uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
         with:
-          oauth-client-id: ${{{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
-          audience: ${{{ secrets.MOR002_TS_AUDIENCE }}
+          oauth-client-id: ${{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.MOR002_TS_AUDIENCE }}
           tags: tag:mor002-mtls-ci
           version: 1.104.6
       - name: Confirm client is joined to the overlay
@@ -133,7 +133,7 @@ jobs:
       - name: Generate the ephemeral client certificate
         env:
           PYTHONPATH: external/E-CPU
-          RUNNER_ENVIRONMENT: ${{{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           mkdir -p evidence/client-host
           python bridges/observation-path/direct_mtls_operation_path.py prepare-client --directory evidence/client-host
@@ -154,16 +154,16 @@ jobs:
           retention-days: 14
       - name: Send A1 over E-CPU ReliableChannel on Tailscale mTLS and record local A2
         env:
-          GH_TOKEN: ${{{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           PYTHONPATH: external/E-CPU
-          RUNNER_ENVIRONMENT: ${{{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           python bridges/observation-path/direct_mtls_operation_path.py connect \
             --directory evidence/client-host --connect-timeout 150
       - name: Bind client operation-record predicate
         env:
           PYTHONPATH: external/E-CPU
-          RUNNER_ENVIRONMENT: ${{{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           python bridges/observation-path/direct_mtls_operation_path.py write-record-predicate \
             --record evidence/client-host/client_host-record.json \
@@ -243,8 +243,8 @@ jobs:
       - name: Require the dedicated MOR-002 federation identity
         shell: bash
         env:
-          MOR002_TS_OAUTH_CLIENT_ID: ${{{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
-          MOR002_TS_AUDIENCE: ${{{ secrets.MOR002_TS_AUDIENCE }}
+          MOR002_TS_OAUTH_CLIENT_ID: ${{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
+          MOR002_TS_AUDIENCE: ${{ secrets.MOR002_TS_AUDIENCE }}
         run: |
           set -euo pipefail
           if [[ -z "$MOR002_TS_OAUTH_CLIENT_ID" || -z "$MOR002_TS_AUDIENCE" ]]; then
@@ -254,8 +254,8 @@ jobs:
       - name: Join the dedicated ephemeral MOR-002 tailnet
         uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
         with:
-          oauth-client-id: ${{{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
-          audience: ${{{ secrets.MOR002_TS_AUDIENCE }}
+          oauth-client-id: ${{ secrets.MOR002_TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.MOR002_TS_AUDIENCE }}
           tags: tag:mor002-mtls-ci
           version: 1.104.6
       - name: Confirm server is joined and advertise only its overlay address
@@ -275,14 +275,14 @@ jobs:
           tailscale status
       - name: Verify client certificate and create signed overlay endpoint
         env:
-          GH_TOKEN: ${{{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           PYTHONPATH: external/E-CPU
-          RUNNER_ENVIRONMENT: ${{{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           mkdir -p evidence/server-host
           python bridges/observation-path/direct_mtls_operation_path.py prepare-server \
             --directory evidence/server-host --bootstrap-timeout 180 \
-            --advertise-host "${{{ steps.overlay.outputs.ip }}"
+            --advertise-host "${{ steps.overlay.outputs.ip }}"
       - name: Attest the server public certificate
         uses: actions/attest@v4
         with:
@@ -302,15 +302,15 @@ jobs:
       - name: Accept the E-CPU A1 operation over Tailscale mTLS
         env:
           PYTHONPATH: external/E-CPU
-          RUNNER_ENVIRONMENT: ${{{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           python bridges/observation-path/direct_mtls_operation_path.py serve \
             --directory evidence/server-host --accept-timeout 165 \
-            --bind-host "${{{ steps.overlay.outputs.ip }}"
+            --bind-host "${{ steps.overlay.outputs.ip }}"
       - name: Bind server operation-record predicate
         env:
           PYTHONPATH: external/E-CPU
-          RUNNER_ENVIRONMENT: ${{{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           python bridges/observation-path/direct_mtls_operation_path.py write-record-predicate \
             --record evidence/server-host/server_host-record.json \
@@ -359,7 +359,7 @@ jobs:
       - name: Produce C1 without a causal clock
         env:
           PYTHONPATH: external/E-CPU:bridges/observation-path
-          RUNNER_ENVIRONMENT: ${{{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           mkdir -p evidence/observer
           python experiments/multi-observer-causal-reconstruction/mor002_overlay.py \
@@ -451,16 +451,16 @@ jobs:
           path: evidence/observer
       - name: Independently verify mTLS receipt and reconstruct A1/A2/B1/C1
         env:
-          GH_TOKEN: ${{{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           PYTHONPATH: external/E-CPU:bridges/observation-path:experiments/multi-observer-causal-reconstruction
-          RUNNER_ENVIRONMENT: ${{{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           mkdir -p evidence/report
           python experiments/multi-observer-causal-reconstruction/mor002_overlay.py \
             verify --directory evidence --output evidence/report/mor002-report.json
       - name: Bind verifier identity to report bytes
         env:
-          RUNNER_ENVIRONMENT: ${{{ runner.environment }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           python experiments/multi-observer-causal-reconstruction/mor002_overlay.py \
             write-report-predicate --report evidence/report/mor002-report.json \
