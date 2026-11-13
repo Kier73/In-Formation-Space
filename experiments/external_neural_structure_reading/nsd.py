@@ -90,28 +90,26 @@ def _require_nonnegative_int(value: Any, label: str) -> int:
     return value
 
 
-def read_safetensors_header(path: Path, relative_path: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Read and validate one Safetensors header, never reading tensor data."""
-    file_size = path.stat().st_size
-    if file_size < 8:
-        raise NSDError(f"{relative_path}: file is shorter than the 8-byte header prefix")
-
-    with path.open("rb") as stream:
-        prefix = stream.read(8)
-        if len(prefix) != 8:
-            raise NSDError(f"{relative_path}: truncated header prefix")
-        header_length = int.from_bytes(prefix, byteorder="little", signed=False)
-        if header_length < 2:
-            raise NSDError(f"{relative_path}: header length is too small")
-        if header_length > MAX_HEADER_BYTES:
-            raise NSDError(
-                f"{relative_path}: header exceeds the {MAX_HEADER_BYTES}-byte safety limit"
-            )
-        if 8 + header_length > file_size:
-            raise NSDError(f"{relative_path}: declared header extends past end of file")
-        header_raw = stream.read(header_length)
-        if len(header_raw) != header_length:
-            raise NSDError(f"{relative_path}: truncated Safetensors header")
+def parse_safetensors_header_bytes(
+    prefix: bytes,
+    header_raw: bytes,
+    file_size: int,
+    relative_path: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Parse a bounded Safetensors header already obtained from a file or range source."""
+    if len(prefix) != 8:
+        raise NSDError(f"{relative_path}: header prefix must contain exactly 8 bytes")
+    header_length = int.from_bytes(prefix, byteorder="little", signed=False)
+    if header_length < 2:
+        raise NSDError(f"{relative_path}: header length is too small")
+    if header_length > MAX_HEADER_BYTES:
+        raise NSDError(
+            f"{relative_path}: header exceeds the {MAX_HEADER_BYTES}-byte safety limit"
+        )
+    if len(header_raw) != header_length:
+        raise NSDError(f"{relative_path}: header bytes do not match the declared length")
+    if file_size < 8 + header_length:
+        raise NSDError(f"{relative_path}: declared header extends past end of file")
 
     header = _parse_json(header_raw.rstrip(b" "), f"{relative_path} header")
     if not isinstance(header, dict):
@@ -168,7 +166,7 @@ def read_safetensors_header(path: Path, relative_path: str) -> tuple[list[dict[s
         raise NSDError(f"{relative_path}: no tensor entries were found")
     previous_end = 0
     for start, end, name in sorted(ranges):
-        if start < previous_end:
+        if end > start and start < previous_end:
             raise NSDError(f"{relative_path}: tensor data ranges overlap at {name!r}")
         previous_end = max(previous_end, end)
 
@@ -184,6 +182,31 @@ def read_safetensors_header(path: Path, relative_path: str) -> tuple[list[dict[s
         "metadata": metadata,
     }
 
+
+def read_safetensors_header(path: Path, relative_path: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Read and validate one Safetensors header, never reading tensor data."""
+    file_size = path.stat().st_size
+    if file_size < 8:
+        raise NSDError(f"{relative_path}: file is shorter than the 8-byte header prefix")
+
+    with path.open("rb") as stream:
+        prefix = stream.read(8)
+        if len(prefix) != 8:
+            raise NSDError(f"{relative_path}: truncated header prefix")
+        header_length = int.from_bytes(prefix, byteorder="little", signed=False)
+        if header_length < 2:
+            raise NSDError(f"{relative_path}: header length is too small")
+        if header_length > MAX_HEADER_BYTES:
+            raise NSDError(
+                f"{relative_path}: header exceeds the {MAX_HEADER_BYTES}-byte safety limit"
+            )
+        if 8 + header_length > file_size:
+            raise NSDError(f"{relative_path}: declared header extends past end of file")
+        header_raw = stream.read(header_length)
+        if len(header_raw) != header_length:
+            raise NSDError(f"{relative_path}: truncated Safetensors header")
+
+    return parse_safetensors_header_bytes(prefix, header_raw, file_size, relative_path)
 
 def inspect_snapshot(
     snapshot_dir: str | Path,
