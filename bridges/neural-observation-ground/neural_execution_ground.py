@@ -220,9 +220,30 @@ class ExecutableNeuralGround:
         # the stated limit. The full source checkpoint is never loaded.
         tensor_count = sum(math.prod(_shape(item["shape"], self.dimensions))
                            for item in self.tensors.values())
-        if tensor_count > max_elements:
+        graph_input_count = sum(math.prod(_shape(item["shape"], self.dimensions))
+                                for item in self.graph["inputs"])
+        activation_count = sum(
+            math.prod(_shape(port["shape"], self.dimensions))
+            for operation in self.operations.values()
+            for port in operation["outputs"]
+        )
+        # Attention uses [batch, heads, sequence, sequence] score, mask,
+        # exponential and probability intermediates. Conservatively include
+        # all attention scratch footprints in the preflight accounting.
+        attention_scratch = sum(
+            8 * batch * operation["attributes"]["head_count"] * sequence * sequence
+            for operation in self.operations.values()
+            if operation["operator"] == "attention.causal_scaled_dot_product"
+        )
+        required_elements = (
+            tensor_count + graph_input_count + activation_count + attention_scratch
+        )
+        if required_elements > max_elements:
             raise NeuralExecutionGroundError(
-                f"synthetic realization requires {tensor_count} tensor elements, budget is {max_elements}"
+                "synthetic realization would exceed element budget: "
+                f"parameters={tensor_count}, graph_inputs={graph_input_count}, "
+                f"activations={activation_count}, attention_scratch={attention_scratch}, "
+                f"total={required_elements}, budget={max_elements}"
             )
         self._tensors: dict[str, np.ndarray] = {}
         self._runtime_inputs: dict[str, np.ndarray] = {}
