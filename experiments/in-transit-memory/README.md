@@ -449,6 +449,23 @@ The sensor result and transport delivery are separate random events. Delivery lo
 
 The backward-induction policy is independently evaluated by forward probability-mass propagation. The full decision nodes retain the arrival-ordered evidence history. Each arrival record has its own digest, and the policy digest binds the complete node table and model inputs.
 
+### First deterministic scan
+
+The checked-in [MRE-005 scan summary](results/delayed-evidence-scan-summary.json) is reconstructed from all four full policy reports by CI.
+
+| Schedule | Survival probability | Expected repairs | Expected delivered reports | Expected utility | Utility change vs no reports |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| No reports | 0.85522557 | 0.32931791 | 0.00000000 | 0.83875967 | 0.00000000 |
+| In-order delivery | 0.85428470 | 0.30759052 | 1.48365803 | 0.83890517 | +0.00014550 |
+| Out-of-order delivery | 0.85229757 | 0.26546061 | 1.48257650 | 0.83902454 | +0.00026487 |
+| Older report times out | 0.85216558 | 0.26310424 | 0.76136046 | 0.83901037 | +0.00025069 |
+
+In the out-of-order schedule, sequence 2 arrives at its measurement epoch and the older sequence 1 arrives two epochs after it was measured. The forward reconstruction records an expected 0.57675653 out-of-order deliveries and 0.72121604 late deliveries. The in-order schedule instead delivers both reports one epoch after measurement.
+
+The out-of-order policy has slightly higher utility than the in-order policy under this declared repair-cost objective, but it also has lower terminal survival (0.85229757 versus 0.85428470) and fewer expected repairs (0.26546061 versus 0.30759052). This is not evidence that out-of-order transport is inherently beneficial. The two schedules change the age/delay profile as well as the sequence of arrivals; the comparison is not a causal isolation of arrival order alone. The utility gains over no reports are all small in this parameter set (roughly 0.00015–0.00026).
+
+The summary values are rounded to eight decimal places. Full exact rational probabilities, belief histories, event digests, decision values, and policy digests remain in the reports reconstructed by the source model. 
+
 ### What this establishes—and what it does not
 
 This experiment can test whether a controller preserves measurement time separately from arrival time, updates a historical state coordinate, and reconstructs the resulting current belief. Its schedules make sequence/arrival inversions and known timeouts explicit.
