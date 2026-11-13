@@ -130,6 +130,7 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
         self.assertEqual(observation["route_state"], "active")
         self.assertEqual(observation["route_type"], "direct")
         self.assertEqual(observation["matched_peer_status"], "active; direct")
+        self.assertEqual(observation["observed_monotonic_ns"], 125)
         self.assertEqual(observation["elapsed_ns"], 25)
         self.assertEqual(observation["status_output_sha256"], direct.digest_bytes(output))
         self.assertNotIn("private-host", repr(observation))
@@ -153,6 +154,7 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
                 "route_type": route_type,
                 "command": "tailscale status",
                 "exit_code": 0,
+                "observed_monotonic_ns": 100,
                 "elapsed_ns": 10,
                 "matched_peer_status": marker,
                 "status_output_sha256": "a" * 64,
@@ -228,6 +230,7 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
             "route_type": "reachable_unclassified",
             "command": "tailscale status",
             "exit_code": 0,
+            "observed_monotonic_ns": 100,
             "elapsed_ns": 10,
             "matched_peer_status": "active; unclassified",
             "status_output_sha256": "a" * 64,
