@@ -73,3 +73,8 @@ The implementation uses only the Python standard library and exact rational arit
 - test_heterogeneous_evidence.py — twelve tests for weighted evidence, count failure, exact posterior merging, identical-sensor reduction, impossible events, and tamper rejection.
 - example.py — runnable four-sensor schedule.
 - README.md — model, update equation, example, evidence scope, and limitations.
+
+
+## Follow-on experiment
+
+[RIV-006: Context-switching evidence accumulation](../context-switching-evidence-accumulator/README.md) relaxes the conditional-iid structure further by adding a persistent hidden Markov operating regime. RIV-005's scalar hypothesis posterior remains sufficient when the known sensor schedule is conditionally independent given H. RIV-006 shows why a joint posterior over H and the next regime is needed when hidden context persists and creates hypothesis-context correlation.

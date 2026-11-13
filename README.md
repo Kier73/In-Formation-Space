@@ -185,3 +185,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Heterogeneous evidence accumulation
 
 - [RIV-005: Heterogeneous evidence accumulation](experiments/heterogeneous-evidence-accumulator/README.md) — extends RIV-004 from identical to position-specific binary sensor channels. It updates an exact posterior after each signal, demonstrates why a simple total count can yield opposite MAP decisions for histories with the same count, and groups 16 histories into 9 terminal posterior states.
+
+## Context-switching evidence accumulation
+
+- [RIV-006: Context-switching evidence accumulation](experiments/context-switching-evidence-accumulator/README.md) — extends RIV-005 with a persistent hidden Markov operating regime that changes sensor reliability. It constructs an exact joint posterior over hypothesis × next context regime and demonstrates that two histories can share both marginal probabilities while producing different updates under the same next signal. The four-sensor example verifies all 16 ordered histories; the joint belief deliberately retains distinctions that the two marginals lose.
