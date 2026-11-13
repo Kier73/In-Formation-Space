@@ -160,7 +160,7 @@ func TestSafeIntegerProfileBoundariesAreAccepted(t *testing.T) {
 
 func TestDuplicateObjectKeysAreRejectedByCanonicalArtifactReader(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "duplicate.json")
-	if err := os.WriteFile(path, []byte("{\\"value\\":1,\\"value\\":2}\n"), 0644); err != nil {
+\tif err := os.WriteFile(path, []byte("{\"value\":1,\"value\":2}\n"), 0644); err != nil {
 		t.Fatal(err)
 	}
 	if _, _, err := ReadCanonicalFile(path); err == nil || !strings.Contains(err.Error(), "canonical JSON") {
