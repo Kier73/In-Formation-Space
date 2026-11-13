@@ -58,8 +58,29 @@ class DecisionTimeEvidenceFrontierTests(unittest.TestCase):
         decision["available_message_ids"] = []
         core = {key: value for key, value in decision.items() if key != "event_digest"}
         decision["event_digest"] = frontier.digest(core)
+        following = altered["receiver_events"][2]
+        following["previous_digest"] = decision["event_digest"]
+        following_core = {key: value for key, value in following.items() if key != "event_digest"}
+        following["event_digest"] = frontier.digest(following_core)
+        last = altered["receiver_events"][3]
+        last["previous_digest"] = following["event_digest"]
+        last["frontier_head_digest"] = following["event_digest"]
+        last_core = {key: value for key, value in last.items() if key != "event_digest"}
+        last["event_digest"] = frontier.digest(last_core)
         with self.assertRaisesRegex(frontier.FrontierError, "available set"):
             frontier.build_report(altered)
+
+    def test_unreceived_message_is_not_mislabeled_lost(self) -> None:
+        report = frontier.build_report(frontier.build_fixture(omit_receiver_event=3))
+        d1 = next(item for item in report["decision_assessments"] if item["decision_id"] == "D1")
+        self.assertEqual(
+            self.message(d1, "m1")["availability"],
+            "not_recorded_as_admitted_at_snapshot",
+        )
+        self.assertEqual(
+            self.message(d1, "m1")["decision_to_receiver_intake"],
+            None,
+        )
 
     def test_used_message_must_be_declared_available(self) -> None:
         altered = copy.deepcopy(self.bundle)
