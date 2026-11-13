@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/multi-observer-causal-reconstruction/report-predicate.schema.json",
+  "title": "Multi-observer causal report attestation predicate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "repository", "run_id", "run_attempt", "workflow_ref", "workflow_sha", "git_ref", "git_sha", "job", "actor_id", "report_sha256", "report_digest", "producer_record_sha256", "path_id", "handoff_digest"],
+  "properties": {
+    "schema": {"const": "in-formation.multi-observer-causal-report-predicate/0.1"},
+    "repository": {"const": "Kier73/In-Formation-Space"},
+    "run_id": {"type": "string", "minLength": 1},
+    "run_attempt": {"type": "string", "minLength": 1},
+    "workflow_ref": {"type": "string", "minLength": 1},
+    "workflow_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "git_ref": {"const": "refs/heads/main"},
+    "git_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "job": {"const": "verifier_host"},
+    "actor_id": {"type": "string", "minLength": 1},
+    "report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "producer_record_sha256": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_host", "receiver_host", "observer_host"],
+      "properties": {
+        "source_host": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "receiver_host": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "observer_host": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "path_id": {"type": "string", "minLength": 1},
+    "handoff_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
