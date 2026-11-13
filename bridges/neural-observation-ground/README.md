@@ -70,8 +70,11 @@ a hostile controller from replacing the whole experiment and its seed.
 
 ## Resource discipline
 
-`max_elements` is an explicit fail-closed aggregate limit over synthetic
-tensor declarations, enforced **before** materializing arrays. Real GPT-2
+`max_elements` is an explicit fail-closed, conservative aggregate
+element budget over synthetic parameter tensors, runtime graph inputs,
+retained operator activations, and attention score/probability scratch space.
+The preflight runs **before** materializing arrays. It is an element accounting
+guard rather than an exact operating-system peak-memory measurement. Real GPT-2
 would require much more memory; the pinned 160-tensor topology is admitted
 into VGI as a `ProofGround` but numeric realization is refused by this
 reference's budget. Real model weights are neither downloaded nor executed.
