@@ -117,7 +117,7 @@ Encounter envelopes may carry a `relations` array linking them to other envelope
 **Files:**
 
 - [causal_graph.py](causal_graph.py) — builds and analyzes a causal poset from a collection of envelopes.
-- [test_causal_graph.py](test_causal_graph.py) — 10 unit tests for cycle detection, transitive reduction, anachronism flagging, and linear extension counting.
+- [test_causal_graph.py](test_causal_graph.py) — 12 unit tests for cycle detection, transitive reduction, clock-domain-scoped timestamp diagnostics, and linear extension counting.
 
 **Relation kinds and induced edge directions:**
 
@@ -131,9 +131,26 @@ Encounter envelopes may carry a `relations` array linking them to other envelope
 
 - **Cycle detection:** 3-color DFS identifies causal contradictions and returns an exact witness path.
 - **Hasse reduction:** transitive reduction extracts the minimal dependency diagram — the edges you would draw by hand.
-- **Anachronism audit:** flags pairs $(u \prec v)$ where the physical clock has $\text{observed\_at}(u) > \text{observed\_at}(v)$. Unknown clocks are left unknown rather than treated as zero.
+- **Timestamp-domain audit:** checks a causal pair only when both envelopes declare the same non-empty `context.observed_at_clock_domain`. Missing timestamps, missing domain IDs, and different domains are reported as unassessed rather than ordered. A same-domain conflict is a diagnostic: a wall clock can step or be misconfigured, so the result does not disprove the causal edge.
 - **Linear extension count:** $|\Omega|$ measures temporal underdetermination — how many total orderings are consistent with the partial causal order. Computed exactly via down-set DP for $\le 16$ internal nodes.
 - **External target identification:** relations pointing outside the supplied envelope set mark an epistemic boundary — the graph is known to be incomplete at those edges.
+
+
+
+**Timestamp comparability:** `observed_at` is a wall-clock reading, not a universal event coordinate. To opt into the diagnostic for one event, supply the clock-domain identity in its context:
+
+```json
+{
+  "observed_at": "2026-11-11T12:05:00Z",
+  "context": {
+    "observed_at_clock_domain": "receiver-wall-clock:boot-17"
+  }
+}
+```
+
+Two causal events are compared only when both timestamps parse and both domain IDs are exactly equal. The ID should identify the clock instance/domain, not merely a device family or a generic label such as `UTC`. A pair with a missing timestamp, missing domain ID, or different domain IDs is unassessed; it does not become concurrent and is not assigned an order. The report exposes checked and unassessed pair counts plus grouped reasons.
+
+A same-domain timestamp conflict means only that the recorded wall-clock readings oppose the causal relation. It may reflect clock adjustment, delayed timestamp capture, bad domain metadata, or a data error. It is not proof that the causal relation is impossible. This audit does not apply affine calibration, infer causality from timestamps, or compare `recorded_at` values.
 
 **Reproduce:**
 
