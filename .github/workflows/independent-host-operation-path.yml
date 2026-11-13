@@ -9,6 +9,9 @@ on:
       - "bridges/observation-path/independent_host_path.py"
       - "bridges/observation-path/test_independent_host_path.py"
       - "bridges/observation-path/independent-host-operation-*.schema.json"
+      - "bridges/observation-path/diverse_host_verifier.py"
+      - "bridges/observation-path/test_diverse_host_verifier.py"
+      - "bridges/observation-path/diverse-host-operation-*.schema.json"
       - "bridges/temporal-provenance/temporal_provenance.py"
       - ".github/workflows/independent-host-operation-path.yml"
   workflow_dispatch:
@@ -244,3 +247,80 @@ jobs:
           path: evidence/independent-report.json
           if-no-files-found: error
           retention-days: 90
+
+  diverse_verifier_host:
+    needs: [source_host, receiver_host]
+    if: needs.source_host.result == 'success' && needs.receiver_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Receive source-host record
+        uses: actions/download-artifact@v4
+        with:
+          name: source-host-evidence
+          path: received-source
+      - name: Receive receiver-host record
+        uses: actions/download-artifact@v4
+        with:
+          name: receiver-host-evidence
+          path: received-receiver
+      - name: Reconstruct evidence with a separate standard-library implementation
+        env:
+          RUNNER_ENVIRONMENT: \${{ runner.environment }}
+        run: |
+          mkdir -p evidence
+          python bridges/observation-path/diverse_host_verifier.py verify \
+            --source received-source/host-a.json \
+            --receiver received-receiver/host-b.json \
+            --output evidence/diverse-report.json
+      - name: Bind the fourth-job identity to the exact report bytes
+        env:
+          RUNNER_ENVIRONMENT: \${{ runner.environment }}
+        run: |
+          python bridges/observation-path/diverse_host_verifier.py write-report-predicate \
+            --report evidence/diverse-report.json \
+            --output evidence/diverse-report.predicate.json
+      - name: Validate diverse report and attestation predicate schemas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          cases = (
+              ("bridges/observation-path/diverse-host-operation-report.schema.json", "evidence/diverse-report.json"),
+              ("bridges/observation-path/diverse-host-operation-report-predicate.schema.json", "evidence/diverse-report.predicate.json"),
+          )
+          for schema_path, instance_path in cases:
+              schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
+              instance = json.loads(Path(instance_path).read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              Draft202012Validator(schema).validate(instance)
+              print(f"valid: {instance_path}")
+          PY
+      - name: Attest the diverse reconstruction report
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/diverse-report.json
+          predicate-type: https://kier73.github.io/in-formation-space/diverse-host-operation-report/v1
+          predicate-path: evidence/diverse-report.predicate.json
+      - name: Preserve the diverse reconstruction result
+        uses: actions/upload-artifact@v4
+        with:
+          name: diverse-host-reconstruction-report
+          path: evidence/diverse-report.json
+          if-no-files-found: error
+          retention-days: 90
+
