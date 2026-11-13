@@ -102,7 +102,7 @@ def _required_env(env: Mapping[str, str], name: str) -> str:
 def host_metadata(role: str, env: Mapping[str, str] | None = None) -> dict[str, Any]:
     """Capture the job context used by the protected, main-only workflow."""
     selected = os.environ if env is None else env
-    if role not in {"source_host", "receiver_host"}:
+    if role not in {"source_host", "receiver_host", "verifier_host"}:
         raise EvidenceError("host role is not supported")
 
     repository = _required_env(selected, "GITHUB_REPOSITORY")
@@ -383,6 +383,37 @@ def _validate_pair_context(source_host: Mapping[str, Any], receiver_host: Mappin
         raise EvidenceError("both operation records must come from GitHub-hosted runners")
 
 
+def _validate_verifier_context(
+    source_host: Mapping[str, Any],
+    receiver_host: Mapping[str, Any],
+    verifier_host: Mapping[str, Any],
+) -> None:
+    _validate_pair_context(source_host, receiver_host)
+    if verifier_host.get("role") != "verifier_host" or verifier_host.get("job") != "verifier_host":
+        raise EvidenceError("independent verifier must run in the verifier_host job")
+    shared_fields = (
+        "repository", "run_id", "run_attempt", "run_number",
+        "workflow_ref", "workflow_sha", "git_ref", "git_sha",
+    )
+    for field in shared_fields:
+        if source_host[field] != verifier_host[field]:
+            raise EvidenceError(f"verifier differs from host records in shared run field {field}")
+    actors = {
+        source_host["actor_id"],
+        receiver_host["actor_id"],
+        verifier_host["actor_id"],
+    }
+    jobs = {
+        source_host["job"],
+        receiver_host["job"],
+        verifier_host["job"],
+    }
+    if len(actors) != 3 or len(jobs) != 3:
+        raise EvidenceError("source, receiver, and verifier must be three distinct job actors")
+    if any(host.get("runner_environment") != "github-hosted" for host in (source_host, receiver_host, verifier_host)):
+        raise EvidenceError("all three roles must use GitHub-hosted runners")
+
+
 def _gh_version(gh: str) -> tuple[int, int, int]:
     result = subprocess.run([gh, "--version"], check=True, capture_output=True, text=True)
     match = re.search(r"gh version (\d+)\.(\d+)\.(\d+)", result.stdout)
@@ -556,10 +587,11 @@ def build_report(
     source_attestation: Mapping[str, Any],
     receiver_attestation: Mapping[str, Any],
     receiver_artifact_sha256: str,
+    verifier_host: Mapping[str, Any],
 ) -> dict[str, Any]:
     source = _validate_record(source, "source_host")
     receiver = _validate_record(receiver, "receiver_host")
-    _validate_pair_context(source["host"], receiver["host"])
+    _validate_verifier_context(source["host"], receiver["host"], verifier_host)
     source_attestation = _validate_attestation_summary(
         source_attestation, str(receiver["source_record_sha256"])
     )
@@ -623,11 +655,20 @@ def build_report(
             "source_artifact_sha256": receiver["source_record_sha256"],
             "attestation": dict(receiver_attestation),
         },
+        "verifier": {
+            "role": verifier_host["role"],
+            "job": verifier_host["job"],
+            "actor_id": verifier_host["actor_id"],
+            "runner_name": verifier_host["runner_name"],
+            "runner_os": verifier_host["runner_os"],
+            "runner_arch": verifier_host["runner_arch"],
+            "runner_environment": verifier_host["runner_environment"],
+        },
         "host_separation": {
-            "distinct_jobs": source["host"]["job"] != receiver["host"]["job"],
-            "distinct_temporal_actors": source["host"]["actor_id"] != receiver["host"]["actor_id"],
-            "both_github_hosted": True,
-            "verification_host_is_third_job": True,
+            "distinct_jobs": len({source["host"]["job"], receiver["host"]["job"], verifier_host["job"]}) == 3,
+            "distinct_temporal_actors": len({source["host"]["actor_id"], receiver["host"]["actor_id"], verifier_host["actor_id"]}) == 3,
+            "both_github_hosted": all(host["runner_environment"] == "github-hosted" for host in (source["host"], receiver["host"], verifier_host)),
+            "verification_host_is_third_job": verifier_host["job"] not in {source["host"]["job"], receiver["host"]["job"]},
             "cross_os": source["host"]["runner_os"] != receiver["host"]["runner_os"],
             "artifact_relay": "GitHub Actions artifact storage",
             "relay_channel_id": RELAY_CHANNEL,
@@ -679,12 +720,14 @@ def verify_to_report(
     receiver_attestation = verify_artifact_attestation(
         receiver_path, receiver, "receiver_host", gh=gh
     )
+    verifier_host = host_metadata("verifier_host")
     report = build_report(
         source,
         receiver,
         source_attestation=source_attestation,
         receiver_attestation=receiver_attestation,
         receiver_artifact_sha256=sha256_file(receiver_path),
+        verifier_host=verifier_host,
     )
     write_json(output_path, report)
     return report
