@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "experiments" / "portable-realization-capsule"))
 
 from formats.canonical_metadata_v1 import (  # noqa: E402
     CanonicalMetadataError,
+    PROFILE_ID,
     canonical_bytes,
     decode_canonical_document,
 )
@@ -31,7 +32,7 @@ CORPUS_PATH = ROOT / "formats" / "canonical-metadata-v1" / "test-vectors.json"
 
 def load_corpus() -> dict:
     corpus = json.loads(CORPUS_PATH.read_text(encoding="utf-8"))
-    if corpus.get("profile") != "in-formation-space.canonical-metadata.v1":
+    if corpus.get("profile") != PROFILE_ID:
         raise AssertionError("unexpected canonical metadata corpus profile")
     return corpus
 
