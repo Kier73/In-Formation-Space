@@ -5,12 +5,16 @@ on:
     paths:
       - "experiments/external_neural_structure_reading/hub.py"
       - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/gpt2_adapter.py"
+      - "experiments/external_neural_structure_reading/gpt2-operation-graph.schema.json"
       - "experiments/external_neural_structure_reading/live_reference/**"
       - ".github/workflows/hfr-001-live-reference.yml"
   pull_request:
     paths:
       - "experiments/external_neural_structure_reading/hub.py"
       - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/gpt2_adapter.py"
+      - "experiments/external_neural_structure_reading/gpt2-operation-graph.schema.json"
       - "experiments/external_neural_structure_reading/live_reference/**"
       - ".github/workflows/hfr-001-live-reference.yml"
   workflow_dispatch:
@@ -30,7 +34,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Observe pinned public GPT-2 metadata and Safetensors headers
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check jsonschema
+
+      - name: Observe pinned public GPT-2 metadata, headers, and inferred graph
         run: >-
           python -m experiments.external_neural_structure_reading.live_reference.run_gpt2
           --output experiments/external_neural_structure_reading/results/gpt2-nsd.json
@@ -40,5 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hfr-001-gpt2-nsd
-          path: experiments/external_neural_structure_reading/results/gpt2-nsd.json
+          path: |
+            experiments/external_neural_structure_reading/results/gpt2-nsd.json
+            experiments/external_neural_structure_reading/results/gpt2-operation-graph.json
           if-no-files-found: warn

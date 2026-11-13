@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 
 from ..hub import inspect_huggingface_model
+from ..gpt2_adapter import interpret_gpt2
+from jsonschema import Draft202012Validator
 
 REPOSITORY = "openai-community/gpt2"
 REVISION = "607a30d783dfa663caf39e06633721c8d4cfcd7e"
@@ -44,6 +46,11 @@ def run(output: Path) -> dict:
             "header transfer was not smaller than the complete Safetensors shard inventory"
         )
 
+    graph = interpret_gpt2(description)
+    schema_path = Path(__file__).parents[1] / "gpt2-operation-graph.schema.json"
+    graph_schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    Draft202012Validator(graph_schema).validate(graph)
+
     output.parent.mkdir(parents=True, exist_ok=True)
     rendered = json.dumps(
         description,
@@ -53,6 +60,16 @@ def run(output: Path) -> dict:
         allow_nan=False,
     ) + "\n"
     output.write_text(rendered, encoding="utf-8", newline="\n")
+
+    graph_output = output.with_name("gpt2-operation-graph.json")
+    graph_rendered = json.dumps(
+        graph,
+        ensure_ascii=False,
+        sort_keys=True,
+        indent=2,
+        allow_nan=False,
+    ) + "\n"
+    graph_output.write_text(graph_rendered, encoding="utf-8", newline="\n")
 
     summary = {
         "repository": REPOSITORY,
@@ -68,6 +85,13 @@ def run(output: Path) -> dict:
         "nsd_path": str(output),
         "nsd_bytes": len(rendered.encode("utf-8")),
         "weight_payload_read": False,
+        "operation_graph_nodes": len(graph["nodes"]),
+        "operation_graph_checks_passed": graph["verification"]["passed_checks"],
+        "operation_graph_blocks_checked": graph["verification"]["checked_transformer_blocks"],
+        "operation_graph_path": str(output.with_name("gpt2-operation-graph.json")),
+        "operation_graph_bytes": len(
+            json.dumps(graph, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False).encode("utf-8")
+        ) + 1,
     }
     print(json.dumps(summary, sort_keys=True))
     return summary
