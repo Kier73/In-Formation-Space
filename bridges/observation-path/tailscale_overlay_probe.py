@@ -362,7 +362,7 @@ def tailscale_ping_command(address: str, tailscale_bin: str = "tailscale") -> li
         raise OverlayProbeError("Tailscale ping target must be in 100.64.0.0/10")
     return [
         tailscale_bin, "ping", "--c", str(PING_COUNT),
-        "--until-direct=false", str(parsed),
+        "--timeout=3s", "--until-direct=false", str(parsed),
     ]
 
 
@@ -441,7 +441,7 @@ def probe_peer(
         if peer_address["status"] != "ready":
             status = "peer_overlay_not_configured"
         else:
-            command = [tailscale_bin, "ping", "--c", str(PING_COUNT), str(peer_address["overlay_ipv4"])]
+            command = tailscale_ping_command(str(peer_address["overlay_ipv4"]), tailscale_bin)
             try:
                 completed = subprocess.run(
                     command, capture_output=True, text=True, timeout=PING_TIMEOUT_SECONDS,
