@@ -23,12 +23,17 @@ def make_envelope(
     env_id: str,
     observed_at: str | None = None,
     relations: List[Dict[str, str]] | None = None,
+    observed_at_clock_domain: str | None = None,
 ) -> Dict[str, Any]:
+    context: Dict[str, str] = {}
+    if observed_at_clock_domain is not None:
+        context["observed_at_clock_domain"] = observed_at_clock_domain
     return {
         "format": "in-formation.encounter/0.1",
         "id": env_id,
         "observed_at": observed_at,
         "source": {"kind": "test-suite"},
+        "context": context,
         "payload": {"value": f"data-for-{env_id}"},
         "relations": relations or [],
     }
@@ -143,18 +148,66 @@ class CausalEncounterGraphTests(unittest.TestCase):
             "A",
             observed_at="2026-11-11T12:05:00Z",
             relations=[{"kind": "causes", "target": "B"}],
+            observed_at_clock_domain="receiver-wall-clock",
         )
-        env_b = make_envelope("B", observed_at="2026-11-11T12:00:00Z")
+        env_b = make_envelope(
+            "B",
+            observed_at="2026-11-11T12:00:00Z",
+            observed_at_clock_domain="receiver-wall-clock",
+        )
 
         graph = CausalEncounterGraph([env_a, env_b])
         report = graph.analyze()
 
         self.assertFalse(report.has_cycle)
-        self.assertEqual(len(report.anachronisms), 1)
-        viol = report.anachronisms[0]
-        self.assertEqual(viol.predecessor_id, "A")
-        self.assertEqual(viol.successor_id, "B")
-        self.assertEqual(viol.time_skew_seconds, 300.0)
+        self.assertEqual(len(report.timestamp_order_conflicts), 1)
+        conflict = report.timestamp_order_conflicts[0]
+        self.assertEqual(conflict.predecessor_id, "A")
+        self.assertEqual(conflict.successor_id, "B")
+        self.assertEqual(conflict.time_skew_seconds, 300.0)
+        self.assertEqual(report.timestamp_pairs_checked, 1)
+        self.assertEqual(report.timestamp_pairs_unassessed, 0)
+
+    def test_different_clock_domains_are_not_compared(self) -> None:
+        env_a = make_envelope(
+            "A",
+            observed_at="2026-11-11T12:05:00Z",
+            relations=[{"kind": "causes", "target": "B"}],
+            observed_at_clock_domain="controller-clock",
+        )
+        env_b = make_envelope(
+            "B",
+            observed_at="2026-11-11T12:00:00Z",
+            observed_at_clock_domain="sensor-clock",
+        )
+
+        report = CausalEncounterGraph([env_a, env_b]).analyze()
+
+        self.assertEqual(report.timestamp_order_conflicts, ())
+        self.assertEqual(report.timestamp_pairs_checked, 0)
+        self.assertEqual(report.timestamp_pairs_unassessed, 1)
+        self.assertEqual(
+            report.timestamp_unassessed_reasons,
+            (("different_clock_domains", 1),),
+        )
+
+    def test_timestamps_without_explicit_clock_domains_remain_unassessed(self) -> None:
+        env_a = make_envelope(
+            "A",
+            observed_at="2026-11-11T12:05:00Z",
+            relations=[{"kind": "causes", "target": "B"}],
+        )
+        env_b = make_envelope("B", observed_at="2026-11-11T12:00:00Z")
+
+        report = CausalEncounterGraph([env_a, env_b]).analyze()
+
+        self.assertEqual(report.timestamp_order_conflicts, ())
+        self.assertEqual(report.timestamp_pairs_checked, 0)
+        self.assertEqual(report.timestamp_pairs_unassessed, 1)
+        self.assertEqual(
+            report.timestamp_unassessed_reasons,
+            (("missing_clock_domain", 1),),
+        )
 
     def test_combinatorial_two_chain_interleaving_count(self) -> None:
         # Two independent chains:
