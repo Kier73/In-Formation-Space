@@ -13,15 +13,20 @@ on:
       - "bridges/temporal-provenance/clock_calibration.py"
       - "bridges/temporal-provenance/temporal_provenance.py"
       - ".github/workflows/distributed-causal-operation-path.yml"
+      - ".github/workflows/independent-host-operation-path.yml"
   pull_request:
     paths:
       - "bridges/observation-path/operation_spans.py"
       - "bridges/observation-path/distributed_operation_path.py"
+      - "bridges/observation-path/independent_host_path.py"
+      - "bridges/observation-path/test_independent_host_path.py"
+      - "bridges/observation-path/independent-host-operation-*.schema.json"
       - "bridges/observation-path/test_distributed_operation_path.py"
       - "bridges/observation-path/distributed-operation-path*.schema.json"
       - "bridges/temporal-provenance/clock_calibration.py"
       - "bridges/temporal-provenance/temporal_provenance.py"
       - ".github/workflows/distributed-causal-operation-path.yml"
+      - ".github/workflows/independent-host-operation-path.yml"
   workflow_dispatch:
 
 permissions:
