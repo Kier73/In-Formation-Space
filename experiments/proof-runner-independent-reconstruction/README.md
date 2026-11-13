@@ -120,7 +120,11 @@ From the repository root:
 mkdir -p external
 git clone https://github.com/Kier73/E-CPU external/E-CPU
 git -C external/E-CPU checkout c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+git clone https://github.com/Kier73/Virtual-Ground-Interpreter external/Virtual-Ground-Interpreter
+git -C external/Virtual-Ground-Interpreter checkout ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+python -m pip install --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
 python -m pip install "cryptography>=42,<47" "jsonschema>=4,<5"
+python -c "from vgi.proof import ProofGroundAdapter, VerifiedKernelReceipt"
 export PYTHONPATH="bridges/proof-attention:external/E-CPU:."
 python -m unittest discover \
   -s experiments/proof-runner-independent-reconstruction \
