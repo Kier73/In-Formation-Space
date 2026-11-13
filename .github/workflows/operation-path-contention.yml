@@ -1,0 +1,42 @@
+name: Operation path contention
+
+on:
+  push:
+    paths:
+      - "experiments/operation-path-sensitivity/**"
+      - "bridges/observation-path/operation_path_criticality.py"
+      - "bridges/observation-path/operation_spans.py"
+      - ".github/workflows/operation-path-contention.yml"
+  pull_request:
+    paths:
+      - "experiments/operation-path-sensitivity/**"
+      - "bridges/observation-path/operation_path_criticality.py"
+      - "bridges/observation-path/operation_spans.py"
+      - ".github/workflows/operation-path-contention.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Verify resource evidence and both graph interpretations
+        run: python -m unittest discover -s experiments/operation-path-sensitivity -v
+      - name: Measure seven shared-lock blocks without speed thresholds
+        run: python experiments/operation-path-sensitivity/contention.py --output results/contention.json
+      - name: Reconstruct evidence in a fresh process
+        run: python experiments/operation-path-sensitivity/contention.py --verify results/contention.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ops003-${{ matrix.os }}
+          path: results/contention.json
+          if-no-files-found: error

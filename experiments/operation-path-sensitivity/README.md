@@ -3,6 +3,9 @@
 Follow-up: [OPS-002 measured fork/join interventions](INTERVENTION-002.md)
 compares these predictions with retained observations from real worker threads.
 
+[OPS-003 shared-resource contention](CONTENTION-003.md) preserves both the
+fork/join graph and a receipt-backed resource-order graph over the same spans.
+
 ## Question
 
 Does reducing the duration of an operation on a longest declared dependency
