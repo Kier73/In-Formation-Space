@@ -156,7 +156,7 @@ jobs:
           path: received-authority
       - name: Verify the exact authority public-key artifact attestation
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           python experiments/proof-runner-independent-reconstruction/host_evidence.py \
             verify-key-attestation \
@@ -226,7 +226,7 @@ jobs:
           path: received-runner
       - name: Verify authority public-key provenance
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           python experiments/proof-runner-independent-reconstruction/host_evidence.py \
             verify-key-attestation \
@@ -235,7 +235,7 @@ jobs:
             --job authority_host
       - name: Verify runner public-key provenance
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           python experiments/proof-runner-independent-reconstruction/host_evidence.py \
             verify-key-attestation \
