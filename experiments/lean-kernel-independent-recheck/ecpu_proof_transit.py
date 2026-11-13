@@ -226,8 +226,14 @@ def _proof_channels(transport: SocketTransport, *, serving: bool) -> ReliableCha
 def send_frames(
     host: str, port: int, paths: Mapping[str, Path],
     *, ca: Path, cert: Path, key: Path, budget: float = MAX_SECONDS,
+    test_fault_after_frames: int | None = None,
 ) -> dict:
     frames = make_frames(paths)
+    if test_fault_after_frames is not None and (
+        type(test_fault_after_frames) is not int
+        or not 1 <= test_fault_after_frames < len(frames)
+    ):
+        raise ProofTransitError("test fault prefix must be nonempty and incomplete")
     tls = connect_mutual_tls(
         host, port, ORIGIN, DESTINATION, _ctx(ca, cert, key, server=False),
         server_hostname=DESTINATION,
@@ -257,6 +263,10 @@ def send_frames(
             if sequence in channel.failed_sequences:
                 raise ProofTransitError(f"E-CPU reliable delivery failed: {sequence}")
             sent += 1
+            if sent == test_fault_after_frames:
+                raise ProofTransitError(
+                    f"intentional test-only sender process fault after {sent} ACKed frames"
+                )
         return {
             "frames_sent": sent,
             "manifest_sha256": frames[-1]["manifest_sha256"],
@@ -326,6 +336,8 @@ def main() -> None:
     sendp = sub.add_parser("send")
     sendp.add_argument("--host", required=True)
     sendp.add_argument("--port", type=int, required=True)
+    sendp.add_argument("--test-fault-after-frames", type=int, default=None,
+                       help="test only: exit after ACKed incomplete prefix; never call proof complete")
     servep = sub.add_parser("serve")
     servep.add_argument("--bind", default="127.0.0.1")
     servep.add_argument("--port", type=int, default=0)
@@ -342,6 +354,7 @@ def main() -> None:
             result = send_frames(
                 args.host, args.port, _subjects(args),
                 ca=args.ca, cert=args.cert, key=args.key,
+                test_fault_after_frames=args.test_fault_after_frames,
             )
             print(f"MAILCPU_PROOF_FRAMES_ACKED:{result['frames_sent']}", flush=True)
         else:
