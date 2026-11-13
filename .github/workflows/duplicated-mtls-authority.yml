@@ -37,7 +37,7 @@ jobs:
       - name: Run cloned-credential recovery-lineage tests
         working-directory: experiments/duplicated-mtls-authority
         env:
-          PYTHONPATH: \${{ github.workspace }}/external/E-CPU
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
         run: |
           python -m py_compile clone_mtls.py clone_owner_worker.py tls_authority_worker.py test_clone_mtls.py
           python -m pytest -q test_clone_mtls.py
