@@ -204,6 +204,62 @@ class BurstLossTests(unittest.TestCase):
         self.assertEqual(report["models"]["shared_channel"]["status"], "no_finite_half_life")
         self.assertEqual(report["models"]["per_packet"]["status"], "no_finite_half_life")
 
+    def test_transient_bad_state_can_recover_without_crossing_half(self):
+        # One packet survives a bad-state visit with probability 0.9 and
+        # transitions to a loss-free absorbing good state with probability 0.9.
+        # Starting-good mass is only 0.2, but eventual survival is > 0.5.
+        args = self.common(
+            slots=1, required=1, good=0.0, bad=0.1,
+            alpha=0.0, beta=0.9, initial_bad=0.8, rounds=100,
+        )
+        report = summarize_scenario(name="transient-bad", **args)
+        for model in ("per_packet", "shared_channel"):
+            self.assertEqual(report["models"][model]["status"], "no_finite_half_life")
+        limiting_survival = 0.2 + 0.8 * (0.9 * 0.9 / (1.0 - 0.9 * 0.1))
+        self.assertAlmostEqual(
+            report["models"]["per_packet"]["retention_at_rounds"]["100"],
+            limiting_survival,
+            places=12,
+        )
+        self.assertAlmostEqual(
+            report["models"]["shared_channel"]["retention_at_rounds"]["100"],
+            limiting_survival,
+            places=12,
+        )
+
+    def test_shared_channel_limit_accounts_for_block_survival_until_recovery(self):
+        args = self.common(
+            slots=2, required=2, good=0.0, bad=0.1,
+            alpha=0.0, beta=0.9, initial_bad=0.8, rounds=100,
+        )
+        report = summarize_scenario(name="shared-recovery-limit", **args)
+        self.assertEqual(
+            report["models"]["shared_channel"]["status"],
+            "no_finite_half_life",
+        )
+        # In B, both packets survive one round with probability 0.9^2.
+        # The channel then exits B with probability 0.9, or repeats B with
+        # probability 0.1. Solve f = 0.9*0.9^2 + 0.1*0.9^2*f.
+        bad_to_good_with_both = (0.9 * 0.9**2) / (1.0 - 0.1 * 0.9**2)
+        limiting_retention = 0.2 + 0.8 * bad_to_good_with_both
+        self.assertAlmostEqual(
+            report["models"]["shared_channel"]["retention_at_rounds"]["100"],
+            limiting_retention,
+            places=12,
+        )
+
+    def test_absorbing_good_limit_below_half_still_crosses(self):
+        args = self.common(
+            slots=1, required=1, good=0.0, bad=0.5,
+            alpha=0.0, beta=0.5, initial_bad=0.9, rounds=100,
+        )
+        report = summarize_scenario(name="finite-recovery", **args)
+        limiting_survival = 0.1 + 0.9 * (0.5 * 0.5 / (1.0 - 0.5 * 0.5))
+        self.assertLess(limiting_survival, 0.5)
+        for model in ("per_packet", "shared_channel"):
+            self.assertEqual(report["models"][model]["status"], "crossed")
+            self.assertIsNotNone(report["models"][model]["first_crossing_round"])
+
     def test_simulation_is_seeded_and_tracks_exact_shared_model(self):
         args = self.common(slots=8, required=5, rounds=5)
         exact = shared_channel_retention_curve(**args)[5]
