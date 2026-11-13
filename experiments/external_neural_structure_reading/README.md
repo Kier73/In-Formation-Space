@@ -174,6 +174,65 @@ python -m experiments.external_neural_structure_reading.live_reference.run_gpt2_
 
 The workflow uploads the resulting topology as `hfr-002-gpt2-typed-topology`. The complete offline test suite also exercises missing tensors, invalid edges, bad dimensions, cycles, unsupported families, tied and untied output heads, and provenance separation.
 
+## HFR-002 comparative BERT encoder — a second family in the same graph IR
+
+The pinned public `google-bert/bert-base-uncased` observation at revision
+`bcde001674fa61ee216714dd9cca5a5f9cfa4b12` reports **206 tensor entries**
+in the Safetensors header, with **24,048 header bytes** and **zero payload bytes
+read**. Its `config.json` declares `BertForMaskedLM`, yet the tensor inventory
+contains the BERT pooler and `cls.seq_relationship` classifier in addition to
+the MLM transform and decoder bias. Consequently the adapter keeps both
+**checkpoint-present MLM and NSP paths** as distinct graph outputs and explicitly
+states that the config label alone does not establish which paths a runtime
+would execute.
+
+The new `bert_graph_ir.py` independently interprets this observed inventory,
+checks every tensor against the family-shaped expectation and emits the **same
+`in-formation-space.neural-computation-graph.v0.1` schema** as GPT-2. It
+introduces generic operator vocabulary needed for a bidirectional encoder:
+
+| Property | GPT-2 causal decoder | BERT bidirectional encoder |
+| --- | --- | --- |
+| Self-attention | Fused query/key/value, causal mask | Separate Q/K/V projections, bidirectional attention and padding mask |
+| Residual normalization | Pre-layer normalization | Post-residual layer normalization |
+| Nonlinearity | Tanh-approximated GELU (`activation.gelu_tanh`) | Erf-based GELU (`activation.gelu_erf`) |
+| Learned embeddings | Token and absolute position | Token, absolute position and token-type |
+| Checkpoint output heads | Vocabulary logits | MLM logits and checkpoint-present next-sentence logits |
+| Parameter acquisition | Not needed for structural graph | Not needed for structural graph |
+
+The canonical IR's tensor, operation, port, edge, evidence and completeness
+schema is unchanged. The additional operators are
+`attention.padding_mask_prepare`,
+`attention.bidirectional_scaled_dot_product`,
+`sequence.select_first_token`, `activation.tanh` and
+`activation.gelu_erf`. Each has an explicit, independently checked local
+dimension/type contract; unknown operators remain rejected.
+
+### Live result
+
+The [HFR-002 BERT workflow](../../../.github/workflows/hfr-002-bert.yml)
+re-observes pinned Hub config and Safetensors headers, compiles the new graph,
+validates the JSON Schema, rechecks graph topology and executes the full offline
+HFR suite.
+
+- **206/206** observed tensor descriptors classified and bound.
+- **184** typed operation nodes with **455** directed typed edges.
+- **453** operation input ports, **184** output ports and **2** graph outputs.
+- **12/12** verifier checks passed, **0** failed.
+- **64/64** offline HFR tests passed.
+- **587,540 bytes** of generated graph description; **0 bytes** of weight payload.
+
+The typed graph is an **interpreted checkpoint-compatible topology**, not a
+numerically executed neural model. The binding of the MLM decoder to the
+word-embedding table, the padding-mask behavior, and the head path semantics are
+family interpretations. Their observational status is retained in provenance
+rather than elevated to direct tensor-header facts. The source's 440 MB weight
+payload remains unacquired.
+
+```bash
+python -m experiments.external_neural_structure_reading.live_reference.run_bert_topology
+```
+
 ## Selected weight geometry: first and last GPT-2 blocks
 
 The next stage, `weight_geometry.py`, performs an explicit, byte-budgeted numerical observation of two matching fused QKV matrices:
