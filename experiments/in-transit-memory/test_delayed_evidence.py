@@ -176,6 +176,7 @@ class DelayedEvidenceTests(unittest.TestCase):
             (0,): 1 - validated["initial_bad_probability"],
             (1,): validated["initial_bad_probability"],
         }
+        from delayed_evidence import _survivor_branches
         for time_index in range(validated["horizon"]):
             branches = _arrival_branches(
                 time_index=time_index, belief=belief, model=validated
@@ -185,6 +186,16 @@ class DelayedEvidenceTests(unittest.TestCase):
                     Fraction(0)),
                 Fraction(1),
             )
+            # The next boundary needs a path belief containing the newly
+            # reached hidden state, not the epoch-zero prior alone.
+            arrival_posterior = branches[0][1]
+            if time_index + 1 < validated["horizon"]:
+                transitions = _survivor_branches(
+                    starting_packets=validated["slots"],
+                    belief=arrival_posterior,
+                    model=validated,
+                )
+                belief = transitions[0][2]
 
     def test_default_sweep_reconstructs_every_scenario_and_receipt_digest(self):
         sweep = build_default_sweep()
