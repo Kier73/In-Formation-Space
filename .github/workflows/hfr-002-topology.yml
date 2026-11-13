@@ -1,0 +1,65 @@
+name: HFR-002 typed neural topology
+
+on:
+  push:
+    paths:
+      - "experiments/external_neural_structure_reading/gpt2_adapter.py"
+      - "experiments/external_neural_structure_reading/neural_graph_ir.py"
+      - "experiments/external_neural_structure_reading/neural-computation-graph.schema.json"
+      - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/hub.py"
+      - "experiments/external_neural_structure_reading/test_*.py"
+      - "experiments/external_neural_structure_reading/live_reference/run_gpt2_topology.py"
+      - ".github/workflows/hfr-002-topology.yml"
+  pull_request:
+    paths:
+      - "experiments/external_neural_structure_reading/gpt2_adapter.py"
+      - "experiments/external_neural_structure_reading/neural_graph_ir.py"
+      - "experiments/external_neural_structure_reading/neural-computation-graph.schema.json"
+      - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/hub.py"
+      - "experiments/external_neural_structure_reading/test_*.py"
+      - "experiments/external_neural_structure_reading/live_reference/run_gpt2_topology.py"
+      - ".github/workflows/hfr-002-topology.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  topology:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install schema and offline test dependencies
+        run: python -m pip install --disable-pip-version-check jsonschema numpy
+
+      - name: Compile HFR-001 and HFR-002
+        run: python -m compileall -q experiments/external_neural_structure_reading
+
+      - name: Run complete offline HFR test suite
+        run: >-
+          python -m unittest discover
+          -s experiments/external_neural_structure_reading
+          -p 'test_*.py'
+          -v
+
+      - name: Reconstruct pinned GPT-2 graph without reading tensor payloads
+        run: >-
+          python -m experiments.external_neural_structure_reading.live_reference.run_gpt2_topology
+          --output experiments/external_neural_structure_reading/results/gpt2-typed-topology.json
+
+      - name: Upload typed graph evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hfr-002-gpt2-typed-topology
+          path: experiments/external_neural_structure_reading/results/gpt2-typed-topology.json
+          if-no-files-found: warn
