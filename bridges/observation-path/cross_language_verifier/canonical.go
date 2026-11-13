@@ -58,7 +58,69 @@ var frameFields = []string{"actor_id", "monotonic", "wall", "causal", "scheduler
 var payloadFields = []string{"schema", "path_id", "attempt_id", "predecessor_span_digest", "sender_actor_id", "sender_completion_frame", "payload_digest"}
 var handoffFields = []string{"schema", "path_id", "attempt_id", "predecessor_span_digest", "successor_span_digest", "channel_id", "message_sequence", "received_sequence", "sender_actor_id", "receiver_actor_id", "payload_digest", "sender_completion_frame", "receiver_start_frame", "handoff_digest"}
 
+// validateJSONUnicodeEscapes rejects unpaired UTF-16 surrogate escapes
+// before encoding/json can silently replace them with U+FFFD.
+func validateJSONUnicodeEscapes(source string) error {
+	if !utf8.ValidString(source) {
+		return fail("JSON input contains invalid UTF-8")
+	}
+
+	inString := false
+	for i := 0; i < len(source); {
+		if !inString {
+			if source[i] == '"' {
+				inString = true
+			}
+			i++
+			continue
+		}
+
+		switch source[i] {
+		case '"':
+			inString = false
+			i++
+		case '\\':
+			if i+1 >= len(source) {
+				return nil // Let the JSON decoder report an incomplete escape.
+			}
+			if source[i+1] != 'u' {
+				i += 2
+				continue
+			}
+			if i+6 > len(source) {
+				return nil // Let the JSON decoder report an incomplete Unicode escape.
+			}
+
+			codeUnit, err := strconv.ParseUint(source[i+2:i+6], 16, 16)
+			if err != nil {
+				return nil // Let the JSON decoder report malformed hexadecimal digits.
+			}
+			switch {
+			case codeUnit >= 0xd800 && codeUnit <= 0xdbff:
+				if i+12 > len(source) || source[i+6] != '\\' || source[i+7] != 'u' {
+					return fail("JSON string contains an unpaired high surrogate escape")
+				}
+				low, err := strconv.ParseUint(source[i+8:i+12], 16, 16)
+				if err != nil || low < 0xdc00 || low > 0xdfff {
+					return fail("JSON string contains an invalid surrogate pair")
+				}
+				i += 12
+			case codeUnit >= 0xdc00 && codeUnit <= 0xdfff:
+				return fail("JSON string contains an unpaired low surrogate escape")
+			default:
+				i += 6
+			}
+		default:
+			i++
+		}
+	}
+	return nil
+}
+
 func DecodeObject(raw []byte) (Object, error) {
+	if err := validateJSONUnicodeEscapes(string(raw)); err != nil {
+		return nil, err
+	}
 	dec := json.NewDecoder(bytes.NewReader(raw))
 	dec.UseNumber()
 	var value any
