@@ -253,7 +253,7 @@ def build_report(*, prior_hypothesis_a: Any, sensors: Sequence[Mapping[str, Any]
         "count_A_diagnostic": {
             "class_count": histories["count_A_class_count"],
             "sufficient_for_posterior": histories["count_A_sufficient_for_posterior"],
-            "sufficient_for_map_decision": histories["count_A_sufficient_for_map"],
+            "sufficient_for_map_decision": histories["count_A_sufficient_for_map_decision"],
             "classes": histories["count_A_diagnostics"],
         },
         "posterior_accumulator": {
