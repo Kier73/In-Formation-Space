@@ -42,17 +42,17 @@ def fixture():
             "calibration_id": "profile-1",
             "prior_probability": "1/2",
             "sensor_models": {
-                "sensor-0": channel("9/10", "1/10"),
-                "sensor-1": channel("3/5", "4/5"),
-                "sensor-2": channel("4/5", "3/5"),
+                "sensor-0": channel("1/2", "1/2"),
+                "sensor-1": channel("1/10", "4/5"),
+                "sensor-2": channel("7/10", "7/10"),
             },
         },
         {
             "calibration_id": "profile-2",
             "prior_probability": "1/2",
             "sensor_models": {
-                "sensor-0": channel("3/5", "3/10"),
-                "sensor-1": channel("4/5", "3/10"),
+                "sensor-0": channel("1/10", "9/10"),
+                "sensor-1": channel("2/5", "4/5"),
                 "sensor-2": channel("3/5", "1/5"),
             },
         },
@@ -92,7 +92,7 @@ def update_belief(belief, calibrations, candidate, signal):
             if candidate["known_hypothesis"] == "A"
             else "p_signal_a_given_hypothesis_b"
         )
-        probability_a = Fraction(**model[key])
+        probability_a = Fraction(model[key])
         likelihood = probability_a if signal == "A" else 1 - probability_a
         weights[calibration["calibration_id"]] = (
             belief[calibration["calibration_id"]] * likelihood
