@@ -195,4 +195,8 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 
 - [RIV-007: Calibration-aware joint evidence accumulation](experiments/calibration-aware-joint-evidence/README.md) — keeps a joint posterior over a hidden hypothesis and a session-shared calibration profile. It demonstrates two observation histories with the same marginal hypothesis posterior but different joint calibration beliefs, which produce different exact updates and opposite MAP decisions on the next signal.
 
+## Decision-value context acquisition
+
+- [RIV-008: Decision-value context acquisition](experiments/decision-value-context-acquisition/README.md) — accepts a joint hypothesis/context posterior from either Markov-regime or session-shared calibration models, then ranks candidate context readers by exact one-step expected Bayes decision-risk reduction per cost. It reports outcome posterior branches and a cost/value Pareto frontier; the selected method remains a proposal and no measurement is dispatched.
+
 - [SRH-006: Independent prepared-result verification](experiments/portable-realization-capsule/INDEPENDENT-PREPARED-RESULT-VERIFICATION-006.md) — inserts a separate Node receiver between durable PSC preparation and E-CPU quorum completion. It independently replays the input/output checkpoints, checks the exact one-step event-chain transition and typed receipt, and binds its verification digest into the final quorum child receipt. A tampered prepared checkpoint is rejected before claim completion.

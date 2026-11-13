@@ -122,3 +122,8 @@ The next useful bridge is not to presume that the hidden regime can be read dire
 ## Related fixed-calibration experiment
 
 [RIV-007: Calibration-aware joint evidence](../calibration-aware-joint-evidence/README.md) studies a different latent-context contract: the calibration profile is drawn once for the session and does not transition. RIV-006 instead models a persistent operating regime that changes according to a Markov transition matrix. Keeping these cases separate makes fixed calibration uncertainty distinguishable from temporal context drift.
+
+
+## Decision-value follow-on
+
+[RIV-008: Decision-value context acquisition](../decision-value-context-acquisition/README.md) consumes a finite joint posterior over hypothesis and context, including beliefs produced by this Markov-regime filter. It compares candidate context readers by exact expected Bayes decision-loss reduction per cost, keeping that objective distinct from VGI's worst-case unresolved-pair minimax planner.

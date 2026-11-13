@@ -1,0 +1,326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/decision-value-context-acquisition/decision-value-acquisition.schema.json",
+  "title": "Decision-value Context Acquisition Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "source_joint_belief_digest",
+    "source_report_digest",
+    "source_ref",
+    "source_state_id",
+    "joint_belief",
+    "decision_loss_matrix",
+    "baseline_decision",
+    "candidate_sensor_models",
+    "candidate_evaluations",
+    "pareto_frontier_sensor_ids",
+    "selection",
+    "measurement_status",
+    "ground_effect",
+    "model_effect",
+    "interpretation_limits",
+    "report_digest"
+  ],
+  "properties": {
+    "format": {"const": "in-formation.decision-value-context-acquisition/0.1"},
+    "schema": {"const": "in-formation.decision-value-context-acquisition/0.1"},
+    "source_joint_belief_digest": {"$ref": "#/$defs/digest"},
+    "source_report_digest": {"$ref": "#/$defs/digest"},
+    "source_ref": {"type": "string", "minLength": 1},
+    "source_state_id": {"$ref": "#/$defs/digest"},
+    "joint_belief": {"$ref": "#/$defs/jointBelief"},
+    "decision_loss_matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decide_a_if_hypothesis_a",
+        "decide_a_if_hypothesis_b",
+        "decide_b_if_hypothesis_a",
+        "decide_b_if_hypothesis_b"
+      ],
+      "properties": {
+        "decide_a_if_hypothesis_a": {"$ref": "#/$defs/rational"},
+        "decide_a_if_hypothesis_b": {"$ref": "#/$defs/rational"},
+        "decide_b_if_hypothesis_a": {"$ref": "#/$defs/rational"},
+        "decide_b_if_hypothesis_b": {"$ref": "#/$defs/rational"}
+      }
+    },
+    "baseline_decision": {"$ref": "#/$defs/decision"},
+    "candidate_sensor_models": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {"$ref": "#/$defs/candidateModel"}
+    },
+    "candidate_evaluations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {"$ref": "#/$defs/candidateEvaluation"}
+    },
+    "pareto_frontier_sensor_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "objective",
+        "cost_budget",
+        "eligible_sensor_ids",
+        "selected_sensor_id"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["selected", "no_candidate_within_cost_budget"]
+        },
+        "objective": {"type": "string", "minLength": 1},
+        "cost_budget": {"$ref": "#/$defs/nonnegativeRationalOrNull"},
+        "eligible_sensor_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "selected_sensor_id": {
+          "anyOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "measurement_status": {"const": "proposal_only_not_dispatched"},
+    "ground_effect": {"const": "none"},
+    "model_effect": {"const": "none"},
+    "interpretation_limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "report_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "rational": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer"},
+        "denominator": {"type": "integer", "minimum": 1}
+      }
+    },
+    "nonnegativeRational": {
+      "allOf": [
+        {"$ref": "#/$defs/rational"},
+        {"type": "object", "properties": {"numerator": {"type": "integer", "minimum": 0}}}
+      ]
+    },
+    "nonnegativeRationalOrNull": {
+      "anyOf": [
+        {"$ref": "#/$defs/nonnegativeRational"},
+        {"type": "null"}
+      ]
+    },
+    "scalar": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "boolean"},
+        {"type": "null"}
+      ]
+    },
+    "jointCoordinate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hypothesis", "context_state", "probability"],
+      "properties": {
+        "hypothesis": {"enum": ["A", "B"]},
+        "context_state": {"type": "string", "minLength": 1},
+        "probability": {"$ref": "#/$defs/nonnegativeRational"}
+      }
+    },
+    "jointBelief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "schema",
+        "source_ref",
+        "source_report_digest",
+        "source_state_id",
+        "joint_posterior",
+        "posterior_hypothesis_a",
+        "posterior_context_marginals",
+        "belief_digest"
+      ],
+      "properties": {
+        "format": {"const": "in-formation.joint-context-belief/0.1"},
+        "schema": {"const": "in-formation.joint-context-belief/0.1"},
+        "source_ref": {"type": "string", "minLength": 1},
+        "source_report_digest": {"$ref": "#/$defs/digest"},
+        "source_state_id": {"$ref": "#/$defs/digest"},
+        "joint_posterior": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/jointCoordinate"}
+        },
+        "posterior_hypothesis_a": {"$ref": "#/$defs/nonnegativeRational"},
+        "posterior_context_marginals": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/nonnegativeRational"}
+        },
+        "belief_digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "posterior_hypothesis_a",
+        "posterior_hypothesis_b",
+        "expected_loss_if_decide_a",
+        "expected_loss_if_decide_b",
+        "optimal_decision",
+        "bayes_decision_loss"
+      ],
+      "properties": {
+        "posterior_hypothesis_a": {"$ref": "#/$defs/nonnegativeRational"},
+        "posterior_hypothesis_b": {"$ref": "#/$defs/nonnegativeRational"},
+        "expected_loss_if_decide_a": {"$ref": "#/$defs/nonnegativeRational"},
+        "expected_loss_if_decide_b": {"$ref": "#/$defs/nonnegativeRational"},
+        "optimal_decision": {"enum": ["A", "B"]},
+        "bayes_decision_loss": {"$ref": "#/$defs/nonnegativeRational"}
+      }
+    },
+    "likelihood": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hypothesis", "context_state", "probability"],
+      "properties": {
+        "hypothesis": {"enum": ["A", "B"]},
+        "context_state": {"type": "string", "minLength": 1},
+        "probability": {"$ref": "#/$defs/nonnegativeRational"}
+      }
+    },
+    "outcomeModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "likelihoods"],
+      "properties": {
+        "outcome": {"$ref": "#/$defs/scalar"},
+        "likelihoods": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/likelihood"}
+        }
+      }
+    },
+    "candidateModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sensor_id", "dimension", "cost", "outcomes"],
+      "properties": {
+        "sensor_id": {"type": "string", "minLength": 1},
+        "dimension": {"type": "string", "minLength": 1},
+        "cost": {
+          "allOf": [
+            {"$ref": "#/$defs/rational"},
+            {"type": "object", "properties": {"numerator": {"type": "integer", "minimum": 1}}}
+          ]
+        },
+        "outcomes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/outcomeModel"}
+        }
+      }
+    },
+    "posteriorOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hypothesis", "context_state", "probability"
+      ],
+      "properties": {
+        "hypothesis": {"enum": ["A", "B"]},
+        "context_state": {"type": "string", "minLength": 1},
+        "probability": {"$ref": "#/$defs/nonnegativeRational"}
+      }
+    },
+    "outcomeEvaluation": {
+      "type": "object",
+      "required": [
+        "outcome",
+        "predictive_probability",
+        "reachable",
+        "posterior_joint_belief",
+        "posterior_decision",
+        "posterior_bayes_decision_loss",
+        "expected_loss_contribution",
+        "decision_changed"
+      ],
+      "properties": {
+        "outcome": {"$ref": "#/$defs/scalar"},
+        "predictive_probability": {"$ref": "#/$defs/nonnegativeRational"},
+        "reachable": {"type": "boolean"},
+        "posterior_joint_belief": {
+          "anyOf": [
+            {"type": "null"},
+            {"type": "array", "items": {"$ref": "#/$defs/posteriorOutcome"}}
+          ]
+        },
+        "posterior_decision": {
+          "anyOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/decision"}
+          ]
+        },
+        "posterior_bayes_decision_loss": {"$ref": "#/$defs/nonnegativeRationalOrNull"},
+        "expected_loss_contribution": {"$ref": "#/$defs/nonnegativeRational"},
+        "decision_changed": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "candidateEvaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sensor_id",
+        "dimension",
+        "cost",
+        "outcomes",
+        "expected_posterior_bayes_decision_loss",
+        "expected_bayes_risk_reduction",
+        "expected_value_per_cost",
+        "probability_of_changing_the_current_decision"
+      ],
+      "properties": {
+        "sensor_id": {"type": "string", "minLength": 1},
+        "dimension": {"type": "string", "minLength": 1},
+        "cost": {
+          "allOf": [
+            {"$ref": "#/$defs/rational"},
+            {"type": "object", "properties": {"numerator": {"type": "integer", "minimum": 1}}}
+          ]
+        },
+        "outcomes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/outcomeEvaluation"}
+        },
+        "expected_posterior_bayes_decision_loss": {"$ref": "#/$defs/nonnegativeRational"},
+        "expected_bayes_risk_reduction": {"$ref": "#/$defs/nonnegativeRational"},
+        "expected_value_per_cost": {"$ref": "#/$defs/nonnegativeRational"},
+        "probability_of_changing_the_current_decision": {"$ref": "#/$defs/nonnegativeRational"}
+      }
+    }
+  }
+}
