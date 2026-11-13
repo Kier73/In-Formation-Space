@@ -76,6 +76,7 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
         command = overlay.tailscale_ping_command("100.73.20.11")
         self.assertEqual(command[:3], ["tailscale", "ping", "--c"])
         self.assertEqual(command[3], str(overlay.PING_COUNT))
+        self.assertIn("--timeout=3s", command)
         self.assertIn("--until-direct=false", command)
         self.assertEqual(command[-1], "100.73.20.11")
         with self.assertRaisesRegex(overlay.OverlayProbeError, "100.64.0.0/10"):
