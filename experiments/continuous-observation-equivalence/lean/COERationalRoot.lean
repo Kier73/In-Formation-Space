@@ -40,18 +40,15 @@ theorem excluded_root_outside (left right root : Rat)
 /-- Positive slope implies strictly increasing affine output. -/
 theorem increasing (m b x y : Rat) (hm : 0 < m) (hxy : x < y) :
     affine m b x < affine m b y := by
+  have hmul : m * x < m * y := (Rat.mul_lt_mul_left hm).mpr hxy
   unfold affine
-  exact (Rat.add_lt_add_right (c := b)).mpr ((Rat.mul_lt_mul_left hm).mpr hxy)
+  grind
 
 /-- Negative slope implies strictly decreasing affine output. -/
 theorem decreasing (m b x y : Rat) (hm : m < 0) (hxy : x < y) :
     affine m b y < affine m b x := by
-  have hpositive : 0 < -m := by simpa using (Rat.neg_lt_neg hm)
-  have hmul : (-m) * x < (-m) * y := (Rat.mul_lt_mul_left hpositive).mpr hxy
-  have hflip : -((-m) * y) < -((-m) * x) := Rat.neg_lt_neg hmul
-  have hreverse : m * y < m * x := by simpa [Rat.neg_mul] using hflip
   unfold affine
-  exact (Rat.add_lt_add_right (c := b)).mpr hreverse
+  grind
 
 /-- If an affine function has a certified exact zero at root, and that root
     lies outside an open rational interval, its positive-branch decision is
@@ -123,7 +120,10 @@ theorem selected_at_root_zero (m b root probe : Rat)
     (hroot : affine m b root = 0) :
     COECellSoundness.selected (fun z : Rat => decide (0 < z)) 0
         (affine m b) probe root = 0 := by
-  simp [COECellSoundness.selected, hroot]
+  unfold COECellSoundness.selected
+  split
+  · exact hroot
+  · rfl
 
 #print axioms COERationalRoot.excluded_root_outside
 #print axioms COERationalRoot.increasing
