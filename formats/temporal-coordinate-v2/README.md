@@ -126,7 +126,7 @@ An implementation must satisfy all of the following:
 
 The first codec corpus is \`formats/temporal-coordinate-v2/vectors.json\`. It includes arbitrary-width integer values, signed nanoseconds, safe-integer overflow, binary64 positive/negative zero, subnormals, extrema, a standard irrational value, phase pairs, and invalid numeric envelopes.
 
-The same vectors are consumed by Python and Go tests. They are not application-level record fixtures. A later version can add Node.js once the E-CPU/JavaScript runtime has a stable typed-frame consumer.
+The same vectors are consumed by Python, Go, and Node.js conformance tests. They are not application-level record fixtures. Node.js implements a typed-frame and operation-span v2 codec but does not change the adoption status of IHP records.
 
 ## Adoption status and migration
 
