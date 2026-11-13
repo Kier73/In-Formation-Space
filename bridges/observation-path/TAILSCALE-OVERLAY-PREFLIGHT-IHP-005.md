@@ -24,7 +24,7 @@ Three independent GitHub-hosted runner jobs participate:
 3. Each producer downloads the other host's address artifact, verifies the GitHub artifact attestation against the exact file digest and pinned signer workflow, then runs tailscale ping --c 8 --timeout=3s --until-direct=false <peer-overlay-ip>. It stores the complete output and classifies the observed route. The explicit until-direct=false setting is important: it preserves a successful DERP or peer-relay result instead of treating "no direct path" as total failure.
 4. verifier_host downloads both address documents and both route records. It independently verifies the four producer attestations, checks that each route record pins the peer's exact attested address-file digest, reconstructs the shared run/actor identities, and signs a report describing both observations.
 
-The semantic application-payload path is not exercised in IHP-005. This is intentional: the goal here is to establish the underlying network route before re-running E-CPU mTLS over it in IHP-004.
+The semantic application-payload path is not exercised in IHP-005. This is intentional: the goal here is to establish the underlying network route before a subsequent experiment re-runs E-CPU mTLS over it.
 
 ## Authentication and one-time Tailscale setup
 
@@ -64,7 +64,7 @@ An example federated identity claim restriction is:
 
 The repository was created on November 11, 2026, after GitHub's July 15, 2026 immutable-subject change. The example therefore uses the immutable subject with owner ID 29310272 and repository ID 1454466415. GitHub repositories created before that change retain the older name-only format unless they opt in; do not copy this subject format into another repository without checking that repository's actual token claims. The exact claim-rule support and claim names should be checked in the Tailscale federated-identity editor against the GitHub OIDC token claims. The repository, immutable subject, main ref, and workflow claim are intended to narrow issuance to this one workflow. The workflow independently checks its GitHub runner identity before accepting evidence.
 
-For IHP-004, after the overlay preflight succeeds, the narrow data-plane grant for the E-CPU listener can be:
+After the overlay preflight succeeds, the narrow data-plane grant for the E-CPU listener can be:
 
 \`\`\`json
 "grants": [
