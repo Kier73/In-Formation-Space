@@ -1724,6 +1724,8 @@ export function verifyPortableStatefulCheckpoint(checkpoint) {
   };
 }
 
+export { canonical };
+
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
     let report;
