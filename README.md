@@ -227,3 +227,8 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 - [RIV-013: Verified reference evidence and authority lineage](experiments/reference-calibrated-evidence/RIV-013-README.md) — validates inline Encounter Envelopes and per-source payload digests for each RIV-012 reference observation, then records a reconstructed append-only Authority Lineage decision. It strengthens content integrity and traceability without claiming source or signer authentication.
 
 - [SRH-007: Remote validator peer](experiments/portable-realization-capsule/REMOTE-VALIDATOR-PEER-007.md) — moves independent prepared-PSC verification into a separate verifier-only service over E-CPU ReliableChannel with mutual TLS. The worker pins the validator certificate, DNS identity, verifier implementation, and exact worker peer/Host/implementation tuple; the remote receipt digest is committed in the E-CPU child receipt. CI tests authenticated exchange, tamper refusal before quorum completion, and certificate-pin failure. The validator remains a separate process on the CI host, not a separate physical fault domain.
+
+
+## Signed review of verified reference evidence
+
+- [RIV-014: Signed review of verified reference evidence](experiments/reference-calibrated-evidence/RIV-014-README.md) — adds a two-reviewer Ed25519/DSSE attestation over the RIV-013 content-integrity bundle and binds reviewer keys through a root-signed, expiring trust manifest. The signatures authenticate reviewer approval of bundle consistency only, not physical sources or measurements.
