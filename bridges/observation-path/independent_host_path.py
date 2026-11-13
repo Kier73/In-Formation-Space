@@ -555,6 +555,7 @@ def build_report(
     *,
     source_attestation: Mapping[str, Any],
     receiver_attestation: Mapping[str, Any],
+    receiver_artifact_sha256: str,
 ) -> dict[str, Any]:
     source = _validate_record(source, "source_host")
     receiver = _validate_record(receiver, "receiver_host")
@@ -563,7 +564,7 @@ def build_report(
         source_attestation, str(receiver["source_record_sha256"])
     )
     receiver_attestation = _validate_attestation_summary(
-        receiver_attestation, str(receiver_attestation.get("subject_sha256", ""))
+        receiver_attestation, receiver_artifact_sha256
     )
 
     if receiver["source_record_sha256"] != source_attestation["subject_sha256"]:
@@ -683,6 +684,7 @@ def verify_to_report(
         receiver,
         source_attestation=source_attestation,
         receiver_attestation=receiver_attestation,
+        receiver_artifact_sha256=sha256_file(receiver_path),
     )
     write_json(output_path, report)
     return report
