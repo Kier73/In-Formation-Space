@@ -34,3 +34,7 @@ jobs:
         run: python experiments/in-transit-memory/repair_epochs.py --scan --simulate --trials 250 --seed 20261112 --json > /dev/null
       - name: Print deterministic repair-policy sweep
         run: python experiments/in-transit-memory/repair_epochs.py --scan
+      - name: Exercise the observed adaptive-repair sweep and simulation CLI
+        run: python experiments/in-transit-memory/adaptive_repair.py --scan --simulate --trials 500 --seed 20261112 --json > /dev/null
+      - name: Print deterministic adaptive-repair policy comparison
+        run: python experiments/in-transit-memory/adaptive_repair.py --scan
