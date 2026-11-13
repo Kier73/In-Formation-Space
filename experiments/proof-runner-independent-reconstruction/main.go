@@ -1083,7 +1083,7 @@ func mustEventObject(value any, index int) any {
 
 func main() {
 	if len(os.Args) < 2 || os.Args[1] != "verify" {
-		fmt.Fprintln(os.Stderr, "usage: go run . verify --ledger ... --request ... --authority-attestation ... --authority-key ... --result ... --receipt ... --runner-key ... --verifier-host ... [--key-attestations-verified]")
+		fmt.Fprintln(os.Stderr, "usage: go run . verify --ledger ... --request ... --authority-attestation ... --authority-key ... --authority-history ... --authority-store ... --process-evidence ... --stale-owner-attempt ... --result ... --receipt ... --runner-key ... --verifier-host ... [--key-attestations-verified] [--sqlite-store-reopened-verified]")
 		os.Exit(2)
 	}
 	flags := flag.NewFlagSet("verify", flag.ExitOnError)
@@ -1091,19 +1091,32 @@ func main() {
 	output := flags.String("output", "reconstruction-report.json", "output report path")
 	flags.StringVar(&paths.Ledger, "ledger", "", "canonical route-ledger document")
 	flags.StringVar(&paths.Request, "request", "", "canonical proof-action request")
-	flags.StringVar(&paths.AuthorityAttestation, "authority-attestation", "", "authority-signed ledger checkpoint")
+	flags.StringVar(&paths.AuthorityAttestation, "authority-attestation", "", "authority-signed SQLite route-ledger checkpoint")
 	flags.StringVar(&paths.AuthorityKey, "authority-key", "", "separately attested authority public-key document")
+	flags.StringVar(&paths.AuthorityHistory, "authority-history", "", "SQLite route-ledger revision history")
+	flags.StringVar(&paths.AuthorityStore, "authority-store", "", "transferred SQLite authority database bytes")
+	flags.StringVar(&paths.ProcessEvidence, "process-evidence", "", "authority process restart evidence")
+	flags.StringVar(&paths.StaleOwnerAttempt, "stale-owner-attempt", "", "rejected stale-generation admission attempt")
 	flags.StringVar(&paths.Result, "result", "", "canonical proof-action result")
 	flags.StringVar(&paths.Receipt, "receipt", "", "runner-signed completion receipt")
 	flags.StringVar(&paths.RunnerKey, "runner-key", "", "separately attested runner public-key document")
 	flags.StringVar(&paths.VerifierHost, "verifier-host", "", "third-host identity document")
 	flags.BoolVar(&paths.KeyAttestationsVerified, "key-attestations-verified", false, "caller has verified both key-document GitHub attestations")
+	flags.BoolVar(&paths.SQLiteStoreReopenedVerified, "sqlite-store-reopened-verified", false, "caller has reopened and validated the transferred SQLite store using the repository adapter")
 	if err := flags.Parse(os.Args[2:]); err != nil { os.Exit(2) }
 	for name, path := range map[string]string{
-		"ledger": paths.Ledger, "request": paths.Request,
-		"authority-attestation": paths.AuthorityAttestation, "authority-key": paths.AuthorityKey,
-		"result": paths.Result, "receipt": paths.Receipt,
-		"runner-key": paths.RunnerKey, "verifier-host": paths.VerifierHost,
+		"ledger": paths.Ledger,
+		"request": paths.Request,
+		"authority-attestation": paths.AuthorityAttestation,
+		"authority-key": paths.AuthorityKey,
+		"authority-history": paths.AuthorityHistory,
+		"authority-store": paths.AuthorityStore,
+		"process-evidence": paths.ProcessEvidence,
+		"stale-owner-attempt": paths.StaleOwnerAttempt,
+		"result": paths.Result,
+		"receipt": paths.Receipt,
+		"runner-key": paths.RunnerKey,
+		"verifier-host": paths.VerifierHost,
 	} {
 		if path == "" { fmt.Fprintf(os.Stderr, "missing --%s\n", name); os.Exit(2) }
 	}
@@ -1116,6 +1129,5 @@ func main() {
 		fmt.Fprintln(os.Stderr, "write report:", err)
 		os.Exit(1)
 	}
-	fmt.Printf("independent reconstruction verified: %s\n", report["completion_receipt_digest"])
+	fmt.Printf("independent SQLite authority reconstruction verified: %s\n", report["completion_receipt_digest"])
 }
-
