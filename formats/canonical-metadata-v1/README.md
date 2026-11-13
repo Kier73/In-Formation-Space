@@ -68,6 +68,10 @@ Independent implementations should consume the same corpus rather than translate
 - line separators U+2028 and U+2029;
 - solidus and HTML-character escaping.
 
+## Python implementation
+
+The shared Python implementation is `formats/canonical_metadata_v1.py`. It exposes the profile identifier, value validation, canonical UTF-8 encoding, SHA-256 object digests, and a strict reader for canonical object artifacts ending in exactly one LF. The PRC encoder and IHP diverse-host verifier delegate their Python canonicalization to this module; Go and Node remain independent implementations.
+
 ## Adoption
 
 - Portable Realization Capsule v1 adopts this profile for its header metadata.
