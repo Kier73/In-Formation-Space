@@ -341,7 +341,7 @@ def _validate_peer_route_observation(
 ) -> dict[str, Any]:
     required = {
         "schema", "observer_role", "local_overlay_ipv4", "peer_overlay_ipv4",
-        "route_state", "route_type", "command", "exit_code", "elapsed_ns",
+        "route_state", "route_type", "command", "exit_code", "observed_monotonic_ns", "elapsed_ns",
         "matched_peer_status", "status_output_sha256", "error",
     }
     if not isinstance(value, Mapping) or set(value) != required:
@@ -376,6 +376,13 @@ def _validate_peer_route_observation(
         not isinstance(exit_code, int) or isinstance(exit_code, bool)
     ):
         raise DirectMTLSError("Tailscale status exit code must be an integer or null")
+    observed_monotonic_ns = value["observed_monotonic_ns"]
+    if (
+        not isinstance(observed_monotonic_ns, int)
+        or isinstance(observed_monotonic_ns, bool)
+        or observed_monotonic_ns < 0
+    ):
+        raise DirectMTLSError("Tailscale observation coordinate must be a non-negative integer")
     elapsed_ns = value["elapsed_ns"]
     if not isinstance(elapsed_ns, int) or isinstance(elapsed_ns, bool) or elapsed_ns < 0:
         raise DirectMTLSError("Tailscale status duration must be a non-negative integer")
@@ -453,7 +460,8 @@ def _observe_tailscale_peer_route(
             error_marker = f"tailscale status exited with code {exit_code}"
     except (OSError, subprocess.SubprocessError) as error:
         error_marker = type(error).__name__
-    elapsed_ns = max(0, time.monotonic_ns() - started_ns)
+    observed_monotonic_ns = time.monotonic_ns()
+    elapsed_ns = max(0, observed_monotonic_ns - started_ns)
     observation = {
         "schema": PEER_ROUTE_OBSERVATION_SCHEMA,
         "observer_role": role,
@@ -463,6 +471,7 @@ def _observe_tailscale_peer_route(
         "route_type": route_type,
         "command": "tailscale status",
         "exit_code": exit_code,
+        "observed_monotonic_ns": observed_monotonic_ns,
         "elapsed_ns": elapsed_ns,
         "matched_peer_status": matched_status,
         "status_output_sha256": digest_bytes(output_bytes),
