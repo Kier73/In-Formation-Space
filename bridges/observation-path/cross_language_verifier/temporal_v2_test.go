@@ -158,6 +158,12 @@ func TestTemporalV2ChemicalTauRulesAndNegativeZeroPreservation(t *testing.T) {
 		t.Run(vector.Name, func(t *testing.T) {
 			value := floatFromTemporalHex(t, vector.BEHex)
 			wire, err := EncodeTemporalBinary64(value)
+			if math.IsInf(value, 0) || math.IsNaN(value) {
+				if err == nil {
+					t.Fatal("accepted a non-finite binary64 value")
+				}
+				return
+			}
 			if err != nil {
 				t.Fatal(err)
 			}
