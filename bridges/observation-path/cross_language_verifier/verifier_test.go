@@ -112,9 +112,7 @@ func TestSharedCanonicalMetadataV1Vectors(t *testing.T) {
 			t.Fatalf("valid vector %s rejected: %v", vector.Name, err)
 		}
 		if string(actual) != vector.CanonicalUTF8 {
-			t.Fatalf("canonical bytes mismatch for %s
- got: %s
-want: %s", vector.Name, actual, vector.CanonicalUTF8)
+			t.Fatalf("canonical bytes mismatch for %s (got %q, want %q)", vector.Name, actual, vector.CanonicalUTF8)
 		}
 		if got := BytesDigest(actual); got != vector.SHA256 {
 			t.Fatalf("canonical digest mismatch for %s: %s", vector.Name, got)
@@ -123,8 +121,7 @@ want: %s", vector.Name, actual, vector.CanonicalUTF8)
 	rejectRawDocument := func(vector vector) {
 		t.Helper()
 		file := filepath.Join(t.TempDir(), vector.Name+".json")
-		if err := os.WriteFile(file, []byte(vector.InputJSON+"
-"), 0644); err != nil {
+		if err := os.WriteFile(file, append([]byte(vector.InputJSON), byte(10)), 0644); err != nil {
 			t.Fatalf("write rejected vector %s: %v", vector.Name, err)
 		}
 		if _, _, err := ReadCanonicalFile(file); err == nil {
