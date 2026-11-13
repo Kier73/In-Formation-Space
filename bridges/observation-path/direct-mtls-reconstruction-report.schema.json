@@ -1,71 +1,373 @@
 {
-  "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "$id":"https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/direct-mtls-reconstruction-report.schema.json",
-  "title":"Direct mTLS independent reconstruction report",
-  "type":"object","additionalProperties":false,
-  "required":["schema","path_id","repository","run_id","run_attempt","client","server","verifier","server_endpoint","direct_transport","duration","limitations","status","causal_reconstruction","report_digest"],
-  "properties":{
-    "schema":{"const":"in-formation.direct-mtls-reconstruction-report/0.1"},
-    "path_id":{"type":"string","minLength":1},
-    "repository":{"const":"Kier73/In-Formation-Space"},
-    "run_id":{"type":"string","minLength":1},
-    "run_attempt":{"type":"string","minLength":1},
-    "client":{"$ref":"#/$defs/hostReport"},
-    "server":{"$ref":"#/$defs/hostReport"},
-    "verifier":{"type":"object"},
-    "server_endpoint":{"type":"object"},
-    "direct_transport":{"type":"object"},
-    "duration":{"type":"object"},
-    "limitations":{"type":"array","minItems":1,"items":{"type":"string"}},
-    "status":{"enum":["direct_mtls_verified","direct_transport_unavailable"]},
-    "causal_reconstruction":{"type":"object"},
-    "report_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}
-  },
-  "$defs":{
-    "attestation":{
-      "type":"object",
-      "required":["verified","subject_sha256","predicate_type","signer_workflow","source_ref","self_hosted_runners_denied"],
-      "properties":{
-        "verified":{"const":true},
-        "subject_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-        "predicate_type":{"type":"string"},
-        "signer_workflow":{"type":"string"},
-        "source_ref":{"type":"string"},
-        "self_hosted_runners_denied":{"const":true}
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/direct-mtls-reconstruction-report.schema.json",
+  "title": "Direct mTLS independent reconstruction report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "path_id",
+    "repository",
+    "run_id",
+    "run_attempt",
+    "client",
+    "server",
+    "verifier",
+    "server_endpoint",
+    "direct_transport",
+    "duration",
+    "limitations",
+    "status",
+    "causal_reconstruction",
+    "report_digest"
+  ],
+  "properties": {
+    "schema": {
+      "const": "in-formation.direct-mtls-reconstruction-report/0.1"
+    },
+    "path_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repository": {
+      "const": "Kier73/In-Formation-Space"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_attempt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client": {
+      "$ref": "#/$defs/hostReport"
+    },
+    "server": {
+      "$ref": "#/$defs/hostReport"
+    },
+    "verifier": {
+      "type": "object"
+    },
+    "server_endpoint": {
+      "type": "object"
+    },
+    "direct_transport": {
+      "type": "object",
+      "properties": {
+        "peer_route_observations": {
+          "$ref": "#/$defs/peerRoutePair"
+        }
+      },
+      "additionalProperties": true
+    },
+    "duration": {
+      "type": "object"
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
       }
     },
-    "hostReport":{
-      "type":"object","additionalProperties":false,
-      "required":["host","status","certificate_sha256","record_digest","record_attestation","certificate_attestation"],
-      "properties":{
-        "host":{"type":"object"},
-        "status":{"enum":["direct_mtls_verified","direct_tcp_unavailable","direct_mtls_rejected"]},
-        "certificate_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-        "record_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-        "record_attestation":{"$ref":"#/$defs/attestation"},
-        "certificate_attestation":{"$ref":"#/$defs/attestation"}
+    "status": {
+      "enum": [
+        "direct_mtls_verified",
+        "direct_transport_unavailable"
+      ]
+    },
+    "causal_reconstruction": {
+      "type": "object"
+    },
+    "report_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "attestation": {
+      "type": "object",
+      "required": [
+        "verified",
+        "subject_sha256",
+        "predicate_type",
+        "signer_workflow",
+        "source_ref",
+        "self_hosted_runners_denied"
+      ],
+      "properties": {
+        "verified": {
+          "const": true
+        },
+        "subject_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "predicate_type": {
+          "type": "string"
+        },
+        "signer_workflow": {
+          "type": "string"
+        },
+        "source_ref": {
+          "type": "string"
+        },
+        "self_hosted_runners_denied": {
+          "const": true
+        }
+      }
+    },
+    "hostReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host",
+        "status",
+        "certificate_sha256",
+        "record_digest",
+        "record_attestation",
+        "certificate_attestation"
+      ],
+      "properties": {
+        "host": {
+          "type": "object"
+        },
+        "status": {
+          "enum": [
+            "direct_mtls_verified",
+            "direct_tcp_unavailable",
+            "direct_mtls_rejected"
+          ]
+        },
+        "certificate_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "record_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "record_attestation": {
+          "$ref": "#/$defs/attestation"
+        },
+        "certificate_attestation": {
+          "$ref": "#/$defs/attestation"
+        }
+      }
+    },
+    "peerRouteObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "observer_role",
+        "local_overlay_ipv4",
+        "peer_overlay_ipv4",
+        "route_state",
+        "route_type",
+        "command",
+        "exit_code",
+        "observed_monotonic_ns",
+        "elapsed_ns",
+        "matched_peer_status",
+        "status_output_sha256",
+        "error"
+      ],
+      "properties": {
+        "schema": {
+          "const": "in-formation.ihp006-peer-route-observation/0.1"
+        },
+        "observer_role": {
+          "enum": [
+            "client_host",
+            "server_host"
+          ]
+        },
+        "local_overlay_ipv4": {
+          "type": "string",
+          "format": "ipv4"
+        },
+        "peer_overlay_ipv4": {
+          "type": "string",
+          "format": "ipv4"
+        },
+        "route_state": {
+          "enum": [
+            "active",
+            "idle",
+            "no_session",
+            "peer_not_found",
+            "command_failed"
+          ]
+        },
+        "route_type": {
+          "enum": [
+            "direct",
+            "derp_relay",
+            "peer_relay",
+            "reachable_unclassified"
+          ]
+        },
+        "command": {
+          "const": "tailscale status"
+        },
+        "exit_code": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer"
+            }
+          ]
+        },
+        "observed_monotonic_ns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "elapsed_ns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "matched_peer_status": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "maxLength": 64
+            }
+          ]
+        },
+        "status_output_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "error": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "maxLength": 160
+            }
+          ]
+        }
+      }
+    },
+    "peerRoutePair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "endpoint_binding",
+        "client",
+        "server",
+        "asymmetric"
+      ],
+      "properties": {
+        "schema": {
+          "const": "in-formation.ihp006-peer-route-pair/0.1"
+        },
+        "endpoint_binding": {
+          "const": "reciprocal_tls_socket_addresses"
+        },
+        "client": {
+          "$ref": "#/$defs/peerRouteObservation"
+        },
+        "server": {
+          "$ref": "#/$defs/peerRouteObservation"
+        },
+        "asymmetric": {
+          "type": "boolean"
+        }
       }
     }
   },
-  "allOf":[
+  "allOf": [
     {
-      "if":{"properties":{"status":{"const":"direct_mtls_verified"}},"required":["status"]},
-      "then":{"properties":{"causal_reconstruction":{
-        "type":"object","required":["status","edge_count","edge_basis","predecessor_span_digest","successor_span_digest","handoff_digest","transport_sequence","receipt_digest","sender_envelope_digest","tls_client_certificate_sha256","tls_server_certificate_sha256","topological_order"],
-        "properties":{
-          "status":{"const":"verified_from_direct_peer_authenticated_receipt"},
-          "edge_count":{"const":1},
-          "predecessor_span_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-          "successor_span_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-          "handoff_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-          "transport_sequence":{"const":1},
-          "receipt_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-          "sender_envelope_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-          "tls_client_certificate_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-          "tls_server_certificate_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
-          "topological_order":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"string","pattern":"^[0-9a-f]{64}$"}}
+      "if": {
+        "properties": {
+          "status": {
+            "const": "direct_mtls_verified"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "causal_reconstruction": {
+            "type": "object",
+            "required": [
+              "status",
+              "edge_count",
+              "edge_basis",
+              "predecessor_span_digest",
+              "successor_span_digest",
+              "handoff_digest",
+              "transport_sequence",
+              "receipt_digest",
+              "sender_envelope_digest",
+              "tls_client_certificate_sha256",
+              "tls_server_certificate_sha256",
+              "topological_order"
+            ],
+            "properties": {
+              "status": {
+                "const": "verified_from_direct_peer_authenticated_receipt"
+              },
+              "edge_count": {
+                "const": 1
+              },
+              "predecessor_span_digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "successor_span_digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "handoff_digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "transport_sequence": {
+                "const": 1
+              },
+              "receipt_digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "sender_envelope_digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "tls_client_certificate_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "tls_server_certificate_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "topological_order": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
         }
-      }}}
+      }
     }
   ]
 }
