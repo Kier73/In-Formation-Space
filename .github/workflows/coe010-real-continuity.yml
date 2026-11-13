@@ -49,7 +49,7 @@ jobs:
         run: lake exe cache get
       - name: Compile independent real semantics and original COE proof chain
         working-directory: experiments/continuous-observation-equivalence/real-lean
-        run: lake build COE010Real
+        run: lake build COE010Network
       - name: Kernel-check real continuity, exact casts and dense uniqueness
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
@@ -57,6 +57,15 @@ jobs:
           grep -Fq "'COE010Real.unique_continuous_real_extension' depends on axioms:" real-extension-proof-output.txt
           if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-extension-proof-output.txt; then
             cat real-extension-proof-output.txt
+            exit 1
+          fi
+      - name: Verify actual accepted certificate has a unique real meaning
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          lake env lean COE010Network.lean | tee real-network-soundness.txt
+          grep -Fq "'COE010Network.acceptedCertificateHasUniqueRealMeaning' depends on axioms:" real-network-soundness.txt
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-network-soundness.txt; then
+            cat real-network-soundness.txt
             exit 1
           fi
       - name: Require rejection of a false all-real ReLU observation
@@ -74,5 +83,6 @@ jobs:
           path: |
             experiments/continuous-observation-equivalence/real-lean/rational-source-sha256.txt
             experiments/continuous-observation-equivalence/real-lean/real-extension-proof-output.txt
+            experiments/continuous-observation-equivalence/real-lean/real-network-soundness.txt
             experiments/continuous-observation-equivalence/real-lean/invalid-real-extension.txt
           if-no-files-found: error
