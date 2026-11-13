@@ -40,3 +40,7 @@ jobs:
         run: python experiments/in-transit-memory/adaptive_repair.py --scan
       - name: Exercise the belief-aware adaptive-repair sweep
         run: python experiments/in-transit-memory/belief_repair.py --scan --json > /dev/null
+      - name: Exercise the delayed and out-of-order evidence repair sweep
+        run: python experiments/in-transit-memory/delayed_evidence.py --scan --json > /dev/null
+      - name: Print deterministic delayed-evidence scan receipt
+        run: python experiments/in-transit-memory/delayed_evidence.py --scan --json

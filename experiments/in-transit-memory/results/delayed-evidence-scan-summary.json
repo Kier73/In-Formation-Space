@@ -1,0 +1,66 @@
+{
+  "format": "in-formation.in-transit-delayed-evidence-scan-summary",
+  "interpretation_limits": [
+    "The sweep digest binds the full exact policy tables and forward reconstructions for all four delivery schedules.",
+    "The summary metrics are rounded to eight decimal places for readability; exact rational values remain in each full report.",
+    "All scenarios are synthetic, with a four-packet block and a three-circulation horizon. They are not empirical network reliability estimates.",
+    "The no_reports row is the baseline. In-order, out-of-order, and timeout schedules use the same channel and repair costs."
+  ],
+  "scenario_count": 4,
+  "schema": "in-formation.in-transit-delayed-evidence-scan-summary/0.1",
+  "summary": [
+    {
+      "decision_node_count": 16,
+      "expected_delivered_report_count": "0.00000000",
+      "expected_late_report_count": "0.00000000",
+      "expected_out_of_order_delivery_count": "0.00000000",
+      "expected_repair_count": "0.32931791",
+      "expected_timeout_report_count": "0.00000000",
+      "expected_utility": "0.83875967",
+      "policy_digest_sha256": "89cbe96c2ef2c10a9d68aab2150fb4e83a7a1b216fa79f3e5df4dd5d17875a51",
+      "scenario_name": "no_reports",
+      "survival_probability": "0.85522557",
+      "utility_delta_vs_no_reports": "0.00000000"
+    },
+    {
+      "decision_node_count": 118,
+      "expected_delivered_report_count": "1.48365803",
+      "expected_late_report_count": "1.48365803",
+      "expected_out_of_order_delivery_count": "0.00000000",
+      "expected_repair_count": "0.30759052",
+      "expected_timeout_report_count": "0.37091451",
+      "expected_utility": "0.83890517",
+      "policy_digest_sha256": "8574b4ad650c8100f67335bfd853c207da0a5e4adfb6c9ec8b15e1f0a780462f",
+      "scenario_name": "in_order_delivery",
+      "survival_probability": "0.85428470",
+      "utility_delta_vs_no_reports": "0.00014550"
+    },
+    {
+      "decision_node_count": 118,
+      "expected_delivered_report_count": "1.48257650",
+      "expected_late_report_count": "0.72121604",
+      "expected_out_of_order_delivery_count": "0.57675653",
+      "expected_repair_count": "0.26546061",
+      "expected_timeout_report_count": "0.37064413",
+      "expected_utility": "0.83902454",
+      "policy_digest_sha256": "e1530d1e341e284c6fd813e86dd599a7523217d706d2085d454f7cd7e21c7a27",
+      "scenario_name": "out_of_order_delivery",
+      "survival_probability": "0.85229757",
+      "utility_delta_vs_no_reports": "0.00026487"
+    },
+    {
+      "decision_node_count": 46,
+      "expected_delivered_report_count": "0.76136046",
+      "expected_late_report_count": "0.00000000",
+      "expected_out_of_order_delivery_count": "0.00000000",
+      "expected_repair_count": "0.26310424",
+      "expected_timeout_report_count": "1.09186017",
+      "expected_utility": "0.83901037",
+      "policy_digest_sha256": "219e4faded3f8e4bf225abe441fd44df7e2ede49604cd4ee064a387c4e88d3ea",
+      "scenario_name": "older_report_times_out",
+      "survival_probability": "0.85216558",
+      "utility_delta_vs_no_reports": "0.00025069"
+    }
+  ],
+  "sweep_digest_sha256": "98fe9d7ec306c9c79dfe5a6ec8795ec0b20ebaa6eec31e355ada4a1445515b85"
+}

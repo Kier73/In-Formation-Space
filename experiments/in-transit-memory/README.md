@@ -416,4 +416,71 @@ python experiments/in-transit-memory/belief_repair.py --scan --json
 MRE-004 is a small exact reference model with limits of eight slots, five epochs, and 50,000 retained belief nodes. It assumes a two-state shared channel, known stationary sensor quality, exact survivor-count observations, and instantaneous sensing and repair. It does not include sensing latency, delayed or dropped readings, transport overhead, observation-path authorization or failure, physical repair duration, calibration drift, adversarial readings, or an E-CPU action adapter. The costs and channel probabilities are synthetic inputs, not measurements.
 
 A natural continuation is to treat readings as evidence with sequence numbers and arrival times: the controller must distinguish a fresh sensor result from a stale result, decide whether to act before it arrives, and preserve enough provenance for another host to reconstruct which belief was available at the decision point. This next step should connect to the observation-path and temporal-provenance work without conflating local clock values with cross-host time.
+## 13. Delayed and out-of-order evidence: MRE-005
 
+MRE-004 assumes a sensor result is available before the decision that uses it. MRE-005 asks a narrower temporal question: what should happen when a measurement arrives after later measurements, or fails to arrive by its declared deadline?
+
+### Historical state versus current state
+
+The controller maintains a posterior over the complete hidden channel-state path observed so far, not merely a probability for the latest state. This permits a late report to condition the state it actually sampled. The Markov transition and intervening survivor-count observations then carry that information forward to the current epoch.
+
+Each report retains:
+
+- a unique message ID and monotonically increasing sequence number;
+- its measurement_epoch;
+- its arrival_epoch and resulting age in logical epochs;
+- its signal when delivered, or an explicit timeout outcome;
+- belief digests and separate posterior probabilities for the measured state and the current state.
+
+Sequence numbers follow measurement order; arrival order is allowed to differ. A timeout is recorded at its declared arrival epoch and is not silently converted into a sensor reading or assumed to describe the channel.
+
+### Exact controller and schedules
+
+The controller chooses WAIT or REPAIR at each epoch after processing messages arriving at that boundary. REPAIR reconstructs all packet slots without resetting the hidden channel. Probabilities and repair cost are exact rational numbers. The objective remains terminal survival probability minus the declared expected repair cost.
+
+The finite model uses four packet slots, a recovery threshold of two, and a three-circulation horizon. It compares four schedules under the same channel and repair inputs:
+
+1. no_reports — no sensor messages;
+2. in_order_delivery — sample 1 arrives before sample 2;
+3. out_of_order_delivery — sample 2 arrives first; the older sample 1 arrives at epoch 2;
+4. older_report_times_out — sample 2 arrives, while sample 1 reaches its deadline without delivery.
+
+The sensor result and transport delivery are separate random events. Delivery loss is assumed independent of the hidden channel and sensor signal. A timeout means the message was not delivered by its configured arrival epoch; later recovery is outside this version.
+
+The backward-induction policy is independently evaluated by forward probability-mass propagation. The full decision nodes retain the arrival-ordered evidence history. Each arrival record has its own digest, and the policy digest binds the complete node table and model inputs.
+
+### First deterministic scan
+
+The checked-in [MRE-005 scan summary](results/delayed-evidence-scan-summary.json) is reconstructed from all four full policy reports by CI.
+
+| Schedule | Survival probability | Expected repairs | Expected delivered reports | Expected utility | Utility change vs no reports |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| No reports | 0.85522557 | 0.32931791 | 0.00000000 | 0.83875967 | 0.00000000 |
+| In-order delivery | 0.85428470 | 0.30759052 | 1.48365803 | 0.83890517 | +0.00014550 |
+| Out-of-order delivery | 0.85229757 | 0.26546061 | 1.48257650 | 0.83902454 | +0.00026487 |
+| Older report times out | 0.85216558 | 0.26310424 | 0.76136046 | 0.83901037 | +0.00025069 |
+
+In the out-of-order schedule, sequence 2 arrives at its measurement epoch and the older sequence 1 arrives two epochs after it was measured. The forward reconstruction records an expected 0.57675653 out-of-order deliveries and 0.72121604 late deliveries. The in-order schedule instead delivers both reports one epoch after measurement.
+
+The out-of-order policy has slightly higher utility than the in-order policy under this declared repair-cost objective, but it also has lower terminal survival (0.85229757 versus 0.85428470) and fewer expected repairs (0.26546061 versus 0.30759052). This is not evidence that out-of-order transport is inherently beneficial. The two schedules change the age/delay profile as well as the sequence of arrivals; the comparison is not a causal isolation of arrival order alone. The utility gains over no reports are all small in this parameter set (roughly 0.00015–0.00026).
+
+The summary values are rounded to eight decimal places. Full exact rational probabilities, belief histories, event digests, decision values, and policy digests remain in the reports reconstructed by the source model. 
+
+### What this establishes—and what it does not
+
+This experiment can test whether a controller preserves measurement time separately from arrival time, updates a historical state coordinate, and reconstructs the resulting current belief. Its schedules make sequence/arrival inversions and known timeouts explicit.
+
+It does not yet model wall clocks, clock uncertainty, stochastic latency distributions, retransmission, duplicate delivery, late-after-timeout recovery, multi-host authentication, or remote evidence consensus. Epoch indices are logical coordinates in one synthetic run, not cross-host timestamps. The full hidden-path belief is exact but grows exponentially with horizon; this is a small reference model, not a scalable general POMDP implementation. No E-CPU adapter or production network claim is made.
+
+### Reproduction
+
+~~~bash
+python -m unittest discover -s experiments/in-transit-memory -p "test_*.py" -v
+python experiments/in-transit-memory/delayed_evidence.py --scan --json
+~~~
+
+The tests check forward/backward equality, evidence digest reconstruction, explicit timeout behavior, sequence order versus arrival order, historical-versus-current posterior distinction, invalid temporal coordinates, and deterministic report reconstruction.
+
+### Next step
+
+A natural continuation is to take the logical arrival/evidence record across genuinely separate hosts. A receiver should be able to reconstruct which evidence was available at a decision, distinguish a late message from a fresh one, and preserve uncertainty when clock mappings do not establish a unique cross-host order. That will require binding the report to a temporal provenance frame and testing independently reconstructed decisions, rather than assuming epoch numbers are globally comparable.
