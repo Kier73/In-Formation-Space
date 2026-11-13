@@ -28,7 +28,7 @@
   ],
   "properties": {
     "schema": {
-      "const": "in-formation.proof-runner-independent-reconstruction-report/0.1"
+      "const": "in-formation.proof-runner-independent-reconstruction-report/0.2"
     },
     "status": {
       "const": "verified"
