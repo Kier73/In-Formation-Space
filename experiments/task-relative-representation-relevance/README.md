@@ -58,3 +58,8 @@ The implementation uses only the Python standard library. Probabilities accept i
 - test_task_relative_relevance.py — focused tests for relevant and redundant distinctions, exact probabilities, viability over the full horizon, partition order, explicit policy bounds, and tamper rejection.
 - example.py — runnable two-state illustration.
 - README.md — model, equations, interpretation, and evidence scope.
+
+
+## Follow-on experiment
+
+[RIV-002: History-dependent representation relevance](../history-dependent-representation-relevance/README.md) extends the controller comparison with time-aware reactive and finite observation-history policies. It separates the value of knowing the current step from the value of retaining a past distinction, and tests a case where two hidden states become observationally identical after the first action.
