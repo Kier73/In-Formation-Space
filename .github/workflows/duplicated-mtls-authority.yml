@@ -62,6 +62,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: duplicated-mtls-authority-identity-report
-          path: evidence/duplicated-mtls-authority/
+          path: |
+            evidence/duplicated-mtls-authority/report.json
+            evidence/duplicated-mtls-authority/membership.json
+            evidence/duplicated-mtls-authority/left/owner-result.json
+            evidence/duplicated-mtls-authority/left/endpoints.json
+            evidence/duplicated-mtls-authority/left/state.bin
+            evidence/duplicated-mtls-authority/left/authorities/*.jsonl
+            evidence/duplicated-mtls-authority/right/owner-result.json
+            evidence/duplicated-mtls-authority/right/endpoints.json
+            evidence/duplicated-mtls-authority/right/state.bin
+            evidence/duplicated-mtls-authority/right/authorities/*.jsonl
           if-no-files-found: error
           retention-days: 90
