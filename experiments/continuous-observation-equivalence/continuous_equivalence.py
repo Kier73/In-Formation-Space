@@ -128,12 +128,14 @@ def compact(regions: list[Region]) -> list[Region]:
     return merged
 
 
-def atlas(layers: tuple[Layer, ...], *, max_regions: int = 4096) -> tuple[Region, ...]:
+def atlas(layers: tuple[Layer, ...], *, max_regions: int = 4096,
+          retain_activation_cells: bool = False) -> tuple[Region, ...]:
     """Propagate exact affine output laws across every reachable real interval.
 
     A ReLU split is made at each interior zero of a preactivation affine
     expression. The functions are continuous, so endpoint values agree with
-    the limits of their neighboring open intervals.
+    the limits of their neighboring open intervals. When retaining activation
+    cells, preserve intermediate ReLU split points even if later layers cancel.
     """
     validate(layers)
     if max_regions < 1:
@@ -157,7 +159,7 @@ def atlas(layers: tuple[Layer, ...], *, max_regions: int = 4096) -> tuple[Region
                 result.append(Region(left, right, tuple(expr if expr.at(at) > 0 else ZERO for expr in pre)))
                 if len(result) > max_regions:
                     raise RegionBudgetExceeded(f"exceeded {max_regions} intermediate regions")
-        regions = compact(result)
+        regions = result if retain_activation_cells else compact(result)
         if len(regions) > max_regions:
             raise RegionBudgetExceeded(f"exceeded {max_regions} intermediate regions")
     return tuple(regions)

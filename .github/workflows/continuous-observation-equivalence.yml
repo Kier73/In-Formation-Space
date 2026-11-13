@@ -33,3 +33,46 @@ jobs:
           name: coe001-continuous-equivalence-report
           path: experiments/continuous-observation-equivalence/continuous-equivalence-report.json
           if-no-files-found: error
+
+  certificate-producer:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build typed activation-cell certificates
+        working-directory: experiments/continuous-observation-equivalence
+        run: python produce_certificates.py certificate-artifacts
+      - name: Retain untrusted producer certificates
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/certificate-artifacts/*.json
+          if-no-files-found: error
+
+  certificate-checker:
+    needs: certificate-producer
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download certificate claims from separate producer job
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Verify all-real intervals independently against pinned model identities
+        working-directory: experiments/continuous-observation-equivalence
+        run: python verify_certificates.py received-certificates --output independent-certificate-report.json
+      - name: Run adversarial certificate rejection tests
+        working-directory: experiments/continuous-observation-equivalence
+        run: python -m unittest discover -s . -p 'test_certificate_checker.py' -v
+      - name: Retain independent checker receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe002-independent-checker-report
+          path: experiments/continuous-observation-equivalence/independent-certificate-report.json
+          if-no-files-found: error
