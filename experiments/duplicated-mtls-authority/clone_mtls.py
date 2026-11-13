@@ -101,6 +101,7 @@ def _openssl(directory: Path, *arguments: str) -> None:
 
 def create_test_certificates(directory: Path) -> dict[str, Path]:
     """Create a throwaway CA, three shared clone identities, and a trusted wrong-DNS client."""
+    directory = directory.resolve()
     if shutil.which("openssl") is None:
         raise CloneExperimentError("OpenSSL CLI is required for ephemeral mTLS test certificates")
     directory.mkdir(parents=True, exist_ok=True)
@@ -443,6 +444,7 @@ def run_cloned_mtls_authority_experiment(
     right_state: str = "right-state",
 ) -> dict[str, Any]:
     """Run two isolated local quorum copies that intentionally reuse the same mTLS credentials."""
+    out_dir = out_dir.resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     credential_dir = out_dir / "credentials"
     certificates = create_test_certificates(credential_dir)
