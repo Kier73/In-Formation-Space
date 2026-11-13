@@ -29,8 +29,10 @@ type object = map[string]any
 
 type Paths struct {
 	Ledger, Request, AuthorityAttestation, AuthorityKey string
+	AuthorityHistory, AuthorityStore, ProcessEvidence, StaleOwnerAttempt string
 	Result, Receipt, RunnerKey, VerifierHost string
 	KeyAttestationsVerified bool
+	SQLiteStoreReopenedVerified bool
 }
 
 type participant struct {
@@ -516,6 +518,212 @@ func verifyParticipantKey(document object, expectedRole string) (participant, er
 		ID: id, Role: expectedRole, KeyID: keyID,
 		PublicKey: ed25519.PublicKey(raw), Host: host,
 	}, nil
+}
+
+func verifyStoreHistory(
+	historyDocument object,
+	ledger object,
+) ([]any, string, error) {
+	if err := exactFields(historyDocument, "entries"); err != nil {
+		return nil, "", fail("SQLite store-history document fields are invalid: %v", err)
+	}
+	rows, err := asArray(historyDocument["entries"], "SQLite history entries")
+	if err != nil { return nil, "", err }
+	if len(rows) == 0 { return nil, "", fail("SQLite history must contain at least one revision") }
+	events, err := asArray(ledger["entries"], "route-ledger entries")
+	if err != nil { return nil, "", err }
+	eventOffset := 0
+	var previousLedgerDigest any
+	for index, raw := range rows {
+		row, err := asObject(raw, fmt.Sprintf("SQLite revision %d", index+1))
+		if err != nil { return nil, "", err }
+		if err := exactFields(row,
+			"revision", "previous_ledger_digest", "ledger_digest",
+			"actor_id", "appended_event_digests", "committed_utc",
+		); err != nil {
+			return nil, "", fail("SQLite revision %d fields are invalid: %v", index+1, err)
+		}
+		revision, err := integerValue(row["revision"], "SQLite revision", 1)
+		if err != nil || revision != int64(index+1) {
+			return nil, "", fail("SQLite revision sequence is not contiguous")
+		}
+		if row["previous_ledger_digest"] != previousLedgerDigest {
+			return nil, "", fail("SQLite revision predecessor digest mismatch")
+		}
+		if _, err := textValue(row["actor_id"], "SQLite revision actor_id"); err != nil {
+			return nil, "", err
+		}
+		if _, err := textValue(row["committed_utc"], "SQLite revision committed_utc"); err != nil {
+			return nil, "", err
+		}
+		appended, err := asArray(row["appended_event_digests"], "SQLite appended event digests")
+		if err != nil { return nil, "", err }
+		if len(appended) == 0 {
+			return nil, "", fail("SQLite revision must append one or more events")
+		}
+		end := eventOffset + len(appended)
+		if end > len(events) {
+			return nil, "", fail("SQLite revision appends beyond the route ledger")
+		}
+		for offset, digestValue := range appended {
+			expectedEvent, err := asObject(events[eventOffset+offset], "route event")
+			if err != nil { return nil, "", err }
+			eventDigest, err := sha256Value(digestValue, "SQLite appended event digest")
+			if err != nil { return nil, "", err }
+			if eventDigest != expectedEvent["event_digest"] {
+				return nil, "", fail("SQLite revision append index differs from the route ledger")
+			}
+			details, err := asObject(expectedEvent["details"], "route event details")
+			if err != nil { return nil, "", err }
+			if row["actor_id"] != details["owner_id"] {
+				return nil, "", fail("SQLite revision actor differs from appended route event owner")
+			}
+		}
+		prefix := object{
+			"format": ledger["format"],
+			"entries": events[:end],
+		}
+		computedDigest, err := digest(prefix)
+		if err != nil { return nil, "", err }
+		suppliedDigest, err := sha256Value(row["ledger_digest"], "SQLite ledger_digest")
+		if err != nil || suppliedDigest != computedDigest {
+			return nil, "", fail("SQLite revision %d intermediate ledger digest mismatch", index+1)
+		}
+		previousLedgerDigest = computedDigest
+		eventOffset = end
+	}
+	finalLedgerDigest, err := sha256Value(ledger["ledger_digest"], "route ledger digest")
+	if err != nil { return nil, "", err }
+	if eventOffset != len(events) || previousLedgerDigest != finalLedgerDigest {
+		return nil, "", fail("SQLite revision history does not reproduce the complete route ledger")
+	}
+	historyDigest, err := digest(rows)
+	if err != nil { return nil, "", err }
+	return rows, historyDigest, nil
+}
+
+func verifyAuthorityProcessEvidence(
+	processEvidence object,
+	staleAttempt object,
+	ledger object,
+	historyRows []any,
+) (string, error) {
+	if err := exactFields(processEvidence,
+		"format", "authority_store_type", "authority_process_count", "phases",
+		"final_store_revision", "final_ledger_digest", "stale_owner_attempt_rejected",
+	); err != nil {
+		return "", fail("authority process evidence fields are invalid: %v", err)
+	}
+	if processEvidence["format"] != "in-formation.proof-runner-authority-process-evidence/0.1" ||
+		processEvidence["authority_store_type"] != "sqlite-local-file" ||
+		processEvidence["stale_owner_attempt_rejected"] != true {
+		return "", fail("authority process evidence format, store type, or stale rejection is invalid")
+	}
+	processCount, err := integerValue(processEvidence["authority_process_count"], "authority_process_count", 1)
+	if err != nil || processCount != 3 {
+		return "", fail("authority process evidence must contain three separate process phases")
+	}
+	revisionCount, err := integerValue(processEvidence["final_store_revision"], "final_store_revision", 1)
+	if err != nil || revisionCount != int64(len(historyRows)) {
+		return "", fail("authority process final revision differs from SQLite history")
+	}
+	if processEvidence["final_ledger_digest"] != ledger["ledger_digest"] {
+		return "", fail("authority process evidence names a different final ledger")
+	}
+	phases, err := asArray(processEvidence["phases"], "authority process phases")
+	if err != nil { return "", err }
+	if len(phases) != 3 {
+		return "", fail("authority process evidence must contain exactly three phases")
+	}
+	expectedNames := []string{
+		"initial_open", "restart_claim_admit_authorize", "stale_generation_replay",
+	}
+	events, err := asArray(ledger["entries"], "ledger events")
+	if err != nil { return "", err }
+	if len(events) != 4 {
+		return "", fail("authority restart profile requires four route-ledger events")
+	}
+	expectedDigests := [][]any{
+		{mustEventDigest(events[0])},
+		{mustEventDigest(events[1]), mustEventDigest(events[2]), mustEventDigest(events[3])},
+		{},
+	}
+	expectedRevisions := []int64{1, 4, 4}
+	expectedDecisions := []string{"opened", "replacement_owner_authorized", "rejected"}
+	seenInstances := map[string]bool{}
+	for index, raw := range phases {
+		phase, err := asObject(raw, fmt.Sprintf("authority phase %d", index+1))
+		if err != nil { return "", err }
+		if index == 2 {
+			if err := exactFields(phase,
+				"phase", "process_id", "process_instance_id", "event_digests",
+				"observed_store_revision", "decision", "stale_attempt_id",
+				"accepted", "observed_owner_id", "observed_owner_generation",
+			); err != nil {
+				return "", fail("stale replay process fields are invalid: %v", err)
+			}
+		} else if err := exactFields(phase,
+			"phase", "process_id", "process_instance_id", "event_digests",
+			"observed_store_revision", "decision",
+		); err != nil {
+			return "", fail("authority process phase fields are invalid: %v", err)
+		}
+		if phase["phase"] != expectedNames[index] || phase["decision"] != expectedDecisions[index] {
+			return "", fail("authority process phase %d identity or decision mismatch", index+1)
+		}
+		if _, err := integerValue(phase["process_id"], "authority process_id", 1); err != nil {
+			return "", err
+		}
+		instanceID, err := textValue(phase["process_instance_id"], "authority process instance ID")
+		if err != nil { return "", err }
+		if seenInstances[instanceID] {
+			return "", fail("authority process instance ID was reused")
+		}
+		seenInstances[instanceID] = true
+		observedRevision, err := integerValue(phase["observed_store_revision"], "observed_store_revision", 1)
+		if err != nil || observedRevision != expectedRevisions[index] {
+			return "", fail("authority process phase %d observed an unexpected store revision", index+1)
+		}
+		digests, err := asArray(phase["event_digests"], "authority phase event digests")
+		if err != nil { return "", err }
+		if len(digests) != len(expectedDigests[index]) {
+			return "", fail("authority process phase %d appended the wrong number of events", index+1)
+		}
+		for j, value := range digests {
+			if value != expectedDigests[index][j] {
+				return "", fail("authority process phase %d event digest mismatch", index+1)
+			}
+		}
+	}
+	stalePhase, _ := asObject(phases[2], "stale replay phase")
+	staleDigest, err := digest(staleAttempt)
+	if err != nil { return "", err }
+	phaseDigest, err := digest(stalePhase)
+	if err != nil || staleDigest != phaseDigest {
+		return "", fail("stale-owner attempt document differs from the third process record")
+	}
+	if staleAttempt["accepted"] != false || staleAttempt["observed_owner_generation"] != json.Number("2") {
+		return "", fail("stale owner-generation attempt was not rejected under generation two")
+	}
+	claim, err := asObject(events[1], "claim event")
+	if err != nil { return "", err }
+	claimDetails, err := asObject(claim["details"], "claim details")
+	if err != nil { return "", err }
+	if staleAttempt["observed_owner_id"] != claimDetails["owner_id"] {
+		return "", fail("stale replay observed a different owner than the claim event")
+	}
+	requestAttempt, err := textValue(staleAttempt["stale_attempt_id"], "stale_attempt_id")
+	if err != nil { return "", err }
+	_ = requestAttempt
+	evidenceDigest, err := digest(processEvidence)
+	if err != nil { return "", err }
+	return evidenceDigest, nil
+}
+
+func mustEventDigest(value any) any {
+	event, ok := value.(map[string]any)
+	if !ok { return nil }
+	return event["event_digest"]
 }
 
 func verifyAuthorityAttestation(
