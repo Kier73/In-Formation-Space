@@ -19,7 +19,7 @@ namespace COE010Real
 /-- Pure expression syntax of the rational-affine and ReLU fragments
     supported by COE-009. No floating point or approximate arithmetic. -/
 inductive Expr where
-  | variable
+  | input
   | literal (value : Rat)
   | sum (lhs rhs : Expr)
   | scale (factor : Rat) (arg : Expr)
@@ -28,7 +28,7 @@ inductive Expr where
 
 /-- Exact rational denotation. -/
 def evalRat : Expr → Rat → Rat
-  | .variable, x => x
+  | .input, x => x
   | .literal value, _ => value
   | .sum a b, x => evalRat a x + evalRat b x
   | .scale factor arg, x => factor * evalRat arg x
@@ -37,7 +37,7 @@ def evalRat : Expr → Rat → Rat
 /-- The continuous real denotation, using exact embeddings of rational
     constants rather than a floating-point approximation. -/
 def evalReal : Expr → ℝ → ℝ
-  | .variable, x => x
+  | .input, x => x
   | .literal value, _ => (value : ℝ)
   | .sum a b, x => evalReal a x + evalReal b x
   | .scale factor arg, x => (factor : ℝ) * evalReal arg x
