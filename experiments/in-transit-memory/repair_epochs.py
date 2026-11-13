@@ -856,16 +856,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.json:
             rendered = json.dumps(reports, indent=2, sort_keys=True, allow_nan=False)
         else:
-            lines = ["scenario | model | k | interval | expected lifetime rounds | repairs / 100 rounds | median epochs"]
+            lines = [
+                "scenario | model | k | interval | expected lifetime rounds | repairs / 100 rounds | median failure epoch"
+            ]
             for report in reports:
                 for policy in report["policies"]:
                     for model in MODELS:
                         entry = policy["models"][model]
+                        median = (
+                            str(entry["median_failure_epoch"])
+                            if entry["median_failure_epoch"] is not None
+                            else f">{entry['max_epochs_checked']} (censored)"
+                        )
                         lines.append(
                             f"{report['scenario']['name']} | {model} | {entry['required']} | "
                             f"{entry['interval_rounds']} | {entry['expected_lifetime_rounds']} | "
-                            f"{entry['expected_repairs_per_100_lifetime_rounds_ratio']} | "
-                            f"{entry['median_failure_epoch']}"
+                            f"{entry['expected_repairs_per_100_lifetime_rounds_ratio']} | {median}"
+                        )
+                for model in MODELS:
+                    lines.append(f"Pareto frontier | {report['scenario']['name']} | {model}")
+                    for item in report["pareto_frontier"][model]:
+                        lines.append(
+                            f"  k={item['recovery_threshold']} L={item['interval_rounds']} | "
+                            f"expected_lifetime_rounds={item['expected_lifetime_rounds']} | "
+                            f"repairs_per_100_rounds={item['expected_repairs_per_100_lifetime_rounds_ratio']}"
                         )
             rendered = "\n".join(lines)
         if args.output is not None:
