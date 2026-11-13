@@ -1102,6 +1102,43 @@ func Verify(paths Paths) (object, error) {
 		"storage_scope": "single-host-local-filesystem",
 		"sqlite_reopen_evidence_digest": sqliteReopenEvidenceDigest,
 	}
+	verifiedLayers := []any{
+		"full route-ledger head digest and supported event hash chain",
+		"open route, owner-generation claim, request admission, and execution-ticket replay",
+		"every SQLite revision prefix digest recomputed independently from its event append index",
+		"authority Ed25519 signature over the route ledger, SQLite database hash, revision audit, and process evidence",
+		"three distinct authority process-instance records bind open, restart, and stale-owner replay phases",
+		"old owner-generation replay rejected after durable ownership replacement",
+		"portable request digest and exact attempt correlation",
+		"portable result digest and request correlation",
+		"runner Ed25519 signature over the exact result and authorization event",
+		"SQLite reopen summary digest and its active epoch, owner, generation, and revision history are independently cross-checked",
+		"three distinct GitHub-hosted workflow job identities in one run",
+	}
+	if sqliteReopenedVerified {
+		verifiedLayers = append(verifiedLayers,
+			"third host reopened the transferred SQLite database using the repository adapter",
+		)
+	} else {
+		verifiedLayers = append(verifiedLayers,
+			"offline fixture explicitly does not claim that a real SQLite database was reopened",
+		)
+	}
+	notEstablished := []any{
+		"multi-host consensus or linearizability: SQLite is a single-host local-file CAS store, not a multi-host authority service",
+		"independent physical or administrative fault domains for the authority's three local processes",
+		"protection from a privileged host actor rewriting both SQLite database and all exported, signed evidence before checkpoint signing",
+		"honest computation, actual Lean execution, or theorem correctness",
+		"VGI kernel acceptance; that remains a separate VerifiedKernelReceipt boundary",
+		"direct peer-to-peer transport; workflow artifacts are still relayed through GitHub Actions",
+		"distinct physical servers for the three GitHub-hosted workflow jobs",
+		"combined cross-host duration or transport latency",
+	}
+	if !sqliteReopenedVerified {
+		notEstablished = append(notEstablished,
+			"offline deterministic fixture does not establish a real SQLite adapter reopen",
+		)
+	}
 	return object{
 		"schema": reportFormat,
 		"status": "verified",
@@ -1141,29 +1178,8 @@ func Verify(paths Paths) (object, error) {
 		"proof_trace_digest": traceDigest,
 		"completion_receipt_digest": receiptDigest,
 		"key_provenance_verified_by_github": paths.KeyAttestationsVerified,
-		"verified_layers": []any{
-			"full route-ledger head digest and supported event hash chain",
-			"open route, owner-generation claim, request admission, and execution-ticket replay",
-			"every SQLite revision prefix digest recomputed independently from its event append index",
-			"authority Ed25519 signature over the route ledger, SQLite database hash, revision audit, and process evidence",
-			"three separate Python authority processes with a real database reopen between phases",
-			"old owner-generation replay rejected after durable ownership replacement",
-			"portable request digest and exact attempt correlation",
-			"portable result digest and request correlation",
-			"runner Ed25519 signature over the exact result and authorization event",
-			"third host reopened the transferred SQLite database using the repository adapter",
-			"three distinct GitHub-hosted workflow job identities in one run",
-		},
-		"not_established": []any{
-			"multi-host consensus or linearizability: SQLite is a single-host local-file CAS store, not a multi-host authority service",
-			"independent physical or administrative fault domains for the authority's three local processes",
-			"protection from a privileged host actor rewriting both SQLite database and all exported, signed evidence before checkpoint signing",
-			"honest computation, actual Lean execution, or theorem correctness",
-			"VGI kernel acceptance; that remains a separate VerifiedKernelReceipt boundary",
-			"direct peer-to-peer transport; workflow artifacts are still relayed through GitHub Actions",
-			"distinct physical servers for the three GitHub-hosted workflow jobs",
-			"combined cross-host duration or transport latency",
-		},
+		"verified_layers": verifiedLayers,
+		"not_established": notEstablished,
 	}, nil
 }
 
