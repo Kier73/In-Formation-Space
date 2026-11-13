@@ -38,3 +38,5 @@ jobs:
         run: python experiments/in-transit-memory/adaptive_repair.py --scan --simulate --trials 500 --seed 20261112 --json > /dev/null
       - name: Print deterministic adaptive-repair policy comparison
         run: python experiments/in-transit-memory/adaptive_repair.py --scan
+      - name: Exercise the belief-aware adaptive-repair sweep
+        run: python experiments/in-transit-memory/belief_repair.py --scan --json > /dev/null
