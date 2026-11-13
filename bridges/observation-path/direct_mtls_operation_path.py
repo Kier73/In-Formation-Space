@@ -823,14 +823,30 @@ def _write_record(directory: Path, record: Mapping[str, Any]) -> Path:
     return path
 
 
-def serve(directory: Path, *, accept_timeout: float = 120.0) -> dict[str, Any]:
+def serve(
+    directory: Path,
+    *,
+    accept_timeout: float = 120.0,
+    bind_host: str | None = None,
+) -> dict[str, Any]:
     host = host_metadata("server_host")
+    workflow_path = _workflow_path(host["workflow_ref"])
+    if workflow_path == TAILSCALE_WORKFLOW_PATH:
+        if bind_host is None:
+            raise DirectMTLSError(
+                "IHP-006 requires an explicit Tailscale bind address; wildcard binding is disabled"
+            )
+        listener_host = _validate_tailscale_ipv4(bind_host)
+    else:
+        if bind_host is not None:
+            raise DirectMTLSError("custom bind addresses are reserved for the IHP-006 overlay workflow")
+        listener_host = "0.0.0.0"
     client_cert_path = directory / "peer-client" / "client-cert.pem"
     server_cert_path = directory / "server-cert.pem"
     server_key_path = directory / "server-key.pem"
     endpoint = read_json(directory / "server-endpoint.json")
     endpoint_core = _verify_endpoint_advertisement(endpoint, server_cert_path)
-    listener = SocketTransport.listen("0.0.0.0", LISTEN_PORT)
+    listener = SocketTransport.listen(listener_host, LISTEN_PORT)
     listener.settimeout(accept_timeout)
     transport: SocketTransport | None = None
 
@@ -1552,6 +1568,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     serve_parser = commands.add_parser("serve")
     serve_parser.add_argument("--directory", type=Path, required=True)
     serve_parser.add_argument("--accept-timeout", type=float, default=120.0)
+    serve_parser.add_argument(
+        "--bind-host",
+        help="explicit Tailscale overlay IPv4 listener address (required by IHP-006)",
+    )
 
     connect_parser = commands.add_parser("connect")
     connect_parser.add_argument("--directory", type=Path, required=True)
@@ -1586,7 +1606,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(json.dumps(result, sort_keys=True))
         elif args.command == "serve":
-            result = serve(args.directory, accept_timeout=args.accept_timeout)
+            result = serve(
+                args.directory,
+                accept_timeout=args.accept_timeout,
+                bind_host=args.bind_host,
+            )
             print(json.dumps(result, sort_keys=True))
         elif args.command == "connect":
             result = connect_and_send(args.directory, connect_timeout_seconds=args.connect_timeout, gh=args.gh)
