@@ -368,6 +368,10 @@ jobs:
         env:
           PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter:external/E-CPU
         run: python -m unittest discover -s experiments/lean-kernel-independent-recheck -p "test_ecpu_proof_transit.py" -v
+      - name: Test recipient-owned intention, disjoint PKI mounts and incomplete-prefix failure
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter:external/E-CPU
+        run: python -m unittest discover -s experiments/lean-kernel-independent-recheck -p "test_ecpu_isolated_host_recovery.py" -v
 
   ecpu_mtls_proof_transfer:
     # A real two-Python-process loopback TCP/mTLS and E-CPU ReliableChannel
@@ -465,5 +469,96 @@ jobs:
             evidence/ecpu-transport-observation.json
             evidence/ecpu-recipient-accepted.json
             evidence/ecpu-recipient-ledger.sqlite3
+          if-no-files-found: error
+          retention-days: 90
+
+
+  ecpu_isolated_host_recovery:
+    # Separate network, process and mount namespaces on one GitHub-hosted
+    # machine. Real mTLS from sender to recipient Docker containers; privileged
+    # issuer authentication happens *inside* the recipient container. Does NOT
+    # establish separate physical/administrative hosts.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [vgi_unified_admission, ecpu_transport_contract_tests]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-proof-runner
+          path: incoming-runner
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-source-checker
+          path: incoming-source-checker
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-serialized-kernel
+          path: incoming-serialized-kernel
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-vgi-kernel-receipt
+          path: incoming-unified-receipt
+      - name: Independently derive trusted receiving host B intention
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter:external/E-CPU
+        run: |
+          mkdir -p evidence
+          python experiments/lean-kernel-independent-recheck/recipient_intent.py \
+            --source-sha "$GITHUB_SHA" --run-id "$GITHUB_RUN_ID" \
+            --run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --scope "ecpu-virtual-host-B" --ttl-seconds 3600 \
+            --output evidence/host-B-trusted-intent.json
+      - name: Isolated hosts with admin-provisioned PKI, hard-kill, recovery and replay
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter:external/E-CPU
+          DOCKER_BUILDKIT: "1"
+        run: |
+          python experiments/lean-kernel-independent-recheck/ecpu_isolated_host_recovery.py \
+            --runner incoming-runner/unified-runner.json \
+            --checker incoming-source-checker/unified-source-checker.json \
+            --signed incoming-source-checker/unified-signed-source.json \
+            --public-key incoming-source-checker/unified-ephemeral-public.pem \
+            --serialized-kernel incoming-serialized-kernel/unified-serialized-kernel.json \
+            --unified-receipt incoming-unified-receipt/unified-vgi-kernel-receipt.json \
+            --intent evidence/host-B-trusted-intent.json \
+            --output evidence/ecpu-isolated-host-recovery.json
+      - name: Attest independently verified isolated-host proof transfer
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/ecpu-isolated-host-recovery.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ecpu-isolated-host-pki-recovery
+          path: evidence/ecpu-isolated-host-recovery.json
           if-no-files-found: error
           retention-days: 90
