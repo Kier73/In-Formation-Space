@@ -256,7 +256,7 @@ class ExecutableNeuralGround:
         if math.prod(shape) > self.max_elements:
             raise NeuralExecutionGroundError("synthetic tensor would exceed element budget")
         dtype = item["dtype"]
-        if name.endswith("attn.bias"):
+        if name.rsplit(".", 2)[-2:] == ["attn", "bias"]:
             mask = np.tril(np.ones(shape[-2:], dtype=bool)).reshape(shape)
             value = mask if dtype == "BOOL" else mask.astype(np.float32)
         elif dtype == "F32":
