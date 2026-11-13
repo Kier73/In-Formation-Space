@@ -80,8 +80,9 @@ The implementation and its seven tests ran locally on Windows with Python
 of source-to-sink paths for all 64 forward DAGs on four labeled nodes and all
 16 binary-duration assignments: 1,024 cases, including all-zero durations.
 The existing operation-path suite passed all 11 tests. The default local Python
-lacked `jsonschema` for the separate operation-span suite; CI installs it
-explicitly and runs that suite as well.
+lacked `jsonschema`; all 13 operation-span tests then passed using the available
+Python 3.11.15 environment with that dependency. CI installs it explicitly and
+runs all three suites.
 
 The dependency files `operation_path_criticality.py`, `operation_spans.py`, and
 the test fixture module `test_operation_path_criticality.py` were compared with
