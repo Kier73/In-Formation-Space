@@ -9,3 +9,27 @@ rev = "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
 
 [[lean_lib]]
 name = "COE010Real"
+
+[[lean_lib]]
+name = "COECellSoundness"
+
+[[lean_lib]]
+name = "COERationalRoot"
+
+[[lean_lib]]
+name = "COEWireCheck"
+
+[[lean_lib]]
+name = "COE008Soundness"
+
+[[lean_lib]]
+name = "COE008Evaluation"
+
+[[lean_lib]]
+name = "COE009Endpoint"
+
+[[lean_lib]]
+name = "COE009Evaluation"
+
+[[lean_lib]]
+name = "COE009Coverage"
