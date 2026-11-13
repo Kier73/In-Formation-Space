@@ -174,18 +174,16 @@ class AdaptiveRepairTests(unittest.TestCase):
             0.12,
         )
 
-    def test_cost_one_policy_keeps_observation_assumption_explicit(self):
+    def test_report_declares_free_exact_observation_assumption(self):
         report = build_adaptive_repair_report(**self.parameters(repair_cost=1.0))
-        self.assertIn(
-            "zero_sensing_cost",
-            report["adaptive_policy"]["decision_table"][0]["channel_state"]
-            if False else report["adaptive_policy"]["decision_table"][0]["channel_state"]
-            + report["adaptive_policy"]["decision_table"][0]["selected_action"]
-            + report["scenario"]["name"]
-            + report["policy_core_digest"],
-        ) if False else None
-        self.assertIn("zero_sensing_cost", report["interpretation_limits"][0] if "interpretation_limits" in report else report["adaptive_policy"]["decision_table"][0].get("observation_assumption", ""))
-        self.assertIn("zero_sensing_cost", report["adaptive_policy"]["decision_table"][0]["selected_action"] if False else report["adaptive_policy"]["decision_table"][0].get("observation_assumption", "")) if "observation_assumption" in report["adaptive_policy"]["decision_table"][0] else self.assertIn("zero_sensing_cost", report["scenario"].get("observation_assumption", ""))
+        self.assertTrue(any(
+            "exact survivor count" in limit and "zero sensing cost" in limit
+            for limit in report["interpretation_limits"]
+        ))
+        self.assertEqual(
+            report["adaptive_policy"]["expected_repair_count"],
+            0.0,
+        )
 
 
 if __name__ == "__main__":
