@@ -26,6 +26,7 @@ from mailcpu import (
     RecoveryLineageCoordinator,
     RecoveryLineageError,
     RecoveryLineagePeerClient,
+    RecoveryLineageTransportError,
     RecoveryStateManifest,
     SeedCommitMembership,
 )
