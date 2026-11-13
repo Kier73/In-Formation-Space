@@ -30,11 +30,11 @@ func fixturePaths(t *testing.T) Paths {
 		AuthorityStore: filepath.Join(root, "authority", "authority-store-fixture.bin"),
 		ProcessEvidence: filepath.Join(root, "authority", "process-evidence.json"),
 		StaleOwnerAttempt: filepath.Join(root, "authority", "stale-owner-attempt.json"),
+		SQLiteAuthorityReport: filepath.Join(root, "authority", "sqlite-authority-verification-fixture.json"),
 		Result: filepath.Join(root, "runner", "result.json"),
 		Receipt: filepath.Join(root, "runner", "completion-receipt.json"),
 		RunnerKey: filepath.Join(root, "runner", "runner-public-key.json"),
 		VerifierHost: filepath.Join(root, "verifier-host.json"),
-		SQLiteStoreReopenedVerified: false,
 	}
 }
 
@@ -88,11 +88,37 @@ func TestThreeHostFixtureReconstructsInGo(t *testing.T) {
 	if report["key_provenance_verified_by_github"] != false {
 		t.Fatal("offline fixture must not claim GitHub key attestations")
 	}
+	if report["sqlite_store_reopened_verified"] != false {
+		t.Fatal("offline fixture must not claim to have reopened a real SQLite database")
+	}
+	if _, ok := report["sqlite_reopen_evidence_digest"].(string); !ok {
+		t.Fatal("offline fixture must bind the exact reopen-summary evidence")
+	}
 	hostSeparation, ok := report["host_separation"].(object)
 	if !ok || hostSeparation["distinct_jobs"] != true ||
 		hostSeparation["distinct_actor_ids"] != true ||
 		hostSeparation["combined_cross_host_elapsed_ns"] != nil {
 		t.Fatalf("host separation or unknown duration was not preserved: %#v", report["host_separation"])
+	}
+}
+
+func TestRejectsSQLiteReopenSummaryWithWrongActiveOwner(t *testing.T) {
+	paths := fixturePaths(t)
+	report := readMutable(t, paths.SQLiteAuthorityReport)
+	report["active_owner_id"] = "unrelated-owner"
+	writeMutable(t, paths.SQLiteAuthorityReport, report)
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("SQLite reopen summary with wrong active owner was accepted")
+	}
+}
+
+func TestRejectsSQLiteReopenSummaryWithDifferentHistoryDigest(t *testing.T) {
+	paths := fixturePaths(t)
+	report := readMutable(t, paths.SQLiteAuthorityReport)
+	report["history_digest"] = strings.Repeat("0", 64)
+	writeMutable(t, paths.SQLiteAuthorityReport, report)
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("SQLite reopen summary with a different history digest was accepted")
 	}
 }
 
