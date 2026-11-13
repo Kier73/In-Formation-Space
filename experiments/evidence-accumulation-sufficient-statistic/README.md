@@ -101,3 +101,8 @@ The implementation uses only the Python standard library. Probability inputs acc
 - test_evidence_accumulation.py — ten tests for exact accuracy, asymmetric channels, uninformative/perfect sensors, unreachable count classes, bounds, and tamper rejection.
 - example.py — runnable five-observation experiment.
 - README.md — statistical derivation, controller, evidence, and scope.
+
+
+## Follow-on experiment
+
+[RIV-005: Heterogeneous evidence accumulation](../heterogeneous-evidence-accumulator/README.md) relaxes RIV-004's identical-sensor assumption. It uses a sequential posterior accumulator, demonstrates a same-count/opposite-decision counterexample, and measures how many ordered histories collapse to the same exact posterior.
