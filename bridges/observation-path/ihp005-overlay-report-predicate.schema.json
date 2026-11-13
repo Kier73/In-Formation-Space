@@ -1,0 +1,20 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/ihp005-overlay-report-predicate.schema.json",
+  "title":"IHP-005 verifier report attestation predicate",
+  "type":"object","additionalProperties":false,
+  "required":["schema","repository","run_id","run_attempt","workflow_ref","workflow_sha","git_ref","git_sha","job","runner_name","runner_environment","report_sha256","report_digest","status","path_id"],
+  "properties":{
+    "schema":{"const":"in-formation.ihp005-overlay-report-predicate/0.1"},
+    "repository":{"const":"Kier73/In-Formation-Space"},
+    "run_id":{"type":"string"},"run_attempt":{"type":"string"},
+    "workflow_ref":{"type":"string"},"workflow_sha":{"type":"string"},
+    "git_ref":{"const":"refs/heads/main"},"git_sha":{"type":"string"},
+    "job":{"const":"verifier_host"},"runner_name":{"type":"string"},
+    "runner_environment":{"const":"github-hosted"},
+    "report_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "report_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "status":{"enum":["direct_peer_to_peer","overlay_reachable_with_relay_or_asymmetry","overlay_path_unavailable","overlay_credentials_missing","overlay_peer_not_configured"]},
+    "path_id":{"type":"string","minLength":1}
+  }
+}
