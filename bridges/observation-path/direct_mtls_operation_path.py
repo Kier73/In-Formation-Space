@@ -615,6 +615,15 @@ def _verify_handoff_envelope(
     return dict(core)
 
 
+def _load_signed_endpoint(
+    endpoint_path: Path,
+    server_cert_path: Path,
+) -> tuple[dict[str, Any], str]:
+    signed_endpoint = read_json(endpoint_path)
+    core = _verify_endpoint_advertisement(signed_endpoint, server_cert_path)
+    return core, digest_object(signed_endpoint)
+
+
 def _verify_endpoint_advertisement(
     endpoint: Mapping[str, Any],
     server_cert_path: Path,
@@ -973,8 +982,8 @@ def connect_and_send(
         server_predicate, server_cert_path, "server_host", host["run_id"], host["run_attempt"]
     )
     server_host = _validate_host_metadata(server_predicate.get("host"), "server_host")
-    endpoint = _verify_endpoint_advertisement(
-        read_json(server_directory / "server-endpoint.json"),
+    endpoint, endpoint_digest = _load_signed_endpoint(
+        server_directory / "server-endpoint.json",
         server_cert_path,
     )
     own_cert_path = directory / "client-cert.pem"
@@ -1016,8 +1025,6 @@ def connect_and_send(
         "handoff_payload": handoff_payload,
     }
     signed_envelope = _signed_document(envelope_core, own_key_path)
-    endpoint_digest = digest_object(endpoint)
-
     deadline = time.monotonic() + connect_timeout_seconds
     transport: SocketTransport | None = None
     last_error = "connection has not been attempted"
