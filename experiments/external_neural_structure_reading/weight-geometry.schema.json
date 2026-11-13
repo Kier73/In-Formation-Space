@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/external_neural_structure_reading/weight-geometry.schema.json",
+  "title": "Selected Weight Geometry Observation v0.1",
+  "description": "Descriptive numerical summaries for an explicit allowlist of selected tensor payloads. Raw payload values are not retained.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "source_observation", "method", "dimensions", "tensor_summaries", "cross_layer_comparisons", "interpretation"],
+  "properties": {
+    "schema": {"const": "in-formation-space.selected-weight-geometry.v0.1"},
+    "source_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision", "license_id"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "license_id": {"type": ["string", "null"]}
+      }
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected_tensor_count", "selected_tensor_names", "dtype", "qkv_column_partition", "matrix_layout", "near_zero_threshold", "spectral_norm_method", "spectral_norm_iterations", "retained_payload_policy"],
+      "properties": {
+        "selected_tensor_count": {"const": 2},
+        "selected_tensor_names": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "dtype": {"const": "F32"},
+        "qkv_column_partition": {
+          "const": ["query", "key", "value"]
+        },
+        "matrix_layout": {"type": "string", "minLength": 1},
+        "near_zero_threshold": {"type": "number", "minimum": 0},
+        "spectral_norm_method": {"const": "deterministic-power-iteration"},
+        "spectral_norm_iterations": {"type": "integer", "minimum": 1},
+        "retained_payload_policy": {"type": "string", "minLength": 1}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_width", "fused_output_width", "hidden_width_per_qkv_slice"],
+      "properties": {
+        "input_width": {"type": "integer", "minimum": 1},
+        "fused_output_width": {"type": "integer", "minimum": 3},
+        "hidden_width_per_qkv_slice": {"type": "integer", "minimum": 1}
+      }
+    },
+    "tensor_summaries": {
+      "type": "object",
+      "minProperties": 2,
+      "maxProperties": 2,
+      "additionalProperties": {"$ref": "#/$defs/tensor-summary"}
+    },
+    "cross_layer_comparisons": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fused_qkv", "q", "k", "v"],
+      "properties": {
+        "fused_qkv": {"$ref": "#/$defs/comparison"},
+        "q": {"$ref": "#/$defs/comparison"},
+        "k": {"$ref": "#/$defs/comparison"},
+        "v": {"$ref": "#/$defs/comparison"}
+      }
+    },
+    "interpretation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "claims", "not_established"],
+      "properties": {
+        "status": {"const": "descriptive-parameter-geometry-only"},
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "not_established": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tensor-evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_sha256", "payload_sha256_scope", "size_bytes", "shard_header_sha256", "absolute_byte_range"],
+      "properties": {
+        "payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "payload_sha256_scope": {"const": "complete-selected-tensor-payload"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "shard_header_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "absolute_byte_range": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 0},
+            {"type": "integer", "minimum": 0}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "matrix-stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shape", "element_count", "mean", "standard_deviation", "minimum", "maximum", "frobenius_norm", "approximate_spectral_norm", "spectral_norm_method", "spectral_norm_iterations", "approximate_stable_rank", "exact_zero_fraction", "near_zero_fraction_at_1e-6", "mean_row_l2_norm", "std_row_l2_norm", "mean_column_l2_norm", "std_column_l2_norm"],
+      "properties": {
+        "shape": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 1},
+            {"type": "integer", "minimum": 1}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "element_count": {"type": "integer", "minimum": 1},
+        "mean": {"type": "number"},
+        "standard_deviation": {"type": "number", "minimum": 0},
+        "minimum": {"type": "number"},
+        "maximum": {"type": "number"},
+        "frobenius_norm": {"type": "number", "minimum": 0},
+        "approximate_spectral_norm": {"type": "number", "minimum": 0},
+        "spectral_norm_method": {"const": "deterministic-power-iteration"},
+        "spectral_norm_iterations": {"type": "integer", "minimum": 1},
+        "approximate_stable_rank": {"type": ["number", "null"], "minimum": 0},
+        "exact_zero_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+        "near_zero_fraction_at_1e-6": {"type": "number", "minimum": 0, "maximum": 1},
+        "mean_row_l2_norm": {"type": "number", "minimum": 0},
+        "std_row_l2_norm": {"type": "number", "minimum": 0},
+        "mean_column_l2_norm": {"type": "number", "minimum": 0},
+        "std_column_l2_norm": {"type": "number", "minimum": 0}
+      }
+    },
+    "tensor-summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tensor_evidence", "fused_qkv", "slices"],
+      "properties": {
+        "tensor_evidence": {"$ref": "#/$defs/tensor-evidence"},
+        "fused_qkv": {"$ref": "#/$defs/matrix-stats"},
+        "slices": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["query", "key", "value"],
+          "properties": {
+            "query": {"$ref": "#/$defs/matrix-stats"},
+            "key": {"$ref": "#/$defs/matrix-stats"},
+            "value": {"$ref": "#/$defs/matrix-stats"}
+          }
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cosine_similarity", "relative_frobenius_distance_to_first", "frobenius_norm_first", "frobenius_norm_second", "interpretation"],
+      "properties": {
+        "cosine_similarity": {"type": ["number", "null"], "minimum": -1, "maximum": 1},
+        "relative_frobenius_distance_to_first": {"type": ["number", "null"], "minimum": 0},
+        "frobenius_norm_first": {"type": "number", "minimum": 0},
+        "frobenius_norm_second": {"type": "number", "minimum": 0},
+        "interpretation": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

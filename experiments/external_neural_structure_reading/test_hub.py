@@ -10,16 +10,24 @@ from urllib.parse import urlparse
 from jsonschema import Draft202012Validator
 
 try:
-    from .hub import NSDError, inspect_huggingface_model
+    from .hub import NSDError, fetch_selected_tensor_payloads, inspect_huggingface_model
 except ImportError:
-    from hub import NSDError, inspect_huggingface_model
+    from hub import NSDError, fetch_selected_tensor_payloads, inspect_huggingface_model
 
 
 REVISION = "0123456789abcdef0123456789abcdef01234567"
 
 
-def safetensors_bytes(name: str, *, dtype: str = "F32", values: int = 2) -> bytes:
+def safetensors_bytes(
+    name: str,
+    *,
+    dtype: str = "F32",
+    values: int = 2,
+    payload: bytes | None = None,
+) -> bytes:
     body_size = values * (4 if dtype == "F32" else 2)
+    if payload is not None and len(payload) != body_size:
+        raise ValueError("synthetic payload length must match the tensor's dtype and shape")
     header = {
         name: {
             "dtype": dtype,
@@ -29,7 +37,8 @@ def safetensors_bytes(name: str, *, dtype: str = "F32", values: int = 2) -> byte
     }
     raw = json.dumps(header, separators=(",", ":")).encode("utf-8")
     raw += b" " * ((-len(raw)) % 8)
-    return len(raw).to_bytes(8, "little") + raw + (b"\0" * body_size)
+    data = payload if payload is not None else (b"\0" * body_size)
+    return len(raw).to_bytes(8, "little") + raw + data
 
 
 class FakeResponse:
@@ -230,6 +239,98 @@ class HubRangeObserverTests(unittest.TestCase):
         with self.assertRaisesRegex(NSDError, "immutable"):
             inspect_huggingface_model("example-org/tiny-model", "main", opener=fake)
         self.assertEqual(fake.requests, [])
+
+
+    def test_selected_tensor_payload_is_read_from_exact_revalidated_range_and_hashed(self):
+        selected_name = "transformer.wte.weight"
+        payload = bytes(range(8))
+        fake = FakeHub(
+            {
+                "model.safetensors": safetensors_bytes(
+                    selected_name,
+                    values=2,
+                    payload=payload,
+                )
+            }
+        )
+        nsd = self.make_observer(fake)
+        fake.requests.clear()
+        fake.responses.clear()
+
+        payloads, evidence = fetch_selected_tensor_payloads(
+            nsd,
+            [selected_name],
+            max_total_bytes=8,
+            max_tensor_bytes=8,
+            opener=fake,
+        )
+
+        self.assertEqual(payloads, {selected_name: payload})
+        self.assertEqual(len(evidence), 1)
+        record = evidence[0]
+        self.assertEqual(record["name"], selected_name)
+        self.assertEqual(record["size_bytes"], 8)
+        self.assertEqual(
+            record["payload_sha256"],
+            __import__("hashlib").sha256(payload).hexdigest(),
+        )
+        self.assertEqual(record["payload_sha256_scope"], "complete-selected-tensor-payload")
+        self.assertEqual(
+            [item["range"] for item in fake.requests if item["range"]],
+            [
+                "bytes=0-7",
+                f"bytes=8-{7 + nsd['observed']['files'][1]['header_bytes']}",
+                f"bytes={record['absolute_byte_range'][0]}-{record['absolute_byte_range'][1]}",
+            ],
+        )
+
+    def test_selected_tensor_budget_is_rejected_before_any_network_request(self):
+        selected_name = "transformer.wte.weight"
+        fake = FakeHub({"model.safetensors": safetensors_bytes(selected_name, values=2)})
+        nsd = self.make_observer(fake)
+        fake.requests.clear()
+        with self.assertRaisesRegex(NSDError, "above max_total_bytes"):
+            fetch_selected_tensor_payloads(
+                nsd,
+                [selected_name],
+                max_total_bytes=7,
+                max_tensor_bytes=8,
+                opener=fake,
+            )
+        self.assertEqual(fake.requests, [])
+
+    def test_selected_tensor_must_exist_in_explicit_allowlist(self):
+        selected_name = "transformer.wte.weight"
+        fake = FakeHub({"model.safetensors": safetensors_bytes(selected_name, values=2)})
+        nsd = self.make_observer(fake)
+        fake.requests.clear()
+        with self.assertRaisesRegex(NSDError, "not present in the NSD"):
+            fetch_selected_tensor_payloads(
+                nsd,
+                ["unlisted.weight"],
+                max_total_bytes=8,
+                max_tensor_bytes=8,
+                opener=fake,
+            )
+        self.assertEqual(fake.requests, [])
+
+    def test_selected_tensor_manifest_must_match_revalidated_header(self):
+        selected_name = "transformer.wte.weight"
+        fake = FakeHub({"model.safetensors": safetensors_bytes(selected_name, values=2)})
+        nsd = self.make_observer(fake)
+        tensor = nsd["observed"]["tensor_manifest"][0]
+        tensor["shape"] = [1, 2]  # same element count, but not the recorded header shape [2]
+        fake.requests.clear()
+        with self.assertRaisesRegex(NSDError, "differs from the NSD header record"):
+            fetch_selected_tensor_payloads(
+                nsd,
+                [selected_name],
+                max_total_bytes=8,
+                max_tensor_bytes=8,
+                opener=fake,
+            )
+        requested_ranges = [item["range"] for item in fake.requests if item["range"]]
+        self.assertEqual(len(requested_ranges), 2)  # header only; no payload range
 
 
 if __name__ == "__main__":

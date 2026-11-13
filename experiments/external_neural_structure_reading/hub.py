@@ -441,3 +441,275 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+_DTYPE_WIDTH_BYTES = {
+    "F64": 8,
+    "I64": 8,
+    "U64": 8,
+    "F32": 4,
+    "I32": 4,
+    "U32": 4,
+    "F16": 2,
+    "BF16": 2,
+    "I16": 2,
+    "U16": 2,
+    "I8": 1,
+    "U8": 1,
+    "BOOL": 1,
+    "F8_E4M3": 1,
+    "F8_E5M2": 1,
+    "F8_E4M3FN": 1,
+    "F8_E5M2FNUZ": 1,
+    "F8_E4M3FNUZ": 1,
+    "F8_E8M0": 1,
+}
+MAX_SELECTED_TENSOR_BYTES = 16 * 1024 * 1024
+MAX_SELECTED_TOTAL_BYTES = 64 * 1024 * 1024
+
+
+def _tensor_element_count(shape: list[int], label: str) -> int:
+    count = 1
+    for dimension in shape:
+        if type(dimension) is not int or dimension < 0:
+            raise NSDError(f"{label} has an invalid tensor dimension")
+        count *= dimension
+    return count
+
+
+def fetch_selected_tensor_payloads(
+    nsd: dict[str, Any],
+    tensor_names: list[str],
+    *,
+    max_total_bytes: int,
+    max_tensor_bytes: int = MAX_SELECTED_TENSOR_BYTES,
+    endpoint: str = DEFAULT_ENDPOINT,
+    timeout: float = 20.0,
+    opener: Opener | None = None,
+) -> tuple[dict[str, bytes], list[dict[str, Any]]]:
+    """Fetch exact allowlisted tensor payload ranges under explicit byte budgets.
+
+    The NSD's source revision and shard headers are rechecked before payload
+    access. Payload ranges are derived from the revalidated Safetensors header,
+    not from a caller-provided offset. This function returns raw bytes only to
+    its caller; evidence records contain hashes and metadata, never payloads.
+    """
+    if not isinstance(nsd, dict) or nsd.get("schema") != NSD_SCHEMA:
+        raise NSDError("nsd must be a Neural Structure Description v0.1")
+    source = nsd.get("source")
+    observed = nsd.get("observed")
+    if not isinstance(source, dict) or not isinstance(observed, dict):
+        raise NSDError("NSD source and observed sections are required")
+    repository = source.get("repository")
+    revision = source.get("revision")
+    if not isinstance(repository, str) or not _REPOSITORY_RE.fullmatch(repository):
+        raise NSDError("NSD source repository is invalid")
+    if not isinstance(revision, str) or not _REVISION_RE.fullmatch(revision):
+        raise NSDError("NSD source revision is not an immutable commit SHA")
+    if not isinstance(timeout, (int, float)) or isinstance(timeout, bool) or timeout <= 0:
+        raise NSDError("timeout must be a positive number")
+    if not isinstance(endpoint, str) or urlparse(endpoint).scheme.lower() != "https":
+        raise NSDError("Hub endpoint must use HTTPS")
+    endpoint = endpoint.rstrip("/")
+
+    for value, label, ceiling in (
+        (max_total_bytes, "max_total_bytes", MAX_SELECTED_TOTAL_BYTES),
+        (max_tensor_bytes, "max_tensor_bytes", MAX_SELECTED_TENSOR_BYTES),
+    ):
+        if type(value) is not int or value <= 0 or value > ceiling:
+            raise NSDError(f"{label} must be between 1 and {ceiling} bytes")
+
+    if not isinstance(tensor_names, list) or not tensor_names:
+        raise NSDError("tensor_names must be a non-empty allowlist")
+    if any(not isinstance(name, str) or not name for name in tensor_names):
+        raise NSDError("tensor_names must contain non-empty exact tensor names")
+    if len(set(tensor_names)) != len(tensor_names):
+        raise NSDError("tensor_names must not contain duplicates")
+
+    tensor_manifest = observed.get("tensor_manifest")
+    file_manifest = observed.get("files")
+    if not isinstance(tensor_manifest, list) or not isinstance(file_manifest, list):
+        raise NSDError("NSD tensor_manifest and files are required")
+    tensors = {
+        item.get("name"): item for item in tensor_manifest
+        if isinstance(item, dict) and isinstance(item.get("name"), str)
+    }
+    files = {
+        item.get("path"): item for item in file_manifest
+        if isinstance(item, dict) and item.get("role") == "safetensors-shard"
+    }
+
+    selected: list[dict[str, Any]] = []
+    total_bytes = 0
+    for name in tensor_names:
+        tensor = tensors.get(name)
+        if tensor is None:
+            raise NSDError(f"selected tensor is not present in the NSD: {name}")
+        dtype = tensor.get("dtype")
+        shape = tensor.get("shape")
+        offsets = tensor.get("data_offsets")
+        shard = tensor.get("shard")
+        if dtype not in _DTYPE_WIDTH_BYTES:
+            raise NSDError(f"selected tensor {name} has unsupported dtype {dtype!r}")
+        if not isinstance(shape, list):
+            raise NSDError(f"selected tensor {name} has an invalid shape")
+        if (
+            not isinstance(offsets, list)
+            or len(offsets) != 2
+            or any(type(value) is not int for value in offsets)
+        ):
+            raise NSDError(f"selected tensor {name} has invalid data offsets")
+        start, end = offsets
+        size = end - start
+        if start < 0 or size < 0:
+            raise NSDError(f"selected tensor {name} has invalid data offsets")
+        expected_size = _tensor_element_count(shape, name) * _DTYPE_WIDTH_BYTES[dtype]
+        if size != expected_size:
+            raise NSDError(
+                f"selected tensor {name} byte count {size} does not match "
+                f"shape/dtype expectation {expected_size}"
+            )
+        if size > max_tensor_bytes:
+            raise NSDError(
+                f"selected tensor {name} is {size} bytes, above max_tensor_bytes={max_tensor_bytes}"
+            )
+        total_bytes += size
+        if total_bytes > max_total_bytes:
+            raise NSDError(
+                f"selected tensor allowlist is {total_bytes} bytes, above "
+                f"max_total_bytes={max_total_bytes}"
+            )
+        file_record = files.get(shard)
+        if not isinstance(file_record, dict):
+            raise NSDError(f"selected tensor {name} references an unknown Safetensors shard")
+        if (
+            file_record.get("sha256_scope") != "8-byte-prefix-and-header-only"
+            or type(file_record.get("header_bytes")) is not int
+            or type(file_record.get("size_bytes")) is not int
+        ):
+            raise NSDError(f"selected tensor {name} has an invalid source shard record")
+        selected.append(
+            {
+                "name": name,
+                "tensor": tensor,
+                "file": file_record,
+                "size_bytes": size,
+            }
+        )
+
+    # Reconfirm the external model identity and file listing before using NSD offsets.
+    repository_part = quote(repository, safe="/")
+    metadata_url = f"{endpoint}/api/models/{repository_part}/revision/{revision.lower()}"
+    info, _ = _read_json_url(
+        metadata_url,
+        label="Hub model metadata",
+        timeout=float(timeout),
+        opener=opener,
+    )
+    if not isinstance(info, dict) or str(info.get("sha", "")).lower() != revision.lower():
+        raise NSDError("Hub no longer resolves the NSD source to its exact immutable revision")
+    siblings = _sibling_names(info)
+
+    header_cache: dict[str, tuple[dict[str, dict[str, Any]], dict[str, Any]]] = {}
+    for item in selected:
+        name = item["name"]
+        tensor = item["tensor"]
+        file_record = item["file"]
+        shard_name = tensor["shard"]
+        if shard_name not in siblings:
+            raise NSDError(f"selected tensor shard is no longer listed by the Hub: {shard_name}")
+
+        if shard_name not in header_cache:
+            shard_url = _model_file_url(endpoint, repository, revision.lower(), shard_name)
+            prefix, total_size = _read_exact_range(
+                shard_url,
+                0,
+                7,
+                timeout=float(timeout),
+                opener=opener,
+            )
+            header_length = int.from_bytes(prefix, byteorder="little", signed=False)
+            if header_length != file_record["header_bytes"]:
+                raise NSDError(f"{shard_name}: Safetensors header length changed since NSD creation")
+            header_raw, header_total = _read_exact_range(
+                shard_url,
+                8,
+                7 + header_length,
+                timeout=float(timeout),
+                opener=opener,
+            )
+            if header_total != total_size or total_size != file_record["size_bytes"]:
+                raise NSDError(f"{shard_name}: Safetensors file size changed since NSD creation")
+            header_tensors, actual_file_record = parse_safetensors_header_bytes(
+                prefix,
+                header_raw,
+                total_size,
+                shard_name,
+            )
+            if actual_file_record["sha256"] != file_record["sha256"]:
+                raise NSDError(f"{shard_name}: Safetensors header digest changed since NSD creation")
+            header_cache[shard_name] = (
+                {entry["name"]: entry for entry in header_tensors},
+                actual_file_record,
+            )
+
+        current_tensors, current_file = header_cache[shard_name]
+        current_tensor = current_tensors.get(name)
+        if current_tensor is None:
+            raise NSDError(f"{shard_name}: selected tensor is absent from the revalidated header")
+        for field in ("name", "dtype", "shape", "shard", "data_offsets", "data_bytes"):
+            if current_tensor.get(field) != tensor.get(field):
+                raise NSDError(f"{shard_name}: selected tensor {name} differs from the NSD header record")
+
+    payloads: dict[str, bytes] = {}
+    evidence: list[dict[str, Any]] = []
+    for item in selected:
+        name = item["name"]
+        tensor = item["tensor"]
+        file_record = item["file"]
+        start, end = tensor["data_offsets"]
+        absolute_start = 8 + file_record["header_bytes"] + start
+        absolute_end = 8 + file_record["header_bytes"] + end
+        if absolute_end > file_record["size_bytes"]:
+            raise NSDError(f"selected tensor {name} extends past the shard")
+        if item["size_bytes"] == 0:
+            payload = b""
+            total_size = file_record["size_bytes"]
+            byte_range = None
+        else:
+            shard_url = _model_file_url(
+                endpoint,
+                repository,
+                revision.lower(),
+                tensor["shard"],
+            )
+            payload, total_size = _read_exact_range(
+                shard_url,
+                absolute_start,
+                absolute_end - 1,
+                timeout=float(timeout),
+                opener=opener,
+            )
+            if total_size != file_record["size_bytes"]:
+                raise NSDError(f"{tensor['shard']}: file size changed during tensor payload read")
+            byte_range = [absolute_start, absolute_end - 1]
+        if len(payload) != item["size_bytes"]:
+            raise NSDError(f"selected tensor {name} payload length is inconsistent")
+        digest = hashlib.sha256(payload).hexdigest()
+        payloads[name] = payload
+        evidence.append(
+            {
+                "name": name,
+                "shard": tensor["shard"],
+                "dtype": tensor["dtype"],
+                "shape": tensor["shape"],
+                "size_bytes": item["size_bytes"],
+                "absolute_byte_range": byte_range,
+                "payload_sha256": digest,
+                "payload_sha256_scope": "complete-selected-tensor-payload",
+                "shard_header_sha256": file_record["sha256"],
+                "shard_size_bytes": total_size,
+            }
+        )
+
+    return payloads, evidence

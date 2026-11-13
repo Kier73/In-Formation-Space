@@ -119,6 +119,55 @@ The resulting graph expands each block into typed nodes for normalization, fused
 
 The public Transformers documentation describes GPT-2 as causal attention, documents the configuration dimensions and defaults, and identifies `GPT2LMHeadModel` as using a language-model head tied to input embeddings. The adapter keeps those framework-level semantics in the interpretation layer rather than attributing them to tensor headers alone: [GPT-2 documentation](https://huggingface.co/docs/transformers/main/model_doc/gpt2).
 
+## Selected weight geometry: first and last GPT-2 blocks
+
+The next stage, `weight_geometry.py`, performs an explicit, byte-budgeted numerical observation of two matching fused QKV matrices:
+
+- `h.0.attn.c_attn.weight`
+- `h.11.attn.c_attn.weight`
+
+Both are observed as F32 matrices of shape `[768, 2304]`. The selected payloads total 14,155,776 bytes. The live workflow sets a 16 MiB total allowlist budget and an 8 MiB per-tensor ceiling.
+
+Before any selected payload request, `fetch_selected_tensor_payloads`:
+
+1. Requires exact tensor names supplied in the allowlist and checks declared shape/dtype against the byte span.
+2. Re-resolves the NSD's immutable Hub revision.
+3. Re-reads each selected shard's header using strict HTTP byte ranges.
+4. Requires the shard size, header digest, and selected tensor header entry to match the original NSD.
+5. Requests only the exact data interval for each selected tensor, verifies the response interval and length, and calculates a SHA-256 digest over the complete selected payload.
+
+The analysis runs in memory. It partitions each fused matrix into Q, K, and V columns and records distribution summaries, Frobenius norms, deterministic power-iteration estimates of spectral norms and stable rank, exact/near-zero fractions, and row/column norm summaries. It also compares the first and last block matrices and their Q/K/V partitions using cosine similarity and relative Frobenius distance.
+
+The retained result is `weight-geometry.schema.json` JSON containing numerical summaries, selected-payload hashes, source header hashes, and the exact selected byte intervals. It does **not** contain raw weight arrays. These are descriptive coordinates in the source checkpoint; similarity or low rank does not by itself establish learned meaning, causal importance, or functional equivalence.
+
+The live workflow is [HFR-001 selected weight geometry](../../../.github/workflows/hfr-001-weight-geometry.yml). Its artifact is `hfr-001-gpt2-weight-geometry`.
+
+## First selected-weight observation
+
+The first live selected-weight run completed against the same pinned GPT-2 revision on GitHub-hosted CI: [run 43477077827](https://github.com/Kier73/In-Formation-Space/actions/runs/43477077827). The retained artifact is named `hfr-001-gpt2-weight-geometry`.
+
+Observed result:
+
+| Measurement | First block (0) | Last block (11) |
+| --- | ---: | ---: |
+| Fused QKV Frobenius norm | 265.537 | 170.899 |
+| Approximate spectral norm (16 power iterations) | 44.745 | 14.811 |
+| Approximate stable rank | 35.22 | 133.14 |
+| Exact-zero fraction | 0 | 0 |
+
+Cosine similarity between first and last stored matrices:
+
+| Parameter slice | Cosine similarity |
+| --- | ---: |
+| Fused QKV | -0.00159 |
+| Query | -0.00241 |
+| Key | -0.00138 |
+| Value | -0.00255 |
+
+These values are recorded as a small, reproducible observation of two parameter arrays—not as a statement about what either layer computes or represents. In particular, the hidden-state coordinate systems can evolve through the network, so raw cross-layer weight cosine is not a basis-invariant functional comparison. Stable-rank values are approximate because the spectral norm is estimated by deterministic 16-step power iteration.
+
+The selected payload hashes and exact absolute file ranges are retained in the geometry artifact. The two payloads total 14,155,776 bytes; no raw parameter values were written into the artifact.
+
 ## Fail-closed checks
 
 The reader rejects duplicate JSON keys, non-finite JSON constants, oversized JSON/header regions, non-commit revision labels, invalid tensor entries, negative dimensions or offsets, offsets beyond the data section, overlapping tensor ranges, symbolic links, path traversal, duplicate tensor names across shards, and any mismatch between a shard index and observed headers.
@@ -127,12 +176,11 @@ It does not validate architecture semantics, tensor element counts against dtype
 
 ## Next discriminating stages
 
-1. Add a second architecture-family adapter so the NSD contract can be compared across different model families. Unsupported operators and unknown tensors must remain explicit rather than being coerced into a GPT-2-shaped template.
-2. Add an opt-in selected-tensor range reader using header-declared offsets, with strict byte budgets and payload-scoped hashes. The present observer intentionally reads no tensor payload values.
-3. Compute weight-space observations—norms, sparsity, rank/singular spectra, and cross-tensor relations—as separately versioned numerical evidence.
-4. Generate independent parameters or parameter rules informed by those observations and compare them against architecture-only baselines.
-5. Test functional preservation on explicit input domains; structural resemblance and parameter statistics alone are not behavioral equivalence.
-6. Explore selective inheritance and cross-family realization only after the preceding evidence exists.
+1. Repeat the selected-weight geometry on additional layers and a second architecture family to learn which observations are checkpoint-specific versus family-recurrent.
+2. Add a tensor-basis or low-rank procedural parameter generator that uses only retained geometry summaries and a new seed; label its outputs as generated, not inherited.
+3. Compare architecture-only initialization with geometry-informed generated parameters on a fixed task and explicit input domain.
+4. Add a small, independently implemented forward reference for a supported graph subset and compare selected numerical behavior, with error tolerances and provenance retained.
+5. Explore selective inheritance and cross-family realization only after the preceding evidence exists.
 
 ## Repository responsibilities
 
