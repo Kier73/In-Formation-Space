@@ -1,5 +1,8 @@
 # OPS-001: Operation-path sensitivity
 
+Follow-up: [OPS-002 measured fork/join interventions](INTERVENTION-002.md)
+compares these predictions with retained observations from real worker threads.
+
 ## Question
 
 Does reducing the duration of an operation on a longest declared dependency
