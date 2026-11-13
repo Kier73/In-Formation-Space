@@ -175,6 +175,19 @@ From the repository root:
 
 The implementation uses only the Python standard library and exact `Fraction` arithmetic. All probabilities, losses, and costs are validated as exact rationals; no floating-point approximation or sampling is used.
 
+## Evidence-gated measurement execution
+
+The [RIV-008 execution adapter](acquisition-execution.md) now binds the selected reader to a planned-only ObservationPath. It requires dispatch, receiver admission, return, explicit AUTHORIZED evidence, and exact interpretation before conditioning the joint posterior on the observed outcome.
+
+A returned outcome outside the candidate model, or a declared outcome with zero predictive probability under the prior joint belief, is rejected as a model mismatch. A valid outcome creates a new immutable joint-belief snapshot and a measurement manifest bound to the full ObservationPath. It does not update the source Ground, likelihood model, or active attention policy.
+
+The execution record also reports the *realized* Bayes decision-risk change for the observed branch. This is distinct from the non-negative expected value of sample information calculated before measurement: one outcome can increase the posterior decision risk even when the candidate has positive EVSI overall.
+
+- [Execution implementation](acquisition_execution.py)
+- [Execution tests](test_acquisition_execution.py)
+- [Measurement record schema](decision-value-measurement.schema.json)
+- [Execution evidence contract](acquisition-execution.md)
+
 ## Next discriminating step
 
-A later execution adapter could take the selected context reader, create a planned ObservationPath bound to the source joint-belief digest, and require the same dispatch, admission, return, authorization, and interpretation evidence used by the current context-measurement bridge. That integration would also need a declared mapping from an observed context value to the updated joint belief; RIV-008 does not invent that measurement model or update the belief itself.
+The next extension is sequential acquisition: recompute candidate value after each authorized outcome, accounting for updated belief, remaining budget, and possible context-dependent measurement cost. That should be compared against finite-horizon dynamic programming and the existing VGI worst-case minimax policy, preserving their different objectives.
