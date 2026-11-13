@@ -62,4 +62,4 @@ The implementation uses only the Python standard library. Probabilities accept i
 
 ## Follow-on experiment
 
-[RIV-002: History-dependent representation relevance](../../history-dependent-representation-relevance/README.md) extends the controller comparison with time-aware reactive and finite observation-history policies. It separates the value of knowing the current step from the value of retaining a past distinction, and tests a case where two hidden states become observationally identical after the first action.
+[RIV-002: History-dependent representation relevance](../history-dependent-representation-relevance/README.md) extends the controller comparison with time-aware reactive and finite observation-history policies. It separates the value of knowing the current step from the value of retaining a past distinction, and tests a case where two hidden states become observationally identical after the first action.
