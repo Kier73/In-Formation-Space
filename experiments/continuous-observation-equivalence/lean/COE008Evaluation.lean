@@ -106,18 +106,18 @@ private theorem allRootGuardsSound (cell : Cell) (as : List Affine)
           evaluateAt (if 0 < evaluateAt a p then a else zeroAffine) x =
           (if 0 < evaluateAt a x then evaluateAt a x else 0) := by
         by_cases hpos : 0 < evaluateAt a p
-        · have hxpos : 0 < evaluateAt a x := by
-            by_contra hxneg
-            have : False := by simpa [hpos, hxneg] using hstable
-            exact this
-          simp [hpos, hxpos]
-        · have hxneg : ¬ 0 < evaluateAt a x := by
-            intro hxx
-            have : False := by simpa [hpos, hxx] using hstable
-            exact this
-          simp [hpos, hxneg, zeroAffine, evaluateAt]
+        · by_cases hxpos : 0 < evaluateAt a x
+          · simp only [if_pos hpos, if_pos hxpos]
+          · have hf : False := by simpa [hpos, hxpos] using hstable
+            exact False.elim hf
+        · by_cases hxpos : 0 < evaluateAt a x
+          · have hf : False := by simpa [hpos, hxpos] using hstable
+            exact False.elim hf
+          · simp only [if_neg hpos, if_neg hxpos]
+            simp [zeroAffine, evaluateAt]
       simp only [List.map_cons]
-      rw [hbranch, ih hguard.2]
+      rw [hbranch]
+      exact congrArg (List.cons _) (ih hguard.2)
 
 /-- An accepted propagation step realizes the same pointwise numeric layer
     as the direct evaluator, at each rational point in that open cell. -/
@@ -136,23 +136,25 @@ theorem advanceSound (cell : Cell) (state : Bool × List Affine)
     grind
   cases hmode : layer.relu with
   | false =>
-      change (pre.map (fun a => evaluateAt a x)) =
-        List.zipWith (fun row bias =>
-          evalRow row (state.2.map (fun a => evaluateAt a x)) bias)
-          layer.weights layer.bias
-      exact hpre
+      simpa [advance, evalLayer, pre, hmode] using hpre
   | true =>
       have hguard : pre.all (rootExcluded cell) = true := by
         simpa [hmode] using hroot
       have hcorrect := allRootGuardsSound cell pre (probe cell) x hp hx hguard
-      change (pre.map (fun a => if 0 < evaluateAt a (probe cell) then a else zeroAffine)).map
-          (fun a => evaluateAt a x) =
-        (List.zipWith (fun row bias =>
-          evalRow row (state.2.map (fun a => evaluateAt a x)) bias)
-          layer.weights layer.bias).map (fun v => if 0 < v then v else 0)
-      rw [hcorrect]
-      simp only [List.map_map]
-      rw [hpre]
+      calc
+        (advance cell state layer).2.map (fun a => evaluateAt a x) =
+            (pre.map (fun a =>
+                if 0 < evaluateAt a (probe cell) then a else zeroAffine)).map
+              (fun a => evaluateAt a x) := by
+                simp [advance, pre, hmode]
+        _ = pre.map (fun a =>
+            if 0 < evaluateAt a x then evaluateAt a x else 0) := hcorrect
+        _ = (pre.map (fun a => evaluateAt a x)).map
+            (fun v => if 0 < v then v else 0) := by
+              simp only [List.map_map]
+        _ = evalLayer layer (state.2.map (fun a => evaluateAt a x)) := by
+              rw [hpre]
+              simp [evalLayer, hmode]
 
 /-- Because every step can only preserve or clear the accumulated validity
     flag, a successful fold entails success of every prefix. -/
