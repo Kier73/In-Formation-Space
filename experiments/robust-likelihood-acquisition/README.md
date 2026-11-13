@@ -163,3 +163,8 @@ The implementation uses only the Python standard library and exact `Fraction` ar
 ## Next discriminating step
 
 The next question is whether the ambiguity set itself can be constrained by authenticated reference observations without pretending that finite calibration evidence eliminates model misspecification. A future bridge could update the admissible likelihood set by explicit reference outcomes, retain excluded-but-not-disproved alternatives, and compare robust plans before and after that evidence. That operation must preserve the original ambiguity set and its reason for exclusion as an append-only revision.
+
+
+## Follow-on experiment: RIV-016
+
+[RIV-016: Finite-horizon robust sequential acquisition](RIV-016-README.md) extends this one-step minimax decision into an adaptive policy tree. It keeps one unknown likelihood scenario fixed across the entire run, carries scenario-specific unnormalized history masses, chooses different next sensors after different outcomes, and enforces a pathwise cost budget. The scenario maximum is applied after each complete policy tree is evaluated; it is not reselected independently inside each branch.

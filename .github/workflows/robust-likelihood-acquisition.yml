@@ -31,7 +31,7 @@ jobs:
         run: |
           python -m py_compile experiments/robust-likelihood-acquisition/robust_likelihood_acquisition.py
           python -m py_compile experiments/robust-likelihood-acquisition/example.py
-      - name: Run exact robust acquisition tests
-        run: python -m unittest discover -s experiments/robust-likelihood-acquisition -p "test_*.py" -v
+      - name: Run exact RIV-015 robust acquisition tests
+        run: python -m unittest discover -s experiments/robust-likelihood-acquisition -p "test_robust_likelihood_acquisition.py" -v
       - name: Run reproducible ambiguity example
         run: python experiments/robust-likelihood-acquisition/example.py
