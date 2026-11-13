@@ -283,3 +283,28 @@ The focused suite independently enumerates short per-packet state/loss paths and
 - This is not a measurement of E-CPU, MailCPU, a real fibre link, or any physical communication system.
 
 The next experiment should relax the fixed periodic schedule: can repair be delayed or triggered by a partial observation of channel state or survivor count without paying more in sensing/coordination than the expected lifetime gain?
+
+
+### 10.1 First deterministic policy sweep
+
+The checked-in [MRE-002 scan summary](results/markov-repair-scan-summary.json) contains the 72 policy/model combinations and the reconstructed Pareto frontiers from CI run [43366801290](https://github.com/Kier73/In-Formation-Space/actions/runs/43366801290). The sweep uses 12 slots, thresholds \(k\in\{1,6,12\}\), intervals \(L\in\{1,2,4,8\}\), and a 100-epoch median-censor horizon.
+
+| Scenario | \(p_G\) | \(p_B\) | \(\alpha\) | \(\beta\) | Initial bad-state mass | Marginal first-round loss |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Stationary moderate bursts | 0.010 | 0.40 | 0.08 | 0.25 | 24.24% | 10.45% |
+| Rare persistent bad bursts | 0.001 | 0.70 | 0.02 | 0.08 | 20.00% | 14.08% |
+
+The rare-persistent-burst scenario gives a useful reversal:
+
+| Recovery policy | iid-marginal | Per-packet Markov | Shared channel |
+| --- | ---: | ---: | ---: |
+| \(k=1,L=1\): expected lifetime rounds | 16,472,837,436 | 16,600,138,212 | 397 |
+| \(k=12,L=8\): expected lifetime rounds | 8.00 | 8.14 | 30.22 |
+
+These are expected circulation counts under the synthetic model, not wall-clock durations. The \(k=1,L=1\) median was not crossed within the 100-epoch scan horizon for any of the three models; the displayed mean comes from the fundamental-matrix calculation and is not a median estimate.
+
+The common channel is dramatically worse for the permissive one-packet recovery rule because a bad-state burst can remove the entire block together. Under the strict all-packet threshold with a longer interval, persistent common-good periods can instead help all slots survive together. Independent packet channels do not preserve that alignment. Correlation therefore has no universal “penalty” sign; its effect depends on the reconstruction rule and repair schedule.
+
+The Pareto frontier keeps repair-event rate visible alongside expected lifetime. For the rare-persistent-burst shared-channel case, its nondominated policies are \(k=1,L=1\), \(k=1,L=2\), \(k=1,L=8\), \(k=6,L=8\), and \(k=12,L=8\). No one of these is declared best without a resource value or repair budget.
+
+The CI summary receipt stores the complete tested grid and the frontier entries. Reproduce the full transition matrices and reports with the CLI commands above. Results whose median is not reached by 100 repair intervals are explicitly right-censored; they are not assigned an infinite half-life.
