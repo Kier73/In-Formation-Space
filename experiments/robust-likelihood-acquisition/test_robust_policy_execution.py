@@ -93,6 +93,29 @@ def adaptive_policy():
     )
 
 
+def two_scenario_policy():
+    base = adaptive_policy()
+    scenarios = copy.deepcopy(base["model_scenarios"])
+    second = copy.deepcopy(scenarios[0])
+    second["scenario_id"] = "model-two"
+    screen = next(
+        item for item in second["candidate_models"]
+        if item["sensor_id"] == "screen"
+    )
+    screen["outcome_likelihoods"] = likelihoods((
+        ("yes", "9/10", "1/5"),
+        ("no", "1/10", "4/5"),
+    ))
+    scenarios.append(second)
+    return build_policy_report(
+        joint_belief=belief(),
+        candidate_sensors=base["candidate_sensors"],
+        model_scenarios=tuple(scenarios),
+        path_cost_budget="1/5",
+        max_measurements=2,
+    )
+
+
 def impossible_outcome_policy():
     candidate = {
         "sensor_id": "meter",
@@ -264,6 +287,64 @@ class RobustPolicyExecutionTests(unittest.TestCase):
             record["current_policy_state"]["scenario_identity_posterior"]
         )
         self.assertEqual(validate_robust_policy_execution_record(record), record)
+
+    def test_scenario_mass_vectors_remain_separate_after_one_realized_outcome(self):
+        report = two_scenario_policy()
+        self.assertEqual(
+            report["selected_policy"]["policy_tree"]["sensor_id"],
+            "screen",
+        )
+        path = complete_path(report, (), "attempt-two-models", "yes")
+        record = build_robust_policy_execution_record(
+            policy_report=report,
+            observation_paths=(path,),
+        )
+        state = record["current_policy_state"]
+        self.assertIsNone(state["scenario_identity_posterior"])
+        self.assertEqual(
+            ratio(next(
+                item["predictive_probability"]
+                for item in record["measurement_manifests"][0]["scenario_predictive_probabilities"].values()
+                if item is not None
+            )),
+            Fraction(1, 2),
+        )
+        predictive = {
+            name: ratio(value)
+            for name, value in record["measurement_manifests"][0][
+                "scenario_predictive_probabilities"
+            ].items()
+        }
+        self.assertEqual(predictive["model-one"], Fraction(1, 2))
+        self.assertEqual(predictive["model-two"], Fraction(11, 20))
+        posteriors = state["scenario_conditioned_joint_posteriors"]
+        posterior_a = {
+            name: sum(
+                (
+                    ratio(row["probability"])
+                    for row in rows
+                    if row["hypothesis"] == "A"
+                ),
+                Fraction(0),
+            )
+            for name, rows in posteriors.items()
+        }
+        self.assertEqual(posterior_a["model-one"], Fraction(4, 5))
+        self.assertEqual(posterior_a["model-two"], Fraction(9, 11))
+        masses = state["scenario_unnormalized_joint_masses"]
+        mass_a = {
+            name: sum(
+                (
+                    ratio(row["mass"])
+                    for row in rows
+                    if row["hypothesis"] == "A"
+                ),
+                Fraction(0),
+            )
+            for name, rows in masses.items()
+        }
+        self.assertEqual(mass_a["model-one"], Fraction(2, 5))
+        self.assertEqual(mass_a["model-two"], Fraction(9, 20))
 
     def test_other_observed_branch_selects_different_second_reader(self):
         first = complete_path(self.report, (), "attempt-1", "no")
