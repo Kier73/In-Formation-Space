@@ -22,6 +22,14 @@ import sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+_REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPOSITORY_ROOT))
+from formats.canonical_metadata_v1 import (  # noqa: E402
+    CanonicalMetadataError,
+    canonical_bytes as _shared_canonical_bytes,
+)
+
 REPOSITORY = "Kier73/In-Formation-Space"
 WORKFLOW_PATH = ".github/workflows/independent-host-operation-path.yml"
 SOURCE_REF = "refs/heads/main"
@@ -108,12 +116,9 @@ def _finite_number(value: object, label: str, minimum: float | None = None) -> f
 
 def canonical_bytes(value: object) -> bytes:
     try:
-        return json.dumps(
-            value, sort_keys=True, separators=(",", ":"),
-            ensure_ascii=False, allow_nan=False,
-        ).encode("utf-8")
-    except (TypeError, ValueError) as error:
-        raise DiverseVerificationError(f"value is not canonical finite JSON: {error}") from error
+        return _shared_canonical_bytes(value)
+    except CanonicalMetadataError as error:
+        raise DiverseVerificationError(str(error)) from error
 
 
 def object_digest(value: object) -> str:
