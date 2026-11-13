@@ -350,7 +350,7 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 		if err != nil || lamport.Sign() < 0 {
 			return nil, v2Fail("causal Lamport value must be non-negative")
 		}
-		v, ok := c["vector"].(map[string]any)
+		v, ok := v2AsObject(c["vector"])
 		if !ok || len(v) == 0 {
 			return nil, v2Fail("causal vector must be a non-empty object")
 		}
@@ -630,7 +630,7 @@ func EncodeOperationSpanV2(span Object) (Object, error) {
 	if raw["format"] != TemporalSpanFormat || (raw["schema"] != "in-formation.operation-span/0.1" && raw["schema"] != TemporalSpanSchema) {
 		return nil, v2Fail("operation span format/source schema mismatch")
 	}
-	if _, ok := raw["context"].(map[string]any); !ok {
+	if _, ok := v2AsObject(raw["context"]); !ok {
 		return nil, v2Fail("operation span context must be object")
 	}
 	start, err := v2TemporalBigInt(raw["monotonic_start_ns"], "monotonic_start_ns")
