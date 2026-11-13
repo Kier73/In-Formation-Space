@@ -37,7 +37,8 @@ def safetensors_bytes(
     }
     raw = json.dumps(header, separators=(",", ":")).encode("utf-8")
     raw += b" " * ((-len(raw)) % 8)
-    return len(raw).to_bytes(8, "little") + raw + (b"\0" * body_size)
+    data = payload if payload is not None else (b"\0" * body_size)
+    return len(raw).to_bytes(8, "little") + raw + data
 
 
 class FakeResponse:
