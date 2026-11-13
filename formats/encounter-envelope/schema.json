@@ -21,7 +21,18 @@
       },
       "additionalProperties": true
     },
-    "context": {"type": "object", "additionalProperties": true},
+    "context": {
+      "type": "object",
+      "properties": {
+        "observed_at_clock_domain": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Explicit identity for the clock domain that produced observed_at; equal IDs permit a scoped consistency diagnostic, not proof of clock accuracy."
+        }
+      },
+      "additionalProperties": true
+    },
     "payload": {
       "type": "object",
       "oneOf": [
