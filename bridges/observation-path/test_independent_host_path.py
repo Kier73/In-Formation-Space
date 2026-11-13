@@ -38,6 +38,10 @@ class IndependentHostOperationPathTests(unittest.TestCase):
             self.source_path,
             runner_env("source_host", runner_name="host-a-vm"),
         )
+        self.verifier_host = path.host_metadata(
+            "verifier_host",
+            runner_env("verifier_host", runner_name="verifier-vm", runner_os="macOS"),
+        )
         with patch.object(path, "verify_artifact_attestation", return_value={"verified": True}):
             self.receiver = path.produce_receiver(
                 self.source_path,
@@ -70,6 +74,7 @@ class IndependentHostOperationPathTests(unittest.TestCase):
             source_attestation=source_attestation,
             receiver_attestation=receiver_attestation,
             receiver_artifact_sha256=path.sha256_file(self.receiver_path),
+            verifier_host=self.verifier_host,
         )
         self.assertEqual(report["causal_reconstruction"]["status"], "verified_from_independent_attested_host_records")
         self.assertEqual(report["causal_reconstruction"]["edge_count"], 1)
