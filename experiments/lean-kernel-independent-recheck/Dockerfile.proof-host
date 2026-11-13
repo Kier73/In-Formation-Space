@@ -1,0 +1,15 @@
+# Reproducible experimental recipient/sender image.
+# The two hosts receive this image separately with disjoint identities and state.
+# No proof artifacts, TLS keys, trusted recipient intent, SQLite state or GH_TOKEN
+# are baked into the image. Those are separately mounted by their owner.
+FROM python:3.11-slim-bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+RUN python -m pip install --no-cache-dir "cryptography>=42,<47"
+COPY experiment/ /opt/proof/experiment/
+COPY mailcpu/ /opt/proof/mailcpu/
+COPY vgi/ /opt/proof/vgi/
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONPATH=/opt/proof/experiment:/opt/proof
+WORKDIR /opt/proof/experiment
+ENTRYPOINT ["python", "/opt/proof/experiment/ecpu_proof_transit.py"]
