@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/reference-calibrated-evidence/finite-horizon-reference-policy.schema.json",
+  "title": "RIV-011 Finite-Horizon Reference Policy Report",
+  "type": "object",
+  "required": ["format", "model", "baseline_target_map_accuracy", "finite_horizon_policy", "greedy_reselection_policy", "comparison", "interpretation_limits", "report_digest"],
+  "additionalProperties": false,
+  "properties": {
+    "format": {"const": "in-formation.finite-horizon-reference-acquisition/0.1"},
+    "model": {
+      "type": "object",
+      "required": ["target_prior_hypothesis_a", "calibrations_with_current_prior", "target_sensor_schedule", "reference_candidates", "max_reference_steps", "cost_budget", "max_policy_states", "max_histories", "calibration_scope", "reference_observation_assumption", "budget_semantics", "repetition_semantics"],
+      "properties": {
+        "target_prior_hypothesis_a": {"$ref": "#/$defs/fraction"},
+        "calibrations_with_current_prior": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+        "target_sensor_schedule": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "reference_candidates": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/candidate"}},
+        "max_reference_steps": {"type": "integer", "minimum": 0, "maximum": 8},
+        "cost_budget": {"$ref": "#/$defs/fraction"},
+        "max_policy_states": {"type": "integer", "minimum": 1},
+        "max_histories": {"type": "integer", "minimum": 1},
+        "calibration_scope": {"type": "string"},
+        "reference_observation_assumption": {"type": "string"},
+        "budget_semantics": {"type": "string"},
+        "repetition_semantics": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "baseline_target_map_accuracy": {"$ref": "#/$defs/fraction"},
+    "finite_horizon_policy": {"$ref": "#/$defs/policySummary"},
+    "greedy_reselection_policy": {
+      "allOf": [
+        {"$ref": "#/$defs/policySummary"},
+        {
+          "type": "object",
+          "required": ["objective"],
+          "properties": {"objective": {"type": "string", "minLength": 1}}
+        }
+      ]
+    },
+    "comparison": {
+      "type": "object",
+      "required": ["finite_horizon_accuracy_gain_over_greedy", "finite_horizon_expected_cost_minus_greedy", "same_pathwise_cost_budget", "same_reference_horizon", "same_target_schedule"],
+      "properties": {
+        "finite_horizon_accuracy_gain_over_greedy": {"$ref": "#/$defs/fraction"},
+        "finite_horizon_expected_cost_minus_greedy": {"$ref": "#/$defs/fraction"},
+        "same_pathwise_cost_budget": {"const": true},
+        "same_reference_horizon": {"type": "integer", "minimum": 0},
+        "same_target_schedule": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "interpretation_limits": {"type": "array", "items": {"type": "string"}},
+    "report_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "fraction": {
+      "type": "object",
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer"},
+        "denominator": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "candidate": {
+      "type": "object",
+      "required": ["candidate_id", "sensor_id", "known_hypothesis", "reference_standard_ref", "reference_standard_sha256", "cost", "outcomes"],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "sensor_id": {"type": "string", "minLength": 1},
+        "known_hypothesis": {"enum": ["A", "B"]},
+        "reference_standard_ref": {"type": "string", "minLength": 1},
+        "reference_standard_sha256": {"$ref": "#/$defs/sha256"},
+        "cost": {"$ref": "#/$defs/fraction"},
+        "outcomes": {"const": ["A", "B"]}
+      },
+      "additionalProperties": false
+    },
+    "policySummary": {
+      "type": "object",
+      "required": ["expected_target_map_accuracy", "expected_downstream_decision_value", "expected_reference_cost", "expected_reference_count", "policy_state_count", "root"],
+      "properties": {
+        "expected_target_map_accuracy": {"$ref": "#/$defs/fraction"},
+        "expected_downstream_decision_value": {"$ref": "#/$defs/fraction"},
+        "expected_reference_cost": {"$ref": "#/$defs/fraction"},
+        "expected_reference_count": {"$ref": "#/$defs/fraction"},
+        "policy_state_count": {"type": "integer", "minimum": 0},
+        "unique_calibration_belief_count": {"type": "integer", "minimum": 0},
+        "objective": {"type": "string"},
+        "root": {"$ref": "#/$defs/policyNode"}
+      },
+      "additionalProperties": false
+    },
+    "policyNode": {
+      "type": "object",
+      "required": ["action", "candidate_id", "sensor_id", "known_hypothesis", "cost", "current_target_map_accuracy", "expected_target_map_accuracy", "expected_reference_cost", "expected_reference_count", "stop_reason", "branches"],
+      "properties": {
+        "action": {"oneOf": [{"type": "null"}, {"const": "acquire_reference"}]},
+        "candidate_id": {"oneOf": [{"type": "null"}, {"type": "string"}]},
+        "sensor_id": {"oneOf": [{"type": "null"}, {"type": "string"}]},
+        "known_hypothesis": {"oneOf": [{"type": "null"}, {"enum": ["A", "B"]}]},
+        "reference_standard_ref": {"type": "string"},
+        "reference_standard_sha256": {"$ref": "#/$defs/sha256"},
+        "cost": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/fraction"}]},
+        "current_target_map_accuracy": {"$ref": "#/$defs/fraction"},
+        "expected_target_map_accuracy": {"$ref": "#/$defs/fraction"},
+        "expected_reference_cost": {"$ref": "#/$defs/fraction"},
+        "expected_reference_count": {"$ref": "#/$defs/fraction"},
+        "stop_reason": {"oneOf": [{"type": "null"}, {"type": "string"}]},
+        "branches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["signal", "predictive_probability", "reachable", "posterior_calibration_probabilities", "child"],
+            "properties": {
+              "signal": {"enum": ["A", "B"]},
+              "predictive_probability": {"$ref": "#/$defs/fraction"},
+              "reachable": {"type": "boolean"},
+              "posterior_calibration_probabilities": {
+                "oneOf": [
+                  {"type": "null"},
+                  {"type": "array", "items": {"$ref": "#/$defs/profileProbability"}}
+                ]
+              },
+              "child": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/policyNode"}]}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "profileProbability": {
+      "type": "object",
+      "required": ["calibration_id", "probability"],
+      "properties": {
+        "calibration_id": {"type": "string"},
+        "probability": {"$ref": "#/$defs/fraction"}
+      },
+      "additionalProperties": false
+    }
+  }
+}
