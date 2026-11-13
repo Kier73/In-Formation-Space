@@ -257,6 +257,38 @@ class DistributedOperationPathTests(unittest.TestCase):
         self.assertEqual(report["critical_path_selection_status"], "chain_identity_uncertain_under_calibration")
         self.assertNotEqual(report["critical_path_lower_span_digests"], report["critical_path_upper_span_digests"])
 
+    def test_same_sender_channel_sequence_can_be_used_for_distinct_receivers(self):
+        a = operation_span("host-a", 0, "a", "fanout-source", 10, 20)
+        b = operation_span("host-b", 0, "b", "receiver-b", 30, 40)
+        c = operation_span("host-c", 0, "c", "receiver-c", 50, 60)
+        sender_frame = frame("host-a", 0, 21, 1, {"host-a": 1})
+        handoff_ab = make_handoff(
+            "path-1", a, b, "fanout-channel", 1,
+            sender_frame,
+            frame("host-b", 0, 30, 2, {"host-a": 1, "host-b": 1}),
+        )
+        handoff_ac = make_handoff(
+            "path-1", a, c, "fanout-channel", 1,
+            sender_frame,
+            frame("host-c", 0, 50, 2, {"host-a": 1, "host-c": 1}),
+        )
+        calibrations = [
+            calibration("host-a", 0, "host-b", 0),
+            calibration("host-c", 0, "host-b", 0),
+        ]
+        trace = build_trace(
+            [a, b, c],
+            "host-b",
+            0,
+            handoffs=[handoff_ab, handoff_ac],
+            calibrations=calibrations,
+        )
+        report = build_distributed_operation_path_report(
+            [a, b, c], trace=trace, clock_calibrations=calibrations
+        )
+        self.assertEqual(report["causal_handoff_count"], 2)
+        self.assertEqual(report["critical_path_lower_ns"], 30)
+
     def test_concurrent_vector_stamps_are_not_accepted_as_a_handoff(self):
         a = operation_span("host-a", 0, "a", "a", 10, 20)
         b = operation_span("host-b", 0, "b", "b", 30, 40)
