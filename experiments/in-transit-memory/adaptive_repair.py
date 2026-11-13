@@ -498,6 +498,15 @@ def build_adaptive_repair_report(
         "decision_table": decision_table,
     }
     policy_digest = _digest(policy_core)
+    state_conditioned_decision_cells = sum(
+        1
+        for index in range(0, len(decision_table), 2)
+        if decision_table[index]["selected_action"]
+        != decision_table[index + 1]["selected_action"]
+    )
+    selected_repair_state_count = sum(
+        row["selected_action"] == "repair" for row in decision_table
+    )
     core = {
         "format": "in-formation.adaptive-repair-report",
         "schema": "in-formation.adaptive-repair-report/0.1",
@@ -521,6 +530,8 @@ def build_adaptive_repair_report(
             **adaptive_eval,
             "initial_value_from_backward_induction": initial_value,
             "policy_digest": policy_digest,
+            "state_conditioned_decision_cells": state_conditioned_decision_cells,
+            "selected_repair_state_count": selected_repair_state_count,
             "decision_table": decision_table,
         },
         "fixed_schedule_comparisons": fixed_reports,
@@ -843,7 +854,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             rendered = json.dumps(reports, indent=2, sort_keys=True, allow_nan=False)
         else:
             lines = [
-                "scenario | k | repair_cost | adaptive_survival | adaptive_repairs | adaptive_utility | best_fixed_L | fixed_utility | utility_gain"
+                "scenario | k | repair_cost | adaptive_survival | adaptive_repairs | adaptive_utility | state_sensitive_cells | best_fixed_L | fixed_utility | utility_gain"
             ]
             for sweep in reports:
                 for report in sweep["policies"]:
@@ -853,6 +864,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         f"{report['scenario']['name']} | {report['scenario']['recovery_threshold']} | "
                         f"{report['scenario']['repair_cost']} | {adaptive['survival_probability']:.6g} | "
                         f"{adaptive['expected_repair_count']:.6g} | {adaptive['expected_utility']:.6g} | "
+                        f"{adaptive['state_conditioned_decision_cells']} | "
                         f"{fixed['interval_rounds']} | {fixed['expected_utility']:.6g} | "
                         f"{report['adaptive_gain_over_best_fixed']:.6g}"
                     )
