@@ -16,6 +16,7 @@ from pathlib import Path
 import sqlite3
 import subprocess
 import sys
+import time
 import uuid
 from typing import Any, Mapping
 
@@ -470,6 +471,31 @@ def verify_sqlite_authority_bundle(
     }
 
 
+def _phase_cas(args: argparse.Namespace) -> None:
+    _Ledger, Store = _load_types()
+    deadline = time.monotonic() + 20.0
+    gate = Path(args.start_gate)
+    while not gate.exists():
+        if time.monotonic() >= deadline:
+            raise RuntimeError("timed out waiting for the concurrent CAS start gate")
+        time.sleep(0.005)
+    store = Store(args.database)
+    accepted = store.compare_and_swap(
+        args.expected_digest,
+        _read(Path(args.candidate)),
+        actor_id=args.actor_id,
+    )
+    _write(
+        Path(args.result),
+        {
+            "actor_id": args.actor_id,
+            "accepted": accepted,
+            "process_id": os.getpid(),
+            "process_instance_id": str(uuid.uuid4()),
+        },
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -498,13 +524,23 @@ def main() -> None:
     stale.add_argument("--initial-owner", required=True)
     stale.add_argument("--phase-output", required=True)
 
+    cas = sub.add_parser("cas")
+    cas.add_argument("--database", required=True)
+    cas.add_argument("--candidate", required=True)
+    cas.add_argument("--expected-digest", required=True)
+    cas.add_argument("--actor-id", required=True)
+    cas.add_argument("--start-gate", required=True)
+    cas.add_argument("--result", required=True)
+
     args = parser.parse_args()
     if args.command == "init":
         _phase_init(args)
     elif args.command == "resume":
         _phase_resume(args)
-    else:
+    elif args.command == "stale-replay":
         _phase_stale_replay(args)
+    else:
+        _phase_cas(args)
 
 
 if __name__ == "__main__":
