@@ -59,11 +59,19 @@ def analyze_gpt2_layer_spectral_profile(
         index = _layer_index(name)
         if index in selected:
             raise LayerSpectralProfileError(f"duplicate selected layer index: {index}")
-        if record.get("dtype") != "F32" or record.get("shape") != [768, 2304]:
+        shape = record.get("shape")
+        if (
+            record.get("dtype") != "F32"
+            or not isinstance(shape, list)
+            or len(shape) != 2
+            or any(type(dimension) is not int or dimension <= 0 for dimension in shape)
+            or shape[1] % 3
+        ):
             raise LayerSpectralProfileError(
-                f"{name}: expected F32 shape [768, 2304], got {record.get('dtype')} {record.get('shape')}"
+                f"{name}: expected an F32 two-dimensional fused-QKV matrix, got "
+                f"{record.get('dtype')} {shape}"
             )
-        expected_size = 768 * 2304 * 4
+        expected_size = shape[0] * shape[1] * 4
         if record.get("size_bytes") != expected_size:
             raise LayerSpectralProfileError(f"{name}: selected tensor byte count is inconsistent")
         digest = record.get("payload_sha256")
@@ -74,7 +82,7 @@ def analyze_gpt2_layer_spectral_profile(
             raise LayerSpectralProfileError(f"{name}: payload is absent or has the wrong size")
         if hashlib.sha256(raw).hexdigest() != digest:
             raise LayerSpectralProfileError(f"{name}: payload SHA-256 mismatch")
-        matrix = np.frombuffer(raw, dtype="<f4").reshape(768, 2304)
+        matrix = np.frombuffer(raw, dtype="<f4").reshape(shape)
         if not np.isfinite(matrix).all():
             raise LayerSpectralProfileError(f"{name}: payload contains NaN or infinity")
         selected[index] = (record, matrix)
@@ -83,12 +91,19 @@ def analyze_gpt2_layer_spectral_profile(
         raise LayerSpectralProfileError(
             f"selected layer indices must be {EXPECTED_LAYERS}, got {tuple(sorted(selected))}"
         )
+    selected_shapes = {tuple(matrix.shape) for _, matrix in selected.values()}
+    if len(selected_shapes) != 1:
+        raise LayerSpectralProfileError("all selected projection matrices must have the same shape")
+    input_width, fused_width = next(iter(selected_shapes))
+    if input_width <= 0 or fused_width <= 0 or fused_width % 3:
+        raise LayerSpectralProfileError("selected fused QKV matrix dimensions are invalid")
+    projection_width = fused_width // 3
 
     profile: list[dict[str, Any]] = []
     layer_spectra: dict[int, dict[str, dict[str, Any]]] = {}
     for index in EXPECTED_LAYERS:
         record, matrix = selected[index]
-        width = matrix.shape[1] // 3
+        width = projection_width
         role_spectra: dict[str, dict[str, Any]] = {}
         for offset, role in enumerate(ROLES):
             projection = matrix[:, offset * width : (offset + 1) * width]
@@ -171,7 +186,7 @@ def analyze_gpt2_layer_spectral_profile(
             "selected_layers": list(EXPECTED_LAYERS),
             "selection_rule": "fixed five-point sample across 12 GPT-2 transformer blocks: 0, 3, 6, 9, 11",
             "tensor_role": "fused QKV projection weight",
-            "expected_tensor_shape": [768, 2304],
+            "expected_tensor_shape": [input_width, fused_width],
             "selected_matrix_count": len(EXPECTED_LAYERS),
             "projection_partition": ["query", "key", "value"],
             "svd_method": "numpy.linalg.svd(compute_uv=False) in float64",
@@ -181,9 +196,9 @@ def analyze_gpt2_layer_spectral_profile(
         "dimensions": {
             "model_layer_count": 12,
             "sampled_layer_count": len(EXPECTED_LAYERS),
-            "hidden_width": 768,
-            "projection_width": 768,
-            "singular_values_per_projection": 768,
+            "hidden_width": input_width,
+            "projection_width": projection_width,
+            "singular_values_per_projection": min(input_width, projection_width),
         },
         "layer_profile": profile,
         "pairwise_spectral_comparisons": pairwise,
