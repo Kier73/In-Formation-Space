@@ -169,3 +169,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 - [SRH-004: Commit-to-outbox crash recovery](experiments/portable-realization-capsule/STATEFUL-COMMIT-OUTBOX-RECOVERY-004.md) — closes SRH-003's tested pure-operation gap by replaying and digest-checking a quorum-completed transition when the worker died before outbox fsync, recovering the successor claim idempotently, and acknowledging the retransmitted ReliableChannel request only after the outbox is durable.
 
 - [SRH-005: Durable prepared-result recovery](experiments/portable-realization-capsule/STATEFUL-PREPARED-RESULT-RECOVERY-005.md) — persists the next PSC checkpoint and typed receipt before quorum completion, then verifies that prepared result against deterministic replay after a worker crash. Tests now cut execution before claim commit, after claim commit, after successor creation, and after outbox fsync, with authority process restart and replacement-worker control drift.
+
+## History-dependent representation relevance
+
+- [RIV-002: History-dependent representation relevance](experiments/history-dependent-representation-relevance/README.md) — extends RIV-001 by separating stationary reactive, time-aware reactive, and finite-history controllers. It measures whether remembered observations preserve task value after hidden states become observationally identical, with exact reachable-history policy enumeration and an explicit exponential search cap.
