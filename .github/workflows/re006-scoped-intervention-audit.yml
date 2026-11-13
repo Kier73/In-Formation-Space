@@ -227,7 +227,8 @@ jobs:
           print(json.dumps({'enrollment':load('re006-enrollment.json'),
                             'bundle':bundle,'model_scope':'open_world'}))
           PY
-          python - <<'PY'          import json
+          python - <<'PY'
+          import json
           with open('re006-hosted-report.json') as f: report=json.load(f)
           assert report['causal_relations']['M0_N0']=='concurrent',report
           assert report['causal_relations']['A1_B0']=='before',report
