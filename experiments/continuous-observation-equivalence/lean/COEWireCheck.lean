@@ -115,17 +115,26 @@ def joinVerified (first second : Cell) : Bool :=
               second.output.map (fun a => evaluateAt a x))
   | _, _ => false
 
+/-- Recursive descriptions of the same end-unbounded / adjacent-join
+    checks, exposing structural witnesses for a universal coverage proof. -/
+def lastUnbounded : List Cell → Bool
+  | [] => false
+  | c :: [] => decide (c.right = none)
+  | _ :: next :: rest => lastUnbounded (next :: rest)
+
+def joinedChain : List Cell → Bool
+  | [] => true
+  | _ :: [] => true
+  | c :: next :: rest => joinVerified c next && joinedChain (next :: rest)
+
 def coverVerified (cells : List Cell) : Bool :=
   match cells with
   | [] => false
   | first :: _ =>
       decide (first.left = none) &&
-      (match cells.reverse with
-       | last :: _ => decide (last.right = none)
-       | [] => false) &&
+      lastUnbounded cells &&
       cells.all intervalProper &&
-      (cells.zip (cells.drop 1)).all
-        (fun pair => joinVerified pair.1 pair.2)
+      joinedChain cells
 
 /-- Full bounded rational-certificate check; malformed dimensions and
     gaps fail closed. A generated closed theorem uses kernel reduction. -/
