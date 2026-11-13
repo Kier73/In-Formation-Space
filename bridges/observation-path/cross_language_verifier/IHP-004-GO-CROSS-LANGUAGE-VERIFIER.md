@@ -24,25 +24,13 @@ IHP-004 therefore tests two related questions:
 
 The experiment deliberately does not hide an unresolved numeric-serialization problem behind a passing result.
 
-## Portable canonical JSON profile used by IHP-004
+## Shared Canonical Metadata Profile v1
 
-IHP-004 adopts the same restricted data model now being exercised by the parallel PRC-001 cross-language receiver work in [Canonical Metadata Profile v1](https://github.com/Kier73/In-Formation-Space/blob/main/formats/canonical-metadata-v1/README.md):
+IHP-004 and PRC-001 adopt the repository-wide [Canonical Metadata Profile v1](../../../formats/canonical-metadata-v1/README.md), identified as `in-formation-space.canonical-metadata.v1`. Its shared conformance vectors are in [test-vectors.json](../../../formats/canonical-metadata-v1/test-vectors.json).
 
-- Values may be null, booleans, Unicode strings containing only valid Unicode scalar values, integers, arrays, and objects.
-- Integers must be in the interoperable safe range from -(2^53 - 1) through +(2^53 - 1). Floating-point values are not part of the profile.
-- Object keys must be ASCII strings and are sorted in ascending ASCII/byte order.
-- Insignificant whitespace is omitted.
-- String values are encoded as UTF-8; non-ASCII characters remain UTF-8 rather than being converted to Unicode escape sequences.
-- Standard JSON escaping is used for quotation marks, reverse solidus, and control characters. HTML-sensitive characters are not specially escaped.
-- U+2028 and U+2029 remain literal UTF-8 code points.
-- Duplicate object keys and values outside the data model are rejected.
-- A file artifact is the canonical JSON bytes followed by exactly one LF byte. Object digests are SHA-256 over canonical JSON bytes without that trailing LF. Artifact-subject digests are SHA-256 over the exact file bytes, including the LF.
+The Python call sites use `formats/canonical_metadata_v1.py` for validation and canonical bytes. Go and Node retain independent implementations so the profile is tested across runtimes rather than by routing all implementations through one encoder. The Python, Go, and Node test suites consume the same vectors, including literal backslash-u text distinct from the actual U+2028/U+2029 code points.
 
-The Go parser uses json.Decoder.UseNumber() so numeric tokens are not first converted through binary floating point. It validates the safe-integer range, ASCII object keys, and Unicode scalar strings before encoding. Decimal, exponent-form, negative-zero, unsafe-integer, non-ASCII-key, or invalid-Unicode inputs are rejected rather than silently normalized differently from Python or JavaScript.
-
-**Important scope of this profile:** the existing IHP-001 v0.1 JSON Schema allows decimal numbers in optional temporal fields such as chronon_phase and chemical_tau. The current Go implementation rejects those values anywhere in a record. It therefore verifies the observed safe-integer IHP-001 records, not every theoretically schema-valid v0.1 record. This is an explicit fail-closed subset, not a claim that the v0.1 format already has a complete cross-language number specification.
-
-The parallel PRC-001 work has already formalized the same restrictions for its v1 metadata. The useful next step is to consolidate this common profile into one repository-level normative specification that IHP and PRC can both reference, rather than fork two canonicalization rules.
+**IHP scope remains intentionally narrower than the full IHP-001 v0.1 schema:** optional temporal fields such as `chronon_phase` and `chemical_tau` may be decimal-valued under that schema, while the current verifier path rejects floating-point values under this profile. This is a fail-closed interoperability subset, not a claim that every schema-valid v0.1 record is supported. A future versioned record schema should define exact decimal/rational semantics before those fields are admitted.
 
 ## Implementation and topology
 
@@ -191,6 +179,4 @@ A passing result would not establish:
 
 ## Next discriminating step
 
-The repository now has a shared [Canonical Metadata Profile v1](https://github.com/Kier73/In-Formation-Space/blob/main/formats/canonical-metadata-v1/README.md) and executable conformance corpus at `formats/canonical-metadata-v1/test-vectors.json`. PRC Python, PRC Node, and IHP Go tests consume the same vectors. The remaining mismatch is that the broad IHP-001 v0.1 schema still permits decimal-valued optional temporal fields, which this Go verifier rejects.
-
-The shared corpus now covers safe-integer boundaries, exponent notation, negative zero, duplicate keys, Unicode scalar validity, object-key ordering, control escaping, U+2028/U+2029, and alternate escape spellings. The next step is a versioned IHP record-schema revision that makes the profile normative at the record boundary and decides how optional temporal coordinates currently expressed as decimals should be represented without floating-point JSON.
+The canonicalization rule and its cross-runtime corpus are now shared with PRC-001. The remaining IHP-specific question is how to represent optional decimal-valued temporal coordinates without introducing runtime-dependent serialization or losing precision. A versioned record-schema revision could use explicit exact-rational or decimal-string fields, with cross-language vectors for range, sign, precision, and round-trip behavior. Until that contract is designed and adopted, the current safe-integer subset should continue to reject these fields.
