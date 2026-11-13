@@ -131,6 +131,32 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
         with self.assertRaisesRegex(direct.DirectMTLSError, "digest"):
             direct._verify_endpoint_advertisement(altered, self.server["certificate_path"])
 
+    def test_client_endpoint_commitment_uses_signed_envelope_not_just_core(self) -> None:
+        core = {
+            "schema": direct.ENDPOINT_SCHEMA,
+            "path_id": "run-123456789-ihp002-direct-mtls",
+            "run_id": "123456789",
+            "run_attempt": "1",
+            "server_host": self.server["host"],
+            "host": "203.0.113.8",
+            "port": direct.LISTEN_PORT,
+            "dns_identity": self.server["dns_identity"],
+            "server_cert_sha256": self.server["certificate_sha256"],
+            "client_actor_id": self.client["host"]["actor_id"],
+            "client_cert_sha256": self.client["certificate_sha256"],
+        }
+        signed = direct._signed_document(core, self.server["private_key_path"])
+        path = self.root / "server-endpoint.json"
+        direct.write_json(path, signed)
+        verified_core, commitment = direct._load_signed_endpoint(
+            path,
+            self.server["certificate_path"],
+        )
+        self.assertEqual(verified_core, core)
+        self.assertEqual(commitment, direct.digest_object(signed))
+        self.assertNotEqual(commitment, direct.digest_object(core))
+
+
     def test_mutual_tls_socket_transport_and_reliable_channel_cross_real_tcp_socket(self) -> None:
         listener = SocketTransport.listen("127.0.0.1", 0)
         server_context = direct._server_context(
