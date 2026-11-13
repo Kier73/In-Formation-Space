@@ -192,3 +192,41 @@ lake env lean COECellSoundness.lean
 The COE-005 workflow installs the pinned Lean compiler, checks the theorem statements in the kernel, retains the exact foundational-axiom report (allowing only the explicitly documented propext dependency for the branch theorem), and requires an intentionally false theorem in COECellInvalid.lean to fail. The negative control ensures this CI route does not accidentally accept a failed proof file.
 
 The next formalization target is to prove the arithmetic bridge from a rational affine expression's root exclusion on a claimed interval to *sign stability* (with equality correctly handled at endpoints), then to connect that lemma to the verified symbolic layer evaluator. That step would discharge a substantive premise currently supplied only by the executable verifier.
+
+
+## COE-006 — Kernel-checked rational root exclusion and sign stability
+
+**Problem:** COE-002/003's exact certificate checker assumes a ReLU preactivation of the form m*x + b cannot change activation state inside an interval that contains no exact zero of that preactivation. COE-005 verified the *logical consequence* of stable activation decisions but did not prove this arithmetic premise.
+
+COE-006 supplies the missing **rational arithmetic** bridge using Lean 4.24.0, pinned separately from the original COE-005 Lean 4.15.0 baseline because Lean's full built-in rational arithmetic/ordered-ring lemmas were added later. The proof is in lean/COERationalRoot.lean; this builds using the Lean standard library only, with no Mathlib dependency.
+
+### Mathematically verified statements
+
+1. **Excluded root is outside the cell:** If it is not true that left < root < right, then root <= left or right <= root. In particular, a root *on* a finite boundary does not invalidate an open-cell certificate.
+2. **Rational affine monotonicity:** A positive slope yields a strictly increasing preactivation; a negative slope yields a strictly decreasing preactivation.
+3. **Sign stability:** For an exact rational affine expression, an exact root witness satisfying m*root + b = 0, and a root-excluded open interval, the Boolean activation decision at any two interior rational points is identical. The proof handles positive slope, negative slope, and the slope-zero case.
+4. **Constant affine function:** A zero-slope preactivation has the same activation decision at every rational input, even when it has no root because its bias is nonzero.
+5. **Selection correctness:** Combining the arithmetic sign-stability result with COE-005's selected-branch theorem proves that the ReLU branch chosen by any interior probe agrees with the pointwise rectified preactivation at **every rational point in the certified open interval**.
+6. **Endpoint root behavior:** At a certified exact root, the selected branch yields zero irrespective of which activation branch was chosen from the interior. This addresses roots *on* an interval endpoint; general endpoint continuity is still a separate obligation.
+
+This version proves the property for rational points and rational coefficients. Extending the same conclusion to **all real input points** needs a corresponding real-number/ordered-field interpretation of the lemma (or a formal bridge showing the rational affine atlas determines the continuous real extension). Thus it does **not** independently establish all-real soundness of the entire serialized certificate. The COE-001/002 algorithmic all-real claim and Python/Go verification remain separate evidence.
+
+The premise that the proposed root actually satisfies the affine zero equation must still be validated by the concrete checker: this theorem does not independently establish correctness of the Python/Go operation that computes root = -b/m. The theorem is not about multidimensional networks, floats, external source authenticity, or admitted E-CPU Ground authority.
+
+### Negative control and trust statement
+
+The file lean/COERootInvalid.lean intentionally attempts to assert that a positive-slope affine function has equal activation decisions at negative and positive points **without excluding its interior root**. The Lean kernel must reject it. CI also retains the original false-theorem negative control and the printed axiom-dependency output for all new theorems.
+
+The newer ordered-ring automated proof uses foundational Lean axioms **propext, Classical.choice and Quot.sound**. Its exact dependency set is recorded and checked by CI, with no admitted proof holes (sorryAx). This is a kernel-checked proof under those explicitly listed foundations; **not** an axiom-free derivation or proof-assistant verification of the Python/Go source code.
+
+### Reproduce
+
+~~~bash
+cd experiments/continuous-observation-equivalence/lean
+lake build
+lake env lean COERationalRoot.lean
+# The next command must return a nonzero exit code:
+lake env lean COERootInvalid.lean
+~~~
+
+A natural next experiment is to verify the computed root equation and interval inequalities directly from the wire-format rational tokens inside a small independent formal checker, then prove endpoint completion via continuity and extend the analysis from rational to real coordinates.
