@@ -26,7 +26,7 @@ The parser is intentionally conservative:
 - `active; direct` becomes `direct`;
 - `active; relay` becomes `derp_relay`;
 - `active; peer-relay` becomes `peer_relay`;
-- an active row with an unfamiliar marker, an idle row, a missing row, or a failed status command remains `reachable_unclassified`.
+- an active row with an unfamiliar marker, an idle row, a missing row, duplicate peer rows, or a failed status command remains `reachable_unclassified`; duplicate rows are also marked `ambiguous`.
 
 This avoids turning an idle or changed CLI format into a false assertion that the application session was unavailable. The mTLS socket itself is the application reachability evidence; the status snapshot supplies only the route-class observation.
 
