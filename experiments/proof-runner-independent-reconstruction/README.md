@@ -70,6 +70,8 @@ All evidence files use the repository's [Canonical Metadata Profile v1](../../fo
 
 The authority and runner signatures are independently checked with Go's standard-library `crypto/ed25519`. Each public-key document has a custom GitHub artifact-attestation predicate that commits to the exact file SHA-256, participant ID, role, key fingerprint, and complete host-identity record. The third host runs `gh attestation verify` with the exact predicate type, signer workflow, protected main ref, and self-hosted-runner denial, then compares the verified predicate with the downloaded key document. This prevents a validly attested key file from being silently paired with a different role or host record. The Go CLI's `--key-attestations-verified` flag is therefore a statement from the workflow orchestration layer; it must never be set by a caller that has not actually performed both checks.
 
+The third host separately emits `sqlite-authority-verification.json` after reopening the transferred database with the repository's Python adapter. The Go verifier does not accept a bare Boolean that claims this happened: it ingests that exact summary, checks its epoch, active owner, generation, revision count, and history digest against the ledger/audit reconstruction, and commits the summary's digest into the final report. The offline fixture deliberately marks `verified: false`; it tests the binding without claiming a real adapter reopen.
+
 Offline tests use deterministic, explicitly non-secret fixture keys. A fixture pass is not a live three-host execution. Live producer jobs use ephemeral generated keys and retain no private key files.
 
 ## What a successful independent reconstruction establishes
