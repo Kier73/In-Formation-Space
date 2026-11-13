@@ -1,0 +1,17 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/direct-mtls-host-record-predicate.schema.json",
+  "title":"Direct mTLS host record attestation predicate",
+  "type":"object","additionalProperties":false,
+  "required":["schema","role","host","record_sha256","record_digest","certificate_sha256","status","path_id"],
+  "properties":{
+    "schema":{"const":"in-formation.direct-mtls-host-record-predicate/0.1"},
+    "role":{"enum":["client_host","server_host"]},
+    "host":{"type":"object"},
+    "record_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "record_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "certificate_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "status":{"enum":["direct_mtls_verified","direct_tcp_unavailable","direct_mtls_rejected"]},
+    "path_id":{"type":"string","minLength":1}
+  }
+}
