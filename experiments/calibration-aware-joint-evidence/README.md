@@ -1,4 +1,4 @@
-# RIV-006: Calibration-aware joint evidence accumulation
+# RIV-007: Calibration-aware joint evidence accumulation
 
 **Status:** finite exact experiment, version 0.1.  
 **Question:** When calibration uncertainty is shared across a session, what belief state must an observer retain to continue making exact Bayesian updates?
@@ -7,11 +7,11 @@
 
 - RIV-004 showed that a count is sufficient for a fixed binary hypothesis and repeated conditionally iid observations from one known channel.
 - RIV-005 allowed position-specific, non-identical sensor channels while keeping each channel's parameters known.
-- RIV-006 makes the channel profile itself uncertain and shared across a complete observation session.
+- RIV-006 models a context regime that changes as a Markov process. RIV-007 instead makes the calibration profile uncertain but fixed for a complete observation session. The two latent-context contracts are complementary, not interchangeable.
 
 The calibration state is a latent variable, not a new independent draw at every reading. Signals are conditionally independent given both the hidden hypothesis and the shared calibration state. Once the calibration variable is marginalized out, signals can be dependent conditional on the hidden hypothesis alone.
 
-This distinction is consistent with sensor-calibration research that treats calibration parameters as uncertain latent processes and models the dependencies induced by shared or colocated sensor observations. Smith et al. model calibration functions using Bayesian priors over slowly varying parameters and report posterior dependencies between calibration processes (Journal of the Royal Statistical Society: Series C, 2023: https://doi.org/10.1093/jrsssc/qlad075). Work on sensor-network metrology also emphasizes that common calibration references, shared environmental conditions, and repeated readings can induce correlated measurement errors (Sensors, 2025: https://www.mdpi.com/2673-8244/5/1/3). Those studies use richer continuous models; RIV-006 is a small discrete finite-state analogue, not a reproduction of their methods or data.
+This distinction is consistent with sensor-calibration research that treats calibration parameters as uncertain latent processes and models the dependencies induced by shared or colocated sensor observations. Smith et al. model calibration functions using Bayesian priors over slowly varying parameters and report posterior dependencies between calibration processes (Journal of the Royal Statistical Society: Series C, 2023: https://doi.org/10.1093/jrsssc/qlad075). Work on sensor-network metrology also emphasizes that common calibration references, shared environmental conditions, and repeated readings can induce correlated measurement errors (Sensors, 2025: https://www.mdpi.com/2673-8244/5/1/3). Those studies use richer continuous models; RIV-007 is a small discrete finite-state analogue, not a reproduction of their methods or data.
 
 ## Model
 
