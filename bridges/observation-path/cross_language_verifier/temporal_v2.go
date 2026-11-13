@@ -27,7 +27,7 @@ var temporalDecimal = regexp.MustCompile(`^(0|-?[1-9][0-9]*)$`)
 var temporalHex64 = regexp.MustCompile(`^[0-9a-f]{16}$`)
 
 func EncodeTemporalInteger(value any) (Object, error) {
-	n, err := temporalBigInt(value, "temporal integer")
+	n, err := v2TemporalBigInt(value, "temporal integer")
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func DecodeTemporalBinary64(value any) (float64, error) {
 	return value64, nil
 }
 
-func temporalBigInt(value any, label string) (*big.Int, error) {
+func v2TemporalBigInt(value any, label string) (*big.Int, error) {
 	switch v := value.(type) {
 	case *big.Int:
 		if v == nil {
@@ -146,17 +146,17 @@ func temporalBigInt(value any, label string) (*big.Int, error) {
 	}
 }
 
-func temporalMinimumZero() *big.Int { return big.NewInt(0) }
+func v2TemporalMinimumZero() *big.Int { return big.NewInt(0) }
 
-func temporalText(value any, label string) (string, error) {
+func v2TemporalText(value any, label string) (string, error) {
 	return textValue(value, label)
 }
 
-func temporalObject(value any, fields []string, label string) (Object, error) {
+func v2TemporalObject(value any, fields []string, label string) (Object, error) {
 	return exactFields(value, fields, label)
 }
 
-func temporalArray(value any, label string) ([]any, error) {
+func v2TemporalArray(value any, label string) ([]any, error) {
 	switch v := value.(type) {
 	case []any:
 		return v, nil
@@ -171,7 +171,7 @@ func temporalArray(value any, label string) ([]any, error) {
 	}
 }
 
-func temporalFloatInput(value any, label string) (float64, error) {
+func v2TemporalFloatInput(value any, label string) (float64, error) {
 	switch v := value.(type) {
 	case float64:
 		if math.IsNaN(v) || math.IsInf(v, 0) {
@@ -189,7 +189,7 @@ func temporalFloatInput(value any, label string) (float64, error) {
 	}
 }
 
-func checkTemporalPhase(real, imaginary float64) error {
+func v2CheckTemporalPhase(real, imaginary float64) error {
 	if math.IsNaN(real) || math.IsNaN(imaginary) || math.IsInf(real, 0) || math.IsInf(imaginary, 0) {
 		return fail("chronon_phase must contain finite binary64 values")
 	}
@@ -205,7 +205,7 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 	if err != nil {
 		return nil, err
 	}
-	actor, err := temporalText(raw["actor_id"], "frame.actor_id")
+	actor, err := v2TemporalText(raw["actor_id"], "frame.actor_id")
 	if err != nil {
 		return nil, err
 	}
@@ -219,19 +219,19 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 	if raw["monotonic"] == nil {
 		out["monotonic"] = nil
 	} else {
-		m, err := temporalObject(raw["monotonic"], []string{"actor_id", "segment", "elapsed_ns"}, "frame.monotonic")
+		m, err := v2TemporalObject(raw["monotonic"], []string{"actor_id", "segment", "elapsed_ns"}, "frame.monotonic")
 		if err != nil {
 			return nil, err
 		}
-		a, err := temporalText(m["actor_id"], "monotonic.actor_id")
+		a, err := v2TemporalText(m["actor_id"], "monotonic.actor_id")
 		if err != nil || a != actor {
 			return nil, fail("monotonic actor does not match frame actor")
 		}
-		segment, err := temporalBigInt(m["segment"], "monotonic.segment")
+		segment, err := v2TemporalBigInt(m["segment"], "monotonic.segment")
 		if err != nil || segment.Sign() < 0 {
 			return nil, fail("monotonic segment must be non-negative")
 		}
-		elapsed, err := temporalBigInt(m["elapsed_ns"], "monotonic.elapsed_ns")
+		elapsed, err := v2TemporalBigInt(m["elapsed_ns"], "monotonic.elapsed_ns")
 		if err != nil || elapsed.Sign() < 0 {
 			return nil, fail("monotonic elapsed_ns must be non-negative")
 		}
@@ -243,11 +243,11 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 	if raw["wall"] == nil {
 		out["wall"] = nil
 	} else {
-		w, err := temporalObject(raw["wall"], []string{"actor_id", "utc_ns", "sample_index"}, "frame.wall")
+		w, err := v2TemporalObject(raw["wall"], []string{"actor_id", "utc_ns", "sample_index"}, "frame.wall")
 		if err != nil {
 			return nil, err
 		}
-		a, err := temporalText(w["actor_id"], "wall.actor_id")
+		a, err := v2TemporalText(w["actor_id"], "wall.actor_id")
 		if err != nil || a != actor {
 			return nil, fail("wall actor does not match frame actor")
 		}
@@ -255,7 +255,7 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
-		index, err := temporalBigInt(w["sample_index"], "wall.sample_index")
+		index, err := v2TemporalBigInt(w["sample_index"], "wall.sample_index")
 		if err != nil || index.Sign() < 0 {
 			return nil, fail("wall sample_index must be non-negative")
 		}
@@ -266,15 +266,15 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 	if raw["causal"] == nil {
 		out["causal"] = nil
 	} else {
-		c, err := temporalObject(raw["causal"], []string{"actor_id", "lamport", "vector"}, "frame.causal")
+		c, err := v2TemporalObject(raw["causal"], []string{"actor_id", "lamport", "vector"}, "frame.causal")
 		if err != nil {
 			return nil, err
 		}
-		a, err := temporalText(c["actor_id"], "causal.actor_id")
+		a, err := v2TemporalText(c["actor_id"], "causal.actor_id")
 		if err != nil || a != actor {
 			return nil, fail("causal actor does not match frame actor")
 		}
-		lamport, err := temporalBigInt(c["lamport"], "causal.lamport")
+		lamport, err := v2TemporalBigInt(c["lamport"], "causal.lamport")
 		if err != nil || lamport.Sign() < 0 {
 			return nil, fail("causal Lamport value must be non-negative")
 		}
@@ -293,7 +293,7 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 			if strings.TrimSpace(vectorActor) == "" {
 				return nil, fail("causal vector actor is empty")
 			}
-			counter, err := temporalBigInt(v[vectorActor], "causal vector counter")
+			counter, err := v2TemporalBigInt(v[vectorActor], "causal vector counter")
 			if err != nil || counter.Sign() < 0 || counter.Cmp(lamport) > 0 {
 				return nil, fail("causal vector counter must be non-negative and <= Lamport")
 			}
@@ -313,15 +313,15 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 	if raw["scheduler"] == nil {
 		out["scheduler"] = nil
 	} else {
-		s, err := temporalObject(raw["scheduler"], []string{"scheduler_id", "tick"}, "frame.scheduler")
+		s, err := v2TemporalObject(raw["scheduler"], []string{"scheduler_id", "tick"}, "frame.scheduler")
 		if err != nil {
 			return nil, err
 		}
-		id, err := temporalText(s["scheduler_id"], "scheduler.scheduler_id")
+		id, err := v2TemporalText(s["scheduler_id"], "scheduler.scheduler_id")
 		if err != nil {
 			return nil, err
 		}
-		tick, err := temporalBigInt(s["tick"], "scheduler.tick")
+		tick, err := v2TemporalBigInt(s["tick"], "scheduler.tick")
 		if err != nil || tick.Sign() < 0 {
 			return nil, fail("scheduler tick must be non-negative")
 		}
@@ -332,7 +332,7 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 	if raw["event_lambda"] == nil {
 		out["event_lambda"] = nil
 	} else {
-		value, err := temporalBigInt(raw["event_lambda"], "event_lambda")
+		value, err := v2TemporalBigInt(raw["event_lambda"], "event_lambda")
 		if err != nil || value.Sign() < 0 {
 			return nil, fail("event_lambda must be non-negative")
 		}
@@ -343,19 +343,19 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 	if raw["chronon_phase"] == nil {
 		out["chronon_phase"] = nil
 	} else {
-		phase, err := temporalArray(raw["chronon_phase"], "chronon_phase")
+		phase, err := v2TemporalArray(raw["chronon_phase"], "chronon_phase")
 		if err != nil || len(phase) != 2 {
 			return nil, fail("chronon_phase must be a pair")
 		}
-		real, err := temporalFloatInput(phase[0], "chronon_phase real")
+		real, err := v2TemporalFloatInput(phase[0], "chronon_phase real")
 		if err != nil {
 			return nil, err
 		}
-		imaginary, err := temporalFloatInput(phase[1], "chronon_phase imaginary")
+		imaginary, err := v2TemporalFloatInput(phase[1], "chronon_phase imaginary")
 		if err != nil {
 			return nil, err
 		}
-		if err := checkTemporalPhase(real, imaginary); err != nil {
+		if err := v2CheckTemporalPhase(real, imaginary); err != nil {
 			return nil, err
 		}
 		r, _ := EncodeTemporalBinary64(real)
@@ -366,7 +366,7 @@ func EncodeTemporalFrameV2(frame Object) (Object, error) {
 	if raw["chemical_tau"] == nil {
 		out["chemical_tau"] = nil
 	} else {
-		tau, err := temporalFloatInput(raw["chemical_tau"], "chemical_tau")
+		tau, err := v2TemporalFloatInput(raw["chemical_tau"], "chemical_tau")
 		if err != nil || tau < 0 {
 			return nil, fail("chemical_tau must be finite and non-negative")
 		}
@@ -388,7 +388,7 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 	if raw["format"] != TemporalFrameFormat || raw["schema"] != TemporalFrameSchema || raw["numeric_profile"] != TemporalNumericSchema {
 		return nil, fail("temporal frame v2 format/schema/profile mismatch")
 	}
-	actor, err := temporalText(raw["actor_id"], "frame.actor_id")
+	actor, err := v2TemporalText(raw["actor_id"], "frame.actor_id")
 	if err != nil {
 		return nil, err
 	}
@@ -397,18 +397,18 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 	if raw["monotonic"] == nil {
 		out["monotonic"] = nil
 	} else {
-		m, err := temporalObject(raw["monotonic"], []string{"actor_id", "segment", "elapsed_ns"}, "frame.monotonic")
+		m, err := v2TemporalObject(raw["monotonic"], []string{"actor_id", "segment", "elapsed_ns"}, "frame.monotonic")
 		if err != nil {
 			return nil, err
 		}
 		if m["actor_id"] != actor {
 			return nil, fail("monotonic actor does not match frame actor")
 		}
-		s, err := DecodeTemporalInteger(m["segment"], temporalMinimumZero(), nil)
+		s, err := DecodeTemporalInteger(m["segment"], v2TemporalMinimumZero(), nil)
 		if err != nil {
 			return nil, err
 		}
-		e, err := DecodeTemporalInteger(m["elapsed_ns"], temporalMinimumZero(), nil)
+		e, err := DecodeTemporalInteger(m["elapsed_ns"], v2TemporalMinimumZero(), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -418,7 +418,7 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 	if raw["wall"] == nil {
 		out["wall"] = nil
 	} else {
-		w, err := temporalObject(raw["wall"], []string{"actor_id", "utc_ns", "sample_index"}, "frame.wall")
+		w, err := v2TemporalObject(raw["wall"], []string{"actor_id", "utc_ns", "sample_index"}, "frame.wall")
 		if err != nil {
 			return nil, err
 		}
@@ -429,7 +429,7 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
-		index, err := DecodeTemporalInteger(w["sample_index"], temporalMinimumZero(), nil)
+		index, err := DecodeTemporalInteger(w["sample_index"], v2TemporalMinimumZero(), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -439,18 +439,18 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 	if raw["causal"] == nil {
 		out["causal"] = nil
 	} else {
-		c, err := temporalObject(raw["causal"], []string{"actor_id", "lamport", "vector"}, "frame.causal")
+		c, err := v2TemporalObject(raw["causal"], []string{"actor_id", "lamport", "vector"}, "frame.causal")
 		if err != nil {
 			return nil, err
 		}
 		if c["actor_id"] != actor {
 			return nil, fail("causal actor does not match frame actor")
 		}
-		lamport, err := DecodeTemporalInteger(c["lamport"], temporalMinimumZero(), nil)
+		lamport, err := DecodeTemporalInteger(c["lamport"], v2TemporalMinimumZero(), nil)
 		if err != nil {
 			return nil, err
 		}
-		entries, err := temporalArray(c["vector"], "causal.vector")
+		entries, err := v2TemporalArray(c["vector"], "causal.vector")
 		if err != nil || len(entries) == 0 {
 			return nil, fail("causal vector must be a non-empty array")
 		}
@@ -458,11 +458,11 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 		prior := ""
 		own := false
 		for i, entry := range entries {
-			e, err := temporalObject(entry, []string{"actor_id", "counter"}, "causal vector entry")
+			e, err := v2TemporalObject(entry, []string{"actor_id", "counter"}, "causal vector entry")
 			if err != nil {
 				return nil, err
 			}
-			id, err := temporalText(e["actor_id"], "causal vector actor")
+			id, err := v2TemporalText(e["actor_id"], "causal vector actor")
 			if err != nil {
 				return nil, err
 			}
@@ -470,7 +470,7 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 				return nil, fail("causal vector actor IDs must be unique and sorted")
 			}
 			prior = id
-			counter, err := DecodeTemporalInteger(e["counter"], temporalMinimumZero(), nil)
+			counter, err := DecodeTemporalInteger(e["counter"], v2TemporalMinimumZero(), nil)
 			if err != nil || counter.Cmp(lamport) > 0 {
 				return nil, fail("causal vector counter must be <= Lamport")
 			}
@@ -488,15 +488,15 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 	if raw["scheduler"] == nil {
 		out["scheduler"] = nil
 	} else {
-		s, err := temporalObject(raw["scheduler"], []string{"scheduler_id", "tick"}, "frame.scheduler")
+		s, err := v2TemporalObject(raw["scheduler"], []string{"scheduler_id", "tick"}, "frame.scheduler")
 		if err != nil {
 			return nil, err
 		}
-		id, err := temporalText(s["scheduler_id"], "scheduler.scheduler_id")
+		id, err := v2TemporalText(s["scheduler_id"], "scheduler.scheduler_id")
 		if err != nil {
 			return nil, err
 		}
-		tick, err := DecodeTemporalInteger(s["tick"], temporalMinimumZero(), nil)
+		tick, err := DecodeTemporalInteger(s["tick"], v2TemporalMinimumZero(), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -506,7 +506,7 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 	if raw["event_lambda"] == nil {
 		out["event_lambda"] = nil
 	} else {
-		n, err := DecodeTemporalInteger(raw["event_lambda"], temporalMinimumZero(), nil)
+		n, err := DecodeTemporalInteger(raw["event_lambda"], v2TemporalMinimumZero(), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -516,7 +516,7 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 	if raw["chronon_phase"] == nil {
 		out["chronon_phase"] = nil
 	} else {
-		phase, err := temporalArray(raw["chronon_phase"], "chronon_phase")
+		phase, err := v2TemporalArray(raw["chronon_phase"], "chronon_phase")
 		if err != nil || len(phase) != 2 {
 			return nil, fail("chronon_phase must contain two binary64 envelopes")
 		}
@@ -528,7 +528,7 @@ func DecodeTemporalFrameV2(value any) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
-		if err := checkTemporalPhase(real, imaginary); err != nil {
+		if err := v2CheckTemporalPhase(real, imaginary); err != nil {
 			return nil, err
 		}
 		out["chronon_phase"] = []any{real, imaginary}
@@ -558,17 +558,17 @@ func EncodeOperationSpanV2(span Object) (Object, error) {
 	if _, ok := raw["context"].(map[string]any); !ok {
 		return nil, fail("operation span context must be object")
 	}
-	start, err := temporalBigInt(raw["monotonic_start_ns"], "monotonic_start_ns")
+	start, err := v2TemporalBigInt(raw["monotonic_start_ns"], "monotonic_start_ns")
 	if err != nil || start.Sign() < 0 {
 		return nil, fail("monotonic_start_ns must be non-negative")
 	}
-	end, err := temporalBigInt(raw["monotonic_end_ns"], "monotonic_end_ns")
+	end, err := v2TemporalBigInt(raw["monotonic_end_ns"], "monotonic_end_ns")
 	if err != nil || end.Sign() < 0 {
 		return nil, fail("monotonic_end_ns must be non-negative")
 	}
 	var elapsed *big.Int
 	if raw["elapsed_ns"] != nil {
-		elapsed, err = temporalBigInt(raw["elapsed_ns"], "elapsed_ns")
+		elapsed, err = v2TemporalBigInt(raw["elapsed_ns"], "elapsed_ns")
 		if err != nil || elapsed.Sign() < 0 {
 			return nil, fail("elapsed_ns must be non-negative or null")
 		}
@@ -623,17 +623,17 @@ func DecodeOperationSpanV2(value any) (Object, error) {
 	if digest != raw["span_digest"] {
 		return nil, fail("operation span v2 digest mismatch")
 	}
-	start, err := DecodeTemporalInteger(raw["monotonic_start_ns"], temporalMinimumZero(), nil)
+	start, err := DecodeTemporalInteger(raw["monotonic_start_ns"], v2TemporalMinimumZero(), nil)
 	if err != nil {
 		return nil, err
 	}
-	end, err := DecodeTemporalInteger(raw["monotonic_end_ns"], temporalMinimumZero(), nil)
+	end, err := DecodeTemporalInteger(raw["monotonic_end_ns"], v2TemporalMinimumZero(), nil)
 	if err != nil {
 		return nil, err
 	}
 	var elapsed *big.Int
 	if raw["elapsed_ns"] != nil {
-		elapsed, err = DecodeTemporalInteger(raw["elapsed_ns"], temporalMinimumZero(), nil)
+		elapsed, err = DecodeTemporalInteger(raw["elapsed_ns"], v2TemporalMinimumZero(), nil)
 		if err != nil {
 			return nil, err
 		}
