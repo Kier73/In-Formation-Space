@@ -4,6 +4,10 @@ on:
   push:
     paths:
       - "bridges/observation-path/operation_spans.py"
+      - "bridges/observation-path/tailscale_overlay_probe.py"
+      - "bridges/observation-path/test_tailscale_overlay_probe.py"
+      - "bridges/observation-path/ihp003-overlay-*.schema.json"
+      - ".github/workflows/tailscale-overlay-preflight.yml"
       - "bridges/observation-path/direct_mtls_operation_path.py"
       - "bridges/observation-path/test_direct_mtls_operation_path.py"
       - "bridges/observation-path/direct-mtls-*.schema.json"
@@ -21,6 +25,10 @@ on:
   pull_request:
     paths:
       - "bridges/observation-path/operation_spans.py"
+      - "bridges/observation-path/tailscale_overlay_probe.py"
+      - "bridges/observation-path/test_tailscale_overlay_probe.py"
+      - "bridges/observation-path/ihp003-overlay-*.schema.json"
+      - ".github/workflows/tailscale-overlay-preflight.yml"
       - "bridges/observation-path/direct_mtls_operation_path.py"
       - "bridges/observation-path/test_direct_mtls_operation_path.py"
       - "bridges/observation-path/direct-mtls-*.schema.json"
@@ -57,7 +65,7 @@ jobs:
       - name: Install schema and direct-mTLS test dependencies
         run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5" "cryptography>=42,<47"
       - name: Compile operation-path implementations
-        run: python -m py_compile bridges/observation-path/operation_spans.py bridges/observation-path/distributed_operation_path.py bridges/observation-path/independent_host_path.py bridges/observation-path/direct_mtls_operation_path.py
+        run: python -m py_compile bridges/observation-path/operation_spans.py bridges/observation-path/distributed_operation_path.py bridges/observation-path/independent_host_path.py bridges/observation-path/direct_mtls_operation_path.py bridges/observation-path/tailscale_overlay_probe.py
       - name: Run existing operation-span tests
         run: python -m unittest discover -s bridges/observation-path -p 'test_operation_spans.py' -v
       - name: Run distributed causal operation-path tests
@@ -72,6 +80,8 @@ jobs:
         env:
           PYTHONPATH: external/E-CPU
         run: python -m unittest discover -s bridges/observation-path -p 'test_direct_mtls_operation_path.py' -v
+      - name: Run Tailscale overlay route-probe tests
+        run: python -m unittest discover -s bridges/observation-path -p 'test_tailscale_overlay_probe.py' -v
       - name: Validate distributed path schemas
         run: |
           python - <<'PY'
@@ -90,6 +100,12 @@ jobs:
               Path("bridges/observation-path/direct-mtls-host-record-predicate.schema.json"),
               Path("bridges/observation-path/direct-mtls-reconstruction-report.schema.json"),
               Path("bridges/observation-path/direct-mtls-reconstruction-report-predicate.schema.json"),
+              Path("bridges/observation-path/ihp003-overlay-address.schema.json"),
+              Path("bridges/observation-path/ihp003-overlay-address-predicate.schema.json"),
+              Path("bridges/observation-path/ihp003-overlay-probe-record.schema.json"),
+              Path("bridges/observation-path/ihp003-overlay-probe-record-predicate.schema.json"),
+              Path("bridges/observation-path/ihp003-overlay-report.schema.json"),
+              Path("bridges/observation-path/ihp003-overlay-report-predicate.schema.json"),
           ):
               schema = json.loads(path.read_text(encoding="utf-8"))
               Draft202012Validator.check_schema(schema)
