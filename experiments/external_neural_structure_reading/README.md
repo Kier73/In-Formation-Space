@@ -168,6 +168,22 @@ These values are recorded as a small, reproducible observation of two parameter 
 
 The selected payload hashes and exact absolute file ranges are retained in the geometry artifact. The two payloads total 14,155,776 bytes; no raw parameter values were written into the artifact.
 
+## Basis-invariant Q/K/V spectral comparison
+
+The raw first-vs-last block cosine result motivates a second comparison. Two matrices can have low coordinatewise cosine even when their singular-value spectra match. The singular values of a matrix are invariant under orthogonal transformations applied independently on the left and right; this makes spectra a useful, though still incomplete, cross-layer structural signature.
+
+`spectral_invariants.py` computes the full singular-value spectrum for each Q, K, and V slice of the same two selected F32 matrices. It uses `numpy.linalg.svd(compute_uv=False)` in float64, then records:
+
+- The singular-value vector and its Frobenius-normalized form
+- Singular-value quantiles and top-1/8/32/64/128 energy fractions
+- Exact stable rank, entropy effective rank, and participation ratio
+- Mean absolute and root-mean-square distance between normalized spectra
+- Jensen-Shannon divergence between squared-singular-value energy distributions
+
+A synthetic test applies orthogonal row/column transformations and checks that the spectra remain equal. The new [QKV spectral invariants workflow](../../../.github/workflows/hfr-001-qkv-spectral-invariants.yml) repeats the live, pinned, 14.16 MB selection under the same 16 MiB total budget and retains the derived spectral record only.
+
+This adds a comparison invariant under orthogonal basis changes, not under arbitrary invertible transformations. It does not assert that two projections implement the same function, that their latent spaces are aligned, or that similar spectra identify learned meaning.
+
 ## Fail-closed checks
 
 The reader rejects duplicate JSON keys, non-finite JSON constants, oversized JSON/header regions, non-commit revision labels, invalid tensor entries, negative dimensions or offsets, offsets beyond the data section, overlapping tensor ranges, symbolic links, path traversal, duplicate tensor names across shards, and any mismatch between a shard index and observed headers.
@@ -176,10 +192,10 @@ It does not validate architecture semantics, tensor element counts against dtype
 
 ## Next discriminating stages
 
-1. Repeat the selected-weight geometry on additional layers and a second architecture family to learn which observations are checkpoint-specific versus family-recurrent.
-2. Add a tensor-basis or low-rank procedural parameter generator that uses only retained geometry summaries and a new seed; label its outputs as generated, not inherited.
-3. Compare architecture-only initialization with geometry-informed generated parameters on a fixed task and explicit input domain.
-4. Add a small, independently implemented forward reference for a supported graph subset and compare selected numerical behavior, with error tolerances and provenance retained.
+1. Compare the full spectral signatures of additional blocks and determine how stable the invariants are across depth, model revisions, and model families.
+2. Investigate matrix-factorization or low-rank procedural parameterizations that preserve selected spectral properties without copying original tensor values.
+3. Compare architecture-only initialization with spectrum-informed generated parameters on a fixed, explicitly scoped task.
+4. Add an independently implemented forward reference for a supported operation-graph subset and compare numerical behavior with stated error tolerances.
 5. Explore selective inheritance and cross-family realization only after the preceding evidence exists.
 
 ## Repository responsibilities
