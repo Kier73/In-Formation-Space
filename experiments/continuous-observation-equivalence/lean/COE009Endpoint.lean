@@ -20,6 +20,21 @@ def closedInside (c : Cell) (x : Rat) : Bool :=
    | none => true
    | some right => decide (x ≤ right))
 
+/-- Separable closed-cell guards used to prove complete coverage. -/
+def aboveLeft (c : Cell) (x : Rat) : Bool :=
+  match c.left with
+  | none => true
+  | some left => decide (left ≤ x)
+
+def belowRight (c : Cell) (x : Rat) : Bool :=
+  match c.right with
+  | none => true
+  | some right => decide (x ≤ right)
+
+theorem closedInsideParts (c : Cell) (x : Rat) :
+    closedInside c x = (aboveLeft c x && belowRight c x) := by
+  rfl
+
 theorem insideImpliesClosed (c : Cell) (x : Rat)
     (h : inside c x = true) : closedInside c x = true := by
   cases c with
