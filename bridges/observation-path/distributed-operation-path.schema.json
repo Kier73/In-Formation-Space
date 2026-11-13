@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/distributed-operation-path.schema.json",
+  "title": "Distributed causal operation path",
+  "description": "A digest-bound operation DAG using local monotonic dependencies, message-linked vector-clock handoffs, and explicit clock-calibration bindings.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format","schema","path_id","attempt_id","reference_clock_actor_id","reference_clock_segment_id","span_digests","local_dependencies","causal_handoffs","calibration_bindings","measurement_scope","trace_digest"],
+  "properties": {
+    "format": {"const": "in-formation.distributed-operation-path"},
+    "schema": {"const": "in-formation.distributed-operation-path/0.1"},
+    "path_id": {"type": "string","minLength": 1},
+    "attempt_id": {"type": "string","minLength": 1},
+    "reference_clock_actor_id": {"type": "string","minLength": 1},
+    "reference_clock_segment_id": {"type": "string","minLength": 1},
+    "span_digests": {"type": "array","minItems": 1,"uniqueItems": true,"items": {"type": "string","pattern": "^[0-9a-f]{64}$"}},
+    "local_dependencies": {"type": "array","items": {"type": "object","additionalProperties": false,"required": ["predecessor_span_digest","successor_span_digest"],"properties": {"predecessor_span_digest": {"type": "string","pattern": "^[0-9a-f]{64}$"},"successor_span_digest": {"type": "string","pattern": "^[0-9a-f]{64}$"}}}},
+    "causal_handoffs": {"type": "array","items": {"type": "object","additionalProperties": false,"required": ["schema","path_id","attempt_id","predecessor_span_digest","successor_span_digest","channel_id","message_sequence","received_sequence","sender_actor_id","receiver_actor_id","payload_digest","sender_completion_frame","receiver_start_frame","handoff_digest"],"properties": {"schema": {"const": "in-formation.operation-path.causal-handoff/0.1"},"path_id": {"type": "string","minLength": 1},"attempt_id": {"type": "string","minLength": 1},"predecessor_span_digest": {"type": "string","pattern": "^[0-9a-f]{64}$"},"successor_span_digest": {"type": "string","pattern": "^[0-9a-f]{64}$"},"channel_id": {"type": "string","minLength": 1},"message_sequence": {"type": "integer","minimum": 1},"received_sequence": {"type": "integer","minimum": 1},"sender_actor_id": {"type": "string","minLength": 1},"receiver_actor_id": {"type": "string","minLength": 1},"payload_digest": {"type": "string","pattern": "^[0-9a-f]{64}$"},"sender_completion_frame": {"type": "object"},"receiver_start_frame": {"type": "object"},"handoff_digest": {"type": "string","pattern": "^[0-9a-f]{64}$"}}}},
+    "calibration_bindings": {"type": "array","items": {"type": "object","additionalProperties": false,"required": ["source_clock_id","calibration_digest"],"properties": {"source_clock_id": {"type": "string","minLength": 1},"calibration_digest": {"type": "string","pattern": "^[0-9a-f]{64}$"}}}},
+    "measurement_scope": {"type": "string","minLength": 1},
+    "trace_digest": {"type": "string","pattern": "^[0-9a-f]{64}$"}
+  }
+}
