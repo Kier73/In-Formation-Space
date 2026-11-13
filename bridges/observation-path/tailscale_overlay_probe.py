@@ -354,10 +354,10 @@ def _validate_address(
 
 def classify_route(output: str, return_code: int) -> str:
     lower = output.lower()
-    if re.search(r"\bvia\s+peer[- ]relay", lower) or "peer-relay(" in lower:
-        return "peer_relay"
     if re.search(r"\bvia\s+\d{1,3}(?:\.\d{1,3}){3}:\d+", lower):
         return "direct"
+    if re.search(r"\bvia\s+peer[- ]relay", lower) or "peer-relay(" in lower:
+        return "peer_relay"
     if "via derp(" in lower or re.search(r"\brelay\s+\"", lower):
         return "derp_relay"
     if return_code == 0 and "pong from" in lower:
@@ -515,8 +515,16 @@ def _validate_record(
         raise OverlayProbeError("record status is unsupported")
     if record["route_type"] not in {"direct", "derp_relay", "peer_relay", "reachable_unclassified", "unreachable", "not_attempted"}:
         raise OverlayProbeError("route type is unsupported")
-    if record["status"] == "route_observed" and record["route_type"] == "unreachable":
-        raise OverlayProbeError("route-observed record has unreachable route classification")
+    if record["status"] == "route_observed":
+        if record["route_type"] not in {"direct", "derp_relay", "peer_relay", "reachable_unclassified"}:
+            raise OverlayProbeError("route-observed record lacks a reachable route classification")
+        if not record["overlay_ipv4"] or not record["peer_overlay_ipv4"] or not record["peer_address_digest"]:
+            raise OverlayProbeError("route-observed record lacks both peer address commitments")
+        if record["ping_exit_code"] != 0 or record["ping_count"] < 1:
+            raise OverlayProbeError("route-observed record lacks a successful Tailscale ping")
+    if record["status"] == "route_unavailable":
+        if record["route_type"] != "unreachable" or not record["peer_address_digest"] or record["ping_count"] < 1:
+            raise OverlayProbeError("route-unavailable record lacks an actual peer probe")
     if record["status"] in {"credentials_missing", "peer_overlay_not_configured"} and record["route_type"] != "not_attempted":
         raise OverlayProbeError("unconfigured record cannot claim a measured route")
     return dict(record)
