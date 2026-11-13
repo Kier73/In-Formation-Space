@@ -607,6 +607,7 @@ func verifyAuthorityProcessEvidence(
 	staleAttempt object,
 	ledger object,
 	historyRows []any,
+	expectedAttemptID string,
 ) (string, error) {
 	if err := exactFields(processEvidence,
 		"format", "authority_store_type", "authority_process_count", "phases",
@@ -714,7 +715,9 @@ func verifyAuthorityProcessEvidence(
 	}
 	requestAttempt, err := textValue(staleAttempt["stale_attempt_id"], "stale_attempt_id")
 	if err != nil { return "", err }
-	_ = requestAttempt
+	if requestAttempt != expectedAttemptID+":stale-replay" {
+		return "", fail("stale replay attempt ID does not derive from the authorized request")
+	}
 	evidenceDigest, err := digest(processEvidence)
 	if err != nil { return "", err }
 	return evidenceDigest, nil
@@ -733,11 +736,18 @@ func verifyAuthorityAttestation(
 	ledgerSequence int64,
 	event object,
 	attemptID, requestDigest string,
+	historyDigest string,
+	historyRows []any,
+	databaseDigest string,
+	processEvidenceDigest string,
 ) error {
 	if err := exactFields(value,
 		"format", "signature_algorithm", "authority_id", "authority_key_id",
 		"ledger_digest", "ledger_sequence", "authorization_event_digest",
 		"execution_id", "attempt_id", "request_digest", "runner_id",
+		"store_type", "store_revision_count", "store_history_digest",
+		"store_database_sha256", "process_evidence_digest",
+		"process_phase_count", "stale_owner_rejected",
 		"attestation_digest", "signature",
 	); err != nil {
 		return fail("authority attestation fields are invalid: %v", err)
@@ -759,6 +769,13 @@ func verifyAuthorityAttestation(
 		"attempt_id": attemptID,
 		"request_digest": requestDigest,
 		"runner_id": details["runner_id"],
+		"store_type": "sqlite-local-file",
+		"store_revision_count": json.Number(strconv.Itoa(len(historyRows))),
+		"store_history_digest": historyDigest,
+		"store_database_sha256": databaseDigest,
+		"process_evidence_digest": processEvidenceDigest,
+		"process_phase_count": json.Number("3"),
+		"stale_owner_rejected": true,
 	}
 	for key, expectedValue := range expected {
 		if value[key] != expectedValue {
