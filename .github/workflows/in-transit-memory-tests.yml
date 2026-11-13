@@ -30,3 +30,5 @@ jobs:
         run: python experiments/in-transit-memory/delay_loop.py --scan --simulate --trials 2000 --seed 20261111 --json > /dev/null
       - name: Exercise the burst-loss scan and simulation CLI
         run: python experiments/in-transit-memory/burst_loss.py --scan --max-rounds 300 --simulate --trials 500 --seed 20261112 --json > /dev/null
+      - name: Exercise the state-preserving repair sweep and simulation CLI
+        run: python experiments/in-transit-memory/repair_epochs.py --scan --simulate --trials 250 --seed 20261112 --json > /dev/null
