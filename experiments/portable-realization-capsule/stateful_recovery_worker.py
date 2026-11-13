@@ -26,6 +26,7 @@ from portable_stateful_checkpoint import decode_checkpoint
 from prepared_result_validation import (
     PreparedResultValidatorEndpoint,
     validate_prepared_result_remotely,
+    verify_stored_remote_validator_receipt,
 )
 from stateful_recovery_handoff import (
     StatefulRuntimeRecoveryEnvelope,
@@ -36,7 +37,7 @@ from stateful_recovery_handoff import (
 REQUEST_CHANNEL = "ifs.psc.stateful-recovery.request.v1"
 RESPONSE_CHANNEL = "ifs.psc.stateful-recovery.response.v1"
 OUTBOX_SCHEMA = "ifs.psc.stateful-recovery-worker-outbox.v1"
-PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v3"
+PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v4"
 _MAX_RECORD_BYTES = 96 * 1024 * 1024
 
 
@@ -475,7 +476,7 @@ def _resume_once(
 
 
 def _run(arguments: list[str]) -> int:
-    if len(arguments) != 21:
+    if len(arguments) != 22:
         raise ValueError(
             "worker requires membership/claim stores, authority B/C endpoints, runtime identity, "
             "next controls, validator peer/host/port/DNS/certificate pin, worker certificate/key, "
@@ -502,6 +503,7 @@ def _run(arguments: list[str]) -> int:
         worker_certificate_path,
         worker_private_key_path,
         validator_ca_path,
+        validator_attestation_public_key_path,
         crash_mode,
     ) = arguments
 
@@ -523,6 +525,7 @@ def _run(arguments: list[str]) -> int:
         worker_certificate_path=Path(worker_certificate_path),
         worker_private_key_path=Path(worker_private_key_path),
         trusted_server_ca_path=Path(validator_ca_path),
+        attestation_public_key_path=Path(validator_attestation_public_key_path),
     )
 
     listener = SocketTransport.listen("127.0.0.1", 0)
@@ -582,6 +585,11 @@ def _run(arguments: list[str]) -> int:
             owner_host_id=owner_host_id,
             implementation_fingerprint=implementation_fingerprint,
         )
+        if prepared is not None and prepared.get("remote_validator_receipt") is not None:
+            verify_stored_remote_validator_receipt(
+                validator_endpoint,
+                prepared["remote_validator_receipt"],
+            )
         selected_next_controls = (
             decode_checkpoint(prepared["output_checkpoint"])["resume_controls"]
             if prepared is not None
