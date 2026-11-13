@@ -116,6 +116,30 @@ theorem sign_stable_of_excluded_root
       have hmzero : m = 0 := Rat.le_antisymm hm_le hzero_le
       simp [affine, hmzero]
 
+/-- A zero-slope affine function is constant for every rational coordinate,
+    with no need to invent a root when its bias is nonzero. -/
+theorem constant_slope_stable (b probe x : Rat) :
+    decide (0 < affine 0 b probe) = decide (0 < affine 0 b x) := by
+  simp [affine]
+
+/-- The concrete arithmetic root exclusion discharges COE-005's abstract
+    stability premise, giving a pointwise ReLU/branch equivalence for *every*
+    interior coordinate of the certified interval. -/
+theorem selected_relu_sound_on_root_free_cell
+    (m b left right root probe x : Rat)
+    (hroot : affine m b root = 0)
+    (hexcluded : ¬ (left < root ∧ root < right))
+    (hprobe : left < probe ∧ probe < right)
+    (hx : left < x ∧ x < right) :
+    COECellSoundness.selected (fun z : Rat => decide (0 < z)) 0
+        (affine m b) probe x =
+    COECellSoundness.rectified (fun z : Rat => decide (0 < z)) 0
+        (affine m b x) := by
+  exact COECellSoundness.selected_sound_of_stable_decision
+    (fun z : Rat => decide (0 < z)) 0 (affine m b) probe x
+    (sign_stable_of_excluded_root m b left right root probe x
+      hroot hexcluded hprobe hx)
+
 /-- Even at the exact zero, the branch selected from *any* interior probe
     agrees with a pointwise ReLU. This handles a root on either endpoint. -/
 theorem selected_at_root_zero (m b root probe : Rat)
@@ -131,5 +155,7 @@ theorem selected_at_root_zero (m b root probe : Rat)
 #print axioms COERationalRoot.increasing
 #print axioms COERationalRoot.decreasing
 #print axioms COERationalRoot.sign_stable_of_excluded_root
+#print axioms COERationalRoot.constant_slope_stable
+#print axioms COERationalRoot.selected_relu_sound_on_root_free_cell
 #print axioms COERationalRoot.selected_at_root_zero
 end COERationalRoot
