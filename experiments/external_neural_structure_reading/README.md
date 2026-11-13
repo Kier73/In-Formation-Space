@@ -142,6 +142,32 @@ The retained result is `weight-geometry.schema.json` JSON containing numerical s
 
 The live workflow is [HFR-001 selected weight geometry](../../../.github/workflows/hfr-001-weight-geometry.yml). Its artifact is `hfr-001-gpt2-weight-geometry`.
 
+## First selected-weight observation
+
+The first live selected-weight run completed against the same pinned GPT-2 revision on GitHub-hosted CI: [run 43477077827](https://github.com/Kier73/In-Formation-Space/actions/runs/43477077827). The retained artifact is named `hfr-001-gpt2-weight-geometry`.
+
+Observed result:
+
+| Measurement | First block (0) | Last block (11) |
+| --- | ---: | ---: |
+| Fused QKV Frobenius norm | 265.537 | 170.899 |
+| Approximate spectral norm (16 power iterations) | 44.745 | 14.811 |
+| Approximate stable rank | 35.22 | 133.14 |
+| Exact-zero fraction | 0 | 0 |
+
+Cosine similarity between first and last stored matrices:
+
+| Parameter slice | Cosine similarity |
+| --- | ---: |
+| Fused QKV | -0.00159 |
+| Query | -0.00241 |
+| Key | -0.00138 |
+| Value | -0.00255 |
+
+These values are recorded as a small, reproducible observation of two parameter arrays—not as a statement about what either layer computes or represents. In particular, the hidden-state coordinate systems can evolve through the network, so raw cross-layer weight cosine is not a basis-invariant functional comparison. Stable-rank values are approximate because the spectral norm is estimated by deterministic 16-step power iteration.
+
+The selected payload hashes and exact absolute file ranges are retained in the geometry artifact. The two payloads total 14,155,776 bytes; no raw parameter values were written into the artifact.
+
 ## Fail-closed checks
 
 The reader rejects duplicate JSON keys, non-finite JSON constants, oversized JSON/header regions, non-commit revision labels, invalid tensor entries, negative dimensions or offsets, offsets beyond the data section, overlapping tensor ranges, symbolic links, path traversal, duplicate tensor names across shards, and any mismatch between a shard index and observed headers.
