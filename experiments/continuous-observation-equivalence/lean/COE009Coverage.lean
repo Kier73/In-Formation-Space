@@ -45,11 +45,13 @@ private theorem joinedCoversFrom (first : Cell) (rest : List Cell) (x : Rat)
                 have hb : belowRight first x = true := by
                   simp [belowRight, hrt, hle]
                 exact hbelow hb
-              exact ⟨t, hrt, ht⟩
-        have hj : joinVerified first next = true := by
+              exact ⟨t, rfl, ht⟩
+        have hpair : joinVerified first next = true ∧
+            joinedChain (next :: tail) = true := by
           change (joinVerified first next &&
             joinedChain (next :: tail)) = true at hlinks
-          exact (Bool.and_eq_true.mp hlinks).1
+          simpa only [Bool.and_eq_true] using hlinks
+        have hj : joinVerified first next = true := hpair.1
         have hnextLeft : next.left = some t := by
           cases hn : next.left with
           | none =>
@@ -60,10 +62,7 @@ private theorem joinedCoversFrom (first : Cell) (rest : List Cell) (x : Rat)
               simpa [hn, heq]
         have hnextStart : aboveLeft next x = true := by
           simp [aboveLeft, hnextLeft, Rat.le_of_lt ht]
-        have hnextLinks : joinedChain (next :: tail) = true := by
-          change (joinVerified first next &&
-            joinedChain (next :: tail)) = true at hlinks
-          exact (Bool.and_eq_true.mp hlinks).2
+        have hnextLinks : joinedChain (next :: tail) = true := hpair.2
         have hnextEnd : lastUnbounded (next :: tail) = true := by
           change lastUnbounded (next :: tail) = true at hlast
           exact hlast
@@ -88,10 +87,10 @@ theorem verifiedCoverCoversRationals (cert : Cert) (x : Rat)
       have hc' : coverVerified (first :: rest) = true := by
         simpa [hcells] using hc
       have hparts :
-          decide (first.left = none) &&
+          (decide (first.left = none) &&
           lastUnbounded (first :: rest) &&
           (first :: rest).all intervalProper &&
-          joinedChain (first :: rest) = true := by
+          joinedChain (first :: rest)) = true := by
         simpa only [coverVerified] using hc'
       simp only [Bool.and_eq_true] at hparts
       have hleft : first.left = none := by
