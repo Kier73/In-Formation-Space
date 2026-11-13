@@ -1,0 +1,234 @@
+name: Unified attested Lean serialized kernel receipt
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/lean-kernel-independent-recheck/**"
+      - ".github/workflows/lean-unified-kernel-receipt.yml"
+  pull_request:
+    paths:
+      - "experiments/lean-kernel-independent-recheck/**"
+      - ".github/workflows/lean-unified-kernel-receipt.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof_runner:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - name: Fail-closed unified receipt adversarial tests (mocked CLI only)
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: python -m unittest discover -s experiments/lean-kernel-independent-recheck -p "test_unified_kernel_receipt.py" -v
+      - name: Observe fixed theorem and export elaborated term
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          python experiments/lean-kernel-independent-recheck/term_receipt.py produce \
+            --output evidence/unified-runner.json
+      - name: Attest exact originating runner bytes on main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/unified-runner.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unified-proof-runner
+          path: evidence/unified-runner.json
+          if-no-files-found: error
+          retention-days: 45
+
+  independent_checker:
+    needs: [proof_runner]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-proof-runner
+          path: received-runner
+      - name: Re-extract source independently and sign exact term statement
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          mkdir -p evidence
+          python experiments/lean-kernel-independent-recheck/term_receipt.py keys \
+            --private evidence/unified-ephemeral-private.pem \
+            --public evidence/unified-ephemeral-public.pem
+          python experiments/lean-kernel-independent-recheck/term_receipt.py recheck \
+            --runner received-runner/unified-runner.json \
+            --private evidence/unified-ephemeral-private.pem \
+            --checker-output evidence/unified-source-checker.json \
+            --output evidence/unified-signed-source.json
+          rm evidence/unified-ephemeral-private.pem
+      - name: Attest source-recheck observation, signed report and key
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            evidence/unified-source-checker.json
+            evidence/unified-signed-source.json
+            evidence/unified-ephemeral-public.pem
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unified-source-checker
+          path: |
+            evidence/unified-source-checker.json
+            evidence/unified-signed-source.json
+            evidence/unified-ephemeral-public.pem
+          if-no-files-found: error
+          retention-days: 45
+
+  serialized_kernel_checker:
+    needs: [proof_runner]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-proof-runner
+          path: received-runner
+      - name: Reconstruct serialized Expr and invoke Lean kernel with adversarial controls
+        env:
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          python experiments/lean-kernel-independent-recheck/serialized_kernel_evidence.py \
+            --runner received-runner/unified-runner.json \
+            --output evidence/unified-serialized-kernel.json
+      - name: Attest independent reconstructed-term kernel report
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/unified-serialized-kernel.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unified-serialized-kernel
+          path: evidence/unified-serialized-kernel.json
+          if-no-files-found: error
+          retention-days: 90
+
+  vgi_unified_admission:
+    # No GitHub-authorized receipts on PR or manual workflow dispatch.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [independent_checker, serialized_kernel_checker]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install "cryptography>=42,<47"
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-proof-runner
+          path: received-runner
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-source-checker
+          path: received-source-checker
+      - uses: actions/download-artifact@v4
+        with:
+          name: unified-serialized-kernel
+          path: received-serialized-kernel
+      - name: Authenticate all five subjects and admit one VGI kernel receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: experiments/lean-kernel-independent-recheck:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: |
+          python experiments/lean-kernel-independent-recheck/unified_kernel_receipt.py \
+            --runner received-runner/unified-runner.json \
+            --checker received-source-checker/unified-source-checker.json \
+            --signed received-source-checker/unified-signed-source.json \
+            --public-key received-source-checker/unified-ephemeral-public.pem \
+            --serialized-kernel received-serialized-kernel/unified-serialized-kernel.json \
+            --output evidence/unified-vgi-kernel-receipt.json
+      - name: Attest final unified VGI admission result
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/unified-vgi-kernel-receipt.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unified-vgi-kernel-receipt
+          path: evidence/unified-vgi-kernel-receipt.json
+          if-no-files-found: error
+          retention-days: 90
