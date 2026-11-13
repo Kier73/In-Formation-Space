@@ -23,10 +23,10 @@ from mailcpu import (
 )
 
 from portable_stateful_checkpoint import decode_checkpoint
-from prepared_result_validation import (
-    PreparedResultValidatorEndpoint,
-    validate_prepared_result_remotely,
-    verify_stored_remote_validator_receipt,
+from prepared_result_quorum import (
+    load_prepared_result_validator_quorum,
+    validate_prepared_result_with_quorum,
+    verify_stored_remote_validator_quorum_receipt,
 )
 from stateful_recovery_handoff import (
     StatefulRuntimeRecoveryEnvelope,
@@ -37,7 +37,7 @@ from stateful_recovery_handoff import (
 REQUEST_CHANNEL = "ifs.psc.stateful-recovery.request.v1"
 RESPONSE_CHANNEL = "ifs.psc.stateful-recovery.response.v1"
 OUTBOX_SCHEMA = "ifs.psc.stateful-recovery-worker-outbox.v1"
-PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v4"
+PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v5"
 _MAX_RECORD_BYTES = 96 * 1024 * 1024
 
 
@@ -143,7 +143,7 @@ def _read_prepared(
         "prepared_sha256",
     }
     if not isinstance(record, Mapping) or set(record) != fields:
-        raise ValueError("prepared result fields do not match v3")
+        raise ValueError("prepared result fields do not match v5")
     core = {key: record[key] for key in fields if key != "prepared_sha256"}
     if record["schema"] != PREPARED_SCHEMA or _digest(core) != record["prepared_sha256"]:
         raise ValueError("prepared result schema or digest is invalid")
@@ -169,8 +169,8 @@ def _read_prepared(
             raise ValueError("prepared remote-validator receipt digest mismatch")
         if (
             verification is None
-            or remote_receipt.get("validation") != verification
-            or remote_receipt.get("validation_digest") != verification.get("verification_digest")
+            or remote_receipt.get("verification") != verification
+            or remote_receipt.get("verification_digest") != verification.get("verification_digest")
         ):
             raise ValueError("prepared remote-validator receipt is not bound to the independent verification")
     if (
@@ -337,13 +337,13 @@ def _store_remote_validator_receipt(
 
 def _verify_prepared_remotely(
     *,
-    endpoint: PreparedResultValidatorEndpoint,
+    validator_quorum: Any,
     envelope: StatefulRuntimeRecoveryEnvelope,
     prepared_path: Path,
 ) -> dict[str, Any]:
     prepared = json.loads(prepared_path.read_text(encoding="utf-8"))
-    return validate_prepared_result_remotely(
-        endpoint,
+    return validate_prepared_result_with_quorum(
+        validator_quorum,
         envelope=envelope.to_dict(),
         prepared_record=prepared,
     )
@@ -476,11 +476,10 @@ def _resume_once(
 
 
 def _run(arguments: list[str]) -> int:
-    if len(arguments) != 22:
+    if len(arguments) != 14:
         raise ValueError(
             "worker requires membership/claim stores, authority B/C endpoints, runtime identity, "
-            "next controls, validator peer/host/port/DNS/certificate pin, worker certificate/key, "
-            "validator CA bundle, and crash mode"
+            "next controls, validator quorum config path, and crash mode"
         )
     (
         membership_path,
@@ -495,15 +494,7 @@ def _run(arguments: list[str]) -> int:
         owner_host_id,
         implementation_fingerprint,
         next_controls_json,
-        validator_peer_id,
-        validator_host,
-        validator_port,
-        validator_dns_identity,
-        validator_certificate_sha256,
-        worker_certificate_path,
-        worker_private_key_path,
-        validator_ca_path,
-        validator_attestation_public_key_path,
+        validator_quorum_config_path,
         crash_mode,
     ) = arguments
 
@@ -513,19 +504,11 @@ def _run(arguments: list[str]) -> int:
     next_resume_controls = json.loads(next_controls_json)
     if not isinstance(next_resume_controls, Mapping):
         raise ValueError("next resume controls must be a JSON object")
-    validator_endpoint = PreparedResultValidatorEndpoint(
-        validator_peer_id=validator_peer_id,
-        host=validator_host,
-        port=int(validator_port),
-        server_dns_identity=validator_dns_identity,
-        server_certificate_sha256=validator_certificate_sha256,
+    validator_quorum = load_prepared_result_validator_quorum(
+        Path(validator_quorum_config_path),
         worker_peer_id=owner_peer_id,
         worker_host_id=owner_host_id,
         worker_implementation_fingerprint=implementation_fingerprint,
-        worker_certificate_path=Path(worker_certificate_path),
-        worker_private_key_path=Path(worker_private_key_path),
-        trusted_server_ca_path=Path(validator_ca_path),
-        attestation_public_key_path=Path(validator_attestation_public_key_path),
     )
 
     listener = SocketTransport.listen("127.0.0.1", 0)
@@ -586,8 +569,8 @@ def _run(arguments: list[str]) -> int:
             implementation_fingerprint=implementation_fingerprint,
         )
         if prepared is not None and prepared.get("remote_validator_receipt") is not None:
-            verify_stored_remote_validator_receipt(
-                validator_endpoint,
+            verify_stored_remote_validator_quorum_receipt(
+                validator_quorum,
                 prepared["remote_validator_receipt"],
             )
         selected_next_controls = (
@@ -641,7 +624,7 @@ def _run(arguments: list[str]) -> int:
                     "prepared file changed after construction and no longer matches the in-memory transition result"
                 )
             independent = _verify_prepared_remotely(
-                endpoint=validator_endpoint,
+                validator_quorum=validator_quorum,
                 envelope=envelope,
                 prepared_path=prepared_path,
             )
