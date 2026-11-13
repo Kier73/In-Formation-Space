@@ -1,0 +1,285 @@
+{
+  "experiment": "RE-004",
+  "host_separation": "local OS processes",
+  "not_established": [
+    "universal causal attribution",
+    "source event authentication",
+    "physical host independence",
+    "real interference-free isolation",
+    "distributed consensus",
+    "shared wall or monotonic clock"
+  ],
+  "results": [
+    {
+      "a_only_survivors": [
+        "coordinate_alias",
+        "high_gain",
+        "triggered_external"
+      ],
+      "b_actions": [
+        "witness"
+      ],
+      "b_outcomes": [
+        5
+      ],
+      "b_status": [
+        "observed"
+      ],
+      "combined": {
+        "causal_scope": "explicit A-head-to-B-handoff dependency only; no inferred external event causality",
+        "evidence_scope": "unkeyed digests and synthetic permitted transitions; not host authentication",
+        "global_elapsed": null,
+        "physical_source_attribution": null,
+        "rejected": {
+          "ambient_external": {
+            "action": "idle",
+            "actor": "A",
+            "observed": 2,
+            "predicted": 3,
+            "sequence": 1
+          },
+          "coordinate_alias": {
+            "action": "witness",
+            "actor": "B",
+            "observed": 5,
+            "predicted": 2,
+            "sequence": 0
+          },
+          "high_gain": {
+            "action": "witness",
+            "actor": "B",
+            "observed": 5,
+            "predicted": 2,
+            "sequence": 0
+          },
+          "low_gain": {
+            "action": "apply",
+            "actor": "A",
+            "observed": 2,
+            "predicted": 1,
+            "sequence": 0
+          }
+        },
+        "schema": "in-formation.re004-reconstruction/1",
+        "status": "singleton_within_catalogue",
+        "survivors": [
+          "triggered_external"
+        ]
+      },
+      "truth_fixture": "triggered_external"
+    },
+    {
+      "a_only_survivors": [
+        "coordinate_alias",
+        "high_gain",
+        "triggered_external"
+      ],
+      "b_actions": [
+        "witness"
+      ],
+      "b_outcomes": [
+        null
+      ],
+      "b_status": [
+        "refused"
+      ],
+      "combined": {
+        "causal_scope": "explicit A-head-to-B-handoff dependency only; no inferred external event causality",
+        "evidence_scope": "unkeyed digests and synthetic permitted transitions; not host authentication",
+        "global_elapsed": null,
+        "physical_source_attribution": null,
+        "rejected": {
+          "ambient_external": {
+            "action": "idle",
+            "actor": "A",
+            "observed": 2,
+            "predicted": 3,
+            "sequence": 1
+          },
+          "low_gain": {
+            "action": "apply",
+            "actor": "A",
+            "observed": 2,
+            "predicted": 1,
+            "sequence": 0
+          }
+        },
+        "schema": "in-formation.re004-reconstruction/1",
+        "status": "unresolved_equivalence_class",
+        "survivors": [
+          "coordinate_alias",
+          "high_gain",
+          "triggered_external"
+        ]
+      },
+      "truth_fixture": "triggered_external"
+    },
+    {
+      "a_only_survivors": [
+        "coordinate_alias",
+        "high_gain",
+        "triggered_external"
+      ],
+      "b_actions": [
+        "witness"
+      ],
+      "b_outcomes": [
+        2
+      ],
+      "b_status": [
+        "observed"
+      ],
+      "combined": {
+        "causal_scope": "explicit A-head-to-B-handoff dependency only; no inferred external event causality",
+        "evidence_scope": "unkeyed digests and synthetic permitted transitions; not host authentication",
+        "global_elapsed": null,
+        "physical_source_attribution": null,
+        "rejected": {
+          "ambient_external": {
+            "action": "idle",
+            "actor": "A",
+            "observed": 2,
+            "predicted": 3,
+            "sequence": 1
+          },
+          "low_gain": {
+            "action": "apply",
+            "actor": "A",
+            "observed": 2,
+            "predicted": 1,
+            "sequence": 0
+          },
+          "triggered_external": {
+            "action": "witness",
+            "actor": "B",
+            "observed": 2,
+            "predicted": 5,
+            "sequence": 0
+          }
+        },
+        "schema": "in-formation.re004-reconstruction/1",
+        "status": "unresolved_equivalence_class",
+        "survivors": [
+          "coordinate_alias",
+          "high_gain"
+        ]
+      },
+      "truth_fixture": "high_gain"
+    },
+    {
+      "a_only_survivors": [
+        "coordinate_alias",
+        "high_gain",
+        "triggered_external"
+      ],
+      "b_actions": [
+        "isolated_apply"
+      ],
+      "b_outcomes": [
+        11
+      ],
+      "b_status": [
+        "applied"
+      ],
+      "combined": {
+        "causal_scope": "explicit A-head-to-B-handoff dependency only; no inferred external event causality",
+        "evidence_scope": "unkeyed digests and synthetic permitted transitions; not host authentication",
+        "global_elapsed": null,
+        "physical_source_attribution": null,
+        "rejected": {
+          "ambient_external": {
+            "action": "idle",
+            "actor": "A",
+            "observed": 2,
+            "predicted": 3,
+            "sequence": 1
+          },
+          "coordinate_alias": {
+            "action": "isolated_apply",
+            "actor": "B",
+            "observed": 11,
+            "predicted": 14,
+            "sequence": 0
+          },
+          "high_gain": {
+            "action": "isolated_apply",
+            "actor": "B",
+            "observed": 11,
+            "predicted": 14,
+            "sequence": 0
+          },
+          "low_gain": {
+            "action": "apply",
+            "actor": "A",
+            "observed": 2,
+            "predicted": 1,
+            "sequence": 0
+          }
+        },
+        "schema": "in-formation.re004-reconstruction/1",
+        "status": "singleton_within_catalogue",
+        "survivors": [
+          "triggered_external"
+        ]
+      },
+      "truth_fixture": "triggered_external"
+    },
+    {
+      "a_only_survivors": [
+        "ambient_external"
+      ],
+      "b_actions": [
+        "witness"
+      ],
+      "b_outcomes": [
+        8
+      ],
+      "b_status": [
+        "observed"
+      ],
+      "combined": {
+        "causal_scope": "explicit A-head-to-B-handoff dependency only; no inferred external event causality",
+        "evidence_scope": "unkeyed digests and synthetic permitted transitions; not host authentication",
+        "global_elapsed": null,
+        "physical_source_attribution": null,
+        "rejected": {
+          "coordinate_alias": {
+            "action": "idle",
+            "actor": "A",
+            "observed": 3,
+            "predicted": 2,
+            "sequence": 1
+          },
+          "high_gain": {
+            "action": "idle",
+            "actor": "A",
+            "observed": 3,
+            "predicted": 2,
+            "sequence": 1
+          },
+          "low_gain": {
+            "action": "apply",
+            "actor": "A",
+            "observed": 2,
+            "predicted": 1,
+            "sequence": 0
+          },
+          "triggered_external": {
+            "action": "idle",
+            "actor": "A",
+            "observed": 3,
+            "predicted": 2,
+            "sequence": 1
+          }
+        },
+        "schema": "in-formation.re004-reconstruction/1",
+        "status": "singleton_within_catalogue",
+        "survivors": [
+          "ambient_external"
+        ]
+      },
+      "truth_fixture": "ambient_external"
+    }
+  ],
+  "schema": "in-formation.response-re004/0.1"
+}
