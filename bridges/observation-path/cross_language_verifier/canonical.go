@@ -13,6 +13,8 @@ import (
 	"math/big"
 	"os"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -78,22 +80,110 @@ func DecodeObject(raw []byte) (Object, error) {
 // UTF-8 is retained, and HTML characters are not escaped. Floating-point and
 // exponent-form JSON number tokens are rejected rather than silently normalized
 // differently by two runtimes.
+// CanonicalBytes implements Canonical Metadata Profile v1 directly. Encoding
+// strings rune-by-rune avoids post-processing \u2028/\u2029 byte sequences,
+// which could otherwise corrupt an ordinary literal string containing those
+// six characters after a backslash.
 func CanonicalBytes(value any) ([]byte, error) {
 	if err := validateIntegerNumberDomain(value, "$"); err != nil {
 		return nil, err
 	}
 	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
-	enc.SetEscapeHTML(false)
-	if err := enc.Encode(value); err != nil {
-		return nil, fail("cannot encode canonical JSON: %v", err)
+	if err := appendCanonicalJSON(&buf, value); err != nil {
+		return nil, err
 	}
-	out := bytes.TrimSuffix(buf.Bytes(), []byte("\n"))
-	// encoding/json always escapes these two Unicode separators; Python's
-	// ensure_ascii=False leaves them as UTF-8, so restore the literal codepoints.
-	out = bytes.ReplaceAll(out, []byte("\\u2028"), []byte("\u2028"))
-	out = bytes.ReplaceAll(out, []byte("\\u2029"), []byte("\u2029"))
-	return append([]byte(nil), out...), nil
+	return buf.Bytes(), nil
+}
+
+func appendCanonicalString(buf *bytes.Buffer, value string) {
+	buf.WriteByte('"')
+	for _, r := range value {
+		switch r {
+		case '"':
+			buf.WriteString(\x60\\\"\x60)
+		case '\\\\':
+			buf.WriteString(\x60\\\\\x60)
+		case '\\b':
+			buf.WriteString(\x60\\b\x60)
+		case '\\f':
+			buf.WriteString(\x60\\f\x60)
+		case '\\n':
+			buf.WriteString(\x60\\n\x60)
+		case '\\r':
+			buf.WriteString(\x60\\r\x60)
+		case '\\t':
+			buf.WriteString(\x60\\t\x60)
+		default:
+			if r < 0x20 {
+				fmt.Fprintf(buf, "\\\\u%04x", r)
+			} else {
+				buf.WriteRune(r)
+			}
+		}
+	}
+	buf.WriteByte('"')
+}
+
+func appendCanonicalJSON(buf *bytes.Buffer, value any) error {
+	switch v := value.(type) {
+	case nil:
+		buf.WriteString("null")
+	case bool:
+		if v { buf.WriteString("true") } else { buf.WriteString("false") }
+	case string:
+		appendCanonicalString(buf, v)
+	case json.Number:
+		buf.WriteString(string(v))
+	case int:
+		buf.Write(strconv.AppendInt(nil, int64(v), 10))
+	case int8:
+		buf.Write(strconv.AppendInt(nil, int64(v), 10))
+	case int16:
+		buf.Write(strconv.AppendInt(nil, int64(v), 10))
+	case int32:
+		buf.Write(strconv.AppendInt(nil, int64(v), 10))
+	case int64:
+		buf.Write(strconv.AppendInt(nil, v, 10))
+	case uint:
+		buf.Write(strconv.AppendUint(nil, uint64(v), 10))
+	case uint8:
+		buf.Write(strconv.AppendUint(nil, uint64(v), 10))
+	case uint16:
+		buf.Write(strconv.AppendUint(nil, uint64(v), 10))
+	case uint32:
+		buf.Write(strconv.AppendUint(nil, uint64(v), 10))
+	case uint64:
+		buf.Write(strconv.AppendUint(nil, v, 10))
+	case map[string]any:
+		keys := make([]string, 0, len(v))
+		for key := range v { keys = append(keys, key) }
+		sort.Strings(keys)
+		buf.WriteByte('{')
+		for index, key := range keys {
+			if index > 0 { buf.WriteByte(',') }
+			appendCanonicalString(buf, key)
+			buf.WriteByte(':')
+			if err := appendCanonicalJSON(buf, v[key]); err != nil { return err }
+		}
+		buf.WriteByte('}')
+	case []any:
+		buf.WriteByte('[')
+		for index, item := range v {
+			if index > 0 { buf.WriteByte(',') }
+			if err := appendCanonicalJSON(buf, item); err != nil { return err }
+		}
+		buf.WriteByte(']')
+	case []string:
+		buf.WriteByte('[')
+		for index, item := range v {
+			if index > 0 { buf.WriteByte(',') }
+			appendCanonicalString(buf, item)
+		}
+		buf.WriteByte(']')
+	default:
+		return fail("canonical metadata contains unsupported value %T", value)
+	}
+	return nil
 }
 
 const maxSafeInteger = int64(1<<53 - 1)
