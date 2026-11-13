@@ -24,10 +24,16 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 ROOT = Path(__file__).resolve().parents[2]
-for relative in ("bridges/observation-path", "bridges/temporal-provenance"):
-    candidate = ROOT / relative
-    if str(candidate) not in sys.path:
-        sys.path.insert(0, str(candidate))
+for candidate in (
+    ROOT / "external" / "E-CPU",
+    ROOT / "bridges" / "observation-path",
+    ROOT / "bridges" / "temporal-provenance",
+):
+    # Resolve the E-CPU checkout from the workspace, not from the script's
+    # directory. PYTHONPATH entries are not reliably relative in script mode.
+    resolved = str(candidate.resolve())
+    if resolved not in sys.path:
+        sys.path.insert(0, resolved)
 
 from operation_spans import OperationSpanRecorder, validate_operation_span
 from distributed_operation_path import (
