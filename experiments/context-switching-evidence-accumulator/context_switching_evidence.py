@@ -295,12 +295,17 @@ def _prefix_layer_summary(
                     "next_signal_a_probability": _doc(evidence_a),
                     "next_signal_b_probability": _doc(evidence_b),
                 })
+            def rational_identity(value):
+                if value is None:
+                    return None
+                return (value["numerator"], value["denominator"])
+
             diverges_on_a = len({
-                row["next_posterior_hypothesis_a_on_signal_a"]
+                rational_identity(row["next_posterior_hypothesis_a_on_signal_a"])
                 for row in rows
             }) > 1
             diverges_on_b = len({
-                row["next_posterior_hypothesis_a_on_signal_b"]
+                rational_identity(row["next_posterior_hypothesis_a_on_signal_b"])
                 for row in rows
             }) > 1
             if diverges_on_a or diverges_on_b:
