@@ -53,7 +53,7 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
             "overlay_tag": overlay.TAG,
             "overlay_ipv4": address["overlay_ipv4"],
             "address_digest": address["address_digest"],
-            "peer_address_digest": None if peer is None else peer["address_digest"],
+            "peer_address_digest": None if peer is None else overlay.digest_bytes(overlay.canonical(peer) + b"\n"),
             "peer_role": "server_host" if role == "client_host" else "client_host",
             "peer_overlay_ipv4": None if peer is None else peer["overlay_ipv4"],
             "peer_address_attestation": peer_attestation,
