@@ -50,3 +50,45 @@ CI runs those commands and retains the deterministic report as an artifact. The 
 ## Background
 
 Piecewise-linear neural verification and exact partitioning are established approaches, not inventions claimed here. See [Bunel et al. (JMLR 2020)](https://jmlr.org/papers/v21/19-468.html) and [Advances in verification of ReLU neural networks](https://link.springer.com/article/10.1007/s10898-020-00949-1). COE-001 is an executable, tightly scoped bridge to observation-relative semantic identity in the three research projects.
+
+
+## COE-002 — Portable exact activation-cell certificates and independent checking
+
+**Question:** Can a separately executed verifier establish a claimed complete-domain ReLU function *without running or trusting the algorithm that constructed the claim?*
+
+COE-002 adds a two-sided protocol. The original atlas constructor emits a set of **atomic activation cells** across the entire real line. Unlike its normalized final-output atlas, these cells preserve all internal ReLU zero crossings, **including hidden changes that subsequently cancel in the final output**. A standalone Python standard-library checker has no import or call into the constructor, its direct evaluator, or the certificate producer. It **verifies proposed cells** rather than using COE-001's procedure to discover missing regions.
+
+The certificate contains:
+
+- Exact rational, one-dimensional affine/ReLU network layers (canonical integer or reduced fraction strings).
+- A SHA-256 digest of the canonical network description; the independent checker also accepts an independently known expected network digest.
+- An ordered, exhaustive cover of open intervals, with finite rational or unbounded endpoints, and the claimed affine output vector on each interval.
+- The reduced, maximal affine output atlas and its COE-001-compatible semantic SHA-256.
+
+For **each proposed atomic interval**, the independent checker symbolically starts from input affine form (1,0), propagates through every layer, and establishes that *every nonconstant ReLU preactivation's exact zero lies outside the interval's interior*. Its sign cannot change inside a zero-free interval, so activation branches are fixed and the claimed affine output is checked exactly. It rejects false laws, discontinuity, holes, overlaps, truncated tails, unsorted intervals, invalid rational representations, unknown fields, inexact parameter encodings, incorrect source/semantic digests, and disclosed-cell omissions. Since affine/ReLU networks are continuous, the checked open-interval laws also determine their endpoint outputs. The checker independently reduces the verified cells to the semantic atlas and verifies its digest.
+
+A particularly important negative control takes the valid one-region **output** atlas for ReLU(x)-ReLU(-x)=x and presents it as a single **activation** cell over all reals. Even though its final function is correct, the checker rejects the certificate: the proposed cell conceals hidden sign changes at x=0. Providing the correct two activation cells passes, and the output digest still matches the one-layer identity function.
+
+### Reproduce
+
+From this experiment directory, using Python 3.11 or later:
+
+~~~bash
+python -m unittest discover -s . -p 'test_*.py' -v
+python produce_certificates.py certificate-artifacts
+python verify_certificates.py certificate-artifacts --output independent-certificate-report.json
+~~~
+
+The conformance suite includes adversarial cases for hidden sign changes, incomplete covers, altered affine coefficients, forged source fingerprints, altered reduced atlases, noncanonical rationals, duplicate JSON keys, unsafe formats, and resource ceilings, together with 120 deterministically generated rational networks. The certificate producer and verifier use the same **declared language and data format**, but distinct implementation algorithms; the validator reads no COE-001 module.
+
+The [COE-001 GitHub Actions workflow](../../.github/workflows/continuous-observation-equivalence.yml) now includes separate certificate-producer and certificate-checker jobs. The first retains five canonical JSON certificate artifacts; the second downloads the artifacts and runs the standalone checker in a separately scheduled job. It retains a report recording exact source identities, exact semantic fingerprints, number of checked activation cells, and artifact-byte hashes.
+
+### Scope of verification and remaining work
+
+- **Mathematical statement:** all-real scalar input, finite feed-forward networks with *rational* weights and affine/ReLU activations, under ideal exact arithmetic; output vectors may contain multiple components. No floating-point rounding, physical timing, arbitrary activation, or multidimensional input is inferred.
+- **Verification strength:** the checker independently validates a complete *claimed* activation partition; it does not rely on tests of finitely many input points. Failure or a configured verification budget exhaustion is not equivalence evidence. Construction budget exhaustion also remains unresolved.
+- **Source identity:** a digest bundled with its own network description proves only consistency of those bytes. The hosted verifier additionally matches separately embedded expected fixture digests; **these are checked-in test pins, not external provenance or authenticated signatures**. Verification of a third-party network would require obtaining its expected source digest from an appropriate trusted context.
+- **Process separation:** distinct GitHub Actions jobs and separate Python implementations are useful independence of execution and method, **not proof of independent organizations, hardware attestation, or separate administrative trust**.
+- **Formal strength:** this is an independently implemented, finite-certificate arithmetic checker with a mathematical justification for all-real coverage. It has not been checked in Lean, Coq, or another proof assistant.
+
+A useful next step is a small **Go or proof-assistant-based checker** for the same exact serialized certificate, reducing common-mode Python implementation risk; another is a trust-qualified bridge from E-CPU model/Ground identities to this rational certificate profile.
