@@ -84,23 +84,17 @@ class FakeHub:
         )
 
         if parsed.path.endswith(f"/api/models/example-org/tiny-model/revision/{REVISION}"):
-            siblings = [{"rfilename": "config.json"}]
-            siblings.extend({"rfilename": name} for name in self.files)
-            if self.weight_map is not None:
-                siblings.append({"rfilename": "model.safetensors.index.json"})
-            payload = {
-                "sha": self.revision,
-                "siblings": siblings,
-            }
             if self.weight_map is not None:
                 self.files["model.safetensors.index.json"] = json.dumps(
                     {"weight_map": self.weight_map}
                 ).encode("utf-8")
-                siblings.append({"rfilename": "model.safetensors.index.json"})
-                payload["siblings"] = siblings
+            siblings = [{"rfilename": "config.json"}]
+            siblings.extend({"rfilename": name} for name in self.files)
+            payload = {"sha": self.revision, "siblings": siblings}
+            body = json.dumps(payload).encode("utf-8")
             response = FakeResponse(
-                json.dumps(payload).encode("utf-8"),
-                headers={"Content-Length": str(len(json.dumps(payload).encode("utf-8")))},
+                body,
+                headers={"Content-Length": str(len(body))},
                 url=url,
             )
         elif parsed.path.endswith("/resolve/" + REVISION + "/config.json"):
