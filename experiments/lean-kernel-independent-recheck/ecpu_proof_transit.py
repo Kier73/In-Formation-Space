@@ -240,14 +240,22 @@ def send_frames(
         for payload in frames:
             sequence = channel.send(payload)
             deadline = time.monotonic() + budget
+            last_tick = time.monotonic()
             while sequence in channel.pending_sequences():
                 channel.process_ack()
                 if sequence not in channel.pending_sequences():
                     break
-                if time.monotonic() >= deadline:
+                now = time.monotonic()
+                if now >= deadline:
                     raise ProofTransitError(f"delivery ACK missing for reliable sequence {sequence}")
-                channel.tick()
-                time.sleep(0.01)
+                if now - last_tick >= 0.1:
+                    failed = channel.tick()
+                    last_tick = now
+                    if sequence in failed:
+                        raise ProofTransitError(f"E-CPU reliable delivery retries exhausted: {sequence}")
+                time.sleep(0.005)
+            if sequence in channel.failed_sequences:
+                raise ProofTransitError(f"E-CPU reliable delivery failed: {sequence}")
             sent += 1
         return {
             "frames_sent": sent,
@@ -300,6 +308,11 @@ def serve(
         time.sleep(0.1)  # leave time for the final wire ACK to be consumed
         return decision
     finally:
+        # Transport RACK for the terminal frame is a delivery acknowledgement,
+        # even if application-level proof admission fails (e.g. replay). Give
+        # the sender time to observe the ACK before closing TLS.
+        if decoder.finished:
+            time.sleep(0.15)
         tls.close()
 
 
