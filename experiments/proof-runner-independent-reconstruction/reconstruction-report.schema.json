@@ -72,7 +72,11 @@
             "store_history_digest",
             "process_phase_count",
             "stale_owner_attempt_rejected",
-            "owner_generation_after_restart"
+            "owner_generation_after_restart",
+            "process_evidence_digest",
+            "process_instances",
+            "stale_owner_attempt_id",
+            "storage_scope"
           ],
           "properties": {
             "store_type": {
@@ -96,6 +100,54 @@
             },
             "owner_generation_after_restart": {
               "const": 2
+            },
+            "process_evidence_digest": {
+              "$ref": "#/$defs/digest"
+            },
+            "process_instances": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "required": [
+                  "phase",
+                  "process_id",
+                  "process_instance_id",
+                  "decision",
+                  "observed_store_revision"
+                ],
+                "properties": {
+                  "phase": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "process_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "process_instance_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "decision": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "observed_store_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "stale_owner_attempt_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "storage_scope": {
+              "const": "single-host-local-filesystem"
             }
           },
           "additionalProperties": true
