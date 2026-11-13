@@ -203,6 +203,14 @@ jobs:
             --source received-source/host-a.json \
             --receiver received-receiver/host-b.json \
             --output evidence/independent-report.json
+      - name: Bind the third-host identity and exact report bytes
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/independent_host_path.py write-report-predicate \
+            --report evidence/independent-report.json \
+            --output evidence/independent-report.predicate.json
       - name: Validate records and independent reconstruction report schemas
         run: |
           python - <<'PY'
@@ -223,14 +231,6 @@ jobs:
               Draft202012Validator(schema).validate(instance)
               print(f"valid: {instance_path}")
           PY
-      - name: Bind the third-host identity and exact report bytes
-        env:
-          PYTHONPATH: external/E-CPU
-          RUNNER_ENVIRONMENT: ${{ runner.environment }}
-        run: |
-          python bridges/observation-path/independent_host_path.py write-report-predicate \
-            --report evidence/independent-report.json \
-            --output evidence/independent-report.predicate.json
       - name: Attest the independently reconstructed report and verifier identity
         uses: actions/attest@v4
         with:
