@@ -214,6 +214,7 @@ jobs:
               ("bridges/observation-path/independent-host-operation-record.schema.json", "received-source/host-a.json"),
               ("bridges/observation-path/independent-host-operation-record.schema.json", "received-receiver/host-b.json"),
               ("bridges/observation-path/independent-host-operation-report.schema.json", "evidence/independent-report.json"),
+              ("bridges/observation-path/independent-host-operation-report-predicate.schema.json", "evidence/independent-report.predicate.json"),
           )
           for schema_path, instance_path in cases:
               schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
