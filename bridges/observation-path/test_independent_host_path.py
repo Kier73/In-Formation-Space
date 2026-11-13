@@ -113,7 +113,9 @@ class IndependentHostOperationPathTests(unittest.TestCase):
 
     def test_rehashed_source_payload_forgery_is_rejected(self) -> None:
         forged = copy.deepcopy(self.source)
-        forged["temporal_frame"]["causal"]["vector"][forged["host"]["actor_id"]] += 2
+        actor = forged["host"]["actor_id"]
+        forged["temporal_frame"]["causal"]["vector"][actor] += 2
+        forged["temporal_frame"]["causal"]["lamport"] += 2
         core = {key: value for key, value in forged.items() if key != "record_digest"}
         forged["record_digest"] = path.digest_object(core)
         with self.assertRaisesRegex(path.EvidenceError, "handoff payload cannot be independently rebuilt"):
@@ -203,7 +205,7 @@ class IndependentHostOperationPathTests(unittest.TestCase):
                 "verifiedTimestamps": [{"kind": "transparency-log"}],
             }
         }]
-        from unittest.mock import CompletedProcess
+        from subprocess import CompletedProcess
         with patch.object(path, "_gh_version", return_value=(2, 104, 0)):
             with patch.object(
                 path.subprocess,
