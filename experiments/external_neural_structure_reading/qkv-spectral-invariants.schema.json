@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/external_neural_structure_reading/qkv-spectral-invariants.schema.json",
+  "title": "QKV Spectral Invariants v0.1",
+  "description": "Exact per-projection singular spectra and cross-layer spectrum distances for selected tensor payloads; raw tensor values are not retained.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "source_observation", "method", "dimensions", "spectra", "cross_layer_spectral_comparisons", "interpretation"],
+  "properties": {
+    "schema": {"const": "in-formation-space.qkv-spectral-invariants.v0.1"},
+    "source_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision", "license_id"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "license_id": {"type": ["string", "null"]}
+      }
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected_tensor_names", "projection_partition", "svd_method", "normalization", "basis_invariance", "comparison_metrics", "raw_payload_policy"],
+      "properties": {
+        "selected_tensor_names": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "projection_partition": {"const": ["query", "key", "value"]},
+        "svd_method": {"type": "string", "minLength": 1},
+        "normalization": {"type": "string", "minLength": 1},
+        "basis_invariance": {"type": "string", "minLength": 1},
+        "comparison_metrics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "raw_payload_policy": {"type": "string", "minLength": 1}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["matrix_input_width", "fused_qkv_output_width", "per_projection_output_width", "singular_values_per_projection"],
+      "properties": {
+        "matrix_input_width": {"type": "integer", "minimum": 1},
+        "fused_qkv_output_width": {"type": "integer", "minimum": 3},
+        "per_projection_output_width": {"type": "integer", "minimum": 1},
+        "singular_values_per_projection": {"type": "integer", "minimum": 1}
+      }
+    },
+    "spectra": {
+      "type": "object",
+      "minProperties": 2,
+      "maxProperties": 2,
+      "additionalProperties": {"$ref": "#/$defs/tensor-spectra"}
+    },
+    "cross_layer_spectral_comparisons": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "key", "value"],
+      "properties": {
+        "query": {"$ref": "#/$defs/spectrum-comparison"},
+        "key": {"$ref": "#/$defs/spectrum-comparison"},
+        "value": {"$ref": "#/$defs/spectrum-comparison"}
+      }
+    },
+    "interpretation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "claims", "not_established"],
+      "properties": {
+        "status": {"const": "basis-invariant-linear-parameter-structure"},
+        "claims": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "not_established": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  },
+  "$defs": {
+    "tensor-evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_sha256", "payload_sha256_scope", "shard_header_sha256", "size_bytes", "absolute_byte_range"],
+      "properties": {
+        "payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "payload_sha256_scope": {"const": "complete-selected-tensor-payload"},
+        "shard_header_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "absolute_byte_range": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 0},
+            {"type": "integer", "minimum": 0}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "projection-spectrum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shape", "rank_bound", "singular_values", "frobenius_normalized_singular_values", "singular_value_quantiles", "frobenius_norm", "spectral_norm", "stable_rank", "entropy_effective_rank", "participation_ratio", "top_singular_energy_fraction", "singular_value_count"],
+      "properties": {
+        "shape": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 1},
+            {"type": "integer", "minimum": 1}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "rank_bound": {"type": "integer", "minimum": 1},
+        "singular_values": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": 0}},
+        "frobenius_normalized_singular_values": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": 0}},
+        "singular_value_quantiles": {
+          "type": "object",
+          "required": ["0", "5", "25", "50", "75", "95", "100"],
+          "additionalProperties": {"type": "number", "minimum": 0}
+        },
+        "frobenius_norm": {"type": "number", "minimum": 0},
+        "spectral_norm": {"type": "number", "minimum": 0},
+        "stable_rank": {"type": ["number", "null"], "minimum": 0},
+        "entropy_effective_rank": {"type": ["number", "null"], "minimum": 0},
+        "participation_ratio": {"type": ["number", "null"], "minimum": 0},
+        "top_singular_energy_fraction": {
+          "type": "object",
+          "required": ["1", "8", "32", "64", "128"],
+          "additionalProperties": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+        },
+        "singular_value_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "tensor-spectra": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tensor_evidence", "qkv"],
+      "properties": {
+        "tensor_evidence": {"$ref": "#/$defs/tensor-evidence"},
+        "qkv": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["query", "key", "value"],
+          "properties": {
+            "query": {"$ref": "#/$defs/projection-spectrum"},
+            "key": {"$ref": "#/$defs/projection-spectrum"},
+            "value": {"$ref": "#/$defs/projection-spectrum"}
+          }
+        }
+      }
+    },
+    "spectrum-comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mean_absolute_frobenius_normalized_singular_value_distance", "root_mean_square_frobenius_normalized_singular_value_distance", "squared_energy_jensen_shannon_divergence_bits", "interpretation"],
+      "properties": {
+        "mean_absolute_frobenius_normalized_singular_value_distance": {"type": "number", "minimum": 0},
+        "root_mean_square_frobenius_normalized_singular_value_distance": {"type": "number", "minimum": 0},
+        "squared_energy_jensen_shannon_divergence_bits": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "interpretation": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
