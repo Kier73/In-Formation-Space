@@ -35,7 +35,7 @@ class LeanCertificateBridgeTests(unittest.TestCase):
         self.assertEqual(len(metadata["models"]), 5)
         for name in sorted(EXPECTED_NETWORK_DIGESTS):
             self.assertIn(f"def {name} : COEWireCheck.Cert", code)
-            self.assertIn(f"theorem {name}_arith_verified : COEWireCheck.verify {name} = true := by decide", code)
+            self.assertIn(f"theorem {name}_arith_verified : COEWireCheck.verify {name} = true := by decide +kernel", code)
             raw = (self.source / f"{name}.json").read_bytes()
             self.assertEqual(metadata["models"][name]["certificate_file_sha256"],
                              hashlib.sha256(raw).hexdigest())
