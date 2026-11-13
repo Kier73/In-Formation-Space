@@ -204,6 +204,31 @@ The analyzer computes the Q/K/V singular spectra at each sampled depth, all ten 
 
 The sample is intentionally sparse. It does not claim the three unsampled blocks follow the same pattern, and its pairwise distances remain structural summaries rather than functional comparisons. The [five-point depth profile workflow](../../../.github/workflows/hfr-001-layer-spectral-profile.yml) retains the live result as `hfr-001-gpt2-layer-spectral-profile`.
 
+### First live depth-profile result
+
+The live pinned run completed at [workflow run 43478448713](https://github.com/Kier73/In-Formation-Space/actions/runs/43478448713). Across the ten sampled layer pairs, mean absolute distance between Frobenius-normalized spectra averaged:
+
+| Projection | Mean pairwise distance | Maximum pairwise distance |
+| --- | ---: | ---: |
+| Query | 0.00141 | 0.00207 |
+| Key | 0.00239 | 0.00390 |
+| Value | 0.00224 | 0.00380 |
+
+The squared-energy Jensen–Shannon divergences were also small across the sampled comparisons (maximum: query 0.0089 bits, key 0.0242 bits, value 0.0243 bits).
+
+However, concentration measures were not stationary. Exact stable rank across the five sampled layers varied as follows:
+
+| Block | Query | Key | Value |
+| ---: | ---: | ---: | ---: |
+| 0 | 66.38 | 19.61 | 31.21 |
+| 3 | 47.63 | 42.42 | 83.04 |
+| 6 | 66.05 | 65.51 | 78.61 |
+| 9 | 58.42 | 55.89 | 157.03 |
+| 11 | 40.69 | 42.85 | 130.85 |
+
+This provides a more precise distinction than “the layers are similar”: normalized spectral shapes are close in this sparse sample, while the concentration of singular-value energy and overall scale change by depth and projection role. These measurements do not identify why those changes occur or what function each transformation performs.
+
+
 ## Fail-closed checks
 
 The reader rejects duplicate JSON keys, non-finite JSON constants, oversized JSON/header regions, non-commit revision labels, invalid tensor entries, negative dimensions or offsets, offsets beyond the data section, overlapping tensor ranges, symbolic links, path traversal, duplicate tensor names across shards, and any mismatch between a shard index and observed headers.
