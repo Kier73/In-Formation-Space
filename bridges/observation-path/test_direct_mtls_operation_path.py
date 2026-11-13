@@ -16,11 +16,18 @@ from mailcpu.temporal import ClockDomain, TemporalContext, TemporalProfile
 import direct_mtls_operation_path as direct
 
 
-def runner_env(role: str, runner_name: str, runner_os: str = "Linux") -> dict[str, str]:
+def runner_env(
+    role: str,
+    runner_name: str,
+    runner_os: str = "Linux",
+    workflow_path: str | None = None,
+) -> dict[str, str]:
     return {
         "GITHUB_REPOSITORY": direct.REPOSITORY,
         "GITHUB_JOB": role,
-        "GITHUB_WORKFLOW_REF": f"{direct.REPOSITORY}/{direct.WORKFLOW_PATH}@{direct.SOURCE_REF}",
+        "GITHUB_WORKFLOW_REF": (
+            f"{direct.REPOSITORY}/{workflow_path or direct.WORKFLOW_PATH}@{direct.SOURCE_REF}"
+        ),
         "GITHUB_WORKFLOW_SHA": "a" * 40,
         "GITHUB_REF": direct.SOURCE_REF,
         "GITHUB_SHA": "a" * 40,
@@ -52,6 +59,40 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.temp.cleanup()
+
+    def test_ihp006_workflow_identity_is_allowlisted_but_other_workflows_are_rejected(self) -> None:
+        env = runner_env(
+            "server_host", "server-vm", workflow_path=direct.TAILSCALE_WORKFLOW_PATH
+        )
+        host = direct.host_metadata("server_host", env)
+        self.assertEqual(host["workflow_ref"], (
+            f"{direct.REPOSITORY}/{direct.TAILSCALE_WORKFLOW_PATH}@{direct.SOURCE_REF}"
+        ))
+        direct._validate_host_metadata(host, "server_host")
+
+        env["GITHUB_WORKFLOW_REF"] = (
+            f"{direct.REPOSITORY}/.github/workflows/unapproved.yml@{direct.SOURCE_REF}"
+        )
+        with self.assertRaisesRegex(direct.DirectMTLSError, "allowlist"):
+            direct.host_metadata("server_host", env)
+
+    def test_tailscale_overlay_address_is_restricted_to_the_cgnat_ipv4_range(self) -> None:
+        self.assertEqual(
+            direct._validate_tailscale_ipv4("100.73.20.11"), "100.73.20.11"
+        )
+        for invalid in ("203.0.113.4", "100.128.0.1", "2001:db8::1", "not-an-ip"):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(direct.DirectMTLSError, "Tailscale overlay address"):
+                    direct._validate_tailscale_ipv4(invalid)
+
+    def test_ihp006_prepare_server_cannot_fall_back_to_public_ip(self) -> None:
+        env = runner_env(
+            "server_host", "server-vm", workflow_path=direct.TAILSCALE_WORKFLOW_PATH
+        )
+        host = direct.host_metadata("server_host", env)
+        with patch.object(direct, "host_metadata", return_value=host):
+            with self.assertRaisesRegex(direct.DirectMTLSError, "public-IP fallback is disabled"):
+                direct.prepare_server(self.root / "no-bootstrap")
 
     def test_ephemeral_certificates_are_role_and_run_bound(self) -> None:
         self.assertNotEqual(
@@ -130,6 +171,36 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
         altered["core"]["host"] = "203.0.113.9"
         with self.assertRaisesRegex(direct.DirectMTLSError, "digest"):
             direct._verify_endpoint_advertisement(altered, self.server["certificate_path"])
+
+    def test_ihp006_endpoint_verifier_rejects_a_public_server_address(self) -> None:
+        identity = direct.generate_identity(
+            "server_host",
+            self.root / "server-ihp006",
+            runner_env(
+                "server_host", "server-vm", workflow_path=direct.TAILSCALE_WORKFLOW_PATH
+            ),
+        )
+        core = {
+            "schema": direct.ENDPOINT_SCHEMA,
+            "path_id": "run-123456789-ihp002-direct-mtls",
+            "run_id": "123456789",
+            "run_attempt": "1",
+            "server_host": identity["host"],
+            "host": "203.0.113.8",
+            "port": direct.LISTEN_PORT,
+            "dns_identity": identity["dns_identity"],
+            "server_cert_sha256": identity["certificate_sha256"],
+            "client_actor_id": self.client["host"]["actor_id"],
+            "client_cert_sha256": self.client["certificate_sha256"],
+        }
+        signed = direct._signed_document(core, identity["private_key_path"])
+        with self.assertRaisesRegex(direct.DirectMTLSError, "100.64.0.0/10"):
+            direct._verify_endpoint_advertisement(signed, identity["certificate_path"])
+
+        core["host"] = "100.73.20.22"
+        signed = direct._signed_document(core, identity["private_key_path"])
+        verified = direct._verify_endpoint_advertisement(signed, identity["certificate_path"])
+        self.assertEqual(verified["host"], "100.73.20.22")
 
     def test_client_endpoint_commitment_uses_signed_envelope_not_just_core(self) -> None:
         core = {
