@@ -68,6 +68,18 @@ def _probability(value: object, label: str) -> float:
     return number
 
 
+def _nonnegative_finite(value: object, label: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise AdaptiveRepairError(f"{label} must be a finite non-negative number")
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError) as error:
+        raise AdaptiveRepairError(f"{label} must be a finite non-negative number") from error
+    if not math.isfinite(number) or number < 0.0:
+        raise AdaptiveRepairError(f"{label} must be a finite non-negative number")
+    return number
+
+
 def _positive_int(value: object, label: str, maximum: Optional[int] = None) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < 1:
         raise AdaptiveRepairError(f"{label} must be a positive integer")
@@ -96,7 +108,7 @@ def _validate_parameters(
     alpha = _probability(good_to_bad_probability, "good_to_bad_probability")
     beta = _probability(bad_to_good_probability, "bad_to_good_probability")
     initial_bad = _probability(initial_bad_probability, "initial_bad_probability")
-    cost = _probability(repair_cost, "repair_cost")
+    cost = _nonnegative_finite(repair_cost, "repair_cost")
     if p_good > p_bad:
         raise AdaptiveRepairError("good_loss_probability must not exceed bad_loss_probability")
     return p_good, p_bad, alpha, beta, initial_bad, cost
@@ -664,7 +676,7 @@ def build_adaptive_repair_sweep(
     if not isinstance(repair_costs, (tuple, list)) or not repair_costs:
         raise AdaptiveRepairError("repair_costs must be non-empty")
     thresholds = sorted(set(_positive_int(k, "recovery_threshold", slots) for k in recovery_thresholds))
-    costs = sorted(set(_probability(value, "repair_cost") for value in repair_costs))
+    costs = sorted(set(_nonnegative_finite(value, "repair_cost") for value in repair_costs))
     reports = []
     for threshold in thresholds:
         for cost_index, cost in enumerate(costs):
@@ -745,6 +757,8 @@ def validate_adaptive_repair_sweep(report: Mapping[str, Any]) -> Dict[str, Any]:
     # Simulation outcomes are stochastic attachments, not reconstructed facts.
     supplied_policies = supplied["policies"]
     rebuilt_policies = rebuilt["policies"]
+    if len(supplied_policies) != len(rebuilt_policies):
+        raise AdaptiveRepairError("adaptive repair sweep policy count differs from reconstruction")
     for actual, expected in zip(supplied_policies, rebuilt_policies):
         actual["adaptive_policy"].pop("simulation", None)
         if actual != expected:
