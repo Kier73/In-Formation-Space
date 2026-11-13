@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/formats/temporal-coordinate-v2/operation-span-v2.schema.json",
+  "title": "Operation span v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "attempt_id",
+    "span_id",
+    "operation_id",
+    "clock_actor_id",
+    "clock_segment_id",
+    "monotonic_start_ns",
+    "monotonic_end_ns",
+    "elapsed_ns",
+    "clock_status",
+    "outcome",
+    "exception_type",
+    "context",
+    "measurement_scope",
+    "span_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.operation-span"
+    },
+    "schema": {
+      "const": "in-formation.operation-span/0.2"
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "span_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clock_actor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clock_segment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "monotonic_start_ns": {
+      "$ref": "temporal-numeric-v2.schema.json"
+    },
+    "monotonic_end_ns": {
+      "$ref": "temporal-numeric-v2.schema.json"
+    },
+    "elapsed_ns": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "temporal-numeric-v2.schema.json"
+        }
+      ]
+    },
+    "clock_status": {
+      "enum": [
+        "measured",
+        "regressed"
+      ]
+    },
+    "outcome": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exception_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "context": {
+      "type": "object"
+    },
+    "measurement_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "span_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
