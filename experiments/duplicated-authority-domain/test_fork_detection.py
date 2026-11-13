@@ -11,6 +11,8 @@ from fork_detection import (
     produce_cluster,
 )
 
+from jsonschema import Draft202012Validator
+
 
 def make_clusters(root: Path, *, left_state="state-left", right_state="state-right"):
     left = root / "left"
@@ -112,6 +114,18 @@ def test_bundle_hash_cannot_be_recomputed_around_a_forged_quorum_proof(tmp_path)
     write_json(bundle_path, bundle)
     with pytest.raises(ForkDetectionError):
         observe_two_clusters(left, right)
+
+
+def test_offline_report_matches_schema_and_does_not_claim_producer_attestations(tmp_path):
+    left, right = make_clusters(tmp_path)
+    report = observe_two_clusters(left, right)
+    schema_path = Path(__file__).with_name("fork-detection-report.schema.json")
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    Draft202012Validator.check_schema(schema)
+    Draft202012Validator(schema).validate(report)
+    assert report["producer_attestations_verified_by_github"] is False
+    assert report["producer_jobs_distinct"] is False
+    assert report["same_github_workflow_run"] is False
 
 
 if __name__ == "__main__":
