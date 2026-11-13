@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/reference-calibrated-evidence/reference-calibrated-evidence.schema.json",
+  "title": "RIV-009 Reference-Calibrated Evidence Report",
+  "type": "object",
+  "required": ["format", "model", "reference_phase", "target_phase", "comparison_in_one_reference_conditioned_target_world", "interpretation_limits", "content_digest"],
+  "additionalProperties": false,
+  "properties": {
+    "format": {"const": "in-formation.reference-calibrated-evidence/0.1"},
+    "model": {
+      "type": "object",
+      "required": ["target_prior_hypothesis_a", "target_sensor_schedule", "calibrations_with_original_prior", "reference_observations", "max_histories", "reference_and_target_share_one_fixed_calibration_profile", "target_hypothesis_prior_independent_of_reference_standards", "conditional_independence_assumption"],
+      "properties": {
+        "target_prior_hypothesis_a": {"$ref": "#/$defs/fraction"},
+        "target_sensor_schedule": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "calibrations_with_original_prior": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+        "reference_observations": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/referenceObservation"}},
+        "max_histories": {"type": "integer", "minimum": 1},
+        "reference_and_target_share_one_fixed_calibration_profile": {"const": true},
+        "target_hypothesis_prior_independent_of_reference_standards": {"const": true},
+        "conditional_independence_assumption": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": true
+    },
+    "reference_phase": {
+      "type": "object",
+      "required": ["observation_count", "observations", "prior_calibration_probabilities", "profile_likelihoods_and_posterior", "reference_evidence_probability", "posterior_calibration_probabilities", "support_count_before", "support_count_after", "total_declared_reference_cost", "update_trace", "target_policy_prefix_trace", "reference_evidence_digest"],
+      "properties": {
+        "observation_count": {"type": "integer", "minimum": 0},
+        "observations": {"type": "array", "items": {"$ref": "#/$defs/referenceObservation"}},
+        "prior_calibration_probabilities": {"type": "array", "items": {"$ref": "#/$defs/profileProbability"}},
+        "profile_likelihoods_and_posterior": {"type": "array", "items": {"type": "object", "required": ["calibration_id", "likelihood", "prior_probability", "posterior_probability"], "properties": {"calibration_id": {"type": "string"}, "likelihood": {"$ref": "#/$defs/fraction"}, "prior_probability": {"$ref": "#/$defs/fraction"}, "posterior_probability": {"$ref": "#/$defs/fraction"}}, "additionalProperties": false}},
+        "reference_evidence_probability": {"$ref": "#/$defs/fraction"},
+        "posterior_calibration_probabilities": {"type": "array", "items": {"$ref": "#/$defs/profileProbability"}},
+        "support_count_before": {"type": "integer", "minimum": 0},
+        "support_count_after": {"type": "integer", "minimum": 0},
+        "total_declared_reference_cost": {"$ref": "#/$defs/fraction"},
+        "update_trace": {"type": "array", "items": {"type": "object"}},
+        "target_policy_prefix_trace": {"type": "array", "items": {"type": "object"}},
+        "reference_evidence_digest": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "target_phase": {
+      "type": "object",
+      "required": ["uncalibrated_prior_filter_report", "reference_conditioned_filter_report", "map_profile_plugin_filter_report", "map_profile_plugin_calibration_id"],
+      "properties": {
+        "uncalibrated_prior_filter_report": {"type": "object"},
+        "reference_conditioned_filter_report": {"type": "object"},
+        "map_profile_plugin_filter_report": {"type": "object"},
+        "map_profile_plugin_calibration_id": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "comparison_in_one_reference_conditioned_target_world": {
+      "type": "object",
+      "required": ["evaluation_world", "uncalibrated_prior_policy_accuracy", "reference_conditioned_bayes_policy_accuracy", "map_profile_plugin_policy_accuracy", "map_profile_plugin_unreachable_history_fallback", "map_profile_plugin_probability_mass_requiring_fallback", "reference_conditioned_gain_over_uncalibrated_prior_policy", "reference_conditioned_gain_over_map_profile_plugin", "optimal_target_map_accuracy", "baseline_probability_mass_requiring_fallback", "calibrated_probability_mass_requiring_fallback"],
+      "properties": {
+        "evaluation_world": {"type": "string", "minLength": 1},
+        "uncalibrated_prior_policy_accuracy": {"$ref": "#/$defs/fraction"},
+        "reference_conditioned_bayes_policy_accuracy": {"$ref": "#/$defs/fraction"},
+        "map_profile_plugin_policy_accuracy": {"$ref": "#/$defs/fraction"},
+        "map_profile_plugin_unreachable_history_fallback": {"const": "A"},
+        "map_profile_plugin_probability_mass_requiring_fallback": {"$ref": "#/$defs/fraction"},
+        "reference_conditioned_gain_over_uncalibrated_prior_policy": {"$ref": "#/$defs/fraction"},
+        "reference_conditioned_gain_over_map_profile_plugin": {"$ref": "#/$defs/fraction"},
+        "optimal_target_map_accuracy": {"$ref": "#/$defs/fraction"},
+        "baseline_probability_mass_requiring_fallback": {"$ref": "#/$defs/fraction"},
+        "calibrated_probability_mass_requiring_fallback": {"$ref": "#/$defs/fraction"}
+      },
+      "additionalProperties": false
+    },
+    "interpretation_limits": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "content_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "fraction": {"type": "object", "required": ["numerator", "denominator"], "properties": {"numerator": {"type": "integer"}, "denominator": {"type": "integer", "minimum": 1}}, "additionalProperties": false},
+    "profileProbability": {"type": "object", "required": ["calibration_id", "probability"], "properties": {"calibration_id": {"type": "string", "minLength": 1}, "probability": {"$ref": "#/$defs/fraction"}}, "additionalProperties": false},
+    "referenceObservation": {
+      "type": "object",
+      "required": ["observation_id", "sensor_id", "known_hypothesis", "signal", "reference_standard_ref", "reference_standard_sha256", "observation_ref", "observation_sha256", "cost"],
+      "properties": {
+        "observation_id": {"type": "string", "minLength": 1},
+        "sensor_id": {"type": "string", "minLength": 1},
+        "known_hypothesis": {"enum": ["A", "B"]},
+        "signal": {"enum": ["A", "B"]},
+        "reference_standard_ref": {"type": "string", "minLength": 1},
+        "reference_standard_sha256": {"$ref": "#/$defs/sha256"},
+        "observation_ref": {"type": "string", "minLength": 1},
+        "observation_sha256": {"$ref": "#/$defs/sha256"},
+        "cost": {"$ref": "#/$defs/fraction"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

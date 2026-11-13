@@ -369,3 +369,22 @@ How should an observer compare candidate context readers when their outcomes hav
 6. How can a selected candidate be carried through an append-only ObservationPath, independently authorized, interpreted, and added to a new immutable joint-belief revision without treating a proposal as an observation?
 
 The initial operational baseline is [RIV-008](../experiments/decision-value-context-acquisition/README.md). It accepts an exact joint posterior, candidate outcome likelihoods, a task loss matrix, and rational costs. It computes one-step expected Bayes risk reduction, value per cost, and a Pareto frontier. Its output is a proposal only; the next step is to bind the selected sensor to the existing evidence-gated context-measurement lifecycle and to investigate robust or sequential objectives when the declared likelihood model is uncertain or the one-step horizon is inadequate.
+
+
+---
+
+## 19. How should known reference observations update shared calibration before target inference?
+
+### The question
+
+RIV-007 preserves uncertainty about a session-shared calibration profile, and RIV-008 compares the decision value of candidate context observations. When known standards are available before an unknown target is measured, how should their evidence update the calibration belief, and what value does that revised belief provide for the downstream target decision?
+
+### Questions
+
+1. How do known-standard observations update a shared calibration posterior while leaving an independent target-hypothesis prior unchanged?
+2. Under one common target-generating model, when does reference-conditioned Bayesian marginalization outperform ignoring reference data or collapsing to a single MAP calibration profile?
+3. How many reference observations are needed to change a target decision, and how should the exact declared acquisition cost be reported separately from measured execution cost?
+4. How should reference labels, standard identity, observation payloads, and calibration revisions be bound to append-only provenance without mistaking a digest for authentication?
+5. How should calibration drift, uncertain standard labels, sensor-specific reference channels, and sequential reference selection extend the fixed-profile model?
+
+The initial finite bridge is [RIV-009](../experiments/reference-calibrated-evidence/README.md). It applies exact reference likelihood updates to a discrete session-shared calibration prior, reuses RIV-007 for target inference, and compares three target policies under one reference-conditioned evaluation world. It treats standard labels and costs as supplied assumptions; reference dispatch, independent authorization, unknown standards, drift, and empirical sensor validation remain separate work.
