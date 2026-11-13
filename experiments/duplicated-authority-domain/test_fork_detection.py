@@ -29,9 +29,8 @@ def test_two_isolated_copies_can_commit_conflicting_roots_under_identical_member
     assert report["shared_fixed_membership"] is True
     assert report["same_generation_and_predecessor"] is True
     assert report["generation"] == 1
-    assert report["predecessor_digest"] == report["clusters"][0]["producer_identity"].get(
-        "genesis_digest", report["predecessor_digest"]
-    )
+    from fork_detection import GENESIS
+    assert report["predecessor_digest"] == GENESIS
     assert report["conflicting_roots"] is True
     assert report["each_cluster_reconstructed_its_own_quorum"] is True
     assert report["left_rejects_right_manifest"] is True
