@@ -41,6 +41,16 @@ jobs:
             cat proof-output.txt
             exit 1
           fi
+      - name: Kernel-check rational root exclusion and zero-root endpoint
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean COERationalRoot.lean | tee rational-root-proof-output.txt
+          grep -q "COERationalRoot.sign_stable_of_excluded_root" rational-root-proof-output.txt
+          grep -q "COERationalRoot.selected_at_root_zero" rational-root-proof-output.txt
+          if grep -Eq 'sorryAx|Classical.choice|Quot.sound' rational-root-proof-output.txt; then
+            cat rational-root-proof-output.txt
+            exit 1
+          fi
       - name: Prove intentionally false control is rejected
         working-directory: experiments/continuous-observation-equivalence/lean
         run: |
@@ -56,5 +66,6 @@ jobs:
           name: coe005-lean-kernel-cell-soundness
           path: |
             experiments/continuous-observation-equivalence/lean/proof-output.txt
+            experiments/continuous-observation-equivalence/lean/rational-root-proof-output.txt
             experiments/continuous-observation-equivalence/lean/invalid-proof-rejection.txt
           if-no-files-found: error
