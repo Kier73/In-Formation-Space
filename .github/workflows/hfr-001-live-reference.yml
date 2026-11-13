@@ -13,6 +13,8 @@ on:
     paths:
       - "experiments/external_neural_structure_reading/hub.py"
       - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/gpt2_adapter.py"
+      - "experiments/external_neural_structure_reading/gpt2-operation-graph.schema.json"
       - "experiments/external_neural_structure_reading/live_reference/**"
       - ".github/workflows/hfr-001-live-reference.yml"
   workflow_dispatch:
