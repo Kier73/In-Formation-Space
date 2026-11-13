@@ -169,6 +169,27 @@
       "line_ending": "lf",
       "prefix_bom": true,
       "accept": false
+    },
+    {
+      "id": "literal-backslash-u2028-sequence",
+      "input_json": "{\"value\":\"\\\\u2028\"}",
+      "line_ending": "lf",
+      "accept": true,
+      "canonical_sha256": "56aee1b509dd84b91bb88e1ba1d5e85e9c13ffa9665d404b320fa251cf7648de"
+    },
+    {
+      "id": "literal-backslash-u2029-sequence",
+      "input_json": "{\"value\":\"\\\\u2029\"}",
+      "line_ending": "lf",
+      "accept": true,
+      "canonical_sha256": "033becd29cb81d6486a6a0a14f03b762d02ab4776c06a4b636b421c058646b70"
+    },
+    {
+      "id": "null-control-character",
+      "input_json": "{\"value\":\"\\u0000\"}",
+      "line_ending": "lf",
+      "accept": true,
+      "canonical_sha256": "b1726f305d50cca343dd2f7709e6fd30c2a9428f35b9c88ed6bc15a53f760254"
     }
   ]
 }
