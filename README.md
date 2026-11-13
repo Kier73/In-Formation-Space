@@ -205,3 +205,8 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Reference-calibrated evidence accumulation
 
 - [RIV-009: Reference-calibrated evidence accumulation](experiments/reference-calibrated-evidence/README.md) — updates a session-shared calibration-profile posterior from known standards, passes that posterior into RIV-007's joint target filter, and compares prior, reference-conditioned Bayes, and MAP-profile plug-in policies in one common target world. Exact reference cost and evidence-prefix traces are retained; standards and physical readings remain supplied evidence, not authenticated facts.
+
+
+## Reference acquisition by downstream decision value
+
+- [RIV-010: Reference acquisition by downstream decision value](experiments/reference-calibrated-evidence/RIV-010-README.md) — selects a known-standard measurement by its one-step expected value to a later target decision, contrasting RIV-008's immediate EVSI with downstream calibration value. Its evidence-gated ObservationPath handoff creates a RIV-009 reference observation only after return, authorization, and interpretation.
