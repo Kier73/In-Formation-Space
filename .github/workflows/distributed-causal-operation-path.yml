@@ -12,6 +12,7 @@ on:
       - "bridges/observation-path/test_direct_mtls_operation_path.py"
       - "bridges/observation-path/direct-mtls-*.schema.json"
       - ".github/workflows/direct-mtls-operation-path.yml"
+      - ".github/workflows/tailscale-mtls-operation-path.yml"
       - "bridges/observation-path/distributed_operation_path.py"
       - "bridges/observation-path/independent_host_path.py"
       - "bridges/observation-path/test_independent_host_path.py"
@@ -33,6 +34,7 @@ on:
       - "bridges/observation-path/test_direct_mtls_operation_path.py"
       - "bridges/observation-path/direct-mtls-*.schema.json"
       - ".github/workflows/direct-mtls-operation-path.yml"
+      - ".github/workflows/tailscale-mtls-operation-path.yml"
       - "bridges/observation-path/distributed_operation_path.py"
       - "bridges/observation-path/independent_host_path.py"
       - "bridges/observation-path/test_independent_host_path.py"
@@ -116,6 +118,46 @@ jobs:
               if "permissions" not in job or "steps" not in job:
                   raise SystemExit(f"job {name} is missing permissions or steps")
           print("valid IHP-005 workflow YAML; no duplicate keys")
+          PY
+      - name: Validate IHP-006 Tailscale mTLS workflow YAML
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          class UniqueKeyLoader(yaml.SafeLoader):
+              pass
+
+          def construct_mapping(loader, node, deep=False):
+              mapping = {}
+              for key_node, value_node in node.value:
+                  key = loader.construct_object(key_node, deep=deep)
+                  if key in mapping:
+                      raise ValueError(f"duplicate YAML key: {key!r}")
+                  mapping[key] = loader.construct_object(value_node, deep=deep)
+              return mapping
+
+          UniqueKeyLoader.add_constructor(
+              yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+              construct_mapping,
+          )
+          workflow = yaml.load(
+              Path(".github/workflows/tailscale-mtls-operation-path.yml").read_text(encoding="utf-8"),
+              Loader=UniqueKeyLoader,
+          )
+          if set(workflow.get("jobs", {})) != {"client_host", "server_host", "verifier_host"}:
+              raise SystemExit("IHP-006 must define client_host, server_host, and verifier_host")
+          if "workflow_dispatch" not in workflow.get("on", {}):
+              raise SystemExit("IHP-006 must be manually dispatched")
+          for name, job in workflow["jobs"].items():
+              if "permissions" not in job or "steps" not in job:
+                  raise SystemExit(f"IHP-006 job {name} is missing permissions or steps")
+          action = "tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c"
+          if workflow["jobs"]["client_host"]["steps"] is None:
+              raise SystemExit("IHP-006 client job has no steps")
+          if not any(step.get("uses") == action for job in workflow["jobs"].values() for step in job["steps"]):
+              raise SystemExit("IHP-006 must pin the Tailscale action to a full commit SHA")
+          print("valid IHP-006 workflow YAML; no duplicate keys; Tailscale action pinned")
           PY
       - name: Validate distributed path schemas
         run: |
