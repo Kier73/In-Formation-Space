@@ -368,7 +368,9 @@ def tailscale_ping_command(address: str, tailscale_bin: str = "tailscale") -> li
 
 def classify_route(output: str, return_code: int) -> str:
     lower = output.lower()
-    if re.search(r"\bvia\s+\d{1,3}(?:\.\d{1,3}){3}:\d+", lower):
+    direct_ipv4 = re.search(r"\bvia\s+\d{1,3}(?:\.\d{1,3}){3}:\d+", lower)
+    direct_ipv6 = re.search(r"\bvia\s+\[[0-9a-f:.%]+\]:\d+", lower)
+    if direct_ipv4 or direct_ipv6:
         return "direct"
     if re.search(r"\bvia\s+peer[- ]relay", lower) or "peer-relay(" in lower:
         return "peer_relay"
