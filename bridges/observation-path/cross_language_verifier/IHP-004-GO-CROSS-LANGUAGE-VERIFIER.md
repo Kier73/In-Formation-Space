@@ -152,6 +152,47 @@ The run preserves five artifacts: \`source-host-evidence\`, \`receiver-host-evid
 
 This first live run establishes that three verifier implementations in two languages independently reconstruct the same causal edge from the same participant records, with the primary Python verifier additionally verifying the source and receiver Sigstore attestations. The Go job does not replace or duplicate that cryptographic input-verification responsibility.
 
+
+## Second live execution after Canonical Metadata Profile v1 consolidation
+
+After PR #98 consolidated the shared Python encoder, Node strict-document receiver, Go canonical writer, and 30-vector cross-runtime corpus, the full main-branch IHP workflow ran again successfully:
+
+- **Run:** [Independent hosted-VM operation path #43365805836](https://github.com/Kier73/In-Formation-Space/actions/runs/43365805836)
+- **Commit:** \`998d82f9685baaba3f94308096c82447ccbeef64\`
+- **Workflow conclusion:** success
+- **Source host:** success
+- **Receiver host:** success
+- **Primary Python verifier:** success, including both source/receiver Sigstore input attestations
+- **Diverse Python verifier:** success
+- **Go cross-language verifier:** success, using the consolidated canonical metadata implementation and the same Python report parity comparison
+
+The three verifier reports agree on the following evidence for this second live record pair:
+
+| Evidence | Value |
+|---|---|
+| Source artifact SHA-256 | \`75117f40bfa6e986205225ec1b5af15468b61643853602559a51a6ef19024661\` |
+| Receiver artifact SHA-256 | \`e5483c258314851dc43ebaf654f1c4ef706fd066f1b705d2f49e3eeffc403159\` |
+| Source record digest | \`bba190e667b5e1e55ccc27e01a1e57ccb35d50ccbe0abb3c8f5959ab998933c9\` |
+| Receiver record digest | \`dc5656aa9f0b79657a1a2a2ac46f703392f8e2b367d110a03bfc2582b84c07ab\` |
+| Source span digest | \`fe61e238d7103943bf5d3cbfdaa46fc5bec8a150ba1a02f2db397fe2750615da\` |
+| Receiver span digest | \`d923f4e344c9ba5f1fef7fd9c4d0454f5a8e08e60cecfce53d9fa37b3ff2511e\` |
+| Payload digest | \`0ad5d6ff3559bab4c5d3e3c76a33128a9e3737570a9a5db73ffd15fedfbc399b\` |
+| Handoff digest | \`f0b859f5f97afa7e0391867624505d3bc69d6871d3fa59a0f85a00c3275a5888\` |
+| Causal edge count | 1 |
+| Sender Lamport / vector | 1 / \`{source: 1}\` |
+| Receiver Lamport / vector | 2 / \`{source: 1, receiver: 1}\` |
+| Vector relation | \`before\` |
+
+The three report object digests are distinct because each names its verifier role and report schema:
+
+- Primary Python: \`7cd2b0fb585705586751a8857533fe070ad12b9b70747ed3f205a53e616cb6ef\`
+- Diverse Python: \`ea6185a5d95e805784b1f46ce0dbd695fad4769e8b91bb10803145e39c6c53cb\`
+- Go: \`c65d20cf65e14d89a6964160354611d2f9589c60dc9e96d4f0ba21b8f2dabcc9\`
+
+The observed local synchronous-call durations were **186,501 ns** on the source host and **209,530 ns** on the receiver host. They remain separate local monotonic measurements; all three reports retain \`combined_cross_host_elapsed_ns: null\`.
+
+The second successful run demonstrates that the cross-language operation-path reconstruction still works after canonicalization was consolidated. The Go report is not merely passing a fixture or a standalone corpus test: it independently reconstructs the current source and receiver records and agrees with the separately generated Python evidence projection.
+
 ## What a passing result would establish
 
 The successful first live fifth-host run established that:
