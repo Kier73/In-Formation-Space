@@ -1,4 +1,4 @@
-name: IHP-003 Tailscale overlay peer-route preflight
+name: IHP-004 Tailscale overlay peer-route preflight
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
     paths:
       - "bridges/observation-path/tailscale_overlay_probe.py"
       - "bridges/observation-path/test_tailscale_overlay_probe.py"
-      - "bridges/observation-path/ihp003-overlay-*.schema.json"
+      - "bridges/observation-path/ihp004-overlay-*.schema.json"
       - ".github/workflows/tailscale-overlay-preflight.yml"
   workflow_dispatch:
 
@@ -51,7 +51,7 @@ jobs:
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "IHP-003: Tailscale OIDC credentials are not configured; recording this explicitly."
+            echo "IHP-004: Tailscale OIDC credentials are not configured; recording this explicitly."
           fi
       - name: Join ephemeral Tailscale node
         if: steps.tailnet_config.outputs.enabled == 'true'
@@ -59,26 +59,26 @@ jobs:
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
-          tags: tag:ihp003-ci
+          tags: tag:ihp004-ci
       - name: Create and bind client overlay address
         env:
           RUNNER_ENVIRONMENT: ${{ runner.environment }}
-          IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
+          IHP004_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
         run: |
           mkdir -p evidence/client
           python bridges/observation-path/tailscale_overlay_probe.py create-address \
             --role client_host --output-dir evidence/client \
-            --enabled "$IHP003_TAILSCALE_ENABLED"
+            --enabled "$IHP004_TAILSCALE_ENABLED"
       - name: Attest client overlay address
         uses: actions/attest@v4
         with:
           subject-path: evidence/client/address.json
-          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-address/v1
+          predicate-type: https://kier73.github.io/in-formation-space/ihp004-overlay-address/v1
           predicate-path: evidence/client/address.predicate.json
       - name: Publish client address bootstrap
         uses: actions/upload-artifact@v4
         with:
-          name: ihp003-client-address
+          name: ihp004-client-address
           path: |
             evidence/client/address.json
             evidence/client/address.predicate.json
@@ -87,11 +87,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RUNNER_ENVIRONMENT: ${{ runner.environment }}
-          IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
+          IHP004_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
         run: |
           python bridges/observation-path/tailscale_overlay_probe.py probe \
             --role client_host --output-dir evidence/client \
-            --peer-artifact ihp003-server-address
+            --peer-artifact ihp004-server-address
       - name: Create client record attestation predicate
         run: |
           python - <<'PY'
@@ -100,7 +100,7 @@ jobs:
           path = Path("evidence/client/record.json")
           record = json.loads(path.read_text(encoding="utf-8"))
           predicate = {
-              "schema": "in-formation.ihp003-overlay-probe-record-predicate/0.1",
+              "schema": "in-formation.ihp004-overlay-probe-record-predicate/0.1",
               "role": "client_host",
               "host": record["host"],
               "record_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
@@ -117,12 +117,12 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: evidence/client/record.json
-          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-probe-record/v1
+          predicate-type: https://kier73.github.io/in-formation-space/ihp004-overlay-probe-record/v1
           predicate-path: evidence/client/record.predicate.json
       - name: Preserve client route evidence
         uses: actions/upload-artifact@v4
         with:
-          name: ihp003-client-result
+          name: ihp004-client-result
           path: |
             evidence/client/record.json
             evidence/client/record.predicate.json
@@ -165,7 +165,7 @@ jobs:
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "IHP-003: Tailscale OIDC credentials are not configured; recording this explicitly."
+            echo "IHP-004: Tailscale OIDC credentials are not configured; recording this explicitly."
           fi
       - name: Join ephemeral Tailscale node
         if: steps.tailnet_config.outputs.enabled == 'true'
@@ -173,26 +173,26 @@ jobs:
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
-          tags: tag:ihp003-ci
+          tags: tag:ihp004-ci
       - name: Create and bind server overlay address
         env:
           RUNNER_ENVIRONMENT: ${{ runner.environment }}
-          IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
+          IHP004_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
         run: |
           mkdir -p evidence/server
           python bridges/observation-path/tailscale_overlay_probe.py create-address \
             --role server_host --output-dir evidence/server \
-            --enabled "$IHP003_TAILSCALE_ENABLED"
+            --enabled "$IHP004_TAILSCALE_ENABLED"
       - name: Attest server overlay address
         uses: actions/attest@v4
         with:
           subject-path: evidence/server/address.json
-          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-address/v1
+          predicate-type: https://kier73.github.io/in-formation-space/ihp004-overlay-address/v1
           predicate-path: evidence/server/address.predicate.json
       - name: Publish server address bootstrap
         uses: actions/upload-artifact@v4
         with:
-          name: ihp003-server-address
+          name: ihp004-server-address
           path: |
             evidence/server/address.json
             evidence/server/address.predicate.json
@@ -201,11 +201,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RUNNER_ENVIRONMENT: ${{ runner.environment }}
-          IHP003_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
+          IHP004_TAILSCALE_ENABLED: ${{ steps.tailnet_config.outputs.enabled }}
         run: |
           python bridges/observation-path/tailscale_overlay_probe.py probe \
             --role server_host --output-dir evidence/server \
-            --peer-artifact ihp003-client-address
+            --peer-artifact ihp004-client-address
       - name: Create server record attestation predicate
         run: |
           python - <<'PY'
@@ -214,7 +214,7 @@ jobs:
           path = Path("evidence/server/record.json")
           record = json.loads(path.read_text(encoding="utf-8"))
           predicate = {
-              "schema": "in-formation.ihp003-overlay-probe-record-predicate/0.1",
+              "schema": "in-formation.ihp004-overlay-probe-record-predicate/0.1",
               "role": "server_host",
               "host": record["host"],
               "record_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
@@ -231,12 +231,12 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: evidence/server/record.json
-          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-probe-record/v1
+          predicate-type: https://kier73.github.io/in-formation-space/ihp004-overlay-probe-record/v1
           predicate-path: evidence/server/record.predicate.json
       - name: Preserve server route evidence
         uses: actions/upload-artifact@v4
         with:
-          name: ihp003-server-result
+          name: ihp004-server-result
           path: |
             evidence/server/record.json
             evidence/server/record.predicate.json
@@ -273,22 +273,22 @@ jobs:
       - name: Download client address document
         uses: actions/download-artifact@v4
         with:
-          name: ihp003-client-address
+          name: ihp004-client-address
           path: evidence/client
       - name: Download server address document
         uses: actions/download-artifact@v4
         with:
-          name: ihp003-server-address
+          name: ihp004-server-address
           path: evidence/server
       - name: Download client route record
         uses: actions/download-artifact@v4
         with:
-          name: ihp003-client-result
+          name: ihp004-client-result
           path: evidence/client-result
       - name: Download server route record
         uses: actions/download-artifact@v4
         with:
-          name: ihp003-server-result
+          name: ihp004-server-result
           path: evidence/server-result
       - name: Place route records beside their address documents
         run: |
@@ -303,31 +303,31 @@ jobs:
         run: |
           python bridges/observation-path/tailscale_overlay_probe.py verify \
             --directory evidence \
-            --output evidence/ihp003-overlay-report.json
+            --output evidence/ihp004-overlay-report.json
       - name: Bind verifier identity and exact report bytes
         env:
           RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           python bridges/observation-path/tailscale_overlay_probe.py write-report-predicate \
-            --report evidence/ihp003-overlay-report.json \
-            --output evidence/ihp003-overlay-report.predicate.json
-      - name: Validate IHP-003 schemas and instances
+            --report evidence/ihp004-overlay-report.json \
+            --output evidence/ihp004-overlay-report.predicate.json
+      - name: Validate IHP-004 schemas and instances
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           from jsonschema import Draft202012Validator
           cases = (
-              ("bridges/observation-path/ihp003-overlay-address.schema.json", "evidence/client/address.json"),
-              ("bridges/observation-path/ihp003-overlay-address.schema.json", "evidence/server/address.json"),
-              ("bridges/observation-path/ihp003-overlay-address-predicate.schema.json", "evidence/client/address.predicate.json"),
-              ("bridges/observation-path/ihp003-overlay-address-predicate.schema.json", "evidence/server/address.predicate.json"),
-              ("bridges/observation-path/ihp003-overlay-probe-record.schema.json", "evidence/client/record.json"),
-              ("bridges/observation-path/ihp003-overlay-probe-record.schema.json", "evidence/server/record.json"),
-              ("bridges/observation-path/ihp003-overlay-probe-record-predicate.schema.json", "evidence/client/record.predicate.json"),
-              ("bridges/observation-path/ihp003-overlay-probe-record-predicate.schema.json", "evidence/server/record.predicate.json"),
-              ("bridges/observation-path/ihp003-overlay-report.schema.json", "evidence/ihp003-overlay-report.json"),
-              ("bridges/observation-path/ihp003-overlay-report-predicate.schema.json", "evidence/ihp003-overlay-report.predicate.json"),
+              ("bridges/observation-path/ihp004-overlay-address.schema.json", "evidence/client/address.json"),
+              ("bridges/observation-path/ihp004-overlay-address.schema.json", "evidence/server/address.json"),
+              ("bridges/observation-path/ihp004-overlay-address-predicate.schema.json", "evidence/client/address.predicate.json"),
+              ("bridges/observation-path/ihp004-overlay-address-predicate.schema.json", "evidence/server/address.predicate.json"),
+              ("bridges/observation-path/ihp004-overlay-probe-record.schema.json", "evidence/client/record.json"),
+              ("bridges/observation-path/ihp004-overlay-probe-record.schema.json", "evidence/server/record.json"),
+              ("bridges/observation-path/ihp004-overlay-probe-record-predicate.schema.json", "evidence/client/record.predicate.json"),
+              ("bridges/observation-path/ihp004-overlay-probe-record-predicate.schema.json", "evidence/server/record.predicate.json"),
+              ("bridges/observation-path/ihp004-overlay-report.schema.json", "evidence/ihp004-overlay-report.json"),
+              ("bridges/observation-path/ihp004-overlay-report-predicate.schema.json", "evidence/ihp004-overlay-report.predicate.json"),
           )
           for schema_path, instance_path in cases:
               schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
@@ -339,12 +339,12 @@ jobs:
       - name: Attest the third-host overlay route report
         uses: actions/attest@v4
         with:
-          subject-path: evidence/ihp003-overlay-report.json
-          predicate-type: https://kier73.github.io/in-formation-space/ihp003-overlay-report/v1
-          predicate-path: evidence/ihp003-overlay-report.predicate.json
-      - name: Preserve the IHP-003 route report
+          subject-path: evidence/ihp004-overlay-report.json
+          predicate-type: https://kier73.github.io/in-formation-space/ihp004-overlay-report/v1
+          predicate-path: evidence/ihp004-overlay-report.predicate.json
+      - name: Preserve the IHP-004 route report
         uses: actions/upload-artifact@v4
         with:
-          name: ihp003-overlay-route-report
-          path: evidence/ihp003-overlay-report.json
+          name: ihp004-overlay-route-report
+          path: evidence/ihp004-overlay-report.json
           retention-days: 90
