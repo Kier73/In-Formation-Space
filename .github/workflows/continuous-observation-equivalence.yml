@@ -1,0 +1,35 @@
+name: COE-001 continuous observation equivalence
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/continuous-observation-equivalence/**'
+      - '.github/workflows/continuous-observation-equivalence.yml'
+  push:
+    paths:
+      - 'experiments/continuous-observation-equivalence/**'
+      - '.github/workflows/continuous-observation-equivalence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  symbolic-relu:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify exact rational atlases and adversarial controls
+        working-directory: experiments/continuous-observation-equivalence
+        run: python -m unittest discover -s . -p 'test_*.py' -v
+      - name: Emit deterministic equivalence evidence
+        working-directory: experiments/continuous-observation-equivalence
+        run: python run_experiment.py > continuous-equivalence-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coe001-continuous-equivalence-report
+          path: experiments/continuous-observation-equivalence/continuous-equivalence-report.json
+          if-no-files-found: error
