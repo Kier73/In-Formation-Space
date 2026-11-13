@@ -345,8 +345,9 @@ def _validate_address(
             parsed = ipaddress.ip_address(address["overlay_ipv4"])
         except ValueError as error:
             raise OverlayProbeError("peer overlay address is invalid") from error
-        if parsed.version != 4 or not parsed.is_private:
-            raise OverlayProbeError("peer overlay address must be a private IPv4 address")
+        tailscale_ipv4 = ipaddress.ip_network("100.64.0.0/10")
+        if parsed.version != 4 or parsed not in tailscale_ipv4:
+            raise OverlayProbeError("peer overlay address must be inside Tailscale's 100.64.0.0/10 IPv4 allocation")
     elif address["overlay_ipv4"] is not None:
         raise OverlayProbeError("unconfigured peer must not advertise an overlay IP")
     return dict(address)
@@ -518,15 +519,19 @@ def _validate_record(
     if record["status"] == "route_observed":
         if record["route_type"] not in {"direct", "derp_relay", "peer_relay", "reachable_unclassified"}:
             raise OverlayProbeError("route-observed record lacks a reachable route classification")
-        if not record["overlay_ipv4"] or not record["peer_overlay_ipv4"] or not record["peer_address_digest"]:
-            raise OverlayProbeError("route-observed record lacks both peer address commitments")
+        if not record["overlay_ipv4"] or not record["peer_overlay_ipv4"] or not record["peer_address_digest"] or not isinstance(record["peer_address_attestation"], Mapping):
+            raise OverlayProbeError("route-observed record lacks both attested peer address commitments")
         if record["ping_exit_code"] != 0 or record["ping_count"] < 1:
             raise OverlayProbeError("route-observed record lacks a successful Tailscale ping")
     if record["status"] == "route_unavailable":
-        if record["route_type"] != "unreachable" or not record["peer_address_digest"] or record["ping_count"] < 1:
-            raise OverlayProbeError("route-unavailable record lacks an actual peer probe")
-    if record["status"] in {"credentials_missing", "peer_overlay_not_configured"} and record["route_type"] != "not_attempted":
-        raise OverlayProbeError("unconfigured record cannot claim a measured route")
+        if record["route_type"] != "unreachable" or not record["peer_address_digest"] or not isinstance(record["peer_address_attestation"], Mapping) or record["ping_count"] < 1:
+            raise OverlayProbeError("route-unavailable record lacks an attested peer probe")
+    if record["status"] == "peer_overlay_not_configured":
+        if record["route_type"] != "not_attempted" or not record["peer_address_digest"] or not isinstance(record["peer_address_attestation"], Mapping):
+            raise OverlayProbeError("unconfigured peer result lacks the peer address attestation")
+    if record["status"] == "credentials_missing":
+        if record["route_type"] != "not_attempted" or record["peer_address_digest"] is not None or record["peer_address_attestation"] is not None:
+            raise OverlayProbeError("missing local credentials cannot claim a peer address or route")
     return dict(record)
 
 
@@ -567,6 +572,11 @@ def build_report(
         raise OverlayProbeError("client probe peer IP differs from server's attested overlay IP")
     if server["peer_overlay_ipv4"] not in {None, client["overlay_ipv4"]}:
         raise OverlayProbeError("server probe peer IP differs from client's attested overlay IP")
+
+    if client["peer_address_attestation"] is not None and dict(client["peer_address_attestation"]) != dict(server_address_attestation):
+        raise OverlayProbeError("client record peer-address attestation differs from verifier's server-address verification")
+    if server["peer_address_attestation"] is not None and dict(server["peer_address_attestation"]) != dict(client_address_attestation):
+        raise OverlayProbeError("server record peer-address attestation differs from verifier's client-address verification")
 
     if client["status"] == "credentials_missing" or server["status"] == "credentials_missing":
         status = "overlay_credentials_missing"
