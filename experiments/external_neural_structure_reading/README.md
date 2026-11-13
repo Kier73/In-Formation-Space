@@ -100,6 +100,25 @@ A separate [live-reference workflow](../../../.github/workflows/hfr-001-live-ref
 
 The workflow writes `results/gpt2-nsd.json` and uploads it as the `hfr-001-gpt2-nsd` artifact. It also reports total Safetensors shard bytes (from validated Content-Range totals) alongside the bytes of Safetensors prefixes and headers actually requested. This is a metadata/header observation, not a model download or functional reconstruction. The exact run and artifact are the evidence; the pinned model's card and license should be rechecked before making any derivative.
 
+## GPT-2 family interpretation: operation graph
+
+The second-stage adapter, `gpt2_adapter.py`, consumes an NSD v0.1 record and checks whether the observed configuration and tensor inventory satisfy the declared `GPT2LMHeadModel` family template. It emits a separate typed operation graph under `gpt2-operation-graph.schema.json`; the original NSD remains unchanged.
+
+For the pinned GPT-2 observation, the adapter checks:
+
+- 12 transformer blocks, each with the expected 13 tensor entries
+- 768-wide hidden state, 12 attention heads (64 dimensions per head), and 1,024-position causal mask
+- Fused QKV projection shape `[768, 2304]` and output projection shape `[768, 768]`
+- MLP projection shapes `[768, 3072]` and `[3072, 768]`
+- Token and position embedding tables plus final layer normalization
+- Output-language-model head binding according to the declared GPT-2 family contract
+
+The MLP intermediate width is derived from the observed tensor shapes because `config.n_inner` is null in this snapshot. The model's `tie_word_embeddings` and `scale_attn_weights` fields are also absent from the observed config; the adapter records their effective values and provenance from the documented GPT-2 family defaults rather than presenting them as direct source observations.
+
+The resulting graph expands each block into typed nodes for normalization, fused QKV projection, causal multi-head attention, attention projection, residual addition, MLP projections, activation, and the final vocabulary projection. A passed graph means the expected names and dimensions align with the family template. It does not execute the operations or establish numerical/functional equivalence.
+
+The public Transformers documentation describes GPT-2 as causal attention, documents the configuration dimensions and defaults, and identifies `GPT2LMHeadModel` as using a language-model head tied to input embeddings. The adapter keeps those framework-level semantics in the interpretation layer rather than attributing them to tensor headers alone: [GPT-2 documentation](https://huggingface.co/docs/transformers/main/model_doc/gpt2).
+
 ## Fail-closed checks
 
 The reader rejects duplicate JSON keys, non-finite JSON constants, oversized JSON/header regions, non-commit revision labels, invalid tensor entries, negative dimensions or offsets, offsets beyond the data section, overlapping tensor ranges, symbolic links, path traversal, duplicate tensor names across shards, and any mismatch between a shard index and observed headers.
@@ -108,12 +127,12 @@ It does not validate architecture semantics, tensor element counts against dtype
 
 ## Next discriminating stages
 
-1. Add a read-only Hugging Face resolver with immutable revision resolution and HTTP range reads for Safetensors headers. A server that ignores range requests must fail closed rather than trigger a full weight download.
-2. Add architecture-family adapters that translate declared config plus tensor names/shapes into typed operation graphs. Unknown or unsupported operations must remain explicit.
-3. Compare architecture-only internal construction against a declared reference contract on a small, deterministic model fixture.
-4. Add weight-space observations—norms, sparsity, rank/singular spectra, and cross-tensor relations—as separately versioned evidence. Do not equate statistical resemblance with retained function.
-5. Generate independent parameters or parameter rules and compare them with architecture-only baselines using task-specific observations.
-6. Only then explore selective inheritance and functional reconstruction.
+1. Add a second architecture-family adapter so the NSD contract can be compared across different model families. Unsupported operators and unknown tensors must remain explicit rather than being coerced into a GPT-2-shaped template.
+2. Add an opt-in selected-tensor range reader using header-declared offsets, with strict byte budgets and payload-scoped hashes. The present observer intentionally reads no tensor payload values.
+3. Compute weight-space observations—norms, sparsity, rank/singular spectra, and cross-tensor relations—as separately versioned numerical evidence.
+4. Generate independent parameters or parameter rules informed by those observations and compare them against architecture-only baselines.
+5. Test functional preservation on explicit input domains; structural resemblance and parameter statistics alone are not behavioral equivalence.
+6. Explore selective inheritance and cross-family realization only after the preceding evidence exists.
 
 ## Repository responsibilities
 
