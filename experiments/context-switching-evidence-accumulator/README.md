@@ -63,9 +63,9 @@ After two signals, histories **AB** and **BA** have the same hypothesis marginal
 
 P(H=A | AB) = P(H=A | BA) = 1/2.
 
-They also have the same context marginal:
+They also have the same predictive marginal for the operating regime at the next sensor position:
 
-P(Z=good | AB) = P(Z=good | BA) = 301/890.
+P(Z(next)=good | AB) = P(Z(next)=good | BA) = 301/890.
 
 But the joint distributions are different: the association between H and Z is reversed. The distinction matters immediately. Under the same next sensor, if the next signal is A:
 
