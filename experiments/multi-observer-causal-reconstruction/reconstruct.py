@@ -286,7 +286,13 @@ def _validate_event(
         raise ReconstructionError(f"event {expected_event_id} has no measured local duration")
     if span["attempt_id"] != f"run-{host['run_id']}-attempt-{host['run_attempt']}":
         raise ReconstructionError(f"event {expected_event_id} belongs to another attempt")
-    if frame["monotonic"]["elapsed_ns"] < span["monotonic_end_ns"]:
+    frame_elapsed = frame["monotonic"]["elapsed_ns"]
+    if expected_event_id == "B1":
+        # B1's witnessed frame is intentionally captured at receiver start,
+        # before its measured operation span begins.
+        if frame_elapsed > span["monotonic_start_ns"]:
+            raise ReconstructionError("B1 receiver-start frame follows its operation start")
+    elif frame_elapsed < span["monotonic_end_ns"]:
         raise ReconstructionError(f"event {expected_event_id} frame predates operation completion")
     return {
         "event_id": expected_event_id,
