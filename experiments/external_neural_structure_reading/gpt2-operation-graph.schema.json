@@ -9,6 +9,7 @@
     "schema",
     "source_observation",
     "family",
+    "family_semantics",
     "dimensions",
     "nodes",
     "verification",
@@ -39,6 +40,22 @@
         "architecture": {"const": "GPT2LMHeadModel"},
         "adapter": {"type": "string"},
         "interpretation_status": {"const": "inferred-family-graph"}
+      }
+    },
+    "family_semantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["activation_function", "attention_scaling", "tied_output_embeddings"],
+      "properties": {
+        "activation_function": {
+          "$ref": "#/$defs/semantic-value"
+        },
+        "attention_scaling": {
+          "$ref": "#/$defs/semantic-value"
+        },
+        "tied_output_embeddings": {
+          "$ref": "#/$defs/semantic-value"
+        }
       }
     },
     "dimensions": {
@@ -123,6 +140,20 @@
     "evidence_boundary": {"type": "string", "minLength": 1}
   },
   "$defs": {
+    "semantic-value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "evidence_basis"],
+      "properties": {
+        "value": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "boolean"}
+          ]
+        },
+        "evidence_basis": {"type": "string", "minLength": 1}
+      }
+    },
     "binding": {
       "type": "object",
       "additionalProperties": false,
