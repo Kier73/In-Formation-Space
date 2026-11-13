@@ -336,6 +336,7 @@
         "route_type",
         "command",
         "exit_code",
+        "observed_monotonic_ns",
         "elapsed_ns",
         "matched_peer_status",
         "status_output_sha256",
@@ -418,6 +419,10 @@
               "maxLength": 160
             }
           ]
+        },
+        "observed_monotonic_ns": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     }
