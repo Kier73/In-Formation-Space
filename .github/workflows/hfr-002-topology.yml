@@ -6,7 +6,7 @@ on:
       - "experiments/external_neural_structure_reading/gpt2_adapter.py"
       - "experiments/external_neural_structure_reading/neural_graph_ir.py"
       - "experiments/external_neural_structure_reading/independent_verifier/**"
-      - "experiments/external_neural_structure_reading/test_independent_graph_verifier.py"
+      - "experiments/external_neural_structure_reading/independent_graph_verifier_tests.py"
       - "experiments/external_neural_structure_reading/neural-computation-graph.schema.json"
       - "experiments/external_neural_structure_reading/nsd.py"
       - "experiments/external_neural_structure_reading/hub.py"
@@ -18,7 +18,7 @@ on:
       - "experiments/external_neural_structure_reading/gpt2_adapter.py"
       - "experiments/external_neural_structure_reading/neural_graph_ir.py"
       - "experiments/external_neural_structure_reading/independent_verifier/**"
-      - "experiments/external_neural_structure_reading/test_independent_graph_verifier.py"
+      - "experiments/external_neural_structure_reading/independent_graph_verifier_tests.py"
       - "experiments/external_neural_structure_reading/neural-computation-graph.schema.json"
       - "experiments/external_neural_structure_reading/nsd.py"
       - "experiments/external_neural_structure_reading/hub.py"
@@ -58,6 +58,13 @@ jobs:
           python -m unittest discover
           -s experiments/external_neural_structure_reading
           -p 'test_*.py'
+          -v
+
+      - name: Run independent Go verifier fixture tests
+        run: >-
+          python -m unittest discover
+          -s experiments/external_neural_structure_reading
+          -p 'independent_graph_verifier_tests.py'
           -v
 
       - name: Reconstruct pinned GPT-2 graph without reading tensor payloads
