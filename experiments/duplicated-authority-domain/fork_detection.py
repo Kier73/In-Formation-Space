@@ -407,7 +407,8 @@ def observe_two_clusters(
     left_job = left["producer_identity"].get("job")
     right_job = right["producer_identity"].get("job")
     workflow_run_match = (
-        left["producer_identity"].get("repository") == right["producer_identity"].get("repository")
+        distinct_jobs
+        and left["producer_identity"].get("repository") == right["producer_identity"].get("repository")
         and left["producer_identity"].get("run_id") == right["producer_identity"].get("run_id")
         and left["producer_identity"].get("run_id") != "local-test"
     )
