@@ -223,3 +223,64 @@ The 22 focused tests include absorbing-state limiting-retention reconstruction (
 This is a two-state, finite-horizon mathematical model. It does not estimate \(p_G\), \(p_B\), \(\alpha\), or \(\beta\) from link traces. It does not inspect or claim to reproduce E-CPU's DelayLoopEngine, RRNS implementation, or any deployed channel. Packet drops are conditionally independent within a state; the shared-state variant is the only one here with cross-packet dependence. There is no repair, retransmission, reordering, finite readout window, decode failure, or repair latency. The base experiment's iid repair-epoch calculation has not yet been combined with these Markov models.
 
 The next discriminating experiment would add a repair/rewrite operation at a declared interval and make repair success depend on whether at least \(k\) packets survive to the repair boundary. A later implementation comparison would need actual packet traces or operation evidence, independently documented state classification, and a declared clock/measurement scope before any fitted model could be treated as descriptive evidence about a real path.
+
+
+## 10. State-preserving repair under burst loss: MRE-002
+
+BTL-001 treated packet loss as absorbing because it contained no repair. MRE-002 introduces a fixed repair interval \(L\) and a recovery threshold \(k\). At the end of each interval:
+
+1. If fewer than \(k\) of the \(n\) data packets remain, the logical word is lost.
+2. If at least \(k\) remain, the word is reconstructed into all \(n\) slots.
+3. The channel state is **not** reset by reconstruction. It continues from the state reached at the repair boundary, including for slots whose data packet was lost earlier in the epoch.
+
+Repair itself is instantaneous in this model. Its count is recorded, but duration, energy, bandwidth, and decoder failure are not assigned invented costs.
+
+### Two persistent environments
+
+For independent per-packet Markov channels, the epoch transition matrix has states \(b=0,\ldots,n\), where \(b\) is the number of bad channel slots at the start of an epoch. Each slot has four possible epoch outcomes: survived/end-good, survived/end-bad, lost/end-good, and lost/end-bad. The implementation computes the exact joint probability of these outcomes over \(L\) circulations, then uses a capped two-dimensional dynamic programme over the number of survivors and the number of bad endpoint slots. Only paths with at least \(k\) survivors enter the transition matrix; at the next epoch, every data slot is rewritten but the endpoint bad-slot count persists.
+
+For a shared channel, the epoch transition matrix is \(2\times2\), indexed by the shared good/bad state at the beginning and end of the interval. Its dynamic programme tracks current survivor count and shared channel state through the \(L\) circulations. It discards paths that fall below \(k\), because they cannot recover before the epoch boundary.
+
+The iid-marginal comparator uses the same first-round marginal loss probability but removes both forms of channel-state persistence.
+
+### Quantities kept separate
+
+The successful-epoch transition matrix \(K\) is sub-stochastic. With initial channel-state distribution \(\mu\), survival after \(m\) successful repair intervals is:
+
+\[
+P(\text{survive }m\text{ intervals})=\mu K^m \mathbf{1}.
+\]
+
+The expected number of attempted intervals, including the final failed interval, is reconstructed from the fundamental matrix:
+
+\[
+E[N]=\mu (I-K)^{-1}\mathbf{1},
+\]
+
+when the fundamental matrix is finite and numerically resolvable. Expected successful repairs are \(E[N]-1\); expected lifetime in circulations is \(L\,E[N]\). A singular or ill-conditioned system is reported as unbounded/ill-conditioned, not assigned a fabricated finite lifetime.
+
+The sweep also computes a Pareto frontier that maximizes expected lifetime while minimizing the ratio of expected successful repairs to expected lifetime rounds. It does **not** collapse lifetime and repair work into one score. This frontier is only with respect to those two reported dimensions: it does not assign a value to extra redundancy, decoder complexity, repair bandwidth, or repair duration.
+
+For each policy, the report compares its median-failure horizon with the original no-repair BTL-001 process over the same total number of circulations. The repair model can preserve the logical word even when the original set of surviving packets would not have lasted that long, because successful recovery rewrites previously lost data.
+
+### Reproduction
+
+~~~bash
+python -m unittest discover -s experiments/in-transit-memory -p "test_*.py" -v
+python experiments/in-transit-memory/repair_epochs.py --scan --json
+python experiments/in-transit-memory/repair_epochs.py --scan --simulate --trials 1000 --seed 20261112 --json --output experiments/in-transit-memory/results/markov-repair-scan.json
+~~~
+
+The focused suite independently enumerates short per-packet state/loss paths and shared-channel state paths; checks the iid geometric special case; reconstructs multi-epoch survival, expected repair count, and the no-repair comparison; verifies seeded simulations; and rejects altered transition matrices even when the outer report digest is recomputed.
+
+### Interpretation limits
+
+- \(p_G,p_B,\alpha,\beta\) are supplied synthetic model parameters, not estimates fitted to link traces.
+- Repair happens at a fixed interval, instantaneously, and only if the threshold is met.
+- Data reconstruction resets packet availability; it does not reset the underlying channel states.
+- The per-packet channel state continues evolving even after its data packet is lost, so a later repair can write new data into that slot under its then-current state.
+- The expected repair rate is a ratio of expectations, not the expected sample-path repair rate.
+- The Pareto frontier is a comparison, not a universal optimal policy. Selecting one policy requires an explicit utility or resource constraint.
+- This is not a measurement of E-CPU, MailCPU, a real fibre link, or any physical communication system.
+
+The next experiment should relax the fixed periodic schedule: can repair be delayed or triggered by a partial observation of channel state or survivor count without paying more in sensing/coordination than the expected lifetime gain?
