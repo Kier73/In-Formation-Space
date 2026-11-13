@@ -94,7 +94,7 @@ jobs:
       - name: Test Go verifier with adversarial mutations of Python certificates
         working-directory: experiments/continuous-observation-equivalence
         env:
-          COE_CERT_DIR: received-certificates
+          COE_CERT_DIR: ${{ github.workspace }}/experiments/continuous-observation-equivalence/received-certificates
         run: go test -v go_checker/main.go go_checker/main_test.go
       - name: Independently check exact rational cover, source and semantic digests in Go
         working-directory: experiments/continuous-observation-equivalence
