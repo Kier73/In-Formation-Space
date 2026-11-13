@@ -94,6 +94,7 @@ jobs:
           python experiments/lean-kernel-independent-recheck/term_receipt.py recheck \
             --runner received-runner/term-runner.json \
             --private evidence/fixture-private.pem \
+            --checker-output evidence/term-independent-observation.json \
             --output evidence/term-signed-recheck.json
           rm evidence/fixture-private.pem
       - name: Attest demonstration checker report and key on main
@@ -102,6 +103,7 @@ jobs:
         with:
           subject-path: |
             evidence/term-signed-recheck.json
+            evidence/term-independent-observation.json
             evidence/fixture-public.pem
       - uses: actions/upload-artifact@v4
         with:
@@ -140,6 +142,7 @@ jobs:
         run: |
           python experiments/lean-kernel-independent-recheck/term_receipt.py admit \
             --runner received-runner/term-runner.json \
+            --checker received-checker/term-independent-observation.json \
             --signed received-checker/term-signed-recheck.json \
             --trusted-public received-checker/fixture-public.pem \
             --output evidence/vgi-admission-observation.json
