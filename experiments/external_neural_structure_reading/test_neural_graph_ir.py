@@ -58,9 +58,9 @@ class NeuralGraphIRTests(unittest.TestCase):
         self.assertEqual(graph["completeness"]["bound_tensor_count"], 30)
         self.assertEqual(graph["verification"]["status"], "passed")
         self.assertEqual(graph["verification"]["failed_check_count"], 0)
-        self.assertEqual(graph["verification"]["operation_count"], 29)
+        self.assertEqual(graph["verification"]["operation_count"], 30)
         self.assertEqual(graph["verification"]["input_port_count"], 66)
-        self.assertEqual(graph["verification"]["output_port_count"], 29)
+        self.assertEqual(graph["verification"]["output_port_count"], 30)
         self.assertEqual(graph["verification"]["edge_count"], 67)
 
         operator_names = {operation["operator"] for operation in graph["operations"]}
