@@ -1,0 +1,28 @@
+name: Proof-runner crash semantics
+
+on:
+  push:
+    paths:
+      - "experiments/proof-runner-crash-semantics/**"
+      - ".github/workflows/proof-runner-crash-semantics.yml"
+  pull_request:
+    paths:
+      - "experiments/proof-runner-crash-semantics/**"
+      - ".github/workflows/proof-runner-crash-semantics.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run crash-semantics tests
+        run: python -m unittest discover -s experiments/proof-runner-crash-semantics -p 'test_*.py' -v
