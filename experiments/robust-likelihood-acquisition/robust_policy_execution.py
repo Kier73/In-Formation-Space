@@ -373,6 +373,10 @@ def _replay_prefix(
         attempt_ids.add(attempt_id)
 
         sensor_id = node["sensor_id"]
+        if sensor_id in used_sensors:
+            raise RobustPolicyExecutionMismatch(
+                "active policy attempts to reuse a sensor already consumed on this path"
+            )
         candidate = candidate_by_id.get(sensor_id)
         if candidate is None:
             raise RobustPolicyExecutionError(
