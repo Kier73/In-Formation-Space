@@ -2,10 +2,9 @@
 """Causal graph and partial-order analysis for encounter envelopes.
 
 Interprets the `relations` of a collection of encounter envelopes as a causal
-partially ordered set (poset), checks for causal cycles, verifies physical
-timestamp consistency, extracts minimal dependency Hasse diagrams (transitive
-reduction), and measures temporal underdetermination via topological linear
-extensions.
+partially ordered set (poset), checks for causal cycles, audits timestamp order only within explicitly shared
+clock domains, extracts minimal dependency Hasse diagrams (transitive reduction),
+and measures temporal underdetermination via topological linear extensions.
 
 Zero third-party dependencies: standard Python only.
 """
@@ -68,8 +67,8 @@ NON_CAUSAL_KINDS: FrozenSet[str] = frozenset(
 
 
 @dataclass(frozen=True)
-class AnachronismViolation:
-    """Witness that causal order contradicts physical timestamps."""
+class TimestampOrderConflict:
+    """Diagnostic witness: same-domain wall timestamps oppose causal order."""
 
     predecessor_id: str
     successor_id: str
@@ -78,9 +77,13 @@ class AnachronismViolation:
     time_skew_seconds: float
 
 
+# Backwards-compatible name for existing callers.
+AnachronismViolation = TimestampOrderConflict
+
+
 @dataclass(frozen=True)
 class CausalGraphReport:
-    """Report on the causal structure of an encounter envelope collection."""
+    """Report on causal structure and the scoped timestamp audit."""
 
     envelope_count: int
     internal_nodes: Tuple[str, ...]
@@ -89,9 +92,17 @@ class CausalGraphReport:
     cycle_witness: Optional[Tuple[str, ...]]
     direct_edges: Tuple[Tuple[str, str], ...]
     hasse_edges: Tuple[Tuple[str, str], ...]
-    anachronisms: Tuple[AnachronismViolation, ...]
+    timestamp_order_conflicts: Tuple[TimestampOrderConflict, ...]
     linear_extension_count: Optional[int]
     sample_topological_order: Optional[Tuple[str, ...]]
+    timestamp_pairs_checked: int = 0
+    timestamp_pairs_unassessed: int = 0
+    timestamp_unassessed_reasons: Tuple[Tuple[str, int], ...] = ()
+
+    @property
+    def anachronisms(self) -> Tuple[TimestampOrderConflict, ...]:
+        """Deprecated compatibility alias; conflicts are diagnostics, not proof."""
+        return self.timestamp_order_conflicts
 
 
 class CausalEncounterGraph:
@@ -101,6 +112,7 @@ class CausalEncounterGraph:
         self._envelopes: Dict[str, Mapping[str, Any]] = {}
         self._observed_times: Dict[str, dt.datetime] = {}
         self._observed_time_strings: Dict[str, str] = {}
+        self._observed_clock_domains: Dict[str, str] = {}
         self._relations: List[Tuple[str, str, str]] = []  # (source, kind, target)
         self._external_targets: Set[str] = set()
 
@@ -118,6 +130,14 @@ class CausalEncounterGraph:
                 if parsed is not None:
                     self._observed_times[env_id] = parsed
                     self._observed_time_strings[env_id] = obs_at
+
+            # Wall-clock timestamps are comparable only when both records
+            # explicitly name the same observed_at clock domain.
+            context = env.get("context")
+            if isinstance(context, Mapping):
+                clock_domain = context.get("observed_at_clock_domain")
+                if isinstance(clock_domain, str) and clock_domain.strip():
+                    self._observed_clock_domains[env_id] = clock_domain.strip()
 
         # Process relations
         for env_id, env in self._envelopes.items():
@@ -148,7 +168,7 @@ class CausalEncounterGraph:
         return cls(loaded)
 
     def analyze(self, max_counting_nodes: int = 16) -> CausalGraphReport:
-        """Analyze causal ordering, detect cycles, check timestamps, and compute Hasse reduction."""
+        """Analyze the causal poset and audit only comparable timestamp pairs."""
         internal_nodes = sorted(self._envelopes.keys())
         all_nodes = sorted(set(internal_nodes).union(self._external_targets))
 
@@ -211,7 +231,7 @@ class CausalEncounterGraph:
                 cycle_witness=tuple(cycle_witness) if cycle_witness else None,
                 direct_edges=tuple(direct_edges_list),
                 hasse_edges=(),
-                anachronisms=(),
+                timestamp_order_conflicts=(),
                 linear_extension_count=0,
                 sample_topological_order=None,
             )
@@ -238,28 +258,47 @@ class CausalEncounterGraph:
                 if not intermediate:
                     hasse_edges.append((u, v))
 
-        # 4. Physical Timestamp Consistency Audit
-        anachronisms: List[AnachronismViolation] = []
-        for u in internal_nodes:
-            if u not in self._observed_times:
-                continue
-            time_u = self._observed_times[u]
+        # 4. Timestamp consistency diagnostic, scoped to an explicitly shared clock.
+        # A timestamp from another or unknown domain is not evidence of order.
+        timestamp_order_conflicts: List[TimestampOrderConflict] = []
+        timestamp_pairs_checked = 0
+        unassessed_reasons: Dict[str, int] = {}
+
+        def mark_unassessed(reason: str) -> None:
+            unassessed_reasons[reason] = unassessed_reasons.get(reason, 0) + 1
+
+        for u in all_nodes:
             for v in tc[u]:
-                if v in self._observed_times:
-                    time_v = self._observed_times[v]
-                    # Since u precedes v causally (u < v), physical time should satisfy time_u <= time_v.
-                    # If time_u > time_v, we have an anachronism (causality goes backward relative to clock!)
-                    if time_u > time_v:
-                        skew = (time_u - time_v).total_seconds()
-                        anachronisms.append(
-                            AnachronismViolation(
-                                predecessor_id=u,
-                                successor_id=v,
-                                predecessor_time=self._observed_time_strings[u],
-                                successor_time=self._observed_time_strings[v],
-                                time_skew_seconds=skew,
-                            )
+                time_u = self._observed_times.get(u)
+                time_v = self._observed_times.get(v)
+                domain_u = self._observed_clock_domains.get(u)
+                domain_v = self._observed_clock_domains.get(v)
+
+                if time_u is None or time_v is None:
+                    mark_unassessed("missing_observed_at")
+                    continue
+                if domain_u is None or domain_v is None:
+                    mark_unassessed("missing_clock_domain")
+                    continue
+                if domain_u != domain_v:
+                    mark_unassessed("different_clock_domains")
+                    continue
+
+                timestamp_pairs_checked += 1
+                if time_u > time_v:
+                    skew = (time_u - time_v).total_seconds()
+                    timestamp_order_conflicts.append(
+                        TimestampOrderConflict(
+                            predecessor_id=u,
+                            successor_id=v,
+                            predecessor_time=self._observed_time_strings[u],
+                            successor_time=self._observed_time_strings[v],
+                            time_skew_seconds=skew,
                         )
+                    )
+
+        timestamp_pairs_unassessed = sum(unassessed_reasons.values())
+        timestamp_unassessed_reasons = tuple(sorted(unassessed_reasons.items()))
 
         # 5. Deterministic Topological Sort (Kahn's algorithm)
         in_degree: Dict[str, int] = {node: 0 for node in all_nodes}
@@ -293,9 +332,12 @@ class CausalEncounterGraph:
             cycle_witness=None,
             direct_edges=tuple(direct_edges_list),
             hasse_edges=tuple(hasse_edges),
-            anachronisms=tuple(anachronisms),
+            timestamp_order_conflicts=tuple(timestamp_order_conflicts),
             linear_extension_count=extension_count,
             sample_topological_order=tuple(topo_order),
+            timestamp_pairs_checked=timestamp_pairs_checked,
+            timestamp_pairs_unassessed=timestamp_pairs_unassessed,
+            timestamp_unassessed_reasons=timestamp_unassessed_reasons,
         )
 
     def _count_linear_extensions(
@@ -366,15 +408,23 @@ def main() -> None:
     for u, v in report.hasse_edges:
         print(f"  {u} -> {v}")
 
-    if report.anachronisms:
-        print(f"\n[ANACHRONISMS] {len(report.anachronisms)} physical timestamp violations detected:")
-        for viol in report.anachronisms:
+    print(
+        f"\nTimestamp audit: {report.timestamp_pairs_checked} same-domain causal pairs checked; "
+        f"{report.timestamp_pairs_unassessed} pairs unassessed."
+    )
+    if report.timestamp_order_conflicts:
+        print(
+            f"\n[TIMESTAMP ORDER CONFLICTS] {len(report.timestamp_order_conflicts)} "
+            "same-domain wall-clock readings oppose the recorded causal order:"
+        )
+        for conflict in report.timestamp_order_conflicts:
             print(
-                f"  {viol.predecessor_id} (time: {viol.predecessor_time}) causally precedes "
-                f"{viol.successor_id} (time: {viol.successor_time}) by +{viol.time_skew_seconds:.3f}s"
+                f"  {conflict.predecessor_id} (time: {conflict.predecessor_time}) causally precedes "
+                f"{conflict.successor_id} (time: {conflict.successor_time}) by "
+                f"+{conflict.time_skew_seconds:.3f}s"
             )
     else:
-        print("\n[TIMESTAMPS] Physical timestamps are consistent with causal partial order.")
+        print("\n[TIMESTAMPS] No same-domain timestamp order conflicts detected.")
 
     if report.linear_extension_count is not None:
         print(f"\nLinear extensions count: |Omega| = {report.linear_extension_count}")
