@@ -253,6 +253,7 @@ jobs:
               ("bridges/observation-path/direct-mtls-host-certificate-predicate.schema.json", "evidence/server-bootstrap/server-cert.predicate.json"),
               ("bridges/observation-path/direct-mtls-host-record.schema.json", "evidence/client-result/client_host-record.json"),
               ("bridges/observation-path/direct-mtls-host-record.schema.json", "evidence/server-result/server_host-record.json"),
+              ("bridges/observation-path/direct-mtls-endpoint-advertisement.schema.json", "evidence/server-bootstrap/server-endpoint.json"),
               ("bridges/observation-path/direct-mtls-host-record-predicate.schema.json", "evidence/client-result/client_host-record.predicate.json"),
               ("bridges/observation-path/direct-mtls-host-record-predicate.schema.json", "evidence/server-result/server_host-record.predicate.json"),
               ("bridges/observation-path/direct-mtls-reconstruction-report.schema.json", "evidence/direct-mtls-report.json"),
