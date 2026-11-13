@@ -348,3 +348,14 @@ python experiments/in-transit-memory/adaptive_repair.py --scan --simulate --tria
 ~~~
 
 The report includes the full state/action table, the count of survivor-count cells where the selected action differs between good and bad channel states, the number of state rows selecting repair, and a policy digest binding the complete decision table. The CI summary prints that digest alongside each adaptive-vs-fixed comparison. The focused tests check backward-vs-forward reconstruction, dominance over fixed schedules, the no-repair special case, repair-cost monotonicity, explicit state/action coverage, agreement with the original BTL-001 no-repair retention, report/sweep digests, and seeded simulation against exact policy metrics. The CLI prints a direct adaptive-vs-best-fixed comparison for each threshold and repair-cost pair.
+
+
+### 11.1 First adaptive policy scan
+
+The checked-in [MRE-003 adaptive policy summary](results/adaptive-repair-scan-summary.json) records 48 threshold/cost combinations from CI run [43367608013](https://github.com/Kier73/In-Formation-Space/actions/runs/43367608013). Each row carries the adaptive survival probability, expected repair count, expected utility, number of state-conditioned decision cells, count of state rows selecting repair, policy-table SHA-256, and best fixed-interval comparison.
+
+A notable moderate-burst example is \(k=1,c=0.10\): adaptive policy utility is 0.849583 versus 0.686204 for the best fixed interval \(L=2\), a gain of 0.163379. The adaptive policy chooses repair in 41 state rows and has 25 survivor-count cells where the choice differs between good and bad channel states.
+
+For the rare-persistent-burst scenario, \(k=1,c=0.10\) gives adaptive utility 0.689606 versus 0.654254 for the best fixed interval \(L=16\), a gain of 0.0353523. Its state table is channel-sensitive in 35 survivor/time cells.
+
+These results are finite-horizon objective comparisons under the explicit zero-cost perfect-observation assumption. They do not show that a deployed controller can observe channel state or survivor count at no cost.
