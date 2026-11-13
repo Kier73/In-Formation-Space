@@ -1,0 +1,52 @@
+name: Signed reference evidence review RIV-014
+
+on:
+  push:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/signed-reference-evidence-review.yml"
+      - "bridges/authority-lineage/authority_lineage.py"
+      - "bridges/authority-lineage/review_certificates.py"
+      - "bridges/authority-lineage/signed_review_receipts.py"
+      - "bridges/authority-lineage/review_trust_manifest.py"
+      - "experiments/reference-calibrated-evidence/verified_reference_evidence_bundle.py"
+  pull_request:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/signed-reference-evidence-review.yml"
+      - "bridges/authority-lineage/authority_lineage.py"
+      - "bridges/authority-lineage/review_certificates.py"
+      - "bridges/authority-lineage/signed_review_receipts.py"
+      - "bridges/authority-lineage/review_trust_manifest.py"
+      - "experiments/reference-calibrated-evidence/verified_reference_evidence_bundle.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  signed-reference-evidence-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5" "cryptography>=41"
+      - name: Validate signed review schema
+        run: |
+          python -c "import json, jsonschema; p='experiments/reference-calibrated-evidence/signed-reference-evidence-review.schema.json'; s=json.load(open(p, encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s)"
+      - name: Compile signed review and existing trust modules
+        run: |
+          python -m py_compile bridges/authority-lineage/authority_lineage.py
+          python -m py_compile bridges/authority-lineage/review_certificates.py
+          python -m py_compile bridges/authority-lineage/signed_review_receipts.py
+          python -m py_compile bridges/authority-lineage/review_trust_manifest.py
+          python -m py_compile formats/encounter-envelope/validate_envelope.py
+          python -m py_compile experiments/reference-calibrated-evidence/verified_reference_evidence_bundle.py
+          python -m py_compile experiments/reference-calibrated-evidence/signed_reference_evidence_review.py
+      - name: Run signed reference review tests
+        env:
+          PYTHONPATH: bridges/observation-path:bridges/authority-lineage:formats/encounter-envelope:experiments/reference-calibrated-evidence
+        run: python -m unittest discover -s experiments/reference-calibrated-evidence -p "test_signed_reference_evidence_review.py" -v

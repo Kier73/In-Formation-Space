@@ -464,3 +464,22 @@ RIV-012 advances an adaptive reference policy only through structurally authoriz
 5. How should late source evidence or a conflicting authority receipt produce a review proposal without rewriting the prior calibration history?
 
 The initial bridge is [RIV-013](../experiments/reference-calibrated-evidence/RIV-013-README.md). It verifies inline Encounter Envelope payloads, each included per-source payload digest, and an append-only Authority Lineage reconstruction for each RIV-012 policy step. It explicitly does not authenticate sensors, physical standards, authority actors, signatures, or external referenced artifacts.
+
+
+---
+
+## 24. How should independent reviewer attestation bind to a verified evidence bundle?
+
+### The question
+
+RIV-013 reconstructs inline Encounter Envelopes, per-source payload digests, and Authority Lineage decisions, but those integrity checks do not authenticate a reviewer who approves the bundle. How should a separate review decision become cryptographically attributable and remain bound to a stable, expiring trust root?
+
+### Questions
+
+1. How should two independent reviewer seats approve the exact RIV-013 bundle digest without being confused with the underlying sensor quorum?
+2. How should Ed25519/DSSE review receipts bind the certificate, reviewer seat, rationale, and retained review artifact?
+3. How should a root-signed, expiring trust manifest bind the reviewer public-key store to a registry generation and prevent trust-store substitution?
+4. What external root-key pin and generation/rollback state must a verifier retain independently?
+5. How can the resulting review approval be recorded as a new Authority Lineage decision while preserving the machine-verified content decision and the explicit exclusion of physical source authentication?
+
+The initial implementation is [RIV-014](../experiments/reference-calibrated-evidence/RIV-014-README.md). It requires two distinct reviewer approvals under the existing independent_two_of_two policy, signs the votes, binds public reviewer keys in a root-signed expiring manifest, and records an accepted Authority Lineage review decision. It authenticates reviewer approval relative to the pinned root—not sensor identities, standard truth, or physical measurements.
