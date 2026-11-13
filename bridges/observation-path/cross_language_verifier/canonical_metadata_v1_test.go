@@ -25,6 +25,9 @@ type canonicalMetadataVector struct {
 }
 
 func decodeCanonicalMetadataValue(source string) (any, error) {
+	if err := validateJSONUnicodeEscapes(source); err != nil {
+		return nil, err
+	}
 	decoder := json.NewDecoder(bytes.NewBufferString(source))
 	decoder.UseNumber()
 	var value any
@@ -134,5 +137,19 @@ func TestReadCanonicalFileRequiresExactCanonicalBytes(t *testing.T) {
 	}
 	if _, _, err := ReadCanonicalFile(noncanonicalPath); err == nil {
 		t.Fatal("noncanonical artifact unexpectedly accepted")
+	}
+}
+
+func TestDecodeObjectAcceptsValidUnicodeSurrogatePair(t *testing.T) {
+	object, err := DecodeObject([]byte(`{"value":"\ud83d\ude80"}`))
+	if err != nil {
+		t.Fatalf("valid UTF-16 surrogate pair was rejected: %v", err)
+	}
+	canonical, err := CanonicalBytes(object)
+	if err != nil {
+		t.Fatalf("canonical encoding failed: %v", err)
+	}
+	if !bytes.Equal(canonical, []byte(`{"value":"🚀"}`)) {
+		t.Fatalf("unexpected canonical output: %s", canonical)
 	}
 }
