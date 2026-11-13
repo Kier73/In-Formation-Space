@@ -120,14 +120,7 @@ class DurableAuthorityTests(unittest.TestCase):
         # child processes can prepare different valid claims from the same head.
         database = self.root / "race.sqlite3"
         database.parent.mkdir(parents=True, exist_ok=True)
-        init_dir = self.root / "race-init"
-        self.bundle = build_sqlite_authority_bundle(
-            init_dir,
-            run_id="sqlite-race-seed",
-            runner_id="runner-sqlite-race",
-        )
-        # A real four-event DB is reduced to a fresh one-event authority using
-        # a separate process phase, not by deleting rows from the existing DB.
+        # Prepare two independent candidates from one one-event authority head.
         from durable_authority import _load_types, _route
         Ledger, Store = _load_types()
         store = Store(database)
