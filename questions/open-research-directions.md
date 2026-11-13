@@ -290,3 +290,22 @@ RIV-002 shows that full observation history can retain a distinction after curre
 5. When does a controller that is optimal for one finite task generalize to a family of tasks or transition models?
 
 The operational baseline is [RIV-003](../experiments/bounded-memory-representation-relevance/README.md). It exhaustively synthesizes deterministic finite-state observation controllers for small supplied models, compares them with an exact full-history target, and reports the minimum among explicitly tested memory sizes. The next step is to study controller compression and task-family reuse without assuming that the same memory state has universal meaning.
+
+
+---
+
+## 15. When can noisy observation history be compressed without losing decision value?
+
+### The question
+
+RIV-002 and RIV-003 show how a deterministic observer may retain a distinction through finite memory. Real observations are often noisy. Can the observer accumulate uncertain evidence into a compact statistic that preserves the optimal decision without storing the ordered signal history?
+
+### Questions
+
+1. Under which sensor and dependence models is a count, likelihood ratio, or posterior a sufficient statistic for a particular decision task?
+2. How does the sufficient representation change when sensor reliability varies over time or observations are conditionally correlated?
+3. Can Bayesian evidence updates be represented as exact, composable transitions across independently operating observers?
+4. How should confidence calibration, sensor drift, evidence provenance, and task utility be carried alongside a compressed statistic?
+5. What is the smallest accumulator that preserves decisions across a family of priors, sensor models, and downstream tasks rather than one fixed MAP classification?
+
+The initial operational baseline is [RIV-004](../experiments/evidence-accumulation-sufficient-statistic/README.md). It compares exact MAP decisions from all ordered histories with a count accumulator for a fixed binary hypothesis and conditionally iid binary sensor model. Its sufficiency claim is conditional on that model; changing dependence, sensor identity, or task may require a different statistic.
