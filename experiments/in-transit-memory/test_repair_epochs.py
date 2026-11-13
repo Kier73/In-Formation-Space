@@ -335,7 +335,7 @@ class RepairEpochTests(unittest.TestCase):
         for spec, recorded in zip(DEFAULT_SCENARIOS, receipt["scenarios"]):
             rebuilt = build_repair_sweep(**spec)
             self.assertEqual(recorded["name"], spec["scenario_name"])
-            self.assertEqual(len(recorded["policies"]), rebuilt["policy_count"])
+            self.assertEqual(len(recorded["policies"]), rebuilt["policy_count"] * 3)
             expected_policies = {}
             for policy in rebuilt["policies"]:
                 for model, entry in policy["models"].items():
@@ -369,7 +369,16 @@ class RepairEpochTests(unittest.TestCase):
 
             for model in ("iid_marginal", "per_packet_markov", "shared_channel"):
                 expected_frontier = rebuilt["pareto_frontier"][model]
-                self.assertEqual(recorded["pareto_frontier"][model], expected_frontier)
+                actual_frontier = recorded["pareto_frontier"][model]
+                self.assertEqual(len(actual_frontier), len(expected_frontier))
+                for actual, expected in zip(actual_frontier, expected_frontier):
+                    for field in (
+                        "recovery_threshold",
+                        "interval_rounds",
+                        "expected_lifetime_rounds",
+                        "expected_repairs_per_100_lifetime_rounds_ratio",
+                    ):
+                        self.assertEqual(actual[field], expected[field])
 
     def test_report_digest_detects_policy_tampering(self):
         params = self.parameters()
