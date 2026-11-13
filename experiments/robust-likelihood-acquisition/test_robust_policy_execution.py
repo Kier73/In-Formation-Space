@@ -2,6 +2,9 @@ import copy
 import hashlib
 import json
 import sys
+from pathlib import Path
+
+import jsonschema
 import unittest
 from fractions import Fraction
 from pathlib import Path
@@ -361,6 +364,19 @@ class RobustPolicyExecutionTests(unittest.TestCase):
                 prior_observation_paths=(first, second),
                 attempt_id="attempt-after-stop",
             )
+
+    def test_execution_record_matches_published_schema(self):
+        path = complete_path(self.report, (), "attempt-schema", "yes")
+        record = build_robust_policy_execution_record(
+            policy_report=self.report,
+            observation_paths=(path,),
+        )
+        schema_path = Path(__file__).with_name(
+            "robust-policy-execution.schema.json"
+        )
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator.check_schema(schema)
+        jsonschema.validate(record, schema)
 
     def test_execution_record_rejects_rehashed_state_tampering(self):
         path = complete_path(self.report, (), "attempt-tamper-record", "yes")
