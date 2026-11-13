@@ -1,0 +1,132 @@
+{
+  "format": "in-formation.in-transit-burst-loss-report",
+  "schema_version": "0.1",
+  "generated_by": "experiments/in-transit-memory/burst_loss.py",
+  "run": {
+    "max_rounds": 500,
+    "monte_carlo_trials_per_model": 2000,
+    "seed_base": 20261112,
+    "seed_increment_per_scenario": 100,
+    "note": "Seeds increment by model index within each scenario; this report is a reproducible numerical summary, not a measurement receipt."
+  },
+  "scenarios": [
+    {
+      "name": "intact_block_stationary_bursts",
+      "slots": 32,
+      "required": 32,
+      "good_loss_probability": 0.001,
+      "bad_loss_probability": 0.35,
+      "good_to_bad_probability": 0.025,
+      "bad_to_good_probability": 0.2,
+      "initial_bad_probability": 0.1111111111111111,
+      "marginal_first_round_loss_probability": 0.03977777777777778,
+      "models": {
+        "iid_average": {
+          "first_crossing_round": 1,
+          "exact_retention_at_crossing": 0.2728324865668664,
+          "monte_carlo": 0.279
+        },
+        "per_packet": {
+          "first_crossing_round": 1,
+          "exact_retention_at_crossing": 0.2728324865668664,
+          "monte_carlo": 0.2595
+        },
+        "shared_channel": {
+          "first_crossing_round": 11,
+          "exact_retention_at_crossing": 0.48522764455705014,
+          "monte_carlo": 0.472
+        }
+      }
+    },
+    {
+      "name": "half_threshold_stationary_bursts",
+      "slots": 64,
+      "required": 32,
+      "good_loss_probability": 0.001,
+      "bad_loss_probability": 0.35,
+      "good_to_bad_probability": 0.025,
+      "bad_to_good_probability": 0.2,
+      "initial_bad_probability": 0.1111111111111111,
+      "marginal_first_round_loss_probability": 0.03977777777777778,
+      "models": {
+        "iid_average": {
+          "first_crossing_round": 18,
+          "exact_retention_at_crossing": 0.43222748764619645,
+          "monte_carlo": 0.44
+        },
+        "per_packet": {
+          "first_crossing_round": 35,
+          "exact_retention_at_crossing": 0.4819073724696845,
+          "monte_carlo": 0.476
+        },
+        "shared_channel": {
+          "first_crossing_round": 32,
+          "exact_retention_at_crossing": 0.4961818498364149,
+          "monte_carlo": 0.4915
+        }
+      }
+    },
+    {
+      "name": "replicated_word_stationary_bursts",
+      "slots": 64,
+      "required": 1,
+      "good_loss_probability": 0.001,
+      "bad_loss_probability": 0.35,
+      "good_to_bad_probability": 0.025,
+      "bad_to_good_probability": 0.2,
+      "initial_bad_probability": 0.1111111111111111,
+      "marginal_first_round_loss_probability": 0.03977777777777778,
+      "models": {
+        "iid_average": {
+          "first_crossing_round": 112,
+          "exact_retention_at_crossing": 0.4946696983445923,
+          "monte_carlo": 0.489
+        },
+        "per_packet": {
+          "first_crossing_round": 235,
+          "exact_retention_at_crossing": 0.4976674517310882,
+          "monte_carlo": 0.4935
+        },
+        "shared_channel": {
+          "first_crossing_round": 110,
+          "exact_retention_at_crossing": 0.49861724064839047,
+          "monte_carlo": 0.517
+        }
+      }
+    },
+    {
+      "name": "persistent_bad_state",
+      "slots": 32,
+      "required": 24,
+      "good_loss_probability": 0.0005,
+      "bad_loss_probability": 0.9,
+      "good_to_bad_probability": 0.01,
+      "bad_to_good_probability": 0.05,
+      "initial_bad_probability": 0.16666666666666666,
+      "marginal_first_round_loss_probability": 0.15041666666666667,
+      "models": {
+        "iid_average": {
+          "first_crossing_round": 2,
+          "exact_retention_at_crossing": 0.4485468094222726,
+          "monte_carlo": 0.4495
+        },
+        "per_packet": {
+          "first_crossing_round": 14,
+          "exact_retention_at_crossing": 0.48139771765294964,
+          "monte_carlo": 0.4745
+        },
+        "shared_channel": {
+          "first_crossing_round": 52,
+          "exact_retention_at_crossing": 0.49912996573354695,
+          "monte_carlo": 0.504
+        }
+      }
+    }
+  ],
+  "limits": [
+    "All probabilities are computed under declared synthetic model parameters; no parameters were fitted from a live channel.",
+    "The per-packet model has independent packet-specific Markov states; the shared-channel model has one state common to all packets.",
+    "Packet losses are conditionally independent within each state. The models contain no repair, retransmission, reordering, or readout cost.",
+    "Monte Carlo values are seeded implementation checks against the finite-state calculations, not external observations."
+  ]
+}
