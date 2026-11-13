@@ -126,13 +126,45 @@ func TestCanonicalBytesMatchPythonUTF8AndSortedObjectProfile(t *testing.T) {
 	}
 }
 
-func TestDecimalJSONNumberIsRejectedUntilPortableNumberProfileExists(t *testing.T) {
+func TestDecimalJSONNumberIsRejectedByCanonicalMetadataV1(t *testing.T) {
 	value, err := DecodeObject([]byte("{\"value\":1.25}"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if _, err := CanonicalBytes(value); err == nil || !strings.Contains(err.Error(), "canonical safe-integer token") {
 		t.Fatalf("expected an explicit unsupported-number error, got %v", err)
+	}
+}
+
+func TestExponentAndNegativeZeroJSONNumbersAreRejected(t *testing.T) {
+	for _, raw := range []string{`{"value":1e2}`, `{"value":-0}`} {
+		value, err := DecodeObject([]byte(raw))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := CanonicalBytes(value); err == nil || !strings.Contains(err.Error(), "canonical safe-integer token") {
+			t.Fatalf("expected noncanonical number rejection for %s, got %v", raw, err)
+		}
+	}
+}
+
+func TestSafeIntegerProfileBoundariesAreAccepted(t *testing.T) {
+	value := Object{
+		"maximum": json.Number("9007199254740991"),
+		"minimum": json.Number("-9007199254740991"),
+	}
+	if _, err := CanonicalBytes(value); err != nil {
+		t.Fatalf("safe-integer boundary should be accepted: %v", err)
+	}
+}
+
+func TestDuplicateObjectKeysAreRejectedByCanonicalArtifactReader(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "duplicate.json")
+	if err := os.WriteFile(path, []byte("{\\"value\\":1,\\"value\\":2}\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := ReadCanonicalFile(path); err == nil || !strings.Contains(err.Error(), "canonical JSON") {
+		t.Fatalf("expected duplicate-key artifact rejection, got %v", err)
 	}
 }
 
