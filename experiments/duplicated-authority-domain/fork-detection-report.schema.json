@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kier73.github.io/in-formation-space/duplicated-authority-domain-report/0.1",
+  "title": "Duplicated fixed-membership authority-domain observation",
+  "type": "object",
+  "required": [
+    "format",
+    "classification",
+    "adjudication",
+    "membership_digest",
+    "shared_fixed_membership",
+    "same_generation_and_predecessor",
+    "generation",
+    "predecessor_digest",
+    "conflicting_roots",
+    "left_rejects_right_manifest",
+    "right_rejects_left_manifest",
+    "each_cluster_reconstructed_its_own_quorum",
+    "producer_attestations_verified_by_github",
+    "producer_jobs_distinct",
+    "same_github_workflow_run",
+    "physical_fault_domain_separation_established",
+    "winner",
+    "clusters",
+    "not_established"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.duplicated-authority-domain-observation/0.1"
+    },
+    "classification": {
+      "enum": [
+        "cloned_membership_split_brain",
+        "matching_duplicate_authority_views",
+        "incomparable_authority_views"
+      ]
+    },
+    "adjudication": {
+      "enum": [
+        "refuse_automatic_winner",
+        "no_fork_observed"
+      ]
+    },
+    "membership_digest": {
+      "oneOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
+    },
+    "shared_fixed_membership": { "type": "boolean" },
+    "same_generation_and_predecessor": { "type": "boolean" },
+    "generation": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "null" }
+      ]
+    },
+    "predecessor_digest": {
+      "oneOf": [
+        { "$ref": "#/$defs/digest" },
+        { "type": "null" }
+      ]
+    },
+    "conflicting_roots": { "type": "boolean" },
+    "left_rejects_right_manifest": { "type": "boolean" },
+    "right_rejects_left_manifest": { "type": "boolean" },
+    "each_cluster_reconstructed_its_own_quorum": { "type": "boolean" },
+    "producer_attestations_verified_by_github": { "type": "boolean" },
+    "producer_jobs_distinct": { "type": "boolean" },
+    "same_github_workflow_run": { "type": "boolean" },
+    "physical_fault_domain_separation_established": { "const": false },
+    "winner": {
+      "oneOf": [
+        { "type": "null" },
+        { "const": "not_applicable" }
+      ]
+    },
+    "clusters": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "cluster_id",
+          "bundle_digest",
+          "root_digest",
+          "state_digest",
+          "proposal_digest",
+          "prepare_members",
+          "commit_members",
+          "producer_identity",
+          "journal_reports",
+          "local_quorum_reconstructed"
+        ],
+        "properties": {
+          "cluster_id": { "enum": ["left", "right"] },
+          "bundle_digest": { "$ref": "#/$defs/digest" },
+          "root_digest": { "$ref": "#/$defs/digest" },
+          "state_digest": { "$ref": "#/$defs/digest" },
+          "proposal_digest": { "$ref": "#/$defs/digest" },
+          "prepare_members": {
+            "type": "array",
+            "minItems": 2,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "commit_members": {
+            "type": "array",
+            "minItems": 2,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "producer_identity": {
+            "type": "object",
+            "required": [
+              "repository",
+              "run_id",
+              "run_attempt",
+              "run_number",
+              "workflow_ref",
+              "workflow_sha",
+              "git_sha",
+              "job",
+              "runner_name",
+              "runner_environment"
+            ],
+            "properties": {
+              "repository": { "type": "string", "minLength": 1 },
+              "run_id": { "type": "string", "minLength": 1 },
+              "run_attempt": { "type": "string", "minLength": 1 },
+              "run_number": { "type": "string", "minLength": 1 },
+              "workflow_ref": { "type": "string", "minLength": 1 },
+              "workflow_sha": { "type": "string", "minLength": 1 },
+              "git_sha": { "type": "string", "minLength": 1 },
+              "job": { "type": "string", "minLength": 1 },
+              "runner_name": { "type": "string", "minLength": 1 },
+              "runner_environment": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": true
+          },
+          "journal_reports": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "required": [
+                "member_id",
+                "journal_sha256",
+                "journal_size_bytes",
+                "journal_head",
+                "journal_sequence",
+                "committed_state",
+                "replay_verified"
+              ],
+              "properties": {
+                "member_id": { "type": "string", "minLength": 1 },
+                "journal_sha256": { "$ref": "#/$defs/digest" },
+                "journal_size_bytes": { "type": "integer", "minimum": 1 },
+                "journal_head": { "$ref": "#/$defs/digest" },
+                "journal_sequence": { "type": "integer", "minimum": 1 },
+                "committed_state": {
+                  "type": "object",
+                  "required": ["slot", "state_digest"],
+                  "properties": {
+                    "slot": { "type": "integer", "minimum": 1 },
+                    "state_digest": { "$ref": "#/$defs/digest" }
+                  },
+                  "additionalProperties": false
+                },
+                "replay_verified": { "const": true }
+              },
+              "additionalProperties": false
+            }
+          },
+          "local_quorum_reconstructed": { "const": true }
+        },
+        "additionalProperties": false
+      }
+    },
+    "not_established": {
+      "type": "array",
+      "minItems": 5,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
