@@ -1,0 +1,328 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kier73.github.io/in-formation-space/mtls-cloned-authority-report/0.1",
+  "title": "Cloned mTLS recovery-authority identity observation",
+  "type": "object",
+  "required": [
+    "format",
+    "classification",
+    "adjudication",
+    "winner",
+    "membership_digest",
+    "shared_fixed_membership",
+    "same_generation_and_predecessor",
+    "generation",
+    "predecessor_digest",
+    "conflicting_roots",
+    "left_accepts_right_manifest",
+    "right_accepts_left_manifest",
+    "clusters",
+    "credential_clone",
+    "peer_authentication",
+    "process_layout",
+    "verified_layers",
+    "not_established"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.duplicated-mtls-authority-domain-observation/0.1"
+    },
+    "classification": {
+      "enum": [
+        "duplicated_mtls_identity_split_brain",
+        "matching_duplicate_identity_views"
+      ]
+    },
+    "adjudication": {
+      "enum": ["refuse_automatic_winner", "no_fork_observed"]
+    },
+    "winner": {
+      "type": "null"
+    },
+    "membership_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "shared_fixed_membership": {
+      "const": true
+    },
+    "same_generation_and_predecessor": {
+      "const": true
+    },
+    "generation": {
+      "const": 1
+    },
+    "predecessor_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "conflicting_roots": {
+      "type": "boolean"
+    },
+    "left_accepts_right_manifest": {
+      "type": "boolean"
+    },
+    "right_accepts_left_manifest": {
+      "type": "boolean"
+    },
+    "clusters": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "cluster_id",
+          "owner_process_id",
+          "owner_certificate_der_sha256",
+          "owner_private_key_file_sha256",
+          "root_digest",
+          "manifest",
+          "manifest_digest",
+          "proof_digest",
+          "prepare_members",
+          "commit_members",
+          "remote_processes",
+          "remote_authorities",
+          "journal_reports",
+          "local_quorum_reconstructed",
+          "local_high_water"
+        ],
+        "properties": {
+          "cluster_id": {
+            "enum": ["left", "right"]
+          },
+          "owner_process_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "owner_certificate_der_sha256": {
+            "$ref": "#/$defs/digest"
+          },
+          "owner_private_key_file_sha256": {
+            "$ref": "#/$defs/digest"
+          },
+          "root_digest": {
+            "$ref": "#/$defs/digest"
+          },
+          "manifest": {
+            "type": "object",
+            "required": [
+              "schema", "version", "machine_id", "incarnation", "owner_id",
+              "owner_term", "membership_digest", "generation", "predecessor_digest",
+              "state_digest", "capture_cut"
+            ],
+            "properties": {
+              "schema": { "const": "mailcpu.recovery-state-manifest.v1" },
+              "version": { "const": 1 },
+              "machine_id": { "type": "string", "minLength": 1 },
+              "incarnation": { "const": 1 },
+              "owner_id": { "const": "A" },
+              "owner_term": { "const": 1 },
+              "membership_digest": { "$ref": "#/$defs/digest" },
+              "generation": { "const": 1 },
+              "predecessor_digest": { "$ref": "#/$defs/digest" },
+              "state_digest": { "$ref": "#/$defs/digest" },
+              "capture_cut": { "const": "after_response_publish" }
+            },
+            "additionalProperties": false
+          },
+          "manifest_digest": {
+            "$ref": "#/$defs/digest"
+          },
+          "proof_digest": {
+            "$ref": "#/$defs/digest"
+          },
+          "prepare_members": {
+            "const": ["A", "B", "C"]
+          },
+          "commit_members": {
+            "const": ["A", "B", "C"]
+          },
+          "remote_processes": {
+            "type": "object",
+            "required": ["B", "C"],
+            "properties": {
+              "B": { "type": "integer", "minimum": 1 },
+              "C": { "type": "integer", "minimum": 1 }
+            },
+            "additionalProperties": false
+          },
+          "remote_authorities": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "object",
+              "required": [
+                "member_id", "endpoint", "port", "server_dns_name", "process_id",
+                "certificate_der_sha256"
+              ],
+              "properties": {
+                "member_id": { "enum": ["B", "C"] },
+                "endpoint": { "type": "string", "minLength": 1 },
+                "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+                "server_dns_name": { "type": "string", "minLength": 1 },
+                "process_id": { "type": "integer", "minimum": 1 },
+                "certificate_der_sha256": { "$ref": "#/$defs/digest" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "journal_reports": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "required": [
+                "member_id", "journal_sha256", "journal_size_bytes",
+                "committed_state", "journal_replay_verified"
+              ],
+              "properties": {
+                "member_id": { "enum": ["A", "B", "C"] },
+                "journal_sha256": { "$ref": "#/$defs/digest" },
+                "journal_size_bytes": { "type": "integer", "minimum": 1 },
+                "committed_state": {
+                  "type": "array",
+                  "prefixItems": [
+                    { "const": 1 },
+                    { "$ref": "#/$defs/digest" }
+                  ],
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "journal_replay_verified": { "const": true }
+              },
+              "additionalProperties": false
+            }
+          },
+          "local_quorum_reconstructed": {
+            "const": true
+          },
+          "local_high_water": {
+            "type": "object",
+            "required": ["generation", "root_digest"],
+            "properties": {
+              "generation": { "const": 1 },
+              "root_digest": { "$ref": "#/$defs/digest" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "credential_clone": {
+      "type": "object",
+      "required": [
+        "owner_certificate_der_sha256",
+        "owner_private_key_file_sha256",
+        "member_certificate_der_sha256",
+        "member_private_key_file_sha256",
+        "left_and_right_owner_certificate_identical",
+        "left_and_right_owner_private_key_identical",
+        "left_and_right_member_certificates_identical",
+        "certificates_are_ephemeral_test_credentials"
+      ],
+      "properties": {
+        "owner_certificate_der_sha256": { "$ref": "#/$defs/digest" },
+        "owner_private_key_file_sha256": { "$ref": "#/$defs/digest" },
+        "member_certificate_der_sha256": {
+          "type": "object",
+          "required": ["B", "C"],
+          "properties": {
+            "B": { "$ref": "#/$defs/digest" },
+            "C": { "$ref": "#/$defs/digest" }
+          },
+          "additionalProperties": false
+        },
+        "member_private_key_file_sha256": {
+          "type": "object",
+          "required": ["B", "C"],
+          "properties": {
+            "B": { "$ref": "#/$defs/digest" },
+            "C": { "$ref": "#/$defs/digest" }
+          },
+          "additionalProperties": false
+        },
+        "left_and_right_owner_certificate_identical": { "const": true },
+        "left_and_right_owner_private_key_identical": { "const": true },
+        "left_and_right_member_certificates_identical": { "const": true },
+        "certificates_are_ephemeral_test_credentials": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "peer_authentication": {
+      "type": "object",
+      "required": [
+        "mechanism", "owner_expected_dns", "member_expected_dns",
+        "wrong_ca_trusted_but_wrong_dns_client_rejected",
+        "correct_owner_identity_remained_serviceable",
+        "correct_owner_observed_left_high_water"
+      ],
+      "properties": {
+        "mechanism": { "const": "mutually-authenticated TLS 1.2+" },
+        "owner_expected_dns": { "const": "owner-a.mailcpu.test" },
+        "member_expected_dns": {
+          "type": "object",
+          "required": ["B", "C"],
+          "properties": {
+            "B": { "const": "member-b.mailcpu.test" },
+            "C": { "const": "member-c.mailcpu.test" }
+          },
+          "additionalProperties": false
+        },
+        "wrong_ca_trusted_but_wrong_dns_client_rejected": { "const": true },
+        "correct_owner_identity_remained_serviceable": { "const": true },
+        "correct_owner_observed_left_high_water": {
+          "type": "array",
+          "prefixItems": [
+            { "const": 1 },
+            { "$ref": "#/$defs/digest" }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "additionalProperties": false
+    },
+    "process_layout": {
+      "type": "object",
+      "required": [
+        "observer_process_id", "separate_owner_and_member_processes",
+        "distinct_process_ids", "process_count", "same_host_process_test",
+        "physical_fault_domain_separation_established", "clusters"
+      ],
+      "properties": {
+        "observer_process_id": { "type": "integer", "minimum": 1 },
+        "separate_owner_and_member_processes": { "const": true },
+        "distinct_process_ids": { "const": true },
+        "process_count": { "const": 7 },
+        "same_host_process_test": { "const": true },
+        "physical_fault_domain_separation_established": { "const": false },
+        "clusters": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "additionalProperties": false
+    },
+    "verified_layers": {
+      "type": "array",
+      "minItems": 8,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "not_established": {
+      "type": "array",
+      "minItems": 7,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}
