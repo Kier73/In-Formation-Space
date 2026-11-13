@@ -10,7 +10,7 @@ This experiment adds `attested_admission.py` and a **main-branch-only** `vgi_att
 - the checker-signed recheck statement;
 - the ephemeral checker Ed25519 public key.
 
-Each is checked through GitHub CLI's attestation verifier against an **explicit authority policy**: repository `Kier73/In-Formation-Space`, stable GitHub repository ID `1454466415`, source commit equal to `GITHUB_SHA`, ref exactly `refs/heads/main`, signer workflow `Kier73/In-Formation-Space/.github/workflows/lean-term-receipt.yml`, exact workflow signing certificate SAN, GitHub-hosted-runner-only policy, SLSA provenance predicate and the actual file's SHA-256 digest. The verifier fetches attestations from GitHub rather than accepting an artifact-supplied bundle as the root of trust.
+Each is checked through GitHub CLI's attestation verifier against an **explicit authority policy**: repository `Kier73/In-Formation-Space`, stable GitHub repository ID `1454466415`, source commit equal to `GITHUB_SHA`, ref exactly `refs/heads/main`, signer workflow `Kier73/In-Formation-Space/.github/workflows/lean-term-receipt.yml` authenticated via the exact workflow signing certificate SAN (GitHub CLI rejects combining `--cert-identity` with `--signer-workflow`), GitHub-hosted-runner-only policy, SLSA provenance predicate and the actual file's SHA-256 digest. The verifier fetches attestations from GitHub rather than accepting an artifact-supplied bundle as the root of trust.
 
 The GitHub CLI version must be **2.102.0 or newer**. Earlier builds contained known flaws in `--signer-workflow` prefix matching and case-insensitive `--source-ref` comparison (GitHub advisories GHSA-wjmr-j3rp-mh2g and GHSA-4mq3-hpgx-9cx8, patched in 2.102.0). Unsupported, missing, or failing verification rejects admission.
 

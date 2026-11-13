@@ -143,7 +143,8 @@ def verify_subjects(
         command = [
             "gh", "attestation", "verify", str(path),
             "--repo", REPO,
-            "--signer-workflow", WORKFLOW,
+            # Exact SAN enforces the workflow and ref in a single mutually
+            # exclusive policy flag (gh forbids --signer-workflow with it).
             "--cert-identity", CERT_IDENTITY,
             "--source-ref", MAIN_REF,
             "--source-digest", context["git_sha"],
