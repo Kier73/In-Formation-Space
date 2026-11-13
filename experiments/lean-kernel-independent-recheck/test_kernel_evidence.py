@@ -64,6 +64,7 @@ class KernelEvidenceTests(unittest.TestCase):
                 exit_code=exit_code, stdout=stdout, stderr=stderr,
             ))
 
+    @patch.dict("os.environ", {"GITHUB_ACTIONS": "false"}, clear=True)
     @patch.object(evidence.subprocess, "run", side_effect=fake_lean_process)
     def test_two_independent_calls_reconstruct_bounded_case_statuses(self, mocked):
         with tempfile.TemporaryDirectory() as directory:
@@ -89,6 +90,7 @@ class KernelEvidenceTests(unittest.TestCase):
             ))
             self.assertGreater(mocked.call_count, 8)
 
+    @patch.dict("os.environ", {"GITHUB_ACTIONS": "false"}, clear=True)
     @patch.object(evidence.subprocess, "run", side_effect=fake_lean_process)
     def test_runner_document_digest_mismatch_is_rejected(self, _mocked):
         with tempfile.TemporaryDirectory() as directory:
@@ -100,6 +102,7 @@ class KernelEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(evidence.KernelEvidenceError, "digest mismatch"):
                 evidence.verify(path, Path(directory) / "checker.json")
 
+    @patch.dict("os.environ", {"GITHUB_ACTIONS": "false"}, clear=True)
     @patch.object(evidence.subprocess, "run", side_effect=fake_lean_process)
     def test_source_hash_mutation_is_rejected_even_with_recomputed_digests(self, _mocked):
         with tempfile.TemporaryDirectory() as directory:
@@ -118,6 +121,7 @@ class KernelEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(evidence.KernelEvidenceError, "not bound to the fixed source"):
                 evidence.verify(path, Path(directory) / "checker.json")
 
+    @patch.dict("os.environ", {"GITHUB_ACTIONS": "false"}, clear=True)
     @patch.object(evidence.subprocess, "run", side_effect=fake_lean_process)
     def test_negative_case_cannot_be_promoted_to_accepted(self, _mocked):
         with tempfile.TemporaryDirectory() as directory:
