@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import struct
 import unittest
 from pathlib import Path
 
-from formats.canonical_metadata_v1 import canonical_bytes, canonical_digest
+from formats.canonical_metadata_v1 import canonical_bytes
 from formats.temporal_coordinate_v2 import (
     FRAME_SCHEMA,
     NUMERIC_SCHEMA,
@@ -145,7 +146,7 @@ class TemporalNumericV2Tests(unittest.TestCase):
         self.assertEqual(restored["scheduler"], frame["scheduler"])
         self.assertEqual(struct.pack(">d", restored["chemical_tau"]).hex(), "8000000000000000")
         self.assertEqual(encode_temporal_frame(restored), wire)
-        self.assertEqual(canonical_digest(wire), canonical_digest(encode_temporal_frame(restored)))
+        self.assertEqual(hashlib.sha256(canonical_bytes(wire)).hexdigest(), hashlib.sha256(canonical_bytes(encode_temporal_frame(restored))).hexdigest())
 
     def test_temporal_frame_rejects_actor_and_causal_inconsistency(self):
         actor = "host-a"
