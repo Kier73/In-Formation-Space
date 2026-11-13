@@ -235,7 +235,7 @@ class ProofTransferReceiverTests(unittest.TestCase):
 
     def test_unpatched_cli_or_wrong_repository_rejects(self):
         self.fake.version = "gh version 2.101.0 (2026-09-11)"
-        with self.assertRaisesRegex(receiver.ReceiverReject, "unpatched"):
+        with self.assertRaisesRegex(term.TermReceiptError, "unpatched"):
             self.accept()
         self.fake = MockGH()
         self.fake.bad_repository = True
