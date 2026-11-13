@@ -13,6 +13,9 @@ on:
       - "bridges/observation-path/test_diverse_host_verifier.py"
       - "bridges/observation-path/diverse-host-operation-*.schema.json"
       - "bridges/observation-path/cross_language_verifier/**"
+      - "formats/canonical-metadata-v1/**"
+      - "experiments/portable-realization-capsule/verify_capsule.mjs"
+      - "experiments/portable-realization-capsule/test_canonical_metadata_v1.mjs"
       - "bridges/temporal-provenance/temporal_provenance.py"
       - ".github/workflows/independent-host-operation-path.yml"
   pull_request:
@@ -21,6 +24,9 @@ on:
       - "bridges/observation-path/test_diverse_host_verifier.py"
       - "bridges/observation-path/diverse-host-operation-*.schema.json"
       - "bridges/observation-path/cross_language_verifier/**"
+      - "formats/canonical-metadata-v1/**"
+      - "experiments/portable-realization-capsule/verify_capsule.mjs"
+      - "experiments/portable-realization-capsule/test_canonical_metadata_v1.mjs"
       - ".github/workflows/independent-host-operation-path.yml"
   workflow_dispatch:
 
@@ -92,6 +98,12 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: bridges/observation-path/cross_language_verifier/go.mod
+      - name: Set up Node.js for the shared canonical metadata receiver
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run the shared canonical metadata v1 Node conformance vectors
+        run: node --test experiments/portable-realization-capsule/test_canonical_metadata_v1.mjs
       - name: Run Go cross-language reconstruction tests
         working-directory: bridges/observation-path/cross_language_verifier
         env:
