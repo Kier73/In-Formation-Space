@@ -222,10 +222,20 @@ jobs:
               Draft202012Validator(schema).validate(instance)
               print(f"valid: {instance_path}")
           PY
-      - name: Attest the independently reconstructed report
+      - name: Bind the third-host identity and exact report bytes
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python bridges/observation-path/independent_host_path.py write-report-predicate \
+            --report evidence/independent-report.json \
+            --output evidence/independent-report.predicate.json
+      - name: Attest the independently reconstructed report and verifier identity
         uses: actions/attest@v4
         with:
           subject-path: evidence/independent-report.json
+          predicate-type: https://kier73.github.io/in-formation-space/independent-host-operation-report/v1
+          predicate-path: evidence/independent-report.predicate.json
       - name: Preserve the independent reconstruction result
         uses: actions/upload-artifact@v4
         with:
