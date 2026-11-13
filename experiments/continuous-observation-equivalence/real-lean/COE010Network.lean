@@ -31,7 +31,7 @@ def compileLayer (layer : Layer) (prev : List Expr) : List Expr :=
   if layer.relu then pres.map Expr.rectified else pres
 
 def compileNetwork (layers : List Layer) : List Expr :=
-  layers.foldl (fun prev layer => compileLayer layer prev) [Expr.variable]
+  layers.foldl (fun prev layer => compileLayer layer prev) [Expr.input]
 
 private theorem foldExprSound (pairs : List (Rat × Expr))
     (acc : Expr) (q : Rat) :
