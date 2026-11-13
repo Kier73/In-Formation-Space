@@ -34,7 +34,9 @@ jobs:
           python -m py_compile experiments/reference-calibrated-evidence/reference_calibrated_evidence.py
           python -m py_compile experiments/reference-calibrated-evidence/example.py
           python -m py_compile experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py
-      - name: Run exact reference-calibration tests
+      - name: Run exact reference-calibration and reference-acquisition tests
+        env:
+          PYTHONPATH: bridges/observation-path:experiments/reference-calibrated-evidence
         run: python -m unittest discover -s experiments/reference-calibrated-evidence -p "test_*.py" -v
       - name: Run reproducible example
         run: python experiments/reference-calibrated-evidence/example.py
