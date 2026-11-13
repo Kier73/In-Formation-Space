@@ -246,6 +246,17 @@ func TestReportPredicateBindsExactReportBytesAndJobIdentity(t *testing.T) {
 	if predicate["job"] != VerifierRole {
 		t.Fatal("predicate does not bind cross-language verifier job")
 	}
+	if outputDir := os.Getenv("IHP004_TEST_OUTPUT_DIR"); outputDir != "" {
+		if err := os.MkdirAll(outputDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := WriteJSON(filepath.Join(outputDir, "report.json"), parsed); err != nil {
+			t.Fatal(err)
+		}
+		if err := WriteJSON(filepath.Join(outputDir, "predicate.json"), predicate); err != nil {
+			t.Fatal(err)
+		}
+	}
 }
 
 func TestIdentityActorIsDistinctAndStable(t *testing.T) {
