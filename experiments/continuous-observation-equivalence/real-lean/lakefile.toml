@@ -1,6 +1,6 @@
 name = "coe_real_continuous_extension"
 version = "0.1.0"
-defaultTargets = ["COE010Real"]
+defaultTargets = ["COE010Real", "COE010Network"]
 
 [[require]]
 name = "mathlib"
@@ -33,3 +33,6 @@ name = "COE009Evaluation"
 
 [[lean_lib]]
 name = "COE009Coverage"
+
+[[lean_lib]]
+name = "COE010Network"
