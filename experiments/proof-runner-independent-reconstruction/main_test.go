@@ -185,8 +185,28 @@ func TestRejectsRehashedButSemanticallyBrokenAdmissionChain(t *testing.T) {
 	rehashLedger(t, ledger)
 	writeMutable(t, paths.Ledger, ledger)
 
+	// Keep the independent SQLite append index and every prefix digest
+	// internally consistent, so the rejection must come from route semantics:
+	// execution_authorized still names the old admission event digest.
+	historyDocument := readMutable(t, paths.AuthorityHistory)
+	rows := historyDocument["entries"].([]any)
+	third := rows[2].(map[string]any)
+	third["appended_event_digests"] = []any{admission["event_digest"]}
+	third["ledger_digest"], _ = digest(object{
+		"format": ledger["format"],
+		"entries": entries[:3],
+	})
+	fourth := rows[3].(map[string]any)
+	fourth["previous_ledger_digest"] = third["ledger_digest"]
+	fourth["appended_event_digests"] = []any{authorization["event_digest"]}
+	fourth["ledger_digest"], _ = digest(object{
+		"format": ledger["format"],
+		"entries": entries[:4],
+	})
+	writeMutable(t, paths.AuthorityHistory, historyDocument)
+
 	if _, err := Verify(paths); err == nil {
-		t.Fatal("fully rehashed but semantically inconsistent ledger was accepted")
+		t.Fatal("fully re-hashed ledger and SQLite history with a stale admission binding was accepted")
 	}
 }
 
