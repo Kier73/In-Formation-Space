@@ -48,7 +48,18 @@ jobs:
         env:
           PYTHONPATH: external/E-CPU
         run: python -m unittest discover -s bridges/observation-path -p 'test_distributed_operation_path.py' -v
-      - name: Parse distributed path schemas
+      - name: Validate distributed path schemas
         run: |
-          python -m json.tool bridges/observation-path/distributed-operation-path.schema.json > /dev/null
-          python -m json.tool bridges/observation-path/distributed-operation-path-report.schema.json > /dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          for path in (
+              Path("bridges/observation-path/distributed-operation-path.schema.json"),
+              Path("bridges/observation-path/distributed-operation-path-report.schema.json"),
+          ):
+              schema = json.loads(path.read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              print(f"valid Draft 2020-12 schema: {path}")
+          PY
