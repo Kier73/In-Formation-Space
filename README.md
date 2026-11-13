@@ -220,3 +220,8 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Evidence-gated execution of finite-horizon reference policies
 
 - [RIV-012: Evidence-gated execution of finite-horizon reference policies](experiments/reference-calibrated-evidence/RIV-012-README.md) — binds each adaptive policy action to the current RIV-011 node, exact posterior, signal prefix and remaining budget; only an authorized interpreted ObservationPath advances the policy and contributes to a cumulative RIV-009 report rebuilt from the original calibration prior.
+
+
+## Verified reference evidence and authority lineage
+
+- [RIV-013: Verified reference evidence and authority lineage](experiments/reference-calibrated-evidence/RIV-013-README.md) — validates inline Encounter Envelopes and per-source payload digests for each RIV-012 reference observation, then records a reconstructed append-only Authority Lineage decision. It strengthens content integrity and traceability without claiming source or signer authentication.
