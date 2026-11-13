@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kier73.github.io/in-formation-space/proof-runner-independent-reconstruction-report/0.1",
+  "$id": "https://kier73.github.io/in-formation-space/proof-runner-independent-reconstruction-report/0.2",
   "title": "Independent proof-runner reconstruction report",
   "type": "object",
   "required": [
