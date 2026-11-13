@@ -110,6 +110,7 @@ jobs:
           name: term-checker-fixture
           path: |
             evidence/term-signed-recheck.json
+            evidence/term-independent-observation.json
             evidence/fixture-public.pem
           if-no-files-found: error
           retention-days: 30
