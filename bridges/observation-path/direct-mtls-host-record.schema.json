@@ -1,0 +1,33 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/direct-mtls-host-record.schema.json",
+  "title":"Direct mTLS host operation record",
+  "type":"object","additionalProperties":false,
+  "required":["schema","role","status","host","certificate_sha256","operation_span","temporal_frame","endpoint_digest","handoff_envelope","received_envelope","receiver_receipt","peer_certificate_sha256","error","record_digest"],
+  "properties":{
+    "schema":{"const":"in-formation.direct-mtls-host-record/0.1"},
+    "role":{"enum":["client_host","server_host"]},
+    "status":{"enum":["direct_mtls_verified","direct_tcp_unavailable","direct_mtls_rejected"]},
+    "host":{"type":"object"},
+    "certificate_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "operation_span":{"anyOf":[{"$ref":"operation-span.schema.json"},{"type":"null"}]},
+    "temporal_frame":{"type":["object","null"]},
+    "endpoint_digest":{"type":["string","null"],"pattern":"^[0-9a-f]{64}$"},
+    "handoff_envelope":{"type":["object","null"]},
+    "received_envelope":{"type":["object","null"]},
+    "receiver_receipt":{"type":["object","null"]},
+    "peer_certificate_sha256":{"type":["string","null"],"pattern":"^[0-9a-f]{64}$"},
+    "error":{"type":["string","null"]},
+    "record_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}
+  },
+  "allOf":[
+    {
+      "if":{"properties":{"status":{"const":"direct_mtls_verified"}},"required":["status"]},
+      "then":{"properties":{
+        "operation_span":{"$ref":"operation-span.schema.json"},
+        "temporal_frame":{"type":"object"},
+        "peer_certificate_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"}
+      }}
+    }
+  ]
+}
