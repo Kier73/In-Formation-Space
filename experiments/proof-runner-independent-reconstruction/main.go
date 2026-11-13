@@ -995,6 +995,17 @@ func Verify(paths Paths) (object, error) {
 	processPhases, _ := asArray(processEvidence["phases"], "authority process phases")
 	claimEvent, _ := asObject(mustEventObject(ledger["entries"], 1), "claim event")
 	claimDetails, _ := asObject(claimEvent["details"], "claim event details")
+	processReports := make([]any, 0, len(processPhases))
+	for _, rawPhase := range processPhases {
+		phase, _ := asObject(rawPhase, "authority process phase")
+		processReports = append(processReports, object{
+			"phase": phase["phase"],
+			"process_id": phase["process_id"],
+			"process_instance_id": phase["process_instance_id"],
+			"decision": phase["decision"],
+			"observed_store_revision": phase["observed_store_revision"],
+		})
+	}
 	authorityReport := object{
 		"participant_id": authority.ID,
 		"role": authority.Role,
@@ -1005,9 +1016,13 @@ func Verify(paths Paths) (object, error) {
 		"store_database_sha256": databaseDigest,
 		"store_revision_count": len(historyRows),
 		"store_history_digest": historyDigest,
+		"process_evidence_digest": processEvidenceDigest,
 		"process_phase_count": len(processPhases),
+		"process_instances": processReports,
 		"stale_owner_attempt_rejected": true,
+		"stale_owner_attempt_id": staleAttempt["stale_attempt_id"],
 		"owner_generation_after_restart": claimDetails["owner_generation"],
+		"storage_scope": "single-host-local-filesystem",
 	}
 	return object{
 		"schema": reportFormat,
