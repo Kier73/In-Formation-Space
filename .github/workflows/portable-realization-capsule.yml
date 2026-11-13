@@ -50,7 +50,9 @@ jobs:
           node-version: "22"
 
       - name: Check independent Node receiver syntax
-        run: node --check experiments/portable-realization-capsule/verify_capsule.mjs
+        run: |
+          node --check experiments/portable-realization-capsule/verify_capsule.mjs
+          node --check experiments/portable-realization-capsule/verify_prepared_result.mjs
 
       - name: Install test runner
         run: python -m pip install --disable-pip-version-check pytest
@@ -74,6 +76,7 @@ jobs:
           experiments/portable-realization-capsule/test_stateful_recovery_handoff.py
           experiments/portable-realization-capsule/test_distributed_stateful_recovery_handoff.py
           experiments/portable-realization-capsule/test_stateful_worker_transport_recovery.py
+          experiments/portable-realization-capsule/test_independent_prepared_result_verifier.py
           external/E-CPU/tests/test_transition_space.py
 
       - name: Execute portable realization capsule corpus

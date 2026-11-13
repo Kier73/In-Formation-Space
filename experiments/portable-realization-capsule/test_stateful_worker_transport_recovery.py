@@ -378,6 +378,23 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
         assert record["input_claim_id"] == assigned.claim_id
         assert record["input_envelope_sha256"] == assigned.envelope_sha256
         assert record["request_sequence"] == 1
+        prepared_record = json.loads(prepared_path.read_text(encoding="utf-8"))
+        prepared_core = {
+            key: value for key, value in prepared_record.items()
+            if key != "prepared_sha256"
+        }
+        assert prepared_record["prepared_sha256"] == hashlib.sha256(
+            _canonical(prepared_core)
+        ).hexdigest()
+        independent = prepared_record["independent_verification"]
+        assert independent is not None
+        assert independent["verification_digest"] == response["result"]["receipt"][
+            "independent_verification_digest"
+        ]
+        receipt = dict(response["result"]["receipt"])
+        receipt_digest = receipt.pop("receipt_sha256")
+        assert receipt_digest == response["result"]["receipt_sha256"]
+        assert hashlib.sha256(_canonical(receipt)).hexdigest() == receipt_digest
         next_envelope = StatefulRuntimeRecoveryEnvelope.from_dict(
             response["result"]["next_envelope"]
         )
