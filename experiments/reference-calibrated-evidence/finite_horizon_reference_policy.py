@@ -508,7 +508,10 @@ def build_report(
 
         # Mirrors RIV-010: value/cost, then absolute value, then lower cost,
         # then lexical candidate ID.
-        chosen = max(ranked, key=lambda row: row[:4])[4]
+        chosen = min(
+            ranked,
+            key=lambda row: (-row[0], -row[1], -row[2], row[3]),
+        )[4]
         action_cost = Fraction(**chosen["cost"])
         expected_accuracy = Fraction(0)
         expected_child_cost = Fraction(0)
