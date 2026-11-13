@@ -5,13 +5,13 @@ on:
     branches: [main]
     paths:
       - "bridges/observation-path/direct_mtls_operation_path.py"
-      - "experiments/multi-observer-causal-reconstruction/mor002_*"
+      - "experiments/multi-observer-causal-reconstruction/mor002*"
       - "experiments/multi-observer-causal-reconstruction/test_mor002_overlay.py"
       - ".github/workflows/mor002-tailscale-causal-reconstruction.yml"
   pull_request:
     paths:
       - "bridges/observation-path/direct_mtls_operation_path.py"
-      - "experiments/multi-observer-causal-reconstruction/mor002_*"
+      - "experiments/multi-observer-causal-reconstruction/mor002*"
       - "experiments/multi-observer-causal-reconstruction/test_mor002_overlay.py"
       - ".github/workflows/mor002-tailscale-causal-reconstruction.yml"
   workflow_dispatch:
