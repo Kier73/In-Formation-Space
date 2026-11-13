@@ -378,8 +378,9 @@ func verifyLedger(value object) (object, string, int64, error) {
 			if err != nil { return nil, "", 0, err }
 			admissionDigest, err := sha256Value(details["admission_event_digest"], "execution.admission_event_digest")
 			if err != nil { return nil, "", 0, err }
-			runnerID, err := textValue(details["runner_id"], "execution.runner_id")
-			if err != nil { return nil, "", 0, err }
+			if _, err := textValue(details["runner_id"], "execution.runner_id"); err != nil {
+				return nil, "", 0, err
+			}
 			admitted, ok := admissions[epochID+"\x00"+attemptID]
 			if !ok || admitted.EventDigest != admissionDigest || admitted.RequestDigest != requestDigest || admitted.RequestSequence != requestSequence {
 				return nil, "", 0, fail("execution authorization does not bind its preceding request admission")
