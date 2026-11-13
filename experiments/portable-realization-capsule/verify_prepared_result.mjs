@@ -12,7 +12,7 @@ import { pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
 import { verifyPortableStatefulCheckpoint } from "./verify_capsule.mjs";
 
-const PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v2";
+const PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v3";
 const ENVELOPE_SCHEMA = "in-formation-space.stateful-runtime-recovery-handoff.v1";
 const MAX_INPUT_BYTES = 96 * 1024 * 1024;
 
@@ -202,7 +202,8 @@ function verifyPrepared(envelope, record) {
     "schema", "request_sequence", "input_claim_id", "input_checkpoint_sha256",
     "input_envelope_sha256", "assignment_epoch", "owner_peer_id", "owner_host_id",
     "implementation_fingerprint", "output_checkpoint_base64", "output_checkpoint_sha256",
-    "receipt_core", "receipt_sha256", "independent_verification", "prepared_sha256",
+    "receipt_core", "receipt_sha256", "independent_verification",
+    "remote_validator_receipt", "prepared_sha256",
   ];
   exactKeys(record, expectedFields, "prepared result");
   if (record.schema !== PREPARED_SCHEMA) fail("unsupported prepared-result schema");
@@ -327,6 +328,45 @@ function verifyPrepared(envelope, record) {
     !same(record.independent_verification, fullVerification)
   ) {
     fail("stored independent-verification receipt differs from this independent replay");
+  }
+
+  const remoteReceipt = record.remote_validator_receipt;
+  if (remoteReceipt !== null) {
+    exactKeys(
+      remoteReceipt,
+      [
+        "schema", "validator_peer_id", "validator_dns_identity",
+        "validator_certificate_sha256", "worker_peer_id", "worker_host_id",
+        "worker_implementation_fingerprint", "request_sha256", "response_sha256",
+        "verifier_implementation_fingerprint",
+        "validation_digest", "validation", "remote_validator_receipt_digest",
+      ],
+      "remote validator receipt"
+    );
+    if (remoteReceipt.schema !== "ifs.psc.remote-validator-receipt.v1") {
+      fail("remote validator receipt schema is unsupported");
+    }
+    const { remote_validator_receipt_digest: remoteDigest, ...remoteCore } = remoteReceipt;
+    if (objectDigest(remoteCore) !== requireDigest(remoteDigest, "remote_validator_receipt_digest")) {
+      fail("remote validator receipt digest mismatch");
+    }
+    for (const field of [
+      "validator_peer_id", "validator_dns_identity", "worker_peer_id", "worker_host_id",
+    ]) requireText(remoteReceipt[field], `remote_validator_receipt.${field}`);
+    for (const field of [
+      "validator_certificate_sha256", "worker_implementation_fingerprint",
+      "request_sha256", "response_sha256", "verifier_implementation_fingerprint",
+      "validation_digest",
+    ]) requireDigest(remoteReceipt[field], `remote_validator_receipt.${field}`);
+    if (
+      remoteReceipt.worker_peer_id !== record.owner_peer_id ||
+      remoteReceipt.worker_host_id !== record.owner_host_id ||
+      remoteReceipt.worker_implementation_fingerprint !== record.implementation_fingerprint ||
+      remoteReceipt.validation_digest !== verificationDigest ||
+      !same(remoteReceipt.validation, fullVerification)
+    ) {
+      fail("remote validator receipt does not bind the exact worker assignment and independent verification report");
+    }
   }
 
   return {

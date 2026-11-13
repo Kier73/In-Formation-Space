@@ -25,6 +25,11 @@ from stateful_recovery_handoff import (
     issue_stateful_recovery_envelope,
     reassign_after_source_loss,
 )
+from remote_validator_test_support import (
+    make_validator_certificates,
+    start_validator_service,
+    stop_validator_service,
+)
 
 
 GENESIS = hashlib.sha256(b"ifs-srh-003-worker-transport-genesis").hexdigest()
@@ -224,9 +229,16 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
     retry_worker: subprocess.Popen[str] | None = None
     first_transport: SocketTransport | None = None
     retry_transport: SocketTransport | None = None
+    validator_process: subprocess.Popen[str] | None = None
 
     try:
         repository_root = Path(__file__).resolve().parents[2]
+        validator_certificates = make_validator_certificates(tmp_path / "validator-tls")
+        validator_process, validator_ready = start_validator_service(
+            repository_root,
+            tmp_path / "validator-service",
+            validator_certificates,
+        )
         process_b, port_b = _start_authority_process(authority_root, membership, "authority-b")
         process_c, port_c = _start_authority_process(authority_root, membership, "authority-c")
 
@@ -246,6 +258,14 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
             "logical-host-recovery-worker",
             RECOVERY_IMPL,
             json.dumps({"advance": 0, "reset": 0}, sort_keys=True, separators=(",", ":")),
+            validator_ready["validator_peer_id"],
+            validator_ready["host"],
+            str(validator_ready["port"]),
+            validator_ready["validator_dns_identity"],
+            validator_ready["server_certificate_sha256"],
+            str(validator_certificates["worker_cert"]),
+            str(validator_certificates["worker_key"]),
+            str(validator_certificates["ca"]),
         ]
 
         first_worker, first_port = _start_worker(
@@ -387,10 +407,27 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
             _canonical(prepared_core)
         ).hexdigest()
         independent = prepared_record["independent_verification"]
+        remote_receipt = prepared_record["remote_validator_receipt"]
         assert independent is not None
-        assert independent["verification_digest"] == response["result"]["receipt"][
-            "independent_verification_digest"
+        assert remote_receipt is not None
+        assert remote_receipt["validator_peer_id"] == validator_ready["validator_peer_id"]
+        assert remote_receipt["validator_dns_identity"] == validator_ready["validator_dns_identity"]
+        assert remote_receipt["validator_certificate_sha256"] == validator_ready["server_certificate_sha256"]
+        assert remote_receipt["worker_peer_id"] == "peer-recovery-worker"
+        assert remote_receipt["worker_host_id"] == "logical-host-recovery-worker"
+        assert remote_receipt["worker_implementation_fingerprint"] == RECOVERY_IMPL
+        assert remote_receipt["verifier_implementation_fingerprint"] == validator_ready[
+            "verifier_implementation_fingerprint"
         ]
+        assert remote_receipt["validation"] == independent
+        assert remote_receipt["validation_digest"] == independent["verification_digest"]
+        remote_core = {
+            key: value for key, value in remote_receipt.items()
+            if key != "remote_validator_receipt_digest"
+        }
+        remote_digest = hashlib.sha256(_canonical(remote_core)).hexdigest()
+        assert remote_receipt["remote_validator_receipt_digest"] == remote_digest
+        assert remote_digest == response["result"]["receipt"]["independent_verification_digest"]
         receipt = dict(response["result"]["receipt"])
         receipt_digest = receipt.pop("receipt_sha256")
         assert receipt_digest == response["result"]["receipt_sha256"]
@@ -442,3 +479,4 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
         _stop(retry_worker)
         _stop(process_b)
         _stop(process_c)
+        stop_validator_service(validator_process)
