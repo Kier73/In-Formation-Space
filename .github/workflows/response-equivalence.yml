@@ -1,0 +1,29 @@
+name: Response equivalence research
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/response-equivalence.yml'
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/response-equivalence.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Test exact response-equivalence contracts
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Reconstruct deterministic RE-001 report
+        run: python experiments/response-equivalence/resonance_equivalence.py > /dev/null
