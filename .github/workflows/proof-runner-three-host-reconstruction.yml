@@ -108,6 +108,8 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: evidence/authority/authority-public-key.json
+          predicate-type: https://kier73.github.io/in-formation-space/proof-runner-participant-key/v1
+          predicate-path: evidence/authority/authority-public-key.predicate.json
       - name: Transfer public authority evidence to the runner host
         uses: actions/upload-artifact@v4
         with:
@@ -171,6 +173,8 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: evidence/runner/runner-public-key.json
+          predicate-type: https://kier73.github.io/in-formation-space/proof-runner-participant-key/v1
+          predicate-path: evidence/runner/runner-public-key.predicate.json
       - name: Transfer result, receipt, and public runner key to the third host
         uses: actions/upload-artifact@v4
         with:
