@@ -192,4 +192,70 @@ theorem foldSound (cell : Cell) (layers : List Layer)
       rw [ih (advance cell state layer) h]
       rw [advanceSound cell state layer x hp hx hpfx]
 
+
+/-- An accepted certificate cell computes the same pointwise observation
+    as the source network for *every rational input in its open interval*.
+    Its numerical weights are evaluated by evalNetwork, not by the symbolic
+    certificate evaluator. -/
+theorem verifiedCellSound (layers : List Layer) (cell : Cell) (x : Rat)
+    (hcell : cellVerified layers cell = true)
+    (hx : inside cell x = true) :
+    cell.output.map (fun a => evaluateAt a x) = evalNetwork layers x := by
+  have hp : inside cell (probe cell) = true := by
+    simp only [cellVerified, Bool.and_eq_true] at hcell
+    grind
+  have hflag : (layers.foldl (advance cell) (true, [⟨1, 0⟩])).1 = true := by
+    simp only [cellVerified, Bool.and_eq_true] at hcell
+    grind
+  have hout : (layers.foldl (advance cell) (true, [⟨1, 0⟩])).2 =
+      cell.output := by
+    simp only [cellVerified, Bool.and_eq_true] at hcell
+    grind
+  have hnumeric := foldSound cell layers (true, [⟨1, 0⟩]) x hp hx hflag
+  have hinit : ([(⟨1, 0⟩ : Affine)]).map (fun a => evaluateAt a x) = [x] := by
+    simp [evaluateAt]
+    grind
+  calc
+    cell.output.map (fun a => evaluateAt a x) =
+        (layers.foldl (advance cell) (true, [⟨1, 0⟩])).2.map
+          (fun a => evaluateAt a x) := by rw [hout]
+    _ = evalNetwork layers x := by
+          simpa only [hinit, evalNetwork] using hnumeric
+
+private theorem allTrueMember {α : Type} (f : α → Bool)
+    (items : List α) (h : items.all f = true)
+    (value : α) (hv : value ∈ items) : f value = true := by
+  induction items with
+  | nil => simp at hv
+  | cons head rest ih =>
+      simp only [List.all_cons, Bool.and_eq_true] at h
+      simp only [List.mem_cons] at hv
+      rcases hv with heq | hrest
+      · subst value
+        exact h.1
+      · exact ih h.2 value hrest
+
+/-- This is the direct COE-008 refinement statement: an accepted
+    COEWireCheck.verify certificate implies its declared affine observation
+    agrees with direct network evaluation at *every rational interior point
+    of every admitted activation cell*. The hypotheses are the verifier's
+    Boolean result and membership, not an independent soundness assumption. -/
+theorem verifiedCertificateSound (cert : Cert) (cell : Cell) (x : Rat)
+    (hverify : verify cert = true)
+    (hmember : cell ∈ cert.cells)
+    (hx : inside cell x = true) :
+    cell.output.map (fun a => evaluateAt a x) =
+      evalNetwork cert.layers x := by
+  have hcells : cert.cells.all (cellVerified cert.layers) = true := by
+    simp only [verify, Bool.and_eq_true] at hverify
+    grind
+  have hcell := allTrueMember (cellVerified cert.layers)
+      cert.cells hcells cell hmember
+  exact verifiedCellSound cert.layers cell x hcell hx
+
+#print axioms COE008Evaluation.weightedAt
+#print axioms COE008Evaluation.advanceSound
+#print axioms COE008Evaluation.foldSound
+#print axioms COE008Evaluation.verifiedCertificateSound
+
 end COE008Evaluation
