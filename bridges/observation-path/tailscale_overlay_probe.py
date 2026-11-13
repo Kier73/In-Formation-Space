@@ -32,7 +32,7 @@ REPORT_PREDICATE_TYPE = "https://kier73.github.io/in-formation-space/ihp003-over
 GH_MIN_VERSION = (2, 103, 3)
 PEER_WAIT_SECONDS = 180.0
 PING_COUNT = 8
-PING_TIMEOUT_SECONDS = 45.0
+PING_TIMEOUT_SECONDS = 60.0
 
 
 class OverlayProbeError(ValueError):
@@ -428,7 +428,7 @@ def probe_peer(
         if peer_address["status"] != "ready":
             status = "peer_overlay_not_configured"
         else:
-            command = [tailscale_bin, "ping", "-c", str(PING_COUNT), str(peer_address["overlay_ipv4"])]
+            command = [tailscale_bin, "ping", "--c", str(PING_COUNT), str(peer_address["overlay_ipv4"])]
             try:
                 completed = subprocess.run(
                     command, capture_output=True, text=True, timeout=PING_TIMEOUT_SECONDS,
