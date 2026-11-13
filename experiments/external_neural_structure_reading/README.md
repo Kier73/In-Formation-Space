@@ -65,6 +65,31 @@ python -m unittest discover \
 
 The tests construct small synthetic Safetensors snapshots; they do not download a model or treat synthetic values as an external model observation.
 
+## Read a public Hub model without materializing its weights
+
+The companion `hub.py` reader resolves a public model at the exact supplied commit SHA, inspects the Hub sibling listing, then requests only the Safetensors header ranges. It supports public repositories and does not currently accept authentication tokens or private/gated models.
+
+```bash
+python -m experiments.external_neural_structure_reading.hub \
+  --repository openai-community/gpt2 \
+  --revision 607a30d783dfa663caf39e06633721c8d4cfcd7e \
+  --license-id mit \
+  --output gpt2-nsd.json
+```
+
+The revision above is an illustrative pinned GPT-2 revision; check the current Hub metadata and source license before using it. The reader requires the Hub's resolved SHA to equal the supplied SHA.
+
+For each Safetensors shard, the remote reader performs two requests:
+
+1. `Range: bytes=0-7` to obtain the header length.
+2. `Range: bytes=8-(7 + header_length)` to obtain the header JSON.
+
+Both responses must be HTTP 206 with an exact `Content-Range`; a server that ignores `Range` and returns HTTP 200 is rejected before its response body is read. The parser does not silently fall back to a full model download. Configuration and index JSON are separately bounded by the same size limit as the local reader.
+
+The current remote path does not fetch model cards, tokenizer files, processor configuration, architecture code, or tensor payloads. It does not yet support private/gated models, authentication, alternate storage backends, or model formats other than Safetensors. The local snapshot reader remains useful for offline snapshots and fixtures.
+
+The offline Hub tests inject a deterministic HTTP opener. They verify revision matching, indexed multi-shard reading, exact range intervals, schema validity, and fail-closed behavior when a server ignores or misreports range requests. They do not depend on live network availability.
+
 ## Fail-closed checks
 
 The reader rejects duplicate JSON keys, non-finite JSON constants, oversized JSON/header regions, non-commit revision labels, invalid tensor entries, negative dimensions or offsets, offsets beyond the data section, overlapping tensor ranges, symbolic links, path traversal, duplicate tensor names across shards, and any mismatch between a shard index and observed headers.
