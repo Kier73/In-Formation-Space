@@ -27,17 +27,25 @@ jobs:
     steps:
       - name: Check out proposed source
         uses: actions/checkout@v4
+      - name: Check out pinned E-CPU runtime dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install Python test dependencies
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
-      - name: Run producer and authority-check tests
+      - name: Run producer, restart, and authority-check tests
         working-directory: experiments/proof-runner-independent-reconstruction
+        env:
+          PYTHONPATH: ${{ github.workspace }}/bridges/proof-attention:${{ github.workspace }}/external/E-CPU:${{ github.workspace }}
         run: |
-          python -m py_compile host_evidence.py test_host_evidence.py
-          python -m unittest -v test_host_evidence
+          python -m py_compile host_evidence.py durable_authority.py test_host_evidence.py test_durable_authority.py
+          python -m unittest -v test_host_evidence test_durable_authority
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
@@ -69,6 +77,10 @@ jobs:
                   "--request", str(fixture / "authority" / "request.json"),
                   "--authority-attestation", str(fixture / "authority" / "authority-attestation.json"),
                   "--authority-key", str(fixture / "authority" / "authority-public-key.json"),
+                  "--authority-history", str(fixture / "authority" / "store-history.json"),
+                  "--authority-store", str(fixture / "authority" / "authority-store-fixture.bin"),
+                  "--process-evidence", str(fixture / "authority" / "process-evidence.json"),
+                  "--stale-owner-attempt", str(fixture / "authority" / "stale-owner-attempt.json"),
                   "--result", str(fixture / "runner" / "result.json"),
                   "--receipt", str(fixture / "runner" / "completion-receipt.json"),
                   "--runner-key", str(fixture / "runner" / "runner-public-key.json"),
@@ -94,6 +106,12 @@ jobs:
     steps:
       - name: Check out In-Formation-Space
         uses: actions/checkout@v4
+      - name: Check out pinned E-CPU runtime dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -101,6 +119,8 @@ jobs:
       - name: Install signing dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
       - name: Produce route-authority checkpoint and ephemeral public identity
+        env:
+          PYTHONPATH: ${{ github.workspace }}/bridges/proof-attention:${{ github.workspace }}/external/E-CPU:${{ github.workspace }}
         run: |
           python experiments/proof-runner-independent-reconstruction/host_evidence.py \
             authority --out-dir evidence/authority
@@ -195,6 +215,12 @@ jobs:
     steps:
       - name: Check out In-Formation-Space
         uses: actions/checkout@v4
+      - name: Check out pinned E-CPU runtime dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -242,6 +268,14 @@ jobs:
             --path received-runner/runner-public-key.json \
             --role runner_host \
             --job runner_host
+      - name: Reopen and verify the transferred SQLite authority on the third host
+        env:
+          PYTHONPATH: ${{ github.workspace }}/bridges/proof-attention:${{ github.workspace }}/external/E-CPU:${{ github.workspace }}
+        run: |
+          python experiments/proof-runner-independent-reconstruction/host_evidence.py \
+            verify-sqlite-authority \
+            --authority-dir received-authority \
+            --output evidence/sqlite-authority-verification.json
       - name: Record the third-host identity
         run: |
           python experiments/proof-runner-independent-reconstruction/host_evidence.py \
@@ -258,11 +292,16 @@ jobs:
             --request ../../received-authority/request.json \
             --authority-attestation ../../received-authority/authority-attestation.json \
             --authority-key ../../received-authority/authority-public-key.json \
+            --authority-history ../../received-authority/store-history.json \
+            --authority-store ../../received-authority/authority-store.sqlite3 \
+            --process-evidence ../../received-authority/process-evidence.json \
+            --stale-owner-attempt ../../received-authority/stale-owner-attempt.json \
             --result ../../received-runner/result.json \
             --receipt ../../received-runner/completion-receipt.json \
             --runner-key ../../received-runner/runner-public-key.json \
             --verifier-host ../../evidence/verifier-host.json \
             --key-attestations-verified \
+            --sqlite-store-reopened-verified \
             --output ../../evidence/reconstruction-report.json
       - name: Validate independent reconstruction report schema
         run: |
