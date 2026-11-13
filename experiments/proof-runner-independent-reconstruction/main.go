@@ -30,9 +30,9 @@ type object = map[string]any
 type Paths struct {
 	Ledger, Request, AuthorityAttestation, AuthorityKey string
 	AuthorityHistory, AuthorityStore, ProcessEvidence, StaleOwnerAttempt string
+	SQLiteAuthorityReport string
 	Result, Receipt, RunnerKey, VerifierHost string
 	KeyAttestationsVerified bool
-	SQLiteStoreReopenedVerified bool
 }
 
 type participant struct {
@@ -727,6 +727,75 @@ func mustEventDigest(value any) any {
 	event, ok := value.(map[string]any)
 	if !ok { return nil }
 	return event["event_digest"]
+}
+
+func verifySQLiteAuthorityReport(
+	report object,
+	ledger object,
+	historyDigest string,
+) (bool, string, error) {
+	if err := exactFields(report,
+		"verified", "store_type", "ledger_digest", "revision_count",
+		"active_epoch_id", "active_owner_id", "active_owner_generation",
+		"history_digest",
+	); err != nil {
+		return false, "", fail("SQLite reopen report fields are invalid: %v", err)
+	}
+	verified, ok := report["verified"].(bool)
+	if !ok {
+		return false, "", fail("SQLite reopen report verified field must be boolean")
+	}
+	if report["store_type"] != "sqlite-local-file" {
+		return false, "", fail("SQLite reopen report has an unexpected store type")
+	}
+	ledgerDigest, err := sha256Value(report["ledger_digest"], "SQLite reopen ledger_digest")
+	if err != nil || ledgerDigest != ledger["ledger_digest"] {
+		return false, "", fail("SQLite reopen report names a different route ledger")
+	}
+	historyRevision, err := integerValue(report["revision_count"], "SQLite reopen revision_count", 1)
+	if err != nil {
+		return false, "", err
+	}
+	entries, err := asArray(ledger["entries"], "route-ledger events")
+	if err != nil { return false, "", err }
+	if historyRevision != int64(len(entries)) {
+		return false, "", fail("SQLite reopen report revision count differs from route history")
+	}
+	lastEvent, err := asObject(eventsLast(entries), "last authorization event")
+	if err != nil { return false, "", err }
+	if report["active_epoch_id"] != lastEvent["epoch_id"] {
+		return false, "", fail("SQLite reopen report names a different active epoch")
+	}
+	claimEvent, err := asObject(eventsAt(entries, 1), "claim event")
+	if err != nil { return false, "", err }
+	claimDetails, err := asObject(claimEvent["details"], "claim details")
+	if err != nil { return false, "", err }
+	if report["active_owner_id"] != claimDetails["owner_id"] {
+		return false, "", fail("SQLite reopen report names a different active owner")
+	}
+	generation, err := integerValue(report["active_owner_generation"], "SQLite reopen active_owner_generation", 1)
+	if err != nil || generation != 2 {
+		return false, "", fail("SQLite reopen report does not recover owner generation two")
+	}
+	suppliedHistoryDigest, err := sha256Value(report["history_digest"], "SQLite reopen history_digest")
+	if err != nil || suppliedHistoryDigest != historyDigest {
+		return false, "", fail("SQLite reopen report history digest differs from reconstructed history")
+	}
+	reportDigest, err := digest(report)
+	if err != nil {
+		return false, "", err
+	}
+	return verified, reportDigest, nil
+}
+
+func eventsLast(events []any) any {
+	if len(events) == 0 { return nil }
+	return events[len(events)-1]
+}
+
+func eventsAt(events []any, index int) any {
+	if index < 0 || index >= len(events) { return nil }
+	return events[index]
 }
 
 func verifyAuthorityAttestation(
