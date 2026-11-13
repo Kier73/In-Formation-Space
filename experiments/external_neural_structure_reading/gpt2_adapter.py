@@ -495,6 +495,32 @@ def interpret_gpt2(nsd: dict[str, Any]) -> dict[str, Any]:
             "adapter": "hfr-001.gpt2-adapter.v0.1",
             "interpretation_status": "inferred-family-graph",
         },
+        "family_semantics": {
+            "activation_function": {
+                "value": activation,
+                "evidence_basis": (
+                    "observed config.json"
+                    if "activation_function" in config
+                    else "GPT2Config family default"
+                ),
+            },
+            "attention_scaling": {
+                "value": scale_value,
+                "evidence_basis": (
+                    "observed config.json"
+                    if "scale_attn_weights" in config
+                    else "GPT2Config family default"
+                ),
+            },
+            "tied_output_embeddings": {
+                "value": tie_value,
+                "evidence_basis": (
+                    "observed config.json"
+                    if "tie_word_embeddings" in config
+                    else "GPT2Config family default and GPT2LMHeadModel contract"
+                ),
+            },
+        },
         "dimensions": {
             "vocabulary_size": vocabulary,
             "hidden_width": hidden,
