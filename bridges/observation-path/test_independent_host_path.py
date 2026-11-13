@@ -230,6 +230,54 @@ class IndependentHostOperationPathTests(unittest.TestCase):
                 with self.assertRaisesRegex(path.EvidenceError, "predicate does not match"):
                     path.verify_artifact_attestation(self.source_path, self.source, "source_host")
 
+    def test_report_predicate_binds_third_verifier_and_exact_report_bytes(self) -> None:
+        source_attestation, receiver_attestation = self.attestations()
+        report = path.build_report(
+            self.source,
+            self.receiver,
+            source_attestation=source_attestation,
+            receiver_attestation=receiver_attestation,
+            receiver_artifact_sha256=path.sha256_file(self.receiver_path),
+            verifier_host=self.verifier_host,
+        )
+        report_path = self.root / "independent-report.json"
+        predicate_path = self.root / "independent-report.predicate.json"
+        path.write_json(report_path, report)
+        predicate = path.write_report_predicate(
+            report_path,
+            predicate_path,
+            runner_env("verifier_host", runner_name="verifier-vm", runner_os="macOS"),
+        )
+        self.assertEqual(predicate["schema"], "in-formation.independent-host-report-predicate/0.1")
+        self.assertEqual(predicate["report_sha256"], path.sha256_file(report_path))
+        self.assertEqual(predicate["report_digest"], report["report_digest"])
+        self.assertEqual(predicate["job"], "verifier_host")
+        self.assertEqual(predicate["actor_id"], self.verifier_host["actor_id"])
+        self.assertEqual(
+            predicate["source_record_sha256"],
+            source_attestation["subject_sha256"],
+        )
+        self.assertEqual(
+            predicate["receiver_record_sha256"],
+            receiver_attestation["subject_sha256"],
+        )
+        self.assertEqual(
+            json.loads(predicate_path.read_text(encoding="utf-8")),
+            predicate,
+        )
+
+        altered = copy.deepcopy(report)
+        altered["verifier"]["actor_id"] = "other-host"
+        core = {key: value for key, value in altered.items() if key != "report_digest"}
+        altered["report_digest"] = path.digest_object(core)
+        path.write_json(report_path, altered)
+        with self.assertRaisesRegex(path.EvidenceError, "does not match the current verifier"):
+            path.write_report_predicate(
+                report_path,
+                predicate_path,
+                runner_env("verifier_host", runner_name="verifier-vm", runner_os="macOS"),
+            )
+
     def test_old_github_cli_is_rejected_before_attestation_verification(self) -> None:
         with patch.object(path, "_gh_version", return_value=(2, 101, 0)):
             with patch.object(path.subprocess, "run") as run:
