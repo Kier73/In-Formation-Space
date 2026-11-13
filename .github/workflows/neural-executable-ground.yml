@@ -1,0 +1,74 @@
+name: Executable neural ProofGround observation
+
+on:
+  push:
+    paths:
+      - "bridges/neural-observation-ground/**"
+      - ".github/workflows/neural-executable-ground.yml"
+  pull_request:
+    paths:
+      - "bridges/neural-observation-ground/**"
+      - ".github/workflows/neural-executable-ground.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-ground:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out IFS
+        uses: actions/checkout@v4
+      - name: Check out pinned VGI ProofGround integration
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: a2a5eec0a778097819ace9a0db44f0b5b1594b4c
+          path: external/Virtual-Ground-Interpreter
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install graph and synthetic execution dependencies
+        run: python -m pip install --disable-pip-version-check numpy jsonschema
+      - name: Compile code
+        run: python -m compileall -q bridges/neural-observation-ground
+      - name: Run numerical-observation and receipt tests
+        env:
+          PYTHONPATH: "bridges/neural-observation-ground:bridges/observation-path:experiments/external_neural_structure_reading:external/Virtual-Ground-Interpreter/virtual_ground_interpreter"
+        run: python -m unittest discover -s bridges/neural-observation-ground -p "test_neural_execution_ground.py" -v
+      - name: Regenerate pinned zero-payload HFR-002 topology
+        run: >-
+          python -m experiments.external_neural_structure_reading.live_reference.run_gpt2_topology
+          --output /tmp/gpt2-typed-topology.json
+      - name: Verify full-scale graph admission and refuse unbudgeted numerical realization
+        env:
+          PYTHONPATH: "bridges/neural-observation-ground:bridges/observation-path:external/Virtual-Ground-Interpreter/virtual_ground_interpreter"
+        run: |
+          python - <<'PY'
+          import json
+          from neural_execution_ground import ExecutableNeuralGround, NeuralExecutionGroundError
+          from vgi.neural_topology import build_neural_topology_proof_ground
+
+          with open("/tmp/gpt2-typed-topology.json", encoding="utf-8") as handle:
+              graph = json.load(handle)
+          package = build_neural_topology_proof_ground(graph)
+          assert package.manifest()["local_validation"]["status"] == "passed"
+          assert len(package.ground.obligations) == 654
+          assert len(package.ground.unresolved_obligations()) == 654
+          try:
+              ExecutableNeuralGround(graph, max_elements=120_000)
+          except NeuralExecutionGroundError as exc:
+              assert "budget" in str(exc)
+          else:
+              raise AssertionError("full-scale synthetic parameter materialization was not refused")
+          print({
+              "graph_digest": package.graph_digest,
+              "proof_obligations": len(package.ground.obligations),
+              "kernel_accepted": 0,
+              "source_tensor_payload_bytes_read": 0,
+              "large_synthetic_execution": "refused-by-explicit-budget",
+          })
+          PY
