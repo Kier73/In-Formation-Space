@@ -1,7 +1,9 @@
 import copy
 import itertools
 import math
+import json
 import unittest
+from pathlib import Path
 
 from burst_loss import (
     binomial_tail_probability,
@@ -9,6 +11,7 @@ from burst_loss import (
     shared_channel_retention_curve,
 )
 from repair_epochs import (
+    DEFAULT_SCENARIOS,
     _expected_attempted_epochs,
     _slot_epoch_outcomes,
     _survival_curve,
@@ -321,6 +324,52 @@ class RepairEpochTests(unittest.TestCase):
                 recovery_thresholds=(2,),
                 max_epochs=10,
             )
+
+    def test_checked_in_summary_receipt_reconstructs_from_source_scenarios(self):
+        receipt_path = Path(__file__).with_name("results") / "markov-repair-scan-summary.json"
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        self.assertEqual(receipt["format"], "in-formation.in-transit-repair-scan-summary")
+        self.assertEqual(receipt["workflow_run_id"], 43366801290)
+        self.assertEqual(len(receipt["scenarios"]), len(DEFAULT_SCENARIOS))
+
+        for spec, recorded in zip(DEFAULT_SCENARIOS, receipt["scenarios"]):
+            rebuilt = build_repair_sweep(**spec)
+            self.assertEqual(recorded["name"], spec["scenario_name"])
+            self.assertEqual(len(recorded["policies"]), rebuilt["policy_count"])
+            expected_policies = {}
+            for policy in rebuilt["policies"]:
+                for model, entry in policy["models"].items():
+                    key = (entry["required"], entry["interval_rounds"], model)
+                    expected_policies[key] = {
+                        "expected_lifetime_rounds": entry["expected_lifetime_rounds"],
+                        "expected_repairs_per_100_lifetime_rounds_ratio": entry[
+                            "expected_repairs_per_100_lifetime_rounds_ratio"
+                        ],
+                        "median_failure_epoch": entry["median_failure_epoch"],
+                        "median_status": entry["median_status"],
+                    }
+            for policy in recorded["policies"]:
+                key = (
+                    policy["recovery_threshold"],
+                    policy["interval_rounds"],
+                    policy["model"],
+                )
+                expected = expected_policies.pop(key)
+                self.assertEqual(
+                    policy["expected_lifetime_rounds"],
+                    expected["expected_lifetime_rounds"],
+                )
+                self.assertEqual(
+                    policy["expected_repairs_per_100_lifetime_rounds_ratio"],
+                    expected["expected_repairs_per_100_lifetime_rounds_ratio"],
+                )
+                self.assertEqual(policy["median_failure_epoch"], expected["median_failure_epoch"])
+                self.assertEqual(policy["median_status"], expected["median_status"])
+            self.assertFalse(expected_policies)
+
+            for model in ("iid_marginal", "per_packet_markov", "shared_channel"):
+                expected_frontier = rebuilt["pareto_frontier"][model]
+                self.assertEqual(recorded["pareto_frontier"][model], expected_frontier)
 
     def test_report_digest_detects_policy_tampering(self):
         params = self.parameters()
