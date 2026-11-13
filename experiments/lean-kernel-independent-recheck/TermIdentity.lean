@@ -15,8 +15,8 @@ private def obj (kind : String) (fields : List (String × Json) := []) : Json :=
 
 private partial def encodeName : Name → Json
   | .anonymous => obj "anonymous"
-  | .str prefix value => obj "str" [("prefix", encodeName prefix), ("value", toJson value)]
-  | .num prefix value => obj "num" [("prefix", encodeName prefix), ("value", toJson value)]
+  | .str parent value => obj "str" [("prefix", encodeName parent), ("value", toJson value)]
+  | .num parent value => obj "num" [("prefix", encodeName parent), ("value", toJson value)]
 
 private partial def encodeLevel : Level → Except String Json
   | .zero => pure (obj "zero")
@@ -54,18 +54,18 @@ private partial def encodeExpr : Expr → Except String Json
       let funExpr ← encodeExpr f
       let argExpr ← encodeExpr a
       pure (obj "app" [("fn", funExpr), ("arg", argExpr)])
-  | .lam _ type body info => do
-      let domain ← encodeExpr type
+  | .lam _ domainExpr body info => do
+      let domain ← encodeExpr domainExpr
       let result ← encodeExpr body
       pure (obj "lam" [("domain", domain), ("body", result),
                         ("binderInfo", toJson (encodeBinderInfo info))])
-  | .forallE _ type body info => do
-      let domain ← encodeExpr type
+  | .forallE _ domainExpr body info => do
+      let domain ← encodeExpr domainExpr
       let result ← encodeExpr body
       pure (obj "forallE" [("domain", domain), ("body", result),
                             ("binderInfo", toJson (encodeBinderInfo info))])
-  | .letE _ type value body nondep => do
-      let domain ← encodeExpr type
+  | .letE _ domainExpr value body nondep => do
+      let domain ← encodeExpr domainExpr
       let definition ← encodeExpr value
       let result ← encodeExpr body
       pure (obj "letE" [("type", domain), ("value", definition),
@@ -73,8 +73,8 @@ private partial def encodeExpr : Expr → Except String Json
   | .lit (.natVal n) => pure (obj "natVal" [("value", toJson n)])
   | .lit (.strVal s) => pure (obj "strVal" [("value", toJson s)])
   | .mdata _ _ => .error "metadata expression: serialization deliberately unsupported"
-  | .proj typeName idx structure => do
-      let value ← encodeExpr structure
+  | .proj typeName idx target => do
+      let value ← encodeExpr target
       pure (obj "proj" [("typeName", encodeName typeName),
                         ("index", toJson idx), ("structure", value)])
 
