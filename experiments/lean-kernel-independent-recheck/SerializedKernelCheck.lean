@@ -112,10 +112,10 @@ run_cmd do
     | .error _ => throwError "kernel recheck: missing serialization profile"
   unless tag == "in-formation.lean-expr-structural/0.1" do
     throwError "kernel recheck: unsupported serialization profile"
-  let theorem ← match textField document "theorem" with
+  let theoremName ← match textField document "theorem" with
     | .ok value => pure value
     | .error _ => throwError "kernel recheck: missing theorem label"
-  unless theorem == "KernelTrial.identity" do
+  unless theoremName == "KernelTrial.identity" do
     throwError "kernel recheck: unexpected theorem"
   let claimedType ← match field document "type" >>= decodeExpr with
     | .ok value => pure value
