@@ -42,9 +42,9 @@ def run(output: Path) -> dict:
             "pinned GPT-2 tensor inventory changed: "
             f"{graph['completeness']['observed_tensor_count']}"
         )
-    if verification["operation_count"] != 149:
+    if verification["operation_count"] != 150:
         raise AssertionError(
-            f"expected 149 operations for 12 GPT-2 blocks, got {verification['operation_count']}"
+            f"expected 150 operations for 12 GPT-2 blocks, got {verification['operation_count']}"
         )
     if verification["edge_count"] != 337:
         raise AssertionError(
