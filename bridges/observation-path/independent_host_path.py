@@ -45,7 +45,7 @@ RECORD_SCHEMA = "in-formation.independent-host-operation-record/0.1"
 PREDICATE_SCHEMA = "in-formation.independent-host-operation-predicate/0.1"
 REPORT_SCHEMA = "in-formation.independent-host-operation-report/0.1"
 RELAY_CHANNEL = "github-actions-artifact-relay/v1"
-GH_MIN_VERSION = (2, 104, 0)
+GH_MIN_VERSION = (2, 103, 3)
 
 
 class EvidenceError(ValueError):
@@ -389,6 +389,16 @@ def _validate_verifier_context(
     verifier_host: Mapping[str, Any],
 ) -> None:
     _validate_pair_context(source_host, receiver_host)
+    host_fields = {
+        "role", "repository", "run_id", "run_attempt", "run_number",
+        "workflow_ref", "workflow_sha", "git_ref", "git_sha", "job",
+        "runner_name", "runner_os", "runner_arch", "runner_environment",
+        "actor_id", "clock_segment_id",
+    }
+    if not isinstance(verifier_host, Mapping) or set(verifier_host) != host_fields:
+        raise EvidenceError("independent verifier host metadata is incomplete or unexpected")
+    if not all(isinstance(verifier_host[key], str) and verifier_host[key] for key in host_fields):
+        raise EvidenceError("independent verifier host metadata must be non-empty text")
     if verifier_host.get("role") != "verifier_host" or verifier_host.get("job") != "verifier_host":
         raise EvidenceError("independent verifier must run in the verifier_host job")
     shared_fields = (
@@ -511,7 +521,7 @@ def verify_artifact_attestation(
     """Require a fresh, cryptographically verified Sigstore attestation for the bytes."""
     if _gh_version(gh) < GH_MIN_VERSION:
         raise EvidenceError(
-            "GitHub CLI 2.104.0 or newer is required for exact signer-policy verification"
+            "GitHub CLI 2.103.3 or newer is required for exact signer-policy verification"
         )
     artifact_digest = sha256_file(artifact_path)
     try:
