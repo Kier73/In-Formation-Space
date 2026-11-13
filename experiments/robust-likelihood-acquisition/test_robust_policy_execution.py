@@ -128,7 +128,7 @@ def locate_node(report, history):
     return node
 
 
-def complete_path(report, prior_paths, attempt_id, outcome):
+def complete_path(report, prior_paths, attempt_id, outcome, candidate_name_override=None):
     prefix_history = []
     for raw_path in prior_paths:
         snapshot = raw_path.to_dict() if isinstance(raw_path, ObservationPath) else raw_path
@@ -145,6 +145,19 @@ def complete_path(report, prior_paths, attempt_id, outcome):
         attempt_id=attempt_id,
     )
     intent = planned.intent
+    if candidate_name_override is not None:
+        planned = ObservationPath(ObservationIntent(
+            attempt_id=intent.attempt_id,
+            candidate_name=candidate_name_override,
+            query=intent.query,
+            hypothesis_set_digest=intent.hypothesis_set_digest,
+            estimated_cost=intent.estimated_cost,
+            plan_ref=intent.plan_ref,
+            authority_required=True,
+            application_required=False,
+            sender_ack_required=False,
+        ))
+        intent = planned.intent
     state_digest = intent.hypothesis_set_digest
     node_digest = digest(node)
     candidate = next(
@@ -262,22 +275,13 @@ class RobustPolicyExecutionTests(unittest.TestCase):
         )
 
     def test_state_binding_rejects_wrong_candidate_node(self):
-        planned = new_robust_policy_observation_path(
-            policy_report=self.report,
-            attempt_id="attempt-wrong-node",
+        wrong = complete_path(
+            self.report,
+            (),
+            "attempt-wrong-node",
+            "yes",
+            candidate_name_override="robust-sequential-sensor:reader-a",
         )
-        wrong_intent = ObservationIntent(
-            attempt_id=planned.intent.attempt_id,
-            candidate_name="robust-sequential-sensor:reader-a",
-            query=planned.intent.query,
-            hypothesis_set_digest=planned.intent.hypothesis_set_digest,
-            estimated_cost=planned.intent.estimated_cost,
-            plan_ref=planned.intent.plan_ref,
-            authority_required=True,
-            application_required=False,
-            sender_ack_required=False,
-        )
-        wrong = ObservationPath(wrong_intent)
         with self.assertRaises(RobustPolicyExecutionMismatch):
             build_robust_policy_execution_record(
                 policy_report=self.report,
