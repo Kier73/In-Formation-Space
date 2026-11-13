@@ -181,3 +181,7 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Evidence accumulation and sufficient statistics
 
 - [RIV-004: Evidence accumulation as a sufficient statistic](experiments/evidence-accumulation-sufficient-statistic/README.md) — compares exact Bayesian MAP decisions from every ordered history with a compact count accumulator under a binary conditionally iid noisy-sensor model. Its five-observation example preserves the exact 459/512 decision accuracy with six count states instead of 32 raw histories.
+
+## Heterogeneous evidence accumulation
+
+- [RIV-005: Heterogeneous evidence accumulation](experiments/heterogeneous-evidence-accumulator/README.md) — extends RIV-004 from identical to position-specific binary sensor channels. It updates an exact posterior after each signal, demonstrates why a simple total count can yield opposite MAP decisions for histories with the same count, and groups 16 histories into 9 terminal posterior states.
