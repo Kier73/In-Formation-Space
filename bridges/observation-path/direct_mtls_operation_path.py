@@ -476,6 +476,58 @@ def _require_run_match(left: Mapping[str, Any], right: Mapping[str, Any]) -> Non
         raise DirectMTLSError("direct operation requires distinct host actors and roles")
 
 
+def _validate_certificate_predicate(
+    predicate: Mapping[str, Any],
+    certificate_path: Path,
+    role: str,
+    expected_run_id: str,
+    expected_attempt: str,
+) -> dict[str, Any]:
+    if set(predicate) != {"schema", "role", "host", "certificate_sha256", "dns_identity"}:
+        raise DirectMTLSError("certificate predicate fields are incomplete or unexpected")
+    if predicate.get("schema") != CERT_PREDICATE_SCHEMA or predicate.get("role") != role:
+        raise DirectMTLSError("certificate predicate schema or role is invalid")
+    host = _validate_host_metadata(predicate.get("host"), role)
+    if host["run_id"] != expected_run_id or host["run_attempt"] != expected_attempt:
+        raise DirectMTLSError("certificate belongs to another workflow run or attempt")
+    if predicate.get("certificate_sha256") != certificate_sha256(certificate_path):
+        raise DirectMTLSError("certificate predicate digest does not match its exact certificate")
+    if predicate.get("dns_identity") != _identity_name(role, expected_run_id):
+        raise DirectMTLSError("certificate predicate DNS identity is not the role/run identity")
+    return dict(predicate)
+
+
+def _validate_record_predicate(
+    predicate: Mapping[str, Any],
+    record_path: Path,
+    record: Mapping[str, Any],
+    role: str,
+) -> dict[str, Any]:
+    expected_fields = {
+        "schema", "role", "host", "record_sha256",
+        "record_digest", "certificate_sha256", "status", "path_id",
+    }
+    if set(predicate) != expected_fields:
+        raise DirectMTLSError("host record predicate fields are incomplete or unexpected")
+    if predicate.get("schema") != RECORD_PREDICATE_SCHEMA or predicate.get("role") != role:
+        raise DirectMTLSError("host record predicate schema or role is invalid")
+    host = _validate_host_metadata(predicate.get("host"), role)
+    if host != record.get("host"):
+        raise DirectMTLSError("record predicate host differs from the record host")
+    if predicate.get("record_sha256") != file_digest(record_path):
+        raise DirectMTLSError("record predicate does not bind the exact record bytes")
+    if predicate.get("record_digest") != record.get("record_digest"):
+        raise DirectMTLSError("record predicate digest differs from the reconstructed record")
+    if predicate.get("certificate_sha256") != record.get("certificate_sha256"):
+        raise DirectMTLSError("record predicate certificate fingerprint differs from the record")
+    if predicate.get("status") != record.get("status"):
+        raise DirectMTLSError("record predicate status differs from the record")
+    expected_path = f"run-{host['run_id']}-ihp002-direct-mtls"
+    if predicate.get("path_id") != expected_path:
+        raise DirectMTLSError("record predicate path ID is not bound to the current run")
+    return dict(predicate)
+
+
 def _context(host: Mapping[str, Any]) -> TemporalContext:
     return TemporalContext(
         str(host["actor_id"]),
@@ -618,13 +670,10 @@ def prepare_server(directory: Path, *, gh: str = "gh", bootstrap_timeout: float 
         expected_predicate=client_predicate,
         gh=gh,
     )
-    if client_predicate.get("schema") != CERT_PREDICATE_SCHEMA or client_predicate.get("role") != "client_host":
-        raise DirectMTLSError("bootstrap certificate is not attested for the client_host role")
+    _validate_certificate_predicate(
+        client_predicate, client_cert_path, "client_host", host["run_id"], host["run_attempt"]
+    )
     client_host = _validate_host_metadata(client_predicate.get("host"), "client_host")
-    if client_host["run_id"] != host["run_id"] or client_host["run_attempt"] != host["run_attempt"]:
-        raise DirectMTLSError("client bootstrap certificate belongs to another workflow run")
-    if client_predicate.get("certificate_sha256") != certificate_sha256(client_cert_path):
-        raise DirectMTLSError("client certificate predicate digest does not match its public certificate")
 
     identity = generate_identity("server_host", directory)
     server_cert_path = identity["certificate_path"]
@@ -767,6 +816,11 @@ def serve(directory: Path, *, accept_timeout: float = 120.0) -> dict[str, Any]:
             if sender_core["sender_cert_sha256"] != peer_sha:
                 raise DirectMTLSError("signed handoff certificate fingerprint differs from TLS peer")
             sender_host = sender_core["sender_host"]
+            if (
+                endpoint_core["client_actor_id"] != sender_host["actor_id"]
+                or endpoint_core["client_cert_sha256"] != sender_core["sender_cert_sha256"]
+            ):
+                raise DirectMTLSError("received handoff signer differs from the endpoint's pinned client")
             source_span = validate_operation_span(sender_core["operation_span"])
             sender_frame = validate_temporal_frame(sender_core["sender_completion_frame"])
             source_stamp = CausalStamp.from_dict(sender_frame["causal"])
@@ -915,22 +969,19 @@ def connect_and_send(
         expected_predicate=server_predicate,
         gh=gh,
     )
-    if server_predicate.get("schema") != CERT_PREDICATE_SCHEMA or server_predicate.get("role") != "server_host":
-        raise DirectMTLSError("server bootstrap certificate is not attested for server_host")
+    _validate_certificate_predicate(
+        server_predicate, server_cert_path, "server_host", host["run_id"], host["run_attempt"]
+    )
     server_host = _validate_host_metadata(server_predicate.get("host"), "server_host")
-    if server_host["run_id"] != host["run_id"] or server_host["run_attempt"] != host["run_attempt"]:
-        raise DirectMTLSError("server bootstrap certificate belongs to another workflow run")
-    if server_predicate.get("certificate_sha256") != certificate_sha256(server_cert_path):
-        raise DirectMTLSError("server certificate predicate digest does not match its public certificate")
     endpoint = _verify_endpoint_advertisement(
         read_json(server_directory / "server-endpoint.json"),
         server_cert_path,
     )
-    if endpoint["client_actor_id"] != host["actor_id"]:
-        raise DirectMTLSError("server endpoint was advertised for another client actor")
     own_cert_path = directory / "client-cert.pem"
     own_key_path = directory / "client-key.pem"
     own_cert_sha = certificate_sha256(own_cert_path)
+    if endpoint["client_actor_id"] != host["actor_id"] or endpoint["client_cert_sha256"] != own_cert_sha:
+        raise DirectMTLSError("server endpoint was advertised for another client actor or certificate")
 
     context = _context(host)
     recorder = _recorder(host, context)
@@ -1153,6 +1204,10 @@ def _validate_record(record: Mapping[str, Any], role: str) -> dict[str, Any]:
     if record["status"] == "direct_mtls_verified":
         if not isinstance(record["operation_span"], Mapping) or not isinstance(record["temporal_frame"], Mapping):
             raise DirectMTLSError(f"{role} successful record lacks its operation span/frame")
+        validate_operation_span(record["operation_span"])
+        validate_temporal_frame(record["temporal_frame"])
+        if not isinstance(record["peer_certificate_sha256"], str) or len(record["peer_certificate_sha256"]) != 64:
+            raise DirectMTLSError(f"{role} successful record lacks a TLS peer certificate fingerprint")
     return dict(record)
 
 
@@ -1171,6 +1226,7 @@ def build_report(
     server_record: Mapping[str, Any],
     client_cert_path: Path,
     server_cert_path: Path,
+    server_endpoint: Mapping[str, Any],
     client_cert_attestation: Mapping[str, Any],
     server_cert_attestation: Mapping[str, Any],
     client_record_attestation: Mapping[str, Any],
@@ -1187,6 +1243,15 @@ def build_report(
 
     client_status = client["status"]
     server_status = server["status"]
+    endpoint_core = _verify_endpoint_advertisement(server_endpoint, server_cert_path)
+    if (
+        endpoint_core["client_actor_id"] != client["host"]["actor_id"]
+        or endpoint_core["client_cert_sha256"] != client_cert_sha
+        or endpoint_core["server_host"]["actor_id"] != server["host"]["actor_id"]
+        or client.get("endpoint_digest") != digest_object(server_endpoint)
+        or server.get("endpoint_digest") != digest_object(server_endpoint)
+    ):
+        raise DirectMTLSError("host records do not bind the same signed endpoint advertisement")
     common = {
         "schema": REPORT_SCHEMA,
         "path_id": f"run-{client['host']['run_id']}-ihp002-direct-mtls",
@@ -1210,6 +1275,7 @@ def build_report(
             "certificate_attestation": dict(server_cert_attestation),
         },
         "verifier": dict(verifier_host),
+        "server_endpoint": dict(server_endpoint),
         "direct_transport": {
             "substrate": "E-CPU SocketTransport over mutually authenticated TLS",
             "data_channel": DATA_CHANNEL,
@@ -1250,6 +1316,13 @@ def build_report(
     received_handoff = server["received_envelope"]
     receipt = client["receiver_receipt"]
     server_receipt = server["receiver_receipt"]
+    if (
+        client["operation_span"] != handoff["core"]["operation_span"]
+        or client["temporal_frame"] != handoff["core"]["sender_completion_frame"]
+        or server["operation_span"] != server_receipt["core"]["receiver_operation_span"]
+        or server["temporal_frame"] != server_receipt["core"]["receiver_start_frame"]
+    ):
+        raise DirectMTLSError("host records differ from the signed operation or receipt endpoints")
     if handoff != received_handoff or receipt != server_receipt:
         raise DirectMTLSError("client and server records disagree on the signed handoff or receipt")
     handoff_core = _verify_signed_document(handoff, client_cert_path)
@@ -1356,6 +1429,7 @@ def verify_to_report(
     server_record_path = server_result / "server_host-record.json"
     client_record = read_json(client_record_path)
     server_record = read_json(server_record_path)
+    server_endpoint = read_json(server_bootstrap / "server-endpoint.json")
     client_certificate_predicate = read_json(client_bootstrap / "client-cert.predicate.json")
     server_certificate_predicate = read_json(server_bootstrap / "server-cert.predicate.json")
     client_record_predicate = read_json(client_result / "client_host-record.predicate.json")
@@ -1373,22 +1447,18 @@ def verify_to_report(
     server_record_attestation = verify_artifact_attestation(
         server_record_path, RECORD_PREDICATE_TYPE, expected_predicate=server_record_predicate, gh=gh
     )
-    for predicate, role in (
-        (client_certificate_predicate, "client_host"),
-        (server_certificate_predicate, "server_host"),
-        (client_record_predicate, "client_host"),
-        (server_record_predicate, "server_host"),
-    ):
-        if predicate.get("role") != role:
-            raise DirectMTLSError(f"signed artifact predicate does not identify {role}")
-        host = _validate_host_metadata(predicate.get("host"), role)
-        if host["run_id"] != _env(os.environ, "GITHUB_RUN_ID"):
-            raise DirectMTLSError("signed artifact belongs to another workflow run")
+    current_run = _env(os.environ, "GITHUB_RUN_ID")
+    current_attempt = _env(os.environ, "GITHUB_RUN_ATTEMPT")
+    _validate_certificate_predicate(client_certificate_predicate, client_cert, "client_host", current_run, current_attempt)
+    _validate_certificate_predicate(server_certificate_predicate, server_cert, "server_host", current_run, current_attempt)
+    _validate_record_predicate(client_record_predicate, client_record_path, client_record, "client_host")
+    _validate_record_predicate(server_record_predicate, server_record_path, server_record, "server_host")
     report = build_report(
         client_record,
         server_record,
         client_cert,
         server_cert,
+        server_endpoint,
         client_cert_attestation,
         server_cert_attestation,
         client_record_attestation,
