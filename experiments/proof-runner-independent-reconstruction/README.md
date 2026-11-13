@@ -12,9 +12,11 @@ The signed completion-receipt experiment (#108) connected one self-digested \`ex
 
 This experiment adds the missing reconstruction steps as distinct evidence layers:
 
-- the authority host emits a hash-chained route-ledger checkpoint and signs a statement committing to its exact ledger digest, sequence, authorization event, request, execution ticket, and runner identity;
-- the runner host consumes that checkpoint, produces the exact portable result envelope, and signs a completion receipt using the previously established receipt format;
-- the independent verifier host receives only the retained artifacts, verifies the authority and runner public-key artifacts against the protected GitHub workflow, replays the supported route-ledger profile, then independently verifies both Ed25519 signatures and all request/result bindings.
+- the authority host uses the repository's SQLiteRouteEpochLedgerStore and ProofActionRouteEpochLedger implementations to create a durable route history across separate OS processes: initial open, restart + ownership claim + request admission + execution authorization, then stale-generation replay and rejection;
+- the authority signs a checkpoint that commits to the exact final ledger, every SQLite audit revision and intermediate ledger digest, the raw SQLite database bytes, all three process-phase records, the stale-owner rejection, the request, execution ticket, and runner identity;
+- the runner host consumes the actual database and audit export, validates the authority signature and all bindings, produces the portable result envelope, then signs a completion receipt using the previously established receipt format;
+- the independent verifier host receives the retained artifacts, verifies the authority and runner public-key artifacts against the protected GitHub workflow, independently replays the route ledger and every SQLite revision prefix in Go, and verifies both Ed25519 signatures and all request/result bindings;
+- before producing its final report, the independent verifier host opens the transferred SQLite database using the repository's own SQLite adapter and checks that its stored current state and append-only audit exactly match the exported evidence.
 
 The private signing keys are generated and held in process memory by their respective producer jobs. They are never written to disk or uploaded. Only public key documents are exported, and those documents are separately attested by their producing jobs.
 
@@ -42,19 +44,22 @@ Independent verifier host
 
 The workflow uses three separate GitHub-hosted jobs in one run. GitHub Actions artifacts are the transfer mechanism. This does not claim direct E-CPU transport, separate cloud providers, independently attested physical machines, or independent administrative fault domains.
 
-## Current ledger profile
+## Durable local authority profile
 
-The Go verifier is intentionally narrow and fail-closed. It currently accepts a single active route epoch containing:
+The live authority producer uses the repository's `bridges/proof-attention/proof_action_route_epoch.py` and `sqlite_route_epoch_store.py` implementations directly. The expected four durable revisions are:
 
-- one \`opened\` event at owner generation 1;
-- zero or more monotonic \`claimed\` owner-generation transitions;
-- one \`admitted\` event binding an attempt, request digest, and reliable-channel sequence;
-- one \`execution_authorized\` event binding the preceding admission, current owner generation, deterministic execution ticket, and runner ID.
+1. `opened`: owner generation 1;
+2. `claimed`: a replacement owner takes generation 2;
+3. `admitted`: the request digest and ReliableChannel sequence are committed under generation 2;
+4. `execution_authorized`: the deterministic execution ticket is committed under that same generation.
 
-It checks the outer ledger digest, contiguous event sequence, previous-event hash chain, each event self-digest, route digest, owner progression, admission-to-authorization linkage, and the deterministic ticket formula. It rejects unsupported event types—including \`closed\` handoff events—instead of treating a partial replay implementation as a complete route-ledger verifier. A later revision can add the full multi-epoch close/open replay rules from \`proof_action_route_epoch.py\`.
+The first event is committed by one process. A second process starts after the first exits, opens the same database through a new SQLite store object, and commits the remaining three events. A third process again reopens the database and attempts to admit a different attempt using the generation-1 owner token. The ledger returns rejection and retains no stale admission. These are separate OS processes on the same authority job's runner, not separate authority machines.
 
-The authority signature authenticates a checkpoint claim under the authority key. It does not independently prove that an external compare-and-swap store was linearizable or that the authority recorded events honestly. This workflow's authority producer constructs a synthetic, single-request route-ledger example; it is not connected to a production E-CPU route authority or shared CAS store.
+The SQLite audit history records the revision number, predecessor ledger digest, new ledger digest, actor ID, appended event digests, and a local UTC commit marker. The verifier does not merely trust those rows: it recomputes the ledger prefix after every revision from the actual ordered event list, verifies the per-revision event append index, checks the predecessor digest chain, and checks that the final prefix equals the exported ledger head. A separate process-level race test prepares two different valid claims from one SQLite revision and launches them as concurrent OS processes. Exactly one compare-and-swap should commit.
 
+The Go replay profile remains intentionally narrow and fail-closed. It accepts one active route epoch with one open, one claim, one admission, and one execution authorization. It rejects unsupported events—including close/handoff—instead of treating a partial replay as a complete route-ledger verifier.
+
+The authority signature authenticates the authority's checkpoint claim and commits to the raw SQLite database SHA-256, the revision history digest, the process-phase evidence, and the stale-owner outcome. It does **not** prove that the host was uncompromised when the database was created or signed, that the local filesystem was honest, or that SQLite offers multi-host linearizability. The existing SQLite adapter targets a single host with a local filesystem. It must not be promoted to a network filesystem or treated as a distributed consensus service.
 ## Canonicalization and implementation diversity
 
 All evidence files use the repository's [Canonical Metadata Profile v1](../../formats/canonical-metadata-v1/README.md): safe integers only, ASCII object keys, Unicode scalar strings, sorted keys, compact UTF-8 JSON, and exactly one trailing LF. The independent verifier is written in Go and reuses the already-tested Go canonical metadata implementation from [IHP-004](../../bridges/observation-path/cross_language_verifier/). It does not call the Python receipt verifier.
@@ -68,6 +73,11 @@ Offline tests use deterministic, explicitly non-secret fixture keys. A fixture p
 A successful third-host report establishes that, for the exact transferred artifacts:
 
 - the complete supported route-ledger document has a valid digest and a replayable event chain;
+- every exported SQLite revision digest reconstructs from the event prefix and append index;
+- the signed SQLite database hash matches the exact transferred database bytes;
+- the third host can reopen that database through the repository adapter and reproduce the exported head and revision audit;
+- the generation-1 owner is rejected after a durable generation-2 claim;
+- a separate concurrency test exercises two OS processes racing one expected CAS revision and observes one winner;
 - the admission event precedes and is exactly bound to the execution authorization;
 - the execution ID matches the route epoch, attempt ID, and request digest;
 - the authority signature verifies over the exact ledger checkpoint and its authorization/request bindings;
@@ -88,7 +98,7 @@ Even a successful live run does not establish:
 - that theorem acceptance occurred; VGI's \`VerifiedKernelReceipt\` remains a separate trust boundary;
 - that the result's Encounter source was fetched and authenticated independently;
 - that E-CPU ReliableChannel, TCP, or mutual TLS transported the artifacts—the current workflow uses GitHub artifact storage;
-- that jobs used distinct physical servers, regions, power supplies, or administrative fault domains;
+- that the three authority processes or the three GitHub-hosted workflow jobs used distinct physical servers, regions, power supplies, or administrative fault domains;
 - a network latency, CPU time, or combined cross-host elapsed duration.
 
 A runner signature proves key possession and commitment to exact bytes. It does not prove computation.
