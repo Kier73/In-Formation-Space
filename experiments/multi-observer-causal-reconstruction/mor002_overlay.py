@@ -579,6 +579,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     followup = sub.add_parser("write-followup-predicate")
     followup.add_argument("--record", type=Path, required=True)
     followup.add_argument("--output", type=Path, required=True)
+    observer_predicate = sub.add_parser("write-observer-predicate")
+    observer_predicate.add_argument("--record", type=Path, required=True)
+    observer_predicate.add_argument("--output", type=Path, required=True)
     report = sub.add_parser("verify")
     report.add_argument("--directory", type=Path, required=True)
     report.add_argument("--output", type=Path, required=True)
@@ -591,6 +594,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             produce_observer(args.output)
         elif args.command == "write-followup-predicate":
             write_followup_predicate(args.record, args.output)
+        elif args.command == "write-observer-predicate":
+            write_observer_predicate(args.record, args.output)
         elif args.command == "verify":
             result = verify_to_report(args.directory, args.output)
             print(json.dumps({"status": result.get("status"), "report_digest": result.get("report_digest")}, sort_keys=True))
