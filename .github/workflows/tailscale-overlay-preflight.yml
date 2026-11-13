@@ -21,7 +21,6 @@ jobs:
       actions: read
       contents: read
       id-token: write
-      attestations: read
       attestations: write
       artifact-metadata: write
     steps:
@@ -136,7 +135,6 @@ jobs:
       actions: read
       contents: read
       id-token: write
-      attestations: read
       attestations: write
       artifact-metadata: write
     steps:
@@ -252,7 +250,6 @@ jobs:
       actions: read
       contents: read
       id-token: write
-      attestations: read
       attestations: write
       artifact-metadata: write
     steps:
