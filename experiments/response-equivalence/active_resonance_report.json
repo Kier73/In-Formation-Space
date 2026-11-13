@@ -1,0 +1,287 @@
+{
+  "experiment": "RE-002",
+  "scope": "finite supplied rational LTI hypotheses; reset-state impulses; no noise",
+  "candidate_labels": [
+    "alternate_third",
+    "alternate_three_quarters",
+    "baseline",
+    "coordinate_alias",
+    "hidden_extra_mode"
+  ],
+  "initial_primary_partition": [
+    [
+      "alternate_third",
+      "alternate_three_quarters",
+      "baseline",
+      "coordinate_alias",
+      "hidden_extra_mode"
+    ]
+  ],
+  "minimax_first_probe": "secondary_v",
+  "first_probe_partition": [
+    [
+      "alternate_third"
+    ],
+    [
+      "alternate_three_quarters"
+    ],
+    [
+      "baseline",
+      "coordinate_alias",
+      "hidden_extra_mode"
+    ]
+  ],
+  "baseline_without_auxiliary_authority": {
+    "actual_synthetic_candidate": "baseline",
+    "status": "unresolved_equivalence_class",
+    "survivors": [
+      "baseline",
+      "coordinate_alias",
+      "hidden_extra_mode"
+    ],
+    "steps": [
+      {
+        "probe": "secondary_v",
+        "before": [
+          "alternate_third",
+          "alternate_three_quarters",
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ],
+        "predicted_partition": [
+          [
+            "alternate_third"
+          ],
+          [
+            "alternate_three_quarters"
+          ],
+          [
+            "baseline",
+            "coordinate_alias",
+            "hidden_extra_mode"
+          ]
+        ],
+        "stage": "interpreted",
+        "cost_units": 2,
+        "observation": [
+          "1",
+          "1/4",
+          "1/16",
+          "1/64"
+        ],
+        "after": [
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ]
+      },
+      {
+        "probe": "auxiliary_v",
+        "before": [
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ],
+        "predicted_partition": [
+          [
+            "hidden_extra_mode"
+          ],
+          [
+            "baseline",
+            "coordinate_alias"
+          ]
+        ],
+        "stage": "evidence_refused",
+        "cost_units": 3,
+        "reason": "missing explicit authority: auxiliary_read",
+        "after": [
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ]
+      }
+    ],
+    "authorization_model": "injected synthetic allow/refuse, not E-CPU admission"
+  },
+  "baseline_with_auxiliary_authority": {
+    "actual_synthetic_candidate": "baseline",
+    "status": "unresolved_equivalence_class",
+    "survivors": [
+      "baseline",
+      "coordinate_alias"
+    ],
+    "steps": [
+      {
+        "probe": "secondary_v",
+        "before": [
+          "alternate_third",
+          "alternate_three_quarters",
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ],
+        "predicted_partition": [
+          [
+            "alternate_third"
+          ],
+          [
+            "alternate_three_quarters"
+          ],
+          [
+            "baseline",
+            "coordinate_alias",
+            "hidden_extra_mode"
+          ]
+        ],
+        "stage": "interpreted",
+        "cost_units": 2,
+        "observation": [
+          "1",
+          "1/4",
+          "1/16",
+          "1/64"
+        ],
+        "after": [
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ]
+      },
+      {
+        "probe": "auxiliary_v",
+        "before": [
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ],
+        "predicted_partition": [
+          [
+            "hidden_extra_mode"
+          ],
+          [
+            "baseline",
+            "coordinate_alias"
+          ]
+        ],
+        "stage": "interpreted",
+        "cost_units": 3,
+        "observation": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "after": [
+          "baseline",
+          "coordinate_alias"
+        ]
+      }
+    ],
+    "authorization_model": "injected synthetic allow/refuse, not E-CPU admission"
+  },
+  "hidden_with_auxiliary_authority": {
+    "actual_synthetic_candidate": "hidden_extra_mode",
+    "status": "singleton_within_declared_candidates",
+    "survivors": [
+      "hidden_extra_mode"
+    ],
+    "steps": [
+      {
+        "probe": "secondary_v",
+        "before": [
+          "alternate_third",
+          "alternate_three_quarters",
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ],
+        "predicted_partition": [
+          [
+            "alternate_third"
+          ],
+          [
+            "alternate_three_quarters"
+          ],
+          [
+            "baseline",
+            "coordinate_alias",
+            "hidden_extra_mode"
+          ]
+        ],
+        "stage": "interpreted",
+        "cost_units": 2,
+        "observation": [
+          "1",
+          "1/4",
+          "1/16",
+          "1/64"
+        ],
+        "after": [
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ]
+      },
+      {
+        "probe": "auxiliary_v",
+        "before": [
+          "baseline",
+          "coordinate_alias",
+          "hidden_extra_mode"
+        ],
+        "predicted_partition": [
+          [
+            "hidden_extra_mode"
+          ],
+          [
+            "baseline",
+            "coordinate_alias"
+          ]
+        ],
+        "stage": "interpreted",
+        "cost_units": 3,
+        "observation": [
+          "1",
+          "7/8",
+          "49/64",
+          "343/512"
+        ],
+        "after": [
+          "hidden_extra_mode"
+        ]
+      }
+    ],
+    "authorization_model": "injected synthetic allow/refuse, not E-CPU admission"
+  },
+  "recovered_combined_input_recurrence": [
+    "3/4",
+    "-1/8"
+  ],
+  "normalized_affine_sensor_rdm_equal": true,
+  "independent_affine_clocks_with_explicit_pairing": {
+    "status": "matched_interval_shape",
+    "normalized_a": [
+      "2/5",
+      "6/5",
+      "4/5",
+      "2"
+    ],
+    "normalized_b": [
+      "2/5",
+      "6/5",
+      "4/5",
+      "2"
+    ],
+    "causal_order_established": false
+  },
+  "clocks_without_pairing": {
+    "status": "unresolved_unpaired_event_ids"
+  },
+  "not_established": [
+    "global generator identity outside finite candidate set",
+    "inferred causal event correspondence without provenance",
+    "real receiver admission, physical clocks, transport or sensor calibration",
+    "general adaptive policy optimality or noisy sensor performance"
+  ]
+}
