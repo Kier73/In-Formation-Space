@@ -395,6 +395,8 @@ A passing handoff is **vector-clock consistent**, not independently authenticate
 
 The supplied clock-calibration anchors are also caller evidence, not authenticated physical measurements. Their scale/offset feasible set is an interval model, not a probability distribution or confidence interval.
 
+The numeric interval calculation projects the minimum and maximum feasible scale onto each span independently. Because one calibration parameter is shared across every span in its actor/segment, this is a conservative outer bound rather than a joint optimization; the reported interval may be wider than the tightest feasible critical-path interval. It does not assign probability to values within the interval.
+
 There is intentionally no global root elapsed time or root slack in this format. Without a common root clock interval, those quantities would imply more than the evidence supports.
 
 Run the focused tests with:
