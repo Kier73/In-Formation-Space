@@ -1,0 +1,50 @@
+name: Verified reference evidence bundle RIV-013
+
+on:
+  push:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/verified-reference-evidence-bundle.yml"
+      - "formats/encounter-envelope/validate_envelope.py"
+      - "bridges/authority-lineage/authority_lineage.py"
+      - "bridges/authority-lineage/observation_adapter.py"
+      - "experiments/reference-calibrated-evidence/finite_horizon_policy_execution.py"
+  pull_request:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/verified-reference-evidence-bundle.yml"
+      - "formats/encounter-envelope/validate_envelope.py"
+      - "bridges/authority-lineage/authority_lineage.py"
+      - "bridges/authority-lineage/observation_adapter.py"
+      - "experiments/reference-calibrated-evidence/finite_horizon_policy_execution.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verified-reference-evidence-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate bundle schema
+        run: |
+          python -c "import json, jsonschema; p='experiments/reference-calibrated-evidence/verified-reference-evidence-bundle.schema.json'; s=json.load(open(p, encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s)"
+      - name: Compile evidence and authority bridges
+        run: |
+          python -m py_compile bridges/observation-path/observation_path.py
+          python -m py_compile bridges/authority-lineage/authority_lineage.py
+          python -m py_compile bridges/authority-lineage/observation_adapter.py
+          python -m py_compile formats/encounter-envelope/validate_envelope.py
+          python -m py_compile experiments/reference-calibrated-evidence/finite_horizon_reference_policy.py
+          python -m py_compile experiments/reference-calibrated-evidence/finite_horizon_policy_execution.py
+          python -m py_compile experiments/reference-calibrated-evidence/verified_reference_evidence_bundle.py
+      - name: Run exact evidence bundle tests
+        env:
+          PYTHONPATH: bridges/observation-path:bridges/authority-lineage:formats/encounter-envelope:experiments/reference-calibrated-evidence
+        run: python -m unittest discover -s experiments/reference-calibrated-evidence -p "test_verified_reference_evidence_bundle.py" -v
