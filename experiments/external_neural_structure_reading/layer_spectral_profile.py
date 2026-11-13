@@ -9,10 +9,16 @@ from typing import Any
 
 import numpy as np
 
-from .spectral_invariants import (
-    _spectrum_distance,
-    _spectrum_summary,
-)
+try:
+    from .spectral_invariants import (
+        _spectrum_distance,
+        _spectrum_summary,
+    )
+except ImportError:  # direct unittest discovery from this directory
+    from spectral_invariants import (
+        _spectrum_distance,
+        _spectrum_summary,
+    )
 
 PROFILE_SCHEMA = "in-formation-space.gpt2-layer-spectral-profile.v0.1"
 EXPECTED_LAYERS = (0, 3, 6, 9, 11)
