@@ -564,10 +564,10 @@ def build_report(
         expected_run_id=verifier["run_id"], expected_attempt=verifier["run_attempt"],
     )
     _require_same_run(client["host"], server["host"], verifier)
-    if client["peer_address_digest"] not in {None, server["address_digest"]}:
-        raise OverlayProbeError("client did not bind the exact server address record")
-    if server["peer_address_digest"] not in {None, client["address_digest"]}:
-        raise OverlayProbeError("server did not bind the exact client address record")
+    if client["peer_address_digest"] not in {None, server_address_attestation.get("subject_sha256")}:
+        raise OverlayProbeError("client did not bind the exact attested server address file bytes")
+    if server["peer_address_digest"] not in {None, client_address_attestation.get("subject_sha256")}:
+        raise OverlayProbeError("server did not bind the exact attested client address file bytes")
     if client["peer_overlay_ipv4"] not in {None, server["overlay_ipv4"]}:
         raise OverlayProbeError("client probe peer IP differs from server's attested overlay IP")
     if server["peer_overlay_ipv4"] not in {None, client["overlay_ipv4"]}:
