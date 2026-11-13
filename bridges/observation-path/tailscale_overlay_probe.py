@@ -353,6 +353,19 @@ def _validate_address(
     return dict(address)
 
 
+def tailscale_ping_command(address: str, tailscale_bin: str = "tailscale") -> list[str]:
+    try:
+        parsed = ipaddress.ip_address(address)
+    except ValueError as error:
+        raise OverlayProbeError("Tailscale ping target must be an IP address") from error
+    if parsed.version != 4 or parsed not in ipaddress.ip_network("100.64.0.0/10"):
+        raise OverlayProbeError("Tailscale ping target must be in 100.64.0.0/10")
+    return [
+        tailscale_bin, "ping", "--c", str(PING_COUNT),
+        "--until-direct=false", str(parsed),
+    ]
+
+
 def classify_route(output: str, return_code: int) -> str:
     lower = output.lower()
     if re.search(r"\bvia\s+\d{1,3}(?:\.\d{1,3}){3}:\d+", lower):
