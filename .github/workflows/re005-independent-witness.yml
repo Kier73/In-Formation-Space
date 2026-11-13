@@ -1,0 +1,221 @@
+name: RE-005 independent event witness and causal non-identifiability
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re005-independent-witness.yml'
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re005-independent-witness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Test complete response-equivalence series
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Verify deterministic RE-005 output
+        run: |
+          python experiments/response-equivalence/independent_event_causation.py > /tmp/re005-deterministic.json
+          cmp experiments/response-equivalence/re005_report.json /tmp/re005-deterministic.json
+      - name: Validate native E-CPU causal stamps and adversarial controls
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re005_cases.py
+
+  enroll-witness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate run-scoped witness shared key in separate enrollment job
+        run: |
+          python - <<'PY' > re005-enrollment.json
+          import json
+          import sys
+          sys.path.insert(0, 'experiments/response-equivalence')
+          from independent_event_causation import enroll
+          print(json.dumps(enroll()))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re005-enrollment-private-fixture
+          path: re005-enrollment.json
+          if-no-files-found: error
+          retention-days: 1
+
+  source-host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Emit independently advanced E-CPU A causal stamps
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re005_hosts.py --source > re005-source.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re005-source-public
+          path: re005-source.json
+          if-no-files-found: error
+
+  witness-host:
+    needs: enroll-witness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          name: re005-enrollment-private-fixture
+      - name: MAC-bind witness C event claims and native E-CPU causal stamps
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re005-witness-request.json
+          import json
+          with open('re005-enrollment.json', encoding='utf-8') as f:
+              enrollment=json.load(f)
+          print(json.dumps({'enrollment':enrollment}))
+          PY
+          python experiments/response-equivalence/ecpu_re005_hosts.py --witness < /tmp/re005-witness-request.json > re005-witness.json
+          rm -f re005-enrollment.json /tmp/re005-witness-request.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re005-witness-public
+          path: re005-witness.json
+          if-no-files-found: error
+
+  receiver-host:
+    needs: [source-host, witness-host]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          name: re005-source-public
+      - uses: actions/download-artifact@v4
+        with:
+          name: re005-witness-public
+      - name: Receive BOTH causal stamps before recording B outputs; no witness signing key
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re005-receiver-request.json
+          import json
+          with open('re005-source.json', encoding='utf-8') as f:
+              a=json.load(f)
+          with open('re005-witness.json', encoding='utf-8') as f:
+              c=json.load(f)
+          print(json.dumps({'source':a,'witness':c,'truth':'common_cause_marker'}))
+          PY
+          python experiments/response-equivalence/ecpu_re005_hosts.py --receiver < /tmp/re005-receiver-request.json > re005-receiver.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re005-receiver-public
+          path: re005-receiver.json
+          if-no-files-found: error
+
+  independent-verifier:
+    needs: [unit-tests, enroll-witness, source-host, witness-host, receiver-host]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          name: re005-enrollment-private-fixture
+      - uses: actions/download-artifact@v4
+        with:
+          name: re005-source-public
+      - uses: actions/download-artifact@v4
+        with:
+          name: re005-witness-public
+      - uses: actions/download-artifact@v4
+        with:
+          name: re005-receiver-public
+      - name: Reconstruct concurrently produced events under native E-CPU vector-clock relations
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re005-verifier-input.json
+          import json
+          def load(path):
+              with open(path,encoding='utf-8') as f:
+                  return json.load(f)
+          print(json.dumps({'source':load('re005-source.json'),
+              'witness':load('re005-witness.json'),
+              'receiver':load('re005-receiver.json'),
+              'enrollment':load('re005-enrollment.json'),
+              'controlled_exclusion_assured': False}))
+          PY
+          python experiments/response-equivalence/ecpu_re005_hosts.py --verify < /tmp/re005-verifier-input.json > re005-independent-report.json
+          python - <<'PY'
+          import json
+          with open('re005-independent-report.json',encoding='utf-8') as f:
+              report=json.load(f)
+          assert report['identification']['survivors'] == [              'common_cause_alias','common_cause_marker','event_causal'],report
+          assert report['causal_relation']['A2_C2'] == 'concurrent',report
+          assert report['causal_relation']['A2_B0'] == 'before',report
+          assert report['causal_relation']['C2_B0'] == 'before',report
+          assert report['physical_causation_proved'] is False,report
+          assert report['combined_cross_host_elapsed'] is None,report
+          print('Independent verification passed; witness authentication is not physical causation')
+          PY
+          rm -f re005-enrollment.json /tmp/re005-verifier-input.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re005-independent-report
+          path: re005-independent-report.json
+          if-no-files-found: error
