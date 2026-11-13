@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/external_neural_structure_reading/gpt2-layer-spectral-profile.schema.json",
+  "title": "GPT-2 Layer Spectral Profile v0.1",
+  "description": "A five-point profile of Q/K/V singular spectra across GPT-2 depth. Raw parameter values are not retained.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "source_observation", "method", "dimensions", "layer_profile", "pairwise_spectral_comparisons", "adjacent_sample_transitions", "interpretation"],
+  "properties": {
+    "schema": {"const": "in-formation-space.gpt2-layer-spectral-profile.v0.1"},
+    "source_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision", "license_id"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "license_id": {"type": ["string", "null"]}
+      }
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected_layers", "selection_rule", "tensor_role", "expected_tensor_shape", "selected_matrix_count", "projection_partition", "svd_method", "normalization", "raw_payload_policy"],
+      "properties": {
+        "selected_layers": {"const": [0, 3, 6, 9, 11]},
+        "selection_rule": {"type": "string", "minLength": 1},
+        "tensor_role": {"type": "string", "minLength": 1},
+        "expected_tensor_shape": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 1},
+            {"type": "integer", "minimum": 3}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "selected_matrix_count": {"const": 5},
+        "projection_partition": {"const": ["query", "key", "value"]},
+        "svd_method": {"type": "string", "minLength": 1},
+        "normalization": {"type": "string", "minLength": 1},
+        "raw_payload_policy": {"type": "string", "minLength": 1}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model_layer_count", "sampled_layer_count", "hidden_width", "projection_width", "singular_values_per_projection"],
+      "properties": {
+        "model_layer_count": {"const": 12},
+        "sampled_layer_count": {"const": 5},
+        "hidden_width": {"type": "integer", "minimum": 1},
+        "projection_width": {"type": "integer", "minimum": 1},
+        "singular_values_per_projection": {"type": "integer", "minimum": 1}
+      }
+    },
+    "layer_profile": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/layer"}
+    },
+    "pairwise_spectral_comparisons": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "key", "value"],
+      "properties": {
+        "query": {"$ref": "#/$defs/pairwise-list"},
+        "key": {"$ref": "#/$defs/pairwise-list"},
+        "value": {"$ref": "#/$defs/pairwise-list"}
+      }
+    },
+    "adjacent_sample_transitions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "key", "value"],
+      "properties": {
+        "query": {"$ref": "#/$defs/transition-list"},
+        "key": {"$ref": "#/$defs/transition-list"},
+        "value": {"$ref": "#/$defs/transition-list"}
+      }
+    },
+    "interpretation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "claims", "not_established"],
+      "properties": {
+        "status": {"const": "sampled-depth-spectral-profile"},
+        "claims": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "not_established": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  },
+  "$defs": {
+    "tensor-evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_sha256", "payload_sha256_scope", "shard_header_sha256", "size_bytes", "absolute_byte_range"],
+      "properties": {
+        "payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "payload_sha256_scope": {"const": "complete-selected-tensor-payload"},
+        "shard_header_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "absolute_byte_range": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 0},
+            {"type": "integer", "minimum": 0}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "spectrum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shape", "rank_bound", "singular_values", "frobenius_normalized_singular_values", "singular_value_quantiles", "frobenius_norm", "spectral_norm", "stable_rank", "entropy_effective_rank", "participation_ratio", "top_singular_energy_fraction", "singular_value_count"],
+      "properties": {
+        "shape": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 1},
+            {"type": "integer", "minimum": 1}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "rank_bound": {"type": "integer", "minimum": 1},
+        "singular_values": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": 0}},
+        "frobenius_normalized_singular_values": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": 0}},
+        "singular_value_quantiles": {
+          "type": "object",
+          "required": ["0", "5", "25", "50", "75", "95", "100"],
+          "additionalProperties": {"type": "number", "minimum": 0}
+        },
+        "frobenius_norm": {"type": "number", "minimum": 0},
+        "spectral_norm": {"type": "number", "minimum": 0},
+        "stable_rank": {"type": ["number", "null"], "minimum": 0},
+        "entropy_effective_rank": {"type": ["number", "null"], "minimum": 0},
+        "participation_ratio": {"type": ["number", "null"], "minimum": 0},
+        "top_singular_energy_fraction": {
+          "type": "object",
+          "required": ["1", "8", "32", "64", "128"],
+          "additionalProperties": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+        },
+        "singular_value_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "layer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["layer_index", "tensor_name", "tensor_evidence", "qkv_spectra"],
+      "properties": {
+        "layer_index": {"enum": [0, 3, 6, 9, 11]},
+        "tensor_name": {"type": "string", "minLength": 1},
+        "tensor_evidence": {"$ref": "#/$defs/tensor-evidence"},
+        "qkv_spectra": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["query", "key", "value"],
+          "properties": {
+            "query": {"$ref": "#/$defs/spectrum"},
+            "key": {"$ref": "#/$defs/spectrum"},
+            "value": {"$ref": "#/$defs/spectrum"}
+          }
+        }
+      }
+    },
+    "pairwise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["first_layer", "second_layer", "mean_absolute_normalized_spectrum_distance", "root_mean_square_normalized_spectrum_distance", "squared_energy_jensen_shannon_divergence_bits"],
+      "properties": {
+        "first_layer": {"enum": [0, 3, 6, 9, 11]},
+        "second_layer": {"enum": [0, 3, 6, 9, 11]},
+        "mean_absolute_normalized_spectrum_distance": {"type": "number", "minimum": 0},
+        "root_mean_square_normalized_spectrum_distance": {"type": "number", "minimum": 0},
+        "squared_energy_jensen_shannon_divergence_bits": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+      }
+    },
+    "pairwise-list": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {"$ref": "#/$defs/pairwise"}
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from_layer", "to_layer", "mean_absolute_normalized_spectrum_distance", "squared_energy_jensen_shannon_divergence_bits", "stable_rank_change", "entropy_effective_rank_change"],
+      "properties": {
+        "from_layer": {"enum": [0, 3, 6, 9]},
+        "to_layer": {"enum": [3, 6, 9, 11]},
+        "mean_absolute_normalized_spectrum_distance": {"type": "number", "minimum": 0},
+        "squared_energy_jensen_shannon_divergence_bits": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "stable_rank_change": {"type": ["number", "null"]},
+        "entropy_effective_rank_change": {"type": ["number", "null"]}
+      }
+    },
+    "transition-list": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/transition"}
+    }
+  }
+}

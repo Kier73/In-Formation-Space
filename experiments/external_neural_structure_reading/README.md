@@ -184,6 +184,51 @@ A synthetic test applies orthogonal row/column transformations and checks that t
 
 This adds a comparison invariant under orthogonal basis changes, not under arbitrary invertible transformations. It does not assert that two projections implement the same function, that their latent spaces are aligned, or that similar spectra identify learned meaning.
 
+## Five-point depth profile
+
+The endpoint spectra were similar after Frobenius normalization, but two blocks cannot tell us whether that relationship persists through depth. The new `layer_spectral_profile.py` experiment samples fused QKV matrices from transformer blocks `0, 3, 6, 9, 11`.
+
+This is an explicit five-tensor allowlist:
+
+| Sampled block | Tensor |
+| ---: | --- |
+| 0 | `h.0.attn.c_attn.weight` |
+| 3 | `h.3.attn.c_attn.weight` |
+| 6 | `h.6.attn.c_attn.weight` |
+| 9 | `h.9.attn.c_attn.weight` |
+| 11 | `h.11.attn.c_attn.weight` |
+
+For the pinned checkpoint, each tensor is F32 `[768, 2304]` (7,077,888 bytes), so the five payloads total 35,389,440 bytes. The live workflow budgets 48 MiB total and 8 MiB per tensor, within the reader's hard limits.
+
+The analyzer computes the Q/K/V singular spectra at each sampled depth, all ten pairwise spectral comparisons per role, and the four adjacent-sample transitions per role. Each transition also records changes in stable rank and entropy effective rank. The output schema retains only derived spectra and source/payload hashes, never raw parameter arrays.
+
+The sample is intentionally sparse. It does not claim the three unsampled blocks follow the same pattern, and its pairwise distances remain structural summaries rather than functional comparisons. The [five-point depth profile workflow](../../../.github/workflows/hfr-001-layer-spectral-profile.yml) retains the live result as `hfr-001-gpt2-layer-spectral-profile`.
+
+### First live depth-profile result
+
+The live pinned run completed at [workflow run 43478448713](https://github.com/Kier73/In-Formation-Space/actions/runs/43478448713). Across the ten sampled layer pairs, mean absolute distance between Frobenius-normalized spectra averaged:
+
+| Projection | Mean pairwise distance | Maximum pairwise distance |
+| --- | ---: | ---: |
+| Query | 0.00141 | 0.00207 |
+| Key | 0.00239 | 0.00390 |
+| Value | 0.00224 | 0.00380 |
+
+The squared-energy Jensen–Shannon divergences were also small across the sampled comparisons (maximum: query 0.0089 bits, key 0.0242 bits, value 0.0243 bits).
+
+However, concentration measures were not stationary. Exact stable rank across the five sampled layers varied as follows:
+
+| Block | Query | Key | Value |
+| ---: | ---: | ---: | ---: |
+| 0 | 66.38 | 19.61 | 31.21 |
+| 3 | 47.63 | 42.42 | 83.04 |
+| 6 | 66.05 | 65.51 | 78.61 |
+| 9 | 58.42 | 55.89 | 157.03 |
+| 11 | 40.69 | 42.85 | 130.85 |
+
+This provides a more precise distinction than “the layers are similar”: normalized spectral shapes are close in this sparse sample, while the concentration of singular-value energy and overall scale change by depth and projection role. These measurements do not identify why those changes occur or what function each transformation performs.
+
+
 ## Fail-closed checks
 
 The reader rejects duplicate JSON keys, non-finite JSON constants, oversized JSON/header regions, non-commit revision labels, invalid tensor entries, negative dimensions or offsets, offsets beyond the data section, overlapping tensor ranges, symbolic links, path traversal, duplicate tensor names across shards, and any mismatch between a shard index and observed headers.
@@ -192,11 +237,11 @@ It does not validate architecture semantics, tensor element counts against dtype
 
 ## Next discriminating stages
 
-1. Compare the full spectral signatures of additional blocks and determine how stable the invariants are across depth, model revisions, and model families.
-2. Investigate matrix-factorization or low-rank procedural parameterizations that preserve selected spectral properties without copying original tensor values.
-3. Compare architecture-only initialization with spectrum-informed generated parameters on a fixed, explicitly scoped task.
-4. Add an independently implemented forward reference for a supported operation-graph subset and compare numerical behavior with stated error tolerances.
-5. Explore selective inheritance and cross-family realization only after the preceding evidence exists.
+1. Use the five-point profile to identify whether spectral structure is depth-stationary, smoothly varying, or grouped by Q/K/V role.
+2. Repeat a compact profile on a second GPT-2 scale or model family to distinguish architecture regularities from this checkpoint's particular training result.
+3. Investigate matrix-factorization or low-rank procedural parameterizations that preserve selected spectral properties without copying original tensor values.
+4. Compare architecture-only initialization with spectrum-informed generated parameters on a fixed task and explicit input domain.
+5. Add an independently implemented forward reference for a supported operation-graph subset and compare numerical behavior with stated error tolerances.
 
 ## Repository responsibilities
 
