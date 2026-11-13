@@ -30,6 +30,7 @@ class HostEvidenceTests(unittest.TestCase):
         self.process_evidence = _read(authority_dir / "process-evidence.json")
         self.stale_attempt = _read(authority_dir / "stale-owner-attempt.json")
         self.database_path = authority_dir / "authority-store-fixture.bin"
+        self.sqlite_report = _read(authority_dir / "sqlite-authority-verification-fixture.json")
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
@@ -50,6 +51,9 @@ class HostEvidenceTests(unittest.TestCase):
         self.assertEqual(event["details"]["request_digest"], self.request["request_digest"])
         self.assertTrue((self.root / "runner" / "completion-receipt.json").is_file())
         self.assertTrue((self.root / "verifier-host.json").is_file())
+        self.assertFalse(self.sqlite_report["verified"])
+        self.assertEqual(self.sqlite_report["active_owner_generation"], 2)
+        self.assertEqual(self.sqlite_report["ledger_digest"], self.ledger["ledger_digest"])
 
     def test_participant_attestation_predicate_binds_exact_key_and_host_role(self) -> None:
         key_path = self.root / "authority" / "authority-public-key.json"
@@ -152,6 +156,7 @@ class HostEvidenceTests(unittest.TestCase):
             "authority/process-evidence.json",
             "authority/stale-owner-attempt.json",
             "authority/authority-store-fixture.bin",
+            "authority/sqlite-authority-verification-fixture.json",
             "runner/result.json",
             "runner/completion-receipt.json",
             "runner/runner-public-key.json",
