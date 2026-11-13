@@ -1,0 +1,33 @@
+name: RE-003 independent-process response reconstruction
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re003-active-host-reconstruction.yml'
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re003-active-host-reconstruction.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-reconstruction:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run RE-001, RE-002, RE-003 local unit tests
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Reconstruct deterministic separate-process encounter
+        shell: bash
+        run: |
+          python experiments/response-equivalence/multi_host_reconstruction.py > /tmp/re003_report.json
+          cmp experiments/response-equivalence/re003_report.json /tmp/re003_report.json

@@ -1,0 +1,352 @@
+{
+  "claims_not_made": [
+    "physical host independence",
+    "authenticated producers",
+    "real E-CPU or VGI runtime admission",
+    "universal law recovery",
+    "distributed wall-clock synchronization"
+  ],
+  "encounters": [
+    {
+      "different_process_ids": true,
+      "host_A_local_ticks": [
+        900011,
+        900022
+      ],
+      "host_A_raw": [
+        1,
+        4
+      ],
+      "host_B_actions": [
+        "inspect",
+        "pulse"
+      ],
+      "host_B_alone_survivors": [
+        "both_variant",
+        "gain_variant"
+      ],
+      "host_B_local_ticks": [
+        -699971,
+        -699942
+      ],
+      "host_B_raw": [
+        1,
+        7
+      ],
+      "host_B_statuses": [
+        "applied",
+        "applied"
+      ],
+      "independent_verifier": {
+        "global_event_order": null,
+        "inference_scope": "finite declared models, exact synthetic transitions, host-local chains",
+        "per_host_event_count": {
+          "A": 2,
+          "B": 2
+        },
+        "rejected": {
+          "both_variant": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 4,
+            "predicted": 6,
+            "seq": 1
+          },
+          "hidden_variant": {
+            "action": "pulse",
+            "host": "B",
+            "observed": 7,
+            "predicted": 5,
+            "seq": 1
+          },
+          "observational_alias": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 4,
+            "predicted": 3,
+            "seq": 1
+          },
+          "reference": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 4,
+            "predicted": 3,
+            "seq": 1
+          }
+        },
+        "schema": "re003-reconstruction/v1",
+        "status": "singleton_within_catalogue",
+        "survivors": [
+          "gain_variant"
+        ]
+      },
+      "initial_host_A_survivors": [
+        "gain_variant",
+        "hidden_variant"
+      ],
+      "inspection_granted": true,
+      "noninvasive_inspection_counterfactual": [
+        1,
+        3
+      ],
+      "scenario": "gain_variant",
+      "selected_host_B_probe": {
+        "actions": [
+          "inspect",
+          "pulse"
+        ],
+        "partitions": [
+          [
+            "gain_variant"
+          ],
+          [
+            "hidden_variant"
+          ]
+        ],
+        "status": "discriminating_sequence_found"
+      }
+    },
+    {
+      "different_process_ids": true,
+      "host_A_local_ticks": [
+        900011,
+        900022
+      ],
+      "host_A_raw": [
+        1,
+        4
+      ],
+      "host_B_actions": [
+        "pulse",
+        "inspect",
+        "pulse"
+      ],
+      "host_B_alone_survivors": [
+        "gain_variant",
+        "hidden_variant"
+      ],
+      "host_B_local_ticks": [
+        -699971,
+        -699942,
+        -699913
+      ],
+      "host_B_raw": [
+        3,
+        null,
+        9
+      ],
+      "host_B_statuses": [
+        "applied",
+        "refused",
+        "applied"
+      ],
+      "independent_verifier": {
+        "global_event_order": null,
+        "inference_scope": "finite declared models, exact synthetic transitions, host-local chains",
+        "per_host_event_count": {
+          "A": 2,
+          "B": 3
+        },
+        "rejected": {
+          "both_variant": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 4,
+            "predicted": 6,
+            "seq": 1
+          },
+          "observational_alias": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 4,
+            "predicted": 3,
+            "seq": 1
+          },
+          "reference": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 4,
+            "predicted": 3,
+            "seq": 1
+          }
+        },
+        "schema": "re003-reconstruction/v1",
+        "status": "unresolved_equivalence_class",
+        "survivors": [
+          "gain_variant",
+          "hidden_variant"
+        ]
+      },
+      "initial_host_A_survivors": [
+        "gain_variant",
+        "hidden_variant"
+      ],
+      "inspection_granted": false,
+      "noninvasive_inspection_counterfactual": null,
+      "scenario": "gain_variant",
+      "selected_host_B_probe": {
+        "actions": [],
+        "partitions": [
+          [
+            "gain_variant",
+            "hidden_variant"
+          ]
+        ],
+        "status": "no_discriminating_sequence_within_scope"
+      }
+    },
+    {
+      "different_process_ids": true,
+      "host_A_local_ticks": [
+        900011,
+        900022
+      ],
+      "host_A_raw": [
+        1,
+        3
+      ],
+      "host_B_actions": [],
+      "host_B_alone_survivors": [
+        "both_variant",
+        "gain_variant",
+        "hidden_variant",
+        "observational_alias",
+        "reference"
+      ],
+      "host_B_local_ticks": [],
+      "host_B_raw": [],
+      "host_B_statuses": [],
+      "independent_verifier": {
+        "global_event_order": null,
+        "inference_scope": "finite declared models, exact synthetic transitions, host-local chains",
+        "per_host_event_count": {
+          "A": 2
+        },
+        "rejected": {
+          "both_variant": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 3,
+            "predicted": 6,
+            "seq": 1
+          },
+          "gain_variant": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 3,
+            "predicted": 4,
+            "seq": 1
+          },
+          "hidden_variant": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 3,
+            "predicted": 4,
+            "seq": 1
+          }
+        },
+        "schema": "re003-reconstruction/v1",
+        "status": "unresolved_equivalence_class",
+        "survivors": [
+          "observational_alias",
+          "reference"
+        ]
+      },
+      "initial_host_A_survivors": [
+        "observational_alias",
+        "reference"
+      ],
+      "inspection_granted": true,
+      "noninvasive_inspection_counterfactual": null,
+      "scenario": "reference",
+      "selected_host_B_probe": {
+        "actions": [],
+        "partitions": [
+          [
+            "observational_alias",
+            "reference"
+          ]
+        ],
+        "status": "no_discriminating_sequence_within_scope"
+      }
+    },
+    {
+      "different_process_ids": true,
+      "host_A_local_ticks": [
+        900011,
+        900022
+      ],
+      "host_A_raw": [
+        1,
+        3
+      ],
+      "host_B_actions": [],
+      "host_B_alone_survivors": [
+        "both_variant",
+        "gain_variant",
+        "hidden_variant",
+        "observational_alias",
+        "reference"
+      ],
+      "host_B_local_ticks": [],
+      "host_B_raw": [],
+      "host_B_statuses": [],
+      "independent_verifier": {
+        "global_event_order": null,
+        "inference_scope": "finite declared models, exact synthetic transitions, host-local chains",
+        "per_host_event_count": {
+          "A": 2
+        },
+        "rejected": {
+          "both_variant": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 3,
+            "predicted": 6,
+            "seq": 1
+          },
+          "gain_variant": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 3,
+            "predicted": 4,
+            "seq": 1
+          },
+          "hidden_variant": {
+            "action": "pulse",
+            "host": "A",
+            "observed": 3,
+            "predicted": 4,
+            "seq": 1
+          }
+        },
+        "schema": "re003-reconstruction/v1",
+        "status": "unresolved_equivalence_class",
+        "survivors": [
+          "observational_alias",
+          "reference"
+        ]
+      },
+      "initial_host_A_survivors": [
+        "observational_alias",
+        "reference"
+      ],
+      "inspection_granted": true,
+      "noninvasive_inspection_counterfactual": null,
+      "scenario": "observational_alias",
+      "selected_host_B_probe": {
+        "actions": [],
+        "partitions": [
+          [
+            "observational_alias",
+            "reference"
+          ]
+        ],
+        "status": "no_discriminating_sequence_within_scope"
+      }
+    }
+  ],
+  "experiment": "RE-003",
+  "schema": "in-formation.response-reconstruction/0.1",
+  "status": "exact synthetic fixture with independent localhost processes"
+}
