@@ -1,0 +1,167 @@
+name: RE-004 intervention versus external evolution
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re004-causal-hosts.yml'
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re004-causal-hosts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          # The already-verified MOR-001 temporal dependency revision.
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run existing and new exact local tests
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Validate reproducible RE-004 report
+        run: |
+          python experiments/response-equivalence/intervention_or_drift.py > /tmp/re004_report.json
+          cmp experiments/response-equivalence/re004_report.json /tmp/re004_report.json
+      - name: Run real E-CPU TemporalContext integration tests
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re004_cases.py
+
+  source-host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Source host produces two events and E-CPU causal frames
+        env:
+          PYTHONPATH: external/E-CPU
+        run: |
+          echo '{"truth":"triggered_external"}' | python experiments/response-equivalence/ecpu_temporal_check.py --source > /tmp/re004-source-bundle.json
+          python - <<'PY'
+          import json
+          with open('/tmp/re004-source-bundle.json', encoding='utf-8') as stream:
+              bundle = json.load(stream)
+          for key, dest in (('public', 're004-source-public.json'), ('private', 're004-source-private.json')):
+              with open(dest, 'w', encoding='utf-8') as stream:
+                  json.dump(bundle[key], stream, sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re004-source-public
+          path: re004-source-public.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re004-source-private
+          path: re004-source-private.json
+          if-no-files-found: error
+
+  receiver-host:
+    needs: source-host
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          name: re004-source-public
+      - uses: actions/download-artifact@v4
+        with:
+          name: re004-source-private
+      - name: Receiver independently resumes checkpoint and merges causal stamp
+        env:
+          PYTHONPATH: external/E-CPU
+        run: |
+          python - <<'PY' > /tmp/re004-receiver-request.json
+          import json
+          with open('re004-source-public.json', encoding='utf-8') as stream:
+              source = json.load(stream)
+          with open('re004-source-private.json', encoding='utf-8') as stream:
+              private = json.load(stream)
+          print(json.dumps({'truth':'triggered_external','source':source,'private':private}))
+          PY
+          python experiments/response-equivalence/ecpu_temporal_check.py --receiver < /tmp/re004-receiver-request.json > re004-receiver-public.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re004-receiver-public
+          path: re004-receiver-public.json
+          if-no-files-found: error
+
+  independent-verifier:
+    needs: [source-host, receiver-host, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          name: re004-source-public
+      - uses: actions/download-artifact@v4
+        with:
+          name: re004-receiver-public
+      - name: Rebuild only from public records using actual E-CPU stamp comparison
+        env:
+          PYTHONPATH: external/E-CPU
+        run: |
+          python - <<'PY' > /tmp/re004-verifier-request.json
+          import json
+          with open('re004-source-public.json', encoding='utf-8') as stream:
+              source = json.load(stream)
+          with open('re004-receiver-public.json', encoding='utf-8') as stream:
+              receiver = json.load(stream)
+          print(json.dumps({'source':source,'receiver':receiver}))
+          PY
+          python experiments/response-equivalence/ecpu_temporal_check.py --verifier < /tmp/re004-verifier-request.json > re004-independent-report.json
+          python - <<'PY'
+          import json
+          with open('re004-independent-report.json', encoding='utf-8') as stream:
+              report = json.load(stream)
+          assert report['model_reconstruction']['survivors'] == ['triggered_external'], report
+          assert report['causal_relation'] == {'A0_A1':'before','A1_B0':'before'}, report
+          assert report['cross_host_elapsed'] is None
+          assert report['external_event_source_attribution'] is None
+          print('Independent verifier accepted the scoped reconstruction; no physical source attribution claimed')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re004-independent-reconstruction
+          path: re004-independent-report.json
+          if-no-files-found: error
