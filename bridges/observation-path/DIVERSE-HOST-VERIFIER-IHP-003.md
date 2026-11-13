@@ -100,9 +100,9 @@ Focused standard-library tests:
       -s bridges/observation-path \
       -p 'test_diverse_host_verifier.py' -v
 
-The pull-request workflow also checks both JSON Schemas and validates a generated fixture report and predicate:
+The existing IHP workflow's diverse_verifier_tests job runs on pull requests and checks both JSON Schemas against a generated fixture report and predicate:
 
-    .github/workflows/diverse-host-verifier-tests.yml
+    .github/workflows/independent-host-operation-path.yml
 
 The live four-job run is launched by the existing main-only IHP workflow after this change reaches main:
 
