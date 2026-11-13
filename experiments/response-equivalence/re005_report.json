@@ -1,0 +1,73 @@
+{
+  "with_control_assurance": {
+    "controlled_exclusion_assured": true,
+    "episodes": [
+      {
+        "candidate_count": 3,
+        "episode": "passive-positive",
+        "observation_scope": "passive_association",
+        "protocol": "passive",
+        "witness_status": "observed"
+      },
+      {
+        "candidate_count": 3,
+        "episode": "passive-negative",
+        "observation_scope": "passive_association",
+        "protocol": "passive",
+        "witness_status": "observed"
+      },
+      {
+        "candidate_count": 2,
+        "episode": "controlled-negative",
+        "observation_scope": "controlled_assumption",
+        "protocol": "controlled",
+        "witness_status": "observed"
+      }
+    ],
+    "event_source_authentication": "HMAC-valid relative to enrolled shared secret",
+    "external_clock_alignment": null,
+    "physical_causation_proved": false,
+    "physical_event_authentication": false,
+    "schema": "in-formation.response-re005/0.1",
+    "survivors": [
+      "common_cause_alias",
+      "common_cause_marker"
+    ]
+  },
+  "without_control_assurance": {
+    "controlled_exclusion_assured": false,
+    "episodes": [
+      {
+        "candidate_count": 3,
+        "episode": "passive-positive",
+        "observation_scope": "passive_association",
+        "protocol": "passive",
+        "witness_status": "observed"
+      },
+      {
+        "candidate_count": 3,
+        "episode": "passive-negative",
+        "observation_scope": "passive_association",
+        "protocol": "passive",
+        "witness_status": "observed"
+      },
+      {
+        "candidate_count": 3,
+        "episode": "controlled-negative",
+        "observation_scope": "not_identifiable",
+        "protocol": "controlled",
+        "witness_status": "observed"
+      }
+    ],
+    "event_source_authentication": "HMAC-valid relative to enrolled shared secret",
+    "external_clock_alignment": null,
+    "physical_causation_proved": false,
+    "physical_event_authentication": false,
+    "schema": "in-formation.response-re005/0.1",
+    "survivors": [
+      "common_cause_alias",
+      "common_cause_marker",
+      "event_causal"
+    ]
+  }
+}
