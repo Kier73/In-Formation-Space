@@ -644,7 +644,7 @@ def build_report(
             "derp_relay_means": "WireGuard-encrypted traffic relayed through a Tailscale DERP server",
             "peer_relay_means": "WireGuard-encrypted traffic relayed through a tagged tailnet peer",
             "application_payload_sent": False,
-            "next_step": "Use the reported tailnet IPs for E-CPU SocketTransport/mTLS in IHP-004; preserve and record the Tailscale route classification.",
+            "next_step": "Use the attested tailnet IPs in a subsequent E-CPU SocketTransport/mTLS experiment; preserve the measured route classification and raw ping evidence.",
         },
         "limitations": [
             "This experiment measures Tailscale overlay peer reachability only; it does not yet send E-CPU application payload or establish mTLS.",
