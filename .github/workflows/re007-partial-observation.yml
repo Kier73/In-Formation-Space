@@ -1,0 +1,190 @@
+name: RE-007 partial observations and active probe identification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re007-partial-observation.yml'
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re007-partial-observation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Test all RE-001 through RE-007 contracts
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Independently regenerate the exact RE-007 report
+        run: |
+          python experiments/response-equivalence/partial_observation.py > /tmp/re007-result.json
+          cmp experiments/response-equivalence/re007_report.json /tmp/re007-result.json
+      - name: Exercise genuine E-CPU TemporalContext and CausalStamp interfaces
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re007_cases.py
+
+  enrollment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Enroll ephemeral synthetic sensor key
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from ecpu_re007_hosts import enrollment
+          reg=enrollment()
+          with open('re007-enrollment-private.json','w',encoding='utf-8') as f: json.dump(reg,f)
+          with open('re007-enrollment-public.json','w',encoding='utf-8') as f:
+              json.dump({k:v for k,v in reg.items() if k != 'sensor_key'},f)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re007-enrollment-private-ci-only
+          path: re007-enrollment-private.json
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re007-enrollment-public
+          path: re007-enrollment-public.json
+          if-no-files-found: error
+
+  controller:
+    needs: enrollment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re007-enrollment-public}
+      - name: Produce original request with genuine E-CPU causal stamp
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re007-controller-input.json
+          import json
+          with open('re007-enrollment-public.json',encoding='utf-8') as f: reg=json.load(f)
+          print(json.dumps({'challenge':reg['challenge']}))
+          PY
+          python experiments/response-equivalence/ecpu_re007_hosts.py --controller < /tmp/re007-controller-input.json > re007-controller.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re007-controller-public
+          path: re007-controller.json
+          if-no-files-found: error
+
+  sensor:
+    needs: [enrollment, controller]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re007-controller-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re007-enrollment-private-ci-only}
+      - name: Bind pending capture to pre-intervention state; deliver late and re-observe
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re007-sensor-input.json
+          import json
+          with open('re007-controller.json',encoding='utf-8') as f: ctrl=json.load(f)
+          with open('re007-enrollment-private.json',encoding='utf-8') as f: reg=json.load(f)
+          print(json.dumps({'controller':ctrl,'enrollment':reg,'truth':'transient'}))
+          PY
+          python experiments/response-equivalence/ecpu_re007_hosts.py --sensor < /tmp/re007-sensor-input.json > re007-sensor.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re007-sensor-public
+          path: re007-sensor.json
+          if-no-files-found: error
+
+  independent-verifier:
+    needs: [tests, enrollment, controller, sensor]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re007-controller-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re007-sensor-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re007-enrollment-private-ci-only}
+      - name: Reconstruct only from public event records and CI enrollment material
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re007-verifier-input.json
+          import json
+          def load(p):
+              with open(p,encoding='utf-8') as f: return json.load(f)
+          print(json.dumps({'controller':load('re007-controller.json'),
+                            'sensor':load('re007-sensor.json'),
+                            'enrollment':load('re007-enrollment-private.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re007_hosts.py --verifier < /tmp/re007-verifier-input.json > re007-verifier-report.json
+          python - <<'PY'
+          import json
+          with open('re007-verifier-report.json',encoding='utf-8') as f: report=json.load(f)
+          assert report['survivors']==['transient'],report
+          assert report['readings']==[0,1],report
+          assert report['cross_host_elapsed'] is None
+          assert report['physical_causation_proved'] is False
+          assert report['absence_of_unobserved_disturbances_proved'] is False
+          print('Validated scoped host causal order and observation capture revisions')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re007-independent-verifier-report
+          path: re007-verifier-report.json
+          if-no-files-found: error
