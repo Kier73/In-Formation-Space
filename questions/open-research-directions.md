@@ -445,3 +445,22 @@ RIV-011 returns an optimal finite policy tree, but the next action is meaningful
 5. When should the policy be reoptimized after an authorized outcome because the live evidence or available resources differ from the original tree?
 
 The initial execution bridge is [RIV-012](../experiments/reference-calibrated-evidence/RIV-012-README.md). It creates node-bound planned paths, replays an authorized interpreted prefix, advances through the RIV-011 policy tree, and rebuilds one cumulative RIV-009 calibration report. External artifact authentication and live transport integration remain distinct responsibilities.
+
+
+---
+
+## 23. How should reference evidence be reconciled across envelopes and authority lineage?
+
+### The question
+
+RIV-012 advances an adaptive reference policy only through structurally authorized interpreted paths. How should the raw returned payload, per-source evidence set, and authority decision be preserved and independently reconstructed so later observers can inspect the evidence behind a calibration update?
+
+### Questions
+
+1. How should an inline Encounter Envelope bind the exact returned signal and policy-node identity under an explicit canonicalization contract?
+2. How should each source's evidence record and payload digest be reconciled with the AUTHORIZED observed-source set and representative?
+3. How can an append-only Authority Lineage decision preserve the source set, policy digest, decision status, and representative reference for every adaptive policy step?
+4. Which integrity results remain content checks, and what additional trust-root, signature, or transport evidence would be needed to authenticate source identity?
+5. How should late source evidence or a conflicting authority receipt produce a review proposal without rewriting the prior calibration history?
+
+The initial bridge is [RIV-013](../experiments/reference-calibrated-evidence/RIV-013-README.md). It verifies inline Encounter Envelope payloads, each included per-source payload digest, and an append-only Authority Lineage reconstruction for each RIV-012 policy step. It explicitly does not authenticate sensors, physical standards, authority actors, signatures, or external referenced artifacts.
