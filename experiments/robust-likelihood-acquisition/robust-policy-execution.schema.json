@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/robust-likelihood-acquisition/robust-policy-execution.schema.json",
+  "title": "RIV-017 Robust Policy Execution Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format", "schema", "policy_report", "policy_report_digest",
+    "observation_paths", "observation_path_digests", "outcome_history",
+    "measurement_manifests", "current_policy_state", "execution_status",
+    "belief_effect", "scenario_model_effect", "ground_effect",
+    "measurement_status", "interpretation_limits", "record_digest"
+  ],
+  "properties": {
+    "format": {"const": "in-formation.robust-sequential-policy-execution/0.1"},
+    "schema": {"const": "in-formation.robust-sequential-policy-execution/0.1"},
+    "policy_report": {"type": "object"},
+    "policy_report_digest": {"$ref": "#/$defs/sha256"},
+    "observation_paths": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["attempt_id", "intent", "status", "terminal", "events"],
+        "properties": {
+          "attempt_id": {"type": "string", "minLength": 1},
+          "intent": {"type": "object"},
+          "status": {"const": "interpreted"},
+          "terminal": {"const": false},
+          "events": {"type": "array", "minItems": 6}
+        }
+      }
+    },
+    "observation_path_digests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/sha256"}
+    },
+    "outcome_history": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sensor_id", "outcome"],
+        "properties": {
+          "sensor_id": {"type": "string", "minLength": 1},
+          "outcome": {"$ref": "#/$defs/scalar"}
+        }
+      }
+    },
+    "measurement_manifests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "attempt_id", "policy_report_digest", "policy_node_digest",
+          "policy_state_digest", "history_prefix", "sensor_id", "dimension",
+          "measurement_cost", "observed_outcome", "dispatch_evidence_ref",
+          "admission_evidence_ref", "return_evidence_ref", "encounter_id",
+          "payload_digest", "canonicalization", "authority_evidence_ref",
+          "authority_policy_digest", "authority_decision_digest",
+          "interpretation_evidence_ref", "observation_path_digest",
+          "scenario_predictive_probabilities",
+          "scenario_joint_posterior_after_outcome"
+        ],
+        "properties": {
+          "attempt_id": {"type": "string", "minLength": 1},
+          "policy_report_digest": {"$ref": "#/$defs/sha256"},
+          "policy_node_digest": {"$ref": "#/$defs/sha256"},
+          "policy_state_digest": {"$ref": "#/$defs/sha256"},
+          "history_prefix": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["sensor_id", "outcome"],
+              "properties": {
+                "sensor_id": {"type": "string", "minLength": 1},
+                "outcome": {"$ref": "#/$defs/scalar"}
+              }
+            }
+          },
+          "sensor_id": {"type": "string", "minLength": 1},
+          "dimension": {"type": "string", "minLength": 1},
+          "measurement_cost": {"$ref": "#/$defs/fraction"},
+          "observed_outcome": {"$ref": "#/$defs/scalar"},
+          "dispatch_evidence_ref": {"type": "string", "minLength": 1},
+          "admission_evidence_ref": {"type": "string", "minLength": 1},
+          "return_evidence_ref": {"type": "string", "minLength": 1},
+          "encounter_id": {"type": "string", "minLength": 1},
+          "payload_digest": {"$ref": "#/$defs/sha256"},
+          "canonicalization": {"type": "string", "minLength": 1},
+          "authority_evidence_ref": {"type": "string", "minLength": 1},
+          "authority_policy_digest": {"$ref": "#/$defs/sha256"},
+          "authority_decision_digest": {"$ref": "#/$defs/sha256"},
+          "interpretation_evidence_ref": {"type": "string", "minLength": 1},
+          "observation_path_digest": {"$ref": "#/$defs/sha256"},
+          "scenario_predictive_probabilities": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "anyOf": [{"$ref": "#/$defs/fraction"}, {"type": "null"}]
+            }
+          },
+          "scenario_joint_posterior_after_outcome": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "anyOf": [
+                {"type": "null"},
+                {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/stateProbability"}}
+              ]
+            }
+          }
+        }
+      }
+    },
+    "current_policy_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node_digest", "node_type", "next_sensor_id", "terminal_decision",
+        "stop_disposition", "outcome_history", "used_sensors",
+        "remaining_measurements", "remaining_path_cost_budget", "total_path_cost",
+        "scenario_unnormalized_joint_masses",
+        "scenario_conditioned_joint_posteriors",
+        "scenario_identity_posterior"
+      ],
+      "properties": {
+        "node_digest": {"$ref": "#/$defs/sha256"},
+        "node_type": {"enum": ["measure", "stop", "model_mismatch_stop"]},
+        "next_sensor_id": {"type": ["string", "null"]},
+        "terminal_decision": {"type": ["string", "null"], "enum": ["A", "B", null]},
+        "stop_disposition": {"type": ["string", "null"]},
+        "outcome_history": {"type": "array"},
+        "used_sensors": {"type": "array", "items": {"type": "string"}},
+        "remaining_measurements": {"type": "integer", "minimum": 0},
+        "remaining_path_cost_budget": {"$ref": "#/$defs/fraction"},
+        "total_path_cost": {"$ref": "#/$defs/fraction"},
+        "scenario_unnormalized_joint_masses": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "array", "minItems": 2, "items": {"$ref": "#/$defs/stateMass"}
+          }
+        },
+        "scenario_conditioned_joint_posteriors": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "anyOf": [
+              {"type": "null"},
+              {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/stateProbability"}}
+            ]
+          }
+        },
+        "scenario_identity_posterior": {"type": "null"}
+      }
+    },
+    "execution_status": {
+      "enum": [
+        "authorized_interpreted_policy_prefix",
+        "authorized_interpreted_policy_terminal",
+        "authorized_interpreted_model_mismatch"
+      ]
+    },
+    "belief_effect": {"const": "scenario_conditioned_joint_mass_prefix_only"},
+    "scenario_model_effect": {"const": "none"},
+    "ground_effect": {"const": "none"},
+    "measurement_status": {"const": "observed_authorized_and_interpreted"},
+    "interpretation_limits": {
+      "type": "array", "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "record_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "fraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer"},
+        "denominator": {"type": "integer", "minimum": 1}
+      }
+    },
+    "scalar": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "boolean"},
+        {"type": "null"}
+      ]
+    },
+    "stateMass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hypothesis", "context_state", "mass"],
+      "properties": {
+        "hypothesis": {"enum": ["A", "B"]},
+        "context_state": {"type": "string", "minLength": 1},
+        "mass": {"$ref": "#/$defs/fraction"}
+      }
+    },
+    "stateProbability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hypothesis", "context_state", "probability"],
+      "properties": {
+        "hypothesis": {"enum": ["A", "B"]},
+        "context_state": {"type": "string", "minLength": 1},
+        "probability": {"$ref": "#/$defs/fraction"}
+      }
+    }
+  }
+}
