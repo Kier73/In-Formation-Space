@@ -13,6 +13,7 @@ import hashlib
 import ipaddress
 import json
 import os
+import re
 import shutil
 import socket
 import ssl
@@ -71,6 +72,7 @@ HANDOFF_SCHEMA = "in-formation.direct-mtls-handoff-envelope/0.1"
 RECEIPT_SCHEMA = "in-formation.direct-mtls-receiver-receipt/0.1"
 RECORD_SCHEMA = "in-formation.direct-mtls-host-record/0.1"
 REPORT_SCHEMA = "in-formation.direct-mtls-reconstruction-report/0.1"
+PEER_ROUTE_OBSERVATION_SCHEMA = "in-formation.ihp006-peer-route-observation/0.1"
 DATA_CHANNEL = "ihp002/direct-operation/v1"
 RECEIPT_CHANNEL = "ihp002/receiver-receipt/v1"
 LISTEN_PORT = 41763
@@ -288,6 +290,235 @@ def _load_certificate(path: Path) -> x509.Certificate:
 def certificate_sha256(path: Path) -> str:
     return digest_bytes(_load_certificate(path).public_bytes(serialization.Encoding.DER))
 
+
+
+
+def _classify_tailscale_peer_status(
+    output: str,
+    peer_ipv4: str,
+) -> tuple[str, str, str | None]:
+    """Classify one peer row from the human-readable Tailscale status table.
+
+    Only the connection-state marker is returned. Hostnames, owner emails, OS
+    labels, public endpoints, and relay region names are deliberately discarded.
+    The caller separately binds a digest of the complete command output.
+    """
+    peer = _validate_tailscale_ipv4(peer_ipv4)
+    matches: list[str] = []
+    for line in output.splitlines():
+        columns = line.strip().split(maxsplit=4)
+        if columns and columns[0] == peer:
+            matches.append(columns[4].strip() if len(columns) >= 5 else "")
+    if len(matches) > 1:
+        return "ambiguous", "reachable_unclassified", None
+    if not matches:
+        return "peer_not_found", "reachable_unclassified", None
+
+    peer_status = matches[0]
+    lower = peer_status.lower()
+    if re.match(r"^active(?:;|\s|$)", lower):
+        detail = lower.split(";", 1)[1] if ";" in lower else lower
+        if re.search(r"\bpeer-relay\b", detail):
+            return "active", "peer_relay", "active; peer-relay"
+        if re.search(r"\bdirect\b", detail):
+            return "active", "direct", "active; direct"
+        if re.search(r"\brelay\b", detail) or "derp(" in detail:
+            return "active", "derp_relay", "active; relay"
+        return "active", "reachable_unclassified", "active; unclassified"
+    if re.match(r"^idle(?:;|\s|$)", lower):
+        return "idle", "reachable_unclassified", "idle"
+    if peer_status == "-" or not peer_status:
+        return "no_session", "reachable_unclassified", peer_status or None
+    return "peer_not_found", "reachable_unclassified", None
+
+
+def _validate_peer_route_observation(
+    value: object,
+    *,
+    expected_role: str | None = None,
+    expected_local_ipv4: str | None = None,
+    expected_peer_ipv4: str | None = None,
+) -> dict[str, Any]:
+    required = {
+        "schema", "observer_role", "local_overlay_ipv4", "peer_overlay_ipv4",
+        "route_state", "route_type", "command", "exit_code", "observed_monotonic_ns", "elapsed_ns",
+        "matched_peer_status", "status_output_sha256", "error",
+    }
+    if not isinstance(value, Mapping) or set(value) != required:
+        raise DirectMTLSError("Tailscale peer-route observation fields are incomplete or unexpected")
+    if value["schema"] != PEER_ROUTE_OBSERVATION_SCHEMA:
+        raise DirectMTLSError("unsupported Tailscale peer-route observation schema")
+    role = value["observer_role"]
+    if role not in {"client_host", "server_host"} or (
+        expected_role is not None and role != expected_role
+    ):
+        raise DirectMTLSError("Tailscale peer-route observer role mismatch")
+    local_ipv4 = _validate_tailscale_ipv4(value["local_overlay_ipv4"])
+    peer_ipv4 = _validate_tailscale_ipv4(value["peer_overlay_ipv4"])
+    if local_ipv4 == peer_ipv4:
+        raise DirectMTLSError("Tailscale local and peer socket addresses must differ")
+    if expected_local_ipv4 is not None and local_ipv4 != _validate_tailscale_ipv4(expected_local_ipv4):
+        raise DirectMTLSError("Tailscale route observation local address differs from the socket")
+    if expected_peer_ipv4 is not None and peer_ipv4 != _validate_tailscale_ipv4(expected_peer_ipv4):
+        raise DirectMTLSError("Tailscale route observation peer address differs from the socket")
+    if value["route_state"] not in {
+        "active", "idle", "no_session", "peer_not_found", "command_failed", "ambiguous"
+    }:
+        raise DirectMTLSError("Tailscale peer-route state is unsupported")
+    if value["route_type"] not in {
+        "direct", "derp_relay", "peer_relay", "reachable_unclassified"
+    }:
+        raise DirectMTLSError("Tailscale peer-route type is unsupported")
+    if value["command"] != "tailscale status":
+        raise DirectMTLSError("Tailscale route observation command is not the pinned status command")
+    exit_code = value["exit_code"]
+    if exit_code is not None and (
+        not isinstance(exit_code, int) or isinstance(exit_code, bool)
+    ):
+        raise DirectMTLSError("Tailscale status exit code must be an integer or null")
+    observed_monotonic_ns = value["observed_monotonic_ns"]
+    if (
+        not isinstance(observed_monotonic_ns, int)
+        or isinstance(observed_monotonic_ns, bool)
+        or observed_monotonic_ns < 0
+    ):
+        raise DirectMTLSError("Tailscale observation coordinate must be a non-negative integer")
+    elapsed_ns = value["elapsed_ns"]
+    if not isinstance(elapsed_ns, int) or isinstance(elapsed_ns, bool) or elapsed_ns < 0:
+        raise DirectMTLSError("Tailscale status duration must be a non-negative integer")
+    marker = value["matched_peer_status"]
+    if marker is not None and (not isinstance(marker, str) or len(marker) > 64):
+        raise DirectMTLSError("Tailscale matched peer status must be a short normalized string")
+    output_digest = value["status_output_sha256"]
+    if not isinstance(output_digest, str) or not re.fullmatch(r"[0-9a-f]{64}", output_digest):
+        raise DirectMTLSError("Tailscale status output digest is invalid")
+    error = value["error"]
+    if error is not None and (not isinstance(error, str) or len(error) > 160):
+        raise DirectMTLSError("Tailscale status error marker is invalid")
+    if value["route_state"] == "command_failed":
+        if exit_code == 0 or error is None or marker is not None:
+            raise DirectMTLSError("failed Tailscale status command has inconsistent result fields")
+    else:
+        if exit_code != 0 or error is not None:
+            raise DirectMTLSError("successful Tailscale status observation has inconsistent command fields")
+    if value["route_state"] == "active" and marker is None:
+        raise DirectMTLSError("active Tailscale peer status is missing its normalized marker")
+    if value["route_state"] != "active" and value["route_type"] != "reachable_unclassified":
+        raise DirectMTLSError("inactive or missing Tailscale peers cannot claim a specific route type")
+    if marker is None and value["route_type"] != "reachable_unclassified":
+        raise DirectMTLSError("a specific Tailscale route type requires a matched peer status marker")
+    return {
+        **dict(value),
+        "local_overlay_ipv4": local_ipv4,
+        "peer_overlay_ipv4": peer_ipv4,
+    }
+
+
+def _observe_tailscale_peer_route(
+    transport: SocketTransport,
+    role: str,
+    *,
+    tailscale_bin: str = "tailscale",
+) -> dict[str, Any]:
+    """Capture the connected peer's route class without failing the app session."""
+    if role not in {"client_host", "server_host"}:
+        raise DirectMTLSError("unsupported Tailscale route observer role")
+    try:
+        local_socket = transport.socket.getsockname()
+        peer_socket = transport.socket.getpeername()
+        local_ipv4 = _validate_tailscale_ipv4(str(local_socket[0]))
+        peer_ipv4 = _validate_tailscale_ipv4(str(peer_socket[0]))
+    except (AttributeError, IndexError, OSError, TypeError, ValueError) as error:
+        raise DirectMTLSError(f"connected socket does not expose valid Tailscale IPv4 endpoints: {error}") from error
+    if local_ipv4 == peer_ipv4:
+        raise DirectMTLSError("connected Tailscale socket endpoints must be distinct")
+
+    started_ns = time.monotonic_ns()
+    output_bytes = b""
+    exit_code: int | None = None
+    error_marker: str | None = None
+    matched_status: str | None = None
+    route_state = "command_failed"
+    route_type = "reachable_unclassified"
+    try:
+        completed = subprocess.run(
+            [tailscale_bin, "status"],
+            capture_output=True,
+            text=False,
+            timeout=8.0,
+            check=False,
+        )
+        raw_output = completed.stdout or b""
+        output_bytes = raw_output if isinstance(raw_output, bytes) else str(raw_output).encode("utf-8")
+        exit_code = completed.returncode
+        if exit_code == 0:
+            decoded = output_bytes.decode("utf-8", errors="replace")
+            route_state, route_type, matched_status = _classify_tailscale_peer_status(
+                decoded, peer_ipv4
+            )
+        else:
+            error_marker = f"tailscale status exited with code {exit_code}"
+    except (OSError, subprocess.SubprocessError) as error:
+        error_marker = type(error).__name__
+    observed_monotonic_ns = time.monotonic_ns()
+    elapsed_ns = max(0, observed_monotonic_ns - started_ns)
+    observation = {
+        "schema": PEER_ROUTE_OBSERVATION_SCHEMA,
+        "observer_role": role,
+        "local_overlay_ipv4": local_ipv4,
+        "peer_overlay_ipv4": peer_ipv4,
+        "route_state": route_state,
+        "route_type": route_type,
+        "command": "tailscale status",
+        "exit_code": exit_code,
+        "observed_monotonic_ns": observed_monotonic_ns,
+        "elapsed_ns": elapsed_ns,
+        "matched_peer_status": matched_status,
+        "status_output_sha256": digest_bytes(output_bytes),
+        "error": error_marker,
+    }
+    return _validate_peer_route_observation(
+        observation,
+        expected_role=role,
+        expected_local_ipv4=local_ipv4,
+        expected_peer_ipv4=peer_ipv4,
+    )
+
+
+def _peer_route_pair_from_records(
+    client_record: Mapping[str, Any],
+    server_record: Mapping[str, Any],
+    endpoint_host: str,
+) -> dict[str, Any]:
+    client_span = client_record.get("operation_span")
+    server_span = server_record.get("operation_span")
+    if not isinstance(client_span, Mapping) or not isinstance(server_span, Mapping):
+        raise DirectMTLSError("IHP-006 route reconstruction requires both operation spans")
+    client_context = client_span.get("context")
+    server_context = server_span.get("context")
+    if not isinstance(client_context, Mapping) or not isinstance(server_context, Mapping):
+        raise DirectMTLSError("IHP-006 operation spans lack route-observation contexts")
+    client_observation = _validate_peer_route_observation(
+        client_context.get("peer_route_observation"), expected_role="client_host"
+    )
+    server_observation = _validate_peer_route_observation(
+        server_context.get("peer_route_observation"), expected_role="server_host"
+    )
+    expected_endpoint = _validate_tailscale_ipv4(endpoint_host)
+    if (
+        client_observation["local_overlay_ipv4"] != server_observation["peer_overlay_ipv4"]
+        or client_observation["peer_overlay_ipv4"] != server_observation["local_overlay_ipv4"]
+        or client_observation["peer_overlay_ipv4"] != expected_endpoint
+        or server_observation["local_overlay_ipv4"] != expected_endpoint
+    ):
+        raise DirectMTLSError("client/server route observations do not bind the reciprocal TLS socket endpoints")
+    return {
+        "schema": "in-formation.ihp006-peer-route-pair/0.1",
+        "endpoint_binding": "reciprocal_tls_socket_addresses",
+        "client": client_observation,
+        "server": server_observation,
+        "asymmetric": client_observation["route_type"] != server_observation["route_type"],
+    }
 
 def _signed_document(core: Mapping[str, Any], private_key_path: Path) -> dict[str, Any]:
     try:
@@ -881,6 +1112,12 @@ def serve(
         if peer_sha != expected_client_sha or peer_sha != endpoint_core["client_cert_sha256"]:
             raise DirectMTLSError("TLS peer certificate differs from the attested client bootstrap certificate")
 
+        peer_route_observation = None
+        if workflow_path == TAILSCALE_WORKFLOW_PATH:
+            peer_route_observation = _observe_tailscale_peer_route(transport, "server_host")
+            if peer_route_observation["local_overlay_ipv4"] != _validate_tailscale_ipv4(endpoint_core["host"]):
+                raise DirectMTLSError("observed server socket address differs from the signed Tailscale endpoint")
+
         context = _context(host)
         receiver_channel = ReliableChannel(
             transport,
@@ -912,12 +1149,18 @@ def serve(
 
             recorder = _recorder(host, context)
             attempt_id = str(sender_core["attempt_id"])
+            operation_context: dict[str, Any] = {
+                "role": "server_host",
+                "channel": DATA_CHANNEL,
+            }
+            if peer_route_observation is not None:
+                operation_context["peer_route_observation"] = peer_route_observation
             recorder.measure(
                 attempt_id=attempt_id,
                 span_id="server-operation",
                 operation_id="ihp002.server.receive-and-transform",
                 operation=lambda: _local_work("ihp002-server-operation"),
-                context={"role": "server_host", "channel": DATA_CHANNEL},
+                context=operation_context,
             )
             successor = recorder.spans[-1]
             witness = build_causal_handoff_witness(
@@ -1069,36 +1312,51 @@ def connect_and_send(
     context = _context(host)
     recorder = _recorder(host, context)
     attempt_id = f"run-{host['run_id']}-attempt-{host['run_attempt']}"
-    recorder.measure(
-        attempt_id=attempt_id,
-        span_id="client-operation",
-        operation_id="ihp002.client.prepare",
-        operation=lambda: _local_work("ihp002-client-operation"),
-        context={"role": "client_host", "channel": DATA_CHANNEL},
-    )
-    source_span = recorder.spans[-1]
-    context.emit_causal_stamp()
-    sender_frame = context.observe().to_dict()
     path_id = f"run-{host['run_id']}-ihp002-direct-mtls"
-    handoff_payload = build_handoff_payload(
-        path_id=path_id,
-        attempt_id=attempt_id,
-        predecessor_span_digest=source_span["span_digest"],
-        sender_completion_frame=sender_frame,
-    )
-    envelope_core = {
-        "schema": HANDOFF_SCHEMA,
-        "path_id": path_id,
-        "attempt_id": attempt_id,
-        "channel_id": DATA_CHANNEL,
-        "message_sequence": 1,
-        "sender_host": host,
-        "sender_cert_sha256": own_cert_sha,
-        "operation_span": source_span,
-        "sender_completion_frame": sender_frame,
-        "handoff_payload": handoff_payload,
-    }
-    signed_envelope = _signed_document(envelope_core, own_key_path)
+
+    def prepare_operation_handoff(
+        route_observation: Mapping[str, Any] | None = None,
+    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
+        operation_context: dict[str, Any] = {
+            "role": "client_host",
+            "channel": DATA_CHANNEL,
+        }
+        if route_observation is not None:
+            operation_context["peer_route_observation"] = dict(route_observation)
+        recorder.measure(
+            attempt_id=attempt_id,
+            span_id="client-operation",
+            operation_id="ihp002.client.prepare",
+            operation=lambda: _local_work("ihp002-client-operation"),
+            context=operation_context,
+        )
+        source_span = recorder.spans[-1]
+        context.emit_causal_stamp()
+        sender_frame = context.observe().to_dict()
+        handoff_payload = build_handoff_payload(
+            path_id=path_id,
+            attempt_id=attempt_id,
+            predecessor_span_digest=source_span["span_digest"],
+            sender_completion_frame=sender_frame,
+        )
+        envelope_core = {
+            "schema": HANDOFF_SCHEMA,
+            "path_id": path_id,
+            "attempt_id": attempt_id,
+            "channel_id": DATA_CHANNEL,
+            "message_sequence": 1,
+            "sender_host": host,
+            "sender_cert_sha256": own_cert_sha,
+            "operation_span": source_span,
+            "sender_completion_frame": sender_frame,
+            "handoff_payload": handoff_payload,
+        }
+        signed_envelope = _signed_document(envelope_core, own_key_path)
+        return source_span, sender_frame, handoff_payload, signed_envelope
+
+    source_span: dict[str, Any] | None = None
+    sender_frame: dict[str, Any] | None = None
+    signed_envelope: dict[str, Any] | None = None
     deadline = time.monotonic() + connect_timeout_seconds
     transport: SocketTransport | None = None
     last_error = "connection has not been attempted"
@@ -1120,6 +1378,7 @@ def connect_and_send(
             time.sleep(2.0)
 
     if transport is None:
+        source_span, sender_frame, _, signed_envelope = prepare_operation_handoff()
         record = _make_record(
             role="client_host",
             host=host,
@@ -1138,6 +1397,12 @@ def connect_and_send(
         peer_sha = _peer_certificate_sha256(transport)
         if peer_sha != endpoint["server_cert_sha256"] or peer_sha != certificate_sha256(server_cert_path):
             raise DirectMTLSError("TLS server peer does not match the attested server certificate")
+        route_observation = None
+        if _workflow_path(host["workflow_ref"]) == TAILSCALE_WORKFLOW_PATH:
+            route_observation = _observe_tailscale_peer_route(transport, "client_host")
+            if route_observation["peer_overlay_ipv4"] != _validate_tailscale_ipv4(endpoint["host"]):
+                raise DirectMTLSError("observed Tailscale peer address differs from the signed server endpoint")
+        source_span, sender_frame, _, signed_envelope = prepare_operation_handoff(route_observation)
         sender_channel = ReliableChannel(
             transport,
             "client-host",
@@ -1289,6 +1554,17 @@ def _validate_record(record: Mapping[str, Any], role: str) -> dict[str, Any]:
         validate_temporal_frame(record["temporal_frame"])
         if not isinstance(record["peer_certificate_sha256"], str) or len(record["peer_certificate_sha256"]) != 64:
             raise DirectMTLSError(f"{role} successful record lacks a TLS peer certificate fingerprint")
+        workflow_path = _workflow_path(host["workflow_ref"])
+        operation_context = record["operation_span"].get("context")
+        if not isinstance(operation_context, Mapping):
+            raise DirectMTLSError(f"{role} operation span context is invalid")
+        if workflow_path == TAILSCALE_WORKFLOW_PATH:
+            _validate_peer_route_observation(
+                operation_context.get("peer_route_observation"),
+                expected_role=role,
+            )
+        elif "peer_route_observation" in operation_context:
+            raise DirectMTLSError("IHP-002 records must not claim IHP-006 Tailscale route evidence")
     return dict(record)
 
 
@@ -1333,6 +1609,25 @@ def build_report(
         or server.get("endpoint_digest") != digest_object(server_endpoint)
     ):
         raise DirectMTLSError("host records do not bind the same signed endpoint advertisement")
+    peer_route_pair = None
+    if (
+        _workflow_path(client["host"]["workflow_ref"]) == TAILSCALE_WORKFLOW_PATH
+        and client_status == "direct_mtls_verified"
+        and server_status == "direct_mtls_verified"
+    ):
+        peer_route_pair = _peer_route_pair_from_records(
+            client, server, str(endpoint_core["host"])
+        )
+    direct_transport = {
+        "substrate": "E-CPU SocketTransport over mutually authenticated TLS",
+        "data_channel": DATA_CHANNEL,
+        "receipt_channel": RECEIPT_CHANNEL,
+        "bootstrap_transport": "GitHub Actions artifacts; public certificates and endpoint advertisement only",
+        "semantic_payload_relayed_by_artifact_store": False,
+    }
+    if peer_route_pair is not None:
+        direct_transport["peer_route_observations"] = peer_route_pair
+
     common = {
         "schema": REPORT_SCHEMA,
         "path_id": f"run-{client['host']['run_id']}-ihp002-direct-mtls",
@@ -1357,13 +1652,7 @@ def build_report(
         },
         "verifier": dict(verifier_host),
         "server_endpoint": dict(server_endpoint),
-        "direct_transport": {
-            "substrate": "E-CPU SocketTransport over mutually authenticated TLS",
-            "data_channel": DATA_CHANNEL,
-            "receipt_channel": RECEIPT_CHANNEL,
-            "bootstrap_transport": "GitHub Actions artifacts; public certificates and endpoint advertisement only",
-            "semantic_payload_relayed_by_artifact_store": False,
-        },
+        "direct_transport": direct_transport,
         "duration": {
             "client_local_elapsed_ns": None,
             "server_local_elapsed_ns": None,

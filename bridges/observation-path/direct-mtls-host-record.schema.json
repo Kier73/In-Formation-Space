@@ -223,7 +223,13 @@
           ]
         },
         "context": {
-          "type": "object"
+          "type": "object",
+          "properties": {
+            "peer_route_observation": {
+              "$ref": "#/$defs/peerRouteObservation"
+            }
+          },
+          "additionalProperties": true
         },
         "measurement_scope": {
           "type": "string",
@@ -317,6 +323,109 @@
           }
         }
       ]
+    },
+    "peerRouteObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "observer_role",
+        "local_overlay_ipv4",
+        "peer_overlay_ipv4",
+        "route_state",
+        "route_type",
+        "command",
+        "exit_code",
+        "observed_monotonic_ns",
+        "elapsed_ns",
+        "matched_peer_status",
+        "status_output_sha256",
+        "error"
+      ],
+      "properties": {
+        "schema": {
+          "const": "in-formation.ihp006-peer-route-observation/0.1"
+        },
+        "observer_role": {
+          "enum": [
+            "client_host",
+            "server_host"
+          ]
+        },
+        "local_overlay_ipv4": {
+          "type": "string",
+          "format": "ipv4"
+        },
+        "peer_overlay_ipv4": {
+          "type": "string",
+          "format": "ipv4"
+        },
+        "route_state": {
+          "enum": [
+            "active",
+            "idle",
+            "no_session",
+            "peer_not_found",
+            "command_failed",
+            "ambiguous"
+          ]
+        },
+        "route_type": {
+          "enum": [
+            "direct",
+            "derp_relay",
+            "peer_relay",
+            "reachable_unclassified"
+          ]
+        },
+        "command": {
+          "const": "tailscale status"
+        },
+        "exit_code": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer"
+            }
+          ]
+        },
+        "elapsed_ns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "matched_peer_status": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "maxLength": 64
+            }
+          ]
+        },
+        "status_output_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "error": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "maxLength": 160
+            }
+          ]
+        },
+        "observed_monotonic_ns": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
     }
   }
 }
