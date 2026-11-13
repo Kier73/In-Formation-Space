@@ -49,10 +49,18 @@ class IndependentHostOperationPathTests(unittest.TestCase):
         self.temp.cleanup()
 
     def attestations(self) -> tuple[dict[str, object], dict[str, object]]:
-        return (
-            {"verified": True, "subject_sha256": path.sha256_file(self.source_path)},
-            {"verified": True, "subject_sha256": path.sha256_file(self.receiver_path)},
-        )
+        def summary(file_path: Path) -> dict[str, object]:
+            return {
+                "verified": True,
+                "subject_sha256": path.sha256_file(file_path),
+                "predicate_type": path.PREDICATE_TYPE,
+                "signer_workflow": path.SIGNER_WORKFLOW,
+                "source_ref": path.SOURCE_REF,
+                "self_hosted_runners_denied": True,
+                "verified_signature_certificate_present": True,
+                "verified_timestamp_count": 1,
+            }
+        return summary(self.source_path), summary(self.receiver_path)
 
     def test_separate_host_records_reconstruct_one_causal_edge_without_clock_calibration(self) -> None:
         source_attestation, receiver_attestation = self.attestations()
@@ -61,6 +69,7 @@ class IndependentHostOperationPathTests(unittest.TestCase):
             self.receiver,
             source_attestation=source_attestation,
             receiver_attestation=receiver_attestation,
+            receiver_artifact_sha256=path.sha256_file(self.receiver_path),
         )
         self.assertEqual(report["causal_reconstruction"]["status"], "verified_from_independent_attested_host_records")
         self.assertEqual(report["causal_reconstruction"]["edge_count"], 1)
@@ -87,7 +96,7 @@ class IndependentHostOperationPathTests(unittest.TestCase):
         core = {key: value for key, value in changed.items() if key != "record_digest"}
         changed["record_digest"] = path.digest_object(core)
         source_attestation, receiver_attestation = self.attestations()
-        with self.assertRaisesRegex(path.EvidenceError, "exact attested source artifact"):
+        with self.assertRaisesRegex(path.EvidenceError, "attestation summary does not verify"):
             path.build_report(
                 self.source,
                 changed,
