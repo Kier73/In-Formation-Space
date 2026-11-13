@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kier73.github.io/in-formation-space/decision-time-evidence-frontier.schema.json",
+  "title": "Decision-time evidence frontier report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "source_actor", "receiver_actor", "source_events",
+    "receiver_events", "decision_assessments", "clock_policy",
+    "interpretation", "report_digest"
+  ],
+  "properties": {
+    "schema": { "const": "in-formation.decision-time-evidence-frontier/0.1" },
+    "source_actor": { "type": "string", "minLength": 1 },
+    "receiver_actor": { "type": "string", "minLength": 1 },
+    "source_events": {
+      "type": "array", "minItems": 1,
+      "items": { "type": "object", "required": ["event_seq", "kind", "message_id", "causal_stamp", "event_digest"] }
+    },
+    "receiver_events": {
+      "type": "array", "minItems": 1,
+      "items": { "type": "object", "required": ["event_seq", "kind", "causal_stamp", "event_digest"] }
+    },
+    "decision_assessments": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "#/$defs/decisionAssessment" }
+    },
+    "clock_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wall_clock_used", "global_total_order", "combined_cross_host_elapsed_ns"],
+      "properties": {
+        "wall_clock_used": { "const": false },
+        "global_total_order": { "type": "null" },
+        "combined_cross_host_elapsed_ns": { "type": "null" }
+      }
+    },
+    "interpretation": { "type": "string", "minLength": 1 },
+    "report_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "relation": { "enum": ["before", "after", "equal", "concurrent"] },
+    "decisionAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id", "event_seq", "frontier_event_seq", "frontier_head_digest",
+        "frontier_status", "declared_available_message_ids",
+        "reconstructed_available_message_ids", "controller_declared_used_message_ids",
+        "messages"
+      ],
+      "properties": {
+        "decision_id": { "type": "string", "minLength": 1 },
+        "event_seq": { "type": "integer", "minimum": 1 },
+        "frontier_event_seq": { "type": "integer", "minimum": 0 },
+        "frontier_head_digest": { "$ref": "#/$defs/digest" },
+        "frontier_status": { "enum": ["complete", "unknown_incomplete_log"] },
+        "declared_available_message_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "reconstructed_available_message_ids": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+          ]
+        },
+        "controller_declared_used_message_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "messages": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/messageAssessment" }
+        }
+      }
+    },
+    "messageAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "message_id", "measurement_sequence", "source_send_to_decision",
+        "decision_to_receiver_intake", "receiver_intake_event_seq",
+        "availability", "controller_declared_used"
+      ],
+      "properties": {
+        "message_id": { "type": "string", "minLength": 1 },
+        "measurement_sequence": { "type": "integer", "minimum": 1 },
+        "source_send_to_decision": { "$ref": "#/$defs/relation" },
+        "decision_to_receiver_intake": { "oneOf": [{ "$ref": "#/$defs/relation" }, { "type": "null" }] },
+        "receiver_intake_event_seq": { "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }] },
+        "availability": {
+          "enum": [
+            "available_at_decision", "arrived_after_decision",
+            "not_recorded_as_admitted_at_snapshot", "unknown_incomplete_log"
+          ]
+        },
+        "controller_declared_used": { "type": "boolean" }
+      }
+    }
+  }
+}
