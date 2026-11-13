@@ -7,7 +7,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import yaml
 from mailcpu.temporal import CausalStamp, ClockDomain, TemporalContext, TemporalProfile
 
 import direct_mtls_operation_path as direct
@@ -164,20 +163,29 @@ class MOR002OverlayTests(unittest.TestCase):
 
     def test_mor002_workflow_fails_closed_without_dedicated_overlay_identity(self) -> None:
         workflow_path = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "mor002-tailscale-causal-reconstruction.yml"
-        workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
-        self.assertEqual(
-            set(workflow["jobs"]),
-            {"tests", "client_host", "server_host", "observer_host", "verifier_host"},
-        )
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        import re
+
+        jobs_match = re.search(r"(?ms)^jobs:\\n(.*?)(?=^[^ \\t]|\\Z)", workflow_text)
+        self.assertIsNotNone(jobs_match)
+        job_names = re.findall(r"(?m)^  ([a-z_]+):$", jobs_match.group(1))
+        self.assertEqual(job_names, ["tests", "client_host", "server_host", "observer_host", "verifier_host"])
+
+        def job_block(name: str) -> str:
+            match = re.search(
+                rf"(?ms)^  {re.escape(name)}:\\n(.*?)(?=^  [a-z_]+:\\n|\\Z)",
+                workflow_text,
+            )
+            self.assertIsNotNone(match)
+            return match.group(1)
+
         action = "tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c"
         for role in ("client_host", "server_host"):
-            job = workflow["jobs"][role]
-            self.assertEqual(job["permissions"]["id-token"], "write")
-            self.assertTrue(any(step.get("uses") == action and step.get("with", {}).get("tags") == "tag:mor002-mtls-ci" for step in job["steps"]))
-            self.assertTrue(any(step.get("name") == "Require the dedicated MOR-002 federation identity" for step in job["steps"]))
-        verifier_steps = workflow["jobs"]["verifier_host"]["steps"]
-        self.assertFalse(any(step.get("uses") == action for step in verifier_steps))
-        workflow_text = workflow_path.read_text(encoding="utf-8")
+            block = job_block(role)
+            self.assertRegex(block, r"(?m)^      id-token: write$")
+            self.assertIn(f"tags: tag:mor002-mtls-ci", block)
+            self.assertIn("Require the dedicated MOR-002 federation identity", block)
+        self.assertNotIn(action, job_block("verifier_host"))
         self.assertIn("MOR002_TS_OAUTH_CLIENT_ID", workflow_text)
         self.assertIn("MOR002_TS_AUDIENCE", workflow_text)
         self.assertNotIn("ipify", workflow_text)
