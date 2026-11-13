@@ -1,0 +1,32 @@
+name: Context-switching evidence accumulator RIV-006
+
+on:
+  push:
+    paths:
+      - "experiments/context-switching-evidence-accumulator/**"
+      - ".github/workflows/context-switching-evidence-accumulator.yml"
+  pull_request:
+    paths:
+      - "experiments/context-switching-evidence-accumulator/**"
+      - ".github/workflows/context-switching-evidence-accumulator.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  context-switching-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile exact filter and example
+        run: |
+          python -m py_compile experiments/context-switching-evidence-accumulator/context_switching_evidence.py
+          python -m py_compile experiments/context-switching-evidence-accumulator/example.py
+      - name: Run exact filtering and counterexample tests
+        run: python -m unittest discover -s experiments/context-switching-evidence-accumulator -p "test_*.py" -v
+      - name: Run reproducible example
+        run: python experiments/context-switching-evidence-accumulator/example.py
