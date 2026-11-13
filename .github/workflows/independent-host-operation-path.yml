@@ -15,7 +15,9 @@ on:
       - "bridges/observation-path/cross_language_verifier/**"
       - "formats/canonical-metadata-v1/**"
       - "experiments/portable-realization-capsule/verify_capsule.mjs"
-      - "experiments/portable-realization-capsule/test_canonical_metadata_v1.mjs"
+      - "formats/canonical-metadata-v1/test_node.mjs"
+      - "formats/canonical_metadata_v1.py"
+      - ".github/workflows/canonical-metadata-conformance.yml"
       - "bridges/temporal-provenance/temporal_provenance.py"
       - ".github/workflows/independent-host-operation-path.yml"
   pull_request:
@@ -26,7 +28,9 @@ on:
       - "bridges/observation-path/cross_language_verifier/**"
       - "formats/canonical-metadata-v1/**"
       - "experiments/portable-realization-capsule/verify_capsule.mjs"
-      - "experiments/portable-realization-capsule/test_canonical_metadata_v1.mjs"
+      - "formats/canonical-metadata-v1/test_node.mjs"
+      - "formats/canonical_metadata_v1.py"
+      - ".github/workflows/canonical-metadata-conformance.yml"
       - ".github/workflows/independent-host-operation-path.yml"
   workflow_dispatch:
 
@@ -103,7 +107,7 @@ jobs:
         with:
           node-version: "22"
       - name: Run the shared canonical metadata v1 Node conformance vectors
-        run: node --test experiments/portable-realization-capsule/test_canonical_metadata_v1.mjs
+        run: node formats/canonical-metadata-v1/test_node.mjs
       - name: Run Go cross-language reconstruction tests
         working-directory: bridges/observation-path/cross_language_verifier
         env:

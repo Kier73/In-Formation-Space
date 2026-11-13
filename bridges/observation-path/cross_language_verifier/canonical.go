@@ -13,6 +13,8 @@ import (
 	"math/big"
 	"os"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -73,26 +75,111 @@ func DecodeObject(raw []byte) (Object, error) {
 	return obj, nil
 }
 
-// CanonicalBytes implements the shared canonical metadata v1 profile:
-// ASCII object keys sort bytewise, whitespace is omitted, strings are UTF-8,
-// HTML characters are not escaped, and only interoperable safe integers are
-// accepted. Floating-point and noncanonical numeric tokens are rejected.
+// CanonicalBytes implements the repository's shared Canonical Metadata
+// Profile v1. It validates the restricted safe-integer data model, sorts ASCII
+// object keys, emits UTF-8 without HTML or non-ASCII escaping, and encodes
+// strings rune-by-rune so literal backslash-u text cannot be confused with
+// U+2028 or U+2029 during byte construction.
 func CanonicalBytes(value any) ([]byte, error) {
 	if err := validateIntegerNumberDomain(value, "$"); err != nil {
 		return nil, err
 	}
 	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
-	enc.SetEscapeHTML(false)
-	if err := enc.Encode(value); err != nil {
-		return nil, fail("cannot encode canonical JSON: %v", err)
+	if err := appendCanonicalJSON(&buf, value); err != nil {
+		return nil, err
 	}
-	out := bytes.TrimSuffix(buf.Bytes(), []byte("\n"))
-	// encoding/json always escapes these two Unicode separators; Python's
-	// ensure_ascii=False leaves them as UTF-8, so restore the literal codepoints.
-	out = bytes.ReplaceAll(out, []byte("\\u2028"), []byte("\u2028"))
-	out = bytes.ReplaceAll(out, []byte("\\u2029"), []byte("\u2029"))
-	return append([]byte(nil), out...), nil
+	return buf.Bytes(), nil
+}
+
+func appendCanonicalString(buf *bytes.Buffer, value string) {
+	buf.WriteByte('"')
+	for _, r := range value {
+		switch r {
+		case '"':
+			buf.WriteString("\\\"")
+		case '\\':
+			buf.WriteString("\\\\")
+		case '\b':
+			buf.WriteString("\\b")
+		case '\f':
+			buf.WriteString("\\f")
+		case '\n':
+			buf.WriteString("\\n")
+		case '\r':
+			buf.WriteString("\\r")
+		case '\t':
+			buf.WriteString("\\t")
+		default:
+			if r < 0x20 {
+				fmt.Fprintf(buf, "\\u%04x", r)
+			} else {
+				buf.WriteRune(r)
+			}
+		}
+	}
+	buf.WriteByte('"')
+}
+
+func appendCanonicalJSON(buf *bytes.Buffer, value any) error {
+	switch v := value.(type) {
+	case nil:
+		buf.WriteString("null")
+	case bool:
+		if v { buf.WriteString("true") } else { buf.WriteString("false") }
+	case string:
+		appendCanonicalString(buf, v)
+	case json.Number:
+		buf.WriteString(string(v))
+	case int:
+		buf.Write(strconv.AppendInt(nil, int64(v), 10))
+	case int8:
+		buf.Write(strconv.AppendInt(nil, int64(v), 10))
+	case int16:
+		buf.Write(strconv.AppendInt(nil, int64(v), 10))
+	case int32:
+		buf.Write(strconv.AppendInt(nil, int64(v), 10))
+	case int64:
+		buf.Write(strconv.AppendInt(nil, v, 10))
+	case uint:
+		buf.Write(strconv.AppendUint(nil, uint64(v), 10))
+	case uint8:
+		buf.Write(strconv.AppendUint(nil, uint64(v), 10))
+	case uint16:
+		buf.Write(strconv.AppendUint(nil, uint64(v), 10))
+	case uint32:
+		buf.Write(strconv.AppendUint(nil, uint64(v), 10))
+	case uint64:
+		buf.Write(strconv.AppendUint(nil, v, 10))
+	case map[string]any:
+		keys := make([]string, 0, len(v))
+		for key := range v { keys = append(keys, key) }
+		sort.Strings(keys)
+		buf.WriteByte('{')
+		for index, key := range keys {
+			if index > 0 { buf.WriteByte(',') }
+			appendCanonicalString(buf, key)
+			buf.WriteByte(':')
+			if err := appendCanonicalJSON(buf, v[key]); err != nil { return err }
+		}
+		buf.WriteByte('}')
+	case []any:
+		buf.WriteByte('[')
+		for index, item := range v {
+			if index > 0 { buf.WriteByte(',') }
+			if err := appendCanonicalJSON(buf, item); err != nil { return err }
+		}
+		buf.WriteByte(']')
+	case []string:
+		buf.WriteByte('[')
+		for index, item := range v {
+			if index > 0 { buf.WriteByte(',') }
+			appendCanonicalString(buf, item)
+		}
+		buf.WriteByte(']')
+	default:
+		return fail("canonical metadata contains unsupported value %T", value)
+	}
+	return nil
 }
 
 const maxSafeInteger = int64(1<<53 - 1)

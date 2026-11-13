@@ -1,0 +1,57 @@
+name: Canonical metadata v1 cross-runtime conformance
+
+on:
+  pull_request:
+    paths:
+      - "formats/canonical_metadata_v1.py"
+      - "formats/canonical-metadata-v1/**"
+      - "bridges/observation-path/diverse_host_verifier.py"
+      - "bridges/observation-path/cross_language_verifier/**"
+      - "experiments/portable-realization-capsule/portable_realization.py"
+      - "experiments/portable-realization-capsule/verify_capsule.mjs"
+      - ".github/workflows/canonical-metadata-conformance.yml"
+  push:
+    branches: [main]
+    paths:
+      - "formats/canonical_metadata_v1.py"
+      - "formats/canonical-metadata-v1/**"
+      - "bridges/observation-path/diverse_host_verifier.py"
+      - "bridges/observation-path/cross_language_verifier/**"
+      - "experiments/portable-realization-capsule/portable_realization.py"
+      - "experiments/portable-realization-capsule/verify_capsule.mjs"
+      - ".github/workflows/canonical-metadata-conformance.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run shared Python conformance against IHP and PRC encoders
+        run: python formats/canonical-metadata-v1/test_python.py
+
+  go:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: bridges/observation-path/cross_language_verifier/go.mod
+      - name: Run Go shared-corpus conformance
+        working-directory: bridges/observation-path/cross_language_verifier
+        run: go test -count=1 -run TestSharedCanonicalMetadataV1Vectors ./...
+
+  node:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run Node shared-corpus conformance
+        run: node formats/canonical-metadata-v1/test_node.mjs
