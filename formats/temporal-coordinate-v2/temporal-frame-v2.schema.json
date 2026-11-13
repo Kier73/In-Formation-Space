@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/formats/temporal-coordinate-v2/temporal-frame-v2.schema.json",
+  "title": "Temporal frame v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "numeric_profile",
+    "actor_id",
+    "monotonic",
+    "wall",
+    "causal",
+    "scheduler",
+    "event_lambda",
+    "chronon_phase",
+    "chemical_tau"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.temporal-frame"
+    },
+    "schema": {
+      "const": "in-formation.temporal-frame/0.2"
+    },
+    "numeric_profile": {
+      "const": "in-formation.temporal-numeric/2.0"
+    },
+    "actor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "monotonic": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "actor_id",
+            "segment",
+            "elapsed_ns"
+          ],
+          "properties": {
+            "actor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "segment": {
+              "$ref": "temporal-numeric-v2.schema.json"
+            },
+            "elapsed_ns": {
+              "$ref": "temporal-numeric-v2.schema.json"
+            }
+          }
+        }
+      ]
+    },
+    "wall": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "actor_id",
+            "utc_ns",
+            "sample_index"
+          ],
+          "properties": {
+            "actor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "utc_ns": {
+              "$ref": "temporal-numeric-v2.schema.json"
+            },
+            "sample_index": {
+              "$ref": "temporal-numeric-v2.schema.json"
+            }
+          }
+        }
+      ]
+    },
+    "causal": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "actor_id",
+            "lamport",
+            "vector"
+          ],
+          "properties": {
+            "actor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "lamport": {
+              "$ref": "temporal-numeric-v2.schema.json"
+            },
+            "vector": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "actor_id",
+                  "counter"
+                ],
+                "properties": {
+                  "actor_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "counter": {
+                    "$ref": "temporal-numeric-v2.schema.json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "scheduler": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scheduler_id",
+            "tick"
+          ],
+          "properties": {
+            "scheduler_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tick": {
+              "$ref": "temporal-numeric-v2.schema.json"
+            }
+          }
+        }
+      ]
+    },
+    "event_lambda": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "temporal-numeric-v2.schema.json"
+        }
+      ]
+    },
+    "chronon_phase": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "temporal-numeric-v2.schema.json"
+          }
+        }
+      ]
+    },
+    "chemical_tau": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "temporal-numeric-v2.schema.json"
+        }
+      ]
+    }
+  }
+}
