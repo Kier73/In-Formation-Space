@@ -1,0 +1,235 @@
+name: Independent hosted-VM operation path
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "bridges/observation-path/operation_spans.py"
+      - "bridges/observation-path/distributed_operation_path.py"
+      - "bridges/observation-path/independent_host_path.py"
+      - "bridges/observation-path/test_independent_host_path.py"
+      - "bridges/observation-path/independent-host-operation-*.schema.json"
+      - "bridges/temporal-provenance/temporal_provenance.py"
+      - ".github/workflows/independent-host-operation-path.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source_host:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install current signed GitHub CLI package
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes gh
+          gh --version
+      - name: Produce source-host operation and temporal evidence
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence
+          python bridges/observation-path/independent_host_path.py produce-source \
+            --output evidence/host-a.json
+          python bridges/observation-path/independent_host_path.py write-predicate \
+            --record evidence/host-a.json \
+            --role source_host \
+            --output evidence/host-a.predicate.json
+      - name: Attest source-host evidence bytes
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/host-a.json
+          predicate-type: https://kier73.github.io/in-formation-space/independent-host-operation-path/v1
+          predicate-path: evidence/host-a.predicate.json
+      - name: Transfer source evidence through GitHub artifact storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-host-evidence
+          path: evidence/host-a.json
+          if-no-files-found: error
+          retention-days: 14
+
+  receiver_host:
+    needs: source_host
+    if: needs.source_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install current signed GitHub CLI package
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes gh
+          gh --version
+      - name: Receive source evidence from the other VM
+        uses: actions/download-artifact@v4
+        with:
+          name: source-host-evidence
+          path: received-source
+      - name: Verify source attestation, merge causal stamp, and record successor operation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence
+          python bridges/observation-path/independent_host_path.py produce-receiver \
+            --source received-source/host-a.json \
+            --output evidence/host-b.json
+          python bridges/observation-path/independent_host_path.py write-predicate \
+            --record evidence/host-b.json \
+            --role receiver_host \
+            --output evidence/host-b.predicate.json
+      - name: Attest receiver-host evidence bytes
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/host-b.json
+          predicate-type: https://kier73.github.io/in-formation-space/independent-host-operation-path/v1
+          predicate-path: evidence/host-b.predicate.json
+      - name: Transfer receiver evidence to the independent verifier
+        uses: actions/upload-artifact@v4
+        with:
+          name: receiver-host-evidence
+          path: evidence/host-b.json
+          if-no-files-found: error
+          retention-days: 14
+
+  verifier_host:
+    needs: [source_host, receiver_host]
+    if: needs.source_host.result == 'success' && needs.receiver_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Install current signed GitHub CLI package
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes gh
+          gh --version
+      - name: Receive both independently produced records
+        uses: actions/download-artifact@v4
+        with:
+          name: source-host-evidence
+          path: received-source
+      - name: Receive the receiver-host continuation
+        uses: actions/download-artifact@v4
+        with:
+          name: receiver-host-evidence
+          path: received-receiver
+      - name: Verify attestations and reconstruct the causal path from a third VM
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence
+          python bridges/observation-path/independent_host_path.py verify \
+            --source received-source/host-a.json \
+            --receiver received-receiver/host-b.json \
+            --output evidence/independent-report.json
+      - name: Validate records and independent reconstruction report schemas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          cases = (
+              ("bridges/observation-path/independent-host-operation-record.schema.json", "received-source/host-a.json"),
+              ("bridges/observation-path/independent-host-operation-record.schema.json", "received-receiver/host-b.json"),
+              ("bridges/observation-path/independent-host-operation-report.schema.json", "evidence/independent-report.json"),
+          )
+          for schema_path, instance_path in cases:
+              schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
+              instance = json.loads(Path(instance_path).read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              Draft202012Validator(schema).validate(instance)
+              print(f"valid: {instance_path}")
+          PY
+      - name: Attest the independently reconstructed report
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/independent-report.json
+      - name: Preserve the independent reconstruction result
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-host-reconstruction-report
+          path: evidence/independent-report.json
+          if-no-files-found: error
+          retention-days: 90
