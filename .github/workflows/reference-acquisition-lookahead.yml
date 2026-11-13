@@ -1,0 +1,53 @@
+name: Reference acquisition lookahead RIV-010
+
+on:
+  push:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/reference-acquisition-lookahead.yml"
+      - "bridges/observation-path/observation_path.py"
+      - "experiments/decision-value-context-acquisition/decision_value_acquisition.py"
+      - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - "experiments/reference-calibrated-evidence/reference_calibrated_evidence.py"
+  pull_request:
+    paths:
+      - "experiments/reference-calibrated-evidence/**"
+      - ".github/workflows/reference-acquisition-lookahead.yml"
+      - "bridges/observation-path/observation_path.py"
+      - "experiments/decision-value-context-acquisition/decision_value_acquisition.py"
+      - "experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py"
+      - "experiments/reference-calibrated-evidence/reference_calibrated_evidence.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reference-acquisition-lookahead:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate RIV-010 schemas
+        run: |
+          python -c "import json, jsonschema; paths=['experiments/reference-calibrated-evidence/reference-acquisition-lookahead.schema.json','experiments/reference-calibrated-evidence/reference-acquisition-execution.schema.json']; [jsonschema.Draft202012Validator.check_schema(json.load(open(p, encoding='utf-8'))) for p in paths]"
+      - name: Compile RIV-010 and upstream modules
+        run: |
+          python -m py_compile bridges/observation-path/observation_path.py
+          python -m py_compile experiments/calibration-aware-joint-evidence/calibration_aware_evidence.py
+          python -m py_compile experiments/decision-value-context-acquisition/decision_value_acquisition.py
+          python -m py_compile experiments/reference-calibrated-evidence/reference_calibrated_evidence.py
+          python -m py_compile experiments/reference-calibrated-evidence/reference_acquisition_lookahead.py
+          python -m py_compile experiments/reference-calibrated-evidence/reference_acquisition_example.py
+      - name: Run exact reference lookahead and execution tests
+        env:
+          PYTHONPATH: bridges/observation-path:experiments/reference-calibrated-evidence
+        run: python -m unittest discover -s experiments/reference-calibrated-evidence -p "test_reference_acquisition_lookahead.py" -v
+      - name: Run reproducible RIV-010 example
+        env:
+          PYTHONPATH: bridges/observation-path:experiments/reference-calibrated-evidence
+        run: python experiments/reference-calibrated-evidence/reference_acquisition_example.py
