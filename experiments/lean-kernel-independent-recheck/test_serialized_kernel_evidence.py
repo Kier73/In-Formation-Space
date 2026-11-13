@@ -67,7 +67,7 @@ class SerializedKernelEvidenceTests(unittest.TestCase):
         self.assertEqual(result["proof_term_fingerprint"], self.runner["proof_term_fingerprint"])
 
     def test_rejects_forged_positive_control(self):
-        with self.assertRaisesRegex(s.SerializedKernelError, "unknown_constructor"):
+        with self.assertRaisesRegex(s.SerializedKernelError, "unbound_variable"):
             s.verify(self.runner, run=FakeLean(self.exp, always_success=True), github_context=self.context)
 
     def test_rejects_false_negative_on_valid_proof(self):
