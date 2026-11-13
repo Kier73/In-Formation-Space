@@ -1,0 +1,77 @@
+name: Duplicated mTLS authority identity
+
+on:
+  push:
+    paths:
+      - "experiments/duplicated-mtls-authority/**"
+      - ".github/workflows/duplicated-mtls-authority.yml"
+  pull_request:
+    paths:
+      - "experiments/duplicated-mtls-authority/**"
+      - ".github/workflows/duplicated-mtls-authority.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out proposed source
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU recovery-lineage implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test and schema dependencies
+        run: python -m pip install --disable-pip-version-check "pytest>=8,<9" "jsonschema>=4,<5"
+      - name: Verify OpenSSL availability
+        run: openssl version
+      - name: Run cloned-credential recovery-lineage tests
+        working-directory: experiments/duplicated-mtls-authority
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: |
+          python -m py_compile clone_mtls.py clone_owner_worker.py tls_authority_worker.py test_clone_mtls.py
+          python -m pytest -q test_clone_mtls.py
+      - name: Produce retained cloned-identity reconstruction report
+        working-directory: experiments/duplicated-mtls-authority
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/E-CPU
+        run: |
+          python clone_mtls.py --out-dir ../../evidence/duplicated-mtls-authority
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          schema = json.loads(Path("mtls-cloned-authority-report.schema.json").read_text(encoding="utf-8"))
+          report = json.loads(Path("../../evidence/duplicated-mtls-authority/report.json").read_text(encoding="utf-8"))
+          Draft202012Validator.check_schema(schema)
+          Draft202012Validator(schema).validate(report)
+          print("valid: retained cloned-mTLS authority report")
+          PY
+      - name: Preserve the local-process authority report
+        uses: actions/upload-artifact@v4
+        with:
+          name: duplicated-mtls-authority-identity-report
+          path: |
+            evidence/duplicated-mtls-authority/report.json
+            evidence/duplicated-mtls-authority/membership.json
+            evidence/duplicated-mtls-authority/left/owner-result.json
+            evidence/duplicated-mtls-authority/left/endpoints.json
+            evidence/duplicated-mtls-authority/left/state.bin
+            evidence/duplicated-mtls-authority/left/authorities/*.jsonl
+            evidence/duplicated-mtls-authority/right/owner-result.json
+            evidence/duplicated-mtls-authority/right/endpoints.json
+            evidence/duplicated-mtls-authority/right/state.bin
+            evidence/duplicated-mtls-authority/right/authorities/*.jsonl
+          if-no-files-found: error
+          retention-days: 90
