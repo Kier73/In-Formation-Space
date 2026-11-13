@@ -1,6 +1,6 @@
 # Tailscale overlay route preflight
 
-**Experiment:** IHP-003  
+**Experiment:** IHP-004  
 **Status:** preflight implementation and CI validation in progress; hosted overlay run pending  
 **Format:** ephemeral OIDC-authenticated tailnet peers and independently attested route observations v0.1
 
@@ -8,7 +8,7 @@
 
 IHP-002 successfully verified its certificates, host records, and final third-host report, but standard hosted VMs could not establish the public inbound TCP connection required by direct mTLS. The client ran in Azure westus3 and the server in AWS us-west-2; the client connect and server accept both timed out.
 
-IHP-003 introduces a routable overlay while preserving the distinction between:
+IHP-004 introduces a routable overlay while preserving the distinction between:
 - the public GitHub artifact service used only to exchange attested peer-address bootstrap documents;
 - the Tailscale control plane and encrypted WireGuard data plane used to establish the private peer route;
 - the later E-CPU application transport, which is deliberately not part of this preflight.
@@ -19,23 +19,23 @@ The objective is to learn whether two independently hosted runners can reach one
 
 Three independent GitHub-hosted runner jobs participate:
 
-1. client_host joins the tailnet as an ephemeral node tagged tag:ihp003-ci, records its Tailscale IPv4 address, and attests its address document.
+1. client_host joins the tailnet as an ephemeral node tagged tag:ihp004-ci, records its Tailscale IPv4 address, and attests its address document.
 2. server_host independently joins the same tailnet with the same tag, records and attests its own address document.
 3. Each producer downloads the other host's address artifact, verifies the GitHub artifact attestation against the exact file digest and pinned signer workflow, then runs tailscale ping --c 8 <peer-overlay-ip>. It stores the complete output and classifies the observed route.
 4. verifier_host downloads both address documents and both route records. It independently verifies the four producer attestations, checks that each route record pins the peer's exact attested address-file digest, reconstructs the shared run/actor identities, and signs a report describing both observations.
 
-The semantic application-payload path is not exercised in IHP-003. This is intentional: the goal here is to establish the underlying network route before re-running E-CPU mTLS over it in IHP-004.
+The semantic application-payload path is not exercised in IHP-004. This is intentional: the goal here is to establish the underlying network route before re-running E-CPU mTLS over it in IHP-004.
 
 ## Authentication and one-time Tailscale setup
 
 The workflow is designed to use Tailscale workload-identity federation with GitHub Actions, not a long-lived auth key, OAuth client secret, or reusable machine credential.
 
 Before enabling the overlay:
-1. Create the Tailscale tag tag:ihp003-ci. Tailscale requires tags used by its GitHub Action to exist already; the tag's access permissions are applied to each ephemeral runner node.
+1. Create the Tailscale tag tag:ihp004-ci. Tailscale requires tags used by its GitHub Action to exist already; the tag's access permissions are applied to each ephemeral runner node.
 2. Create a Tailscale federated OIDC identity for GitHub Actions. Select the auth_keys scope (shown in the admin console as Auth Keys > Write). Restrict the identity to the Kier73/In-Formation-Space repository and the protected refs/heads/main workflow as tightly as the federation claim controls permit.
 3. Add the federated identity's Client ID as the GitHub repository secret TS_OAUTH_CLIENT_ID.
 4. Add its Audience as the GitHub repository secret TS_AUDIENCE.
-5. Review the tailnet access policy for tag:ihp003-ci. For the next E-CPU transport experiment, grant only the required client-to-server TCP port (IHP-002 used 41763) between these tagged peers.
+5. Review the tailnet access policy for tag:ihp004-ci. For the next E-CPU transport experiment, grant only the required client-to-server TCP port (IHP-002 used 41763) between these tagged peers.
 
 The Client ID and Audience are federation identifiers rather than long-lived secret credentials, but this workflow reads them from repository secrets for convenient configuration. No reusable auth key or OAuth client secret is used.
 
@@ -74,7 +74,7 @@ The third verifier checks:
 - each peer-address attestation embedded in the probe record against the verifier's own independent verification of the same address artifact;
 - the report and its verifier-specific predicate.
 
-The final report itself is attested and preserved as the ihp003-overlay-route-report workflow artifact.
+The final report itself is attested and preserved as the ihp004-overlay-route-report workflow artifact.
 
 ## Interpretation and limits
 
