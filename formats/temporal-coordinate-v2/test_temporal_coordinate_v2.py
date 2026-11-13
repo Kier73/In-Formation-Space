@@ -81,6 +81,11 @@ class TemporalNumericV2Tests(unittest.TestCase):
     def test_chemical_tau_constraints_preserve_negative_zero(self):
         for vector in VECTORS["chemical_tau_cases"]:
             with self.subTest(vector=vector["name"]):
+                # A non-finite value cannot be represented by a binary64 envelope.
+                if vector["name"] == "infinity":
+                    with self.assertRaises(TemporalCoordinateError):
+                        encode_binary64(float_from_hex(vector["be_hex"]))
+                    continue
                 envelope = encode_binary64(float_from_hex(vector["be_hex"]))
                 value = decode_binary64(envelope)
                 if vector["accepted"]:
