@@ -93,9 +93,9 @@ def decode_integer(
 
 def encode_binary64(value: float) -> dict[str, str]:
     """Encode a finite IEEE-754 binary64 value by its exact 64-bit pattern."""
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise TemporalCoordinateError("binary64 value must be numeric")
-    number = float(value)
+    if isinstance(value, bool) or not isinstance(value, float):
+        raise TemporalCoordinateError("binary64 value must be a Python float")
+    number = value
     if not math.isfinite(number):
         raise TemporalCoordinateError("binary64 value must be finite")
     bits = struct.pack(">d", number).hex()
@@ -228,9 +228,9 @@ def encode_temporal_frame(frame: Mapping[str, Any]) -> dict[str, Any]:
     else:
         if not isinstance(phase, (list, tuple)) or len(phase) != 2:
             raise TemporalCoordinateError("chronon_phase must be a real/imaginary pair")
-        if any(isinstance(item, bool) or not isinstance(item, (int, float)) for item in phase):
-            raise TemporalCoordinateError("chronon_phase components must be numeric, not Boolean")
-        phase_values = [float(phase[0]), float(phase[1])]
+        if any(isinstance(item, bool) or not isinstance(item, float) for item in phase):
+            raise TemporalCoordinateError("chronon_phase components must be Python floats")
+        phase_values = [phase[0], phase[1]]
         _check_phase(phase_values)
         wire["chronon_phase"] = [encode_binary64(phase_values[0]), encode_binary64(phase_values[1])]
 
@@ -238,9 +238,9 @@ def encode_temporal_frame(frame: Mapping[str, Any]) -> dict[str, Any]:
     if tau is None:
         wire["chemical_tau"] = None
     else:
-        if isinstance(tau, bool) or not isinstance(tau, (int, float)):
-            raise TemporalCoordinateError("chemical_tau must be numeric, not Boolean")
-        tau_float = float(tau)
+        if isinstance(tau, bool) or not isinstance(tau, float):
+            raise TemporalCoordinateError("chemical_tau must be a Python float")
+        tau_float = tau
         if not math.isfinite(tau_float) or tau_float < 0.0:
             raise TemporalCoordinateError("chemical_tau must be finite and non-negative")
         wire["chemical_tau"] = encode_binary64(tau_float)
