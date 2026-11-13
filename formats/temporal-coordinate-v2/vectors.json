@@ -1,0 +1,165 @@
+{
+  "schema": "in-formation.temporal-coordinate-v2-test-vectors/0.1",
+  "profile": "in-formation.temporal-numeric/2.0",
+  "integers": [
+    {
+      "name": "zero",
+      "decimal": "0"
+    },
+    {
+      "name": "negative-one",
+      "decimal": "-1"
+    },
+    {
+      "name": "above-safe-integer",
+      "decimal": "9007199254740992"
+    },
+    {
+      "name": "signed-int64-maximum",
+      "decimal": "9223372036854775807"
+    },
+    {
+      "name": "signed-int64-minimum",
+      "decimal": "-9223372036854775808"
+    },
+    {
+      "name": "uint64-maximum",
+      "decimal": "18446744073709551615"
+    },
+    {
+      "name": "large-arbitrary-positive",
+      "decimal": "1234567890123456789012345678901234567890"
+    },
+    {
+      "name": "large-arbitrary-negative",
+      "decimal": "-1234567890123456789012345678901234567890"
+    }
+  ],
+  "binary64": [
+    {
+      "name": "positive-zero",
+      "be_hex": "0000000000000000"
+    },
+    {
+      "name": "negative-zero",
+      "be_hex": "8000000000000000"
+    },
+    {
+      "name": "one",
+      "be_hex": "3ff0000000000000"
+    },
+    {
+      "name": "negative-one",
+      "be_hex": "bff0000000000000"
+    },
+    {
+      "name": "half",
+      "be_hex": "3fe0000000000000"
+    },
+    {
+      "name": "pi",
+      "be_hex": "400921fb54442d18"
+    },
+    {
+      "name": "smallest-subnormal",
+      "be_hex": "0000000000000001"
+    },
+    {
+      "name": "largest-finite",
+      "be_hex": "7fefffffffffffff"
+    },
+    {
+      "name": "unit-phase-component",
+      "be_hex": "3fe6a09e667f3bcd"
+    },
+    {
+      "name": "chemical-quarter",
+      "be_hex": "3fd0000000000000"
+    }
+  ],
+  "invalid_integer_tokens": [
+    "-0",
+    "+1",
+    "01",
+    "-01",
+    "1.0",
+    "1e3",
+    " 1",
+    ""
+  ],
+  "invalid_binary64_tokens": [
+    {
+      "name": "wrong-length",
+      "be_hex": "3ff000000000000"
+    },
+    {
+      "name": "uppercase",
+      "be_hex": "3FF0000000000000"
+    },
+    {
+      "name": "positive-infinity",
+      "be_hex": "7ff0000000000000"
+    },
+    {
+      "name": "negative-infinity",
+      "be_hex": "fff0000000000000"
+    },
+    {
+      "name": "nan",
+      "be_hex": "7ff8000000000000"
+    }
+  ],
+  "chemical_tau_cases": [
+    {
+      "name": "positive-zero",
+      "be_hex": "0000000000000000",
+      "accepted": true
+    },
+    {
+      "name": "negative-zero-preserved",
+      "be_hex": "8000000000000000",
+      "accepted": true
+    },
+    {
+      "name": "positive-finite",
+      "be_hex": "3fc0000000000000",
+      "accepted": true
+    },
+    {
+      "name": "negative-finite",
+      "be_hex": "bff0000000000000",
+      "accepted": false
+    },
+    {
+      "name": "infinity",
+      "be_hex": "7ff0000000000000",
+      "accepted": false
+    }
+  ],
+  "chronon_phase_cases": [
+    {
+      "name": "positive-real-axis",
+      "real_be_hex": "3ff0000000000000",
+      "imag_be_hex": "0000000000000000",
+      "accepted": true
+    },
+    {
+      "name": "quarter-turn",
+      "real_be_hex": "0000000000000000",
+      "imag_be_hex": "3ff0000000000000",
+      "accepted": true
+    },
+    {
+      "name": "diagonal-unit",
+      "real_be_hex": "3fe6a09e667f3bcd",
+      "imag_be_hex": "3fe6a09e667f3bcd",
+      "accepted": true
+    },
+    {
+      "name": "not-unit",
+      "real_be_hex": "3ff0000000000000",
+      "imag_be_hex": "3ff0000000000000",
+      "accepted": false
+    }
+  ]
+}

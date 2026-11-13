@@ -1,0 +1,123 @@
+name: Temporal coordinate v2 codec conformance
+
+on:
+  push:
+    paths:
+      - "formats/temporal-coordinate-v2/**"
+      - "formats/temporal_coordinate_v2.py"
+      - "bridges/observation-path/cross_language_verifier/temporal_v2*.go"
+      - "bridges/observation-path/cross_language_verifier/go.mod"
+      - ".github/workflows/temporal-coordinate-v2.yml"
+  pull_request:
+    paths:
+      - "formats/temporal-coordinate-v2/**"
+      - "formats/temporal_coordinate_v2.py"
+      - "bridges/observation-path/cross_language_verifier/temporal_v2*.go"
+      - "bridges/observation-path/cross_language_verifier/go.mod"
+      - ".github/workflows/temporal-coordinate-v2.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Run Python temporal v2 codec tests
+        run: python -m unittest discover -s formats/temporal-coordinate-v2 -p 'test_*.py' -v
+      - name: Validate v2 schemas and representative frames/spans
+        run: |
+          python - <<'PY'
+          import json
+          import math
+          import struct
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+          from formats.temporal_coordinate_v2 import encode_temporal_frame, encode_operation_span_v2
+
+          root = Path(".")
+          base = root / "formats" / "temporal-coordinate-v2"
+          schemas = {
+              "numeric": json.loads((base / "temporal-numeric-v2.schema.json").read_text()),
+              "frame": json.loads((base / "temporal-frame-v2.schema.json").read_text()),
+              "span": json.loads((base / "operation-span-v2.schema.json").read_text()),
+          }
+          for schema in schemas.values():
+              Draft202012Validator.check_schema(schema)
+
+          actor = "schema-host"
+          frame = encode_temporal_frame({
+              "actor_id": actor,
+              "monotonic": {"actor_id": actor, "segment": 2**64, "elapsed_ns": 2**80},
+              "wall": {"actor_id": actor, "utc_ns": -(2**63), "sample_index": 2**53},
+              "causal": {"actor_id": actor, "lamport": 2**64, "vector": {actor: 2**64}},
+              "scheduler": {"scheduler_id": "test", "tick": 2**96},
+              "event_lambda": 2**53 + 1,
+              "chronon_phase": [math.sqrt(0.5), math.sqrt(0.5)],
+              "chemical_tau": -0.0,
+          })
+          Draft202012Validator(schemas["frame"]).validate(frame)
+
+          span = encode_operation_span_v2({
+              "format": "in-formation.operation-span",
+              "schema": "in-formation.operation-span/0.1",
+              "attempt_id": "schema-attempt",
+              "span_id": "schema-span",
+              "operation_id": "host.operation",
+              "clock_actor_id": actor,
+              "clock_segment_id": "0",
+              "monotonic_start_ns": 2**80,
+              "monotonic_end_ns": 2**80 + 20,
+              "elapsed_ns": 20,
+              "clock_status": "measured",
+              "outcome": "succeeded",
+              "exception_type": None,
+              "context": {"role": "source_host"},
+              "measurement_scope": "synchronous-call",
+              "span_digest": "0" * 64,
+          })
+          Draft202012Validator(schemas["span"]).validate(span)
+
+          numeric = {
+              "format": "in-formation.temporal-numeric",
+              "schema": "in-formation.temporal-numeric/2.0",
+              "kind": "integer",
+              "encoding": "canonical-decimal-string",
+              "value": str(2**96),
+          }
+          Draft202012Validator(schemas["numeric"]).validate(numeric)
+          print("temporal numeric, frame, and span v2 schemas valid")
+          PY
+
+  go:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Go from module declaration
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: bridges/observation-path/cross_language_verifier/go.mod
+      - name: Run Go temporal v2 and existing verifier tests
+        working-directory: bridges/observation-path/cross_language_verifier
+        run: go test -count=1 -v ./...
+
+  node:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run Node temporal v2 codec tests
+        run: node --test formats/temporal-coordinate-v2/test_temporal_coordinate_v2.mjs

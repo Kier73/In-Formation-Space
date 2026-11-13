@@ -1,0 +1,318 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/formats/temporal-coordinate-v2/temporal-frame-v2.schema.json",
+  "title": "Temporal frame v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema",
+    "numeric_profile",
+    "actor_id",
+    "monotonic",
+    "wall",
+    "causal",
+    "scheduler",
+    "event_lambda",
+    "chronon_phase",
+    "chemical_tau"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.temporal-frame"
+    },
+    "schema": {
+      "const": "in-formation.temporal-frame/0.2"
+    },
+    "numeric_profile": {
+      "const": "in-formation.temporal-numeric/2.0"
+    },
+    "actor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "monotonic": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "actor_id",
+            "segment",
+            "elapsed_ns"
+          ],
+          "properties": {
+            "actor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "segment": {
+              "$ref": "#/$defs/integer"
+            },
+            "elapsed_ns": {
+              "$ref": "#/$defs/integer"
+            }
+          }
+        }
+      ]
+    },
+    "wall": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "actor_id",
+            "utc_ns",
+            "sample_index"
+          ],
+          "properties": {
+            "actor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "utc_ns": {
+              "$ref": "#/$defs/integer"
+            },
+            "sample_index": {
+              "$ref": "#/$defs/integer"
+            }
+          }
+        }
+      ]
+    },
+    "causal": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "actor_id",
+            "lamport",
+            "vector"
+          ],
+          "properties": {
+            "actor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "lamport": {
+              "$ref": "#/$defs/integer"
+            },
+            "vector": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "actor_id",
+                  "counter"
+                ],
+                "properties": {
+                  "actor_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "counter": {
+                    "$ref": "#/$defs/integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "scheduler": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scheduler_id",
+            "tick"
+          ],
+          "properties": {
+            "scheduler_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tick": {
+              "$ref": "#/$defs/integer"
+            }
+          }
+        }
+      ]
+    },
+    "event_lambda": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/integer"
+        }
+      ]
+    },
+    "chronon_phase": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/binary64"
+          }
+        }
+      ]
+    },
+    "chemical_tau": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/binary64"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "integer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "schema",
+        "kind",
+        "encoding",
+        "value"
+      ],
+      "properties": {
+        "format": {
+          "const": "in-formation.temporal-numeric"
+        },
+        "schema": {
+          "const": "in-formation.temporal-numeric/2.0"
+        },
+        "kind": {
+          "const": "integer"
+        },
+        "encoding": {
+          "const": "canonical-decimal-string"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^(0|-?[1-9][0-9]*)$"
+        }
+      }
+    },
+    "binary64": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "schema",
+        "kind",
+        "encoding",
+        "value"
+      ],
+      "properties": {
+        "format": {
+          "const": "in-formation.temporal-numeric"
+        },
+        "schema": {
+          "const": "in-formation.temporal-numeric/2.0"
+        },
+        "kind": {
+          "const": "binary64"
+        },
+        "encoding": {
+          "const": "ieee754-binary64-be-hex"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{16}$"
+        }
+      }
+    },
+    "numeric": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "format",
+            "schema",
+            "kind",
+            "encoding",
+            "value"
+          ],
+          "properties": {
+            "format": {
+              "const": "in-formation.temporal-numeric"
+            },
+            "schema": {
+              "const": "in-formation.temporal-numeric/2.0"
+            },
+            "kind": {
+              "const": "integer"
+            },
+            "encoding": {
+              "const": "canonical-decimal-string"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "format",
+            "schema",
+            "kind",
+            "encoding",
+            "value"
+          ],
+          "properties": {
+            "format": {
+              "const": "in-formation.temporal-numeric"
+            },
+            "schema": {
+              "const": "in-formation.temporal-numeric/2.0"
+            },
+            "kind": {
+              "const": "binary64"
+            },
+            "encoding": {
+              "const": "ieee754-binary64-be-hex"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{16}$"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
