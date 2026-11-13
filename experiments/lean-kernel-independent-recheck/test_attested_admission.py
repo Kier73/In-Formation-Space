@@ -50,6 +50,8 @@ class MockGitHubVerifier:
             return SimpleNamespace(returncode=1, stdout="", stderr="untrusted")
         if args == ["gh", "--version"]:
             return SimpleNamespace(returncode=0, stdout=self.version, stderr="")
+        if "--cert-identity" in args and "--signer-workflow" in args:
+            return SimpleNamespace(returncode=1, stdout="", stderr="mutually exclusive policy flags")
         if self.empty:
             return SimpleNamespace(returncode=0, stdout="[]", stderr="")
         name = Path(args[3])
@@ -109,11 +111,11 @@ class AttestationPolicyTests(unittest.TestCase):
         self.assertEqual(result["repository_id"], a.REPO_ID)
         self.assertEqual(len(self.fake.calls), 4)
         for cmd in self.fake.calls[1:]:
+            self.assertNotIn("--signer-workflow", cmd)
             for constraint in (
                 ["--repo", a.REPO],
                 ["--source-ref", a.MAIN_REF],
                 ["--source-digest", SHA],
-                ["--signer-workflow", a.WORKFLOW],
                 ["--cert-identity", a.CERT_IDENTITY],
                 ["--deny-self-hosted-runners"],
             ):
