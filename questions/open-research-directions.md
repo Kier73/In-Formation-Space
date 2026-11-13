@@ -328,3 +328,22 @@ RIV-004 showed that a simple count is sufficient for an identical binary sensor 
 5. What is the trade-off between state cardinality, exact arithmetic, update cost, and the value of retaining raw observation provenance?
 
 The initial operational baseline is [RIV-005](../experiments/heterogeneous-evidence-accumulator/README.md). It compares exact sequential posterior updates with every ordered history under a fixed heterogeneous sensor schedule. The next step is to extend the accumulator to uncertain or changing sensor models without silently treating a point calibration as certain.
+
+
+---
+
+## 17. How should observers preserve uncertainty about shared calibration?
+
+### The question
+
+RIV-004 and RIV-005 model noisy observations using known likelihoods. In a real sensor deployment, calibration itself may be uncertain and shared over time. If the calibration profile is a latent variable, marginalizing it too early can remove dependencies needed for later evidence updates.
+
+### Questions
+
+1. When is the marginal posterior over the target hypothesis sufficient for future updates, and when must the observer retain a joint belief over target state and calibration?
+2. How should the belief state change when calibration drifts within a session rather than remaining fixed?
+3. Can calibration posteriors be updated and transferred between observers while preserving sensor identity, calibration provenance, and dependence assumptions?
+4. How does model uncertainty affect the value of a compressed sufficient statistic and the risk of false confidence?
+5. What practical evidence distinguishes a shared session calibration, independent per-reading calibration, and a time-varying calibration process?
+
+The initial operational baseline is [RIV-007](../experiments/calibration-aware-joint-evidence/README.md). It contrasts a discrete session-shared calibration profile with an independent-redraw comparator and gives a same-marginal/different-joint-belief counterexample. The next step is to compare static calibration uncertainty with an explicit drift process.

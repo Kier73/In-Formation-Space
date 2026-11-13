@@ -189,3 +189,8 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Context-switching evidence accumulation
 
 - [RIV-006: Context-switching evidence accumulation](experiments/context-switching-evidence-accumulator/README.md) — extends RIV-005 with a persistent hidden Markov operating regime that changes sensor reliability. It constructs an exact joint posterior over hypothesis × next context regime and demonstrates that two histories can share both marginal probabilities while producing different updates under the same next signal. The four-sensor example verifies all 16 ordered histories; the joint belief deliberately retains distinctions that the two marginals lose.
+
+
+## Calibration-aware joint evidence
+
+- [RIV-007: Calibration-aware joint evidence accumulation](experiments/calibration-aware-joint-evidence/README.md) — keeps a joint posterior over a hidden hypothesis and a session-shared calibration profile. It demonstrates two observation histories with the same marginal hypothesis posterior but different joint calibration beliefs, which produce different exact updates and opposite MAP decisions on the next signal.
