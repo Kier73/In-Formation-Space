@@ -359,3 +359,61 @@ A notable moderate-burst example is \(k=1,c=0.10\): adaptive policy utility is 0
 For the rare-persistent-burst scenario, \(k=1,c=0.10\) gives adaptive utility 0.689606 versus 0.654254 for the best fixed interval \(L=16\), a gain of 0.0353523. Its state table is channel-sensitive in 35 survivor/time cells.
 
 These results are finite-horizon objective comparisons under the explicit zero-cost perfect-observation assumption. They do not show that a deployed controller can observe channel state or survivor count at no cost.
+
+## 12. Belief-aware adaptive repair: MRE-004
+
+MRE-003 gives the controller exact, free access to the shared channel label. MRE-004 removes that assumption. The shared good/bad channel state is hidden. The controller knows the current surviving-packet count, but represents its uncertainty about the channel as an exact posterior probability that the current decision-time state is bad.
+
+Before each circulation, the controller may **SKIP** sensing or pay a declared cost for one binary reading. Sensor quality is specified by sensitivity \(P(y=B\mid s=B)\) and false-positive rate \(P(y=B\mid s=G)\). After a reading, Bayes' rule updates the belief, and the controller chooses WAIT or REPAIR. If sensing is skipped, it chooses using its existing belief.
+
+The ordering of evidence and state transition is explicit:
+
+1. Begin with a belief over the current hidden channel state and the exact current survivor count.
+2. Optionally sense and update the current-state belief by Bayes' rule.
+3. Choose WAIT or REPAIR from that belief.
+4. Packet losses occur according to the hidden current channel state.
+5. The channel makes its Markov transition after those losses.
+6. The next exact survivor-count observation is used with the transition model to construct the next decision-time belief.
+
+Thus the survivor count is not merely a remaining-capacity variable: it is also evidence about the hidden channel. A large surviving count shifts the posterior differently from a small count. The current model assumes that this count is observed exactly; it does not yet model delayed or dropped survivor reports.
+
+### Exact belief-state dynamic programme
+
+All probabilities and costs are exact rational numbers. The finite-horizon controller computes over \((t,m,b)\), where \(t\) is the epoch, \(m\) the surviving-packet count, and \(b\) the posterior probability that the channel is bad. The sensor branches and survivor-count transitions are Bayesian updates over the two hidden channel states. REPAIR reconstructs all data packets but does not reset or reveal the channel state.
+
+The objective is explicit:
+
+\[
+U=P(\text{recoverable at horizon})-c_r E[\text{repairs}]-c_s E[\text{sensing actions}],
+\]
+
+where \(c_r\) and \(c_s\) are caller-declared costs in units of terminal survival reward. The controller chooses sensing only when its expected downstream value exceeds the declared sensing cost; exact ties choose SKIP. The implementation retains every decision node and action value, hashes the complete policy, and validates reports by rebuilding them from their declared inputs. A separate forward probability-mass propagation must exactly equal the backward-induction initial value.
+
+### First synthetic scenarios
+
+The default scan uses two small finite models, each with five packet slots and a four-circulation horizon. The values below compare optional noisy sensing with a no-sensing baseline under the same synthetic channel and repair parameters.
+
+| Scenario | Terminal survival | Expected repairs | Expected sensor readings | Utility with sensing | No-sensing utility | Gain |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Moderate bursts | 0.77239279 | 0.30393165 | 0.05297039 | 0.75666651 | 0.75619312 | 0.00047338 |
+| Persistent bursts | 0.77688514 | 0.03250642 | 0.01006793 | 0.77343314 | 0.77332633 | 0.00010681 |
+
+These gains are positive but small in the selected parameter sets. The first policy has 1,441 retained belief-state decision nodes and selects sensing in 212 of them; the second has 3,505 nodes and selects sensing in 182. A node being selected for sensing does not imply that it is visited on every run; expected sensing counts in the table are forward-propagated under the policy.
+
+The scan is a mathematical illustration of when noisy information can be worth paying for. It is not a measured network reliability result, real sensor calibration, or a general claim that sensing materially improves repair.
+
+### Cross-checks and reproduction
+
+A perfect, free sensor (sensitivity 1, false-positive rate 0, sensing cost 0) recovers the fully observed MRE-003 value for the same channel and repair parameters. An uninformative sensor (sensitivity and false-positive rate both 0.5) with positive cost is never selected. Tests also check Bayesian branch normalization, survivor-count belief updates, exact forward/backward agreement, report reconstruction and tamper rejection, cost monotonicity, and the checked-in scan receipt.
+
+~~~bash
+python -m unittest discover -s experiments/in-transit-memory -p "test_*.py" -v
+python experiments/in-transit-memory/belief_repair.py --scan --json
+~~~
+
+### Scope and next questions
+
+MRE-004 is a small exact reference model with limits of eight slots, five epochs, and 50,000 retained belief nodes. It assumes a two-state shared channel, known stationary sensor quality, exact survivor-count observations, and instantaneous sensing and repair. It does not include sensing latency, delayed or dropped readings, transport overhead, observation-path authorization or failure, physical repair duration, calibration drift, adversarial readings, or an E-CPU action adapter. The costs and channel probabilities are synthetic inputs, not measurements.
+
+A natural continuation is to treat readings as evidence with sequence numbers and arrival times: the controller must distinguish a fresh sensor result from a stale result, decide whether to act before it arrives, and preserve enough provenance for another host to reconstruct which belief was available at the decision point. This next step should connect to the observation-path and temporal-provenance work without conflating local clock values with cross-host time.
+
