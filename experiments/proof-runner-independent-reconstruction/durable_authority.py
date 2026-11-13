@@ -240,11 +240,18 @@ def _phase_stale_replay(args: argparse.Namespace) -> None:
 def _run_phase(arguments: list[str], env: Mapping[str, str]) -> None:
     completed = subprocess.run(
         [sys.executable, str(Path(__file__).resolve()), *arguments],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
         env=dict(env),
     )
+    if completed.returncode != 0:
+        raise RuntimeError(
+            "authority child phase failed "
+            f"({arguments[0]}, exit={completed.returncode})\\n"
+            f"stdout:\\n{completed.stdout}\\n"
+            f"stderr:\\n{completed.stderr}"
+        )
     if completed.stdout.strip():
         print(completed.stdout.strip())
 
