@@ -10,7 +10,7 @@
     "schema": {"const": "in-formation.independent-host-operation-record/0.1"},
     "role": {"enum": ["source_host", "receiver_host"]},
     "host": {"$ref": "#/$defs/host"},
-    "operation_span": {"$ref": "operation-span.schema.json"},
+    "operation_span": {"$ref": "#/$defs/operationSpan"},
     "temporal_frame": {"$ref": "#/$defs/temporalFrame"},
     "handoff_payload": {"anyOf": [{"$ref": "#/$defs/handoffPayload"}, {"type": "null"}]},
     "source_record_sha256": {"anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
@@ -22,6 +22,34 @@
     {"properties": {"role": {"const": "receiver_host"}, "handoff_payload": {"type": "null"}, "source_record_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "handoff_witness": {"$ref": "#/$defs/handoffWitness"}}}
   ],
   "$defs": {
+    "operationSpan": {
+      "type": "object", "additionalProperties": false,
+      "required": ["format", "schema", "attempt_id", "span_id", "operation_id", "clock_actor_id", "clock_segment_id", "monotonic_start_ns", "monotonic_end_ns", "elapsed_ns", "clock_status", "outcome", "exception_type", "context", "measurement_scope", "span_digest"],
+      "properties": {
+        "format": {"const": "in-formation.operation-span"},
+        "schema": {"const": "in-formation.operation-span/0.1"},
+        "attempt_id": {"type": "string", "minLength": 1},
+        "span_id": {"type": "string", "minLength": 1},
+        "operation_id": {"type": "string", "minLength": 1},
+        "clock_actor_id": {"type": "string", "minLength": 1},
+        "clock_segment_id": {"type": "string", "minLength": 1},
+        "monotonic_start_ns": {"type": "integer", "minimum": 0},
+        "monotonic_end_ns": {"type": "integer", "minimum": 0},
+        "elapsed_ns": {"oneOf": [{"type": "null"}, {"type": "integer", "minimum": 0}]},
+        "clock_status": {"enum": ["measured", "regressed"]},
+        "outcome": {"enum": ["succeeded", "raised"]},
+        "exception_type": {"oneOf": [{"type": "null"}, {"type": "string", "minLength": 1}]},
+        "context": {"type": "object"},
+        "measurement_scope": {"type": "string", "minLength": 1},
+        "span_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "allOf": [
+        {"if": {"properties": {"clock_status": {"const": "measured"}}, "required": ["clock_status"]}, "then": {"properties": {"elapsed_ns": {"type": "integer", "minimum": 0}}}},
+        {"if": {"properties": {"clock_status": {"const": "regressed"}}, "required": ["clock_status"]}, "then": {"properties": {"elapsed_ns": {"type": "null"}}}},
+        {"if": {"properties": {"outcome": {"const": "succeeded"}}, "required": ["outcome"]}, "then": {"properties": {"exception_type": {"type": "null"}}}},
+        {"if": {"properties": {"outcome": {"const": "raised"}}, "required": ["outcome"]}, "then": {"properties": {"exception_type": {"type": "string", "minLength": 1}}}}
+      ]
+    },
     "host": {
       "type": "object", "additionalProperties": false,
       "required": ["role", "repository", "run_id", "run_attempt", "run_number", "workflow_ref", "workflow_sha", "git_ref", "git_sha", "job", "runner_name", "runner_os", "runner_arch", "runner_environment", "actor_id", "clock_segment_id"],
