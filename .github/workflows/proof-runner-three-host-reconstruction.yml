@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Kier73/Virtual-Ground-Interpreter
-          ref: 43289a54c3e881ba70bf64924c71aa30e680b6d2
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
           path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -47,6 +47,8 @@ jobs:
           python-version: "3.11"
       - name: Install pinned Virtual Ground Interpreter dependency
         run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - name: Verify the proof-ground runtime API
+        run: python -c "from vgi.proof import ProofGroundAdapter, VerifiedKernelReceipt; print('verified VGI proof-ground imports')"
       - name: Install Python test dependencies
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
       - name: Run producer, restart, and authority-check tests
@@ -127,7 +129,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Kier73/Virtual-Ground-Interpreter
-          ref: 43289a54c3e881ba70bf64924c71aa30e680b6d2
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
           path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -135,6 +137,8 @@ jobs:
           python-version: "3.11"
       - name: Install pinned Virtual Ground Interpreter dependency
         run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - name: Verify the proof-ground runtime API
+        run: python -c "from vgi.proof import ProofGroundAdapter, VerifiedKernelReceipt; print('verified VGI proof-ground imports')"
       - name: Install signing dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
       - name: Produce route-authority checkpoint and ephemeral public identity
@@ -173,7 +177,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Kier73/Virtual-Ground-Interpreter
-          ref: 43289a54c3e881ba70bf64924c71aa30e680b6d2
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
           path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -181,6 +185,8 @@ jobs:
           python-version: "3.11"
       - name: Install pinned Virtual Ground Interpreter dependency
         run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - name: Verify the proof-ground runtime API
+        run: python -c "from vgi.proof import ProofGroundAdapter, VerifiedKernelReceipt; print('verified VGI proof-ground imports')"
       - name: Install signing dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
       - name: Install current signed GitHub CLI package
@@ -252,7 +258,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Kier73/Virtual-Ground-Interpreter
-          ref: 43289a54c3e881ba70bf64924c71aa30e680b6d2
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
           path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -260,6 +266,8 @@ jobs:
           python-version: "3.11"
       - name: Install pinned Virtual Ground Interpreter dependency
         run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - name: Verify the proof-ground runtime API
+        run: python -c "from vgi.proof import ProofGroundAdapter, VerifiedKernelReceipt; print('verified VGI proof-ground imports')"
       - name: Install key-attestation verifier dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
       - name: Install current signed GitHub CLI package
