@@ -675,6 +675,13 @@ def verify_to_report(directory: Path, output_path: Path, *, gh: str = "gh") -> d
         server_address_path, server_address_predicate, "server_host",
         _env(os.environ, "GITHUB_RUN_ID"), _env(os.environ, "GITHUB_RUN_ATTEMPT"), gh,
     )
+    if (
+        client_record.get("address_digest") != client_address["address_digest"]
+        or client_record.get("overlay_ipv4") != client_address["overlay_ipv4"]
+        or server_record.get("address_digest") != server_address["address_digest"]
+        or server_record.get("overlay_ipv4") != server_address["overlay_ipv4"]
+    ):
+        raise OverlayProbeError("host probe records do not bind their own attested overlay-address artifacts")
     for path, record, role in (
         (client_record_path, client_record, "client_host"),
         (server_record_path, server_record, "server_host"),
