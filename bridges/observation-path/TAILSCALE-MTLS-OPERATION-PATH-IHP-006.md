@@ -115,3 +115,19 @@ The local protocol suite covers certificate generation and pinning, signed endpo
 ## Known distinction
 
 A Tailscale `ping` result identifies the overlay path used for the probe; it does not establish that the E-CPU application port is permitted. IHP-006 therefore tests the actual TCP/TLS application exchange on port `41763` instead of treating an ICMP/DISCO route observation as proof of application connectivity. When successful, it records the result at the application-protocol layer.
+
+## IHP-007: route class observed by the application session
+
+The IHP-007 follow-on records a route snapshot on each operation host immediately after the mutually authenticated socket is established. It runs `tailscale status` and selects the row whose first column matches the peer IPv4 address obtained from that host's live TLS socket. The classification is attached to the host's operation-span context, then covered by the sender envelope or receiver receipt, the host-record digest, and the GitHub artifact attestation.
+
+The parser recognizes the documented `direct`, `relay` (DERP), and `peer-relay` markers. It also preserves an explicit `reachable_unclassified` outcome when the peer row is absent, idle, or uses an unrecognized marker. This is deliberate: Tailscale status is a point-in-time view, not a guarantee that both peers will report an identical class. The third verifier checks the two socket-address observations are reciprocal and keeps the two route classifications separate; it records whether they differ rather than forcing them into one answer.
+
+The evidence retains:
+- the observer role and the local/peer Tailscale IPv4 values from the actual TLS socket;
+- the state and normalized route-class marker for the matching peer row;
+- the local duration of the status command and its exit code;
+- a SHA-256 commitment to the complete status output.
+
+The evidence deliberately does not retain the full status output or the peer's hostname, owner email, operating-system label, public endpoint, or DERP region. The normalized marker is enough for the route-class question, while the full-output digest binds the source snapshot without copying other tailnet inventory into a public artifact. A failed status command or unrecognized output does not fail an otherwise valid mTLS operation; the report says the route class is unclassified instead.
+
+IHP-007 does not change IHP-002's public-network behavior and does not infer a common clock across the two hosts. A route observation is a local snapshot adjacent to the application session, not a cross-host latency measurement.
