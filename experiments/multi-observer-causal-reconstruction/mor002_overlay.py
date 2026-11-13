@@ -156,6 +156,8 @@ def write_followup_predicate(record_path: Path, predicate_path: Path) -> dict[st
     if signed["signed_digest"] != direct.digest_object(core):
         raise MOR002Error("source follow-up signed digest mismatch")
     host = direct._validate_host_metadata(core.get("host"), "client_host")
+    if host != direct.host_metadata("client_host"):
+        raise MOR002Error("source follow-up host identity differs from the current client runner")
     expected = {
         "schema", "event_id", "predecessor_event_id", "path_id", "attempt_id",
         "host", "predecessor_span_digest", "predecessor_frame",
