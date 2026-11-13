@@ -168,3 +168,27 @@ python -m unittest discover -s . -p 'test_ground_binding.py' -v
 The mathematical claim is complete **only for the exact scalar rational affine/ReLU language and observer profile**, under ideal real arithmetic and bounded certificate-processing resources. E-CPU's RepresentationRef and TranslationContract are immutable *descriptions and identities*: they do not register a Structural Memory revision, approve a new Ground, issue a host capability, run a model, verify external provenance, or grant Hypervisor access. Production integration would need an explicit admission policy and receiver capability check from E-CPU's existing Ground/Hypervisor architecture, plus independently authenticated source evidence.
 
 A natural subsequent frontier is formalizing a small certificate soundness lemma in Lean, while keeping separate the code-verification obligation that every serialized interval and each affine ReLU root is checked correctly.
+
+
+## COE-005 — Lean-kernel-checked branch and complete-cover soundness rules
+
+**Question:** Which mathematically critical implications in COE-002/003 can we have checked by an independent proof kernel rather than just reproduced in Python/Go?
+
+The pinned Lean 4.15 project in the lean/ subdirectory proves two intentionally small rules without mathematical libraries or admitted proof holes. The branch theorem depends on Lean's foundational propext axiom (as reported by the kernel); the cover theorem depends on no axioms:
+
+1. **Selected branch soundness:** For any value type, any Boolean activation predicate and any function, if the activation decision at an arbitrary x is the same as the decision at the selected probe, the piecewise chosen branch produces exactly the same result as the pointwise rectifying operator at x. This is independent of a particular ReLU numeric implementation.
+2. **Complete observation cover transfer:** For any coordinate type X and any output type Y, if every x lies in at least one certified cell and two realizations equal the same claimed observation in each cell, they are equivalent at **every coordinate of X**. This is a universal quantified theorem; it does not rely on enumerating coordinates.
+
+These are the logical rules exercised in the all-real COE checker, with premises that must still be established by the concrete code. In particular, the Lean development does **not** yet prove that the Python or Go root-exclusion algorithm ensures activation decisions cannot change inside a proposed interval; does not prove that cells cover the entire real line including endpoints; and does not formalize the JSON parser, Fraction arithmetic, source SHA-256, E-CPU admission or trust. **It therefore does not constitute end-to-end formal verification of COE-004.** The existing standalone verifier and cross-language tests remain necessary.
+
+### Check
+
+~~~bash
+cd experiments/continuous-observation-equivalence/lean
+lake build
+lake env lean COECellSoundness.lean
+~~~
+
+The COE-005 workflow installs the pinned Lean compiler, checks the theorem statements in the kernel, retains the exact foundational-axiom report (allowing only the explicitly documented propext dependency for the branch theorem), and requires an intentionally false theorem in COECellInvalid.lean to fail. The negative control ensures this CI route does not accidentally accept a failed proof file.
+
+The next formalization target is to prove the arithmetic bridge from a rational affine expression's root exclusion on a claimed interval to *sign stability* (with equality correctly handled at endpoints), then to connect that lemma to the verified symbolic layer evaluator. That step would discharge a substantive premise currently supplied only by the executable verifier.
