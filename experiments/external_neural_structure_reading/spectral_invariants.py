@@ -110,7 +110,7 @@ def _spectrum_summary(matrix: np.ndarray) -> dict[str, Any]:
     quantiles = np.percentile(singular_values, SINGULAR_QUANTILES)
     top_energy = {
         str(count): (
-            float(np.sum(energy[: min(count, energy.size)]) / total_energy)
+            min(1.0, float(np.sum(energy[: min(count, energy.size)]) / total_energy))
             if total_energy > 0.0
             else None
         )
@@ -155,7 +155,7 @@ def _spectrum_distance(left: dict[str, Any], right: dict[str, Any]) -> dict[str,
         return float(np.sum(first[mask] * np.log2(first[mask] / second[mask])))
 
     js = (
-        0.5 * kl_divergence(p, midpoint) + 0.5 * kl_divergence(q, midpoint)
+        min(1.0, 0.5 * kl_divergence(p, midpoint) + 0.5 * kl_divergence(q, midpoint))
         if p_total > 0.0 and q_total > 0.0
         else None
     )
