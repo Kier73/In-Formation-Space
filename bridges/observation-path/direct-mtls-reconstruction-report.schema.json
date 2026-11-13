@@ -198,7 +198,8 @@
             "idle",
             "no_session",
             "peer_not_found",
-            "command_failed"
+            "command_failed",
+            "ambiguous"
           ]
         },
         "route_type": {
