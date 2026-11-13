@@ -3,14 +3,15 @@
 **Status:** finite exact one-step value-of-information experiment, version 0.1.  
 **Question:** Given a joint posterior over a target hypothesis and latent context, which candidate context observation best improves a declared decision, after accounting for observation cost?
 
-## Relationship to RIV-006 and RIV-007
+## Relationship to RIV-006 through RIV-009
 
-The current shared evidence experiments construct different kinds of joint beliefs:
+The shared evidence sequence constructs several distinct joint-belief models:
 
 - [RIV-006: Context-switching evidence accumulation](../context-switching-evidence-accumulator/README.md) uses a hidden Markov operating regime that changes over time.
 - [RIV-007: Calibration-aware joint evidence](../calibration-aware-joint-evidence/README.md) uses a discrete calibration profile drawn once and shared across a session.
+- [RIV-009: Reference-calibrated evidence accumulation](../reference-calibrated-evidence/README.md) conditions the session-shared calibration prior on known reference standards before running the target filter.
 
-Both preserve a joint posterior rather than discarding the association between the hypothesis and latent context. RIV-008 is deliberately model-agnostic at that boundary: it accepts a finite exact joint belief over a binary hypothesis and any finite set of context labels.
+These models preserve a joint posterior rather than discarding the association between the hypothesis and latent context. RIV-008 is deliberately model-agnostic at that boundary: it accepts a finite exact joint belief over a binary hypothesis and any finite set of context labels. The tests now construct input beliefs from all three upstream models, including the reference-conditioned target belief nested inside the RIV-009 report.
 
 RIV-008 asks a different question from VGI's partial-probe minimax planner. VGI's planner chooses a worst-case policy to reduce unresolved attempt pairs. RIV-008 ranks one-step context-reading methods by their **expected reduction in Bayes decision loss**, using caller-supplied likelihoods, costs, and a declared task loss matrix. Neither objective is universally preferable; they answer different questions.
 
