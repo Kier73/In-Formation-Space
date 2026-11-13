@@ -666,7 +666,6 @@ func verify(nsd, graph object) report {
 		fmt.Sprintf("runtime and fixed dimensions independently reconstructed from config and tensor shapes; mismatches=%v", dimensionFailures))
 
 	batchSequence := shape("batch", "sequence")
-	hiddenShape := shape("batch", "sequence", float64(hidden))
 	graphInputFailures := []string{}
 	inputs := map[string]object{}
 	for _, raw := range asArray(graph["inputs"]) {
