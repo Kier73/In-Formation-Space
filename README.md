@@ -200,3 +200,8 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 - [RIV-008: Decision-value context acquisition](experiments/decision-value-context-acquisition/README.md) — accepts a joint hypothesis/context posterior from either Markov-regime or session-shared calibration models, then ranks candidate context readers by exact one-step expected Bayes decision-risk reduction per cost. It reports outcome posterior branches and a cost/value Pareto frontier; the selected method remains a proposal and no measurement is dispatched.
 
 - [SRH-006: Independent prepared-result verification](experiments/portable-realization-capsule/INDEPENDENT-PREPARED-RESULT-VERIFICATION-006.md) — inserts a separate Node receiver between durable PSC preparation and E-CPU quorum completion. It independently replays the input/output checkpoints, checks the exact one-step event-chain transition and typed receipt, and binds its verification digest into the final quorum child receipt. A tampered prepared checkpoint is rejected before claim completion.
+
+
+## Reference-calibrated evidence accumulation
+
+- [RIV-009: Reference-calibrated evidence accumulation](experiments/reference-calibrated-evidence/README.md) — updates a session-shared calibration-profile posterior from known standards, passes that posterior into RIV-007's joint target filter, and compares prior, reference-conditioned Bayes, and MAP-profile plug-in policies in one common target world. Exact reference cost and evidence-prefix traces are retained; standards and physical readings remain supplied evidence, not authenticated facts.
