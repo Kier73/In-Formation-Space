@@ -1,0 +1,62 @@
+{
+  "experiment": "RE-001",
+  "arithmetic": "exact rational",
+  "scope": "zero-state discrete-time LTI, single input/output, no noise",
+  "base_markov_first_8": [
+    "2",
+    "3/4",
+    "5/16",
+    "9/64",
+    "17/256",
+    "33/1024",
+    "65/4096",
+    "129/16384"
+  ],
+  "observable_modal_recurrence": {
+    "a": "3/4",
+    "b": "-1/8",
+    "rule": "h[k+2] = a*h[k+1] + b*h[k]"
+  },
+  "hankel_rank_base_3x3": 2,
+  "hankel_rank_extra_hidden_3x3": 2,
+  "hankel_rank_delayed_9x9": 9,
+  "compared_to_base": {
+    "coordinate": {
+      "state_dimension": 2,
+      "first_difference_index": null,
+      "first_6_coefficients_equal": true,
+      "first_20_coefficients_equal": true
+    },
+    "hidden": {
+      "state_dimension": 3,
+      "first_difference_index": null,
+      "first_6_coefficients_equal": true,
+      "first_20_coefficients_equal": true
+    },
+    "same_modes_changed_output": {
+      "state_dimension": 2,
+      "first_difference_index": 0,
+      "first_6_coefficients_equal": false,
+      "first_20_coefficients_equal": false
+    },
+    "delayed": {
+      "state_dimension": 9,
+      "first_difference_index": 6,
+      "first_6_coefficients_equal": true,
+      "first_20_coefficients_equal": false
+    }
+  },
+  "new_observer_hidden_markov_first_3": [
+    "1",
+    "7/8",
+    "49/64"
+  ],
+  "rdm_pairs": 10,
+  "rdm_sensor_gain_squared_ratio": 9,
+  "rdm_all_pairs_match_after_calibration": true,
+  "interpretation": {
+    "established": "two visible modal poles and a 2-state minimal response law in this fixture",
+    "not_established": "unique internal state, absence of unobservable modes, or equivalence beyond finite tests without system assumptions",
+    "delayed_counterexample": "six identical coefficients are distinguishable at coefficient index six"
+  }
+}
