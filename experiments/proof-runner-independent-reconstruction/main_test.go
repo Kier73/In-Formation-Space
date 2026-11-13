@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"os"
+	"strings"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -25,6 +26,11 @@ func fixturePaths(t *testing.T) Paths {
 		Request: filepath.Join(root, "authority", "request.json"),
 		AuthorityAttestation: filepath.Join(root, "authority", "authority-attestation.json"),
 		AuthorityKey: filepath.Join(root, "authority", "authority-public-key.json"),
+		AuthorityHistory: filepath.Join(root, "authority", "store-history.json"),
+		AuthorityStore: filepath.Join(root, "authority", "authority-store-fixture.bin"),
+		ProcessEvidence: filepath.Join(root, "authority", "process-evidence.json"),
+		StaleOwnerAttempt: filepath.Join(root, "authority", "stale-owner-attempt.json"),
+		SQLiteAuthorityReport: filepath.Join(root, "authority", "sqlite-authority-verification-fixture.json"),
 		Result: filepath.Join(root, "runner", "result.json"),
 		Receipt: filepath.Join(root, "runner", "completion-receipt.json"),
 		RunnerKey: filepath.Join(root, "runner", "runner-public-key.json"),
@@ -82,11 +88,80 @@ func TestThreeHostFixtureReconstructsInGo(t *testing.T) {
 	if report["key_provenance_verified_by_github"] != false {
 		t.Fatal("offline fixture must not claim GitHub key attestations")
 	}
+	if report["sqlite_store_reopened_verified"] != false {
+		t.Fatal("offline fixture must not claim to have reopened a real SQLite database")
+	}
+	if _, ok := report["sqlite_reopen_evidence_digest"].(string); !ok {
+		t.Fatal("offline fixture must bind the exact reopen-summary evidence")
+	}
 	hostSeparation, ok := report["host_separation"].(object)
 	if !ok || hostSeparation["distinct_jobs"] != true ||
 		hostSeparation["distinct_actor_ids"] != true ||
 		hostSeparation["combined_cross_host_elapsed_ns"] != nil {
 		t.Fatalf("host separation or unknown duration was not preserved: %#v", report["host_separation"])
+	}
+}
+
+func TestRejectsSQLiteReopenSummaryWithWrongActiveOwner(t *testing.T) {
+	paths := fixturePaths(t)
+	report := readMutable(t, paths.SQLiteAuthorityReport)
+	report["active_owner_id"] = "unrelated-owner"
+	writeMutable(t, paths.SQLiteAuthorityReport, report)
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("SQLite reopen summary with wrong active owner was accepted")
+	}
+}
+
+func TestRejectsSQLiteReopenSummaryWithDifferentHistoryDigest(t *testing.T) {
+	paths := fixturePaths(t)
+	report := readMutable(t, paths.SQLiteAuthorityReport)
+	report["history_digest"] = strings.Repeat("0", 64)
+	writeMutable(t, paths.SQLiteAuthorityReport, report)
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("SQLite reopen summary with a different history digest was accepted")
+	}
+}
+
+func TestRejectsTamperedSQLiteIntermediateRevision(t *testing.T) {
+	paths := fixturePaths(t)
+	historyDocument := readMutable(t, paths.AuthorityHistory)
+	rows := historyDocument["entries"].([]any)
+	second := rows[1].(map[string]any)
+	second["ledger_digest"] = strings.Repeat("0", 64)
+	third := rows[2].(map[string]any)
+	third["previous_ledger_digest"] = strings.Repeat("0", 64)
+	writeMutable(t, paths.AuthorityHistory, historyDocument)
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("altered intermediate SQLite revision was accepted")
+	}
+}
+
+func TestRejectsTamperedStaleOwnerProcessEvidence(t *testing.T) {
+	paths := fixturePaths(t)
+	process := readMutable(t, paths.ProcessEvidence)
+	phases := process["phases"].([]any)
+	stale := phases[2].(map[string]any)
+	stale["accepted"] = true
+	writeMutable(t, paths.ProcessEvidence, process)
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("process evidence claiming stale-owner acceptance was accepted")
+	}
+}
+
+func TestRejectsTamperedSQLiteDatabaseBytes(t *testing.T) {
+	paths := fixturePaths(t)
+	file, err := os.OpenFile(paths.AuthorityStore, os.O_APPEND|os.O_WRONLY, 0)
+	if err != nil {
+		t.Fatalf("open SQLite fixture bytes: %v", err)
+	}
+	if _, err := file.Write([]byte("tamper")); err != nil {
+		t.Fatalf("tamper SQLite fixture bytes: %v", err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatalf("close tampered SQLite fixture: %v", err)
+	}
+	if _, err := Verify(paths); err == nil {
+		t.Fatal("tampered SQLite authority database bytes were accepted")
 	}
 }
 
@@ -125,19 +200,39 @@ func TestRejectsRehashedButSemanticallyBrokenAdmissionChain(t *testing.T) {
 	paths := fixturePaths(t)
 	ledger := readMutable(t, paths.Ledger)
 	entries := ledger["entries"].([]any)
-	admission := entries[1].(map[string]any)
+	admission := entries[2].(map[string]any)
 	admissionDetails := admission["details"].(map[string]any)
 	admissionDetails["request_sequence"] = json.Number("2")
 	rehashEvent(t, admission)
 
-	authorization := entries[2].(map[string]any)
+	authorization := entries[3].(map[string]any)
 	authorization["previous_event_digest"] = admission["event_digest"]
 	rehashEvent(t, authorization)
 	rehashLedger(t, ledger)
 	writeMutable(t, paths.Ledger, ledger)
 
+	// Keep the independent SQLite append index and every prefix digest
+	// internally consistent, so the rejection must come from route semantics:
+	// execution_authorized still names the old admission event digest.
+	historyDocument := readMutable(t, paths.AuthorityHistory)
+	rows := historyDocument["entries"].([]any)
+	third := rows[2].(map[string]any)
+	third["appended_event_digests"] = []any{admission["event_digest"]}
+	third["ledger_digest"], _ = digest(object{
+		"format": ledger["format"],
+		"entries": entries[:3],
+	})
+	fourth := rows[3].(map[string]any)
+	fourth["previous_ledger_digest"] = third["ledger_digest"]
+	fourth["appended_event_digests"] = []any{authorization["event_digest"]}
+	fourth["ledger_digest"], _ = digest(object{
+		"format": ledger["format"],
+		"entries": entries[:4],
+	})
+	writeMutable(t, paths.AuthorityHistory, historyDocument)
+
 	if _, err := Verify(paths); err == nil {
-		t.Fatal("fully rehashed but semantically inconsistent ledger was accepted")
+		t.Fatal("fully re-hashed ledger and SQLite history with a stale admission binding was accepted")
 	}
 }
 

@@ -16,19 +16,21 @@ import (
 
 const (
 	ledgerFormat = "in-formation.proof-action-route-ledger/0.1"
-	authorityAttestationFormat = "in-formation.proof-action-route-ledger-attestation/0.1"
+	authorityAttestationFormat = "in-formation.proof-action-route-ledger-attestation/0.2"
 	requestFormat = "in-formation.proof-action-request/0.1"
 	resultFormat = "in-formation.proof-action-result/0.1"
 	receiptFormat = "in-formation.proof-runner-completion-receipt/0.1"
 	keyFormat = "in-formation.proof-runner-participant-key/0.1"
 	verifierHostFormat = "in-formation.proof-runner-verifier-host/0.1"
-	reportFormat = "in-formation.proof-runner-independent-reconstruction-report/0.1"
+	reportFormat = "in-formation.proof-runner-independent-reconstruction-report/0.2"
 )
 
 type object = map[string]any
 
 type Paths struct {
 	Ledger, Request, AuthorityAttestation, AuthorityKey string
+	AuthorityHistory, AuthorityStore, ProcessEvidence, StaleOwnerAttempt string
+	SQLiteAuthorityReport string
 	Result, Receipt, RunnerKey, VerifierHost string
 	KeyAttestationsVerified bool
 }
@@ -518,6 +520,284 @@ func verifyParticipantKey(document object, expectedRole string) (participant, er
 	}, nil
 }
 
+func verifyStoreHistory(
+	historyDocument object,
+	ledger object,
+) ([]any, string, error) {
+	if err := exactFields(historyDocument, "entries"); err != nil {
+		return nil, "", fail("SQLite store-history document fields are invalid: %v", err)
+	}
+	rows, err := asArray(historyDocument["entries"], "SQLite history entries")
+	if err != nil { return nil, "", err }
+	if len(rows) == 0 { return nil, "", fail("SQLite history must contain at least one revision") }
+	events, err := asArray(ledger["entries"], "route-ledger entries")
+	if err != nil { return nil, "", err }
+	eventOffset := 0
+	var previousLedgerDigest any
+	for index, raw := range rows {
+		row, err := asObject(raw, fmt.Sprintf("SQLite revision %d", index+1))
+		if err != nil { return nil, "", err }
+		if err := exactFields(row,
+			"revision", "previous_ledger_digest", "ledger_digest",
+			"actor_id", "appended_event_digests", "committed_utc",
+		); err != nil {
+			return nil, "", fail("SQLite revision %d fields are invalid: %v", index+1, err)
+		}
+		revision, err := integerValue(row["revision"], "SQLite revision", 1)
+		if err != nil || revision != int64(index+1) {
+			return nil, "", fail("SQLite revision sequence is not contiguous")
+		}
+		if row["previous_ledger_digest"] != previousLedgerDigest {
+			return nil, "", fail("SQLite revision predecessor digest mismatch")
+		}
+		if _, err := textValue(row["actor_id"], "SQLite revision actor_id"); err != nil {
+			return nil, "", err
+		}
+		if _, err := textValue(row["committed_utc"], "SQLite revision committed_utc"); err != nil {
+			return nil, "", err
+		}
+		appended, err := asArray(row["appended_event_digests"], "SQLite appended event digests")
+		if err != nil { return nil, "", err }
+		if len(appended) == 0 {
+			return nil, "", fail("SQLite revision must append one or more events")
+		}
+		end := eventOffset + len(appended)
+		if end > len(events) {
+			return nil, "", fail("SQLite revision appends beyond the route ledger")
+		}
+		for offset, digestValue := range appended {
+			expectedEvent, err := asObject(events[eventOffset+offset], "route event")
+			if err != nil { return nil, "", err }
+			eventDigest, err := sha256Value(digestValue, "SQLite appended event digest")
+			if err != nil { return nil, "", err }
+			if eventDigest != expectedEvent["event_digest"] {
+				return nil, "", fail("SQLite revision append index differs from the route ledger")
+			}
+			details, err := asObject(expectedEvent["details"], "route event details")
+			if err != nil { return nil, "", err }
+			if row["actor_id"] != details["owner_id"] {
+				return nil, "", fail("SQLite revision actor differs from appended route event owner")
+			}
+		}
+		prefix := object{
+			"format": ledger["format"],
+			"entries": events[:end],
+		}
+		computedDigest, err := digest(prefix)
+		if err != nil { return nil, "", err }
+		suppliedDigest, err := sha256Value(row["ledger_digest"], "SQLite ledger_digest")
+		if err != nil || suppliedDigest != computedDigest {
+			return nil, "", fail("SQLite revision %d intermediate ledger digest mismatch", index+1)
+		}
+		previousLedgerDigest = computedDigest
+		eventOffset = end
+	}
+	finalLedgerDigest, err := sha256Value(ledger["ledger_digest"], "route ledger digest")
+	if err != nil { return nil, "", err }
+	if eventOffset != len(events) || previousLedgerDigest != finalLedgerDigest {
+		return nil, "", fail("SQLite revision history does not reproduce the complete route ledger")
+	}
+	historyDigest, err := digest(rows)
+	if err != nil { return nil, "", err }
+	return rows, historyDigest, nil
+}
+
+func verifyAuthorityProcessEvidence(
+	processEvidence object,
+	staleAttempt object,
+	ledger object,
+	historyRows []any,
+	expectedAttemptID string,
+) (string, error) {
+	if err := exactFields(processEvidence,
+		"format", "authority_store_type", "authority_process_count", "phases",
+		"final_store_revision", "final_ledger_digest", "stale_owner_attempt_rejected",
+	); err != nil {
+		return "", fail("authority process evidence fields are invalid: %v", err)
+	}
+	if processEvidence["format"] != "in-formation.proof-runner-authority-process-evidence/0.1" ||
+		processEvidence["authority_store_type"] != "sqlite-local-file" ||
+		processEvidence["stale_owner_attempt_rejected"] != true {
+		return "", fail("authority process evidence format, store type, or stale rejection is invalid")
+	}
+	processCount, err := integerValue(processEvidence["authority_process_count"], "authority_process_count", 1)
+	if err != nil || processCount != 3 {
+		return "", fail("authority process evidence must contain three separate process phases")
+	}
+	revisionCount, err := integerValue(processEvidence["final_store_revision"], "final_store_revision", 1)
+	if err != nil || revisionCount != int64(len(historyRows)) {
+		return "", fail("authority process final revision differs from SQLite history")
+	}
+	if processEvidence["final_ledger_digest"] != ledger["ledger_digest"] {
+		return "", fail("authority process evidence names a different final ledger")
+	}
+	phases, err := asArray(processEvidence["phases"], "authority process phases")
+	if err != nil { return "", err }
+	if len(phases) != 3 {
+		return "", fail("authority process evidence must contain exactly three phases")
+	}
+	expectedNames := []string{
+		"initial_open", "restart_claim_admit_authorize", "stale_generation_replay",
+	}
+	events, err := asArray(ledger["entries"], "ledger events")
+	if err != nil { return "", err }
+	if len(events) != 4 {
+		return "", fail("authority restart profile requires four route-ledger events")
+	}
+	expectedDigests := [][]any{
+		{mustEventDigest(events[0])},
+		{mustEventDigest(events[1]), mustEventDigest(events[2]), mustEventDigest(events[3])},
+		{},
+	}
+	expectedRevisions := []int64{1, 4, 4}
+	expectedDecisions := []string{"opened", "replacement_owner_authorized", "rejected"}
+	seenInstances := map[string]bool{}
+	for index, raw := range phases {
+		phase, err := asObject(raw, fmt.Sprintf("authority phase %d", index+1))
+		if err != nil { return "", err }
+		if index == 2 {
+			if err := exactFields(phase,
+				"phase", "process_id", "process_instance_id", "event_digests",
+				"observed_store_revision", "decision", "stale_attempt_id",
+				"accepted", "observed_owner_id", "observed_owner_generation",
+			); err != nil {
+				return "", fail("stale replay process fields are invalid: %v", err)
+			}
+		} else if err := exactFields(phase,
+			"phase", "process_id", "process_instance_id", "event_digests",
+			"observed_store_revision", "decision",
+		); err != nil {
+			return "", fail("authority process phase fields are invalid: %v", err)
+		}
+		if phase["phase"] != expectedNames[index] || phase["decision"] != expectedDecisions[index] {
+			return "", fail("authority process phase %d identity or decision mismatch", index+1)
+		}
+		if _, err := integerValue(phase["process_id"], "authority process_id", 1); err != nil {
+			return "", err
+		}
+		instanceID, err := textValue(phase["process_instance_id"], "authority process instance ID")
+		if err != nil { return "", err }
+		if seenInstances[instanceID] {
+			return "", fail("authority process instance ID was reused")
+		}
+		seenInstances[instanceID] = true
+		observedRevision, err := integerValue(phase["observed_store_revision"], "observed_store_revision", 1)
+		if err != nil || observedRevision != expectedRevisions[index] {
+			return "", fail("authority process phase %d observed an unexpected store revision", index+1)
+		}
+		digests, err := asArray(phase["event_digests"], "authority phase event digests")
+		if err != nil { return "", err }
+		if len(digests) != len(expectedDigests[index]) {
+			return "", fail("authority process phase %d appended the wrong number of events", index+1)
+		}
+		for j, value := range digests {
+			if value != expectedDigests[index][j] {
+				return "", fail("authority process phase %d event digest mismatch", index+1)
+			}
+		}
+	}
+	stalePhase, _ := asObject(phases[2], "stale replay phase")
+	staleDigest, err := digest(staleAttempt)
+	if err != nil { return "", err }
+	phaseDigest, err := digest(stalePhase)
+	if err != nil || staleDigest != phaseDigest {
+		return "", fail("stale-owner attempt document differs from the third process record")
+	}
+	if staleAttempt["accepted"] != false || staleAttempt["observed_owner_generation"] != json.Number("2") {
+		return "", fail("stale owner-generation attempt was not rejected under generation two")
+	}
+	claim, err := asObject(events[1], "claim event")
+	if err != nil { return "", err }
+	claimDetails, err := asObject(claim["details"], "claim details")
+	if err != nil { return "", err }
+	if staleAttempt["observed_owner_id"] != claimDetails["owner_id"] {
+		return "", fail("stale replay observed a different owner than the claim event")
+	}
+	requestAttempt, err := textValue(staleAttempt["stale_attempt_id"], "stale_attempt_id")
+	if err != nil { return "", err }
+	if requestAttempt != expectedAttemptID+":stale-replay" {
+		return "", fail("stale replay attempt ID does not derive from the authorized request")
+	}
+	evidenceDigest, err := digest(processEvidence)
+	if err != nil { return "", err }
+	return evidenceDigest, nil
+}
+
+func mustEventDigest(value any) any {
+	event, ok := value.(map[string]any)
+	if !ok { return nil }
+	return event["event_digest"]
+}
+
+func verifySQLiteAuthorityReport(
+	report object,
+	ledger object,
+	historyDigest string,
+) (bool, string, error) {
+	if err := exactFields(report,
+		"verified", "store_type", "ledger_digest", "revision_count",
+		"active_epoch_id", "active_owner_id", "active_owner_generation",
+		"history_digest",
+	); err != nil {
+		return false, "", fail("SQLite reopen report fields are invalid: %v", err)
+	}
+	verified, ok := report["verified"].(bool)
+	if !ok {
+		return false, "", fail("SQLite reopen report verified field must be boolean")
+	}
+	if report["store_type"] != "sqlite-local-file" {
+		return false, "", fail("SQLite reopen report has an unexpected store type")
+	}
+	ledgerDigest, err := sha256Value(report["ledger_digest"], "SQLite reopen ledger_digest")
+	if err != nil || ledgerDigest != ledger["ledger_digest"] {
+		return false, "", fail("SQLite reopen report names a different route ledger")
+	}
+	historyRevision, err := integerValue(report["revision_count"], "SQLite reopen revision_count", 1)
+	if err != nil {
+		return false, "", err
+	}
+	entries, err := asArray(ledger["entries"], "route-ledger events")
+	if err != nil { return false, "", err }
+	if historyRevision != int64(len(entries)) {
+		return false, "", fail("SQLite reopen report revision count differs from route history")
+	}
+	lastEvent, err := asObject(eventsLast(entries), "last authorization event")
+	if err != nil { return false, "", err }
+	if report["active_epoch_id"] != lastEvent["epoch_id"] {
+		return false, "", fail("SQLite reopen report names a different active epoch")
+	}
+	claimEvent, err := asObject(eventsAt(entries, 1), "claim event")
+	if err != nil { return false, "", err }
+	claimDetails, err := asObject(claimEvent["details"], "claim details")
+	if err != nil { return false, "", err }
+	if report["active_owner_id"] != claimDetails["owner_id"] {
+		return false, "", fail("SQLite reopen report names a different active owner")
+	}
+	generation, err := integerValue(report["active_owner_generation"], "SQLite reopen active_owner_generation", 1)
+	if err != nil || generation != 2 {
+		return false, "", fail("SQLite reopen report does not recover owner generation two")
+	}
+	suppliedHistoryDigest, err := sha256Value(report["history_digest"], "SQLite reopen history_digest")
+	if err != nil || suppliedHistoryDigest != historyDigest {
+		return false, "", fail("SQLite reopen report history digest differs from reconstructed history")
+	}
+	reportDigest, err := digest(report)
+	if err != nil {
+		return false, "", err
+	}
+	return verified, reportDigest, nil
+}
+
+func eventsLast(events []any) any {
+	if len(events) == 0 { return nil }
+	return events[len(events)-1]
+}
+
+func eventsAt(events []any, index int) any {
+	if index < 0 || index >= len(events) { return nil }
+	return events[index]
+}
+
 func verifyAuthorityAttestation(
 	value object,
 	authority participant,
@@ -525,11 +805,18 @@ func verifyAuthorityAttestation(
 	ledgerSequence int64,
 	event object,
 	attemptID, requestDigest string,
+	historyDigest string,
+	historyRows []any,
+	databaseDigest string,
+	processEvidenceDigest string,
 ) error {
 	if err := exactFields(value,
 		"format", "signature_algorithm", "authority_id", "authority_key_id",
 		"ledger_digest", "ledger_sequence", "authorization_event_digest",
 		"execution_id", "attempt_id", "request_digest", "runner_id",
+		"store_type", "store_revision_count", "store_history_digest",
+		"store_database_sha256", "process_evidence_digest",
+		"process_phase_count", "stale_owner_rejected",
 		"attestation_digest", "signature",
 	); err != nil {
 		return fail("authority attestation fields are invalid: %v", err)
@@ -551,6 +838,13 @@ func verifyAuthorityAttestation(
 		"attempt_id": attemptID,
 		"request_digest": requestDigest,
 		"runner_id": details["runner_id"],
+		"store_type": "sqlite-local-file",
+		"store_revision_count": json.Number(strconv.Itoa(len(historyRows))),
+		"store_history_digest": historyDigest,
+		"store_database_sha256": databaseDigest,
+		"process_evidence_digest": processEvidenceDigest,
+		"process_phase_count": json.Number("3"),
+		"stale_owner_rejected": true,
 	}
 	for key, expectedValue := range expected {
 		if value[key] != expectedValue {
@@ -699,6 +993,16 @@ func Verify(paths Paths) (object, error) {
 	if err != nil { return nil, fmt.Errorf("read authority attestation: %w", err) }
 	authorityKeyDoc, err := readObject(paths.AuthorityKey)
 	if err != nil { return nil, fmt.Errorf("read authority public key: %w", err) }
+	historyDocument, err := readObject(paths.AuthorityHistory)
+	if err != nil { return nil, fmt.Errorf("read SQLite revision history: %w", err) }
+	processEvidence, err := readObject(paths.ProcessEvidence)
+	if err != nil { return nil, fmt.Errorf("read authority process evidence: %w", err) }
+	staleAttempt, err := readObject(paths.StaleOwnerAttempt)
+	if err != nil { return nil, fmt.Errorf("read stale-owner attempt evidence: %w", err) }
+	sqliteAuthorityReport, err := readObject(paths.SQLiteAuthorityReport)
+	if err != nil { return nil, fmt.Errorf("read SQLite authority reopen report: %w", err) }
+	databaseBytes, err := os.ReadFile(paths.AuthorityStore)
+	if err != nil { return nil, fmt.Errorf("read transferred SQLite authority database: %w", err) }
 	result, err := readObject(paths.Result)
 	if err != nil { return nil, fmt.Errorf("read result: %w", err) }
 	receipt, err := readObject(paths.Receipt)
@@ -715,7 +1019,7 @@ func Verify(paths Paths) (object, error) {
 	verifierHost, err := verifyVerifierHost(verifierHostDoc, authority, runner)
 	if err != nil { return nil, fmt.Errorf("third-host separation: %w", err) }
 
-	for _, field := range []string{"repository", "run_id", "run_attempt", "workflow_ref", "workflow_sha", "git_ref", "git_sha"} {
+	for _, field := range []string{"repository", "run_id", "run_attempt", "run_number", "workflow_ref", "workflow_sha", "git_ref", "git_sha"} {
 		if authority.Host[field] != runner.Host[field] {
 			return nil, fail("authority and runner hosts differ in %s", field)
 		}
@@ -725,11 +1029,36 @@ func Verify(paths Paths) (object, error) {
 	if err != nil { return nil, fmt.Errorf("route ledger reconstruction: %w", err) }
 	attemptID, requestDigest, err := verifyRequest(request, event)
 	if err != nil { return nil, err }
+
+	historyRows, historyDigest, err := verifyStoreHistory(historyDocument, ledger)
+	if err != nil { return nil, fmt.Errorf("SQLite revision reconstruction: %w", err) }
+	sqliteReopenedVerified, sqliteReopenEvidenceDigest, err := verifySQLiteAuthorityReport(
+		sqliteAuthorityReport,
+		ledger,
+		historyDigest,
+	)
+	if err != nil { return nil, fmt.Errorf("SQLite adapter reopen evidence: %w", err) }
+	processEvidenceDigest, err := verifyAuthorityProcessEvidence(
+		processEvidence, staleAttempt, ledger, historyRows, attemptID,
+	)
+	if err != nil { return nil, fmt.Errorf("authority restart and fencing evidence: %w", err) }
+	databaseHash := sha256.Sum256(databaseBytes)
+	databaseDigest := hex.EncodeToString(databaseHash[:])
+
 	resultDigest, evidenceDigest, traceDigest, err := verifyResult(result, attemptID, requestDigest)
 	if err != nil { return nil, err }
 	if err := verifyAuthorityAttestation(
-		authorityAttestation, authority, ledgerDigest, ledgerSequence,
-		event, attemptID, requestDigest,
+		authorityAttestation,
+		authority,
+		ledgerDigest,
+		ledgerSequence,
+		event,
+		attemptID,
+		requestDigest,
+		historyDigest,
+		historyRows,
+		databaseDigest,
+		processEvidenceDigest,
 	); err != nil {
 		return nil, fmt.Errorf("authority signature: %w", err)
 	}
@@ -740,6 +1069,76 @@ func Verify(paths Paths) (object, error) {
 	if err != nil { return nil, fmt.Errorf("runner receipt: %w", err) }
 
 	details, _ := asObject(event["details"], "authorization details")
+	processPhases, _ := asArray(processEvidence["phases"], "authority process phases")
+	claimEvent, _ := asObject(mustEventObject(ledger["entries"], 1), "claim event")
+	claimDetails, _ := asObject(claimEvent["details"], "claim event details")
+	processReports := make([]any, 0, len(processPhases))
+	for _, rawPhase := range processPhases {
+		phase, _ := asObject(rawPhase, "authority process phase")
+		processReports = append(processReports, object{
+			"phase": phase["phase"],
+			"process_id": phase["process_id"],
+			"process_instance_id": phase["process_instance_id"],
+			"decision": phase["decision"],
+			"observed_store_revision": phase["observed_store_revision"],
+		})
+	}
+	authorityReport := object{
+		"participant_id": authority.ID,
+		"role": authority.Role,
+		"key_id": authority.KeyID,
+		"job": authority.Host["job"],
+		"actor_id": authority.Host["actor_id"],
+		"store_type": "sqlite-local-file",
+		"store_database_sha256": databaseDigest,
+		"store_revision_count": len(historyRows),
+		"store_history_digest": historyDigest,
+		"process_evidence_digest": processEvidenceDigest,
+		"process_phase_count": len(processPhases),
+		"process_instances": processReports,
+		"stale_owner_attempt_rejected": true,
+		"stale_owner_attempt_id": staleAttempt["stale_attempt_id"],
+		"owner_generation_after_restart": claimDetails["owner_generation"],
+		"storage_scope": "single-host-local-filesystem",
+		"sqlite_reopen_evidence_digest": sqliteReopenEvidenceDigest,
+	}
+	verifiedLayers := []any{
+		"full route-ledger head digest and supported event hash chain",
+		"open route, owner-generation claim, request admission, and execution-ticket replay",
+		"every SQLite revision prefix digest recomputed independently from its event append index",
+		"authority Ed25519 signature over the route ledger, SQLite database hash, revision audit, and process evidence",
+		"three distinct authority process-instance records bind open, restart, and stale-owner replay phases",
+		"old owner-generation replay rejected after durable ownership replacement",
+		"portable request digest and exact attempt correlation",
+		"portable result digest and request correlation",
+		"runner Ed25519 signature over the exact result and authorization event",
+		"SQLite reopen summary digest and its active epoch, owner, generation, and revision history are independently cross-checked",
+		"three distinct GitHub-hosted workflow job identities in one run",
+	}
+	if sqliteReopenedVerified {
+		verifiedLayers = append(verifiedLayers,
+			"third host reopened the transferred SQLite database using the repository adapter",
+		)
+	} else {
+		verifiedLayers = append(verifiedLayers,
+			"offline fixture explicitly does not claim that a real SQLite database was reopened",
+		)
+	}
+	notEstablished := []any{
+		"multi-host consensus or linearizability: SQLite is a single-host local-file CAS store, not a multi-host authority service",
+		"independent physical or administrative fault domains for the authority's three local processes",
+		"protection from a privileged host actor rewriting both SQLite database and all exported, signed evidence before checkpoint signing",
+		"honest computation, actual Lean execution, or theorem correctness",
+		"VGI kernel acceptance; that remains a separate VerifiedKernelReceipt boundary",
+		"direct peer-to-peer transport; workflow artifacts are still relayed through GitHub Actions",
+		"distinct physical servers for the three GitHub-hosted workflow jobs",
+		"combined cross-host duration or transport latency",
+	}
+	if !sqliteReopenedVerified {
+		notEstablished = append(notEstablished,
+			"offline deterministic fixture does not establish a real SQLite adapter reopen",
+		)
+	}
 	return object{
 		"schema": reportFormat,
 		"status": "verified",
@@ -750,13 +1149,7 @@ func Verify(paths Paths) (object, error) {
 		"execution_id": details["execution_id"],
 		"attempt_id": attemptID,
 		"request_digest": requestDigest,
-		"authority": object{
-			"participant_id": authority.ID,
-			"role": authority.Role,
-			"key_id": authority.KeyID,
-			"job": authority.Host["job"],
-			"actor_id": authority.Host["actor_id"],
-		},
+		"authority": authorityReport,
 		"runner": object{
 			"participant_id": runner.ID,
 			"role": runner.Role,
@@ -778,34 +1171,29 @@ func Verify(paths Paths) (object, error) {
 			"artifact_relay": "GitHub Actions artifact storage",
 			"combined_cross_host_elapsed_ns": nil,
 		},
+		"sqlite_store_reopened_verified": sqliteReopenedVerified,
+		"sqlite_reopen_evidence_digest": sqliteReopenEvidenceDigest,
 		"result_digest": resultDigest,
 		"return_evidence_digest": evidenceDigest,
 		"proof_trace_digest": traceDigest,
 		"completion_receipt_digest": receiptDigest,
 		"key_provenance_verified_by_github": paths.KeyAttestationsVerified,
-		"verified_layers": []any{
-			"full route-ledger head digest and supported event hash chain",
-			"open-route ownership, request admission, and execution-ticket replay",
-			"authority Ed25519 signature over the exact ledger head and authorization event",
-			"portable request digest and exact attempt correlation",
-			"portable result digest and request correlation",
-			"runner Ed25519 signature over the exact result and authorization event",
-			"three distinct GitHub-hosted workflow job identities in one run",
-		},
-		"not_established": []any{
-			"external shared-CAS linearizability or the live state at admission; this experiment uses an authority-signed synthetic ledger checkpoint",
-			"honest computation, actual Lean execution, or theorem correctness",
-			"VGI kernel acceptance; that remains a separate VerifiedKernelReceipt boundary",
-			"direct peer-to-peer transport; these records travel through GitHub Actions artifacts",
-			"distinct physical servers or independent administrative fault domains",
-			"combined cross-host duration or transport latency",
-		},
+		"verified_layers": verifiedLayers,
+		"not_established": notEstablished,
 	}, nil
+}
+
+func mustEventObject(value any, index int) any {
+	events, ok := value.([]any)
+	if !ok || index < 0 || index >= len(events) {
+		return nil
+	}
+	return events[index]
 }
 
 func main() {
 	if len(os.Args) < 2 || os.Args[1] != "verify" {
-		fmt.Fprintln(os.Stderr, "usage: go run . verify --ledger ... --request ... --authority-attestation ... --authority-key ... --result ... --receipt ... --runner-key ... --verifier-host ... [--key-attestations-verified]")
+		fmt.Fprintln(os.Stderr, "usage: go run . verify --ledger ... --request ... --authority-attestation ... --authority-key ... --authority-history ... --authority-store ... --process-evidence ... --stale-owner-attempt ... --sqlite-authority-report ... --result ... --receipt ... --runner-key ... --verifier-host ... [--key-attestations-verified]")
 		os.Exit(2)
 	}
 	flags := flag.NewFlagSet("verify", flag.ExitOnError)
@@ -813,8 +1201,13 @@ func main() {
 	output := flags.String("output", "reconstruction-report.json", "output report path")
 	flags.StringVar(&paths.Ledger, "ledger", "", "canonical route-ledger document")
 	flags.StringVar(&paths.Request, "request", "", "canonical proof-action request")
-	flags.StringVar(&paths.AuthorityAttestation, "authority-attestation", "", "authority-signed ledger checkpoint")
+	flags.StringVar(&paths.AuthorityAttestation, "authority-attestation", "", "authority-signed SQLite route-ledger checkpoint")
 	flags.StringVar(&paths.AuthorityKey, "authority-key", "", "separately attested authority public-key document")
+	flags.StringVar(&paths.AuthorityHistory, "authority-history", "", "SQLite route-ledger revision history")
+	flags.StringVar(&paths.AuthorityStore, "authority-store", "", "transferred SQLite authority database bytes")
+	flags.StringVar(&paths.ProcessEvidence, "process-evidence", "", "authority process restart evidence")
+	flags.StringVar(&paths.StaleOwnerAttempt, "stale-owner-attempt", "", "rejected stale-generation admission attempt")
+	flags.StringVar(&paths.SQLiteAuthorityReport, "sqlite-authority-report", "", "third-host SQLite adapter reopen evidence")
 	flags.StringVar(&paths.Result, "result", "", "canonical proof-action result")
 	flags.StringVar(&paths.Receipt, "receipt", "", "runner-signed completion receipt")
 	flags.StringVar(&paths.RunnerKey, "runner-key", "", "separately attested runner public-key document")
@@ -822,10 +1215,19 @@ func main() {
 	flags.BoolVar(&paths.KeyAttestationsVerified, "key-attestations-verified", false, "caller has verified both key-document GitHub attestations")
 	if err := flags.Parse(os.Args[2:]); err != nil { os.Exit(2) }
 	for name, path := range map[string]string{
-		"ledger": paths.Ledger, "request": paths.Request,
-		"authority-attestation": paths.AuthorityAttestation, "authority-key": paths.AuthorityKey,
-		"result": paths.Result, "receipt": paths.Receipt,
-		"runner-key": paths.RunnerKey, "verifier-host": paths.VerifierHost,
+		"ledger": paths.Ledger,
+		"request": paths.Request,
+		"authority-attestation": paths.AuthorityAttestation,
+		"authority-key": paths.AuthorityKey,
+		"authority-history": paths.AuthorityHistory,
+		"authority-store": paths.AuthorityStore,
+		"process-evidence": paths.ProcessEvidence,
+		"stale-owner-attempt": paths.StaleOwnerAttempt,
+		"sqlite-authority-report": paths.SQLiteAuthorityReport,
+		"result": paths.Result,
+		"receipt": paths.Receipt,
+		"runner-key": paths.RunnerKey,
+		"verifier-host": paths.VerifierHost,
 	} {
 		if path == "" { fmt.Fprintf(os.Stderr, "missing --%s\n", name); os.Exit(2) }
 	}
@@ -838,6 +1240,5 @@ func main() {
 		fmt.Fprintln(os.Stderr, "write report:", err)
 		os.Exit(1)
 	}
-	fmt.Printf("independent reconstruction verified: %s\n", report["completion_receipt_digest"])
+	fmt.Printf("independent SQLite authority reconstruction verified: %s\n", report["completion_receipt_digest"])
 }
-

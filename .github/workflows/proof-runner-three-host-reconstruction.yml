@@ -6,6 +6,7 @@ on:
     paths:
       - "experiments/proof-runner-independent-reconstruction/**"
       - "experiments/proof-runner-completion-receipts/**"
+      - "bridges/proof-attention/**"
       - "formats/canonical_metadata_v1.py"
       - "bridges/observation-path/cross_language_verifier/**"
       - ".github/workflows/proof-runner-three-host-reconstruction.yml"
@@ -13,6 +14,7 @@ on:
     paths:
       - "experiments/proof-runner-independent-reconstruction/**"
       - "experiments/proof-runner-completion-receipts/**"
+      - "bridges/proof-attention/**"
       - "formats/canonical_metadata_v1.py"
       - "bridges/observation-path/cross_language_verifier/**"
       - ".github/workflows/proof-runner-three-host-reconstruction.yml"
@@ -27,17 +29,35 @@ jobs:
     steps:
       - name: Check out proposed source
         uses: actions/checkout@v4
+      - name: Check out pinned E-CPU runtime dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+      - name: Check out pinned Virtual Ground Interpreter runtime dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install pinned Virtual Ground Interpreter dependency
+        run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - name: Verify the proof-ground runtime API
+        run: python -c "from vgi.proof import ProofGroundAdapter, VerifiedKernelReceipt; print('verified VGI proof-ground imports')"
       - name: Install Python test dependencies
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
-      - name: Run producer and authority-check tests
+      - name: Run producer, restart, and authority-check tests
         working-directory: experiments/proof-runner-independent-reconstruction
+        env:
+          PYTHONPATH: ${{ github.workspace }}/bridges/proof-attention:${{ github.workspace }}/external/E-CPU:${{ github.workspace }}
         run: |
-          python -m py_compile host_evidence.py test_host_evidence.py
-          python -m unittest -v test_host_evidence
+          python -m py_compile host_evidence.py durable_authority.py test_host_evidence.py test_durable_authority.py
+          python -m unittest -v test_host_evidence test_durable_authority
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
@@ -69,6 +89,11 @@ jobs:
                   "--request", str(fixture / "authority" / "request.json"),
                   "--authority-attestation", str(fixture / "authority" / "authority-attestation.json"),
                   "--authority-key", str(fixture / "authority" / "authority-public-key.json"),
+                  "--authority-history", str(fixture / "authority" / "store-history.json"),
+                  "--authority-store", str(fixture / "authority" / "authority-store-fixture.bin"),
+                  "--process-evidence", str(fixture / "authority" / "process-evidence.json"),
+                  "--stale-owner-attempt", str(fixture / "authority" / "stale-owner-attempt.json"),
+                  "--sqlite-authority-report", str(fixture / "authority" / "sqlite-authority-verification-fixture.json"),
                   "--result", str(fixture / "runner" / "result.json"),
                   "--receipt", str(fixture / "runner" / "completion-receipt.json"),
                   "--runner-key", str(fixture / "runner" / "runner-public-key.json"),
@@ -94,13 +119,31 @@ jobs:
     steps:
       - name: Check out In-Formation-Space
         uses: actions/checkout@v4
+      - name: Check out pinned E-CPU runtime dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+      - name: Check out pinned Virtual Ground Interpreter runtime dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install pinned Virtual Ground Interpreter dependency
+        run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - name: Verify the proof-ground runtime API
+        run: python -c "from vgi.proof import ProofGroundAdapter, VerifiedKernelReceipt; print('verified VGI proof-ground imports')"
       - name: Install signing dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
       - name: Produce route-authority checkpoint and ephemeral public identity
+        env:
+          PYTHONPATH: ${{ github.workspace }}/bridges/proof-attention:${{ github.workspace }}/external/E-CPU:${{ github.workspace }}
         run: |
           python experiments/proof-runner-independent-reconstruction/host_evidence.py \
             authority --out-dir evidence/authority
@@ -130,10 +173,20 @@ jobs:
     steps:
       - name: Check out In-Formation-Space
         uses: actions/checkout@v4
+      - name: Check out pinned Virtual Ground Interpreter runtime dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install pinned Virtual Ground Interpreter dependency
+        run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - name: Verify the proof-ground runtime API
+        run: python -c "from vgi.proof import ProofGroundAdapter, VerifiedKernelReceipt; print('verified VGI proof-ground imports')"
       - name: Install signing dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47"
       - name: Install current signed GitHub CLI package
@@ -195,10 +248,26 @@ jobs:
     steps:
       - name: Check out In-Formation-Space
         uses: actions/checkout@v4
+      - name: Check out pinned E-CPU runtime dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c82d795e6b7602cc3d6e8c41e8622820914f5cbf
+          path: external/E-CPU
+      - name: Check out pinned Virtual Ground Interpreter runtime dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install pinned Virtual Ground Interpreter dependency
+        run: python -m pip install --disable-pip-version-check --no-deps external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - name: Verify the proof-ground runtime API
+        run: python -c "from vgi.proof import ProofGroundAdapter, VerifiedKernelReceipt; print('verified VGI proof-ground imports')"
       - name: Install key-attestation verifier dependency
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5"
       - name: Install current signed GitHub CLI package
@@ -242,6 +311,28 @@ jobs:
             --path received-runner/runner-public-key.json \
             --role runner_host \
             --job runner_host
+      - name: Reopen and verify the transferred SQLite authority on the third host
+        env:
+          PYTHONPATH: ${{ github.workspace }}/bridges/proof-attention:${{ github.workspace }}/external/E-CPU:${{ github.workspace }}
+        run: |
+          python experiments/proof-runner-independent-reconstruction/host_evidence.py \
+            verify-sqlite-authority \
+            --authority-dir received-authority \
+            --output evidence/sqlite-authority-verification.json
+      - name: Validate independent SQLite reopen evidence schema
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/proof-runner-independent-reconstruction")
+          schema = json.loads((root / "sqlite-authority-verification.schema.json").read_text(encoding="utf-8"))
+          evidence = json.loads(Path("evidence/sqlite-authority-verification.json").read_text(encoding="utf-8"))
+          Draft202012Validator.check_schema(schema)
+          Draft202012Validator(schema).validate(evidence)
+          print("valid: third-host SQLite authority reopen evidence")
+          PY
       - name: Record the third-host identity
         run: |
           python experiments/proof-runner-independent-reconstruction/host_evidence.py \
@@ -258,6 +349,11 @@ jobs:
             --request ../../received-authority/request.json \
             --authority-attestation ../../received-authority/authority-attestation.json \
             --authority-key ../../received-authority/authority-public-key.json \
+            --authority-history ../../received-authority/store-history.json \
+            --authority-store ../../received-authority/authority-store.sqlite3 \
+            --process-evidence ../../received-authority/process-evidence.json \
+            --stale-owner-attempt ../../received-authority/stale-owner-attempt.json \
+            --sqlite-authority-report ../../evidence/sqlite-authority-verification.json \
             --result ../../received-runner/result.json \
             --receipt ../../received-runner/completion-receipt.json \
             --runner-key ../../received-runner/runner-public-key.json \
@@ -287,6 +383,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: proof-runner-independent-reconstruction-report
-          path: evidence/reconstruction-report.json
+          path: |
+            evidence/reconstruction-report.json
+            evidence/sqlite-authority-verification.json
           if-no-files-found: error
           retention-days: 90

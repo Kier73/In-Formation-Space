@@ -11,6 +11,7 @@ from host_evidence import (
     KEY_PREDICATE_SCHEMA,
     _read,
     _verify_authority_material,
+    _validate_authority_process_evidence,
     build_fixture,
 )
 
@@ -23,20 +24,36 @@ class HostEvidenceTests(unittest.TestCase):
         self.ledger = _read(self.root / "authority" / "route-ledger.json")
         self.request = _read(self.root / "authority" / "request.json")
         self.attestation = _read(self.root / "authority" / "authority-attestation.json")
-        self.authority_key = _read(self.root / "authority" / "authority-public-key.json")
+        authority_dir = self.root / "authority"
+        self.authority_key = _read(authority_dir / "authority-public-key.json")
+        self.history = _read(authority_dir / "store-history.json")["entries"]
+        self.process_evidence = _read(authority_dir / "process-evidence.json")
+        self.stale_attempt = _read(authority_dir / "stale-owner-attempt.json")
+        self.database_path = authority_dir / "authority-store-fixture.bin"
+        self.sqlite_report = _read(authority_dir / "sqlite-authority-verification-fixture.json")
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
     def test_fixture_is_complete_and_authority_binding_reconstructs(self) -> None:
         event = _verify_authority_material(
-            self.ledger, self.request, self.attestation, self.authority_key
+            self.ledger,
+            self.request,
+            self.attestation,
+            self.authority_key,
+            history=self.history,
+            process_evidence=self.process_evidence,
+            stale_attempt=self.stale_attempt,
+            database_path=self.database_path,
         )
         self.assertEqual(event["event_type"], "execution_authorized")
         self.assertEqual(event["details"]["attempt_id"], self.request["attempt_id"])
         self.assertEqual(event["details"]["request_digest"], self.request["request_digest"])
         self.assertTrue((self.root / "runner" / "completion-receipt.json").is_file())
         self.assertTrue((self.root / "verifier-host.json").is_file())
+        self.assertFalse(self.sqlite_report["verified"])
+        self.assertEqual(self.sqlite_report["active_owner_generation"], 2)
+        self.assertEqual(self.sqlite_report["ledger_digest"], self.ledger["ledger_digest"])
 
     def test_participant_attestation_predicate_binds_exact_key_and_host_role(self) -> None:
         key_path = self.root / "authority" / "authority-public-key.json"
@@ -57,15 +74,73 @@ class HostEvidenceTests(unittest.TestCase):
         altered["signature"] = ("0" if signature[0] != "0" else "1") + signature[1:]
         with self.assertRaisesRegex(EvidenceError, "signature verification failed"):
             _verify_authority_material(
-                self.ledger, self.request, altered, self.authority_key
+                self.ledger,
+                self.request,
+                altered,
+                self.authority_key,
+                history=self.history,
+                process_evidence=self.process_evidence,
+                stale_attempt=self.stale_attempt,
+                database_path=self.database_path,
             )
 
     def test_ledger_substitution_is_rejected_by_signed_checkpoint(self) -> None:
         altered = copy.deepcopy(self.ledger)
-        altered["entries"][1]["details"]["request_sequence"] = 99
-        with self.assertRaisesRegex(EvidenceError, "ledger digest mismatch"):
+        altered["entries"][1]["details"]["owner_generation"] = 9
+        with self.assertRaisesRegex(EvidenceError, "route ledger digest mismatch"):
             _verify_authority_material(
-                altered, self.request, self.attestation, self.authority_key
+                altered,
+                self.request,
+                self.attestation,
+                self.authority_key,
+                history=self.history,
+                process_evidence=self.process_evidence,
+                stale_attempt=self.stale_attempt,
+                database_path=self.database_path,
+            )
+
+    def test_history_tampering_is_rejected_even_with_revision_link_rewrite(self) -> None:
+        altered = copy.deepcopy(self.history)
+        altered[1]["ledger_digest"] = "0" * 64
+        altered[2]["previous_ledger_digest"] = "0" * 64
+        with self.assertRaisesRegex(EvidenceError, "intermediate ledger digest mismatch"):
+            _verify_authority_material(
+                self.ledger,
+                self.request,
+                self.attestation,
+                self.authority_key,
+                history=altered,
+                process_evidence=self.process_evidence,
+                stale_attempt=self.stale_attempt,
+                database_path=self.database_path,
+            )
+
+    def test_process_evidence_cannot_claim_a_different_stale_owner_outcome(self) -> None:
+        altered_process = copy.deepcopy(self.process_evidence)
+        altered_process["phases"][2]["accepted"] = True
+        altered = altered_process["phases"][2]
+        with self.assertRaisesRegex(EvidenceError, "stale owner-generation attempt"):
+            _validate_authority_process_evidence(
+                self.ledger,
+                altered_process,
+                altered,
+                self.history,
+                self.request,
+            )
+
+    def test_database_bytes_are_bound_by_the_authority_signature(self) -> None:
+        altered_path = self.root / "authority" / "altered-store.bin"
+        altered_path.write_bytes(self.database_path.read_bytes() + b"tamper")
+        with self.assertRaisesRegex(EvidenceError, "does not bind the ledger, SQLite audit"):
+            _verify_authority_material(
+                self.ledger,
+                self.request,
+                self.attestation,
+                self.authority_key,
+                history=self.history,
+                process_evidence=self.process_evidence,
+                stale_attempt=self.stale_attempt,
+                database_path=altered_path,
             )
 
     def test_fixture_artifacts_are_reproducible(self) -> None:
@@ -77,6 +152,11 @@ class HostEvidenceTests(unittest.TestCase):
             "authority/authority-attestation.json",
             "authority/authority-public-key.json",
             "authority/authority-public-key.predicate.json",
+            "authority/store-history.json",
+            "authority/process-evidence.json",
+            "authority/stale-owner-attempt.json",
+            "authority/authority-store-fixture.bin",
+            "authority/sqlite-authority-verification-fixture.json",
             "runner/result.json",
             "runner/completion-receipt.json",
             "runner/runner-public-key.json",
