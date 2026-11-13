@@ -162,6 +162,7 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
         self.assertEqual(report["client"]["route_type"], "direct")
         self.assertEqual(report["server"]["route_type"], "direct")
         self.assertFalse(report["path_semantics"]["application_payload_sent"])
+        self.assertNotIn("IHP-004", report["path_semantics"]["next_step"])
 
     def test_report_distinguishes_relayed_overlay_from_direct_path(self) -> None:
         client_address, _ = self.address("client_host", self.client_env, "100.64.0.11")
