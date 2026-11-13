@@ -48,7 +48,7 @@ def evalReal : Expr → ℝ → ℝ
 theorem evalReal_at_rat (expr : Expr) (q : Rat) :
     evalReal expr (q : ℝ) = (evalRat expr q : ℝ) := by
   induction expr with
-  | variable => rfl
+  | input => rfl
   | literal value => rfl
   | sum lhs rhs ihl ihr =>
       simp only [evalReal, evalRat, ihl, ihr, Rat.cast_add]
@@ -61,7 +61,7 @@ theorem evalReal_at_rat (expr : Expr) (q : Rat) :
     interpretation. This is an existence proof, not a continuity premise. -/
 theorem continuous_evalReal (expr : Expr) : Continuous (evalReal expr) := by
   induction expr with
-  | variable => simpa only [evalReal] using
+  | input => simpa only [evalReal] using
       (continuous_id : Continuous (fun x : ℝ => x))
   | literal value => simpa only [evalReal] using
       (continuous_const : Continuous (fun _ : ℝ => (value : ℝ)))
