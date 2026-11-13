@@ -1,0 +1,14 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/direct-mtls-host-certificate-predicate.schema.json",
+  "title":"Direct mTLS host certificate attestation predicate",
+  "type":"object","additionalProperties":false,
+  "required":["schema","role","host","certificate_sha256","dns_identity"],
+  "properties":{
+    "schema":{"const":"in-formation.direct-mtls-host-certificate-predicate/0.1"},
+    "role":{"enum":["client_host","server_host"]},
+    "host":{"type":"object"},
+    "certificate_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "dns_identity":{"type":"string","minLength":1}
+  }
+}

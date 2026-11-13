@@ -1,0 +1,28 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/direct-mtls-endpoint-advertisement.schema.json",
+  "title":"Signed direct mTLS endpoint advertisement",
+  "type":"object","additionalProperties":false,
+  "required":["core","signature","signed_digest"],
+  "properties":{
+    "core":{
+      "type":"object","additionalProperties":false,
+      "required":["schema","path_id","run_id","run_attempt","server_host","host","port","dns_identity","server_cert_sha256","client_actor_id","client_cert_sha256"],
+      "properties":{
+        "schema":{"const":"in-formation.direct-mtls-endpoint-advertisement/0.1"},
+        "path_id":{"type":"string","minLength":1},
+        "run_id":{"type":"string","minLength":1},
+        "run_attempt":{"type":"string","minLength":1},
+        "server_host":{"type":"object"},
+        "host":{"type":"string","minLength":1},
+        "port":{"type":"integer","minimum":1,"maximum":65535},
+        "dns_identity":{"type":"string","minLength":1},
+        "server_cert_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+        "client_actor_id":{"type":"string","minLength":1},
+        "client_cert_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"}
+      }
+    },
+    "signature":{"type":"string","contentEncoding":"base64"},
+    "signed_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}
+  }
+}

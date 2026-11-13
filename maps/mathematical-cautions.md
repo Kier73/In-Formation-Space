@@ -140,6 +140,20 @@ The expression
 
 is the probability of at least one error across \(k\) independent opportunities, each with error probability \(\epsilon\). It is a useful baseline, but an agent-to-agent error cascade is unlikely to satisfy independence automatically. Shared assumptions, copying, correction, and correlated failures change the result. A cascade model should specify the dependency structure rather than infer it from this expression.
 
+## 9. Retention formulas carry a loss and recovery model
+
+The delay-loop expression
+
+\[
+t_{1/2} = \frac{\tau \ln 2}{M p}
+\]
+
+is not a universal persistence law. It approximates the intact-block case when every one of \(M\) packets must survive and \(p\) is small. The exact intact-block expression uses \(-\ln(1-p)\) rather than \(p\), and a \(k\)-of-\(n\) recovery threshold produces a different half-life. Without repair or renewal, every finite \(k\)-of-\(n\) configuration still decays. The [in-transit memory experiment](../experiments/in-transit-memory/README.md) records exact calculations, a seeded simulation, and the repair-epoch trade-off.
+
+## 10. A finite zero-error run is not a zero-error channel
+
+Observing no symbol errors in a finite simulation supports a statement such as \(P_{\text{clean}}=(1-p)^N\), not the equality \(p=0\). Under additive Gaussian jitter, the exact symbol error probability is positive for every positive noise standard deviation, however small; it may simply be below the simulation's resolution. A bounded-jitter guarantee is a different claim, and it must state the bound and the decoder's tracking rule. The [cadence channel experiment](../experiments/cadence-channel/README.md) separates exact error probability, a sufficient bounded-jitter condition, PLL tracking, and the horizon over which a clean run is informative. A "zero BER" report should state its noise model, message length, and confidence rather than silently replacing a bound with an equality.
+
 ## Working rule
 
 Keep equations. Keep speculative models. Keep ambitious intuitions. But attach the conditions under which each expression is meaningful, and record when a formula is only an analogy or a proposed scaling law. A model becomes more useful—not less adventurous—when another contributor can tell what would make it fail.

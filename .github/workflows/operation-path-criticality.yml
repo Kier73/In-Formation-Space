@@ -1,0 +1,42 @@
+name: Operation path criticality
+
+on:
+  push:
+    paths:
+      - "bridges/observation-path/operation_spans.py"
+      - "bridges/observation-path/operation_path_criticality.py"
+      - "bridges/observation-path/test_operation_path_criticality.py"
+      - "bridges/observation-path/operation-path*.schema.json"
+      - ".github/workflows/operation-path-criticality.yml"
+  pull_request:
+    paths:
+      - "bridges/observation-path/operation_spans.py"
+      - "bridges/observation-path/operation_path_criticality.py"
+      - "bridges/observation-path/test_operation_path_criticality.py"
+      - "bridges/observation-path/operation-path*.schema.json"
+      - ".github/workflows/operation-path-criticality.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema dependency
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Compile operation path analyzer
+        run: python -m py_compile bridges/observation-path/operation_spans.py bridges/observation-path/operation_path_criticality.py
+      - name: Run operation span tests
+        run: python -m unittest discover -s bridges/observation-path -p 'test_operation_spans.py' -v
+      - name: Run operation path criticality tests
+        run: python -m unittest discover -s bridges/observation-path -p 'test_operation_path_criticality.py' -v
+      - name: Parse portable schemas
+        run: |
+          python -m json.tool bridges/observation-path/operation-path.schema.json > /dev/null
+          python -m json.tool bridges/observation-path/operation-path-criticality.schema.json > /dev/null

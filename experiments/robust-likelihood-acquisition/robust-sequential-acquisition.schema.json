@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Kier73/In-Formation-Space/blob/main/experiments/robust-likelihood-acquisition/robust-sequential-acquisition.schema.json",
+  "title": "RIV-016 Robust Sequential Acquisition Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format", "schema", "joint_belief", "candidate_sensors", "model_scenarios",
+    "decision_loss_matrix", "path_cost_budget", "max_measurements", "search_limits",
+    "ambiguity_set", "baseline_decision", "selected_policy", "root_pareto_frontier",
+    "search_metrics", "measurement_status", "ground_effect", "model_effect",
+    "interpretation_limits", "report_digest"
+  ],
+  "properties": {
+    "format": {"const": "in-formation.robust-sequential-acquisition/0.1"},
+    "schema": {"const": "in-formation.robust-sequential-acquisition/0.1"},
+    "joint_belief": {"$ref": "#/$defs/jointBelief"},
+    "candidate_sensors": {
+      "type": "array", "minItems": 1, "maxItems": 6,
+      "items": {"$ref": "#/$defs/candidate"}
+    },
+    "model_scenarios": {
+      "type": "array", "minItems": 1, "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scenario_id", "candidate_models"],
+        "properties": {
+          "scenario_id": {"type": "string", "minLength": 1},
+          "candidate_models": {
+            "type": "array", "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sensor_id", "outcome_likelihoods"],
+              "properties": {
+                "sensor_id": {"type": "string", "minLength": 1},
+                "outcome_likelihoods": {
+                  "type": "array", "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["outcome", "likelihoods"],
+                    "properties": {
+                      "outcome": {"$ref": "#/$defs/scalar"},
+                      "likelihoods": {
+                        "type": "array", "minItems": 2,
+                        "items": {"$ref": "#/$defs/stateLikelihood"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "decision_loss_matrix": {"$ref": "#/$defs/lossMatrix"},
+    "path_cost_budget": {"$ref": "#/$defs/fraction"},
+    "max_measurements": {"type": "integer", "minimum": 0, "maximum": 6},
+    "search_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_dp_states", "max_frontier_size", "max_policy_combinations"],
+      "properties": {
+        "max_dp_states": {"type": "integer", "minimum": 1},
+        "max_frontier_size": {"type": "integer", "minimum": 1},
+        "max_policy_combinations": {"type": "integer", "minimum": 1}
+      }
+    },
+    "ambiguity_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenario_ids", "scenario_count", "scenario_weights", "scenario_persistence"],
+      "properties": {
+        "scenario_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "scenario_count": {"type": "integer", "minimum": 1},
+        "scenario_weights": {"type": "null"},
+        "scenario_persistence": {"type": "string", "minLength": 1}
+      }
+    },
+    "baseline_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "worst_case_no_measurement_risk"],
+      "properties": {
+        "action": {"enum": ["A", "B"]},
+        "worst_case_no_measurement_risk": {"$ref": "#/$defs/fraction"}
+      }
+    },
+    "selected_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_tree", "scenario_expected_decision_loss",
+        "scenario_expected_measurement_cost", "worst_case_expected_decision_loss",
+        "worst_case_expected_measurement_cost", "maximum_path_cost",
+        "maximum_measurements_on_path", "robust_expected_loss_reduction"
+      ],
+      "properties": {
+        "policy_tree": {"$ref": "#/$defs/policyTree"},
+        "scenario_expected_decision_loss": {
+          "type": "object", "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/fraction"}
+        },
+        "scenario_expected_measurement_cost": {
+          "type": "object", "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/fraction"}
+        },
+        "worst_case_expected_decision_loss": {"$ref": "#/$defs/fraction"},
+        "worst_case_expected_measurement_cost": {"$ref": "#/$defs/fraction"},
+        "maximum_path_cost": {"$ref": "#/$defs/fraction"},
+        "maximum_measurements_on_path": {"type": "integer", "minimum": 0, "maximum": 6},
+        "robust_expected_loss_reduction": {"$ref": "#/$defs/fraction"}
+      }
+    },
+    "root_pareto_frontier": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scenario_expected_decision_loss", "scenario_expected_measurement_cost",
+          "worst_case_expected_decision_loss", "worst_case_expected_measurement_cost",
+          "maximum_path_cost", "maximum_measurements_on_path", "policy_tree"
+        ],
+        "properties": {
+          "scenario_expected_decision_loss": {
+            "type": "object", "minProperties": 1,
+            "additionalProperties": {"$ref": "#/$defs/fraction"}
+          },
+          "scenario_expected_measurement_cost": {
+            "type": "object", "minProperties": 1,
+            "additionalProperties": {"$ref": "#/$defs/fraction"}
+          },
+          "worst_case_expected_decision_loss": {"$ref": "#/$defs/fraction"},
+          "worst_case_expected_measurement_cost": {"$ref": "#/$defs/fraction"},
+          "maximum_path_cost": {"$ref": "#/$defs/fraction"},
+          "maximum_measurements_on_path": {"type": "integer", "minimum": 0, "maximum": 6},
+          "policy_tree": {"$ref": "#/$defs/policyTree"}
+        }
+      }
+    },
+    "search_metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dp_state_count", "policy_combination_count", "maximum_frontier_size"],
+      "properties": {
+        "dp_state_count": {"type": "integer", "minimum": 1},
+        "policy_combination_count": {"type": "integer", "minimum": 0},
+        "maximum_frontier_size": {"type": "integer", "minimum": 1}
+      }
+    },
+    "measurement_status": {"const": "policy_proposal_only_not_dispatched"},
+    "ground_effect": {"const": "none"},
+    "model_effect": {"const": "none"},
+    "interpretation_limits": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "fraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": {"type": "integer"},
+        "denominator": {"type": "integer", "minimum": 1}
+      }
+    },
+    "scalar": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "boolean"},
+        {"type": "null"}
+      ]
+    },
+    "jointBelief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format", "schema", "source_ref", "source_report_digest",
+        "source_state_id", "joint_posterior", "posterior_hypothesis_a",
+        "posterior_context_marginals", "belief_digest"
+      ],
+      "properties": {
+        "format": {"const": "in-formation.joint-context-belief/0.1"},
+        "schema": {"const": "in-formation.joint-context-belief/0.1"},
+        "source_ref": {"type": "string", "minLength": 1},
+        "source_report_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_state_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "joint_posterior": {
+          "type": "array", "minItems": 2,
+          "items": {"$ref": "#/$defs/stateProbability"}
+        },
+        "posterior_hypothesis_a": {"$ref": "#/$defs/fraction"},
+        "posterior_context_marginals": {
+          "type": "object", "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/fraction"}
+        },
+        "belief_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "stateProbability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hypothesis", "context_state", "probability"],
+      "properties": {
+        "hypothesis": {"enum": ["A", "B"]},
+        "context_state": {"type": "string", "minLength": 1},
+        "probability": {"$ref": "#/$defs/fraction"}
+      }
+    },
+    "stateLikelihood": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hypothesis", "context_state", "probability"],
+      "properties": {
+        "hypothesis": {"enum": ["A", "B"]},
+        "context_state": {"type": "string", "minLength": 1},
+        "probability": {"$ref": "#/$defs/fraction"}
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sensor_id", "dimension", "cost", "outcomes"],
+      "properties": {
+        "sensor_id": {"type": "string", "minLength": 1},
+        "dimension": {"type": "string", "minLength": 1},
+        "cost": {"$ref": "#/$defs/fraction"},
+        "outcomes": {
+          "type": "array", "minItems": 1, "maxItems": 4,
+          "items": {"$ref": "#/$defs/scalar"}
+        }
+      }
+    },
+    "lossMatrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decide_a_if_hypothesis_a", "decide_a_if_hypothesis_b",
+        "decide_b_if_hypothesis_a", "decide_b_if_hypothesis_b"
+      ],
+      "properties": {
+        "decide_a_if_hypothesis_a": {"$ref": "#/$defs/fraction"},
+        "decide_a_if_hypothesis_b": {"$ref": "#/$defs/fraction"},
+        "decide_b_if_hypothesis_a": {"$ref": "#/$defs/fraction"},
+        "decide_b_if_hypothesis_b": {"$ref": "#/$defs/fraction"}
+      }
+    },
+    "policyTree": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["node_type", "decision"],
+          "properties": {
+            "node_type": {"const": "stop"},
+            "decision": {"enum": ["A", "B"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["node_type", "disposition", "reason"],
+          "properties": {
+            "node_type": {"const": "model_mismatch_stop"},
+            "disposition": {"const": "stop_and_review"},
+            "reason": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["node_type", "sensor_id", "measurement_cost", "branches"],
+          "properties": {
+            "node_type": {"const": "measure"},
+            "sensor_id": {"type": "string", "minLength": 1},
+            "measurement_cost": {"$ref": "#/$defs/fraction"},
+            "branches": {
+              "type": "array", "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["outcome", "next"],
+                "properties": {
+                  "outcome": {"$ref": "#/$defs/scalar"},
+                  "next": {"$ref": "#/$defs/policyTree"}
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

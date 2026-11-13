@@ -1,0 +1,319 @@
+{
+  "horizon_cap": 1000000000,
+  "horizon_note": "A null 95% clean-run horizon means the computed horizon exceeds horizon_cap; the exact symbol error probability is still positive for every sigma > 0.",
+  "python": "3.14.0",
+  "scan": [
+    {
+      "clean_probability_32": 1.0,
+      "exact_ber": 1.2417830369680431e-138,
+      "exact_ser": 5.73130632446789e-138,
+      "genie_ber": 0.0,
+      "genie_ser": 0.0,
+      "horizon_95": null,
+      "pll_baseline_variance_ratio": 0.025438080000092584,
+      "pll_ber": 0.0,
+      "pll_error_after_error": null,
+      "pll_error_after_ok": 0.0,
+      "pll_longest_error_run": 0,
+      "pll_ser": 0.0,
+      "sigma_ms": 0.02,
+      "sigma_over_quantum": 0.02,
+      "static_ber": 0.0,
+      "static_ser": 0.0
+    },
+    {
+      "clean_probability_32": 1.0,
+      "exact_ber": 3.09556529106528e-24,
+      "exact_ser": 1.428722442030129e-23,
+      "genie_ber": 0.0,
+      "genie_ser": 0.0,
+      "horizon_95": null,
+      "pll_baseline_variance_ratio": 0.02543808000009299,
+      "pll_ber": 0.0,
+      "pll_error_after_error": null,
+      "pll_error_after_ok": 0.0,
+      "pll_longest_error_run": 0,
+      "pll_ser": 0.0,
+      "sigma_ms": 0.05,
+      "sigma_over_quantum": 0.05,
+      "static_ber": 0.0,
+      "static_ser": 0.0
+    },
+    {
+      "clean_probability_32": 0.9999828010489693,
+      "exact_ber": 2.3290440212475647e-07,
+      "exact_ser": 5.374716972734916e-07,
+      "genie_ber": 1.25e-06,
+      "genie_ser": 5e-06,
+      "horizon_95": 95434,
+      "pll_baseline_variance_ratio": 0.02543700237894223,
+      "pll_ber": 1.25e-06,
+      "pll_error_after_error": 0.0,
+      "pll_error_after_ok": 5.000050000500005e-06,
+      "pll_longest_error_run": 1,
+      "pll_ser": 5e-06,
+      "sigma_ms": 0.1,
+      "sigma_over_quantum": 0.1,
+      "static_ber": 1.25e-06,
+      "static_ser": 5e-06
+    },
+    {
+      "clean_probability_32": 0.9745748242684281,
+      "exact_ber": 0.000348611520722454,
+      "exact_ser": 0.0008044881247440701,
+      "genie_ber": 0.0004125,
+      "genie_ser": 0.00096,
+      "horizon_95": 63,
+      "pll_baseline_variance_ratio": 0.025976816045838083,
+      "pll_ber": 0.00040875,
+      "pll_error_after_error": 0.0,
+      "pll_error_after_ok": 0.0009509081172519757,
+      "pll_longest_error_run": 1,
+      "pll_ser": 0.00095,
+      "sigma_ms": 0.15,
+      "sigma_over_quantum": 0.15,
+      "static_ber": 0.0003475,
+      "static_ser": 0.000805
+    },
+    {
+      "clean_probability_32": 0.6874501915665404,
+      "exact_ber": 0.005045353077190131,
+      "exact_ser": 0.01164312248583027,
+      "genie_ber": 0.00546875,
+      "genie_ser": 0.01262,
+      "horizon_95": 4,
+      "pll_baseline_variance_ratio": 0.03039376803938299,
+      "pll_ber": 0.00562,
+      "pll_error_after_error": 0.01730769230769231,
+      "pll_error_after_ok": 0.012943327980384906,
+      "pll_longest_error_run": 3,
+      "pll_ser": 0.013,
+      "sigma_ms": 0.2,
+      "sigma_over_quantum": 0.2,
+      "static_ber": 0.0050225,
+      "static_ser": 0.011535
+    },
+    {
+      "clean_probability_32": 0.24783886508433506,
+      "exact_ber": 0.01848448211540298,
+      "exact_ser": 0.04265649740283603,
+      "genie_ber": 0.01965875,
+      "genie_ser": 0.045395,
+      "horizon_95": 1,
+      "pll_baseline_variance_ratio": 0.039251988552511614,
+      "pll_ber": 0.0200925,
+      "pll_error_after_error": 0.0475473321858864,
+      "pll_error_after_ok": 0.046428215602271596,
+      "pll_longest_error_run": 4,
+      "pll_ser": 0.04648,
+      "sigma_ms": 0.25,
+      "sigma_over_quantum": 0.25,
+      "static_ber": 0.0184975,
+      "static_ser": 0.04261
+    },
+    {
+      "clean_probability_32": 0.049582278337707,
+      "exact_ber": 0.03882963434807707,
+      "exact_ser": 0.08960691051152757,
+      "genie_ber": 0.040445,
+      "genie_ser": 0.09351,
+      "horizon_95": 0,
+      "pll_baseline_variance_ratio": 0.055421882497310636,
+      "pll_ber": 0.0424125,
+      "pll_error_after_error": 0.10141449216156871,
+      "pll_error_after_ok": 0.0975356952820149,
+      "pll_longest_error_run": 5,
+      "pll_ser": 0.097915,
+      "sigma_ms": 0.3,
+      "sigma_over_quantum": 0.3,
+      "static_ber": 0.03884,
+      "static_ser": 0.08961
+    },
+    {
+      "clean_probability_32": 0.0008549928872236932,
+      "exact_ber": 0.085832152054379,
+      "exact_ser": 0.19809332562535367,
+      "genie_ber": 0.08748125,
+      "genie_ser": 0.20219,
+      "horizon_95": 0,
+      "pll_baseline_variance_ratio": 0.11623610239987071,
+      "pll_ber": 0.09534625,
+      "pll_error_after_error": 0.22533421094441544,
+      "pll_error_after_ok": 0.21887264332435552,
+      "pll_longest_error_run": 13,
+      "pll_ser": 0.220295,
+      "sigma_ms": 0.4,
+      "sigma_over_quantum": 0.4,
+      "static_ber": 0.085425,
+      "static_ser": 0.19701
+    },
+    {
+      "clean_probability_32": 1.2390985191448212e-05,
+      "exact_ber": 0.12878093941476143,
+      "exact_ser": 0.297478601121482,
+      "genie_ber": 0.1304375,
+      "genie_ser": 0.30161,
+      "horizon_95": 0,
+      "pll_baseline_variance_ratio": 0.13752801925111363,
+      "pll_ber": 0.1408625,
+      "pll_error_after_error": 0.328394189724534,
+      "pll_error_after_ok": 0.3243050870077777,
+      "pll_longest_error_run": 13,
+      "pll_ser": 0.325635,
+      "sigma_ms": 0.5,
+      "sigma_over_quantum": 0.5,
+      "static_ber": 0.12808375,
+      "static_ser": 0.29656
+    }
+  ],
+  "scan_config": {
+    "base_delay_ms": 20.0,
+    "bits_per_symbol": 4,
+    "pll_alpha": 0.05,
+    "quantum_ms": 1.0
+  },
+  "seed": 20261112,
+  "source_checks": [
+    {
+      "base_delay_ms": 20.0,
+      "exact_ber": 0.001096792150699456,
+      "exact_clean_probability": 0.9221046530345578,
+      "exact_ser": 0.0025310588093064297,
+      "failure_rate": 0.104,
+      "failures": 52,
+      "first_failures": [
+        2,
+        15,
+        22,
+        24,
+        30,
+        53,
+        54,
+        64,
+        71,
+        81
+      ],
+      "horizon_95": 20,
+      "name": "short_jitter_test",
+      "quantum_ms": 6.0,
+      "seeds": 500,
+      "sigma_over_quantum": 0.16666666666666666,
+      "symbols_per_message": 32,
+      "three_sigma_bound_holds": false,
+      "three_sigma_over_quantum": 0.5
+    },
+    {
+      "base_delay_ms": 50.0,
+      "exact_ber": 1.667463780677865e-10,
+      "exact_clean_probability": 0.9999999938432094,
+      "exact_ser": 3.847993922285535e-10,
+      "failure_rate": 0.0,
+      "failures": 0,
+      "first_failures": [],
+      "horizon_95": 133298792,
+      "name": "wan_benchmark",
+      "quantum_ms": 25.0,
+      "seeds": 500,
+      "sigma_over_quantum": 0.08,
+      "symbols_per_message": 16,
+      "three_sigma_bound_holds": true,
+      "three_sigma_over_quantum": 0.24
+    }
+  ],
+  "source_revision": "c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65",
+  "targeted": {
+    "baseline_variance": [
+      {
+        "baseline_variance_ratio": 0.02543808000009299,
+        "linear_prediction": 0.025641025641025644,
+        "pll_ser": 0.0,
+        "sigma_ms": 0.05,
+        "trials": 200000
+      },
+      {
+        "baseline_variance_ratio": 0.03039376803938299,
+        "linear_prediction": 0.025641025641025644,
+        "pll_ser": 0.013,
+        "sigma_ms": 0.2,
+        "trials": 200000
+      }
+    ],
+    "bounded_jitter": [
+      {
+        "jmax_over_quantum": 0.2,
+        "longest_error_run": 0,
+        "mean_baseline_error_ms": 0.18099565442848126,
+        "symbol_errors": 0
+      },
+      {
+        "jmax_over_quantum": 0.24,
+        "longest_error_run": 0,
+        "mean_baseline_error_ms": 0.21719478531417852,
+        "symbol_errors": 0
+      },
+      {
+        "jmax_over_quantum": 0.25,
+        "longest_error_run": 0,
+        "mean_baseline_error_ms": 0.2262445680356043,
+        "symbol_errors": 0
+      },
+      {
+        "jmax_over_quantum": 0.26,
+        "longest_error_run": 1,
+        "mean_baseline_error_ms": 0.23554310697593503,
+        "symbol_errors": 1
+      },
+      {
+        "jmax_over_quantum": 0.3,
+        "longest_error_run": 1,
+        "mean_baseline_error_ms": 0.2717422378616296,
+        "symbol_errors": 1
+      }
+    ],
+    "drift": [
+      {
+        "drift_ms_per_symbol": 0.02,
+        "drift_over_alpha_quantum": 0.19999999999999998,
+        "pll_errors": 0,
+        "pll_mean_baseline_error_ms": -0.17640000000000378,
+        "static_errors": 474
+      },
+      {
+        "drift_ms_per_symbol": 0.04,
+        "drift_over_alpha_quantum": 0.39999999999999997,
+        "pll_errors": 0,
+        "pll_mean_baseline_error_ms": -0.3528000000000026,
+        "static_errors": 487
+      },
+      {
+        "drift_ms_per_symbol": 0.049,
+        "drift_over_alpha_quantum": 0.49,
+        "pll_errors": 0,
+        "pll_mean_baseline_error_ms": -0.43218000000000334,
+        "static_errors": 489
+      },
+      {
+        "drift_ms_per_symbol": 0.05,
+        "drift_over_alpha_quantum": 0.5,
+        "pll_errors": 47,
+        "pll_mean_baseline_error_ms": -0.5171272537088207,
+        "static_errors": 489
+      },
+      {
+        "drift_ms_per_symbol": 0.051,
+        "drift_over_alpha_quantum": 0.5099999999999999,
+        "pll_errors": 462,
+        "pll_mean_baseline_error_ms": -4.943820000015831,
+        "static_errors": 490
+      },
+      {
+        "drift_ms_per_symbol": 0.08,
+        "drift_over_alpha_quantum": 0.7999999999999999,
+        "pll_errors": 490,
+        "pll_mean_baseline_error_ms": -6.851600000000003,
+        "static_errors": 493
+      }
+    ]
+  },
+  "trials": 200000
+}
