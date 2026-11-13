@@ -126,7 +126,9 @@ def convert_one(name: str, raw: bytes) -> tuple[str, int, str]:
         f"-- source-activation-cell-count: {len(cells)}",
         f"def {name} : COEWireCheck.Cert :=",
         "  " + model,
-        f"theorem {name}_arith_verified : COEWireCheck.verify {name} = true := by decide",
+        f"#eval COEWireCheck.verify {name}",
+        f"theorem {name}_arith_verified : COEWireCheck.verify {name} = true := by decide +kernel",
+        f"#print axioms COE007.{name}_arith_verified",
     ]
     return "\n".join(lines), len(cells), hashlib.sha256(raw).hexdigest()
 
