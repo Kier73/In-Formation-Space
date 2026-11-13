@@ -1,0 +1,36 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://github.com/Kier73/In-Formation-Space/blob/main/bridges/observation-path/ihp003-overlay-address.schema.json",
+  "title":"IHP-003 ephemeral Tailscale overlay address",
+  "type":"object","additionalProperties":false,
+  "required":["schema","role","host","status","overlay_provider","overlay_tag","overlay_ipv4","address_digest"],
+  "properties":{
+    "schema":{"const":"in-formation.ihp003-overlay-address/0.1"},
+    "role":{"enum":["client_host","server_host"]},
+    "host":{"$ref":"#/$defs/host"},
+    "status":{"enum":["ready","credentials_missing"]},
+    "overlay_provider":{"const":"tailscale"},
+    "overlay_tag":{"const":"tag:ihp003-ci"},
+    "overlay_ipv4":{"type":["string","null"],"format":"ipv4"},
+    "address_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}
+  },
+  "allOf":[
+    {"if":{"properties":{"status":{"const":"ready"}},"required":["status"]},"then":{"properties":{"overlay_ipv4":{"type":"string","format":"ipv4"}}}},
+    {"if":{"properties":{"status":{"const":"credentials_missing"}},"required":["status"]},"then":{"properties":{"overlay_ipv4":{"type":"null"}}}}
+  ],
+  "$defs":{
+    "host":{
+      "type":"object","additionalProperties":false,
+      "required":["role","repository","run_id","run_attempt","run_number","workflow_ref","workflow_sha","git_ref","git_sha","job","runner_name","runner_os","runner_arch","runner_environment","actor_id"],
+      "properties":{
+        "role":{"type":"string"},"repository":{"const":"Kier73/In-Formation-Space"},
+        "run_id":{"type":"string"},"run_attempt":{"type":"string"},"run_number":{"type":"string"},
+        "workflow_ref":{"type":"string"},"workflow_sha":{"type":"string"},
+        "git_ref":{"const":"refs/heads/main"},"git_sha":{"type":"string"},
+        "job":{"type":"string"},"runner_name":{"type":"string"},
+        "runner_os":{"type":"string"},"runner_arch":{"type":"string"},
+        "runner_environment":{"const":"github-hosted"},"actor_id":{"type":"string"}
+      }
+    }
+  }
+}
