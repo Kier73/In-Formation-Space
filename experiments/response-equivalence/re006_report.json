@@ -1,0 +1,79 @@
+{
+  "declared_closed_world": {
+    "audit_status": "controls_passed_under_declared_sampling",
+    "conditional_exclusion_admitted": true,
+    "external_clock_alignment": null,
+    "model_scope": "declared_closed_world",
+    "monitor_status": "observed",
+    "negative_control_status": "observed",
+    "physical_causation_proved": false,
+    "reason": "conditional finite-model reconstruction; completeness and sensor fidelity are assumptions",
+    "sampling_scope": "three_samples",
+    "schema": "in-formation.response-re006/0.1",
+    "source_identity": "role-HMAC under shared test-enrollment authority",
+    "survivors": [
+      "common_cause_alias",
+      "common_cause_marker"
+    ],
+    "unobserved_channels_excluded": false
+  },
+  "experiment": "RE-006",
+  "interference_detected": {
+    "audit_status": "not_admitted_missing_or_failed_controls",
+    "conditional_exclusion_admitted": false,
+    "external_clock_alignment": null,
+    "model_scope": "declared_closed_world",
+    "monitor_status": "observed",
+    "negative_control_status": "observed",
+    "physical_causation_proved": false,
+    "reason": "no justified closed-world exclusion from these receipts alone",
+    "sampling_scope": "three_samples",
+    "schema": "in-formation.response-re006/0.1",
+    "source_identity": "role-HMAC under shared test-enrollment authority",
+    "survivors": [
+      "common_cause_alias",
+      "common_cause_marker",
+      "event_causal"
+    ],
+    "unobserved_channels_excluded": false
+  },
+  "open_world": {
+    "audit_status": "controls_passed_under_declared_sampling",
+    "conditional_exclusion_admitted": false,
+    "external_clock_alignment": null,
+    "model_scope": "open_world",
+    "monitor_status": "observed",
+    "negative_control_status": "observed",
+    "physical_causation_proved": false,
+    "reason": "no justified closed-world exclusion from these receipts alone",
+    "sampling_scope": "three_samples",
+    "schema": "in-formation.response-re006/0.1",
+    "source_identity": "role-HMAC under shared test-enrollment authority",
+    "survivors": [
+      "common_cause_alias",
+      "common_cause_marker",
+      "event_causal"
+    ],
+    "unobserved_channels_excluded": false
+  },
+  "refused_monitor": {
+    "audit_status": "not_admitted_missing_or_failed_controls",
+    "conditional_exclusion_admitted": false,
+    "external_clock_alignment": null,
+    "model_scope": "declared_closed_world",
+    "monitor_status": "refused",
+    "negative_control_status": "observed",
+    "physical_causation_proved": false,
+    "reason": "no justified closed-world exclusion from these receipts alone",
+    "sampling_scope": null,
+    "schema": "in-formation.response-re006/0.1",
+    "source_identity": "role-HMAC under shared test-enrollment authority",
+    "survivors": [
+      "common_cause_alias",
+      "common_cause_marker",
+      "event_causal"
+    ],
+    "unobserved_channels_excluded": false
+  },
+  "scope": "synthetic mathematical fixture; no physical exclusion certificate"
+}

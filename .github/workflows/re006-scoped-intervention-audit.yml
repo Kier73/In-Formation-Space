@@ -1,0 +1,245 @@
+name: RE-006 scoped intervention audit and negative controls
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re006-scoped-intervention-audit.yml'
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re006-scoped-intervention-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run entire RE-001 through RE-006 suite
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Reconstruct exact deterministic RE-006 evidence report
+        run: |
+          python experiments/response-equivalence/scoped_intervention_audit.py > /tmp/re006-report.json
+          cmp experiments/response-equivalence/re006_report.json /tmp/re006-report.json
+      - name: Verify actual E-CPU clock and vector-contract tests
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re006_cases.py
+
+  enrollment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Enroll ephemeral role HMAC keys in isolated CI step (not physical attestation)
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from scoped_intervention_audit import enroll
+          registration=enroll()
+          with open('re006-enrollment.json','w') as f: json.dump(registration,f)
+          with open('re006-enrollment-public.json','w') as f:
+              json.dump({k:v for k,v in registration.items() if k != 'keys'},f)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re006-private-enrollment-ci-fixture
+          path: re006-enrollment.json
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re006-public-enrollment
+          path: re006-enrollment-public.json
+          if-no-files-found: error
+
+  opening-host:
+    needs: enrollment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-private-enrollment-ci-fixture}
+      - name: Emit A opening receipt with actual native E-CPU stamp
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' | python experiments/response-equivalence/ecpu_re006_hosts.py --open > re006-open.json
+          import json
+          print(json.dumps({'enrollment':json.load(open('re006-enrollment.json'))}))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re006-open-public, path: re006-open.json, if-no-files-found: error}
+
+  monitor-host:
+    needs: [enrollment, opening-host]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-private-enrollment-ci-fixture}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-open-public}
+      - name: Emit M event/sentinel witness bracketed after A open
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' | python experiments/response-equivalence/ecpu_re006_hosts.py --monitor > re006-monitor.json
+          import json
+          print(json.dumps({'enrollment':json.load(open('re006-enrollment.json')),'open':json.load(open('re006-open.json'))}))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re006-monitor-public, path: re006-monitor.json, if-no-files-found: error}
+
+  negative-control-host:
+    needs: [enrollment, opening-host]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-private-enrollment-ci-fixture}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-open-public}
+      - name: Emit N sham and positive-control observations with native E-CPU stamp
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' | python experiments/response-equivalence/ecpu_re006_hosts.py --negative > re006-negative.json
+          import json
+          print(json.dumps({'enrollment':json.load(open('re006-enrollment.json')),'open':json.load(open('re006-open.json'))}))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re006-negative-public, path: re006-negative.json, if-no-files-found: error}
+
+  closing-host:
+    needs: [opening-host, monitor-host, negative-control-host, enrollment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-private-enrollment-ci-fixture}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-open-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-monitor-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-negative-public}
+      - name: Restore logical A actor and close after both independent observations
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' | python experiments/response-equivalence/ecpu_re006_hosts.py --close > re006-close.json
+          import json
+          print(json.dumps({'enrollment':json.load(open('re006-enrollment.json')),
+                            'open':json.load(open('re006-open.json')),
+                            'monitor':json.load(open('re006-monitor.json')),
+                            'negative_control':json.load(open('re006-negative.json'))}))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re006-close-public, path: re006-close.json, if-no-files-found: error}
+
+  plant-host:
+    needs: [closing-host, enrollment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-public-enrollment}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-close-public}
+      - name: B receives A close stamp and observes synthetic plant without signer keys
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' | python experiments/response-equivalence/ecpu_re006_hosts.py --plant > re006-plant.json
+          import json
+          print(json.dumps({'enrollment':json.load(open('re006-enrollment-public.json')),
+                            'close':json.load(open('re006-close.json'))}))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re006-plant-public, path: re006-plant.json, if-no-files-found: error}
+
+  independent-verifier:
+    needs: [tests, enrollment, opening-host, monitor-host, negative-control-host, closing-host, plant-host]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-private-enrollment-ci-fixture}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-open-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-monitor-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-negative-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-close-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re006-plant-public}
+      - name: Independently replay canonical receipts and real E-CPU vector clocks
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' | python experiments/response-equivalence/ecpu_re006_hosts.py --verify > re006-hosted-report.json
+          import json
+          def load(name):
+              with open(name,encoding='utf-8') as f: return json.load(f)
+          bundle={kind:load('re006-'+file+'.json') for kind,file in (
+              ('open','open'),('monitor','monitor'),('negative_control','negative'),
+              ('close','close'),('plant','plant'))}
+          print(json.dumps({'enrollment':load('re006-enrollment.json'),
+                            'bundle':bundle,'model_scope':'open_world'}))
+          PY
+          python - <<'PY'
+          import json
+          with open('re006-hosted-report.json') as f: report=json.load(f)
+          assert report['causal_relations']['M0_N0']=='concurrent',report
+          assert report['causal_relations']['A1_B0']=='before',report
+          assert report['identification']['survivors']==[
+              'common_cause_alias','common_cause_marker','event_causal'],report
+          assert not report['identification']['conditional_exclusion_admitted'],report
+          assert report['identification']['audit_status']=='controls_passed_under_declared_sampling',report
+          assert report['physical_causation_proved'] is False,report
+          assert report['cross_host_elapsed'] is None,report
+          print('RE-006 independent verifier passed: bounded controls, no physical causal attribution')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re006-independent-audit, path: re006-hosted-report.json, if-no-files-found: error}
+
