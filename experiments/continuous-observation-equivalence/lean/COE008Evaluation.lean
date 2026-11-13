@@ -233,7 +233,7 @@ private theorem allTrueMember {α : Type} (f : α → Bool)
       rcases hv with heq | hrest
       · subst value
         exact h.1
-      · exact ih h.2 value hrest
+      · exact ih h.2 hrest
 
 /-- This is the direct COE-008 refinement statement: an accepted
     COEWireCheck.verify certificate implies its declared affine observation
