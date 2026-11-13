@@ -44,6 +44,7 @@ LIMITS = [
     "A message sequence and payload digest bind the supplied handoff record internally; they do not prove that a physical network peer sent or received that message.",
     "Clock calibration anchors and witness references are caller-supplied. Calibration digests permit reconstruction but do not authenticate the physical anchors.",
     "Affine scale bounds are numeric feasible-set envelopes, not probability distributions or calibrated confidence intervals.",
+    "Duration bounds use scale extrema separately for each span. Shared calibration parameters correlate spans from one clock domain; this v0.1 projection does not optimize those correlations jointly and can therefore produce wider-than-necessary bounds.",
     "The critical-path duration interval is conservative. Its lower-bound and upper-bound maximizing chains can differ; path identity may remain unresolved under calibration uncertainty.",
     "There is no common root interval in this format. It does not report global wall latency, root slack, transport overhead, CPU time, or CPU utilization.",
     "Operation spans measure supplied synchronous call boundaries. Nested or overlapping instrumentation can count work more than once; omitted dependency edges can understate the actual critical path.",
@@ -424,6 +425,7 @@ def build_distributed_operation_path_trace(
             raise DistributedOperationPathError("causal handoff references an unknown operation span")
         channel_key = (
             _text(handoff.get("sender_actor_id"), "handoff sender_actor_id"),
+            _text(handoff.get("receiver_actor_id"), "handoff receiver_actor_id"),
             _text(handoff.get("channel_id"), "handoff channel_id"),
             _integer(handoff.get("message_sequence"), "handoff message_sequence", 1),
         )
