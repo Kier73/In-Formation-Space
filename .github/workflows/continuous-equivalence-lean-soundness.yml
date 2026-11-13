@@ -35,7 +35,9 @@ jobs:
           lake env lean COECellSoundness.lean | tee proof-output.txt
           grep -q "selected_sound_of_stable_decision" proof-output.txt
           grep -q "observation_equivalence_of_complete_cover" proof-output.txt
-          if grep -Eq 'depends on axioms:|sorryAx' proof-output.txt; then
+          grep -Fq "'COECellSoundness.selected_sound_of_stable_decision' depends on axioms: [propext]" proof-output.txt
+          grep -Fq "'COECellSoundness.observation_equivalence_of_complete_cover' does not depend on any axioms" proof-output.txt
+          if grep -Eq 'sorryAx|Classical.choice|Quot.sound' proof-output.txt; then
             cat proof-output.txt
             exit 1
           fi
