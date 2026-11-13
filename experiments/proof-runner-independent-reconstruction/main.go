@@ -924,6 +924,14 @@ func Verify(paths Paths) (object, error) {
 	if err != nil { return nil, fmt.Errorf("read authority attestation: %w", err) }
 	authorityKeyDoc, err := readObject(paths.AuthorityKey)
 	if err != nil { return nil, fmt.Errorf("read authority public key: %w", err) }
+	historyDocument, err := readObject(paths.AuthorityHistory)
+	if err != nil { return nil, fmt.Errorf("read SQLite revision history: %w", err) }
+	processEvidence, err := readObject(paths.ProcessEvidence)
+	if err != nil { return nil, fmt.Errorf("read authority process evidence: %w", err) }
+	staleAttempt, err := readObject(paths.StaleOwnerAttempt)
+	if err != nil { return nil, fmt.Errorf("read stale-owner attempt evidence: %w", err) }
+	databaseBytes, err := os.ReadFile(paths.AuthorityStore)
+	if err != nil { return nil, fmt.Errorf("read transferred SQLite authority database: %w", err) }
 	result, err := readObject(paths.Result)
 	if err != nil { return nil, fmt.Errorf("read result: %w", err) }
 	receipt, err := readObject(paths.Receipt)
@@ -940,7 +948,7 @@ func Verify(paths Paths) (object, error) {
 	verifierHost, err := verifyVerifierHost(verifierHostDoc, authority, runner)
 	if err != nil { return nil, fmt.Errorf("third-host separation: %w", err) }
 
-	for _, field := range []string{"repository", "run_id", "run_attempt", "workflow_ref", "workflow_sha", "git_ref", "git_sha"} {
+	for _, field := range []string{"repository", "run_id", "run_attempt", "run_number", "workflow_ref", "workflow_sha", "git_ref", "git_sha"} {
 		if authority.Host[field] != runner.Host[field] {
 			return nil, fail("authority and runner hosts differ in %s", field)
 		}
@@ -950,11 +958,30 @@ func Verify(paths Paths) (object, error) {
 	if err != nil { return nil, fmt.Errorf("route ledger reconstruction: %w", err) }
 	attemptID, requestDigest, err := verifyRequest(request, event)
 	if err != nil { return nil, err }
+
+	historyRows, historyDigest, err := verifyStoreHistory(historyDocument, ledger)
+	if err != nil { return nil, fmt.Errorf("SQLite revision reconstruction: %w", err) }
+	processEvidenceDigest, err := verifyAuthorityProcessEvidence(
+		processEvidence, staleAttempt, ledger, historyRows, attemptID,
+	)
+	if err != nil { return nil, fmt.Errorf("authority restart and fencing evidence: %w", err) }
+	databaseHash := sha256.Sum256(databaseBytes)
+	databaseDigest := hex.EncodeToString(databaseHash[:])
+
 	resultDigest, evidenceDigest, traceDigest, err := verifyResult(result, attemptID, requestDigest)
 	if err != nil { return nil, err }
 	if err := verifyAuthorityAttestation(
-		authorityAttestation, authority, ledgerDigest, ledgerSequence,
-		event, attemptID, requestDigest,
+		authorityAttestation,
+		authority,
+		ledgerDigest,
+		ledgerSequence,
+		event,
+		attemptID,
+		requestDigest,
+		historyDigest,
+		historyRows,
+		databaseDigest,
+		processEvidenceDigest,
 	); err != nil {
 		return nil, fmt.Errorf("authority signature: %w", err)
 	}
@@ -965,6 +992,23 @@ func Verify(paths Paths) (object, error) {
 	if err != nil { return nil, fmt.Errorf("runner receipt: %w", err) }
 
 	details, _ := asObject(event["details"], "authorization details")
+	processPhases, _ := asArray(processEvidence["phases"], "authority process phases")
+	claimEvent, _ := asObject(mustEventObject(ledger["entries"], 1), "claim event")
+	claimDetails, _ := asObject(claimEvent["details"], "claim event details")
+	authorityReport := object{
+		"participant_id": authority.ID,
+		"role": authority.Role,
+		"key_id": authority.KeyID,
+		"job": authority.Host["job"],
+		"actor_id": authority.Host["actor_id"],
+		"store_type": "sqlite-local-file",
+		"store_database_sha256": databaseDigest,
+		"store_revision_count": len(historyRows),
+		"store_history_digest": historyDigest,
+		"process_phase_count": len(processPhases),
+		"stale_owner_attempt_rejected": true,
+		"owner_generation_after_restart": claimDetails["owner_generation"],
+	}
 	return object{
 		"schema": reportFormat,
 		"status": "verified",
@@ -975,13 +1019,7 @@ func Verify(paths Paths) (object, error) {
 		"execution_id": details["execution_id"],
 		"attempt_id": attemptID,
 		"request_digest": requestDigest,
-		"authority": object{
-			"participant_id": authority.ID,
-			"role": authority.Role,
-			"key_id": authority.KeyID,
-			"job": authority.Host["job"],
-			"actor_id": authority.Host["actor_id"],
-		},
+		"authority": authorityReport,
 		"runner": object{
 			"participant_id": runner.ID,
 			"role": runner.Role,
@@ -1003,6 +1041,7 @@ func Verify(paths Paths) (object, error) {
 			"artifact_relay": "GitHub Actions artifact storage",
 			"combined_cross_host_elapsed_ns": nil,
 		},
+		"sqlite_store_reopened_verified": paths.SQLiteStoreReopenedVerified,
 		"result_digest": resultDigest,
 		"return_evidence_digest": evidenceDigest,
 		"proof_trace_digest": traceDigest,
@@ -1010,22 +1049,36 @@ func Verify(paths Paths) (object, error) {
 		"key_provenance_verified_by_github": paths.KeyAttestationsVerified,
 		"verified_layers": []any{
 			"full route-ledger head digest and supported event hash chain",
-			"open-route ownership, request admission, and execution-ticket replay",
-			"authority Ed25519 signature over the exact ledger head and authorization event",
+			"open route, owner-generation claim, request admission, and execution-ticket replay",
+			"every SQLite revision prefix digest recomputed independently from its event append index",
+			"authority Ed25519 signature over the route ledger, SQLite database hash, revision audit, and process evidence",
+			"three separate Python authority processes with a real database reopen between phases",
+			"old owner-generation replay rejected after durable ownership replacement",
 			"portable request digest and exact attempt correlation",
 			"portable result digest and request correlation",
 			"runner Ed25519 signature over the exact result and authorization event",
+			"third host reopened the transferred SQLite database using the repository adapter",
 			"three distinct GitHub-hosted workflow job identities in one run",
 		},
 		"not_established": []any{
-			"external shared-CAS linearizability or the live state at admission; this experiment uses an authority-signed synthetic ledger checkpoint",
+			"multi-host consensus or linearizability: SQLite is a single-host local-file CAS store, not a multi-host authority service",
+			"independent physical or administrative fault domains for the authority's three local processes",
+			"protection from a privileged host actor rewriting both SQLite database and all exported, signed evidence before checkpoint signing",
 			"honest computation, actual Lean execution, or theorem correctness",
 			"VGI kernel acceptance; that remains a separate VerifiedKernelReceipt boundary",
-			"direct peer-to-peer transport; these records travel through GitHub Actions artifacts",
-			"distinct physical servers or independent administrative fault domains",
+			"direct peer-to-peer transport; workflow artifacts are still relayed through GitHub Actions",
+			"distinct physical servers for the three GitHub-hosted workflow jobs",
 			"combined cross-host duration or transport latency",
 		},
 	}, nil
+}
+
+func mustEventObject(value any, index int) any {
+	events, ok := value.([]any)
+	if !ok || index < 0 || index >= len(events) {
+		return nil
+	}
+	return events[index]
 }
 
 func main() {
