@@ -1,0 +1,1579 @@
+{
+  "cases": [
+    {
+      "certificate": {
+        "generated_digest": "f898166cd1378a80fd361927acc544f661ad8009fb72edf4f2d8d90b8b11f32e",
+        "parent_index": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "duplicate-incoming-and-conserve-outgoing-coefficients",
+        "schema": "ifs.dyadic-neuron-widening.v1",
+        "source_digest": "3f9bbec2cc7053df204d77c48f9e3d712701b96c3fc71560794ab5f88d998582"
+      },
+      "context": {
+        "provenance": {
+          "kind": "procedural",
+          "rule": "PCG64-dyadic-coefficients",
+          "seed": 31,
+          "source_payload_bytes": 0
+        },
+        "source": {
+          "activation": "relu",
+          "digest": "3f9bbec2cc7053df204d77c48f9e3d712701b96c3fc71560794ab5f88d998582",
+          "dimensions": [
+            4,
+            16,
+            4
+          ],
+          "schema": "ifs.feed-forward-block.v1",
+          "tensors": {
+            "down_bias": {
+              "dtype": "F32",
+              "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+              "shape": [
+                4
+              ]
+            },
+            "down_weight": {
+              "dtype": "F32",
+              "sha256": "7984485e38f87e03758a7854aec9d29f4041eb6eda5b8ccc64db23da4c45a98b",
+              "shape": [
+                16,
+                4
+              ]
+            },
+            "up_bias": {
+              "dtype": "F32",
+              "sha256": "3e2de1b26f85ca2a9f679437243019f2787ea0bbc7b6664bed8c9bd44e2f93c8",
+              "shape": [
+                16
+              ]
+            },
+            "up_weight": {
+              "dtype": "F32",
+              "sha256": "9f0448f886a63d8bd82b9d0f0864d91c0cee1b4a05fee1d96e1aa791b2567239",
+              "shape": [
+                4,
+                16
+              ]
+            }
+          }
+        },
+        "target_width": 24
+      },
+      "dag": {
+        "digest": "adb6fbc2375fd47ccc4e5ff5866242b925450951c7928ec9e0b0ce92c66a6c29",
+        "format": "mailcpu-navigable-computation-dag-v1",
+        "state": {
+          "commits": [
+            {
+              "node_digest": "6e35bcd423c45d8afba46d63231b8e8c210753d9871d2d96d342452da358a63a",
+              "node_id": "construct",
+              "result": {
+                "certificate": {
+                  "generated_digest": "f898166cd1378a80fd361927acc544f661ad8009fb72edf4f2d8d90b8b11f32e",
+                  "parent_index": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                  ],
+                  "rule": "duplicate-incoming-and-conserve-outgoing-coefficients",
+                  "schema": "ifs.dyadic-neuron-widening.v1",
+                  "source_digest": "3f9bbec2cc7053df204d77c48f9e3d712701b96c3fc71560794ab5f88d998582"
+                },
+                "generated": {
+                  "activation": "relu",
+                  "digest": "f898166cd1378a80fd361927acc544f661ad8009fb72edf4f2d8d90b8b11f32e",
+                  "dimensions": [
+                    4,
+                    24,
+                    4
+                  ],
+                  "schema": "ifs.feed-forward-block.v1",
+                  "tensors": {
+                    "down_bias": {
+                      "dtype": "F32",
+                      "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+                      "shape": [
+                        4
+                      ]
+                    },
+                    "down_weight": {
+                      "dtype": "F32",
+                      "sha256": "b1aa4f7d69cd8e3940a2aa1430f8cbf71883569cae08a72e70eacbefdfe8f54b",
+                      "shape": [
+                        24,
+                        4
+                      ]
+                    },
+                    "up_bias": {
+                      "dtype": "F32",
+                      "sha256": "0d1fb9792b60be086d8c215aa737bd87326db0347528d3dc2d3fb6c00a08e83f",
+                      "shape": [
+                        24
+                      ]
+                    },
+                    "up_weight": {
+                      "dtype": "F32",
+                      "sha256": "7a37997e26c1b1d95adec3e3c330e8b9c497a3b6eb1fd0a582d39948261c04d0",
+                      "shape": [
+                        4,
+                        24
+                      ]
+                    }
+                  }
+                }
+              },
+              "result_digest": "a60a1e9091dfb76bda545e7f81fc74af5d96d361f48f757572fc2a60e985382a"
+            },
+            {
+              "node_digest": "64aec9152a8ee262ba6e54f5eddd1114050b28ef8b3d3fc838cacf8200c518cb",
+              "node_id": "generated_forward",
+              "result": {
+                "atol": 1e-10,
+                "comparisons": 6,
+                "max_absolute_error": 0.0,
+                "rtol": 1e-10,
+                "status": "passed"
+              },
+              "result_digest": "ecdbbe1120de1e80529831a0cdf0759b056b7da7bb3e4ad1fdfeb150a9666f87"
+            },
+            {
+              "node_digest": "bd6d30dd9750643a6ae69c259093d5a7cb0cd71955239d999798cd08e7c4af9c",
+              "node_id": "source_forward",
+              "result": {
+                "atol": 1e-10,
+                "comparisons": 6,
+                "max_absolute_error": 0.0,
+                "rtol": 1e-10,
+                "status": "passed"
+              },
+              "result_digest": "ecdbbe1120de1e80529831a0cdf0759b056b7da7bb3e4ad1fdfeb150a9666f87"
+            },
+            {
+              "node_digest": "8f815c8cca991a7e831e60250ac8e3ffceb1294a1848549dd45033e009fffe6a",
+              "node_id": "verify",
+              "result": {
+                "coefficient_law": {
+                  "coefficient_comparison": "exact-binary32-in-binary64",
+                  "floating_point_bitwise_equivalence_claimed": false,
+                  "incoming_neurons_checked": 24,
+                  "kernel_accepted": false,
+                  "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+                  "outgoing_coefficients_checked": 64,
+                  "status": "passed"
+                },
+                "numerical_comparison": {
+                  "atol": 1e-10,
+                  "comparisons": 8,
+                  "max_absolute_error": 0.0,
+                  "rtol": 1e-10,
+                  "status": "passed"
+                },
+                "rehashed_coefficient_tamper_rejected": true
+              },
+              "result_digest": "ea87f89c3b60651b90f63ac5de240b83b276488e0cfca6d30fa49f0e9ef4d056"
+            }
+          ],
+          "max_nodes": 256,
+          "nodes": [
+            {
+              "context_digest": "f06e08046d2720215651564ad17eff1c4a6add55424f8e912e46aa57c55f2b20",
+              "dependencies": [],
+              "digest": "6e35bcd423c45d8afba46d63231b8e8c210753d9871d2d96d342452da358a63a",
+              "node_id": "construct",
+              "operation": "pnf.construct",
+              "payload": {
+                "context_digest": "f06e08046d2720215651564ad17eff1c4a6add55424f8e912e46aa57c55f2b20"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "f06e08046d2720215651564ad17eff1c4a6add55424f8e912e46aa57c55f2b20",
+              "dependencies": [
+                "construct"
+              ],
+              "digest": "64aec9152a8ee262ba6e54f5eddd1114050b28ef8b3d3fc838cacf8200c518cb",
+              "node_id": "generated_forward",
+              "operation": "pnf.generated_forward",
+              "payload": {
+                "context_digest": "f06e08046d2720215651564ad17eff1c4a6add55424f8e912e46aa57c55f2b20"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "f06e08046d2720215651564ad17eff1c4a6add55424f8e912e46aa57c55f2b20",
+              "dependencies": [],
+              "digest": "bd6d30dd9750643a6ae69c259093d5a7cb0cd71955239d999798cd08e7c4af9c",
+              "node_id": "source_forward",
+              "operation": "pnf.source_forward",
+              "payload": {
+                "context_digest": "f06e08046d2720215651564ad17eff1c4a6add55424f8e912e46aa57c55f2b20"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "f06e08046d2720215651564ad17eff1c4a6add55424f8e912e46aa57c55f2b20",
+              "dependencies": [
+                "construct",
+                "source_forward",
+                "generated_forward"
+              ],
+              "digest": "8f815c8cca991a7e831e60250ac8e3ffceb1294a1848549dd45033e009fffe6a",
+              "node_id": "verify",
+              "operation": "pnf.verify",
+              "payload": {
+                "context_digest": "f06e08046d2720215651564ad17eff1c4a6add55424f8e912e46aa57c55f2b20"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            }
+          ],
+          "version": 1
+        }
+      },
+      "execution_host_scope": "one local process; E-CPU dependency and commit semantics",
+      "execution_order": [
+        "construct",
+        "source_forward",
+        "generated_forward",
+        "verify"
+      ],
+      "generated": {
+        "activation": "relu",
+        "digest": "f898166cd1378a80fd361927acc544f661ad8009fb72edf4f2d8d90b8b11f32e",
+        "dimensions": [
+          4,
+          24,
+          4
+        ],
+        "schema": "ifs.feed-forward-block.v1",
+        "tensors": {
+          "down_bias": {
+            "dtype": "F32",
+            "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+            "shape": [
+              4
+            ]
+          },
+          "down_weight": {
+            "dtype": "F32",
+            "sha256": "b1aa4f7d69cd8e3940a2aa1430f8cbf71883569cae08a72e70eacbefdfe8f54b",
+            "shape": [
+              24,
+              4
+            ]
+          },
+          "up_bias": {
+            "dtype": "F32",
+            "sha256": "0d1fb9792b60be086d8c215aa737bd87326db0347528d3dc2d3fb6c00a08e83f",
+            "shape": [
+              24
+            ]
+          },
+          "up_weight": {
+            "dtype": "F32",
+            "sha256": "7a37997e26c1b1d95adec3e3c330e8b9c497a3b6eb1fd0a582d39948261c04d0",
+            "shape": [
+              4,
+              24
+            ]
+          }
+        }
+      },
+      "generated_scalar_oracle": {
+        "atol": 1e-10,
+        "comparisons": 6,
+        "max_absolute_error": 0.0,
+        "rtol": 1e-10,
+        "status": "passed"
+      },
+      "oracle_output_indices": [
+        0,
+        2,
+        3
+      ],
+      "probe_inputs": [
+        [
+          -0.5625,
+          -0.125,
+          0.3125,
+          -0.4375
+        ],
+        [
+          -0.375,
+          0.0625,
+          0.5,
+          -0.25
+        ]
+      ],
+      "raw_parameters_retained": false,
+      "restoration_equal": true,
+      "source_scalar_oracle": {
+        "atol": 1e-10,
+        "comparisons": 6,
+        "max_absolute_error": 0.0,
+        "rtol": 1e-10,
+        "status": "passed"
+      },
+      "training_performed": false,
+      "verification": {
+        "coefficient_law": {
+          "coefficient_comparison": "exact-binary32-in-binary64",
+          "floating_point_bitwise_equivalence_claimed": false,
+          "incoming_neurons_checked": 24,
+          "kernel_accepted": false,
+          "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+          "outgoing_coefficients_checked": 64,
+          "status": "passed"
+        },
+        "numerical_comparison": {
+          "atol": 1e-10,
+          "comparisons": 8,
+          "max_absolute_error": 0.0,
+          "rtol": 1e-10,
+          "status": "passed"
+        },
+        "rehashed_coefficient_tamper_rejected": true
+      }
+    },
+    {
+      "certificate": {
+        "generated_digest": "2c0fd5d529a801ac27aa9a8ddd8bde2ed43445fb58d63b54f2b70aefac131ac2",
+        "parent_index": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "rule": "duplicate-incoming-and-conserve-outgoing-coefficients",
+        "schema": "ifs.dyadic-neuron-widening.v1",
+        "source_digest": "3f9bbec2cc7053df204d77c48f9e3d712701b96c3fc71560794ab5f88d998582"
+      },
+      "context": {
+        "provenance": {
+          "kind": "procedural",
+          "rule": "PCG64-dyadic-coefficients",
+          "seed": 31,
+          "source_payload_bytes": 0
+        },
+        "source": {
+          "activation": "relu",
+          "digest": "3f9bbec2cc7053df204d77c48f9e3d712701b96c3fc71560794ab5f88d998582",
+          "dimensions": [
+            4,
+            16,
+            4
+          ],
+          "schema": "ifs.feed-forward-block.v1",
+          "tensors": {
+            "down_bias": {
+              "dtype": "F32",
+              "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+              "shape": [
+                4
+              ]
+            },
+            "down_weight": {
+              "dtype": "F32",
+              "sha256": "7984485e38f87e03758a7854aec9d29f4041eb6eda5b8ccc64db23da4c45a98b",
+              "shape": [
+                16,
+                4
+              ]
+            },
+            "up_bias": {
+              "dtype": "F32",
+              "sha256": "3e2de1b26f85ca2a9f679437243019f2787ea0bbc7b6664bed8c9bd44e2f93c8",
+              "shape": [
+                16
+              ]
+            },
+            "up_weight": {
+              "dtype": "F32",
+              "sha256": "9f0448f886a63d8bd82b9d0f0864d91c0cee1b4a05fee1d96e1aa791b2567239",
+              "shape": [
+                4,
+                16
+              ]
+            }
+          }
+        },
+        "target_width": 32
+      },
+      "dag": {
+        "digest": "9b833b1b04f0e2a245ee43f5722a9e87b9dd3ed1c4aaaf52308988d929569935",
+        "format": "mailcpu-navigable-computation-dag-v1",
+        "state": {
+          "commits": [
+            {
+              "node_digest": "8f612e71bb6af4914a438b2dd4899ef9fd3a0eaa2f97d342743f7f52515eef66",
+              "node_id": "construct",
+              "result": {
+                "certificate": {
+                  "generated_digest": "2c0fd5d529a801ac27aa9a8ddd8bde2ed43445fb58d63b54f2b70aefac131ac2",
+                  "parent_index": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                  ],
+                  "rule": "duplicate-incoming-and-conserve-outgoing-coefficients",
+                  "schema": "ifs.dyadic-neuron-widening.v1",
+                  "source_digest": "3f9bbec2cc7053df204d77c48f9e3d712701b96c3fc71560794ab5f88d998582"
+                },
+                "generated": {
+                  "activation": "relu",
+                  "digest": "2c0fd5d529a801ac27aa9a8ddd8bde2ed43445fb58d63b54f2b70aefac131ac2",
+                  "dimensions": [
+                    4,
+                    32,
+                    4
+                  ],
+                  "schema": "ifs.feed-forward-block.v1",
+                  "tensors": {
+                    "down_bias": {
+                      "dtype": "F32",
+                      "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+                      "shape": [
+                        4
+                      ]
+                    },
+                    "down_weight": {
+                      "dtype": "F32",
+                      "sha256": "023dfdfbc4b6f3dbff9955b8b9e40d587ca7919a574131ae4bca276908acdced",
+                      "shape": [
+                        32,
+                        4
+                      ]
+                    },
+                    "up_bias": {
+                      "dtype": "F32",
+                      "sha256": "4b448f6cae3eb1ec1a85a8939a2976ee59ec7f501b2f532125b78b402714849d",
+                      "shape": [
+                        32
+                      ]
+                    },
+                    "up_weight": {
+                      "dtype": "F32",
+                      "sha256": "d47c141e27ffe96308d25cdeff70e76e4c618f87efdd4272f477304350f8c003",
+                      "shape": [
+                        4,
+                        32
+                      ]
+                    }
+                  }
+                }
+              },
+              "result_digest": "608505ccd611a1348c3a13e3fb2ec07eb428002dca1e0471cd394c58908d2e99"
+            },
+            {
+              "node_digest": "2d4c3127b2ac83c23e9aa4623d5149dd64623e7b630d2f8c25f02063bdb0633f",
+              "node_id": "generated_forward",
+              "result": {
+                "atol": 1e-10,
+                "comparisons": 6,
+                "max_absolute_error": 0.0,
+                "rtol": 1e-10,
+                "status": "passed"
+              },
+              "result_digest": "ecdbbe1120de1e80529831a0cdf0759b056b7da7bb3e4ad1fdfeb150a9666f87"
+            },
+            {
+              "node_digest": "1daef2a507730ac30b4af35d19d3e940bd7d1ac62aad61b60d3e3f2bc7674ee2",
+              "node_id": "source_forward",
+              "result": {
+                "atol": 1e-10,
+                "comparisons": 6,
+                "max_absolute_error": 0.0,
+                "rtol": 1e-10,
+                "status": "passed"
+              },
+              "result_digest": "ecdbbe1120de1e80529831a0cdf0759b056b7da7bb3e4ad1fdfeb150a9666f87"
+            },
+            {
+              "node_digest": "fa49e21bfbe49c3035876e6059f912dc98ff992a2d9c324ec95bc1851ce1d6d5",
+              "node_id": "verify",
+              "result": {
+                "coefficient_law": {
+                  "coefficient_comparison": "exact-binary32-in-binary64",
+                  "floating_point_bitwise_equivalence_claimed": false,
+                  "incoming_neurons_checked": 32,
+                  "kernel_accepted": false,
+                  "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+                  "outgoing_coefficients_checked": 64,
+                  "status": "passed"
+                },
+                "numerical_comparison": {
+                  "atol": 1e-10,
+                  "comparisons": 8,
+                  "max_absolute_error": 0.0,
+                  "rtol": 1e-10,
+                  "status": "passed"
+                },
+                "rehashed_coefficient_tamper_rejected": true
+              },
+              "result_digest": "6ff370ac8dcad094547a902864b9825bdd16c054c9bec38a14fc6d9dfdcd80c0"
+            }
+          ],
+          "max_nodes": 256,
+          "nodes": [
+            {
+              "context_digest": "836427bb171932b937eb6dd6d03a524fc69ed1f6210cb34019743910b9f1227a",
+              "dependencies": [],
+              "digest": "8f612e71bb6af4914a438b2dd4899ef9fd3a0eaa2f97d342743f7f52515eef66",
+              "node_id": "construct",
+              "operation": "pnf.construct",
+              "payload": {
+                "context_digest": "836427bb171932b937eb6dd6d03a524fc69ed1f6210cb34019743910b9f1227a"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "836427bb171932b937eb6dd6d03a524fc69ed1f6210cb34019743910b9f1227a",
+              "dependencies": [
+                "construct"
+              ],
+              "digest": "2d4c3127b2ac83c23e9aa4623d5149dd64623e7b630d2f8c25f02063bdb0633f",
+              "node_id": "generated_forward",
+              "operation": "pnf.generated_forward",
+              "payload": {
+                "context_digest": "836427bb171932b937eb6dd6d03a524fc69ed1f6210cb34019743910b9f1227a"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "836427bb171932b937eb6dd6d03a524fc69ed1f6210cb34019743910b9f1227a",
+              "dependencies": [],
+              "digest": "1daef2a507730ac30b4af35d19d3e940bd7d1ac62aad61b60d3e3f2bc7674ee2",
+              "node_id": "source_forward",
+              "operation": "pnf.source_forward",
+              "payload": {
+                "context_digest": "836427bb171932b937eb6dd6d03a524fc69ed1f6210cb34019743910b9f1227a"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "836427bb171932b937eb6dd6d03a524fc69ed1f6210cb34019743910b9f1227a",
+              "dependencies": [
+                "construct",
+                "source_forward",
+                "generated_forward"
+              ],
+              "digest": "fa49e21bfbe49c3035876e6059f912dc98ff992a2d9c324ec95bc1851ce1d6d5",
+              "node_id": "verify",
+              "operation": "pnf.verify",
+              "payload": {
+                "context_digest": "836427bb171932b937eb6dd6d03a524fc69ed1f6210cb34019743910b9f1227a"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            }
+          ],
+          "version": 1
+        }
+      },
+      "execution_host_scope": "one local process; E-CPU dependency and commit semantics",
+      "execution_order": [
+        "construct",
+        "source_forward",
+        "generated_forward",
+        "verify"
+      ],
+      "generated": {
+        "activation": "relu",
+        "digest": "2c0fd5d529a801ac27aa9a8ddd8bde2ed43445fb58d63b54f2b70aefac131ac2",
+        "dimensions": [
+          4,
+          32,
+          4
+        ],
+        "schema": "ifs.feed-forward-block.v1",
+        "tensors": {
+          "down_bias": {
+            "dtype": "F32",
+            "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+            "shape": [
+              4
+            ]
+          },
+          "down_weight": {
+            "dtype": "F32",
+            "sha256": "023dfdfbc4b6f3dbff9955b8b9e40d587ca7919a574131ae4bca276908acdced",
+            "shape": [
+              32,
+              4
+            ]
+          },
+          "up_bias": {
+            "dtype": "F32",
+            "sha256": "4b448f6cae3eb1ec1a85a8939a2976ee59ec7f501b2f532125b78b402714849d",
+            "shape": [
+              32
+            ]
+          },
+          "up_weight": {
+            "dtype": "F32",
+            "sha256": "d47c141e27ffe96308d25cdeff70e76e4c618f87efdd4272f477304350f8c003",
+            "shape": [
+              4,
+              32
+            ]
+          }
+        }
+      },
+      "generated_scalar_oracle": {
+        "atol": 1e-10,
+        "comparisons": 6,
+        "max_absolute_error": 0.0,
+        "rtol": 1e-10,
+        "status": "passed"
+      },
+      "oracle_output_indices": [
+        0,
+        2,
+        3
+      ],
+      "probe_inputs": [
+        [
+          -0.5625,
+          -0.125,
+          0.3125,
+          -0.4375
+        ],
+        [
+          -0.375,
+          0.0625,
+          0.5,
+          -0.25
+        ]
+      ],
+      "raw_parameters_retained": false,
+      "restoration_equal": true,
+      "source_scalar_oracle": {
+        "atol": 1e-10,
+        "comparisons": 6,
+        "max_absolute_error": 0.0,
+        "rtol": 1e-10,
+        "status": "passed"
+      },
+      "training_performed": false,
+      "verification": {
+        "coefficient_law": {
+          "coefficient_comparison": "exact-binary32-in-binary64",
+          "floating_point_bitwise_equivalence_claimed": false,
+          "incoming_neurons_checked": 32,
+          "kernel_accepted": false,
+          "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+          "outgoing_coefficients_checked": 64,
+          "status": "passed"
+        },
+        "numerical_comparison": {
+          "atol": 1e-10,
+          "comparisons": 8,
+          "max_absolute_error": 0.0,
+          "rtol": 1e-10,
+          "status": "passed"
+        },
+        "rehashed_coefficient_tamper_rejected": true
+      }
+    },
+    {
+      "certificate": {
+        "generated_digest": "13425e64d4331002b779e6dbfbe5dd1c4707c7f15cf20e8f2ab3e6a835088aa4",
+        "parent_index": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "duplicate-incoming-and-conserve-outgoing-coefficients",
+        "schema": "ifs.dyadic-neuron-widening.v1",
+        "source_digest": "2b05db3fbd1f127b21093587545742489b3328b9d610d1f44518299ffde7d4e5"
+      },
+      "context": {
+        "provenance": {
+          "kind": "procedural",
+          "rule": "PCG64-dyadic-coefficients",
+          "seed": 31,
+          "source_payload_bytes": 0
+        },
+        "source": {
+          "activation": "gelu_tanh",
+          "digest": "2b05db3fbd1f127b21093587545742489b3328b9d610d1f44518299ffde7d4e5",
+          "dimensions": [
+            4,
+            16,
+            4
+          ],
+          "schema": "ifs.feed-forward-block.v1",
+          "tensors": {
+            "down_bias": {
+              "dtype": "F32",
+              "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+              "shape": [
+                4
+              ]
+            },
+            "down_weight": {
+              "dtype": "F32",
+              "sha256": "7984485e38f87e03758a7854aec9d29f4041eb6eda5b8ccc64db23da4c45a98b",
+              "shape": [
+                16,
+                4
+              ]
+            },
+            "up_bias": {
+              "dtype": "F32",
+              "sha256": "3e2de1b26f85ca2a9f679437243019f2787ea0bbc7b6664bed8c9bd44e2f93c8",
+              "shape": [
+                16
+              ]
+            },
+            "up_weight": {
+              "dtype": "F32",
+              "sha256": "9f0448f886a63d8bd82b9d0f0864d91c0cee1b4a05fee1d96e1aa791b2567239",
+              "shape": [
+                4,
+                16
+              ]
+            }
+          }
+        },
+        "target_width": 24
+      },
+      "dag": {
+        "digest": "3f7028aa00bcd4e355a9bde29a3264d246ec4b5ce51cebc9534d50d39afa8362",
+        "format": "mailcpu-navigable-computation-dag-v1",
+        "state": {
+          "commits": [
+            {
+              "node_digest": "e29a220be77869986bd285d5032712264476ff393049687cb8730dadf1416570",
+              "node_id": "construct",
+              "result": {
+                "certificate": {
+                  "generated_digest": "13425e64d4331002b779e6dbfbe5dd1c4707c7f15cf20e8f2ab3e6a835088aa4",
+                  "parent_index": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7
+                  ],
+                  "rule": "duplicate-incoming-and-conserve-outgoing-coefficients",
+                  "schema": "ifs.dyadic-neuron-widening.v1",
+                  "source_digest": "2b05db3fbd1f127b21093587545742489b3328b9d610d1f44518299ffde7d4e5"
+                },
+                "generated": {
+                  "activation": "gelu_tanh",
+                  "digest": "13425e64d4331002b779e6dbfbe5dd1c4707c7f15cf20e8f2ab3e6a835088aa4",
+                  "dimensions": [
+                    4,
+                    24,
+                    4
+                  ],
+                  "schema": "ifs.feed-forward-block.v1",
+                  "tensors": {
+                    "down_bias": {
+                      "dtype": "F32",
+                      "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+                      "shape": [
+                        4
+                      ]
+                    },
+                    "down_weight": {
+                      "dtype": "F32",
+                      "sha256": "b1aa4f7d69cd8e3940a2aa1430f8cbf71883569cae08a72e70eacbefdfe8f54b",
+                      "shape": [
+                        24,
+                        4
+                      ]
+                    },
+                    "up_bias": {
+                      "dtype": "F32",
+                      "sha256": "0d1fb9792b60be086d8c215aa737bd87326db0347528d3dc2d3fb6c00a08e83f",
+                      "shape": [
+                        24
+                      ]
+                    },
+                    "up_weight": {
+                      "dtype": "F32",
+                      "sha256": "7a37997e26c1b1d95adec3e3c330e8b9c497a3b6eb1fd0a582d39948261c04d0",
+                      "shape": [
+                        4,
+                        24
+                      ]
+                    }
+                  }
+                }
+              },
+              "result_digest": "285b1452fccef812c2a4c3b947f1bea317ae71066566b0464c6ecd9a67caf92e"
+            },
+            {
+              "node_digest": "362e895309c320b66006335e4bdb3f63c547a1831e72775f23f02e135efda397",
+              "node_id": "generated_forward",
+              "result": {
+                "atol": 1e-10,
+                "comparisons": 6,
+                "max_absolute_error": 5.551115123125783e-17,
+                "rtol": 1e-10,
+                "status": "passed"
+              },
+              "result_digest": "23ef71c1eb0da259f2417cf22eb24a88dcce2e6dcf4c355093d6a33deafd490e"
+            },
+            {
+              "node_digest": "0b1ce673bd4bd0bcaa61a77e15e2b3a49bc68b4eb66f54d0c333dd57a7b0a3c1",
+              "node_id": "source_forward",
+              "result": {
+                "atol": 1e-10,
+                "comparisons": 6,
+                "max_absolute_error": 5.551115123125783e-17,
+                "rtol": 1e-10,
+                "status": "passed"
+              },
+              "result_digest": "23ef71c1eb0da259f2417cf22eb24a88dcce2e6dcf4c355093d6a33deafd490e"
+            },
+            {
+              "node_digest": "e24f159d06426a18fc44d8547133b4797cc8a2d3867d6021de667ffe01d08e16",
+              "node_id": "verify",
+              "result": {
+                "coefficient_law": {
+                  "coefficient_comparison": "exact-binary32-in-binary64",
+                  "floating_point_bitwise_equivalence_claimed": false,
+                  "incoming_neurons_checked": 24,
+                  "kernel_accepted": false,
+                  "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+                  "outgoing_coefficients_checked": 64,
+                  "status": "passed"
+                },
+                "numerical_comparison": {
+                  "atol": 1e-10,
+                  "comparisons": 8,
+                  "max_absolute_error": 5.551115123125783e-17,
+                  "rtol": 1e-10,
+                  "status": "passed"
+                },
+                "rehashed_coefficient_tamper_rejected": true
+              },
+              "result_digest": "cd3df266363d4137cae566e64018d46900317a9be227f4fb89c48d4bcdc6f01b"
+            }
+          ],
+          "max_nodes": 256,
+          "nodes": [
+            {
+              "context_digest": "100f6c87f7d3b4ec9a4e49dc52e0404593706832d5107a9f5859d752b310a555",
+              "dependencies": [],
+              "digest": "e29a220be77869986bd285d5032712264476ff393049687cb8730dadf1416570",
+              "node_id": "construct",
+              "operation": "pnf.construct",
+              "payload": {
+                "context_digest": "100f6c87f7d3b4ec9a4e49dc52e0404593706832d5107a9f5859d752b310a555"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "100f6c87f7d3b4ec9a4e49dc52e0404593706832d5107a9f5859d752b310a555",
+              "dependencies": [
+                "construct"
+              ],
+              "digest": "362e895309c320b66006335e4bdb3f63c547a1831e72775f23f02e135efda397",
+              "node_id": "generated_forward",
+              "operation": "pnf.generated_forward",
+              "payload": {
+                "context_digest": "100f6c87f7d3b4ec9a4e49dc52e0404593706832d5107a9f5859d752b310a555"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "100f6c87f7d3b4ec9a4e49dc52e0404593706832d5107a9f5859d752b310a555",
+              "dependencies": [],
+              "digest": "0b1ce673bd4bd0bcaa61a77e15e2b3a49bc68b4eb66f54d0c333dd57a7b0a3c1",
+              "node_id": "source_forward",
+              "operation": "pnf.source_forward",
+              "payload": {
+                "context_digest": "100f6c87f7d3b4ec9a4e49dc52e0404593706832d5107a9f5859d752b310a555"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "100f6c87f7d3b4ec9a4e49dc52e0404593706832d5107a9f5859d752b310a555",
+              "dependencies": [
+                "construct",
+                "source_forward",
+                "generated_forward"
+              ],
+              "digest": "e24f159d06426a18fc44d8547133b4797cc8a2d3867d6021de667ffe01d08e16",
+              "node_id": "verify",
+              "operation": "pnf.verify",
+              "payload": {
+                "context_digest": "100f6c87f7d3b4ec9a4e49dc52e0404593706832d5107a9f5859d752b310a555"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            }
+          ],
+          "version": 1
+        }
+      },
+      "execution_host_scope": "one local process; E-CPU dependency and commit semantics",
+      "execution_order": [
+        "construct",
+        "source_forward",
+        "generated_forward",
+        "verify"
+      ],
+      "generated": {
+        "activation": "gelu_tanh",
+        "digest": "13425e64d4331002b779e6dbfbe5dd1c4707c7f15cf20e8f2ab3e6a835088aa4",
+        "dimensions": [
+          4,
+          24,
+          4
+        ],
+        "schema": "ifs.feed-forward-block.v1",
+        "tensors": {
+          "down_bias": {
+            "dtype": "F32",
+            "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+            "shape": [
+              4
+            ]
+          },
+          "down_weight": {
+            "dtype": "F32",
+            "sha256": "b1aa4f7d69cd8e3940a2aa1430f8cbf71883569cae08a72e70eacbefdfe8f54b",
+            "shape": [
+              24,
+              4
+            ]
+          },
+          "up_bias": {
+            "dtype": "F32",
+            "sha256": "0d1fb9792b60be086d8c215aa737bd87326db0347528d3dc2d3fb6c00a08e83f",
+            "shape": [
+              24
+            ]
+          },
+          "up_weight": {
+            "dtype": "F32",
+            "sha256": "7a37997e26c1b1d95adec3e3c330e8b9c497a3b6eb1fd0a582d39948261c04d0",
+            "shape": [
+              4,
+              24
+            ]
+          }
+        }
+      },
+      "generated_scalar_oracle": {
+        "atol": 1e-10,
+        "comparisons": 6,
+        "max_absolute_error": 5.551115123125783e-17,
+        "rtol": 1e-10,
+        "status": "passed"
+      },
+      "oracle_output_indices": [
+        0,
+        2,
+        3
+      ],
+      "probe_inputs": [
+        [
+          -0.5625,
+          -0.125,
+          0.3125,
+          -0.4375
+        ],
+        [
+          -0.375,
+          0.0625,
+          0.5,
+          -0.25
+        ]
+      ],
+      "raw_parameters_retained": false,
+      "restoration_equal": true,
+      "source_scalar_oracle": {
+        "atol": 1e-10,
+        "comparisons": 6,
+        "max_absolute_error": 5.551115123125783e-17,
+        "rtol": 1e-10,
+        "status": "passed"
+      },
+      "training_performed": false,
+      "verification": {
+        "coefficient_law": {
+          "coefficient_comparison": "exact-binary32-in-binary64",
+          "floating_point_bitwise_equivalence_claimed": false,
+          "incoming_neurons_checked": 24,
+          "kernel_accepted": false,
+          "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+          "outgoing_coefficients_checked": 64,
+          "status": "passed"
+        },
+        "numerical_comparison": {
+          "atol": 1e-10,
+          "comparisons": 8,
+          "max_absolute_error": 5.551115123125783e-17,
+          "rtol": 1e-10,
+          "status": "passed"
+        },
+        "rehashed_coefficient_tamper_rejected": true
+      }
+    },
+    {
+      "certificate": {
+        "generated_digest": "c8045555d28c9a0dc9fb605666d741becfc4a2061270c093b16a1a89438a4426",
+        "parent_index": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "rule": "duplicate-incoming-and-conserve-outgoing-coefficients",
+        "schema": "ifs.dyadic-neuron-widening.v1",
+        "source_digest": "2b05db3fbd1f127b21093587545742489b3328b9d610d1f44518299ffde7d4e5"
+      },
+      "context": {
+        "provenance": {
+          "kind": "procedural",
+          "rule": "PCG64-dyadic-coefficients",
+          "seed": 31,
+          "source_payload_bytes": 0
+        },
+        "source": {
+          "activation": "gelu_tanh",
+          "digest": "2b05db3fbd1f127b21093587545742489b3328b9d610d1f44518299ffde7d4e5",
+          "dimensions": [
+            4,
+            16,
+            4
+          ],
+          "schema": "ifs.feed-forward-block.v1",
+          "tensors": {
+            "down_bias": {
+              "dtype": "F32",
+              "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+              "shape": [
+                4
+              ]
+            },
+            "down_weight": {
+              "dtype": "F32",
+              "sha256": "7984485e38f87e03758a7854aec9d29f4041eb6eda5b8ccc64db23da4c45a98b",
+              "shape": [
+                16,
+                4
+              ]
+            },
+            "up_bias": {
+              "dtype": "F32",
+              "sha256": "3e2de1b26f85ca2a9f679437243019f2787ea0bbc7b6664bed8c9bd44e2f93c8",
+              "shape": [
+                16
+              ]
+            },
+            "up_weight": {
+              "dtype": "F32",
+              "sha256": "9f0448f886a63d8bd82b9d0f0864d91c0cee1b4a05fee1d96e1aa791b2567239",
+              "shape": [
+                4,
+                16
+              ]
+            }
+          }
+        },
+        "target_width": 32
+      },
+      "dag": {
+        "digest": "e99ed55d3c6c5bd5e5c1578bdaab93503e520f204853f483d79944e86d796718",
+        "format": "mailcpu-navigable-computation-dag-v1",
+        "state": {
+          "commits": [
+            {
+              "node_digest": "947ad5957e4de6fe47960c740ea19306ba0f46ec24db803b359259ad59f8f14f",
+              "node_id": "construct",
+              "result": {
+                "certificate": {
+                  "generated_digest": "c8045555d28c9a0dc9fb605666d741becfc4a2061270c093b16a1a89438a4426",
+                  "parent_index": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                  ],
+                  "rule": "duplicate-incoming-and-conserve-outgoing-coefficients",
+                  "schema": "ifs.dyadic-neuron-widening.v1",
+                  "source_digest": "2b05db3fbd1f127b21093587545742489b3328b9d610d1f44518299ffde7d4e5"
+                },
+                "generated": {
+                  "activation": "gelu_tanh",
+                  "digest": "c8045555d28c9a0dc9fb605666d741becfc4a2061270c093b16a1a89438a4426",
+                  "dimensions": [
+                    4,
+                    32,
+                    4
+                  ],
+                  "schema": "ifs.feed-forward-block.v1",
+                  "tensors": {
+                    "down_bias": {
+                      "dtype": "F32",
+                      "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+                      "shape": [
+                        4
+                      ]
+                    },
+                    "down_weight": {
+                      "dtype": "F32",
+                      "sha256": "023dfdfbc4b6f3dbff9955b8b9e40d587ca7919a574131ae4bca276908acdced",
+                      "shape": [
+                        32,
+                        4
+                      ]
+                    },
+                    "up_bias": {
+                      "dtype": "F32",
+                      "sha256": "4b448f6cae3eb1ec1a85a8939a2976ee59ec7f501b2f532125b78b402714849d",
+                      "shape": [
+                        32
+                      ]
+                    },
+                    "up_weight": {
+                      "dtype": "F32",
+                      "sha256": "d47c141e27ffe96308d25cdeff70e76e4c618f87efdd4272f477304350f8c003",
+                      "shape": [
+                        4,
+                        32
+                      ]
+                    }
+                  }
+                }
+              },
+              "result_digest": "1b55cd07c3c72f49319bcf2b53611830d5aa7041574281b12cdbbc6d0dde2d00"
+            },
+            {
+              "node_digest": "d959728e297b488d41ef13eaa0470eca1b2fa72b4aef99176126f33fd9aef723",
+              "node_id": "generated_forward",
+              "result": {
+                "atol": 1e-10,
+                "comparisons": 6,
+                "max_absolute_error": 5.551115123125783e-17,
+                "rtol": 1e-10,
+                "status": "passed"
+              },
+              "result_digest": "23ef71c1eb0da259f2417cf22eb24a88dcce2e6dcf4c355093d6a33deafd490e"
+            },
+            {
+              "node_digest": "1f4cd867f58c7073021abfae1a55ca8865aa417dcfb65bbf760c8dd40ad4f7fc",
+              "node_id": "source_forward",
+              "result": {
+                "atol": 1e-10,
+                "comparisons": 6,
+                "max_absolute_error": 5.551115123125783e-17,
+                "rtol": 1e-10,
+                "status": "passed"
+              },
+              "result_digest": "23ef71c1eb0da259f2417cf22eb24a88dcce2e6dcf4c355093d6a33deafd490e"
+            },
+            {
+              "node_digest": "8fca1687db07be972398702226aa3713e82960c3d60248771c9dd1d9faf0cd48",
+              "node_id": "verify",
+              "result": {
+                "coefficient_law": {
+                  "coefficient_comparison": "exact-binary32-in-binary64",
+                  "floating_point_bitwise_equivalence_claimed": false,
+                  "incoming_neurons_checked": 32,
+                  "kernel_accepted": false,
+                  "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+                  "outgoing_coefficients_checked": 64,
+                  "status": "passed"
+                },
+                "numerical_comparison": {
+                  "atol": 1e-10,
+                  "comparisons": 8,
+                  "max_absolute_error": 5.551115123125783e-17,
+                  "rtol": 1e-10,
+                  "status": "passed"
+                },
+                "rehashed_coefficient_tamper_rejected": true
+              },
+              "result_digest": "bce73e85fcc485b7a5713cc1cd01fbae0784ed6926c2c40a91ed19806895cefa"
+            }
+          ],
+          "max_nodes": 256,
+          "nodes": [
+            {
+              "context_digest": "83696d451620f43fd7df344155162214aaa4d49ffc057c7244002ba641e16357",
+              "dependencies": [],
+              "digest": "947ad5957e4de6fe47960c740ea19306ba0f46ec24db803b359259ad59f8f14f",
+              "node_id": "construct",
+              "operation": "pnf.construct",
+              "payload": {
+                "context_digest": "83696d451620f43fd7df344155162214aaa4d49ffc057c7244002ba641e16357"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "83696d451620f43fd7df344155162214aaa4d49ffc057c7244002ba641e16357",
+              "dependencies": [
+                "construct"
+              ],
+              "digest": "d959728e297b488d41ef13eaa0470eca1b2fa72b4aef99176126f33fd9aef723",
+              "node_id": "generated_forward",
+              "operation": "pnf.generated_forward",
+              "payload": {
+                "context_digest": "83696d451620f43fd7df344155162214aaa4d49ffc057c7244002ba641e16357"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "83696d451620f43fd7df344155162214aaa4d49ffc057c7244002ba641e16357",
+              "dependencies": [],
+              "digest": "1f4cd867f58c7073021abfae1a55ca8865aa417dcfb65bbf760c8dd40ad4f7fc",
+              "node_id": "source_forward",
+              "operation": "pnf.source_forward",
+              "payload": {
+                "context_digest": "83696d451620f43fd7df344155162214aaa4d49ffc057c7244002ba641e16357"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            },
+            {
+              "context_digest": "83696d451620f43fd7df344155162214aaa4d49ffc057c7244002ba641e16357",
+              "dependencies": [
+                "construct",
+                "source_forward",
+                "generated_forward"
+              ],
+              "digest": "8fca1687db07be972398702226aa3713e82960c3d60248771c9dd1d9faf0cd48",
+              "node_id": "verify",
+              "operation": "pnf.verify",
+              "payload": {
+                "context_digest": "83696d451620f43fd7df344155162214aaa4d49ffc057c7244002ba641e16357"
+              },
+              "resource": "local.numpy",
+              "revision": 1
+            }
+          ],
+          "version": 1
+        }
+      },
+      "execution_host_scope": "one local process; E-CPU dependency and commit semantics",
+      "execution_order": [
+        "construct",
+        "source_forward",
+        "generated_forward",
+        "verify"
+      ],
+      "generated": {
+        "activation": "gelu_tanh",
+        "digest": "c8045555d28c9a0dc9fb605666d741becfc4a2061270c093b16a1a89438a4426",
+        "dimensions": [
+          4,
+          32,
+          4
+        ],
+        "schema": "ifs.feed-forward-block.v1",
+        "tensors": {
+          "down_bias": {
+            "dtype": "F32",
+            "sha256": "a14665b94806e906d394ae0849843a897d052c4ffa62a869a4b31c206ed57ab5",
+            "shape": [
+              4
+            ]
+          },
+          "down_weight": {
+            "dtype": "F32",
+            "sha256": "023dfdfbc4b6f3dbff9955b8b9e40d587ca7919a574131ae4bca276908acdced",
+            "shape": [
+              32,
+              4
+            ]
+          },
+          "up_bias": {
+            "dtype": "F32",
+            "sha256": "4b448f6cae3eb1ec1a85a8939a2976ee59ec7f501b2f532125b78b402714849d",
+            "shape": [
+              32
+            ]
+          },
+          "up_weight": {
+            "dtype": "F32",
+            "sha256": "d47c141e27ffe96308d25cdeff70e76e4c618f87efdd4272f477304350f8c003",
+            "shape": [
+              4,
+              32
+            ]
+          }
+        }
+      },
+      "generated_scalar_oracle": {
+        "atol": 1e-10,
+        "comparisons": 6,
+        "max_absolute_error": 5.551115123125783e-17,
+        "rtol": 1e-10,
+        "status": "passed"
+      },
+      "oracle_output_indices": [
+        0,
+        2,
+        3
+      ],
+      "probe_inputs": [
+        [
+          -0.5625,
+          -0.125,
+          0.3125,
+          -0.4375
+        ],
+        [
+          -0.375,
+          0.0625,
+          0.5,
+          -0.25
+        ]
+      ],
+      "raw_parameters_retained": false,
+      "restoration_equal": true,
+      "source_scalar_oracle": {
+        "atol": 1e-10,
+        "comparisons": 6,
+        "max_absolute_error": 5.551115123125783e-17,
+        "rtol": 1e-10,
+        "status": "passed"
+      },
+      "training_performed": false,
+      "verification": {
+        "coefficient_law": {
+          "coefficient_comparison": "exact-binary32-in-binary64",
+          "floating_point_bitwise_equivalence_claimed": false,
+          "incoming_neurons_checked": 32,
+          "kernel_accepted": false,
+          "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+          "outgoing_coefficients_checked": 64,
+          "status": "passed"
+        },
+        "numerical_comparison": {
+          "atol": 1e-10,
+          "comparisons": 8,
+          "max_absolute_error": 5.551115123125783e-17,
+          "rtol": 1e-10,
+          "status": "passed"
+        },
+        "rehashed_coefficient_tamper_rejected": true
+      }
+    }
+  ],
+  "environment": {
+    "numpy": "2.2.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.13.3"
+  },
+  "schema": "ifs.procedural-neural-formation.v1",
+  "scope": "standalone affine/activation/affine blocks, evaluation semantics; no full-model quality claim"
+}

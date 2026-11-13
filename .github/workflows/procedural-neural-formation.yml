@@ -1,0 +1,91 @@
+name: PNF-001 procedural and observed neural formation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/procedural_neural_formation/**'
+      - '.github/workflows/procedural-neural-formation.yml'
+  pull_request:
+    paths:
+      - 'experiments/procedural_neural_formation/**'
+      - '.github/workflows/procedural-neural-formation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  formation:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/Virtual-Ground-Interpreter
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - name: Install numeric and schema dependencies
+        run: python -m pip install numpy jsonschema
+      - name: Test construction, independent checks and repository adapters
+        env:
+          PYTHONPATH: 'external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+        run: python -m unittest experiments.procedural_neural_formation.test_formation -v
+      - name: Regress existing HFR observation and topology contracts
+        run: python -m unittest discover -s experiments/external_neural_structure_reading -p 'test_*.py' -v
+      - name: Generate and verify four procedural realizations
+        env:
+          PYTHONPATH: 'external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+        run: python -m experiments.procedural_neural_formation.run --output pnf-procedural.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 'pnf-procedural-${{ matrix.python }}'
+          path: pnf-procedural.json
+          if-no-files-found: error
+
+  live-huggingface:
+    needs: formation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/Virtual-Ground-Interpreter
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install numpy jsonschema
+      - name: Observe exactly four source tensors, widen and independently check
+        env:
+          PYTHONPATH: 'external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+          OPENBLAS_NUM_THREADS: '1'
+        run: python -m experiments.procedural_neural_formation.run --live --output pnf-live.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnf-live-observed-and-procedural
+          path: pnf-live.json
+          if-no-files-found: error
