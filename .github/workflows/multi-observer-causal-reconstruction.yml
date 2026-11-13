@@ -1,0 +1,379 @@
+name: Multi-observer causal reconstruction
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/multi-observer-causal-reconstruction/**"
+      - ".github/workflows/multi-observer-causal-reconstruction.yml"
+  pull_request:
+    paths:
+      - "experiments/multi-observer-causal-reconstruction/**"
+      - ".github/workflows/multi-observer-causal-reconstruction.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Compile experiment and tests
+        env:
+          PYTHONPATH: external/E-CPU
+        run: |
+          python -m py_compile \
+            experiments/multi-observer-causal-reconstruction/reconstruct.py \
+            experiments/multi-observer-causal-reconstruction/test_reconstruct.py
+      - name: Run multi-observer causal reconstruction tests
+        env:
+          PYTHONPATH: external/E-CPU
+        run: |
+          python -m unittest discover \
+            -s experiments/multi-observer-causal-reconstruction \
+            -p 'test_*.py' -v
+      - name: Validate schemas against independent producer fixtures
+        env:
+          PYTHONPATH: external/E-CPU
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          import tempfile
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/multi-observer-causal-reconstruction")
+          sys.path.insert(0, str(root))
+          import test_reconstruct
+
+          suite = test_reconstruct.MultiObserverCausalReconstructionTests()
+          suite.setUp()
+          try:
+              report = suite.report()
+              with tempfile.TemporaryDirectory() as directory:
+                  directory = Path(directory)
+                  report_path = directory / "report.json"
+                  predicate_path = directory / "report-predicate.json"
+                  test_reconstruct.experiment.write_json(report_path, report)
+                  predicate = test_reconstruct.experiment.write_report_predicate(
+                      report_path,
+                      predicate_path,
+                      test_reconstruct.runner_env("verifier_host"),
+                  )
+                  cases = (
+                      ("record.schema.json", suite.source),
+                      ("record.schema.json", suite.receiver),
+                      ("record.schema.json", suite.observer),
+                      ("report.schema.json", report),
+                      ("report-predicate.schema.json", predicate),
+                  )
+                  for schema_name, instance in cases:
+                      schema = json.loads((root / schema_name).read_text(encoding="utf-8"))
+                      Draft202012Validator.check_schema(schema)
+                      Draft202012Validator(schema).validate(instance)
+                      print(f"valid: {schema_name}")
+          finally:
+              suite.tearDown()
+          PY
+
+  source_host:
+    needs: tests
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install current GitHub CLI
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes gh
+          gh --version
+      - name: Produce A1 and later local event A2 on source host
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence
+          python experiments/multi-observer-causal-reconstruction/reconstruct.py \
+            produce-source --output evidence/source.json
+      - name: Bind source record to the exact host identity
+        run: |
+          python experiments/multi-observer-causal-reconstruction/reconstruct.py \
+            write-record-predicate --record evidence/source.json \
+            --role source_host --output evidence/source.predicate.json
+      - name: Attest source host record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/source.json
+          predicate-type: https://kier73.github.io/in-formation-space/multi-observer-causal-record/v1
+          predicate-path: evidence/source.predicate.json
+      - name: Transfer source record through GitHub artifact storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: multi-observer-source-record
+          path: evidence/source.json
+          if-no-files-found: error
+          retention-days: 14
+
+  receiver_host:
+    needs: [tests, source_host]
+    if: needs.tests.result == 'success' && needs.source_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install current GitHub CLI
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes gh
+          gh --version
+      - name: Receive the A1 source artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: multi-observer-source-record
+          path: received-source
+      - name: Verify source attestation, merge A1, and record B1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence
+          python experiments/multi-observer-causal-reconstruction/reconstruct.py \
+            produce-receiver --source received-source/source.json \
+            --output evidence/receiver.json
+      - name: Bind receiver record to the exact host identity
+        run: |
+          python experiments/multi-observer-causal-reconstruction/reconstruct.py \
+            write-record-predicate --record evidence/receiver.json \
+            --role receiver_host --output evidence/receiver.predicate.json
+      - name: Attest receiver host record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/receiver.json
+          predicate-type: https://kier73.github.io/in-formation-space/multi-observer-causal-record/v1
+          predicate-path: evidence/receiver.predicate.json
+      - name: Transfer receiver record to the independent verifier
+        uses: actions/upload-artifact@v4
+        with:
+          name: multi-observer-receiver-record
+          path: evidence/receiver.json
+          if-no-files-found: error
+          retention-days: 14
+
+  observer_host:
+    needs: tests
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Produce C1 without the causal clock domain
+        env:
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence
+          python experiments/multi-observer-causal-reconstruction/reconstruct.py \
+            produce-observer --output evidence/observer.json
+      - name: Bind observer record to the exact host identity
+        run: |
+          python experiments/multi-observer-causal-reconstruction/reconstruct.py \
+            write-record-predicate --record evidence/observer.json \
+            --role observer_host --output evidence/observer.predicate.json
+      - name: Attest independent observer record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/observer.json
+          predicate-type: https://kier73.github.io/in-formation-space/multi-observer-causal-record/v1
+          predicate-path: evidence/observer.predicate.json
+      - name: Transfer observer record to the independent verifier
+        uses: actions/upload-artifact@v4
+        with:
+          name: multi-observer-independent-observer-record
+          path: evidence/observer.json
+          if-no-files-found: error
+          retention-days: 14
+
+  verifier_host:
+    needs: [tests, source_host, receiver_host, observer_host]
+    if: needs.tests.result == 'success' && needs.source_host.result == 'success' && needs.receiver_host.result == 'success' && needs.observer_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out pinned E-CPU temporal implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Install current GitHub CLI
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+            | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes gh
+          gh --version
+      - name: Receive independently produced records
+        uses: actions/download-artifact@v4
+        with:
+          name: multi-observer-source-record
+          path: received-source
+      - name: Receive receiver continuation record
+        uses: actions/download-artifact@v4
+        with:
+          name: multi-observer-receiver-record
+          path: received-receiver
+      - name: Receive independent observer record
+        uses: actions/download-artifact@v4
+        with:
+          name: multi-observer-independent-observer-record
+          path: received-observer
+      - name: Independently verify all three attestations and reconstruct the event graph
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: external/E-CPU
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          mkdir -p evidence
+          python experiments/multi-observer-causal-reconstruction/reconstruct.py \
+            verify --source received-source/source.json \
+            --receiver received-receiver/receiver.json \
+            --observer received-observer/observer.json \
+            --output evidence/report.json
+      - name: Bind verifier identity to the exact report bytes
+        env:
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python experiments/multi-observer-causal-reconstruction/reconstruct.py \
+            write-report-predicate --report evidence/report.json \
+            --output evidence/report.predicate.json
+      - name: Validate all host records, report, and attestation predicate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/multi-observer-causal-reconstruction")
+          cases = (
+              ("record.schema.json", "received-source/source.json"),
+              ("record.schema.json", "received-receiver/receiver.json"),
+              ("record.schema.json", "received-observer/observer.json"),
+              ("report.schema.json", "evidence/report.json"),
+              ("report-predicate.schema.json", "evidence/report.predicate.json"),
+          )
+          for schema_name, instance_name in cases:
+              schema = json.loads((root / schema_name).read_text(encoding="utf-8"))
+              instance = json.loads(Path(instance_name).read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              Draft202012Validator(schema).validate(instance)
+              print(f"valid: {instance_name}")
+          PY
+      - name: Attest independent reconstruction report
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/report.json
+          predicate-type: https://kier73.github.io/in-formation-space/multi-observer-causal-report/v1
+          predicate-path: evidence/report.predicate.json
+      - name: Preserve independent reconstruction result
+        uses: actions/upload-artifact@v4
+        with:
+          name: multi-observer-causal-reconstruction-report
+          path: |
+            evidence/report.json
+            evidence/report.predicate.json
+          if-no-files-found: error
+          retention-days: 90
