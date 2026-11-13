@@ -147,7 +147,8 @@ jobs:
           )
           if set(workflow.get("jobs", {})) != {"client_host", "server_host", "verifier_host"}:
               raise SystemExit("IHP-006 must define client_host, server_host, and verifier_host")
-          if "workflow_dispatch" not in workflow.get("on", {}):
+          events = workflow.get("on", workflow.get(True, {}))
+          if "workflow_dispatch" not in events:
               raise SystemExit("IHP-006 must be manually dispatched")
           for name, job in workflow["jobs"].items():
               if "permissions" not in job or "steps" not in job:
