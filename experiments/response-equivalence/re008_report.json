@@ -1,0 +1,297 @@
+{
+  "after_delivery": {
+    "blind_epoch_bound": 0,
+    "blind_epochs": [],
+    "conflict_epochs": [],
+    "corroborated_epochs": [
+      0,
+      3,
+      6,
+      7
+    ],
+    "coverage_scope": "declared eight capture epochs under CI-enrolled roles",
+    "full_physical_coverage_proved": false,
+    "physical_event_loss_bound": null,
+    "physical_sensor_identity_proved": false,
+    "schema": "in-formation.response-re008/0.1",
+    "single_observer_epochs": [
+      1,
+      2,
+      4,
+      5
+    ],
+    "slots": [
+      {
+        "epoch": 0,
+        "observers": {
+          "A": "absent",
+          "B": "absent"
+        },
+        "status": "corroborated_absent"
+      },
+      {
+        "epoch": 1,
+        "observers": {
+          "A": "present",
+          "B": "dropout"
+        },
+        "status": "single_present"
+      },
+      {
+        "epoch": 2,
+        "observers": {
+          "A": "dropout",
+          "B": "absent"
+        },
+        "status": "single_absent"
+      },
+      {
+        "epoch": 3,
+        "observers": {
+          "A": "absent",
+          "B": "absent"
+        },
+        "status": "corroborated_absent"
+      },
+      {
+        "epoch": 4,
+        "observers": {
+          "A": "present",
+          "B": "dropout"
+        },
+        "status": "single_present"
+      },
+      {
+        "epoch": 5,
+        "observers": {
+          "A": "dropout",
+          "B": "absent"
+        },
+        "status": "single_absent"
+      },
+      {
+        "epoch": 6,
+        "observers": {
+          "A": "present",
+          "B": "present"
+        },
+        "status": "corroborated_present"
+      },
+      {
+        "epoch": 7,
+        "observers": {
+          "A": "absent",
+          "B": "absent"
+        },
+        "status": "corroborated_absent"
+      }
+    ],
+    "status": "declared_epochs_observed"
+  },
+  "archive_recovery": {
+    "blind_epoch_bound": 0,
+    "blind_epochs": [],
+    "conflict_epochs": [],
+    "corroborated_epochs": [
+      0,
+      3,
+      7
+    ],
+    "coverage_scope": "declared eight capture epochs under CI-enrolled roles",
+    "full_physical_coverage_proved": false,
+    "physical_event_loss_bound": null,
+    "physical_sensor_identity_proved": false,
+    "schema": "in-formation.response-re008/0.1",
+    "single_observer_epochs": [
+      1,
+      2,
+      4,
+      5,
+      6
+    ],
+    "slots": [
+      {
+        "epoch": 0,
+        "observers": {
+          "A": "absent",
+          "B": "absent"
+        },
+        "status": "corroborated_absent"
+      },
+      {
+        "epoch": 1,
+        "observers": {
+          "A": "present",
+          "B": "dropout"
+        },
+        "status": "single_present"
+      },
+      {
+        "epoch": 2,
+        "observers": {
+          "A": "dropout",
+          "B": "absent"
+        },
+        "status": "single_absent"
+      },
+      {
+        "epoch": 3,
+        "observers": {
+          "A": "absent",
+          "B": "absent"
+        },
+        "status": "corroborated_absent"
+      },
+      {
+        "epoch": 4,
+        "observers": {
+          "A": "present",
+          "B": "dropout"
+        },
+        "status": "single_present"
+      },
+      {
+        "epoch": 5,
+        "observers": {
+          "A": "dropout",
+          "B": "absent"
+        },
+        "status": "single_absent"
+      },
+      {
+        "epoch": 6,
+        "observers": {
+          "A": "pending",
+          "B": "present"
+        },
+        "status": "single_present"
+      },
+      {
+        "epoch": 7,
+        "observers": {
+          "A": "absent",
+          "B": "absent"
+        },
+        "status": "corroborated_absent"
+      }
+    ],
+    "status": "declared_epochs_observed"
+  },
+  "before_delivery": {
+    "blind_epoch_bound": 0,
+    "blind_epochs": [],
+    "conflict_epochs": [],
+    "corroborated_epochs": [
+      0,
+      3,
+      7
+    ],
+    "coverage_scope": "declared eight capture epochs under CI-enrolled roles",
+    "full_physical_coverage_proved": false,
+    "physical_event_loss_bound": null,
+    "physical_sensor_identity_proved": false,
+    "schema": "in-formation.response-re008/0.1",
+    "single_observer_epochs": [
+      1,
+      2,
+      4,
+      5,
+      6
+    ],
+    "slots": [
+      {
+        "epoch": 0,
+        "observers": {
+          "A": "absent",
+          "B": "absent"
+        },
+        "status": "corroborated_absent"
+      },
+      {
+        "epoch": 1,
+        "observers": {
+          "A": "present",
+          "B": "dropout"
+        },
+        "status": "single_present"
+      },
+      {
+        "epoch": 2,
+        "observers": {
+          "A": "dropout",
+          "B": "absent"
+        },
+        "status": "single_absent"
+      },
+      {
+        "epoch": 3,
+        "observers": {
+          "A": "absent",
+          "B": "absent"
+        },
+        "status": "corroborated_absent"
+      },
+      {
+        "epoch": 4,
+        "observers": {
+          "A": "present",
+          "B": "dropout"
+        },
+        "status": "single_present"
+      },
+      {
+        "epoch": 5,
+        "observers": {
+          "A": "dropout",
+          "B": "absent"
+        },
+        "status": "single_absent"
+      },
+      {
+        "epoch": 6,
+        "observers": {
+          "A": "pending",
+          "B": "present"
+        },
+        "status": "single_present"
+      },
+      {
+        "epoch": 7,
+        "observers": {
+          "A": "absent",
+          "B": "absent"
+        },
+        "status": "corroborated_absent"
+      }
+    ],
+    "status": "declared_epochs_observed"
+  },
+  "claims": {
+    "declared_epoch_count": 8,
+    "honest_enrollment_assumption": true,
+    "no_unobserved_physical_events_proved": false
+  },
+  "experiment": "RE-008",
+  "lost_archive": {
+    "archive_gaps": {
+      "A": [],
+      "B": [
+        3
+      ]
+    },
+    "blind_epoch_bound": null,
+    "full_physical_coverage_proved": false,
+    "schema": "in-formation.response-re008/0.1",
+    "status": "unresolved_log_continuity"
+  },
+  "planned_audit": {
+    "action": "request_capture_bound_delivery",
+    "intervention_cost": 0,
+    "observation_cost": 1,
+    "outcome": "planned_only",
+    "target": [
+      "A",
+      6
+    ]
+  }
+}
