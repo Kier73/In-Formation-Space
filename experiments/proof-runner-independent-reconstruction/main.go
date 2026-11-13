@@ -22,7 +22,7 @@ const (
 	receiptFormat = "in-formation.proof-runner-completion-receipt/0.1"
 	keyFormat = "in-formation.proof-runner-participant-key/0.1"
 	verifierHostFormat = "in-formation.proof-runner-verifier-host/0.1"
-	reportFormat = "in-formation.proof-runner-independent-reconstruction-report/0.1"
+	reportFormat = "in-formation.proof-runner-independent-reconstruction-report/0.2"
 )
 
 type object = map[string]any
