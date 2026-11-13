@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Attested, ephemeral Tailscale overlay reachability probe for IHP-003."""
+"""Attested, ephemeral Tailscale overlay reachability probe for IHP-004."""
 from __future__ import annotations
 
 import argparse
@@ -19,16 +19,16 @@ REPOSITORY = "Kier73/In-Formation-Space"
 WORKFLOW_PATH = ".github/workflows/tailscale-overlay-preflight.yml"
 SIGNER_WORKFLOW = f"{REPOSITORY}/{WORKFLOW_PATH}"
 SOURCE_REF = "refs/heads/main"
-TAG = "tag:ihp003-ci"
-ADDRESS_SCHEMA = "in-formation.ihp003-overlay-address/0.1"
-ADDRESS_PREDICATE_SCHEMA = "in-formation.ihp003-overlay-address-predicate/0.1"
-RECORD_SCHEMA = "in-formation.ihp003-overlay-probe-record/0.1"
-RECORD_PREDICATE_SCHEMA = "in-formation.ihp003-overlay-probe-record-predicate/0.1"
-REPORT_SCHEMA = "in-formation.ihp003-overlay-report/0.1"
-REPORT_PREDICATE_SCHEMA = "in-formation.ihp003-overlay-report-predicate/0.1"
-ADDRESS_PREDICATE_TYPE = "https://kier73.github.io/in-formation-space/ihp003-overlay-address/v1"
-RECORD_PREDICATE_TYPE = "https://kier73.github.io/in-formation-space/ihp003-overlay-probe-record/v1"
-REPORT_PREDICATE_TYPE = "https://kier73.github.io/in-formation-space/ihp003-overlay-report/v1"
+TAG = "tag:ihp004-ci"
+ADDRESS_SCHEMA = "in-formation.ihp004-overlay-address/0.1"
+ADDRESS_PREDICATE_SCHEMA = "in-formation.ihp004-overlay-address-predicate/0.1"
+RECORD_SCHEMA = "in-formation.ihp004-overlay-probe-record/0.1"
+RECORD_PREDICATE_SCHEMA = "in-formation.ihp004-overlay-probe-record-predicate/0.1"
+REPORT_SCHEMA = "in-formation.ihp004-overlay-report/0.1"
+REPORT_PREDICATE_SCHEMA = "in-formation.ihp004-overlay-report-predicate/0.1"
+ADDRESS_PREDICATE_TYPE = "https://kier73.github.io/in-formation-space/ihp004-overlay-address/v1"
+RECORD_PREDICATE_TYPE = "https://kier73.github.io/in-formation-space/ihp004-overlay-probe-record/v1"
+REPORT_PREDICATE_TYPE = "https://kier73.github.io/in-formation-space/ihp004-overlay-report/v1"
 GH_MIN_VERSION = (2, 103, 3)
 PEER_WAIT_SECONDS = 180.0
 PING_COUNT = 8
@@ -89,7 +89,7 @@ def _env(source: Mapping[str, str], name: str) -> str:
 def host_metadata(role: str, env: Mapping[str, str] | None = None) -> dict[str, str]:
     source = os.environ if env is None else env
     if role not in {"client_host", "server_host", "verifier_host"}:
-        raise OverlayProbeError("unsupported IHP-003 host role")
+        raise OverlayProbeError("unsupported IHP-004 host role")
     result = {
         "role": role,
         "repository": _env(source, "GITHUB_REPOSITORY"),
@@ -109,9 +109,9 @@ def host_metadata(role: str, env: Mapping[str, str] | None = None) -> dict[str, 
     if result["repository"] != REPOSITORY:
         raise OverlayProbeError("runner repository does not match the pinned repository")
     if result["workflow_ref"] != f"{REPOSITORY}/{WORKFLOW_PATH}@{SOURCE_REF}":
-        raise OverlayProbeError("runner workflow identity is not the protected IHP-003 main workflow")
+        raise OverlayProbeError("runner workflow identity is not the protected IHP-004 main workflow")
     if result["git_ref"] != SOURCE_REF or result["runner_environment"] != "github-hosted":
-        raise OverlayProbeError("IHP-003 evidence must come from a main-branch GitHub-hosted runner")
+        raise OverlayProbeError("IHP-004 evidence must come from a main-branch GitHub-hosted runner")
     if result["job"] != role:
         raise OverlayProbeError(f"expected job {role}, received {result['job']}")
     result["actor_id"] = (
@@ -337,7 +337,7 @@ def _validate_address(
     if host["run_id"] != expected_run_id or host["run_attempt"] != expected_attempt:
         raise OverlayProbeError("peer address belongs to another workflow run/attempt")
     if address["overlay_provider"] != "tailscale" or address["overlay_tag"] != TAG:
-        raise OverlayProbeError("peer address does not identify the IHP-003 Tailscale overlay")
+        raise OverlayProbeError("peer address does not identify the IHP-004 Tailscale overlay")
     if address["status"] not in {"ready", "credentials_missing"}:
         raise OverlayProbeError("peer address status is unsupported")
     if address["status"] == "ready":
@@ -466,7 +466,7 @@ def probe_peer(
         "ping_exit_code": ping_exit_code,
         "ping_output": ping_output,
         "diagnostic": (
-            "Tailscale peer-path probe only; no E-CPU application payload was sent by this IHP-003 preflight."
+            "Tailscale peer-path probe only; no E-CPU application payload was sent by this IHP-004 preflight."
         ),
     }
     record = {**core, "record_digest": digest_object(core)}
@@ -593,7 +593,7 @@ def build_report(
 
     report_core = {
         "schema": REPORT_SCHEMA,
-        "path_id": f"run-{verifier['run_id']}-ihp003-tailscale-overlay",
+        "path_id": f"run-{verifier['run_id']}-ihp004-tailscale-overlay",
         "repository": REPOSITORY,
         "run_id": verifier["run_id"],
         "run_attempt": verifier["run_attempt"],
@@ -793,13 +793,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "create-address":
             create_address(args.role, args.output_dir, enabled=args.enabled == "true")
         elif args.command == "probe":
-            probe_peer(args.role, args.output_dir, peer_artifact=args.peer_artifact, enabled=os.environ.get("IHP003_TAILSCALE_ENABLED") == "true", gh=args.gh)
+            probe_peer(args.role, args.output_dir, peer_artifact=args.peer_artifact, enabled=os.environ.get("IHP004_TAILSCALE_ENABLED") == "true", gh=args.gh)
         elif args.command == "verify":
             verify_to_report(args.directory, args.output, gh=args.gh)
         elif args.command == "write-report-predicate":
             write_report_predicate(args.report, args.output)
     except (OverlayProbeError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
-        print(f"ihp003-overlay-probe: {error}", file=sys.stderr)
+        print(f"ihp004-overlay-probe: {error}", file=sys.stderr)
         return 2
     return 0
 
