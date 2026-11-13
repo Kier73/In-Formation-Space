@@ -1,0 +1,196 @@
+name: RE-008 observer overlap, sealed coverage, and E-CPU causal verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re008-coverage-reconstruction.yml'
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re008-coverage-reconstruction.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run RE-001 through RE-008 Python tests
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Deterministically regenerate coverage report
+        run: |
+          python experiments/response-equivalence/coverage_reconstruction.py > /tmp/re008-report.json
+          cmp experiments/response-equivalence/re008_report.json /tmp/re008-report.json
+      - name: Exercise genuine E-CPU temporal implementation
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re008_cases.py
+
+  enrollment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Create scoped CI enrollment and role-specific key fixtures
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from coverage_reconstruction import enrollment
+          reg=enrollment()
+          for name,document in (
+              ('re008-public-enrollment.json',{'challenge':reg['challenge'],'key_ids':reg['key_ids']}),
+              ('re008-enrollment-A.json',{'challenge':reg['challenge'],'key_ids':reg['key_ids'],'keys':{'A':reg['keys']['A']}}),
+              ('re008-enrollment-B.json',{'challenge':reg['challenge'],'key_ids':reg['key_ids'],'keys':{'B':reg['keys']['B']}}),
+              ('re008-verifier-enrollment.json',reg)):
+              with open(name,'w',encoding='utf-8') as out: json.dump(document,out,sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re008-public-enrollment, path: re008-public-enrollment.json, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re008-enrollment-A-ci, path: re008-enrollment-A.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re008-enrollment-B-ci, path: re008-enrollment-B.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re008-verifier-enrollment-ci, path: re008-verifier-enrollment.json, retention-days: 1, if-no-files-found: error}
+
+  controller:
+    needs: enrollment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re008-public-enrollment}
+      - name: Establish declared epoch window with E-CPU causal frame
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re008-controller-input.json
+          import json
+          with open('re008-public-enrollment.json',encoding='utf-8') as f: reg=json.load(f)
+          print(json.dumps({'challenge':reg['challenge']}))
+          PY
+          python experiments/response-equivalence/ecpu_coverage_hosts.py --controller < /tmp/re008-controller-input.json > re008-controller.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re008-controller-public, path: re008-controller.json, if-no-files-found: error}
+
+  observer-a:
+    needs: [enrollment, controller]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re008-controller-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re008-enrollment-A-ci}
+      - name: Collect and seal role-A epoch observations, including delayed receipt
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re008-A-input.json
+          import json
+          def read(p):
+              with open(p,encoding='utf-8') as f: return json.load(f)
+          print(json.dumps({'controller':read('re008-controller.json'),'enrollment':read('re008-enrollment-A.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_coverage_hosts.py --A < /tmp/re008-A-input.json > re008-A-public.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re008-A-public, path: re008-A-public.json, if-no-files-found: error}
+
+  observer-b:
+    needs: [enrollment, controller]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re008-controller-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re008-enrollment-B-ci}
+      - name: Independently collect and seal role-B epoch observations
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re008-B-input.json
+          import json
+          def read(p):
+              with open(p,encoding='utf-8') as f: return json.load(f)
+          print(json.dumps({'controller':read('re008-controller.json'),'enrollment':read('re008-enrollment-B.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_coverage_hosts.py --B < /tmp/re008-B-input.json > re008-B-public.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re008-B-public, path: re008-B-public.json, if-no-files-found: error}
+
+  independent-verifier:
+    needs: [tests, enrollment, controller, observer-a, observer-b]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re008-controller-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re008-A-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re008-B-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re008-verifier-enrollment-ci}
+      - name: Verify signed log completeness, observer overlap and actual E-CPU causal relations
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY' > /tmp/re008-verifier-input.json
+          import json
+          def read(p):
+              with open(p,encoding='utf-8') as f: return json.load(f)
+          print(json.dumps({'controller':read('re008-controller.json'),
+                            'A':read('re008-A-public.json'),'B':read('re008-B-public.json'),
+                            'enrollment':read('re008-verifier-enrollment.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_coverage_hosts.py --verifier < /tmp/re008-verifier-input.json > re008-independent-report.json
+          python - <<'PY'
+          import json
+          with open('re008-independent-report.json',encoding='utf-8') as f: report=json.load(f)
+          assert report['status']=='declared_epoch_coverage_verified',report
+          assert report['coverage']['blind_epoch_bound']==0,report
+          assert report['coverage']['slots'][6]['status']=='corroborated_present',report
+          assert report['causal_relation']['A_concurrent_B']=='concurrent',report
+          assert report['external_event_loss_bound'] is None
+          assert report['physical_event_completeness_proved'] is False
+          assert report['cross_host_elapsed'] is None
+          print('Verified scoped coverage without inferring physical event completeness')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re008-independent-coverage-verifier, path: re008-independent-report.json, if-no-files-found: error}
