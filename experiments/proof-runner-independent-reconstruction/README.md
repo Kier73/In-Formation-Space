@@ -46,6 +46,8 @@ The workflow uses three separate GitHub-hosted jobs in one run. The authority jo
 
 GitHub Actions artifacts transfer the database and retained evidence to the runner and verifier jobs. This does not claim that the three authority processes are three hosts, that SQLite is a multi-host consensus service, or that E-CPU ReliableChannel transported the artifacts. The third workflow job independently reads the transferred database; it is not the authority's transaction coordinator.
 
+This experiment is complementary to [MOR-001: Multi-observer causal reconstruction](../multi-observer-causal-reconstruction/README.md), which examines independently produced temporal evidence and cross-host causal relations. Here the focus is whether a route authority can survive local process restart and whether a separate observer can reconstruct its durable history. Neither experiment alone establishes a general multi-host consensus authority.
+
 ## Durable local authority profile
 
 The live authority producer uses the repository's `bridges/proof-attention/proof_action_route_epoch.py` and `sqlite_route_epoch_store.py` implementations directly. The expected four durable revisions are:
