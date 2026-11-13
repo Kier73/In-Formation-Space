@@ -76,6 +76,21 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
         with self.assertRaisesRegex(direct.DirectMTLSError, "allowlist"):
             direct.host_metadata("server_host", env)
 
+    def test_ihp006_artifact_attestation_pins_the_new_signer_workflow(self) -> None:
+        workflow_ref = (
+            f"{direct.REPOSITORY}/{direct.TAILSCALE_WORKFLOW_PATH}@{direct.SOURCE_REF}"
+        )
+        with patch.dict(direct.os.environ, {"GITHUB_WORKFLOW_REF": workflow_ref}, clear=False):
+            signer_workflow = direct._signer_workflow_from_environment()
+        command = direct._attestation_command(
+            self.client["certificate_path"],
+            direct.CERT_PREDICATE_TYPE,
+            "gh",
+            signer_workflow=signer_workflow,
+        )
+        self.assertIn(f"{direct.REPOSITORY}/{direct.TAILSCALE_WORKFLOW_PATH}", command)
+        self.assertNotIn(direct.SIGNER_WORKFLOW, command)
+
     def test_tailscale_overlay_address_is_restricted_to_the_cgnat_ipv4_range(self) -> None:
         self.assertEqual(
             direct._validate_tailscale_ipv4("100.73.20.11"), "100.73.20.11"
