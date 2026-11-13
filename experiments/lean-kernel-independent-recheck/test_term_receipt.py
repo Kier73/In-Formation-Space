@@ -56,7 +56,7 @@ class TermReceiptTests(unittest.TestCase):
 
     def test_rejects_tampered_signature_and_wrong_signer(self):
         signed = copy.deepcopy(self.signed)
-        signed["payload"]["checker_observation_digest"] = "f" * 64
+        signed["signature_base64"] = "AAAA"  # malformed Ed25519 signature, valid base64
         signed["document_digest"] = t.digest({k: v for k, v in signed.items() if k != "document_digest"})
         with self.assertRaisesRegex(t.TermReceiptError, "signature"):
             t.admit(self.runner, self.checker, signed, self.key.public_key())
