@@ -55,11 +55,12 @@ jobs:
           fi
       - name: Join ephemeral Tailscale node
         if: steps.tailnet_config.outputs.enabled == 'true'
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
           tags: tag:ihp003-ci
+          version: 1.104.5
       - name: Create and bind client overlay address
         env:
           RUNNER_ENVIRONMENT: ${{ runner.environment }}
@@ -169,11 +170,12 @@ jobs:
           fi
       - name: Join ephemeral Tailscale node
         if: steps.tailnet_config.outputs.enabled == 'true'
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
           tags: tag:ihp003-ci
+          version: 1.104.5
       - name: Create and bind server overlay address
         env:
           RUNNER_ENVIRONMENT: ${{ runner.environment }}
