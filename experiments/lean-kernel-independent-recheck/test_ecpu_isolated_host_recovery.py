@@ -120,7 +120,10 @@ class VirtualHostProvisioningTests(unittest.TestCase):
         for frame in frames[:2]:
             decoder.ingest(frame)
         self.assertFalse(decoder.finished)
-        self.assertFalse(decoder.raw)
+        # The first subject may be fully buffered, but the six-subject
+        # transfer is incomplete and cannot be promoted to VGI admission.
+        self.assertEqual(set(decoder.raw), {"runner"})
+        self.assertNotEqual(set(decoder.raw), set(transport.SUBJECTS))
         with self.assertRaisesRegex(transport.ProofTransitError, "incomplete"):
             decoder.materialize(self.root)
 
