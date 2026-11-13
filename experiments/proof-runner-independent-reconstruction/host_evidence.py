@@ -191,17 +191,213 @@ def _derive_execution_id(epoch_id: str, attempt_id: str, request_digest: str) ->
     })
 
 
+def _validate_store_revision_history(
+    ledger: Mapping[str, Any],
+    history: list[Mapping[str, Any]],
+) -> None:
+    """Recompute each SQLite ledger prefix from its append-only revision delta."""
+    entries = ledger.get("entries")
+    if not isinstance(entries, list) or not isinstance(history, list) or not history:
+        raise EvidenceError("SQLite authority history and route ledger must be non-empty")
+    event_offset = 0
+    previous_ledger_digest: str | None = None
+    for expected_revision, row in enumerate(history, 1):
+        required = {
+            "revision", "previous_ledger_digest", "ledger_digest", "actor_id",
+            "appended_event_digests", "committed_utc",
+        }
+        if not isinstance(row, Mapping) or set(row) != required:
+            raise EvidenceError(f"SQLite revision {expected_revision} fields are invalid")
+        if type(row["revision"]) is not int or row["revision"] != expected_revision:
+            raise EvidenceError("SQLite revision sequence is not contiguous")
+        if row["previous_ledger_digest"] != previous_ledger_digest:
+            raise EvidenceError("SQLite revision predecessor digest mismatch")
+        actor = row["actor_id"]
+        if not isinstance(actor, str) or not actor.strip():
+            raise EvidenceError("SQLite revision actor ID is invalid")
+        if not isinstance(row["committed_utc"], str) or not row["committed_utc"]:
+            raise EvidenceError("SQLite revision commit marker is invalid")
+        appended = row["appended_event_digests"]
+        if not isinstance(appended, list) or not appended:
+            raise EvidenceError("SQLite revision must append event digests")
+        end_offset = event_offset + len(appended)
+        if end_offset > len(entries):
+            raise EvidenceError("SQLite revision appends beyond the route ledger")
+        batch = entries[event_offset:end_offset]
+        if [event.get("event_digest") for event in batch] != appended:
+            raise EvidenceError("SQLite revision append index differs from route ledger events")
+        for event in batch:
+            details = event.get("details", {})
+            event_actor = details.get("owner_id") if isinstance(details, Mapping) else None
+            if actor != event_actor:
+                raise EvidenceError("SQLite revision actor differs from appended event owner")
+        prefix = {"format": ledger["format"], "entries": entries[:end_offset]}
+        computed = _digest(prefix)
+        if row["ledger_digest"] != computed:
+            raise EvidenceError(
+                f"SQLite revision {expected_revision} intermediate ledger digest mismatch"
+            )
+        previous_ledger_digest = computed
+        event_offset = end_offset
+    if event_offset != len(entries) or previous_ledger_digest != ledger.get("ledger_digest"):
+        raise EvidenceError("SQLite revision history does not reproduce the complete route ledger")
+
+
+def _validate_authority_process_evidence(
+    ledger: Mapping[str, Any],
+    process_evidence: Mapping[str, Any],
+    stale_attempt: Mapping[str, Any],
+    history: list[Mapping[str, Any]],
+    request: Mapping[str, Any],
+) -> None:
+    required = {
+        "format", "authority_store_type", "authority_process_count", "phases",
+        "final_store_revision", "final_ledger_digest", "stale_owner_attempt_rejected",
+    }
+    if not isinstance(process_evidence, Mapping) or set(process_evidence) != required:
+        raise EvidenceError("authority process evidence fields are invalid")
+    if process_evidence["format"] != "in-formation.proof-runner-authority-process-evidence/0.1":
+        raise EvidenceError("authority process evidence format is unsupported")
+    if process_evidence["authority_store_type"] != "sqlite-local-file":
+        raise EvidenceError("authority store type is not the declared SQLite local-file adapter")
+    if process_evidence["authority_process_count"] != 3 or process_evidence["final_store_revision"] != len(history):
+        raise EvidenceError("authority process count or final revision is inconsistent")
+    if process_evidence["final_ledger_digest"] != ledger.get("ledger_digest"):
+        raise EvidenceError("authority process evidence names a different final ledger")
+    if process_evidence["stale_owner_attempt_rejected"] is not True:
+        raise EvidenceError("authority process evidence does not record stale-owner rejection")
+
+    phases = process_evidence["phases"]
+    expected_phases = [
+        "initial_open",
+        "restart_claim_admit_authorize",
+        "stale_generation_replay",
+    ]
+    if not isinstance(phases, list) or len(phases) != 3:
+        raise EvidenceError("authority process evidence must contain three phases")
+    if [item.get("phase") for item in phases] != expected_phases:
+        raise EvidenceError("authority process phases are missing or reordered")
+    instance_ids: set[str] = set()
+    for phase in phases:
+        if not isinstance(phase, Mapping):
+            raise EvidenceError("authority process phase must be an object")
+        process_id = phase.get("process_id")
+        instance_id = phase.get("process_instance_id")
+        if type(process_id) is not int or process_id <= 0:
+            raise EvidenceError("authority phase process ID is invalid")
+        if not isinstance(instance_id, str) or not instance_id or instance_id in instance_ids:
+            raise EvidenceError("authority process instances are not distinct")
+        instance_ids.add(instance_id)
+        if type(phase.get("observed_store_revision")) is not int:
+            raise EvidenceError("authority phase store revision is invalid")
+        if not isinstance(phase.get("event_digests"), list):
+            raise EvidenceError("authority phase event digest list is invalid")
+    entries = ledger["entries"]
+    expected_digests = [
+        [entries[0]["event_digest"]],
+        [entries[1]["event_digest"], entries[2]["event_digest"], entries[3]["event_digest"]],
+        [],
+    ]
+    if [item["event_digests"] for item in phases] != expected_digests:
+        raise EvidenceError("authority process phases do not bind the expected ledger commits")
+    if [item["observed_store_revision"] for item in phases] != [1, 4, 4]:
+        raise EvidenceError("authority process phases do not match the SQLite revision history")
+    if [item["decision"] for item in phases] != [
+        "opened", "replacement_owner_authorized", "rejected"
+    ]:
+        raise EvidenceError("authority process phase decisions are invalid")
+
+    stale_fields = {
+        "phase", "process_id", "process_instance_id", "event_digests",
+        "observed_store_revision", "decision", "stale_attempt_id", "accepted",
+        "observed_owner_id", "observed_owner_generation",
+    }
+    if not isinstance(stale_attempt, Mapping) or set(stale_attempt) != stale_fields:
+        raise EvidenceError("stale-owner attempt record fields are invalid")
+    if stale_attempt != phases[2]:
+        raise EvidenceError("stale-owner attempt does not match the third process record")
+    if (
+        stale_attempt["accepted"] is not False
+        or stale_attempt["observed_owner_generation"] != 2
+        or stale_attempt["observed_owner_id"] != entries[1]["details"]["owner_id"]
+        or stale_attempt["stale_attempt_id"] != f"{request['attempt_id']}:stale-replay"
+    ):
+        raise EvidenceError("stale owner-generation attempt was not rejected as expected")
+
+
+def _database_bytes(path_or_bytes: Path | bytes) -> bytes:
+    if isinstance(path_or_bytes, bytes):
+        return path_or_bytes
+    return path_or_bytes.read_bytes()
+
+
+def _authority_attestation_core(
+    authority_key: Ed25519PrivateKey,
+    *,
+    authority_id: str,
+    runner_id: str,
+    ledger: Mapping[str, Any],
+    request: Mapping[str, Any],
+    history: list[Mapping[str, Any]],
+    process_evidence: Mapping[str, Any],
+    stale_attempt: Mapping[str, Any],
+    database_path_or_bytes: Path | bytes,
+) -> dict[str, Any]:
+    _validate_store_revision_history(ledger, history)
+    _validate_authority_process_evidence(
+        ledger, process_evidence, stale_attempt, history, request
+    )
+    event = ledger["entries"][-1]
+    details = event["details"]
+    database_sha256 = hashlib.sha256(_database_bytes(database_path_or_bytes)).hexdigest()
+    return {
+        "format": AUTHORITY_ATTESTATION_FORMAT,
+        "signature_algorithm": "Ed25519",
+        "authority_id": authority_id,
+        "authority_key_id": _key_id(authority_key.public_key()),
+        "ledger_digest": ledger["ledger_digest"],
+        "ledger_sequence": len(ledger["entries"]),
+        "authorization_event_digest": event["event_digest"],
+        "execution_id": details["execution_id"],
+        "attempt_id": request["attempt_id"],
+        "request_digest": request["request_digest"],
+        "runner_id": runner_id,
+        "store_type": "sqlite-local-file",
+        "store_revision_count": len(history),
+        "store_history_digest": _digest(history),
+        "store_database_sha256": database_sha256,
+        "process_evidence_digest": _digest(process_evidence),
+        "process_phase_count": len(process_evidence["phases"]),
+        "stale_owner_rejected": stale_attempt["accepted"] is False,
+    }
+
+
+def _sign_authority_attestation(
+    authority_key: Ed25519PrivateKey,
+    core: Mapping[str, Any],
+) -> dict[str, Any]:
+    attestation_digest = _digest(dict(core))
+    signed_payload = {**dict(core), "attestation_digest": attestation_digest}
+    return {
+        **signed_payload,
+        "signature": authority_key.sign(canonical_bytes(signed_payload)).hex(),
+    }
+
+
 def _build_authority_material(
     authority_key: Ed25519PrivateKey,
     *,
     fixture: bool,
-) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
-    host = _host_identity("authority_host", fixture=fixture)
-    run_id = host["run_id"]
-    attempt_id = "proof-run:fixture:000001" if fixture else f"proof-run:{run_id}:000001"
-    epoch_id = "proof-route-epoch-fixture" if fixture else f"proof-route-epoch-{run_id}"
-    runner_id = "lean-worker-fixture" if fixture else f"lean-worker-{run_id}"
-    owner_id = "route-owner-fixture" if fixture else f"route-owner-{run_id}"
+) -> tuple[
+    dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any],
+    list[dict[str, Any]], bytes, dict[str, Any], dict[str, Any],
+]:
+    run_id = "fixture" if fixture else "live"
+    attempt_id = "proof-run:fixture:000001" if fixture else "proof-run:live:000001"
+    epoch_id = "proof-route-epoch-fixture" if fixture else "proof-route-epoch-live"
+    runner_id = "lean-worker-fixture" if fixture else "lean-worker-live"
+    initial_owner = "route-owner-fixture-process-1" if fixture else "route-owner-live-process-1"
+    replacement_owner = "route-owner-fixture-process-2" if fixture else "route-owner-live-process-2"
 
     request_core = {
         "format": "in-formation.proof-action-request/0.1",
@@ -224,7 +420,6 @@ def _build_authority_material(
         "result_channel": f"proof-result-{run_id}",
         "policy": {"lease_ticks": 3, "max_attempts": 4, "window_size": 8},
     }
-
     opened = _make_event(
         sequence=1,
         previous_event_digest="0" * 64,
@@ -235,19 +430,32 @@ def _build_authority_material(
         details={
             "predecessor_close_digest": None,
             "owner_generation": 1,
-            "owner_id": owner_id,
+            "owner_id": initial_owner,
+        },
+    )
+    claimed = _make_event(
+        sequence=2,
+        previous_event_digest=opened["event_digest"],
+        event_type="claimed",
+        epoch_id=epoch_id,
+        epoch_number=1,
+        route=route,
+        details={
+            "owner_generation": 2,
+            "previous_owner_id": initial_owner,
+            "owner_id": replacement_owner,
         },
     )
     admitted = _make_event(
-        sequence=2,
-        previous_event_digest=opened["event_digest"],
+        sequence=3,
+        previous_event_digest=claimed["event_digest"],
         event_type="admitted",
         epoch_id=epoch_id,
         epoch_number=1,
         route=route,
         details={
-            "owner_id": owner_id,
-            "owner_generation": 1,
+            "owner_id": replacement_owner,
+            "owner_generation": 2,
             "attempt_id": attempt_id,
             "request_digest": request["request_digest"],
             "request_sequence": 1,
@@ -255,15 +463,15 @@ def _build_authority_material(
     )
     execution_id = _derive_execution_id(epoch_id, attempt_id, request["request_digest"])
     authorized = _make_event(
-        sequence=3,
+        sequence=4,
         previous_event_digest=admitted["event_digest"],
         event_type="execution_authorized",
         epoch_id=epoch_id,
         epoch_number=1,
         route=route,
         details={
-            "owner_id": owner_id,
-            "owner_generation": 1,
+            "owner_id": replacement_owner,
+            "owner_generation": 2,
             "attempt_id": attempt_id,
             "request_digest": request["request_digest"],
             "request_sequence": 1,
@@ -272,35 +480,92 @@ def _build_authority_material(
             "runner_id": runner_id,
         },
     )
-    ledger_core = {"format": LEDGER_FORMAT, "entries": [opened, admitted, authorized]}
+    entries = [opened, claimed, admitted, authorized]
+    ledger_core = {"format": LEDGER_FORMAT, "entries": entries}
     ledger = {**ledger_core, "ledger_digest": _digest(ledger_core)}
 
-    attestation_core = {
-        "format": AUTHORITY_ATTESTATION_FORMAT,
-        "signature_algorithm": "Ed25519",
-        "authority_id": "route-authority-fixture" if fixture else f"route-authority-{run_id}",
-        "authority_key_id": _key_id(authority_key.public_key()),
-        "ledger_digest": ledger["ledger_digest"],
-        "ledger_sequence": len(ledger["entries"]),
-        "authorization_event_digest": authorized["event_digest"],
-        "execution_id": execution_id,
-        "attempt_id": attempt_id,
-        "request_digest": request["request_digest"],
-        "runner_id": runner_id,
+    history = []
+    previous_digest = None
+    for index, event in enumerate(entries, 1):
+        prefix = {"format": LEDGER_FORMAT, "entries": entries[:index]}
+        current_digest = _digest(prefix)
+        history.append({
+            "revision": index,
+            "previous_ledger_digest": previous_digest,
+            "ledger_digest": current_digest,
+            "actor_id": event["details"]["owner_id"],
+            "appended_event_digests": [event["event_digest"]],
+            "committed_utc": "2026-11-13T00:00:00.000Z",
+        })
+        previous_digest = current_digest
+
+    process_evidence = {
+        "format": "in-formation.proof-runner-authority-process-evidence/0.1",
+        "authority_store_type": "sqlite-local-file",
+        "authority_process_count": 3,
+        "phases": [
+            {
+                "phase": "initial_open",
+                "process_id": 10001,
+                "process_instance_id": "fixture-process-instance-1",
+                "event_digests": [opened["event_digest"]],
+                "observed_store_revision": 1,
+                "decision": "opened",
+            },
+            {
+                "phase": "restart_claim_admit_authorize",
+                "process_id": 10002,
+                "process_instance_id": "fixture-process-instance-2",
+                "event_digests": [
+                    claimed["event_digest"],
+                    admitted["event_digest"],
+                    authorized["event_digest"],
+                ],
+                "observed_store_revision": 4,
+                "decision": "replacement_owner_authorized",
+            },
+            {
+                "phase": "stale_generation_replay",
+                "process_id": 10003,
+                "process_instance_id": "fixture-process-instance-3",
+                "event_digests": [],
+                "observed_store_revision": 4,
+                "decision": "rejected",
+                "stale_attempt_id": f"{attempt_id}:stale-replay",
+                "accepted": False,
+                "observed_owner_id": replacement_owner,
+                "observed_owner_generation": 2,
+            },
+        ],
+        "final_store_revision": 4,
+        "final_ledger_digest": ledger["ledger_digest"],
+        "stale_owner_attempt_rejected": True,
     }
-    attestation_digest = _digest(attestation_core)
-    signed_payload = {**attestation_core, "attestation_digest": attestation_digest}
-    authority_attestation = {
-        **signed_payload,
-        "signature": authority_key.sign(canonical_bytes(signed_payload)).hex(),
-    }
+    stale_attempt = process_evidence["phases"][2]
+    database_bytes = b"fixture-only: deterministic stand-in; not a live SQLite database\n"
+    authority_id = "route-authority-fixture" if fixture else f"route-authority-{run_id}"
+    core = _authority_attestation_core(
+        authority_key,
+        authority_id=authority_id,
+        runner_id=runner_id,
+        ledger=ledger,
+        request=request,
+        history=history,
+        process_evidence=process_evidence,
+        stale_attempt=stale_attempt,
+        database_path_or_bytes=database_bytes,
+    )
+    authority_attestation = _sign_authority_attestation(authority_key, core)
     key_doc = _participant_key_document(
         authority_key,
-        attestation_core["authority_id"],
+        authority_id,
         "authority_host",
         fixture=fixture,
     )
-    return ledger, request, authority_attestation, key_doc
+    return (
+        ledger, request, authority_attestation, key_doc,
+        history, database_bytes, process_evidence, stale_attempt,
+    )
 
 
 def _verify_authority_material(
@@ -308,6 +573,11 @@ def _verify_authority_material(
     request: Mapping[str, Any],
     attestation: Mapping[str, Any],
     key_doc: Mapping[str, Any],
+    *,
+    history: list[Mapping[str, Any]],
+    process_evidence: Mapping[str, Any],
+    stale_attempt: Mapping[str, Any],
+    database_path: Path,
 ) -> dict[str, Any]:
     if key_doc.get("format") != KEY_FORMAT or key_doc.get("role") != "authority_host":
         raise EvidenceError("authority public-key document has the wrong format or role")
@@ -325,6 +595,9 @@ def _verify_authority_material(
         "format", "signature_algorithm", "authority_id", "authority_key_id",
         "ledger_digest", "ledger_sequence", "authorization_event_digest",
         "execution_id", "attempt_id", "request_digest", "runner_id",
+        "store_type", "store_revision_count", "store_history_digest",
+        "store_database_sha256", "process_evidence_digest",
+        "process_phase_count", "stale_owner_rejected",
         "attestation_digest", "signature",
     }
     if set(attestation) != expected_fields:
@@ -347,15 +620,19 @@ def _verify_authority_material(
     if ledger.get("format") != LEDGER_FORMAT or ledger.get("ledger_digest") != _digest(ledger_core):
         raise EvidenceError("route ledger digest mismatch")
     entries = ledger.get("entries")
-    if not isinstance(entries, list) or not entries:
-        raise EvidenceError("route ledger must contain events")
-    event = entries[-1]
+    if not isinstance(entries, list) or len(entries) != 4:
+        raise EvidenceError("route ledger must contain the four expected authority events")
     try:
-        validated_event = validate_execution_authorization_event(event)
+        _validate_store_revision_history(ledger, list(history))
+        _validate_authority_process_evidence(
+            ledger, process_evidence, stale_attempt, list(history), request
+        )
         validated_request = validate_request_document(request)
-    except (CompletionReceiptError, TypeError, ValueError) as exc:
-        raise EvidenceError(f"authority documents failed request/event validation: {exc}") from exc
+        validated_event = validate_execution_authorization_event(entries[-1])
+    except (CompletionReceiptError, TypeError, ValueError, KeyError) as exc:
+        raise EvidenceError(f"authority evidence failed semantic validation: {exc}") from exc
     details = validated_event["details"]
+    database_sha256 = hashlib.sha256(database_path.read_bytes()).hexdigest()
     if (
         attestation["authority_id"] != key_doc["participant_id"]
         or attestation["authority_key_id"] != key_doc["key_id"]
@@ -368,8 +645,15 @@ def _verify_authority_material(
         or attestation["runner_id"] != details["runner_id"]
         or details["attempt_id"] != validated_request["attempt_id"]
         or details["request_digest"] != validated_request["request_digest"]
+        or attestation["store_type"] != "sqlite-local-file"
+        or attestation["store_revision_count"] != len(history)
+        or attestation["store_history_digest"] != _digest(list(history))
+        or attestation["store_database_sha256"] != database_sha256
+        or attestation["process_evidence_digest"] != _digest(process_evidence)
+        or attestation["process_phase_count"] != 3
+        or attestation["stale_owner_rejected"] is not True
     ):
-        raise EvidenceError("authority attestation does not bind the exact ledger, event, and request")
+        raise EvidenceError("authority attestation does not bind the ledger, SQLite audit, processes, and request")
     return dict(validated_event)
 
 
