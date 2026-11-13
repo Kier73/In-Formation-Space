@@ -101,7 +101,7 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
             )
         self.assertEqual(address["status"], "ready")
         self.assertEqual(address["overlay_ipv4"], "100.73.20.11")
-        self.assertEqual(address["overlay_tag"], "tag:ihp003-ci")
+        self.assertEqual(address["overlay_tag"], "tag:ihp004-ci")
         self.assertEqual(
             address["address_digest"],
             overlay.digest_object({k: v for k, v in address.items() if k != "address_digest"}),
@@ -126,7 +126,7 @@ class TailscaleOverlayProbeTests(unittest.TestCase):
         )
         self.assertEqual(address["status"], "credentials_missing")
         self.assertIsNone(address["overlay_ipv4"])
-        self.assertEqual(address["overlay_tag"], "tag:ihp003-ci")
+        self.assertEqual(address["overlay_tag"], "tag:ihp004-ci")
 
     def test_report_reconstructs_direct_peer_route_from_two_distinct_host_records(self) -> None:
         client_address, _ = self.address("client_host", self.client_env, "100.64.0.11")
