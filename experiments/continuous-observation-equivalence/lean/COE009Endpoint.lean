@@ -45,20 +45,22 @@ theorem betweenInsideClosed (c : Cell) (p q r : Rat)
 private theorem positiveSlopeReflect (a : Affine)
     (hm : 0 < a.slope) (u v : Rat)
     (h : evaluateAt a u ≤ evaluateAt a v) : u ≤ v := by
-  by_contra hn
-  have hvu : v < u := (Rat.not_le).mp hn
-  have hf := COERationalRoot.increasing a.slope a.offset v u hm hvu
-  change evaluateAt a v < evaluateAt a u at hf
-  grind
+  by_cases hle : u ≤ v
+  · exact hle
+  · have hvu : v < u := (Rat.not_le).mp hle
+    have hf := COERationalRoot.increasing a.slope a.offset v u hm hvu
+    change evaluateAt a v < evaluateAt a u at hf
+    grind
 
 private theorem negativeSlopeReflect (a : Affine)
     (hm : a.slope < 0) (u v : Rat)
     (h : evaluateAt a u ≤ evaluateAt a v) : v ≤ u := by
-  by_contra hn
-  have huv : u < v := (Rat.not_le).mp hn
-  have hf := COERationalRoot.decreasing a.slope a.offset u v hm huv
-  change evaluateAt a v < evaluateAt a u at hf
-  grind
+  by_cases hle : v ≤ u
+  · exact hle
+  · have huv : u < v := (Rat.not_le).mp hle
+    have hf := COERationalRoot.decreasing a.slope a.offset u v hm huv
+    change evaluateAt a v < evaluateAt a u at hf
+    grind
 
 private theorem positiveSlopeStrict (a : Affine)
     (hm : 0 < a.slope) (u v : Rat)
@@ -97,7 +99,8 @@ theorem selectedAtClosed (c : Cell) (a : Affine) (p x : Rat)
     · have hxpos : 0 < evaluateAt a x := by simpa [← hsame] using hpos
       simp [hpos, hxpos]
     · have hxneg : ¬ 0 < evaluateAt a x := by simpa [← hsame] using hpos
-      simp [hpos, hxneg, zeroAffine, evaluateAt]
+      simp only [if_neg hpos, if_neg hxneg]
+      change (0 : Rat) * x + 0 = 0
       grind
   · let r : Rat := -a.offset / a.slope
     obtain ⟨hrzero, hrout⟩ := rootGuardFacts c a hguard hmzero
