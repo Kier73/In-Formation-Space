@@ -97,6 +97,14 @@ class MOR002OverlayTests(unittest.TestCase):
             "before",
         )
 
+    def test_source_followup_is_captured_after_channel_send_but_before_ack(self) -> None:
+        source = Path(direct.__file__).read_text(encoding="utf-8")
+        send_at = source.index("sequence = sender_channel.send(signed_envelope)")
+        a2_at = source.index("_write_mor002_source_followup(", send_at)
+        ack_at = source.index("_wait_for_ack(sender_channel", send_at)
+        self.assertLess(send_at, a2_at)
+        self.assertLess(a2_at, ack_at)
+
     def test_native_sparse_vector_clock_produces_a2_b1_concurrency(self) -> None:
         a = "actor-A"
         b = "actor-B"
@@ -150,8 +158,9 @@ class MOR002OverlayTests(unittest.TestCase):
         altered["core"] = altered_core
         altered["signed_digest"] = direct.digest_object(altered_core)
         record_path.write_text(json.dumps(altered), encoding="utf-8")
-        with self.assertRaisesRegex(mor002.MOR002Error, "must be A2 and remain outside"):
-            mor002.write_followup_predicate(record_path, self.root / "predicate.json")
+        with patch.dict(os.environ, runner_env("client_host", "client-vm"), clear=True):
+            with self.assertRaisesRegex(mor002.MOR002Error, "must be A2 and remain outside"):
+                mor002.write_followup_predicate(record_path, self.root / "predicate.json")
 
     def test_mor002_workflow_fails_closed_without_dedicated_overlay_identity(self) -> None:
         workflow_path = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "mor002-tailscale-causal-reconstruction.yml"
