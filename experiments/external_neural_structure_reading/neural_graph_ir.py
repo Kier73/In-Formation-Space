@@ -143,6 +143,7 @@ def _operation(
     attributes: dict[str, Any],
     *,
     semantic_basis: str = "GPT2LMHeadModel family contract",
+    semantic_reference: str = TRANSFORMERS_REFERENCE,
 ) -> dict[str, Any]:
     return {
         "id": identifier,
@@ -154,7 +155,7 @@ def _operation(
             "operator_semantics": {
                 "status": "family-interpreted",
                 "basis": semantic_basis,
-                "reference": TRANSFORMERS_REFERENCE,
+                "reference": semantic_reference,
             },
             "port_shapes": {
                 "status": "dimensionally-derived",
@@ -744,7 +745,7 @@ def _operation_contract(operation: dict[str, Any]) -> list[str]:
                 require(inputs["indices"]["dtype"] == "I64", "embedding indices must be I64")
                 require(inputs["table"]["dtype"] == outputs["embeddings"]["dtype"], "embedding table/output dtype mismatch")
     elif operator == "tensor.add":
-        require(set(inputs) in ({"left", "right"}, {"token_embeddings", "position_embeddings"}, {"residual", "update"}), "tensor.add has an unsupported input signature")
+        require(len(inputs) == 2, "tensor.add must have exactly two typed input ports")
         require(len(outputs) == 1, "tensor.add must have one output")
         if len(inputs) == 2 and len(outputs) == 1:
             first, second = list(inputs.values())
@@ -817,6 +818,52 @@ def _operation_contract(operation: dict[str, Any]) -> list[str]:
             require(mask[2] == mask[3], "causal mask must be square")
             require(attributes.get("causal") is True, "attention must declare causal masking")
             require(attributes.get("scale_by_sqrt_head_width") is True, "attention must declare scaled dot-product")
+    elif operator == "attention.padding_mask_prepare":
+        require(set(inputs) == {"mask"} and set(outputs) == {"mask"}, "padding mask prepare port signature is invalid")
+        if set(inputs) == {"mask"} and set(outputs) == {"mask"}:
+            require(inputs["mask"]["dtype"] == outputs["mask"]["dtype"] == "I64", "mask prepare must preserve integer mask dtype")
+            require(inputs["mask"]["shape"] == outputs["mask"]["shape"], "mask prepare must preserve mask shape")
+            require(len(inputs["mask"]["shape"]) == 2, "padding mask must be rank 2")
+        require(attributes.get("mask_semantics") == "one_attend_zero_mask", "mask prepare requires declared padding convention")
+    elif operator == "attention.bidirectional_scaled_dot_product":
+        require(set(inputs) == {"query", "key", "value", "mask"}, "bidirectional attention input signature is invalid")
+        require(set(outputs) == {"context"}, "bidirectional attention output signature is invalid")
+        if set(inputs) == {"query", "key", "value", "mask"} and set(outputs) == {"context"}:
+            query = inputs["query"]
+            key = inputs["key"]
+            value = inputs["value"]
+            mask = inputs["mask"]
+            context = outputs["context"]
+            require(query["shape"] == key["shape"] == value["shape"] == context["shape"], "bidirectional attention projected Q/K/V/context shapes must match")
+            require(query["dtype"] == key["dtype"] == value["dtype"] == context["dtype"], "bidirectional attention projected dtypes must match")
+            require(len(query["shape"]) == 3, "bidirectional attention uses batch/sequence/feature tensors")
+            if len(query["shape"]) == 3:
+                require(mask["shape"] == query["shape"][:2], "bidirectional padding mask batch/sequence shape must match queries")
+            require(mask["dtype"] == "I64", "bidirectional padding mask must be I64")
+            heads = attributes.get("head_count")
+            head_width = attributes.get("head_width")
+            require(type(heads) is int and heads > 0, "head_count must be positive")
+            require(type(head_width) is int and head_width > 0, "head_width must be positive")
+            if type(heads) is int and type(head_width) is int and len(query["shape"]) == 3:
+                require(query["shape"][2] == heads * head_width, "attention feature width does not match heads x head width")
+            require(attributes.get("causal") is False, "bidirectional attention must explicitly be noncausal")
+            require(attributes.get("scale_by_sqrt_head_width") is True, "bidirectional attention must declare scaling")
+            require(attributes.get("mask_semantics") == "one_attend_zero_mask", "bidirectional attention mask convention is missing")
+    elif operator == "sequence.select_first_token":
+        require(set(inputs) == {"sequence"} and set(outputs) == {"first"}, "first-token selection port signature is invalid")
+        if set(inputs) == {"sequence"} and set(outputs) == {"first"}:
+            source = inputs["sequence"]
+            target = outputs["first"]
+            require(len(source["shape"]) == 3, "first-token input must be batch/sequence/hidden")
+            if len(source["shape"]) == 3:
+                require(target["shape"] == [source["shape"][0], source["shape"][2]], "first-token output must be batch/hidden")
+            require(source["dtype"] == target["dtype"], "first-token selection dtype mismatch")
+        require(attributes.get("token_index") == 0, "first-token selection must explicitly target token zero")
+    elif operator == "activation.tanh":
+        require(set(inputs) == {"value"} and set(outputs) == {"output"}, "tanh port signature is invalid")
+        if set(inputs) == {"value"} and set(outputs) == {"output"}:
+            require(inputs["value"]["shape"] == outputs["output"]["shape"], "tanh must preserve shape")
+            require(inputs["value"]["dtype"] == outputs["output"]["dtype"], "tanh must preserve dtype")
     elif operator == "activation.gelu_tanh":
         require(set(inputs) == {"value"} and set(outputs) == {"output"}, "GELU port signature is invalid")
         if inputs and outputs:
