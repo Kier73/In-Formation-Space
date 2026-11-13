@@ -344,7 +344,7 @@ These statements quantify over arbitrary typed certificates, layers and rational
 
 ### Complete coverage of the rational line (COE009Coverage.lean)
 
-The executable checker now uses structurally recursive forms of its established endpoint and adjacency tests, lastUnbounded and joinedChain. This makes the verification evidence available for a terminating list induction. Acceptance still requires an unbounded first and last cell, nonempty/proper intervals, and exact equality of adjacent cutpoints and output values.
+The executable checker now uses structurally recursive forms of its established endpoint and adjacency tests, lastUnbounded and joinedChain. This makes the verification evidence available for a terminating list induction. The additional Lean theorems joinedChainEquivalent and lastUnboundedEquivalent prove that these structural checks are **equivalent** to the original List.zip and List.reverse implementations for every list of cells; acceptance semantics have not been silently changed. Acceptance still requires an unbounded first and last cell, nonempty/proper intervals, and exact equality of adjacent cutpoints and output values.
 
 - verifiedCoverCoversRationals: for every rational coordinate x and every accepted certificate, there is at least one member of the declared activation-cell list whose **closed interval contains x**.
 - verifiedCertificateAllRationals: combining that complete coverage with closed-cell network soundness proves that, at **every rational x**, at least one claimed certificate affine observation equals the independent numeric evaluation of the source network. This includes all finite rational breakpoints.
