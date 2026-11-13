@@ -716,6 +716,9 @@ def run_cloned_mtls_authority_experiment(
                 process.communicate(timeout=5)
         for process in processes.values():
             _stop(process)
+        # Test keys are deliberately reusable during the scenario only; retain fingerprints,
+        # not private-key files, in the reconstruction output directory.
+        shutil.rmtree(credential_dir, ignore_errors=True)
 
 
 def main() -> int:
