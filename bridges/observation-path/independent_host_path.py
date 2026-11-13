@@ -250,6 +250,8 @@ def _validate_record(document: Mapping[str, Any], expected_role: str) -> dict[st
         )
         if dict(payload) != rebuilt:
             raise EvidenceError("source handoff payload cannot be independently rebuilt")
+        if payload["attempt_id"] != span["attempt_id"]:
+            raise EvidenceError("source handoff attempt does not match the operation span")
         if frame["monotonic"]["elapsed_ns"] < span["monotonic_end_ns"]:
             raise EvidenceError("source frame predates its measured operation completion")
     else:
@@ -259,6 +261,11 @@ def _validate_record(document: Mapping[str, Any], expected_role: str) -> dict[st
             raise EvidenceError("receiver stores the received payload only inside its witness")
         if not isinstance(document["handoff_witness"], Mapping):
             raise EvidenceError("receiver record is missing its causal handoff witness")
+        witness = document["handoff_witness"]
+        if witness.get("attempt_id") != span["attempt_id"]:
+            raise EvidenceError("receiver handoff attempt does not match the operation span")
+        if witness.get("successor_span_digest") != span["span_digest"]:
+            raise EvidenceError("receiver handoff successor does not match the operation span")
 
     return dict(document)
 
@@ -505,6 +512,8 @@ def verify_artifact_attestation(
         and isinstance(verification_signature.get("certificate"), Mapping)
     )
     timestamps = verified.get("verifiedTimestamps", [])
+    if not certificate_present:
+        raise EvidenceError("verified artifact attestation is missing its signing certificate")
     return {
         "verified": True,
         "subject_sha256": artifact_digest,
@@ -517,6 +526,29 @@ def verify_artifact_attestation(
     }
 
 
+def _validate_attestation_summary(summary: Mapping[str, Any], expected_digest: str) -> dict[str, Any]:
+    required = {
+        "verified", "subject_sha256", "predicate_type", "signer_workflow",
+        "source_ref", "self_hosted_runners_denied",
+        "verified_signature_certificate_present", "verified_timestamp_count",
+    }
+    if not isinstance(summary, Mapping) or set(summary) != required:
+        raise EvidenceError("attestation verification summary fields are incomplete or unexpected")
+    if summary["verified"] is not True or summary["subject_sha256"] != expected_digest:
+        raise EvidenceError("attestation summary does not verify the expected artifact digest")
+    if summary["predicate_type"] != PREDICATE_TYPE:
+        raise EvidenceError("attestation summary uses an unexpected predicate type")
+    if summary["signer_workflow"] != SIGNER_WORKFLOW or summary["source_ref"] != SOURCE_REF:
+        raise EvidenceError("attestation summary does not pin the protected main workflow")
+    if summary["self_hosted_runners_denied"] is not True:
+        raise EvidenceError("attestation summary did not deny self-hosted runners")
+    if summary["verified_signature_certificate_present"] is not True:
+        raise EvidenceError("attestation summary has no verified signing certificate")
+    if isinstance(summary["verified_timestamp_count"], bool) or not isinstance(summary["verified_timestamp_count"], int) or summary["verified_timestamp_count"] < 0:
+        raise EvidenceError("attestation timestamp count is invalid")
+    return dict(summary)
+
+
 def build_report(
     source: Mapping[str, Any],
     receiver: Mapping[str, Any],
@@ -527,6 +559,12 @@ def build_report(
     source = _validate_record(source, "source_host")
     receiver = _validate_record(receiver, "receiver_host")
     _validate_pair_context(source["host"], receiver["host"])
+    source_attestation = _validate_attestation_summary(
+        source_attestation, str(receiver["source_record_sha256"])
+    )
+    receiver_attestation = _validate_attestation_summary(
+        receiver_attestation, str(receiver_attestation.get("subject_sha256", ""))
+    )
 
     if receiver["source_record_sha256"] != source_attestation["subject_sha256"]:
         raise EvidenceError("receiver did not bind the exact attested source artifact")
