@@ -167,6 +167,67 @@ class AdaptiveRepairTests(unittest.TestCase):
             for report in sweep["policies"]
         ))
 
+    def test_checked_in_scan_receipt_reconstructs_from_all_48_source_policies(self):
+        receipt_path = Path(__file__).with_name("results") / "adaptive-repair-scan-summary.json"
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        self.assertEqual(receipt["format"], "in-formation.adaptive-repair-scan-summary")
+        self.assertEqual(receipt["workflow_run_id"], 43367608013)
+        self.assertEqual(len(receipt["policies"]), 48)
+
+        actual_by_key = {
+            (
+                row["scenario_name"],
+                row["recovery_threshold"],
+                row["repair_cost"],
+            ): row
+            for row in receipt["policies"]
+        }
+        self.assertEqual(len(actual_by_key), 48)
+
+        for scenario in DEFAULT_SCENARIOS:
+            for threshold in scenario["recovery_thresholds"]:
+                for repair_cost in scenario["repair_costs"]:
+                    rebuilt = build_adaptive_repair_report(
+                        scenario_name=scenario["scenario_name"],
+                        slots=scenario["slots"],
+                        recovery_threshold=threshold,
+                        horizon=scenario["horizon"],
+                        good_loss_probability=scenario["good_loss_probability"],
+                        bad_loss_probability=scenario["bad_loss_probability"],
+                        good_to_bad_probability=scenario["good_to_bad_probability"],
+                        bad_to_good_probability=scenario["bad_to_good_probability"],
+                        initial_bad_probability=scenario["initial_bad_probability"],
+                        repair_cost=repair_cost,
+                        fixed_intervals=scenario["fixed_intervals"],
+                    )
+                    key = (scenario["scenario_name"], threshold, repair_cost)
+                    actual = actual_by_key.pop(key)
+                    adaptive = rebuilt["adaptive_policy"]
+                    fixed = rebuilt["best_fixed_schedule"]
+                    self.assertEqual(actual["policy_digest_sha256"], adaptive["policy_digest"])
+                    self.assertEqual(
+                        actual["state_conditioned_decision_cells"],
+                        adaptive["state_conditioned_decision_cells"],
+                    )
+                    self.assertEqual(
+                        actual["selected_repair_state_count"],
+                        adaptive["selected_repair_state_count"],
+                    )
+                    self.assertEqual(
+                        actual["best_fixed_interval_rounds"],
+                        fixed["interval_rounds"],
+                    )
+                    self.assertEqual(actual["adaptive_survival_probability"], f'{adaptive["survival_probability"]:.6g}')
+                    self.assertEqual(actual["adaptive_expected_repair_count"], f'{adaptive["expected_repair_count"]:.6g}')
+                    self.assertEqual(actual["adaptive_expected_utility"], f'{adaptive["expected_utility"]:.6g}')
+                    self.assertEqual(actual["best_fixed_expected_utility"], f'{fixed["expected_utility"]:.6g}')
+                    self.assertEqual(
+                        actual["adaptive_gain_over_best_fixed"],
+                        f'{rebuilt["adaptive_gain_over_best_fixed"]:.6g}',
+                    )
+
+        self.assertFalse(actual_by_key)
+
     def test_sweep_digest_detects_mutated_fixed_schedule_comparison(self):
         spec = {
             **DEFAULT_SCENARIOS[0],
