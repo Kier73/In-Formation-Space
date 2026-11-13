@@ -9,10 +9,10 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { createHash } from "node:crypto";
+import { createHash, createPublicKey, verify as verifyEd25519Signature } from "node:crypto";
 import { verifyPortableStatefulCheckpoint } from "./verify_capsule.mjs";
 
-const PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v3";
+const PREPARED_SCHEMA = "ifs.psc.stateful-recovery-worker-prepared.v4";
 const ENVELOPE_SCHEMA = "in-formation-space.stateful-runtime-recovery-handoff.v1";
 const MAX_INPUT_BYTES = 96 * 1024 * 1024;
 
@@ -197,7 +197,7 @@ function validateEnvelope(envelope) {
   };
 }
 
-function verifyPrepared(envelope, record) {
+function verifyPrepared(envelope, record, trustedValidatorKeyId = null) {
   const expectedFields = [
     "schema", "request_sequence", "input_claim_id", "input_checkpoint_sha256",
     "input_envelope_sha256", "assignment_epoch", "owner_peer_id", "owner_host_id",
@@ -338,12 +338,12 @@ function verifyPrepared(envelope, record) {
         "schema", "validator_peer_id", "validator_dns_identity",
         "validator_certificate_sha256", "worker_peer_id", "worker_host_id",
         "worker_implementation_fingerprint", "request_sha256", "response_sha256",
-        "verifier_implementation_fingerprint",
-        "validation_digest", "validation", "remote_validator_receipt_digest",
+        "verifier_implementation_fingerprint", "validation_digest", "validation",
+        "signed_response", "remote_validator_receipt_digest",
       ],
       "remote validator receipt"
     );
-    if (remoteReceipt.schema !== "ifs.psc.remote-validator-receipt.v1") {
+    if (remoteReceipt.schema !== "ifs.psc.remote-validator-receipt.v2") {
       fail("remote validator receipt schema is unsupported");
     }
     const { remote_validator_receipt_digest: remoteDigest, ...remoteCore } = remoteReceipt;
@@ -358,6 +358,96 @@ function verifyPrepared(envelope, record) {
       "request_sha256", "response_sha256", "verifier_implementation_fingerprint",
       "validation_digest",
     ]) requireDigest(remoteReceipt[field], `remote_validator_receipt.${field}`);
+
+    const signedResponse = remoteReceipt.signed_response;
+    exactKeys(
+      signedResponse,
+      [
+        "schema", "request_id", "request_sha256", "validator_peer_id",
+        "validator_dns_identity", "worker_peer_id", "worker_host_id",
+        "worker_implementation_fingerprint", "status", "validation_report",
+        "verifier_implementation_fingerprint", "rejection", "response_sha256", "attestation",
+      ],
+      "signed validator response"
+    );
+    const {
+      response_sha256: signedResponseDigest,
+      attestation,
+      ...signedResponseCore
+    } = signedResponse;
+    if (
+      signedResponse.schema !== "ifs.psc.remote-validator.response.v1" ||
+      signedResponse.status !== "verified" ||
+      signedResponse.rejection !== null ||
+      objectDigest(signedResponseCore) !== requireDigest(signedResponseDigest, "signed_response.response_sha256")
+    ) {
+      fail("signed validator response body or digest is invalid");
+    }
+    if (
+      signedResponse.request_sha256 !== remoteReceipt.request_sha256 ||
+      signedResponse.validator_peer_id !== remoteReceipt.validator_peer_id ||
+      signedResponse.validator_dns_identity !== remoteReceipt.validator_dns_identity ||
+      signedResponse.worker_peer_id !== remoteReceipt.worker_peer_id ||
+      signedResponse.worker_host_id !== remoteReceipt.worker_host_id ||
+      signedResponse.worker_implementation_fingerprint !== remoteReceipt.worker_implementation_fingerprint ||
+      signedResponse.verifier_implementation_fingerprint !== remoteReceipt.verifier_implementation_fingerprint ||
+      signedResponseDigest !== remoteReceipt.response_sha256 ||
+      !same(signedResponse.validation_report?.verification, fullVerification) ||
+      signedResponse.validation_report?.verification_digest !== verificationDigest
+    ) {
+      fail("signed validator response does not bind the exact worker and verification result");
+    }
+
+    exactKeys(
+      attestation,
+      [
+        "schema", "algorithm", "key_id", "public_key_pem",
+        "signed_payload_sha256", "signature_base64",
+      ],
+      "Ed25519 validator attestation"
+    );
+    if (
+      attestation.schema !== "ifs.psc.validator-attestation.v1" ||
+      attestation.algorithm !== "Ed25519" ||
+      attestation.signed_payload_sha256 !== signedResponseDigest
+    ) {
+      fail("validator attestation metadata does not bind the signed response digest");
+    }
+    if (
+      typeof attestation.public_key_pem !== "string" ||
+      attestation.public_key_pem.length === 0 ||
+      attestation.public_key_pem.length > 4096
+    ) fail("validator attestation public-key PEM is missing or exceeds its bound");
+    const publicKey = createPublicKey(attestation.public_key_pem);
+    if (publicKey.asymmetricKeyType !== "ed25519") fail("validator attestation key is not Ed25519");
+    const publicKeyDer = publicKey.export({ type: "spki", format: "der" });
+    const attestationKeyId = requireDigest(attestation.key_id, "attestation.key_id");
+    if (sha256(publicKeyDer) !== attestationKeyId) {
+      fail("validator attestation public-key identity digest mismatch");
+    }
+    if (
+      trustedValidatorKeyId !== null &&
+      attestationKeyId !== requireDigest(trustedValidatorKeyId, "trusted_validator_key_id")
+    ) {
+      fail("validator attestation key is not in the configured offline trust set");
+    }
+    const signature = decodeCanonicalBase64(
+      attestation.signature_base64,
+      "attestation.signature_base64",
+      1024
+    );
+    if (
+      signature.length !== 64 ||
+      !verifyEd25519Signature(
+        null,
+        Buffer.from(signedResponseDigest, "hex"),
+        publicKey,
+        signature
+      )
+    ) {
+      fail("Ed25519 validator attestation signature verification failed");
+    }
+
     if (
       remoteReceipt.worker_peer_id !== record.owner_peer_id ||
       remoteReceipt.worker_host_id !== record.owner_host_id ||
@@ -382,11 +472,19 @@ function argument(name) {
   return process.argv[index + 1];
 }
 
+function optionalArgument(name) {
+  const index = process.argv.indexOf(name);
+  if (index < 0) return null;
+  if (!process.argv[index + 1]) fail(`missing value for ${name}`);
+  return process.argv[index + 1];
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
     const envelope = readJsonFile(argument("--envelope"), "handoff envelope");
     const prepared = readJsonFile(argument("--prepared"), "prepared result");
-    process.stdout.write(`${JSON.stringify(verifyPrepared(envelope, prepared))}\n`);
+    const trustedValidatorKeyId = optionalArgument("--trusted-validator-key-id");
+    process.stdout.write(`${JSON.stringify(verifyPrepared(envelope, prepared, trustedValidatorKeyId))}\n`);
   } catch (error) {
     process.stderr.write(`invalid prepared result: ${error.message}\n`);
     process.exitCode = 1;

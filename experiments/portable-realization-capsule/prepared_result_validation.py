@@ -8,6 +8,7 @@ verification and publication of a content-bound validation receipt.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -22,6 +23,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+
 from mailcpu import ReliabilityPolicy, ReliableChannel, SocketTransport
 from mailcpu.mtls_transport import accept_mutual_tls, connect_mutual_tls
 
@@ -30,7 +34,8 @@ REQUEST_CHANNEL = "ifs.psc.remote-validator.request.v1"
 RESPONSE_CHANNEL = "ifs.psc.remote-validator.response.v1"
 REQUEST_SCHEMA = "ifs.psc.remote-validator.request.v1"
 RESPONSE_SCHEMA = "ifs.psc.remote-validator.response.v1"
-VALIDATION_RECEIPT_SCHEMA = "ifs.psc.remote-validator-receipt.v1"
+VALIDATION_RECEIPT_SCHEMA = "ifs.psc.remote-validator-receipt.v2"
+ATTESTATION_SCHEMA = "ifs.psc.validator-attestation.v1"
 
 _MAX_REQUEST_BYTES = 96 * 1024 * 1024
 _MAX_FRAME_BYTES = 192 * 1024 * 1024
@@ -92,6 +97,34 @@ def _exact_fields(value: Any, expected: set[str], field: str) -> Mapping[str, An
     return value
 
 
+def _public_key_fingerprint(public_key: Ed25519PublicKey) -> str:
+    der = public_key.public_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    return _bytes_digest(der)
+
+
+def _load_ed25519_public_key(path: Path) -> Ed25519PublicKey:
+    try:
+        selected = serialization.load_pem_public_key(path.read_bytes())
+    except (OSError, ValueError, TypeError) as exc:
+        raise PreparedResultValidationError("validator attestation public key is not valid PEM") from exc
+    if not isinstance(selected, Ed25519PublicKey):
+        raise PreparedResultValidationError("validator attestation public key must be Ed25519")
+    return selected
+
+
+def _load_ed25519_private_key(path: Path) -> Ed25519PrivateKey:
+    try:
+        selected = serialization.load_pem_private_key(path.read_bytes(), password=None)
+    except (OSError, ValueError, TypeError) as exc:
+        raise PreparedResultValidationError("validator attestation private key is not valid unencrypted PEM") from exc
+    if not isinstance(selected, Ed25519PrivateKey):
+        raise PreparedResultValidationError("validator attestation private key must be Ed25519")
+    return selected
+
+
 def verifier_implementation_fingerprint(script_directory: Path | None = None) -> str:
     """Bind the independent Node verifier and its shared capsule receiver by their exact bytes."""
     root = script_directory or Path(__file__).resolve().parent
@@ -123,6 +156,7 @@ class PreparedResultValidatorEndpoint:
     worker_certificate_path: Path
     worker_private_key_path: Path
     trusted_server_ca_path: Path
+    attestation_public_key_path: Path
     timeout_seconds: float = 30.0
 
     def __post_init__(self) -> None:
@@ -148,6 +182,7 @@ class PreparedResultValidatorEndpoint:
             (self.worker_certificate_path, "worker certificate"),
             (self.worker_private_key_path, "worker private key"),
             (self.trusted_server_ca_path, "validator CA bundle"),
+            (self.attestation_public_key_path, "validator attestation public key"),
         ):
             if not isinstance(value, Path) or not value.is_file():
                 raise PreparedResultValidationError(f"{name} path must refer to an existing file")
@@ -299,10 +334,14 @@ def validate_prepared_result_remotely(
             "validation_report",
             "verifier_implementation_fingerprint",
             "response_sha256",
+            "attestation",
             "rejection",
         }
         _exact_fields(response, response_fields, "remote validator response")
-        response_core = {key: value for key, value in response.items() if key != "response_sha256"}
+        response_core = {
+            key: value for key, value in response.items()
+            if key not in {"response_sha256", "attestation"}
+        }
         if (
             response["schema"] != RESPONSE_SCHEMA
             or response["request_id"] != request["request_id"]
@@ -316,6 +355,47 @@ def validate_prepared_result_remotely(
             or _digest(response_core) != _require_digest(response["response_sha256"], "response_sha256")
         ):
             raise PreparedResultValidationError("remote validator response identity or digest mismatch")
+
+        attestation = response["attestation"]
+        _exact_fields(
+            attestation,
+            {
+                "schema", "algorithm", "key_id", "public_key_pem",
+                "signed_payload_sha256", "signature_base64",
+            },
+            "validator attestation",
+        )
+        if (
+            attestation["schema"] != ATTESTATION_SCHEMA
+            or attestation["algorithm"] != "Ed25519"
+            or attestation["signed_payload_sha256"] != response["response_sha256"]
+        ):
+            raise PreparedResultValidationError("validator attestation schema or signed payload is invalid")
+        pinned_public_key = _load_ed25519_public_key(endpoint.attestation_public_key_path)
+        public_key_pem = attestation["public_key_pem"]
+        if not isinstance(public_key_pem, str) or not public_key_pem or len(public_key_pem) > 4096:
+            raise PreparedResultValidationError("attestation public key PEM is missing or exceeds its bound")
+        presented_public_key = serialization.load_pem_public_key(public_key_pem.encode("ascii"))
+        if not isinstance(presented_public_key, Ed25519PublicKey):
+            raise PreparedResultValidationError("validator attestation presented a non-Ed25519 public key")
+        pinned_key_id = _public_key_fingerprint(pinned_public_key)
+        presented_key_id = _public_key_fingerprint(presented_public_key)
+        if (
+            presented_key_id != pinned_key_id
+            or _require_digest(attestation["key_id"], "attestation.key_id") != pinned_key_id
+        ):
+            raise PreparedResultValidationError("validator attestation public key does not match the pinned key")
+        signature_text = attestation["signature_base64"]
+        if not isinstance(signature_text, str):
+            raise PreparedResultValidationError("validator attestation signature must be Base64 text")
+        try:
+            signature = base64.b64decode(signature_text, validate=True)
+            if base64.b64encode(signature).decode("ascii") != signature_text or len(signature) != 64:
+                raise ValueError("non-canonical Ed25519 signature")
+            pinned_public_key.verify(signature, bytes.fromhex(response["response_sha256"]))
+        except Exception as exc:
+            raise PreparedResultValidationError("validator attestation signature verification failed") from exc
+
         if response["status"] != "verified":
             rejection = response.get("rejection")
             raise PreparedResultValidationError(
@@ -358,6 +438,7 @@ def validate_prepared_result_remotely(
             "verifier_implementation_fingerprint": remote_implementation,
             "validation_digest": report["verification_digest"],
             "validation": dict(report["verification"]),
+            "signed_response": dict(response),
         }
         remote_receipt_digest = _digest(remote_receipt_core)
         remote_receipt = {
@@ -385,6 +466,123 @@ def validate_prepared_result_remotely(
             transport.close()
 
 
+def verify_stored_remote_validator_receipt(
+    endpoint: PreparedResultValidatorEndpoint,
+    remote_receipt: Mapping[str, Any],
+) -> str:
+    """Revalidate a persisted validator attestation against the worker's pinned public key."""
+    expected_receipt_fields = {
+        "schema", "validator_peer_id", "validator_dns_identity",
+        "validator_certificate_sha256", "worker_peer_id", "worker_host_id",
+        "worker_implementation_fingerprint", "request_sha256", "response_sha256",
+        "verifier_implementation_fingerprint", "validation_digest", "validation",
+        "signed_response", "remote_validator_receipt_digest",
+    }
+    receipt = _exact_fields(remote_receipt, expected_receipt_fields, "stored remote validator receipt")
+    receipt_core = {
+        key: value for key, value in receipt.items()
+        if key != "remote_validator_receipt_digest"
+    }
+    receipt_digest = _require_digest(
+        receipt["remote_validator_receipt_digest"],
+        "remote_validator_receipt_digest",
+    )
+    if _digest(receipt_core) != receipt_digest:
+        raise PreparedResultValidationError("stored remote validator receipt digest mismatch")
+
+    if (
+        receipt["schema"] != VALIDATION_RECEIPT_SCHEMA
+        or receipt["validator_peer_id"] != endpoint.validator_peer_id
+        or receipt["validator_dns_identity"] != endpoint.server_dns_identity
+        or receipt["validator_certificate_sha256"] != endpoint.server_certificate_sha256
+        or receipt["worker_peer_id"] != endpoint.worker_peer_id
+        or receipt["worker_host_id"] != endpoint.worker_host_id
+        or receipt["worker_implementation_fingerprint"] != endpoint.worker_implementation_fingerprint
+    ):
+        raise PreparedResultValidationError("stored validator receipt identity differs from pinned endpoint")
+
+    response = receipt["signed_response"]
+    response_fields = {
+        "schema", "request_id", "request_sha256", "validator_peer_id",
+        "validator_dns_identity", "worker_peer_id", "worker_host_id",
+        "worker_implementation_fingerprint", "status", "validation_report",
+        "verifier_implementation_fingerprint", "response_sha256", "attestation", "rejection",
+    }
+    signed_response = _exact_fields(response, response_fields, "stored signed validator response")
+    response_core = {
+        key: value for key, value in signed_response.items()
+        if key not in {"response_sha256", "attestation"}
+    }
+    response_digest = _require_digest(signed_response["response_sha256"], "signed_response.response_sha256")
+    if _digest(response_core) != response_digest:
+        raise PreparedResultValidationError("stored signed validator response digest mismatch")
+    if (
+        signed_response["schema"] != RESPONSE_SCHEMA
+        or signed_response["status"] != "verified"
+        or signed_response["rejection"] is not None
+        or signed_response["request_sha256"] != receipt["request_sha256"]
+        or signed_response["validator_peer_id"] != endpoint.validator_peer_id
+        or signed_response["validator_dns_identity"] != endpoint.server_dns_identity
+        or signed_response["worker_peer_id"] != endpoint.worker_peer_id
+        or signed_response["worker_host_id"] != endpoint.worker_host_id
+        or signed_response["worker_implementation_fingerprint"] != endpoint.worker_implementation_fingerprint
+        or signed_response["verifier_implementation_fingerprint"] != receipt["verifier_implementation_fingerprint"]
+        or response_digest != receipt["response_sha256"]
+    ):
+        raise PreparedResultValidationError("stored signed validator response identity mismatch")
+
+    attestation = _exact_fields(
+        signed_response["attestation"],
+        {
+            "schema", "algorithm", "key_id", "public_key_pem",
+            "signed_payload_sha256", "signature_base64",
+        },
+        "stored validator attestation",
+    )
+    if (
+        attestation["schema"] != ATTESTATION_SCHEMA
+        or attestation["algorithm"] != "Ed25519"
+        or attestation["signed_payload_sha256"] != response_digest
+    ):
+        raise PreparedResultValidationError("stored validator attestation metadata mismatch")
+
+    pinned_key = _load_ed25519_public_key(endpoint.attestation_public_key_path)
+    public_key_pem = attestation["public_key_pem"]
+    if not isinstance(public_key_pem, str) or not public_key_pem or len(public_key_pem) > 4096:
+        raise PreparedResultValidationError("stored attestation public key PEM is missing or exceeds its bound")
+    presented_key = serialization.load_pem_public_key(public_key_pem.encode("ascii"))
+    if not isinstance(presented_key, Ed25519PublicKey):
+        raise PreparedResultValidationError("stored validator attestation key is not Ed25519")
+    pinned_key_id = _public_key_fingerprint(pinned_key)
+    if (
+        _public_key_fingerprint(presented_key) != pinned_key_id
+        or _require_digest(attestation["key_id"], "attestation.key_id") != pinned_key_id
+    ):
+        raise PreparedResultValidationError("stored validator attestation key does not match the pinned key")
+    try:
+        signature_text = _require_text(attestation["signature_base64"], "attestation.signature_base64")
+        signature = base64.b64decode(signature_text, validate=True)
+        if base64.b64encode(signature).decode("ascii") != signature_text or len(signature) != 64:
+            raise ValueError("non-canonical Ed25519 signature")
+        pinned_key.verify(signature, bytes.fromhex(response_digest))
+    except Exception as exc:
+        raise PreparedResultValidationError("stored Ed25519 validator attestation signature is invalid") from exc
+
+    report = signed_response["validation_report"]
+    if (
+        not isinstance(report, Mapping)
+        or report.get("valid") is not True
+        or report.get("verification_digest") != receipt["validation_digest"]
+        or report.get("verification") != receipt["validation"]
+        or _digest({
+            key: value for key, value in report.get("verification", {}).items()
+            if key != "verification_digest"
+        }) != receipt["validation_digest"]
+    ):
+        raise PreparedResultValidationError("stored validator attestation report differs from its receipt")
+    return receipt_digest
+
+
 class PreparedResultValidatorService:
     """A verifier-only service with no E-CPU claim-store or quorum-publication capability."""
 
@@ -400,6 +598,7 @@ class PreparedResultValidatorService:
         listener: socket.socket,
         tls_context: ssl.SSLContext,
         certificate_path: Path,
+        attestation_private_key_path: Path,
         handshake_timeout: float = 5.0,
         poll_interval: float = _SERVICE_POLL_SECONDS,
     ) -> None:
@@ -429,6 +628,15 @@ class PreparedResultValidatorService:
         self.listener = listener
         self.tls_context = tls_context
         self.certificate_path = certificate_path
+        if not isinstance(attestation_private_key_path, Path) or not attestation_private_key_path.is_file():
+            raise ValueError("validator attestation private key path must identify an existing PEM key")
+        self.attestation_private_key = _load_ed25519_private_key(attestation_private_key_path)
+        self.attestation_public_key = self.attestation_private_key.public_key()
+        self.attestation_key_id = _public_key_fingerprint(self.attestation_public_key)
+        self.attestation_public_key_pem = self.attestation_public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ).decode("ascii")
         self.handshake_timeout = float(handshake_timeout)
         self.poll_interval = float(poll_interval)
         self._stopped = False
@@ -478,6 +686,24 @@ class PreparedResultValidatorService:
             finally:
                 transport.close()
 
+    def _signed_response(self, response_core: Mapping[str, Any]) -> dict[str, Any]:
+        selected_core = dict(response_core)
+        response_digest = _digest(selected_core)
+        signature = self.attestation_private_key.sign(bytes.fromhex(response_digest))
+        attestation = {
+            "schema": ATTESTATION_SCHEMA,
+            "algorithm": "Ed25519",
+            "key_id": self.attestation_key_id,
+            "public_key_pem": self.attestation_public_key_pem,
+            "signed_payload_sha256": response_digest,
+            "signature_base64": base64.b64encode(signature).decode("ascii"),
+        }
+        return {
+            **selected_core,
+            "response_sha256": response_digest,
+            "attestation": attestation,
+        }
+
     def _serve_connection(self, transport: SocketTransport) -> None:
         policy = ReliabilityPolicy(lease_ticks=1, max_attempts=8, window_size=2)
         incoming = ReliableChannel(
@@ -519,7 +745,7 @@ class PreparedResultValidatorService:
                     "verifier_implementation_fingerprint": self.verifier_fingerprint,
                     "rejection": f"{type(exc).__name__}: {exc}",
                 }
-                holder["response"] = {**core, "response_sha256": _digest(core)}
+                holder["response"] = self._signed_response(core)
 
         deadline = time.monotonic() + _SERVICE_REQUEST_TIMEOUT_SECONDS
         received = None
@@ -644,7 +870,7 @@ class PreparedResultValidatorService:
             "verifier_implementation_fingerprint": self.verifier_fingerprint,
             "rejection": None,
         }
-        return {**core, "response_sha256": _digest(core)}
+        return self._signed_response(core)
 
 
 def build_service_from_arguments(arguments: list[str]) -> PreparedResultValidatorService:
@@ -660,6 +886,7 @@ def build_service_from_arguments(arguments: list[str]) -> PreparedResultValidato
     parser.add_argument("--certificate", type=Path, required=True)
     parser.add_argument("--private-key", type=Path, required=True)
     parser.add_argument("--client-ca", type=Path, required=True)
+    parser.add_argument("--attestation-private-key", type=Path, required=True)
     selected = parser.parse_args(arguments)
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.minimum_version = ssl.TLSVersion.TLSv1_2
@@ -677,6 +904,7 @@ def build_service_from_arguments(arguments: list[str]) -> PreparedResultValidato
         listener=listener,
         tls_context=context,
         certificate_path=selected.certificate,
+        attestation_private_key_path=selected.attestation_private_key,
     )
 
 
@@ -695,6 +923,8 @@ if __name__ == "__main__":
                 "port": port,
                 "pid": os.getpid(),
                 "server_certificate_sha256": service.server_certificate_sha256,
+                "attestation_key_id": service.attestation_key_id,
+                "attestation_public_key_pem": service.attestation_public_key_pem,
                 "verifier_implementation_fingerprint": service.verifier_fingerprint,
             },
             sort_keys=True,

@@ -233,3 +233,5 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Additional operation-path analysis
 
 - [Causal operation-path criticality](bridges/observation-path/README.md#causal-operation-path-criticality) — separates aggregate synchronous call duration, the longest declared dependency chain, and root slack while refusing cross-clock aggregation and preserving the distinction between temporal order and causality.
+
+- [SRH-008: Signed validator attestation](experiments/portable-realization-capsule/SIGNED-VALIDATOR-ATTESTATION-008.md) — adds a separate Ed25519 signing identity to the SRH-007 verifier-only peer. Workers pin its public-key fingerprint independently of the TLS certificate, bind the signed response into the durable remote receipt/E-CPU child receipt, and verify persisted attestations on restart. The standalone Node verifier can verify the signature offline and enforce an externally supplied trusted key ID. CI tests signature tampering, untrusted keys, and offline verification.

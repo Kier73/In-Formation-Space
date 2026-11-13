@@ -9,6 +9,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
 
 VALIDATOR_PEER_ID = "validator-peer-01"
 VALIDATOR_DNS = "validator-node.mailcpu.test"
@@ -78,6 +81,25 @@ def make_validator_certificates(directory: Path) -> dict[str, Path]:
         )
         files[f"{role}_key"] = key
         files[f"{role}_cert"] = certificate
+
+    attestation_private = Ed25519PrivateKey.generate()
+    attestation_private_path = directory / "validator-attestation-private.pem"
+    attestation_public_path = directory / "validator-attestation-public.pem"
+    attestation_private_path.write_bytes(
+        attestation_private.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+    )
+    attestation_public_path.write_bytes(
+        attestation_private.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+    )
+    files["attestation_private_key"] = attestation_private_path
+    files["attestation_public_key"] = attestation_public_path
     return files
 
 
@@ -128,6 +150,7 @@ def start_validator_service(
             "--certificate", str(certificates["validator_cert"]),
             "--private-key", str(certificates["validator_key"]),
             "--client-ca", str(certificates["ca"]),
+            "--attestation-private-key", str(certificates["attestation_private_key"]),
         ],
         cwd=repository_root,
         env=environment,
@@ -157,6 +180,12 @@ def start_validator_service(
         certificates["validator_cert"].read_text(encoding="ascii")
     )
     assert hashlib.sha256(expected_der).hexdigest() == ready["server_certificate_sha256"]
+    public_key = serialization.load_pem_public_key(certificates["attestation_public_key"].read_bytes())
+    public_der = public_key.public_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    assert hashlib.sha256(public_der).hexdigest() == ready["attestation_key_id"]
     return process, ready
 
 

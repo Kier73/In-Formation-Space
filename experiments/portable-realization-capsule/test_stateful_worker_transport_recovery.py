@@ -266,6 +266,7 @@ def test_checkpoint_crosses_reliable_channel_and_recovers_after_worker_kill(
             str(validator_certificates["worker_cert"]),
             str(validator_certificates["worker_key"]),
             str(validator_certificates["ca"]),
+            str(validator_certificates["attestation_public_key"]),
         ]
 
         first_worker, first_port = _start_worker(
