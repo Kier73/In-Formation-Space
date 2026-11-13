@@ -13,6 +13,45 @@ total rational-domain semantic correctness statement for accepted certificates.
 namespace COE009Coverage
 open COEWireCheck COE009Endpoint COE009Evaluation
 
+/-- The structural link checker is definitionally the same adjacent-pair
+    test as the original COE-007 List.zip implementation. -/
+theorem joinedChainEquivalent (cells : List Cell) :
+    joinedChain cells =
+      (cells.zip (cells.drop 1)).all
+        (fun pair => joinVerified pair.1 pair.2) := by
+  induction cells with
+  | nil => rfl
+  | cons first rest ih =>
+      cases rest with
+      | nil => rfl
+      | cons next tail =>
+          simp [joinedChain, ih]
+
+/-- The structural terminal sentinel agrees with the original
+    reverse-head test of the final cell's +infinity endpoint. -/
+theorem lastUnboundedEquivalent (cells : List Cell) :
+    lastUnbounded cells =
+      (match cells.reverse with
+       | [] => false
+       | last :: _ => decide (last.right = none)) := by
+  induction cells with
+  | nil => rfl
+  | cons first rest ih =>
+      cases rest with
+      | nil => rfl
+      | cons next tail =>
+          change lastUnbounded (next :: tail) =
+            (match (next :: tail).reverse ++ [first] with
+             | [] => false
+             | last :: _ => decide (last.right = none))
+          rw [ih]
+          cases hrev : (next :: tail).reverse with
+          | nil =>
+              have hh : (next :: tail).reverse ≠ [] := by simp
+              exact False.elim (hh hrev)
+          | cons last remaining =>
+              simp [hrev]
+
 private theorem joinedCoversFrom (first : Cell) (rest : List Cell) (x : Rat)
     (hstart : aboveLeft first x = true)
     (hlinks : joinedChain (first :: rest) = true)
@@ -119,6 +158,8 @@ theorem verifiedCertificateAllRationals (cert : Cert) (x : Rat)
   exact ⟨cell, hmem, hclosed,
     verifiedCertificateClosedSound cert cell x hverify hmem hclosed⟩
 
+#print axioms COE009Coverage.joinedChainEquivalent
+#print axioms COE009Coverage.lastUnboundedEquivalent
 #print axioms COE009Coverage.verifiedCoverCoversRationals
 #print axioms COE009Coverage.verifiedCertificateAllRationals
 
