@@ -1,0 +1,63 @@
+name: HFR-001 QKV spectral invariants
+
+on:
+  push:
+    paths:
+      - "experiments/external_neural_structure_reading/hub.py"
+      - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/spectral_invariants.py"
+      - "experiments/external_neural_structure_reading/qkv-spectral-invariants.schema.json"
+      - "experiments/external_neural_structure_reading/test_*.py"
+      - "experiments/external_neural_structure_reading/live_reference/run_spectral_invariants.py"
+      - ".github/workflows/hfr-001-qkv-spectral-invariants.yml"
+  pull_request:
+    paths:
+      - "experiments/external_neural_structure_reading/hub.py"
+      - "experiments/external_neural_structure_reading/nsd.py"
+      - "experiments/external_neural_structure_reading/spectral_invariants.py"
+      - "experiments/external_neural_structure_reading/qkv-spectral-invariants.schema.json"
+      - "experiments/external_neural_structure_reading/test_*.py"
+      - "experiments/external_neural_structure_reading/live_reference/run_spectral_invariants.py"
+      - ".github/workflows/hfr-001-qkv-spectral-invariants.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qkv-spectral-invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out experiment workspace
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install geometry and schema dependencies
+        run: python -m pip install --disable-pip-version-check numpy jsonschema
+
+      - name: Compile HFR-001
+        run: python -m compileall -q experiments/external_neural_structure_reading
+
+      - name: Run all offline HFR-001 tests
+        run: >-
+          python -m unittest discover
+          -s experiments/external_neural_structure_reading
+          -p 'test_*.py'
+          -v
+
+      - name: Compare first/last GPT-2 QKV singular spectra
+        run: >-
+          python -m experiments.external_neural_structure_reading.live_reference.run_spectral_invariants
+          --output experiments/external_neural_structure_reading/results/gpt2-qkv-spectral-invariants.json
+
+      - name: Upload QKV spectral invariant evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hfr-001-gpt2-qkv-spectral-invariants
+          path: experiments/external_neural_structure_reading/results/gpt2-qkv-spectral-invariants.json
+          if-no-files-found: warn
