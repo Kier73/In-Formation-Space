@@ -200,7 +200,7 @@ class MultiObserverCausalReconstructionTests(unittest.TestCase):
     def test_four_roles_must_have_distinct_temporal_actors(self) -> None:
         altered_verifier = copy.deepcopy(self.verifier)
         altered_verifier["actor_id"] = self.source["host"]["actor_id"]
-        with self.assertRaisesRegex(experiment.ReconstructionError, "distinct job actors"):
+        with self.assertRaisesRegex(experiment.ReconstructionError, "actor ID is not bound"):
             experiment.build_report(
                 self.source,
                 self.receiver,
