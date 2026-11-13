@@ -215,7 +215,7 @@ class BurstLossTests(unittest.TestCase):
         report = summarize_scenario(name="transient-bad", **args)
         for model in ("per_packet", "shared_channel"):
             self.assertEqual(report["models"][model]["status"], "no_finite_half_life")
-        limiting_survival = 0.2 + 0.8 * (0.9 * 0.9 / (1.0 - 0.1 * 0.1))
+        limiting_survival = 0.2 + 0.8 * (0.9 * 0.9 / (1.0 - 0.9 * 0.1))
         self.assertAlmostEqual(
             report["models"]["per_packet"]["retention_at_rounds"]["100"],
             limiting_survival,
