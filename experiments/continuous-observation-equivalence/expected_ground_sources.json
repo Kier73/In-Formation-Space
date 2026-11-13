@@ -1,0 +1,14 @@
+{
+  "schema": "in-formation-space.coe004.verifier-source-policy/0.1",
+  "ecpu_repository": "Kier73/E-CPU",
+  "ecpu_revision": "3b57adcc2baaaa7e56e4bab943946f4e87e95c65",
+  "ground_profile_file": "ground_profile.json",
+  "expected_network_sha256": {
+    "identity": "4cdb6f67907dd5286cd9ef7b073761fe876ec61090ed6db92dd6b676fcdad09d",
+    "relu_identity": "df076e896b0b2c760a1f3fd7731f33a2377cd850458a6bb5518bc80e36fb8508",
+    "zero": "ee6c630e6497be8396be01184a555c6c4287d0d56fedab76e5b0f3bc089c632f",
+    "triangular_bump": "19d42b0402acac39e255920842e73a28a3e364e96211dc623f8c717ed1285571",
+    "rescaled_bump": "f6c4916fa52ca096ebd7de65f0cd9eb722fd581be06591b94fe52332fd717eb1"
+  },
+  "trust_note": "Pinned policy belongs to the verifier checkout; not copied from producer artifacts. It is not remote source authentication."
+}
