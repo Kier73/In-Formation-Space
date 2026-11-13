@@ -14,6 +14,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 )
 
 const (
@@ -95,20 +96,77 @@ func CanonicalBytes(value any) ([]byte, error) {
 	return append([]byte(nil), out...), nil
 }
 
+const maxSafeInteger = int64(1<<53 - 1)
+
+func validateUnicodeScalarString(value, path string) error {
+	if !utf8.ValidString(value) {
+		return fail("%s contains invalid Unicode scalar data", path)
+	}
+	for _, r := range value {
+		if r >= 0xd800 && r <= 0xdfff {
+			return fail("%s contains a non-scalar Unicode surrogate", path)
+		}
+	}
+	return nil
+}
+
+func validateSafeInteger(value *big.Int, path string) error {
+	limit := big.NewInt(maxSafeInteger)
+	negativeLimit := new(big.Int).Neg(new(big.Int).Set(limit))
+	if value.Cmp(negativeLimit) < 0 || value.Cmp(limit) > 0 {
+		return fail("%s is outside the canonical metadata safe-integer range", path)
+	}
+	return nil
+}
+
 func validateIntegerNumberDomain(value any, path string) error {
 	switch v := value.(type) {
+	case nil, bool:
+		return nil
+	case string:
+		return validateUnicodeScalarString(v, path)
 	case float32, float64:
-		return fail("unsupported floating-point Go value at %s; use canonical integer JSON values", path)
+		return fail("%s floating-point values are not supported by canonical metadata v1", path)
 	case json.Number:
 		s := string(v)
 		if !integerPattern.MatchString(s) || s == "-0" {
-			return fail("unsupported non-integer or non-canonical JSON number at %s: %q; IHP-004 currently accepts integer JSON numbers only", path, s)
+			return fail("%s must be a canonical safe-integer token, got %q", path, s)
 		}
-		if _, ok := new(big.Int).SetString(s, 10); !ok {
-			return fail("invalid integer at %s", path)
+		integer, ok := new(big.Int).SetString(s, 10)
+		if !ok {
+			return fail("%s contains an invalid integer", path)
 		}
+		return validateSafeInteger(integer, path)
+	case int:
+		return validateSafeInteger(big.NewInt(int64(v)), path)
+	case int8:
+		return validateSafeInteger(big.NewInt(int64(v)), path)
+	case int16:
+		return validateSafeInteger(big.NewInt(int64(v)), path)
+	case int32:
+		return validateSafeInteger(big.NewInt(int64(v)), path)
+	case int64:
+		return validateSafeInteger(big.NewInt(v), path)
+	case uint:
+		return validateSafeInteger(new(big.Int).SetUint64(uint64(v)), path)
+	case uint8:
+		return validateSafeInteger(new(big.Int).SetUint64(uint64(v)), path)
+	case uint16:
+		return validateSafeInteger(new(big.Int).SetUint64(uint64(v)), path)
+	case uint32:
+		return validateSafeInteger(new(big.Int).SetUint64(uint64(v)), path)
+	case uint64:
+		return validateSafeInteger(new(big.Int).SetUint64(v), path)
 	case map[string]any:
 		for k, item := range v {
+			if err := validateUnicodeScalarString(k, path+" object key"); err != nil {
+				return err
+			}
+			for i := 0; i < len(k); i++ {
+				if k[i] > 0x7f {
+					return fail("%s object keys must be ASCII for canonical metadata v1", path)
+				}
+			}
 			if err := validateIntegerNumberDomain(item, path+"."+k); err != nil {
 				return err
 			}
@@ -119,6 +177,14 @@ func validateIntegerNumberDomain(value any, path string) error {
 				return err
 			}
 		}
+	case []string:
+		for i, item := range v {
+			if err := validateUnicodeScalarString(item, fmt.Sprintf("%s[%d]", path, i)); err != nil {
+				return err
+			}
+		}
+	default:
+		return fail("%s contains a value unsupported by canonical metadata v1 (%T)", path, value)
 	}
 	return nil
 }
