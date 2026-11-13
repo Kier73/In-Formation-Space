@@ -243,9 +243,7 @@ func TestTemporalFrameV2RoundtripWithWideCountersAndBinary64Domains(t *testing.T
 		t.Fatal(err)
 	}
 	if string(canonical) != string(canonicalAgain) {
-		t.Fatalf("frame roundtrip changed canonical bytes
-%s
-%s", canonical, canonicalAgain)
+		t.Fatalf("frame roundtrip changed canonical bytes\n%s\n%s", canonical, canonicalAgain)
 	}
 }
 
