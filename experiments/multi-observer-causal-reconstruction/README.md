@@ -1,7 +1,7 @@
 # Multi-observer causal reconstruction
 
 **Experiment:** MOR-001  
-**Status:** implementation and local regression suite added; independent hosted-VM execution pending  
+**Status:** hosted MOR-001 run #3 succeeded; all three producers and the independent fourth-host verifier completed successfully  
 **Question:** can a later verifier reconstruct precedence, concurrency, and genuinely unobserved relations among separate observers without a shared wall clock or shared runtime memory?
 
 ## Discriminating event graph
@@ -76,9 +76,36 @@ Validate the three schemas with a Draft 2020-12 JSON Schema implementation:
 
 The hosted workflow is .github/workflows/multi-observer-causal-reconstruction.yml. It uses separate source, receiver, observer, and verifier jobs. The receiver receives the source record through GitHub Actions artifact storage. The observer is independent and does not receive a message from A or B. The verifier receives all three retained records as artifacts.
 
+## Observed hosted result
+
+**Run:** [MOR-001 workflow run #3](https://github.com/Kier73/In-Formation-Space/actions/runs/43455775681)  
+**Run ID:** `43455775681` · **Main revision:** `c1913ace3ccd35b6417726e57ef2a0025dcb9561`  
+**Report digest:** `56a555755486d79c28df71273c8c7acdaa6f9e899bd282a8a9da9ad4fd810b18`
+
+All five jobs passed: the fixture/test job, source host A, receiver host B, independent observer C, and independent verifier. The verifier confirmed all three producer artifact attestations, reconstructed the event matrix from the retained TemporalFrames, validated the report and predicate against the schemas, and attested the exact report bytes.
+
+The captured causal stamps were:
+
+| Event | Source actor counter | Receiver actor counter | Interpretation |
+|---|---:|---:|---|
+| A1 | 1 | 0 | First source event |
+| A2 | 2 | 0 | Later source-local event; not sent |
+| B1 | 1 | 1 | Receiver event after merging A1 |
+| C1 | — | — | No causal stamp |
+
+The independent report reconstructed exactly two strict-before pairs (A1 before A2; A1 before B1), one concurrent pair (A2 with B1), and three unobserved pairs (each pair involving C1). There was no global total order.
+
+The report retained four callable-local durations: A1 248,593 ns, A2 201,822 ns, B1 193,491 ns, and C1 283,412 ns. These are per-actor synchronous-callable monotonic spans, not CPU-time measurements. No combined cross-host duration was computed.
+
+The wall-source offsets were deliberately set to +12 hours for A, -12 hours for B, and +3 hours for C. The resulting calendar readings were retained but explicitly excluded from causal ordering. This demonstrates that the reconstruction did not need a common wall clock; it does not measure natural clock skew or calibration accuracy.
+
+The source, receiver, observer, and verifier used four distinct GitHub-hosted jobs and temporal actor identities. The event message was relayed through GitHub Actions artifact storage. This run therefore establishes independent artifact-based causal reconstruction, not direct E-CPU peer transport, distinct physical servers, or physical simultaneity.
+
+The report and its verifier predicate are retained as the `multi-observer-causal-reconstruction-report` artifact in the linked workflow run. The report SHA-256 is `129b18df6d022553c9aa5c0bd544dee16d8910701a8ee847dd7d23db6b2d8930`.
+
 ## Interpretation boundary
 
-A successful hosted run would establish that the protected workflow produced separately attested records, and that a fourth job reconstructed the declared pairwise vector-clock relationships from those records. It would not establish direct peer-to-peer E-CPU transport: the A1 payload in this experiment is relayed through GitHub Actions artifacts.
+The successful hosted run establishes that the protected workflow produced separately attested records, and that a fourth job reconstructed the declared pairwise vector-clock relationships from those records. It does not establish direct peer-to-peer E-CPU transport: the A1 payload in this experiment is relayed through GitHub Actions artifacts.
 
 The deliberately offset wall readings do not establish physical clock skew or calibration accuracy. They demonstrate that this verifier does not need to compare wall clocks to reconstruct the expected causal structure.
 
@@ -88,4 +115,4 @@ A2 and B1 being concurrent means neither recorded vector stamp is componentwise 
 
 ## Next discriminating step
 
-After MOR-001 succeeds, carry the same four-event graph over the IHP-006 private overlay and E-CPU mTLS/ReliableChannel path. Keep the event contract and independent verifier unchanged, and change only the A1-to-B1 transport. That would compare artifact-relayed reconstruction with authenticated live message delivery without conflating transport success with causal correctness.
+With MOR-001 now successful, carry the same four-event graph over the IHP-006 private overlay and E-CPU mTLS/ReliableChannel path. Keep the event contract and independent verifier unchanged, and change only the A1-to-B1 transport. That would compare artifact-relayed reconstruction with authenticated live message delivery without conflating transport success with causal correctness.
