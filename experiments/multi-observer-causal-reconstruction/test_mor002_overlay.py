@@ -4,8 +4,17 @@ import json
 import os
 import tempfile
 import unittest
+import sys
 from pathlib import Path
 from unittest.mock import patch
+
+ROOT = Path(__file__).resolve().parents[2]
+for import_root in (
+    ROOT / "bridges" / "observation-path",
+    ROOT / "experiments" / "multi-observer-causal-reconstruction",
+):
+    if str(import_root) not in sys.path:
+        sys.path.insert(0, str(import_root))
 
 from mailcpu.temporal import CausalStamp, ClockDomain, TemporalContext, TemporalProfile
 
