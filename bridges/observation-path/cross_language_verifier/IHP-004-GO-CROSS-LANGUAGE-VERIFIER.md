@@ -26,7 +26,7 @@ The experiment deliberately does not hide an unresolved numeric-serialization pr
 
 ## Portable canonical JSON profile used by IHP-004
 
-IHP-004 adopts the same restricted data model now being exercised by the parallel PRC-001 cross-language receiver work in [Canonical Metadata Profile v1](https://github.com/Kier73/In-Formation-Space/blob/main/experiments/portable-realization-capsule/CANONICAL-METADATA-V1.md):
+IHP-004 adopts the same restricted data model now being exercised by the parallel PRC-001 cross-language receiver work in [Canonical Metadata Profile v1](https://github.com/Kier73/In-Formation-Space/blob/main/formats/canonical-metadata-v1/README.md):
 
 - Values may be null, booleans, Unicode strings containing only valid Unicode scalar values, integers, arrays, and objects.
 - Integers must be in the interoperable safe range from -(2^53 - 1) through +(2^53 - 1). Floating-point values are not part of the profile.
@@ -86,6 +86,7 @@ The Go tests require the actual fixture artifact hashes to match those values, r
 The Go regression suite covers:
 
 - reconstruction of the actual preserved IHP-001 records and parity with the Python IHP-003 evidence projection;
+- the shared canonical metadata v1 vectors for Python, Node.js, and Go, including byte-level outputs and SHA-256 digests;
 - canonical UTF-8 strings, sorted keys, and non-escaped HTML characters;
 - explicit rejection of decimal JSON number tokens;
 - stale record digest rejection;
@@ -190,6 +191,6 @@ A passing result would not establish:
 
 ## Next discriminating step
 
-The PRC line has now placed [Canonical Metadata Profile v1](https://github.com/Kier73/In-Formation-Space/blob/main/experiments/portable-realization-capsule/CANONICAL-METADATA-V1.md) on main. IHP-004 adopts its safe-integer, ASCII-key, and Unicode-scalar restrictions. The remaining mismatch is that the broad IHP-001 v0.1 schema still permits decimal-valued optional temporal fields, which this Go verifier rejects.
+The repository now has a shared [Canonical Metadata Profile v1](https://github.com/Kier73/In-Formation-Space/blob/main/formats/canonical-metadata-v1/README.md) and executable conformance corpus at `formats/canonical-metadata-v1/test-vectors.json`. PRC Python, PRC Node, and IHP Go tests consume the same vectors. The remaining mismatch is that the broad IHP-001 v0.1 schema still permits decimal-valued optional temporal fields, which this Go verifier rejects.
 
-The next useful step is a versioned IHP record-schema revision that makes the shared canonical metadata profile normative at the record boundary. Add a cross-language corpus for safe-integer boundaries, exponent notation, negative zero, duplicate keys, Unicode scalar validity, object-key ordering, and all optional temporal coordinates. Then require Python and Go to accept or reject each fixture identically. This will turn an implementation-specific restriction into a portable, versioned contract.
+The shared corpus now covers safe-integer boundaries, exponent notation, negative zero, duplicate keys, Unicode scalar validity, object-key ordering, control escaping, U+2028/U+2029, and alternate escape spellings. The next step is a versioned IHP record-schema revision that makes the profile normative at the record boundary and decides how optional temporal coordinates currently expressed as decimals should be represented without floating-point JSON.
