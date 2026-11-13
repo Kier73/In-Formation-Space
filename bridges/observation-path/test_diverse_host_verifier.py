@@ -26,6 +26,11 @@ def seal(document):
     core = {key: value for key, value in document.items() if key not in {"record_digest"}}
     return {**core, "record_digest": object_digest(core)}
 
+def encode(document):
+    return json.dumps(
+        document, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
+    ).encode("utf-8") + b"\n"
+
 
 def host(role, runner_name, runner_os="Linux"):
     run_id = "123456789"
@@ -220,21 +225,21 @@ class DiverseHostVerifierTests(unittest.TestCase):
         changed = copy.deepcopy(self.source)
         changed["host"]["runner_name"] = "invented-runner"
         with self.assertRaisesRegex(DiverseVerificationError, "record digest"):
-            self.run_reconstruction(source=changed)
+            self.run_reconstruction(source=changed, source_bytes=encode(changed))
 
     def test_payload_digest_is_recomputed_not_trusted(self):
         changed = copy.deepcopy(self.source)
         changed["handoff_payload"]["path_id"] = "different-path"
         changed = seal(changed)
         with self.assertRaisesRegex(DiverseVerificationError, "payload digest"):
-            self.run_reconstruction(source=changed)
+            self.run_reconstruction(source=changed, source_bytes=encode(changed))
 
     def test_receiver_must_bind_exact_source_artifact_bytes(self):
         changed = copy.deepcopy(self.receiver)
         changed["source_record_sha256"] = "f" * 64
         changed = seal(changed)
         with self.assertRaisesRegex(DiverseVerificationError, "exact source artifact bytes"):
-            self.run_reconstruction(receiver=changed)
+            self.run_reconstruction(receiver=changed, receiver_bytes=encode(changed))
 
     def test_noncanonical_source_bytes_are_rejected(self):
         with self.assertRaisesRegex(DiverseVerificationError, "canonical JSON"):
