@@ -1,0 +1,30 @@
+name: Evidence accumulation sufficient statistic RIV-004
+
+on:
+  push:
+    paths:
+      - "experiments/evidence-accumulation-sufficient-statistic/**"
+      - ".github/workflows/evidence-accumulation-sufficient-statistic.yml"
+  pull_request:
+    paths:
+      - "experiments/evidence-accumulation-sufficient-statistic/**"
+      - ".github/workflows/evidence-accumulation-sufficient-statistic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  riv-004:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile
+        run: python -m py_compile experiments/evidence-accumulation-sufficient-statistic/evidence_accumulation.py experiments/evidence-accumulation-sufficient-statistic/example.py
+      - name: Run focused tests
+        run: python -m unittest discover -s experiments/evidence-accumulation-sufficient-statistic -p 'test_*.py' -v
+      - name: Reproduce example
+        run: python experiments/evidence-accumulation-sufficient-statistic/example.py
