@@ -12,6 +12,7 @@ on:
       - "bridges/observation-path/diverse_host_verifier.py"
       - "bridges/observation-path/test_diverse_host_verifier.py"
       - "bridges/observation-path/diverse-host-operation-*.schema.json"
+      - "bridges/observation-path/cross_language_verifier/**"
       - "bridges/temporal-provenance/temporal_provenance.py"
       - ".github/workflows/independent-host-operation-path.yml"
   pull_request:
@@ -19,6 +20,7 @@ on:
       - "bridges/observation-path/diverse_host_verifier.py"
       - "bridges/observation-path/test_diverse_host_verifier.py"
       - "bridges/observation-path/diverse-host-operation-*.schema.json"
+      - "bridges/observation-path/cross_language_verifier/**"
       - ".github/workflows/independent-host-operation-path.yml"
   workflow_dispatch:
 
@@ -77,6 +79,53 @@ jobs:
                   Draft202012Validator.check_schema(schema)
                   Draft202012Validator(schema).validate(instance)
                   print(f"valid: {schema_path}")
+          PY
+
+
+  cross_language_verifier_tests:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out proposed changes
+        uses: actions/checkout@v4
+      - name: Set up Go from the module declaration
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: bridges/observation-path/cross_language_verifier/go.mod
+      - name: Run Go cross-language reconstruction tests
+        working-directory: bridges/observation-path/cross_language_verifier
+        env:
+          IHP004_TEST_OUTPUT_DIR: \${{ runner.temp }}/ihp004-schema-output
+        run: |
+          go test -count=1 -v ./...
+      - name: Set up Python for Draft 2020-12 schema validation
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate Go report and predicate schemas against generated outputs
+        env:
+          IHP004_TEST_OUTPUT_DIR: \${{ runner.temp }}/ihp004-schema-output
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("bridges/observation-path/cross_language_verifier")
+          output = Path(os.environ["IHP004_TEST_OUTPUT_DIR"])
+          cases = (
+              (root / "cross-language-host-operation-report.schema.json", output / "report.json"),
+              (root / "cross-language-host-operation-report-predicate.schema.json", output / "predicate.json"),
+          )
+          for schema_path, instance_path in cases:
+              schema = json.loads(schema_path.read_text(encoding="utf-8"))
+              instance = json.loads(instance_path.read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              Draft202012Validator(schema).validate(instance)
+              print(f"valid: {instance_path.name}")
           PY
 
   source_host:
@@ -380,6 +429,91 @@ jobs:
         with:
           name: diverse-host-reconstruction-report
           path: evidence/diverse-report.json
+          if-no-files-found: error
+          retention-days: 90
+
+  cross_language_verifier_host:
+    needs: [source_host, receiver_host, verifier_host, diverse_verifier_host]
+    if: needs.source_host.result == 'success' && needs.receiver_host.result == 'success' && needs.verifier_host.result == 'success' && needs.diverse_verifier_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Set up Go from the module declaration
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: bridges/observation-path/cross_language_verifier/go.mod
+      - name: Run Go conformance tests on the fifth host
+        working-directory: bridges/observation-path/cross_language_verifier
+        run: go test -count=1 ./...
+      - name: Receive source-host record
+        uses: actions/download-artifact@v4
+        with:
+          name: source-host-evidence
+          path: bridges/observation-path/cross_language_verifier/received-source
+      - name: Receive receiver-host record
+        uses: actions/download-artifact@v4
+        with:
+          name: receiver-host-evidence
+          path: bridges/observation-path/cross_language_verifier/received-receiver
+      - name: Receive independently reconstructed Python report
+        uses: actions/download-artifact@v4
+        with:
+          name: diverse-host-reconstruction-report
+          path: bridges/observation-path/cross_language_verifier/received-diverse
+      - name: Reconstruct the same byte records in Go and compare the Python evidence projection
+        working-directory: bridges/observation-path/cross_language_verifier
+        env:
+          RUNNER_ENVIRONMENT: \${{ runner.environment }}
+        run: |
+          mkdir -p evidence
+          go run ./cmd/ihp004 verify \
+            --source received-source/host-a.json \
+            --receiver received-receiver/host-b.json \
+            --python-report received-diverse/diverse-report.json \
+            --report evidence/go-report.json \
+            --predicate evidence/go-report.predicate.json
+      - name: Set up Python for report schema validation
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install JSON Schema validator
+        run: python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+      - name: Validate the Go report and predicate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("bridges/observation-path/cross_language_verifier")
+          cases = (
+              (root / "cross-language-host-operation-report.schema.json", root / "evidence/go-report.json"),
+              (root / "cross-language-host-operation-report-predicate.schema.json", root / "evidence/go-report.predicate.json"),
+          )
+          for schema_path, instance_path in cases:
+              schema = json.loads(schema_path.read_text(encoding="utf-8"))
+              instance = json.loads(instance_path.read_text(encoding="utf-8"))
+              Draft202012Validator.check_schema(schema)
+              Draft202012Validator(schema).validate(instance)
+              print(f"valid: {instance_path.name}")
+          PY
+      - name: Attest the cross-language reconstruction report
+        uses: actions/attest@v4
+        with:
+          subject-path: bridges/observation-path/cross_language_verifier/evidence/go-report.json
+          predicate-type: https://kier73.github.io/in-formation-space/cross-language-host-operation-report/v1
+          predicate-path: bridges/observation-path/cross_language_verifier/evidence/go-report.predicate.json
+      - name: Preserve the cross-language reconstruction result
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-language-host-reconstruction-report
+          path: bridges/observation-path/cross_language_verifier/evidence/go-report.json
           if-no-files-found: error
           retention-days: 90
 
