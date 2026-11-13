@@ -168,3 +168,8 @@ The implementation uses exact `Fraction` arithmetic. Search and frontier limits 
 ## Next step
 
 A subsequent execution bridge could bind each selected policy node to an ObservationPath and only advance one child after an authorized interpreted result. It must preserve the fixed-scenario semantics while retaining the actual returned evidence, and it must treat an outcome outside all declared branches as model mismatch rather than automatically refitting a model.
+
+
+## Follow-on execution bridge: RIV-017
+
+[RIV-017: Evidence-gated execution of robust sequential policy trees](RIV-017-README.md) binds each completed sensor ObservationPath to the active policy node and exact scenario-mass prefix. It advances only after an AUTHORIZED and interpreted return, keeps scenario masses separate, and treats undeclared outcomes or all-scenario-impossible branches as model mismatches rather than silently extending the policy.
