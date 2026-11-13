@@ -120,6 +120,24 @@ class AdaptiveRepairTests(unittest.TestCase):
             high["adaptive_policy"]["expected_repair_count"],
         )
 
+    def test_policy_reports_when_action_depends_on_observed_channel_state(self):
+        report = build_adaptive_repair_report(**self.parameters(repair_cost=0.1))
+        table = report["adaptive_policy"]["decision_table"]
+        state_dependent = sum(
+            1
+            for index in range(0, len(table), 2)
+            if table[index]["selected_action"] != table[index + 1]["selected_action"]
+        )
+        repair_states = sum(row["selected_action"] == "repair" for row in table)
+        self.assertEqual(
+            report["adaptive_policy"]["state_conditioned_decision_cells"],
+            state_dependent,
+        )
+        self.assertEqual(
+            report["adaptive_policy"]["selected_repair_state_count"],
+            repair_states,
+        )
+
     def test_report_reconstructs_from_source_parameters(self):
         report = build_adaptive_repair_report(**self.parameters())
         self.assertEqual(validate_adaptive_repair_report(report), report)
