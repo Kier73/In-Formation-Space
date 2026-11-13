@@ -5,12 +5,14 @@ on:
     paths:
       - 'experiments/continuous-observation-equivalence/lean/**'
       - 'experiments/continuous-observation-equivalence/real-lean/**'
+      - 'experiments/continuous-observation-equivalence/README.md'
       - '.github/workflows/coe010-real-continuity.yml'
   push:
     branches: [main]
     paths:
       - 'experiments/continuous-observation-equivalence/lean/**'
       - 'experiments/continuous-observation-equivalence/real-lean/**'
+      - 'experiments/continuous-observation-equivalence/README.md'
       - '.github/workflows/coe010-real-continuity.yml'
   workflow_dispatch:
 
@@ -54,7 +56,7 @@ jobs:
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
           lake env lean COE010Real.lean | tee real-extension-proof-output.txt
-          grep -Fq "'COE010Real.unique_continuous_real_extension' depends on axioms:" real-extension-proof-output.txt
+          grep -Fq "'COE010Real.unique_continuous_real_extension' depends on axioms: [propext, Classical.choice, Quot.sound]" real-extension-proof-output.txt
           if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-extension-proof-output.txt; then
             cat real-extension-proof-output.txt
             exit 1
@@ -63,7 +65,7 @@ jobs:
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
           lake env lean COE010Network.lean | tee real-network-soundness.txt
-          grep -Fq "'COE010Network.acceptedCertificateHasUniqueRealMeaning' depends on axioms:" real-network-soundness.txt
+          grep -Fq "'COE010Network.acceptedCertificateHasUniqueRealMeaning' depends on axioms: [propext, Classical.choice, Quot.sound]" real-network-soundness.txt
           if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-network-soundness.txt; then
             cat real-network-soundness.txt
             exit 1
