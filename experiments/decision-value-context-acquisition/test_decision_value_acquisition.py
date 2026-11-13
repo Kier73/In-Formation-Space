@@ -474,10 +474,7 @@ class DecisionValueContextAcquisitionTests(unittest.TestCase):
             {
                 "hypothesis": item["hypothesis"],
                 "context_state": item["context_state"],
-                "probability": 1 - Fraction(
-                    item["probability"]["numerator"],
-                    item["probability"]["denominator"],
-                )
+                "probability": Fraction(1, 10)
                 if item["context_state"] == "profile-1"
                 else Fraction(9, 10),
             }
