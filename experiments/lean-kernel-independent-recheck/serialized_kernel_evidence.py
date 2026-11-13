@@ -59,6 +59,8 @@ def _observe(export: dict, case: str, *, run=subprocess.run) -> dict:
         "stdout_sha256": _sha(completed.stdout.encode("utf-8")),
         "stderr_sha256": _sha(completed.stderr.encode("utf-8")),
         "kernel_accepted_observed": accepted,
+        "stdout_excerpt": completed.stdout[-2000:],
+        "stderr_excerpt": completed.stderr[-2000:],
     }
 
 
@@ -102,7 +104,7 @@ def verify(runner_document: dict, *, run=subprocess.run,
             observation = _observe(_mutant(runner_document["export"], case), case, run=run)
             observations.append(observation)
             if observation["kernel_accepted_observed"] != (case == "accepted"):
-                raise SerializedKernelError(f"kernel check did not reject/accept as expected: {case}")
+                raise SerializedKernelError(f"kernel check did not reject/accept as expected: {case}; exit={observation['process_exit_code']} stdout={observation['stdout_excerpt']} stderr={observation['stderr_excerpt']}")
     finally:
         SERIALIZED.unlink(missing_ok=True)
 
