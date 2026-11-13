@@ -45,5 +45,5 @@ jobs:
         run: python -m unittest discover -s experiments/reference-calibrated-evidence -p "test_finite_horizon_reference_policy.py" -v
       - name: Run reproducible policy example
         env:
-          PYTHONPATH: experiments/reference-calibrated-evidence
+          PYTHONPATH: bridges/observation-path:experiments/reference-calibrated-evidence
         run: python experiments/reference-calibrated-evidence/finite_horizon_reference_policy_example.py
