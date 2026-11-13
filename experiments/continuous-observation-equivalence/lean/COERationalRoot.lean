@@ -1,10 +1,29 @@
 import COECellSoundness
+import Init.Data.Rat.Lemmas
 
 /-! COE-006: rational affine root-exclusion lemmas. -/
 namespace COERationalRoot
 
 /-- Exact rational affine preactivation, using the same m*x+b convention as COE-002. -/
 def affine (m b x : Rat) : Rat := m * x + b
+
+/-- Rational transitivity when the first comparison is non-strict. -/
+private theorem le_lt_rat {a b c : Rat} (hab : a ≤ b) (hbc : b < c) : a < c := by
+  have hle : a ≤ c := Rat.le_trans hab (Rat.le_of_lt hbc)
+  apply Rat.lt_of_le_of_ne hle
+  intro heq
+  have hcb : c ≤ b := by simpa [← heq] using hab
+  have hbc_eq : b = c := Rat.le_antisymm (Rat.le_of_lt hbc) hcb
+  exact (Rat.ne_of_lt hbc) hbc_eq
+
+/-- Rational transitivity when the second comparison is non-strict. -/
+private theorem lt_le_rat {a b c : Rat} (hab : a < b) (hbc : b ≤ c) : a < c := by
+  have hle : a ≤ c := Rat.le_trans (Rat.le_of_lt hab) hbc
+  apply Rat.lt_of_le_of_ne hle
+  intro heq
+  have hba : b ≤ a := by simpa [heq] using hbc
+  have hab_eq : a = b := Rat.le_antisymm (Rat.le_of_lt hab) hba
+  exact (Rat.ne_of_lt hab) hab_eq
 
 /-- Excluding an exact root from an open cell places it on one side of its endpoints. -/
 theorem excluded_root_outside (left right root : Rat)
@@ -47,8 +66,8 @@ theorem sign_stable_of_excluded_root
   have hside := excluded_root_outside left right root hexcluded
   by_cases hmpos : 0 < m
   · rcases hside with hleft | hright
-    · have hrprobe : root < probe := lt_of_le_of_lt hleft hprobe.1
-      have hrx : root < x := lt_of_le_of_lt hleft hx.1
+    · have hrprobe : root < probe := le_lt_rat hleft hprobe.1
+      have hrx : root < x := le_lt_rat hleft hx.1
       have hprobePos : 0 < affine m b probe := by
         have h := increasing m b root probe hmpos hrprobe
         simpa [hroot] using h
@@ -56,8 +75,8 @@ theorem sign_stable_of_excluded_root
         have h := increasing m b root x hmpos hrx
         simpa [hroot] using h
       simp [hprobePos, hxPos]
-    · have hprobeRoot : probe < root := lt_of_lt_of_le hprobe.2 hright
-      have hxRoot : x < root := lt_of_lt_of_le hx.2 hright
+    · have hprobeRoot : probe < root := lt_le_rat hprobe.2 hright
+      have hxRoot : x < root := lt_le_rat hx.2 hright
       have hprobeNeg : affine m b probe < 0 := by
         have h := increasing m b probe root hmpos hprobeRoot
         simpa [hroot] using h
@@ -71,8 +90,8 @@ theorem sign_stable_of_excluded_root
       simp [hp, hq]
   · by_cases hmneg : m < 0
     · rcases hside with hleft | hright
-      · have hrprobe : root < probe := lt_of_le_of_lt hleft hprobe.1
-        have hrx : root < x := lt_of_le_of_lt hleft hx.1
+      · have hrprobe : root < probe := le_lt_rat hleft hprobe.1
+        have hrx : root < x := le_lt_rat hleft hx.1
         have hprobeNeg : affine m b probe < 0 := by
           have h := decreasing m b root probe hmneg hrprobe
           simpa [hroot] using h
@@ -84,8 +103,8 @@ theorem sign_stable_of_excluded_root
         have hq : ¬0 < affine m b x := fun h =>
           ((Rat.not_le).mpr hxNeg) (Rat.le_of_lt h)
         simp [hp, hq]
-      · have hprobeRoot : probe < root := lt_of_lt_of_le hprobe.2 hright
-        have hxRoot : x < root := lt_of_lt_of_le hx.2 hright
+      · have hprobeRoot : probe < root := lt_le_rat hprobe.2 hright
+        have hxRoot : x < root := lt_le_rat hx.2 hright
         have hprobePos : 0 < affine m b probe := by
           have h := decreasing m b probe root hmneg hprobeRoot
           simpa [hroot] using h
