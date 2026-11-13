@@ -1,0 +1,38 @@
+name: VGI minimax observation-path execution
+
+on:
+  push:
+    paths:
+      - "bridges/observation-path/minimax_policy_execution.py"
+      - "bridges/observation-path/test_minimax_policy_execution.py"
+      - ".github/workflows/minimax-partial-probe-execution.yml"
+  pull_request:
+    paths:
+      - "bridges/observation-path/minimax_policy_execution.py"
+      - "bridges/observation-path/test_minimax_policy_execution.py"
+      - ".github/workflows/minimax-partial-probe-execution.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out In-Formation-Space
+        uses: actions/checkout@v4
+      - name: Check out VGI minimax planner at a fixed revision
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ac13c1bbd92dfd09f17de51adef7adb2d2088bf6
+          path: external/Virtual-Ground-Interpreter
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run minimax policy execution and receipt tests
+        env:
+          PYTHONPATH: bridges/observation-path:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: python -m unittest discover -s bridges/observation-path -p "test_minimax_policy_execution.py" -v
