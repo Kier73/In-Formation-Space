@@ -100,22 +100,22 @@ func appendCanonicalString(buf *bytes.Buffer, value string) {
 	for _, r := range value {
 		switch r {
 		case '"':
-			buf.WriteString(\x60\\\"\x60)
-		case '\\\\':
-			buf.WriteString(\x60\\\\\x60)
-		case '\\b':
-			buf.WriteString(\x60\\b\x60)
-		case '\\f':
-			buf.WriteString(\x60\\f\x60)
-		case '\\n':
-			buf.WriteString(\x60\\n\x60)
-		case '\\r':
-			buf.WriteString(\x60\\r\x60)
-		case '\\t':
-			buf.WriteString(\x60\\t\x60)
+			buf.WriteString("\\\"")
+		case '\\':
+			buf.WriteString("\\\\")
+		case '\b':
+			buf.WriteString("\\b")
+		case '\f':
+			buf.WriteString("\\f")
+		case '\n':
+			buf.WriteString("\\n")
+		case '\r':
+			buf.WriteString("\\r")
+		case '\t':
+			buf.WriteString("\\t")
 		default:
 			if r < 0x20 {
-				fmt.Fprintf(buf, "\\\\u%04x", r)
+				fmt.Fprintf(buf, "\\u%04x", r)
 			} else {
 				buf.WriteRune(r)
 			}
