@@ -95,10 +95,10 @@ class DirectMTLSOperationPathTests(unittest.TestCase):
             ),
             ("peer_not_found", "reachable_unclassified", None),
         )
-        duplicate_rows = (
-            f"{peer} client-a owner-a linux active; direct 198.51.100.4:41641\\n"
-            f"{peer} client-b owner-b linux active; relay sea"
-        )
+        duplicate_rows = "\\n".join((
+            f"{peer} client-a owner-a linux active; direct 198.51.100.4:41641",
+            f"{peer} client-b owner-b linux active; relay sea",
+        ))
         self.assertEqual(
             direct._classify_tailscale_peer_status(duplicate_rows, peer),
             ("ambiguous", "reachable_unclassified", None),
