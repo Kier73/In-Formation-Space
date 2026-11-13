@@ -1,0 +1,30 @@
+name: Heterogeneous evidence accumulator RIV-005
+
+on:
+  push:
+    paths:
+      - "experiments/heterogeneous-evidence-accumulator/**"
+      - ".github/workflows/heterogeneous-evidence-accumulator.yml"
+  pull_request:
+    paths:
+      - "experiments/heterogeneous-evidence-accumulator/**"
+      - ".github/workflows/heterogeneous-evidence-accumulator.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  riv-005:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile
+        run: python -m py_compile experiments/heterogeneous-evidence-accumulator/heterogeneous_evidence.py experiments/heterogeneous-evidence-accumulator/example.py
+      - name: Run focused tests
+        run: python -m unittest discover -s experiments/heterogeneous-evidence-accumulator -p 'test_*.py' -v
+      - name: Reproduce example
+        run: python experiments/heterogeneous-evidence-accumulator/example.py

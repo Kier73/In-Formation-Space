@@ -309,3 +309,22 @@ RIV-002 and RIV-003 show how a deterministic observer may retain a distinction t
 5. What is the smallest accumulator that preserves decisions across a family of priors, sensor models, and downstream tasks rather than one fixed MAP classification?
 
 The initial operational baseline is [RIV-004](../experiments/evidence-accumulation-sufficient-statistic/README.md). It compares exact MAP decisions from all ordered histories with a count accumulator for a fixed binary hypothesis and conditionally iid binary sensor model. Its sufficiency claim is conditional on that model; changing dependence, sensor identity, or task may require a different statistic.
+
+
+---
+
+## 16. How should sufficient evidence representations adapt to heterogeneous sensors?
+
+### The question
+
+RIV-004 showed that a simple count is sufficient for an identical binary sensor repeated independently. When each sensor has a different likelihood model, the same count can merge histories that imply opposite decisions. Can a posterior or likelihood-ratio accumulator preserve the evidence while still merging histories that are genuinely equivalent for future inference?
+
+### Questions
+
+1. How many distinct posterior states are reachable under different sensor schedules, and when do multiple histories merge?
+2. When does a total count remain sufficient, and when must the accumulator retain sensor-specific evidence?
+3. Can a posterior state be transported between independent observers together with enough sensor-model provenance to continue exact updating?
+4. How should sensor calibration uncertainty, drift, and correlation change the accumulator's state?
+5. What is the trade-off between state cardinality, exact arithmetic, update cost, and the value of retaining raw observation provenance?
+
+The initial operational baseline is [RIV-005](../experiments/heterogeneous-evidence-accumulator/README.md). It compares exact sequential posterior updates with every ordered history under a fixed heterogeneous sensor schedule. The next step is to extend the accumulator to uncertain or changing sensor models without silently treating a point calibration as certain.
