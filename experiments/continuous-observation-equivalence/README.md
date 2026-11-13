@@ -371,3 +371,55 @@ lake env lean COE009Coverage.lean
 A separate GitHub Actions job still consumes unmodified COE-002 producer artifacts, independently checks the original certificates in Python and Go, reconstructs E-CPU candidate Ground identities under pinned policies, executes the five concrete Lean certificate proofs, and rejects adversarial certificate mutations.
 
 The most significant next frontier is the **formal real-number semantic extension** from the established all-rational pointwise result: define the ideal real-input interpretation of exact rational affine and ReLU layers, establish their continuity, and show that agreement on the dense rational domain extends uniquely to every real coordinate. Only then can the Lean model establish the same complete continuous real-domain result claimed by the existing algorithm.
+
+
+## COE-010 — Unique continuous real meaning of certified rational neural observations
+
+COE-009 kernel-checks the **entire rational input line**, including every activation breakpoint, for arbitrary accepted typed activation-cell certificates. COE-010 uses mathlib's real topology, the density of rational numbers in the real numbers, and an explicit real neural semantics to establish the next mathematical step.
+
+**Main result:** For any typed certificate accepted by the actual Lean verifier, and for **every output component**, there exists a continuous real-valued function whose values at all embedded rational inputs match the mathematically verified certificate observations. Furthermore, **every** continuous real-valued function that has those same values at every rational input is identical to the constructed function **at every real input**. The real function is explicitly compiled from the certificate's actual rational neural-network layers; its existence is not postulated as an axiom.
+
+### Two-layer formalization
+
+The Mathlib-dependent COE010Real.lean module defines a small exact-rational expression language with variable, rational constant, sum, rational scaling, and ReLU constructors; it implements both an exact rational evaluator and a mathematically real-valued evaluator. It proves:
+
+- evalReal_at_rat: real interpretation restricted to the embedded rationals agrees exactly with the cast of the rational interpretation.
+- continuous_evalReal: every finite expression in the supported affine/ReLU language is continuous over the real line.
+- equal_of_all_rational_agreement: two continuous real-valued functions that coincide on **all rationals** coincide on **all reals**, using the proven density of the rational embedding.
+- unique_continuous_real_extension: a finite exact rational expression has one and only one continuous extension of its rational interpretation to the entire real line.
+
+COE010Network.lean then provides the previously missing connection to the **actual** source network:
+
+- compileLayer and compileNetwork: construct expressions from the real source Layer structures and their declared weight matrices, biases and ReLU flags.
+- compileNetworkSound: the compiled expressions evaluate identically to COE008Evaluation.evalNetwork at *every rational input*, with no sampling or fixed network depth.
+- componentContinuous and componentAtRat: every output component has continuous real semantics whose rational restriction is the independent numeric network evaluator.
+- certifiedAtRat: selects an observation witness from COE009's previously proved complete rational-domain certificate theorem. At a shared rational cutpoint the choice of either valid cell cannot alter its value, because COE009 has already proved equality to the same source network.
+- acceptedCertificateHasUniqueRealMeaning: combines the accepted certificate, COE009 rational soundness, explicit network compilation, continuity, and rational density to prove **existence and uniqueness of the continuous real meaning** of each component for any accepted certificate.
+
+This proof is not merely a uniqueness theorem for two unrelated example functions. It quantitatively depends on the actual executable Lean certificate verifier and the original network's exact weights. The theorem is valid for arbitrary finite certificates supported by that verifier, not only the five example models.
+
+### Reproducibility and trust
+
+COE-010 intentionally uses a **separate Lake project** at real-lean so existing COE-005–009 Lean checks stay lightweight and Mathlib-free. The new project pins Lean 4.24.0 and Mathlib's exact Git commit f897ebcf72cd16f89ab4577d0c826cd14afaafc7. The CI job copies the original COE-005–009 Lean modules **without changing their source**, retains SHA-256 fingerprints of those originals, compiles them again in the Mathlib project, and kernel-checks the new theorems.
+
+The axiom report explicitly lists propext, Classical.choice and Quot.sound. The workflow rejects any sorryAx or Lean.ofReduceBool in the positive theorem reports, and requires Lean to reject the false theorem claiming ReLU is the identity on a negative real input. The original certificate producer, Go and Python independent checkers, and E-CPU candidate Ground identity checks continue under the separate original CI workflow.
+
+Reproduce with Git, Python only if generating certificates, and Lean 4.24.0:
+
+~~~bash
+cd experiments/continuous-observation-equivalence/real-lean
+cp ../lean/COE*.lean .
+lake update
+lake exe cache get
+lake build COE010Network
+lake env lean COE010Real.lean
+lake env lean COE010Network.lean
+# This intentionally false claim MUST fail:
+lake env lean COE010Invalid.lean
+~~~
+
+### Important distinction: meaning, not physical realization
+
+This theorem establishes a **unique continuous ideal real-number interpretation** for every accepted typed certificate's rational outputs. It does **not** yet prove that a separately serialized **real-valued piecewise atlas parser** exactly implements the same function at an irrational coordinate. Such an atlas needs a real-interval membership theorem or a continuous-atlas realization proof. It also does **not** verify the Python JSON-to-Lean translator, authenticated source authority, E-CPU Ground admission, or floating-point GPU execution. A physical implementation would need separate error bounds and realization contracts.
+
+A natural next investigation is to define a piecewise real affine observer directly from the accepted cells, prove its continuity across all exact breakpoints, and use COE-010's uniqueness theorem to identify that observer with the compiled source real network. That would connect the retained cell atlas itself—not only its unique continuous mathematical meaning—to every irrational coordinate.

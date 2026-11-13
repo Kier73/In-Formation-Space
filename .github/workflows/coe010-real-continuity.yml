@@ -1,0 +1,90 @@
+name: COE-010 exact real extension via mathlib
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/continuous-observation-equivalence/lean/**'
+      - 'experiments/continuous-observation-equivalence/real-lean/**'
+      - 'experiments/continuous-observation-equivalence/README.md'
+      - '.github/workflows/coe010-real-continuity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/continuous-observation-equivalence/lean/**'
+      - 'experiments/continuous-observation-equivalence/real-lean/**'
+      - 'experiments/continuous-observation-equivalence/README.md'
+      - '.github/workflows/coe010-real-continuity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-continuous-extension:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import exact already kernel-checked COE sources
+        run: |
+          cp experiments/continuous-observation-equivalence/lean/COE*.lean \
+             experiments/continuous-observation-equivalence/real-lean/
+          sha256sum experiments/continuous-observation-equivalence/lean/COE*.lean \
+            > experiments/continuous-observation-equivalence/real-lean/rational-source-sha256.txt
+      - name: Install the pinned Lean 4.24 toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/continuous-observation-equivalence/real-lean
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - name: Resolve the pinned mathlib revision
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          lake update
+          test "$(git -C .lake/packages/mathlib rev-parse HEAD)" = \
+            "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+      - name: Restore pinned mathlib binary cache
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: lake exe cache get
+      - name: Compile independent real semantics and original COE proof chain
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: lake build COE010Network
+      - name: Kernel-check real continuity, exact casts and dense uniqueness
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          lake env lean COE010Real.lean | tee real-extension-proof-output.txt
+          grep -Fq "'COE010Real.unique_continuous_real_extension' depends on axioms: [propext, Classical.choice, Quot.sound]" real-extension-proof-output.txt
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-extension-proof-output.txt; then
+            cat real-extension-proof-output.txt
+            exit 1
+          fi
+      - name: Verify actual accepted certificate has a unique real meaning
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          lake env lean COE010Network.lean | tee real-network-soundness.txt
+          grep -Fq "'COE010Network.acceptedCertificateHasUniqueRealMeaning' depends on axioms: [propext, Classical.choice, Quot.sound]" real-network-soundness.txt
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-network-soundness.txt; then
+            cat real-network-soundness.txt
+            exit 1
+          fi
+      - name: Require rejection of a false all-real ReLU observation
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          if lake env lean COE010Invalid.lean > invalid-real-extension.txt 2>&1; then
+            echo "A false all-real ReLU identity was accepted"
+            exit 1
+          fi
+          grep -Eq 'error:|unsolved goals' invalid-real-extension.txt
+      - name: Retain source fingerprints, kernel and negative-control evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe010-mathlib-real-extension-evidence
+          path: |
+            experiments/continuous-observation-equivalence/real-lean/rational-source-sha256.txt
+            experiments/continuous-observation-equivalence/real-lean/real-extension-proof-output.txt
+            experiments/continuous-observation-equivalence/real-lean/real-network-soundness.txt
+            experiments/continuous-observation-equivalence/real-lean/invalid-real-extension.txt
+          if-no-files-found: error
