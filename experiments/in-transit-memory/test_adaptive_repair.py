@@ -179,7 +179,11 @@ class AdaptiveRepairTests(unittest.TestCase):
     def test_report_declares_free_exact_observation_assumption(self):
         report = build_adaptive_repair_report(**self.parameters(repair_cost=1.0))
         self.assertTrue(any(
-            "exact survivor count" in limit and "sensing and telemetry are assumed instantaneous and free" in limit.lower()
+            "fully observed" in limit and "surviving-packet count" in limit
+            for limit in report["interpretation_limits"]
+        ))
+        self.assertTrue(any(
+            "sensing and telemetry are assumed instantaneous and free" in limit.lower()
             for limit in report["interpretation_limits"]
         ))
         self.assertEqual(
