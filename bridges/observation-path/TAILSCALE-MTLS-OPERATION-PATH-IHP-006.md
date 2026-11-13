@@ -19,7 +19,7 @@ IHP-006 joins the two operation hosts to a dedicated tailnet and changes only th
 Three separate GitHub-hosted jobs participate:
 
 1. **client_host** joins the IHP-006 tailnet, creates its ephemeral client certificate, attests and publishes only the public certificate, then downloads the server's attested bootstrap and sends the signed operation over E-CPU SocketTransport/mTLS.
-2. **server_host** independently joins the same tailnet, verifies the client's public certificate attestation, creates its own certificate and a signed endpoint advertisement containing its Tailscale IPv4 address, then listens on TCP port `41763`. Its ReliableChannel commit callback validates the signed envelope, merges the sender's E-CPU causal stamp, performs the successor operation, signs the receiver receipt, and durably writes its record before the channel ACK is emitted.
+2. **server_host** independently joins the same tailnet, verifies the client's public certificate attestation, creates its own certificate and a signed endpoint advertisement containing its Tailscale IPv4 address, then binds only to that Tailscale interface on TCP port `41763`. Its ReliableChannel commit callback validates the signed envelope, merges the sender's E-CPU causal stamp, performs the successor operation, signs the receiver receipt, and durably writes its record before the channel ACK is emitted.
 3. **verifier_host** does not join the tailnet. It downloads public certificates and attested host records, independently verifies the GitHub artifact attestations, reconstructs the signed endpoint, TLS peer fingerprints, ReliableChannel sequence, envelope, receiver receipt, operation spans and causal witness, then attests the reconstruction report.
 
 | Material | Path |
@@ -78,6 +78,7 @@ If either IHP-006 secret is absent, both operation jobs fail before producing ce
 ## Endpoint and trust checks
 
 - `prepare-server --advertise-host` accepts only an IPv4 address within Tailscale's `100.64.0.0/10` range.
+- `serve --bind-host` requires the same validated overlay address in IHP-006; it never binds the listener to `0.0.0.0` or a public interface. IHP-002 retains its original wildcard listener behavior.
 - The IHP-006 workflow identity requires that explicit address; omitting it fails closed before bootstrap.
 - A third-party or public endpoint is rejected when an endpoint is signed by an IHP-006 server identity.
 - The server endpoint is signed by its per-run Ed25519 key and binds the server certificate fingerprint, client actor and client certificate fingerprint.
