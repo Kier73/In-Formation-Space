@@ -12,6 +12,7 @@ import json
 from collections.abc import Mapping
 from typing import Any
 
+PROFILE_ID = "in-formation-space.canonical-metadata.v1"
 MAX_SAFE_INTEGER = (1 << 53) - 1
 
 
