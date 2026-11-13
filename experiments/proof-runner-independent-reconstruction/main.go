@@ -16,7 +16,7 @@ import (
 
 const (
 	ledgerFormat = "in-formation.proof-action-route-ledger/0.1"
-	authorityAttestationFormat = "in-formation.proof-action-route-ledger-attestation/0.1"
+	authorityAttestationFormat = "in-formation.proof-action-route-ledger-attestation/0.2"
 	requestFormat = "in-formation.proof-action-request/0.1"
 	resultFormat = "in-formation.proof-action-result/0.1"
 	receiptFormat = "in-formation.proof-runner-completion-receipt/0.1"
