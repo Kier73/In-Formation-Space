@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kier73.github.io/in-formation-space/lean-kernel-independent-check/0.1",
+  "title": "Independent Lean kernel subprocess recheck evidence",
+  "type": "object",
+  "required": [
+    "format",
+    "status",
+    "runner_host",
+    "checker_host",
+    "toolchain",
+    "lean_version",
+    "runner_observation_digest",
+    "runner_case_digests",
+    "checker_case_digests",
+    "accepted_theorem",
+    "negative_cases_rejected",
+    "vgi_verified_kernel_receipt_issued",
+    "proof_term_fingerprint_observed",
+    "not_established",
+    "document_digest"
+  ],
+  "properties": {
+    "format": {
+      "const": "in-formation.lean-kernel-independent-check/0.1"
+    },
+    "status": {
+      "const": "independently_rechecked"
+    },
+    "runner_host": {
+      "$ref": "#/$defs/host"
+    },
+    "checker_host": {
+      "$ref": "#/$defs/host"
+    },
+    "toolchain": {
+      "const": "leanprover/lean4:v4.15.0"
+    },
+    "lean_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runner_observation_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "runner_case_digests": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/digest"
+      }
+    },
+    "checker_case_digests": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/digest"
+      }
+    },
+    "accepted_theorem": {
+      "const": "KernelTrial.identity"
+    },
+    "negative_cases_rejected": {
+      "const": [
+        "KernelTrial.sorryTrial",
+        "KernelTrial.falseClaim",
+        "KernelTrial.axiomTrial"
+      ]
+    },
+    "vgi_verified_kernel_receipt_issued": {
+      "const": false
+    },
+    "proof_term_fingerprint_observed": {
+      "const": false
+    },
+    "not_established": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "string"
+      }
+    },
+    "document_digest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "host": {
+      "type": "object",
+      "required": [
+        "repository",
+        "run_id",
+        "run_attempt",
+        "git_sha",
+        "git_ref",
+        "job",
+        "role",
+        "runner_name",
+        "runner_environment"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "run_attempt": {
+          "type": "string"
+        },
+        "git_sha": {
+          "type": "string"
+        },
+        "git_ref": {
+          "type": "string"
+        },
+        "job": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "runner_name": {
+          "type": "string"
+        },
+        "runner_environment": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

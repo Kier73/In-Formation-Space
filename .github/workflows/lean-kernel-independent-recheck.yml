@@ -1,0 +1,116 @@
+name: Independent Lean kernel recheck
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/lean-kernel-independent-recheck/**"
+      - ".github/workflows/lean-kernel-independent-recheck.yml"
+  pull_request:
+    paths:
+      - "experiments/lean-kernel-independent-recheck/**"
+      - ".github/workflows/lean-kernel-independent-recheck.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof_runner:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@v4
+      - name: Install pinned Lean and build fixture
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - name: Test observer failure paths
+        working-directory: experiments/lean-kernel-independent-recheck
+        run: python -m unittest -v test_kernel_evidence
+      - name: Run Lean on the axiom-free theorem and three negative controls
+        run: |
+          python experiments/lean-kernel-independent-recheck/kernel_evidence.py produce \
+            --output evidence/lean-runner-observation.json
+      - name: Attest original runner observation on main
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/lean-runner-observation.json
+      - name: Transfer exact runner observation
+        uses: actions/upload-artifact@v4
+        with:
+          name: lean-kernel-runner-observation
+          path: evidence/lean-runner-observation.json
+          if-no-files-found: error
+          retention-days: 30
+
+  independent_checker:
+    needs: [proof_runner]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@v4
+      - name: Install pinned Lean and build checker fixture independently
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/lean-kernel-independent-recheck
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+      - name: Receive the runner observation
+        uses: actions/download-artifact@v4
+        with:
+          name: lean-kernel-runner-observation
+          path: received-runner
+      - name: Recheck fixed proof and all three negative controls with Lean
+        run: |
+          python experiments/lean-kernel-independent-recheck/kernel_evidence.py verify \
+            --runner-report received-runner/lean-runner-observation.json \
+            --output evidence/lean-independent-report.json
+      - name: Validate retained independent report schema
+        run: |
+          python -m pip install --disable-pip-version-check "jsonschema>=4,<5"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          root = Path("experiments/lean-kernel-independent-recheck")
+          schema = json.loads((root / "independent-report.schema.json").read_text(encoding="utf-8"))
+          report = json.loads(Path("evidence/lean-independent-report.json").read_text(encoding="utf-8"))
+          Draft202012Validator.check_schema(schema)
+          Draft202012Validator(schema).validate(report)
+          assert report["vgi_verified_kernel_receipt_issued"] is False
+          assert report["proof_term_fingerprint_observed"] is False
+          print("valid: independent Lean check report preserves VGI trust boundary")
+          PY
+      - name: Attest independent recheck report on main
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/lean-independent-report.json
+      - name: Preserve independent checker evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: lean-kernel-independent-report
+          path: evidence/lean-independent-report.json
+          if-no-files-found: error
+          retention-days: 90

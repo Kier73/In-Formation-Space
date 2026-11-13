@@ -1,0 +1,6 @@
+name = "kernel_witness"
+version = "0.1.0"
+defaultTargets = ["KernelTrial"]
+
+[[lean_lib]]
+name = "KernelTrial"
