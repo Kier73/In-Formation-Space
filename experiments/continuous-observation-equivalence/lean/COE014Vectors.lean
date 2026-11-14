@@ -34,3 +34,6 @@ example : (pad []).map Array.size = some 64 := by decide +kernel
 example : (pad (List.replicate 56 97)).map Array.size = some 128 := by decide +kernel
 
 end COE014Vectors
+
+/-- Entrypoint for the pure-Lean independent SHA-256 vector runner. -/
+def main : IO Unit := COE014Vectors.main
