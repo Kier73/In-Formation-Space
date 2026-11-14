@@ -145,7 +145,7 @@ class OIDCClaimsTests(unittest.TestCase):
                     "statement": {
                         "subject": [{"digest": {"sha256": oidc.file_digest(file)}}],
                         "predicateType": oidc.CLAIMS_PREDICATE_TYPE,
-                        "predicate": expected,
+                        "predicate": copy.deepcopy(expected),
                     },
                     "signature": {"certificate": {"rawBytes": "fixture"}},
                 },
