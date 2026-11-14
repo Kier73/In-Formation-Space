@@ -259,3 +259,66 @@ Future binding of a cost policy to E-CPU operation spans or VGI observation
 receipts must separately authenticate its provenance, units, validity epoch,
 execution semantics, and source/receiver context. An optimized *plan*
 cannot by itself authorize or prove an external host execution.
+
+
+### OE-002 — Source-reconstructed empirical cost proposals
+
+[The operation-span witness binding](../observation-path/witness_cost_binding.py)
+connects the costed navigator to this repository's real
+[`OperationSpanRecorder`](../observation-path/operation_spans.py) and
+`validate_operation_cost_profiles` contracts. Its input is the **original
+span collection**, its independently rebuildable cost-profile report, an
+ordered mapping from navigation action/test labels to concrete operation IDs,
+one declared clock actor and segment, and an explicit operator opt-in.
+
+The adapter **does not run** an E-CPU operation, VGI observation, or network
+request. It constructs an **untrusted planning proposal**, not an authority
+decision. Importantly, a source-content SHA-256 alone does not authenticate the
+origin of a measurement. No producer-issued profile can select costs until
+the verifier independently rebuilds it from the supplied spans.
+
+**Conservative selection:** only successful measured synchronous spans
+from the requested actor/segment are eligible. Each selected operation must
+have at least the declared sample count and the profile's own
+`descriptive_only` readiness; a failed or regressed span for the selected
+operation/context causes refusal. The operation's **nearest-rank p95 in
+nanoseconds** is used as an *assumed additive planning cost* for one declared
+action or one terminal observation test. The policy names its clock context,
+metric, operation bindings, original span digests and profile digest, and
+carries the status `untrusted-operator-opt-in-proposal-only`. It requires an
+explicit opt-in again upon reconstruction and when handing the costs to the
+navigator.
+
+A useful exact counterexample now has a second kind of evidence. When
+successful synthetic measured spans for `action.expensive`,
+`action.cheap` and `test.read` yield respective p95s of 10, 2 and 1
+nanoseconds in a single supplied actor/segment, the planner selects
+`cheap, cheap` over a one-step `expensive` path. Unlike the earlier
+purely caller-declared numbers, these values are **derived from concrete
+operation-span documents** and can be independently reconstructed. Those
+particular spans use a deterministic injected test clock and do **not**
+represent observed E-CPU host performance.
+
+Run source-binding and navigator tests:
+
+```bash
+python -m unittest discover -s bridges/observation-equivalence -p 'test_*.py' -v
+python -m unittest discover -s bridges/observation-path -p 'test_witness_cost_binding.py' -v
+```
+
+The second suite includes reconstruction from source spans, an active
+cost-vs-hop discrepancy, mandatory opt-in, insufficient samples, wrong host
+or clock segment, failed calls, regressed time, tampered/rehashed report and
+proposal contents, duplicate labels, and mismatched navigator action/test
+orders. The project's existing span recorder/profile logic remains the sole
+authority for *structural* validation and sample reconstruction.
+
+**Interpretation caveats:** the p95 is descriptive, neither an upper bound
+nor a forecast; summing independent p95 observations does not establish the
+95th percentile of a composed path. Different operation contexts, effects,
+queuing, concurrency, retries, implementation revisions, and temporal
+segments can change the relevant cost. The strict one-actor/segment policy is
+an initial comparable subset, not a universal cross-substrate price system.
+No plan is counted as an E-CPU/VGI execution receipt. The next bridge must
+bind dispatch, admitted evidence, authorized interpretation and observed
+result to the selected witness under receiver-owned policy and provenance.
