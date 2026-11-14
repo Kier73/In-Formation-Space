@@ -607,3 +607,201 @@ jobs:
             experiments/continuous-observation-equivalence/coe017_attest/refusal.txt
             experiments/continuous-observation-equivalence/coe017_attest/replay-refusal.txt
           if-no-files-found: error
+
+  coe018-journal-producer:
+    needs: [certificate-producer, same-source-evidence-convergence, verifier-attestation-producer]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/received-verifier-attestation
+      - name: Make untrusted PUBLIC TEST-ONLY signed acceptance, key rotation and revocation
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/history-demo \
+            ../received-verifier-attestation/signed-verifier-receipt.json \
+            ../received-coe016/coe016-bound-source-receipt.json \
+            demo-policy.json demo-state.json ../received-certificates \
+            ../untrusted-governance-artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coe018-public-demo-untrusted-journal
+          path: experiments/continuous-observation-equivalence/untrusted-governance-artifacts/*.json
+          if-no-files-found: error
+
+  coe018-receiver-a:
+    needs: [coe018-journal-producer, certificate-producer, verifier-attestation-producer, same-source-evidence-convergence]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/received-verifier-attestation
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe018-public-demo-untrusted-journal
+          path: experiments/continuous-observation-equivalence/received-governance
+      - name: Test signed history, new-key proofs, revocation, fork and rollback
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: go test -count=1 -v ./history ./cmd/history-demo ./cmd/history-verify
+      - name: Refuse public demonstration keys without explicit opt-in
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          if go run ./cmd/history-verify \
+            -journal ../received-governance/untrusted-governance-journal.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -policy demo-policy.json -state demo-state.json \
+            -certs ../received-certificates \
+            -expected-anchor ../received-governance/producer-claimed-anchor.json \
+            -output receiver-a.json > refused-demo.txt 2>&1; then
+            echo 'ERROR: public demo keys silently accepted'
+            exit 1
+          fi
+          grep -Fq 'demo authority refused without opt-in' refused-demo.txt
+      - name: Independently reconstruct verified byte-bound authority history
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/history-verify \
+            -journal ../received-governance/untrusted-governance-journal.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -policy demo-policy.json -state demo-state.json \
+            -certs ../received-certificates \
+            -expected-anchor ../received-governance/producer-claimed-anchor.json \
+            -output receiver-a.json -allow-demo
+          grep -Fq '"status":"revoked-under-policy"' receiver-a.json
+          grep -Fq '"external_anchor_authenticated":false' receiver-a.json
+          grep -Fq '"ground_admitted":false' receiver-a.json
+          grep -Fq '"real_world_identity_authenticated":false' receiver-a.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coe018-receiver-a-reconstruction
+          path: experiments/continuous-observation-equivalence/coe017_attest/receiver-a.json
+          if-no-files-found: error
+
+  coe018-receiver-b:
+    needs: [coe018-journal-producer, certificate-producer, verifier-attestation-producer, same-source-evidence-convergence]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/received-verifier-attestation
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe018-public-demo-untrusted-journal
+          path: experiments/continuous-observation-equivalence/received-governance
+      - name: Independently reconstruct the SAME source and authenticated decisions
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/history-verify \
+            -journal ../received-governance/untrusted-governance-journal.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -policy demo-policy.json -state demo-state.json \
+            -certs ../received-certificates \
+            -expected-anchor ../received-governance/producer-claimed-anchor.json \
+            -output receiver-b.json -allow-demo
+          grep -Fq '"status":"revoked-under-policy"' receiver-b.json
+          grep -Fq '"external_anchor_authenticated":false' receiver-b.json
+          grep -Fq '"ground_admitted":false' receiver-b.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coe018-receiver-b-reconstruction
+          path: experiments/continuous-observation-equivalence/coe017_attest/receiver-b.json
+          if-no-files-found: error
+
+  coe018-independent-receiver-convergence:
+    needs: [coe018-receiver-a, coe018-receiver-b]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe018-receiver-a-reconstruction
+          path: receiver-a
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe018-receiver-b-reconstruction
+          path: receiver-b
+      - name: Compare separately produced authority states without trusting either summary
+        run: |
+          cmp receiver-a/receiver-a.json receiver-b/receiver-b.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("receiver-a/receiver-a.json").read_bytes())
+          assert r["schema"] == "ifs.coe018.independent-authority-replay/v1"
+          assert r["journal_count"] == 3 and r["final_sequence"] == 5
+          assert r["status"] == "revoked-under-policy" and r["receipt_revoked"] is True
+          assert r["active_signers"] == ["demo-vr-41", "demo-vr-74"]
+          assert r["compared_expected_anchor"] is True
+          assert r["external_anchor_authenticated"] is False
+          assert r["real_world_identity_authenticated"] is False
+          assert r["ground_admitted"] is False
+          print("COE-018: independently reconstructed verifier decisions agree")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coe018-independent-receiver-comparison
+          path: |
+            receiver-a/receiver-a.json
+            receiver-b/receiver-b.json
+          if-no-files-found: error
+
+  coe018-authority-unit:
+    # Fast exact-head feedback, independent of the long Lean proving chain.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Go authority journal and adversarial independence/replay matrix
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: go test -count=1 -v ./history ./cmd/history-demo ./cmd/history-verify
