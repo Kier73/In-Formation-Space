@@ -613,3 +613,66 @@ lake env lean COE013RealLink.lean
 ~~~
 
 Next investigations: independently reconstruct or verify SHA-256 under a formal specification, bind a signed exact source manifest to the original file bytes, and construct explicit numerical realization/error contracts for deployed hardware. These are different problems from the now kernel-checked canonical JSON syntax and mathematical semantics.
+
+
+## COE-014 — Source-byte SHA-256 integrity and pinned network policy
+
+COE-013 kernel-checks canonical original JSON bytes, exact typed certificate reconstruction, mathematical admission and ideal real-valued piecewise semantics. It previously syntax-checked SHA-256 fields but did not recalculate them. COE-014 introduces a separate, pure-Lean SHA-256 function and a receiver-owned source digest allowlist, reducing this remaining provenance gap.
+
+### Pure-Lean SHA-256
+
+The new lean/COE014SHA256.lean implements SHA-256 padding, big-endian message lengths, the 64 round constants, bitwise compression, multiblock message scheduling, binary digests and lowercase hexadecimal digests. The implementation uses ordinary Lean UInt32 modular arithmetic, not an external hashing library, native_decide or a trusted hash axiom.
+
+The dedicated COE014Vectors.lean runner compares this implementation against five independently known SHA-256 results: empty input, short ASCII, ordinary text, a 256-octet binary multiblock input and 1000 repeated ASCII bytes. These are **runtime tests of pure Lean code**, not a general proof of equivalence to the FIPS specification or of SHA-256 collision resistance.
+
+### Hashing the original network bytes
+
+COE013Json.Envelope now retains the exact original network JSON object byte span as networkRaw during canonical JSON parsing. It is **not** a reconstructed encoding supplied by Python. COE014Provenance.acceptPinnedBytes checks all three requirements:
+
+1. The original canonical JSON envelope and COE-012 rational tokens pass the unchanged Lean certificate verifier.
+2. SHA-256(networkRaw), computed independently in Lean, equals the original JSON network_sha256 field.
+3. The matching digest belongs to the verifier-owned, statically reviewed list of five network SHA-256 pins already used by independent Python/Go fixtures.
+
+The kernel-checked pinned_bytes_witness theorem derives the actual digest equality, pinned membership and a mathematically admitted typed certificate from the Boolean gate. pinned_implies_accepted shows that the stronger gate never weakens the old mathematical admission checks.
+
+### Five original sources and adversarial checks
+
+The emitter emit_lean_hash_replay.py supplies positions for test mutations but does not calculate the hash for Lean. The original bytes are the same COE-013 byte literals already verified in the repository. The compiled pure-Lean runner recomputes every original producer model's nested-network digest and checks it against both the claimed field and the independent static receiver policy.
+
+For **every one of five** sources it also mutates one network numeric value without updating the hash, and separately alters the SHA-256 field without changing the network. Both corrupted byte streams must still parse as valid JSON, and both must fail the SHA-256 consistency or pinned gate. The original seven-job Python, Go, Lean and E-CPU candidate-Ground regression continues independently.
+
+### All-real formal interpretation
+
+COE014RealLink.pinnedSourceAllReal connects stronger hash-pinned byte admission to the complete mathematical theorem from COE-011: each accepted cell atlas denotes the same ideal neural computation at **every real coordinate**, including irrational inputs and exact ReLU cutpoints. pinnedSourceContinuous proves the resulting piecewise interpreter remains globally continuous. No external numeric parsing or externally asserted hash equality is used as an axiom for these implications.
+
+### Explicit trust boundary
+
+**Integrity is not authenticity.** A receiver-owned list of hashes is a trusted policy, not a digital signature of the origin. A compromised allowlist, modified checker, or substituted supposedly trusted code remains a threat. COE-014 does not verify SHA-256 collision resistance, source signatures, key distribution, network-host identity or E-CPU Ground admission. It also does not formally recompute the different semantic_atlas fingerprint; independent Python and Go checkers retain those responsibilities.
+
+The original external file-to-Lean-byte-literal transport is still not a formal theorem. The concrete five SHA-256 comparisons are executed and independently tested in the Lean runner; the universal theorem is a kernel-checked statement about what success of the strengthened Boolean admission means. GPU/CPU floating-point realization also remains separate.
+
+### Reproduction
+
+~~~bash
+cd experiments/continuous-observation-equivalence
+python produce_certificates.py received-certificates
+python emit_lean_certificates.py received-certificates lean/GeneratedCertificateProofs.lean
+python emit_lean_wire.py received-certificates lean/GeneratedWireProofs.lean
+python emit_lean_json_bytes.py received-certificates lean/GeneratedJSONProofs.lean
+python emit_lean_hash_replay.py received-certificates lean/GeneratedHashReplay.lean
+cd lean
+lake build
+lake env lean --run COE014Vectors.lean
+lake env lean -o .lake/build/lib/lean/GeneratedCertificateProofs.olean GeneratedCertificateProofs.lean
+lake env lean -o .lake/build/lib/lean/GeneratedWireProofs.olean GeneratedWireProofs.lean
+lake env lean -o .lake/build/lib/lean/GeneratedJSONProofs.olean GeneratedJSONProofs.lean
+lake env lean --run GeneratedHashReplay.lean
+cd ../real-lean
+cp ../lean/COE*.lean .
+lake update
+lake exe cache get
+lake build COE014RealLink COE011Fixtures
+lake env lean COE014RealLink.lean
+~~~
+
+The next frontier is authentic source signatures or independent authority claims, verified key distribution, a formal refinement relation between the pure-Lean SHA algorithm and an external cryptographic specification, and separately numerical execution/error contracts.
