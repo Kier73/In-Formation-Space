@@ -258,10 +258,10 @@ def reconstruct(source: Mapping[str, Any], a: Mapping[str, Any], b: Mapping[str,
               'scope': 'synthetic CI-enrolled 60 commanded positives and 20 sham trials'}
     if iid_assumed:
         result['conditional_95pct_one_sided_upper_miss'] = {
-            name: round(upper_binomial_miss(counts[f'{name}_non_detection'], POSITIVE), 9)
+            name: math.ceil(upper_binomial_miss(counts[f'{name}_non_detection'], POSITIVE) * 10**9) / 10**9
             for name in ('A', 'B')}
-        result['conditional_95pct_one_sided_upper_miss']['joint'] = round(
-            upper_binomial_miss(counts['joint_non_detection'], POSITIVE), 9)
+        result['conditional_95pct_one_sided_upper_miss']['joint'] = (
+            math.ceil(upper_binomial_miss(counts['joint_non_detection'], POSITIVE) * 10**9) / 10**9)
         result['iid_assumptions'] = ('independent and identically distributed trials',
             'stationary detection conditions', 'truthful instrumented injection ledger',
             'unbiased trial selection', 'unchanged conditions in future trials')
