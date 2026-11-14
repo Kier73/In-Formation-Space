@@ -1,6 +1,6 @@
 # CAG-004: topology-neutral intention and physical resource accounting
 
-Status: experimental; PR tests and independent hosted integration require verification. CAG-004 is inspired by [E-CPU PR #120](https://github.com/Kier73/E-CPU/pull/120) (SHN-001), pinned experimental head 3a81f1c386b1fc223cc0aec354c099c8c1f717a5. CAG-004 does not modify or merge that PR.
+Status: independently verified hosted topology-neutral experiment; the five-job protected-main run is preserved in [CAG-004 evidence](results/ci-run-43563184861.md). Physical one/two-port hardware and independent external-provider hosting are NOT established. CAG-004 is inspired by [E-CPU PR #120](https://github.com/Kier73/E-CPU/pull/120) (SHN-001), pinned experimental head 3a81f1c386b1fc223cc0aec354c099c8c1f717a5. CAG-004 does not modify or merge that PR.
 
 ## Main proposition
 
