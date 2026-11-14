@@ -1,0 +1,95 @@
+name: USM-005 independent observer of recovered model Ground
+
+on:
+  push:
+    paths:
+      - 'bridges/model-native-operations/verify_recovered_model.py'
+      - 'bridges/model-native-operations/test_recovery_independent.py'
+      - 'bridges/model-native-operations/README_USM005.md'
+      - '.github/workflows/model-recovery-independent.yml'
+  pull_request:
+    paths:
+      - 'bridges/model-native-operations/verify_recovered_model.py'
+      - 'bridges/model-native-operations/test_recovery_independent.py'
+      - 'bridges/model-native-operations/README_USM005.md'
+      - '.github/workflows/model-recovery-independent.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovered-ecpu-producer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout independent experiment
+        uses: actions/checkout@v4
+      - name: Check out immutable E-CPU USM-005 implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 4c30c7144927bd707071e668e785078043eb50b8
+          path: ecpu
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install only producer-side E-CPU
+        run: python -m pip install -e ecpu
+      - name: Validate ephemeral TLS certificate generator
+        run: openssl version
+      - name: Run real receiver hard-crash and authenticated model recovery
+        run: |
+          cd ecpu
+          python -m examples.model_receiver_recovery demo --output ../usm005-source.json
+      - name: Retain only receiver/model evidence, never private keys
+        uses: actions/upload-artifact@v4
+        with:
+          name: usm005-native-ecpu-crash-recovery
+          path: usm005-source.json
+          if-no-files-found: error
+
+  independent-observer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: recovered-ecpu-producer
+    steps:
+      - name: Checkout IFS observer without E-CPU
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Test independent recovery verifier and tamper cases
+        run: >-
+          python -m unittest discover
+          -s bridges/model-native-operations
+          -p 'test_recovery_independent.py' -v
+      - name: Receive transferred operation evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: usm005-native-ecpu-crash-recovery
+          path: producer-evidence
+      - name: Independently reconstruct E-CPU recovered orbit and Ground result
+        run: >-
+          python bridges/model-native-operations/verify_recovered_model.py
+          producer-evidence/usm005-source.json
+          --output usm005-independent-report.json
+      - name: Require independent source and operation alignment
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          doc = json.loads(Path("usm005-independent-report.json").read_text())
+          assert doc["verified"] is True
+          assert doc["event_count"] == 3
+          assert doc["independent_host_source_oracle_match"] is True
+          assert doc["native_quorum_signatures_independently_verified"] is False
+          print("USM-005 independent observer reconstructed recovered model/E-CPU session")
+          PY
+      - name: Retain independent verifier's distinct report
+        uses: actions/upload-artifact@v4
+        with:
+          name: usm005-independent-model-recovery-verdict
+          path: usm005-independent-report.json
+          if-no-files-found: error
