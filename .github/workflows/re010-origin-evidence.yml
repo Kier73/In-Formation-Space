@@ -1,0 +1,235 @@
+name: RE-010 independent event origin and E-CPU causal evidence
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re010-origin-evidence.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re010-origin-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify full RE-001 through RE-010 local regression suite
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Deterministic report replay
+        run: |
+          python experiments/response-equivalence/event_origin_commitment.py > /tmp/re010-report.json
+          cmp experiments/response-equivalence/re010_report.json /tmp/re010-report.json
+      - name: Check actual pinned E-CPU temporal adapter
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re010_cases.py
+
+  enrollment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Create ephemeral CI role enrollment (not trusted physical keys)
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from event_origin_commitment import registration
+          reg=registration()
+          for kind, data in (
+              ('verifier',reg),
+              ('public',{'challenge':reg['challenge'],'key_ids':reg['key_ids']}),
+              *((role,{'challenge':reg['challenge'],'key_ids':reg['key_ids'],
+                        'keys':{role:reg['keys'][role]}})
+                for role in ('S','O','A','B')),
+          ):
+              with open(f're010-{kind}-enrollment.json','w',encoding='utf-8') as out:
+                  json.dump(data,out,sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-public-registration, path: re010-public-enrollment.json, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-verifier-registration-ci, path: re010-verifier-enrollment.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-S-registration-ci, path: re010-S-enrollment.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-O-registration-ci, path: re010-O-enrollment.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-A-registration-ci, path: re010-A-enrollment.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-B-registration-ci, path: re010-B-enrollment.json, retention-days: 1, if-no-files-found: error}
+
+  controller:
+    needs: enrollment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-public-registration}
+      - name: Emit real E-CPU controller causal frame
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re010-controller-request.json
+          import json
+          with open('re010-public-enrollment.json',encoding='utf-8') as f: reg=json.load(f)
+          print(json.dumps({'challenge':reg['challenge']}))
+          PY
+          python experiments/response-equivalence/ecpu_re010_hosts.py --controller < /tmp/re010-controller-request.json > re010-controller.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-controller-public, path: re010-controller.json, if-no-files-found: error}
+
+  source:
+    needs: [enrollment, controller]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-controller-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-S-registration-ci}
+      - name: Produce source-counter claims from S-only signing material
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re010-source-request.json
+          import json
+          def read(p):
+              with open(p,encoding='utf-8') as f: return json.load(f)
+          print(json.dumps({'controller':read('re010-controller.json'),'registration':read('re010-S-enrollment.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re010_hosts.py --source < /tmp/re010-source-request.json > re010-source.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-source-public, path: re010-source.json, if-no-files-found: error}
+
+  origin:
+    needs: [enrollment, controller]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-controller-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-O-registration-ci}
+      - name: Produce event-identity commitments without source/observer files
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re010-origin-request.json
+          import json
+          def read(p):
+              with open(p,encoding='utf-8') as f: return json.load(f)
+          print(json.dumps({'controller':read('re010-controller.json'),'registration':read('re010-O-enrollment.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re010_hosts.py --origin < /tmp/re010-origin-request.json > re010-origin.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-origin-public, path: re010-origin.json, if-no-files-found: error}
+
+  observer:
+    needs: [enrollment, source]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: {actor: ['A','B']}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-source-public}
+      - uses: actions/download-artifact@v4
+        with:
+          name: re010-${{ matrix.actor }}-registration-ci
+      - name: Produce sealed witness logs with role-limited keys
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re010-observer-request.json
+          import json,os
+          role='${{ matrix.actor }}'
+          def read(p):
+              with open(p,encoding='utf-8') as f: return json.load(f)
+          print(json.dumps({'source':read('re010-source.json'),'registration':read(f're010-{role}-enrollment.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re010_hosts.py --${{ matrix.actor }} < /tmp/re010-observer-request.json > re010-${{ matrix.actor }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re010-${{ matrix.actor }}-public
+          path: re010-${{ matrix.actor }}.json
+          if-no-files-found: error
+
+  independent-verifier:
+    needs: [source, origin, observer, tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-source-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-origin-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-A-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-B-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re010-verifier-registration-ci}
+      - name: Independently recheck E-CPU vector relationships and signed event identities
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re010-verifier-request.json
+          import json
+          def read(p):
+              with open(p,encoding='utf-8') as f: return json.load(f)
+          print(json.dumps({'source':read('re010-source.json'),
+                            'origin':read('re010-origin.json'),
+                            'A':read('re010-A.json'),'B':read('re010-B.json'),
+                            'registration':read('re010-verifier-enrollment.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re010_hosts.py --verifier < /tmp/re010-verifier-request.json > re010-independent-report.json
+          python - <<'PY'
+          import json
+          with open('re010-independent-report.json',encoding='utf-8') as f: r=json.load(f)
+          assert r['status']=='scoped_origin_counter_triangle_verified'
+          assert r['triangulation']['origin_only_epochs']==[3]
+          assert r['origin_causal_evidence']['origin_concurrent_A_and_B']=='concurrent'
+          assert r['physical_event_attested'] is False
+          assert r['independent_fault_domains_proved'] is False
+          assert r['cross_host_elapsed'] is None
+          print('Verified signed scoped disagreements and causal frames; physical truth unresolved.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re010-independent-report, path: re010-independent-report.json, if-no-files-found: error}
