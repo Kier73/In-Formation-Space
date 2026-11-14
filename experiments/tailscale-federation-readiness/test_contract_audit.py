@@ -60,6 +60,18 @@ class FederationContractTests(unittest.TestCase):
         with self.assertRaisesRegex(audit.ContractError, "restricted to main"):
             audit.inspect_workflow(doc, "MOR-002")
 
+    def test_mor002_live_peer_requires_explicit_dispatch(self) -> None:
+        doc = self.document("MOR-002")
+        doc["jobs"]["client_host"]["if"] = "needs.tests.result == 'success' && github.ref == 'refs/heads/main'"
+        with self.assertRaisesRegex(audit.ContractError, "manual dispatch"):
+            audit.inspect_workflow(doc, "MOR-002")
+
+    def test_mor002_independent_observer_requires_dispatch(self) -> None:
+        doc = self.document("MOR-002")
+        doc["jobs"]["observer_host"]["if"] = "needs.tests.result == 'success' && github.ref == 'refs/heads/main'"
+        with self.assertRaisesRegex(audit.ContractError, "manual dispatch"):
+            audit.inspect_workflow(doc, "MOR-002")
+
     def test_authkey_fallback_is_forbidden(self) -> None:
         doc = self.document("MOR-002")
         self.join_step(doc, "client_host")["with"]["authkey"] = "secrets.SHARED_TAILSCALE_KEY"
