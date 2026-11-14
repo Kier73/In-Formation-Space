@@ -51,7 +51,7 @@ jobs:
         run: lake exe cache get
       - name: Compile independent real semantics and original COE proof chain
         working-directory: experiments/continuous-observation-equivalence/real-lean
-        run: lake build COE011Fixtures
+        run: lake build COE012RealLink COE011Fixtures
       - name: Kernel-check real continuity, exact casts and dense uniqueness
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
@@ -100,6 +100,17 @@ jobs:
             cat real-piecewise-fixtures.txt
             exit 1
           fi
+      - name: Kernel-prove decoded wire certificates inherit all-real atlas semantics
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          lake env lean COE012RealLink.lean | tee real-wire-semantic-proof.txt
+          for theorem in acceptedWireAllReal acceptedWireContinuous fractionalWireAllReal; do
+            grep -Fq "'COE012RealLink.${theorem}' depends on axioms: [propext, Classical.choice, Quot.sound]" real-wire-semantic-proof.txt
+          done
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-wire-semantic-proof.txt; then
+            cat real-wire-semantic-proof.txt
+            exit 1
+          fi
       - name: Require kernel rejection of a gapped activation-cell cover
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
@@ -130,6 +141,7 @@ jobs:
             experiments/continuous-observation-equivalence/real-lean/real-atlas-soundness.txt
             experiments/continuous-observation-equivalence/real-lean/real-piecewise-network-soundness.txt
             experiments/continuous-observation-equivalence/real-lean/real-piecewise-fixtures.txt
+            experiments/continuous-observation-equivalence/real-lean/real-wire-semantic-proof.txt
             experiments/continuous-observation-equivalence/real-lean/invalid-piecewise-cover.txt
             experiments/continuous-observation-equivalence/real-lean/invalid-real-extension.txt
           if-no-files-found: error

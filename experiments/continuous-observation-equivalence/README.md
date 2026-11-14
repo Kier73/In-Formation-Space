@@ -481,3 +481,62 @@ lake env lean COE011Invalid.lean
 ~~~
 
 A natural follow-up is to reduce the remaining serialization and realization trust boundary: validate the exact JSON rational-token parser against a formally verified decoding contract, and separately specify numerical approximation error bounds for implementations that observe or execute the proven ideal real-valued interpretation.
+
+
+## COE-012 — Kernel-decoded original wire token bytes
+
+COE-011 proved that an accepted typed activation-cell certificate's actual piecewise-affine atlas agrees with its ideal real neural-network evaluator at every real coordinate. But the initial COE-007 adapter turned source JSON rational strings into typed Lean Rat literals in ordinary Python. The mathematical result did not, by itself, prove that Python transported the correct numerical values.
+
+COE-012 reduces that numerical translation trust by carrying the original certificate's **ASCII token bytes** as ordinary lists of natural-number byte codes into Lean. Within Lean, a separate, structurally recursive decoder decides whether the spellings are canonical, calculates the exact rational numbers, decodes the allowed endpoint sentinels and activation labels, constructs the original typed certificate, and invokes the unchanged independent certificate checker.
+
+### Kernel-reducible decoder (lean/COE012Wire.lean)
+
+The source-token wire language is deliberately small: a canonical ASCII integer (including zero and negative integers) or a reduced signed-numerator fraction with an ASCII decimal denominator greater than one. The decoder checks canonical digit sequences, rejects signed zero and leading zeros, rejects zero/unit/negative denominators, verifies coprime numerator and denominator and performs exact rational division **in Lean**. It accepts only -inf as the absent left bound, +inf as the absent right bound, and linear or relu for activation modes. There are no floating-point or Python Fraction values in the WireCert representation.
+
+The token decoder works over lists of ASCII codes rather than opaque Lean string-library operations. This matters for formal evidence: Lean 4.24's string conversion and splitting operations used in an initial experimental parser did not reduce under the kernel-only decision tactic. Structurally recursive lists and arithmetic do, so a successful proof depends on actual kernel arithmetic, not native evaluation or trusted execution of a parser.
+
+The acceptWire Boolean is true **only when** token decoding succeeds and the pre-existing COEWireCheck.verify accepts the resulting exact typed certificate. The lemma acceptWire_implies_verified recovers that typed mathematical certificate from wire admission.
+
+### Replaying the five original certificates
+
+The additional emit_lean_wire.py bridge is intentionally **data-only**. It reads exactly the canonical five original COE-002 source files under the independently checked source-network pin policy, transports their token strings as ASCII codes without interpreting their numeric values, and emits five kernel-checkable obligations in GeneratedWireProofs.lean.
+
+For each of the five source artifacts, the obligations require that its Lean-decoded wire representation equals the original typed literal certificate that COE-007 previously replayed, that the newly decoded wire certificate passes the original mathematical verifier, and that the emitted manifest retains the original canonical source-file SHA-256.
+
+The original independent Python and Go byte verifiers, complete activation-cell tests, malicious certificate mutations, and E-CPU candidate-Ground identity checks remain separate.
+
+### Mathematical real meaning (real-lean/COE012RealLink.lean)
+
+COE-012 also composes **actual Lean wire admission** with the all-real COE-011 atlas theorem. For any accepted wire-token object, output component and real coordinate, there exists the decoded certified object such that its own piecewise-real cell-atlas interpreter agrees with the independently compiled source neural network. The decoded atlas interpreter is globally continuous. No Python-computed rational literal or parser-soundness axiom is passed to these statements.
+
+A nontrivial source example with exactly encoded -3/2 weight establishes positive admission and an all-real semantic bridge. Negative controls include unreduced fractions, leading zeros, signed zero, malformed syntax, reversed infinity sentinels, unsupported activation modes, and injection-like text. The false proposition claiming an unreduced fraction is admitted must be rejected by Lean.
+
+### Distinctions and remaining work
+
+This is **not yet a fully verified JSON parser**. The extraction of JSON objects/arrays/strings and the conversion of ASCII strings into lists of byte codes remain ordinary Python. The verifier-owned expected source-network manifest and independent byte-checking reports provide separate practical safeguards, but they are not proofs of the JSON envelope's faithful conversion. COE-012 reduces trust in numeric decoding, activation and boundary label interpretation; it does not eliminate the transport boundary.
+
+The theorem concerns exact rational parameters and the ideal real interpretation of finite scalar affine/ReLU networks. It does not establish physical floating-point execution accuracy, source authentication, remote execution, or E-CPU Ground admission.
+
+To reproduce with Python 3.11+ and pinned Lean 4.24.0:
+
+~~~bash
+cd experiments/continuous-observation-equivalence
+python produce_certificates.py received-certificates
+python -m unittest test_lean_wire -v
+python emit_lean_certificates.py received-certificates lean/GeneratedCertificateProofs.lean
+python emit_lean_wire.py received-certificates lean/GeneratedWireProofs.lean
+cd lean
+lake build
+lake env lean -o .lake/build/lib/lean/GeneratedCertificateProofs.olean GeneratedCertificateProofs.lean
+lake env lean GeneratedWireProofs.lean
+# The deliberately false unreduced-token admission MUST fail:
+lake env lean COE012WireInvalid.lean
+cd ../real-lean
+cp ../lean/COE*.lean .
+lake update
+lake exe cache get
+lake build COE012RealLink
+lake env lean COE012RealLink.lean
+~~~
+
+The next frontier is a self-contained Lean decoder for the canonical JSON envelope itself, or a proof-bearing external parser independently checkable against the original raw JSON bytes. Separately, physical implementations require numerical error bounds and execution-attestation contracts.

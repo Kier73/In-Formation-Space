@@ -25,18 +25,18 @@ structure Layer where
   weights : List (List Rat)
   bias : List Rat
   relu : Bool
-  deriving Repr
+  deriving Repr, DecidableEq
 
 structure Cell where
   left : Option Rat
   right : Option Rat
   output : List Affine
-  deriving Repr
+  deriving Repr, DecidableEq
 
 structure Cert where
   layers : List Layer
   cells : List Cell
-  deriving Repr
+  deriving Repr, DecidableEq
 
 def evaluateAt (a : Affine) (x : Rat) : Rat := a.slope * x + a.offset
 
