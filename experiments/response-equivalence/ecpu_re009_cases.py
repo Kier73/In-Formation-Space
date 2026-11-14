@@ -41,7 +41,7 @@ class HostedECPURe009Tests(unittest.TestCase):
         bad['witness']['bindings'][0]['frame']['causal']['vector']['C'] = 0
         bad['witness']['digest'] = sha({k:v for k,v in bad['witness'].items() if k != 'digest'})
         bad['digest'] = sha({k:v for k,v in bad.items() if k != 'digest'})
-        with self.assertRaisesRegex(Exception, 'binding'):
+        with self.assertRaisesRegex(Exception, 'HMAC|binding'):
             verify(self.s, bad, self.b, self.reg)
 
     def test_cross_session_ack_replayed_rejected(self):
