@@ -276,9 +276,9 @@ func demoPolicy(old attest.Policy)attest.Policy{
  next.MinimumSequence=4
  next.Keys=append([]attest.Key{},old.Keys...)
  for i:=range next.Keys{if next.Keys[i].ID=="demo-vr-52"{next.Keys[i].State="revoked"}}
- private:=ed25519.NewKeyFromSeed(bytes.Repeat([]byte{0x63},ed25519.SeedSize))
+ private:=ed25519.NewKeyFromSeed(bytes.Repeat([]byte{0x74},ed25519.SeedSize))
  next.Keys=append(next.Keys,attest.Key{
-    ID:"demo-vr-63",Algorithm:"ed25519",
+    ID:"demo-vr-74",Algorithm:"ed25519",
     PublicKey:base64.StdEncoding.EncodeToString(private.Public().(ed25519.PublicKey)),
     State:"active",ValidFrom:4,
  })
@@ -294,6 +294,10 @@ func GenerateDemo(signedRaw,evidenceRaw,initialPolicyRaw,initialStateRaw []byte,
  if err!=nil{return result,err}
  if original.Sequence!=3{return result,fail("demo expects initial verifier receipt sequence 3")}
  next:=demoPolicy(policy)
+ // Fail early on public-key aliasing against *all* existing receiver identities,
+ // including revoked keys; synthetic fixtures may use different historical pins.
+ nextBytes,e:=Canonical(next);if e!=nil{return result,e}
+ if _,e=attest.ParsePolicy(nextBytes);e!=nil{return result,fmt.Errorf("invalid rotated verifier trust policy: %w",e)}
  result=Journal{Schema:JournalSchema,Entries:[]Entry{}}
  previous:=strings.Repeat("0",64)
  insert:=func(kind string,sequence uint64,successors *attest.Policy,reason string,oldKeys,newKeys []byte)error{
@@ -311,8 +315,8 @@ func GenerateDemo(signedRaw,evidenceRaw,initialPolicyRaw,initialStateRaw []byte,
    return nil
  }
  if err:=insert("accept",3,nil,"",[]byte{0x41,0x52},nil);err!=nil{return result,err}
- if err:=insert("rotate",4,&next,"",[]byte{0x41,0x52},[]byte{0x41,0x63});err!=nil{return result,err}
- if err:=insert("revoke",5,nil,"verifier-credential-retired",[]byte{0x41,0x63},nil);err!=nil{return result,err}
+ if err:=insert("rotate",4,&next,"",[]byte{0x41,0x52},[]byte{0x41,0x74});err!=nil{return result,err}
+ if err:=insert("revoke",5,nil,"verifier-credential-retired",[]byte{0x41,0x74},nil);err!=nil{return result,err}
  result.Anchor=Anchor{Schema:AnchorSchema,Count:3,Head:previous}
  raw,err:=Canonical(result);if err!=nil{return result,err}
  if _,err=Replay(raw,signedRaw,evidenceRaw,initialPolicyRaw,initialStateRaw,certDir,&result.Anchor,true);err!=nil{
