@@ -222,6 +222,10 @@ def server(peer: str, directory: Path, cert_dir: Path, ready_path: Path) -> None
                                  'signature_b64':c.sign_receipt(private_key,payload)}
                         send(t,'coordinator','RECEIPT',receipt)
                     elif op=='CLOSE':
+                        # Application-level close acknowledgement prevents an
+                        # SSL socket shutdown from tearing a partial MailCPU
+                        # frame out from under the remote decoder.
+                        send(t,'coordinator','CLOSED',{'done':True})
                         break
                     else:
                         send(t,'coordinator','REJECT',{'code':'unknown-operator'})
@@ -394,14 +398,15 @@ def run(directory: Path) -> dict[str, Any]:
                   'report:',report['report_digest'])
             return report
         finally:
+            clean_closes = []
             for peer,t in sessions.items():
                 try:
                     send(t,peer,'CLOSE',{'done':True})
-                    # Give the remote MailCPU frame decoder a chance to read
-                    # the complete close message before the TLS socket closes.
-                    time.sleep(.06)
-                except Exception:
-                    pass
+                    reply=receive(t,'CLOSED',timeout=5.0)
+                    if reply is None or reply[0]!='CLOSED' or reply[1]!={'done':True}:
+                        clean_closes.append(peer + ': no explicit MailCPU close receipt')
+                except Exception as exc:
+                    clean_closes.append(peer + ': ' + str(exc))
                 try: t.close()
                 except Exception: pass
             host_failures = []
@@ -412,9 +417,9 @@ def run(directory: Path) -> dict[str, Any]:
                 if proc.returncode:
                     detail = (keys/f'{peer}.stderr').read_text()[-2000:]
                     host_failures.append(peer + ' (' + str(proc.returncode) + '): ' + detail)
-            if host_failures and sys.exc_info()[0] is None:
+            if (host_failures or clean_closes) and sys.exc_info()[0] is None:
                 raise LiveObserverError('authenticated observers did not terminate cleanly: ' +
-                                        '; '.join(host_failures))
+                                        '; '.join(host_failures + clean_closes))
             for detail in host_failures:
                 print('Observer process failure: ' + detail, file=sys.stderr)
 
@@ -440,6 +445,7 @@ def main() -> None:
 
 if __name__=='__main__':
     main()
+
 
 
 
