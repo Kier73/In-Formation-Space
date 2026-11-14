@@ -422,3 +422,74 @@ jobs:
             experiments/continuous-observation-equivalence/lean/invalid-wire-token.txt
             experiments/continuous-observation-equivalence/lean/negative-*-rejection.txt
           if-no-files-found: error
+
+  same-source-evidence-convergence:
+    # One CI run binds four independent verdicts to the same original files.
+    # Previous jobs must succeed; this stage is NOT proof of external identity
+    # and deliberately cannot convert public demo signatures into Ground authority.
+    needs: [certificate-producer, signed-manifest-producer, signed-manifest-verifier,
+            certificate-checker, go-certificate-checker, lean-certificate-replay]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Receive exact original untrusted certificate files
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Receive untrusted signed source manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: coe015-untrusted-signed-manifest
+          path: experiments/continuous-observation-equivalence/received-authority-claims
+      - name: Receive completed independent Lean kernel evidence from this workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: coe007-lean-certificate-replay
+          path: experiments/continuous-observation-equivalence/joined-lean-evidence
+      - name: Receive separately verified Python mathematical evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-independent-checker-report
+          path: experiments/continuous-observation-equivalence/joined-python-evidence
+      - name: Receive separately verified Go mathematical evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: coe003-go-independent-checker-report
+          path: experiments/continuous-observation-equivalence/joined-go-evidence
+      - name: Re-verify Ed25519 under a local receiver-controlled TEST policy
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: |
+          go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-authority-claims/signed-manifest.json \
+            -certs ../received-certificates \
+            -allow-demo \
+            -report ../joined-authority-receipt.json
+      - name: Adversarially test exact-byte cross-evidence convergence
+        working-directory: experiments/continuous-observation-equivalence
+        run: python -m unittest test_coe016_binding -v
+      - name: Reject divergent original bytes, semantics, pins or proof records
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python coe016_binding.py \
+            --certs received-certificates \
+            --authority joined-authority-receipt.json \
+            --lean joined-lean-evidence/lean-json-replay-manifest.json \
+            --python joined-python-evidence/independent-certificate-report.json \
+            --go joined-go-evidence/go-independent-check-report.json \
+            --lean-log joined-lean-evidence/sha256-pinned-network-replay.txt \
+            --output coe016-bound-source-receipt.json
+      - name: Retain explicitly non-admitting cross-evidence receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/coe016-bound-source-receipt.json
+          if-no-files-found: error
