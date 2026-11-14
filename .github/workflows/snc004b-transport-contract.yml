@@ -1,0 +1,91 @@
+name: SNC-004B live capsule transport protocol contracts
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - '.github/workflows/snc004b-transport-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - '.github/workflows/snc004b-transport-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capsule-protocol-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - name: SNC-004B bounded frame and independent policy rejection tests
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+        run: |
+          set -euo pipefail
+          python -m unittest discover \
+            -s experiments/semantic_neural_compilation \
+            -p 'snc004b_tests.py' -v
+      - name: SNC-004A independent certificate admission regression
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+        run: |
+          set -euo pipefail
+          python -m unittest discover \
+            -s experiments/semantic_neural_compilation \
+            -p 'snc004_tests.py' -v
+
+  actual-local-socket:
+    needs: capsule-protocol-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Transfer capsule over real loopback mTLS and fail closed on mismatched receiver semantics
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+        run: |
+          set -euo pipefail
+          python experiments/semantic_neural_compilation/run_snc004b_local.py \
+            --output snc004b-local-mtls-evidence.json | tee snc004b-local-stdout.json
+          python - <<'PY'
+          import json
+          with open("snc004b-local-mtls-evidence.json") as f:
+              r=json.load(f)
+          assert r["status"]=="authenticated-local-transfer-and-policy-denial-verified"
+          assert r["accepted"]["independent_outputs"]==["3/4"]
+          assert r["denied"]["accepted"] is False
+          assert r["cross_host_overlay_verified"] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004b-real-local-mtls-evidence
+          path: |
+            snc004b-local-mtls-evidence.json
+            snc004b-local-stdout.json
+          if-no-files-found: error
