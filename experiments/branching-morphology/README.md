@@ -67,3 +67,9 @@ The six local tests checked balanced expansion/count, invalid-input rejection, t
 4. Can two distinct grammars yield near-identical silhouettes, and how should that ambiguity be assessed without relying on visual intuition alone?
 
 Do not interpret this as evidence about actual botany, vascular structures, evolution, or natural growth processes. The aesthetic resemblance is an invitation to investigate, not validation.
+
+## Exact follow-up: BMO-002
+
+A special case admits a stronger result than the finite measurements above. At a **60°** turning angle, an integer triangular-lattice recurrence and a finite 25-point hull-containment certificate establish, by induction, that the canopy's **convex hull scales exactly by 3 at every expansion depth n ≥ 2**. Its hull/bounding-box fraction is exactly **19/36**, and its width/height ratio is exactly **1/√3**. This does not generalize to the other sampled angles.
+
+See [Exact 60° lattice certificate](EXACT-LATTICE-60.md), [source](lattice60.py), and [independent reconstruction tests](test_lattice60.py). Run `python experiments/branching-morphology/lattice60.py` for the machine-readable certificate.
