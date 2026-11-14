@@ -145,6 +145,21 @@ example : decodeLeft "+inf" = none := by decide +kernel
 example : decodeRight "-inf" = none := by decide +kernel
 example : decodeActivation "sigmoid" = none := by decide +kernel
 
+/-- A nontrivial exact rational line, expressed entirely as untrusted
+wire strings before decoding. No producer-supplied Rat value is needed. -/
+def rationalLineWire : WireCert :=
+  { layers := [
+      { weights := [["-3/2"]], bias := ["0"], activation := "linear" }]
+    cells := [
+      { left := "-inf", right := "+inf",
+        affines := [{ slope := "-3/2", offset := "0" }] }] }
+
+/-- The actual typed certificate checker accepts the decoded network. -/
+theorem rationalLineWireAccepted : acceptWire rationalLineWire = true := by
+  decide +kernel
+
+#print axioms COE012Wire.rationalLineWireAccepted
+
 #print axioms COE012Wire.acceptWire_implies_verified
 
 end COE012Wire
