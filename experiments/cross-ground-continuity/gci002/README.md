@@ -4,9 +4,12 @@
 across observer Grounds *after actual VGI evidence finalization*, and can a
 deliberate non-congruent observer be refused rather than treated as equivalent?
 
-**Status:** active hosted experiment; read its exact workflow evidence before
-claiming a pass. This extends [GCI-001](../gci001/README.md) without replacing
-its signed source or claiming general Ground universality.
+**Status:** independently verified bounded experiment. The [main-branch
+10-job run](results/ci-run-43568329696.md) passed on November 14, 2026.
+This extends [GCI-001](../gci001/README.md) without replacing
+its signed source or claiming general Ground universality. GitHub currently
+reports `main` as unprotected; workflow provenance does not establish
+protected-branch governance.
 
 ## An eight-edge mathematical orbit that is actually closed
 
