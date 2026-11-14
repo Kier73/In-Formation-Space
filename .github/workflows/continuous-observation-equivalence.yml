@@ -778,7 +778,7 @@ jobs:
           assert r["schema"] == "ifs.coe018.independent-authority-replay/v1"
           assert r["journal_count"] == 3 and r["final_sequence"] == 5
           assert r["status"] == "revoked-under-policy" and r["receipt_revoked"] is True
-          assert r["active_signers"] == ["demo-vr-41", "demo-vr-63"]
+          assert r["active_signers"] == ["demo-vr-41", "demo-vr-74"]
           assert r["compared_expected_anchor"] is True
           assert r["external_anchor_authenticated"] is False
           assert r["real_world_identity_authenticated"] is False
