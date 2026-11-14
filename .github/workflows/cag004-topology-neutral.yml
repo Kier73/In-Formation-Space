@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - 'experiments/convergent-ground-fabric/cag004/**'
+      - 'experiments/cross-ground-continuity/gci001/**'
       - '.github/workflows/cag004-topology-neutral.yml'
   push:
     branches: [main]
     paths:
       - 'experiments/convergent-ground-fabric/cag004/**'
+      - 'experiments/cross-ground-continuity/gci001/**'
       - '.github/workflows/cag004-topology-neutral.yml'
   workflow_dispatch:
 
@@ -30,6 +32,10 @@ jobs:
         run: |
           python -m unittest discover -s experiments/convergent-ground-fabric/cag004 -p 'test_contract.py' -v
           python -m py_compile experiments/convergent-ground-fabric/cag004/contract.py experiments/convergent-ground-fabric/cag004/hosts.py
+      - name: Test cross-Ground contracts and adversarial observer contexts
+        run: |
+          python -m unittest discover -s experiments/cross-ground-continuity/gci001 -p 'test_continuity.py' -v
+          python -m py_compile experiments/cross-ground-continuity/gci001/continuity.py experiments/cross-ground-continuity/gci001/vgi_host.py
 
   intent_host:
     needs: tests
@@ -240,3 +246,122 @@ jobs:
           path: evidence/cag004/auditor-report.json
           retention-days: 90
           if-no-files-found: error
+
+  vgi_ground_host:
+    needs: [tests, intent_host]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned independent VGI affine realization
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/VGI
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install VGI and source signature verifier
+        run: |
+          python -m pip install "cryptography>=43,<47"
+          python -m pip install -e external/VGI/virtual_ground_interpreter
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - name: Require actual workflow attestations for source and trust on main
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Execute exact 2D and quotient modular-affine Grounds in real VGI
+        run: |
+          python experiments/cross-ground-continuity/gci001/vgi_host.py --directory evidence/cag004
+      - name: Attest actual VGI execution report on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/vgi-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gci001-vgi-ground-report
+          path: evidence/cag004/vgi-report.json
+          if-no-files-found: error
+          retention-days: 90
+
+  continuity_verifier:
+    needs: [tests, intent_host, internal_loci_host, receiver_host, verifier_host, vgi_ground_host]
+    if: needs.tests.result == 'success' && needs.intent_host.result == 'success' && needs.internal_loci_host.result == 'success' && needs.receiver_host.result == 'success' && needs.verifier_host.result == 'success' && needs.vgi_ground_host.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install only independent signature verifier, NOT E-CPU or VGI
+        run: python -m pip install "cryptography>=43,<47"
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-internal-observer-report
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-receiver-observer-report
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci001-vgi-ground-report
+          path: evidence/cag004
+      - name: Require exact main-workflow attestations for all input reports
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json internal-report.json receiver-report.json vgi-report.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Reconstruct CAG-004 and VGI agreement without either execution runtime
+        run: |
+          python experiments/cross-ground-continuity/gci001/continuity.py verify --directory evidence/cag004
+      - name: Attest independently reconstructed cross-Ground audit on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/continuity-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gci001-cross-ground-audit
+          path: evidence/cag004/continuity-audit.json
+          if-no-files-found: error
+          retention-days: 90
