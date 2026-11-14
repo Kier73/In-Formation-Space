@@ -179,6 +179,7 @@ func Replay(journalRaw,signedRaw,evidenceRaw,initialPolicyRaw,initialStateRaw []
  policy,err:=attest.ParsePolicy(initialPolicyRaw);if err!=nil{return empty,err}
  if policy.Mode=="test-only"&&!allowDemo{return empty,fail("demo authority refused without opt-in")}
  state,err:=attest.ParseState(initialStateRaw);if err!=nil{return empty,err}
+ if state.Issuer!=policy.Issuer{return empty,fail("receiver genesis replay state issuer differs from trusted policy")}
  original,_,err:=attest.Verify(signedRaw,evidenceRaw,initialPolicyRaw,initialStateRaw,certificateDir,allowDemo)
  if err!=nil{return empty,fmt.Errorf("COE-017 source receipt: %w",err)}
  journal,err:=ParseJournal(journalRaw);if err!=nil{return empty,err}
