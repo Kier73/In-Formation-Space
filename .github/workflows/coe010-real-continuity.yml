@@ -51,7 +51,7 @@ jobs:
         run: lake exe cache get
       - name: Compile independent real semantics and original COE proof chain
         working-directory: experiments/continuous-observation-equivalence/real-lean
-        run: lake build COE011Atlas
+        run: lake build COE011Coverage
       - name: Kernel-check real continuity, exact casts and dense uniqueness
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
@@ -79,6 +79,17 @@ jobs:
             cat real-atlas-soundness.txt
             exit 1
           fi
+      - name: Kernel-check direct piecewise real certificate interpretation and continuity
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          lake env lean COE011Coverage.lean | tee real-piecewise-network-soundness.txt
+          for theorem in verifiedRealCover overlappingCellsAgree piecewiseReal_eq_network continuous_piecewiseReal piecewiseReal_at_rational; do
+            grep -Fq "'COE011Coverage.${theorem}' depends on axioms: [propext, Classical.choice, Quot.sound]" real-piecewise-network-soundness.txt
+          done
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-piecewise-network-soundness.txt; then
+            cat real-piecewise-network-soundness.txt
+            exit 1
+          fi
       - name: Require rejection of a false all-real ReLU observation
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
@@ -96,5 +107,6 @@ jobs:
             experiments/continuous-observation-equivalence/real-lean/real-extension-proof-output.txt
             experiments/continuous-observation-equivalence/real-lean/real-network-soundness.txt
             experiments/continuous-observation-equivalence/real-lean/real-atlas-soundness.txt
+            experiments/continuous-observation-equivalence/real-lean/real-piecewise-network-soundness.txt
             experiments/continuous-observation-equivalence/real-lean/invalid-real-extension.txt
           if-no-files-found: error
