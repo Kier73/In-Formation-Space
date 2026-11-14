@@ -1,0 +1,242 @@
+name: CAG-004 topology-neutral internal and remote E-CPU realization
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/convergent-ground-fabric/cag004/**'
+      - '.github/workflows/cag004-topology-neutral.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/convergent-ground-fabric/cag004/**'
+      - '.github/workflows/cag004-topology-neutral.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Ed25519 contract checker
+        run: python -m pip install "cryptography>=43,<47"
+      - name: Validate signed intention, independent oracle and resource-forgery controls
+        run: |
+          python -m unittest discover -s experiments/convergent-ground-fabric/cag004 -p 'test_contract.py' -v
+          python -m py_compile experiments/convergent-ground-fabric/cag004/contract.py experiments/convergent-ground-fabric/cag004/hosts.py
+
+  intent_host:
+    needs: tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install signature primitive
+        run: python -m pip install "cryptography>=43,<47"
+      - name: Create bounded intention with ephemeral signing key
+        run: |
+          python experiments/convergent-ground-fabric/cag004/contract.py issue --directory evidence/cag004
+      - name: Attest source intention on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/signed-intent.json
+      - name: Attest distinct trust bootstrap on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/issuer-trust.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: |
+            evidence/cag004/signed-intent.json
+            evidence/cag004/issuer-trust.json
+          if-no-files-found: error
+          retention-days: 90
+
+  internal_loci_host:
+    needs: [tests, intent_host]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout exact E-CPU PR 120 SHN-001 experimental implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3a81f1c386b1fc223cc0aec354c099c8c1f717a5
+          path: external/E-CPU-SHN
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install real E-CPU experimental SHN implementation and signature checker
+        run: |
+          python -m pip install "cryptography>=43,<47"
+          python -m pip install -e external/E-CPU-SHN
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - name: Verify exact workflow-scope source attestation on main
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Observe exactly one interpreter, three virtual hosts and restart at each handoff
+        run: |
+          python experiments/convergent-ground-fabric/cag004/hosts.py internal --directory evidence/cag004
+      - name: Attest exact internal host report on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/internal-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cag004-internal-observer-report
+          path: evidence/cag004/internal-report.json
+          retention-days: 90
+          if-no-files-found: error
+
+  receiver_host:
+    needs: [tests, intent_host]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out pinned independently authorized E-CPU main runtime
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU-Receiver
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install receiver-owned E-CPU and signature checker
+        run: |
+          python -m pip install "cryptography>=43,<47"
+          python -m pip install -e external/E-CPU-Receiver
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - name: Verify exact workflow-scope source attestation on main
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Independently run receiver-local mathematical operator under E-CPU Hypervisor
+        run: |
+          python experiments/convergent-ground-fabric/cag004/hosts.py receiver --directory evidence/cag004
+      - name: Attest exact separate receiver report on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/receiver-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cag004-receiver-observer-report
+          path: evidence/cag004/receiver-report.json
+          retention-days: 90
+          if-no-files-found: error
+
+  verifier_host:
+    needs: [tests, intent_host, internal_loci_host, receiver_host]
+    if: needs.tests.result == 'success' && needs.intent_host.result == 'success' && needs.internal_loci_host.result == 'success' && needs.receiver_host.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pure independent verifier dependencies, not E-CPU runtime
+        run: python -m pip install "cryptography>=43,<47"
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-internal-observer-report
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-receiver-observer-report
+          path: evidence/cag004
+      - name: Verify workflow-attested source, trust and two host reports on main
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json internal-report.json receiver-report.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Independently check common intention, three observer topologies and resource truthfulness
+        run: |
+          python experiments/convergent-ground-fabric/cag004/contract.py verify --directory evidence/cag004
+      - name: Attest independent topology audit on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/auditor-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cag004-independent-topology-audit
+          path: evidence/cag004/auditor-report.json
+          retention-days: 90
+          if-no-files-found: error
