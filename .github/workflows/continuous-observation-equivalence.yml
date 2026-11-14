@@ -257,6 +257,29 @@ jobs:
             cat lean-json-byte-proof-output.txt
             exit 1
           fi
+      - name: Verify pure Lean SHA-256 against five standard reference vectors
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean --run COE014Vectors.lean | tee sha256-reference-vectors.txt
+          for name in empty abc fox multi thousand; do
+            grep -Fq "SHA-256 ${name}: PASS" sha256-reference-vectors.txt
+          done
+      - name: Generate raw-network hash and adversarial mutation replay
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python emit_lean_hash_replay.py received-certificates lean/GeneratedHashReplay.lean
+      - name: Independently reconstruct pinned SHA-256 on five original networks
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean -o .lake/build/lib/lean/GeneratedJSONProofs.olean GeneratedJSONProofs.lean > lean-json-olean-output.txt
+          lake env lean --run GeneratedHashReplay.lean | tee sha256-pinned-network-replay.txt
+          for name in identity relu_identity zero triangular_bump rescaled_bump; do
+            grep -Fq "COE-014 ${name}: original network SHA-256 and pin PASS" sha256-pinned-network-replay.txt
+          done
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' sha256-pinned-network-replay.txt; then
+            cat sha256-pinned-network-replay.txt
+            exit 1
+          fi
       - name: Require kernel rejection of malformed duplicate-key JSON proof
         working-directory: experiments/continuous-observation-equivalence/lean
         run: |
@@ -311,6 +334,10 @@ jobs:
             experiments/continuous-observation-equivalence/lean/lean-json-replay-manifest.json
             experiments/continuous-observation-equivalence/lean/GeneratedJSONProofs.lean
             experiments/continuous-observation-equivalence/lean/lean-json-byte-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/sha256-reference-vectors.txt
+            experiments/continuous-observation-equivalence/lean/GeneratedHashReplay.lean
+            experiments/continuous-observation-equivalence/lean/lean-json-olean-output.txt
+            experiments/continuous-observation-equivalence/lean/sha256-pinned-network-replay.txt
             experiments/continuous-observation-equivalence/lean/invalid-json-byte-proof.txt
             experiments/continuous-observation-equivalence/lean/lean-wire-olean-output.txt
             experiments/continuous-observation-equivalence/lean/invalid-wire-token.txt
