@@ -5,12 +5,14 @@ on:
     paths:
       - 'experiments/convergent-ground-fabric/cag004/**'
       - 'experiments/cross-ground-continuity/gci001/**'
+      - 'experiments/cross-ground-continuity/gci002/**'
       - '.github/workflows/cag004-topology-neutral.yml'
   push:
     branches: [main]
     paths:
       - 'experiments/convergent-ground-fabric/cag004/**'
       - 'experiments/cross-ground-continuity/gci001/**'
+      - 'experiments/cross-ground-continuity/gci002/**'
       - '.github/workflows/cag004-topology-neutral.yml'
   workflow_dispatch:
 
@@ -36,6 +38,10 @@ jobs:
         run: |
           python -m unittest discover -s experiments/cross-ground-continuity/gci001 -p 'test_continuity.py' -v
           python -m py_compile experiments/cross-ground-continuity/gci001/continuity.py experiments/cross-ground-continuity/gci001/vgi_host.py
+      - name: Exercise GCI-002 orbit-source and observer-refusal adversarial controls
+        run: |
+          python -m unittest discover -s experiments/cross-ground-continuity/gci002 -p 'test_contract.py' -v
+          python -m py_compile experiments/cross-ground-continuity/gci002/contract.py experiments/cross-ground-continuity/gci002/ecpu_orbit_probe.py experiments/cross-ground-continuity/gci002/vgi_closed_orbit.py
 
   intent_host:
     needs: tests
@@ -363,5 +369,193 @@ jobs:
         with:
           name: gci001-cross-ground-audit
           path: evidence/cag004/continuity-audit.json
+          if-no-files-found: error
+          retention-days: 90
+
+  ecpu_orbit_probe_host:
+    needs: [tests, intent_host]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out independently pinned E-CPU law navigator
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU-OrbitProbe
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install actual E-CPU module and signature checker
+        run: |
+          python -m pip install "cryptography>=43,<47"
+          python -m pip install -e external/E-CPU-OrbitProbe
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - name: Verify original workflow-attested source and trust on main
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Calculate eight actual E-CPU affine orbit observations
+        run: |
+          python experiments/cross-ground-continuity/gci002/ecpu_orbit_probe.py --directory evidence/cag004
+      - name: Attest eight-edge E-CPU observed report on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/orbit-probe.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gci002-ecpu-eight-edge-orbit-probe
+          path: evidence/cag004/orbit-probe.json
+          if-no-files-found: error
+          retention-days: 90
+
+  vgi_certified_ground_host:
+    needs: [tests, intent_host, ecpu_orbit_probe_host]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out exact independent VGI transition and affine certificate runtime
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/VGI
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install real VGI and signed-intent checker
+        run: |
+          python -m pip install "cryptography>=43,<47"
+          python -m pip install -e external/VGI/virtual_ground_interpreter
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-ecpu-eight-edge-orbit-probe
+          path: evidence/cag004
+      - name: Check source key and eight E-CPU edge report attestations on main
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json orbit-probe.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Admit explicit source evidence, fail closed on missing edge, certify complete VGI orbit
+        run: |
+          python experiments/cross-ground-continuity/gci002/vgi_closed_orbit.py --directory evidence/cag004
+      - name: Attest actual evidence-admitted VGI closed-orbit certificate on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/closed-orbit-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gci002-vgi-closed-orbit-certificate
+          path: evidence/cag004/closed-orbit-report.json
+          if-no-files-found: error
+          retention-days: 90
+
+  gci002_independent_verifier:
+    needs: [continuity_verifier, ecpu_orbit_probe_host, vgi_certified_ground_host]
+    if: needs.continuity_verifier.result == 'success' && needs.ecpu_orbit_probe_host.result == 'success' && needs.vgi_certified_ground_host.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install only signature verifier, NOT E-CPU or VGI
+        run: python -m pip install "cryptography>=43,<47"
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-internal-observer-report
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-receiver-observer-report
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci001-vgi-ground-report
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-ecpu-eight-edge-orbit-probe
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-vgi-closed-orbit-certificate
+          path: evidence/cag004
+      - name: Check source, both E-CPU paths and both VGI reports for main-workflow attestations
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json internal-report.json receiver-report.json vgi-report.json orbit-probe.json closed-orbit-report.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Reconstruct all CAG-004, GCI-001, GCI-002 source and certificate claims without source runtimes
+        run: |
+          python experiments/cross-ground-continuity/gci002/contract.py verify --directory evidence/cag004
+      - name: Attest independent eight-edge closure and observer refusal on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/gci002-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gci002-independent-observer-ground-audit
+          path: evidence/cag004/gci002-audit.json
           if-no-files-found: error
           retention-days: 90

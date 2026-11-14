@@ -79,7 +79,7 @@ def run(directory: Path) -> dict:
     for row in source["observations"][:-1]:
         short_ledger = short_ledger.finalize(f"r{row['state']}", c.ACTION)
     partial = make_ground(short_ledger, context, source["report_digest"])
-    partial_policy = OrbitPolicy.derive(partial)
+    partial_policy = OrbitPolicy.from_mapping(partial, {s: c.ACTION for s in partial.states})
     partial_orbit = OrbitNavigator.compile(
         partial, partial_policy,
         start_state="r7", start_time=OrbitTimeCoordinate(c.CLOCK, 0),
