@@ -73,7 +73,8 @@ def observer_host(source: Mapping[str,Any],reg: Mapping[str,Any],role: str,
     ctx=context(role)
     ctx.receive_causal_stamp(s)
     receipt=observer(reg,source['plan'],role,sensor=sensor,firmware=firmware,
-                     miss_slots=miss_slots,late_slots=late_slots)
+                     miss_slots=miss_slots,late_slots=late_slots,
+                     defer_source_mac_to_verifier='S' not in reg.get('keys',{}))
     stamp=ctx.emit_causal_stamp()
     binding=sign(reg,role,'temporal_binding',{'source_seal':source['calibration']['source']['seal']['digest'],
         'certificate_digest':source['certificate']['digest'],
