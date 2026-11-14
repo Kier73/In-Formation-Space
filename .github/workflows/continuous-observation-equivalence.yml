@@ -792,3 +792,16 @@ jobs:
             receiver-a/receiver-a.json
             receiver-b/receiver-b.json
           if-no-files-found: error
+
+  coe018-authority-unit:
+    # Fast exact-head feedback, independent of the long Lean proving chain.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Go authority journal and adversarial independence/replay matrix
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: go test -count=1 -v ./history ./cmd/history-demo ./cmd/history-verify
