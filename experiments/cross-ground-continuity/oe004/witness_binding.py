@@ -25,9 +25,9 @@ sys.path.insert(0, str(ROOT / "bridges" / "observation-equivalence"))
 sys.path.insert(0, str(ROOT / "experiments" / "cross-ground-continuity" / "gci004"))
 
 from costed_navigation import CostedDistinctionNavigator
-from witness_realization import build_plan, verify_plan
 
 SCHEMA = "in-formation.oe004-authenticated-observation-witness/0.1"
+PLAN_SCHEMA = "in-formation.oe004-symbolic-parity-plan/0.1"
 SCOPE = (
     "GCI-004 real E-CPU loopback mTLS receiver process, ephemeral single-run "
     "test-CA and leaf-key ECDSA receipt, independent CI-job source-and-private-"
@@ -45,19 +45,24 @@ def digest(value: Any) -> str:
     return hashlib.sha256(canonical(value)).hexdigest()
 
 
-def plan_parity_distinction(candidates: list[int], policy_digest: str) -> dict[str, Any]:
-    """Use OE-003's existing model/policy-pinned minimum-cost witness checker.
-
-    The given candidate states must be drawn from a separately verified Ground
-    and observation fiber. There is no action word: the requested parity read
-    directly distinguishes one even from one odd *candidate*. Other candidates
-    of the same parity remain unresolved.
-    """
+def _check_candidates(candidates: list[int]) -> list[int]:
     if (not isinstance(candidates, list) or not candidates
         or any(type(x) is not int or x not in range(8) for x in candidates)
         or len(set(candidates)) != len(candidates)
         or candidates != sorted(candidates)):
         raise ValueError("candidates must be sorted, distinct Z/8Z integers")
+    return candidates
+
+
+def plan_parity_distinction(candidates: list[int], policy_digest: str) -> dict[str, Any]:
+    """Compute an OE-001/002 witness with a **symbolic**, not nanosecond, cost.
+
+    The candidate set must be sourced from the independently validated GCI-003
+    Ground. No actions are executed by this model-relative witness plan.
+    Its cost is exactly GCI-003's declared parity-feature cost (one symbolic
+    unit); actual GCI-004 network nanoseconds remain a separate observable.
+    """
+    _check_candidates(candidates)
     if type(policy_digest) is not str or not policy_digest:
         raise ValueError("source policy identity is required")
     even = next((s for s in candidates if s % 2 == 0), None)
@@ -70,24 +75,49 @@ def plan_parity_distinction(candidates: list[int], policy_digest: str) -> dict[s
         lambda state, test: int(state) % 2,
         lambda state, action: state,
     )
-    plan = build_plan(
-        nav, str(even), str(odd),
-        request_id="gci004-far-y-parity-hypothesis-witness",
-        source_policy_digest=policy_digest,
-        action_costs=(), test_costs=(1,),
+    selected = nav.plan_min_cost(
+        str(even), str(odd), action_costs=(), test_costs=(1,)
     )
-    verify_plan(
-        plan, expected_model_digest=plan["model_digest"],
-        expected_source_policy_digest=policy_digest,
-    )
-    if (plan["selected"]["actions"] != [] or plan["selected"]["test"] != "parity"
-        or plan["selected"]["expected"]["left"]["value"] != 0
-        or plan["selected"]["expected"]["right"]["value"] != 1):
-        raise ValueError("unexpected witness planner result")
-    return plan
+    if (selected.witness.status != "distinguished"
+        or selected.witness.actions != ()
+        or selected.witness.distinguishing_test != "parity"
+        or selected.witness.left_observation != 0
+        or selected.witness.right_observation != 1
+        or selected.total_cost != 1):
+        raise ValueError("unexpected exact parity witness result")
+    model = {
+        "states": list(states),
+        "actions": [],
+        "tests": ["parity"],
+        "outputs": [[int(state) % 2] for state in states],
+        "transitions": [[] for _ in states],
+    }
+    core = {
+        "schema": PLAN_SCHEMA,
+        "source_policy_digest": policy_digest,
+        "request_id": "gci004-far-y-parity-hypothesis-witness",
+        "model": model,
+        "model_digest": digest(model),
+        "initial_states": {"left": str(even), "right": str(odd)},
+        "selected": {
+            "actions": [],
+            "test": "parity",
+            "expected": {
+                "left": {"state": str(even), "value": 0},
+                "right": {"state": str(odd), "value": 1},
+            },
+            "symbolic_cost": {
+                "unit": "gci003-declared-feature-cost-units",
+                "amount": 1,
+            },
+        },
+        "status": "planned-not-executed",
+    }
+    return {**core, "plan_digest": digest(core)}
 
 
 def filter_parity_candidates(candidates: list[int], reading: int) -> tuple[list[int], list[int]]:
+    _check_candidates(candidates)
     if type(reading) is not int or reading not in (0, 1):
         raise ValueError("signed parity reading must be exactly 0 or 1")
     matching = [s for s in candidates if s % 2 == reading]
