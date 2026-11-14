@@ -1,4 +1,4 @@
-"""COE-012: transport original certificate *string tokens* into Lean.
+"""COE-012: transport exact source ASCII token bytes into Lean.
 
 No numeric token is parsed into a Python Fraction or normalized here.
 Lean's separate COE012Wire decoder owns exact rational parsing, sentinel
@@ -23,10 +23,14 @@ from emit_lean_certificates import (
 
 
 def literal(value: Any) -> str:
-    """Emit a literal String, *not* any rational or Lean executable code."""
-    require(type(value) is str and len(value) <= 128, "invalid source token")
-    # Only quote and escape; do not interpret token values.
-    return json.dumps(value, ensure_ascii=True)
+    """Transport original token ASCII byte codes, with NO numeric parsing.
+
+    ASCII-to-Nat structure conversion remains in the Python envelope trust
+    boundary. Actual numeric interpretation is wholly Lean kernel reducible.
+    """
+    require(type(value) is str and len(value) <= 128 and value.isascii(),
+            "invalid non-ASCII source token")
+    return "[" + ", ".join(str(code) for code in value.encode("ascii")) + "]"
 
 
 def wire_affine(raw: Any) -> str:
