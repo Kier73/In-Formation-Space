@@ -1,7 +1,8 @@
 """Shortest observable distinctions in a supplied finite deterministic Ground.
 
 Observation equivalence is relative to the *declared* states, actions and tests.
-No action is executed on an external host; transitions are model descriptions.
+The navigator calls user-supplied model callbacks locally; they must be pure,
+deterministic and side-effect-free. It does not initiate remote host operations.
 Unknown/invalid/incomplete models fail closed rather than yielding equivalence.
 """
 
