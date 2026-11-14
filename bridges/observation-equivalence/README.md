@@ -209,3 +209,53 @@ intention* that exposes a necessary distinction before imposing a Ground
 translation or host change. Actual execution, authority, provenance,
 revocation, observation costs, and incomplete/non-deterministic models require
 other contracts; neither a witness nor equality here grants them.
+
+
+### Cost-aware observation navigation
+
+[`costed_navigation.py`](costed_navigation.py) adds a second planning
+objective on the **same completely supplied deterministic model**:
+minimize the sum of the costs of intervening with actions along an action
+word **and the cost of one terminal differentiating observation test**.
+
+Caller-supplied `action_costs` and `test_costs` must be ordered
+nonnegative Python integers aligned with declared actions and tests.
+Costs are **assumptions**, not automatically measured elapsed time, host
+authority, energy, money, risk, or trustworthy operational metadata.
+Intermediate observations are neither performed nor charged. In
+particular, an action can modify the hypothetical state: this is an
+**active intervention plan**, not a passive observation of unchanged
+states.
+
+The costed navigator runs a reverse multi-source Dijkstra search over
+unordered pairs. Each already-distinguishable pair is a seed whose
+distance equals the cheapest differentiating test. Each reverse action
+edge carries its declared cost, and the distance tie break prefers
+fewer actions. A greedy descent in declared action order reconstructs
+the lexicographically first minimum-cost/minimum-length action word;
+terminal test ties use declared test order. Zero-cost cycles are safe:
+the secondary strictly-decreasing action count prevents infinite
+reconstructions. For a finite pair graph with \(P=n(n-1)/2\), \(m\)
+actions and \(k\) tests, a single cost policy is planned in
+\(O(Pk + Pm\log P)\) time and \(O(Pm)\) additional space
+(assuming unit-cost integer arithmetic), and returns either a finite
+witness or model-relative equivalence. A small `max_pairs` budget
+rejects a model before an equivalence result is produced.
+
+**Counterexample to length-as-cost:** given states `a` and `b`,
+an `expensive` action (cost 10) distinguishes them in one step, while
+two `cheap` actions (cost 2 each) distinguish them in two steps.
+Both require one final test costing 1. Shortest-action navigation
+returns `('expensive',)` with total cost 11; cost-aware navigation
+returns `('cheap', 'cheap')` with total cost 5. This is an exact
+modeled cost comparison, not a claim of measured speedup.
+
+The tests include 80 seeded small random transition models, independently
+checking the selected action word and test against exhaustive enumeration,
+plus zero-cost cycles, cheapest-test selection and invalid-cost rejection.
+Run with the same `unittest discover` command above.
+
+Future binding of a cost policy to E-CPU operation spans or VGI observation
+receipts must separately authenticate its provenance, units, validity epoch,
+execution semantics, and source/receiver context. An optimized *plan*
+cannot by itself authorize or prove an external host execution.
