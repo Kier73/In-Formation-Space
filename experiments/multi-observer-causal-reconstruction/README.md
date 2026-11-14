@@ -115,6 +115,8 @@ A2 and B1 being concurrent means neither recorded vector stamp is componentwise 
 
 ## MOR-002: causal reconstruction over the Tailscale E-CPU channel
 
+**IHP-008 activation guard:** PR and push events run the MOR-002 test job, but all four live participant jobs now require an explicit manual workflow dispatch from main. The separate OIDC/tag prerequisites and the independently verified mTLS/causal evidence gates are unchanged. See [federation readiness](../tailscale-federation-readiness/README.md).
+
 **Status:** merged to `main` as `aa5cc63c6936ce1ac69d8c1c76ab19e007e8d257`; PR CI passed. The first main-branch run completed its tests and attested the independent C1 observer, but both peer jobs failed closed because the dedicated MOR-002 Tailscale secrets were absent. No MOR-002 tailnet join or E-CPU socket exchange has yet been observed.  
 **Workflow:** [MOR-002 Tailscale causal reconstruction](../../.github/workflows/mor002-tailscale-causal-reconstruction.yml)  
 **Transport implementation:** [IHP-006 direct mTLS operation path](../../bridges/observation-path/TAILSCALE-MTLS-OPERATION-PATH-IHP-006.md)  
