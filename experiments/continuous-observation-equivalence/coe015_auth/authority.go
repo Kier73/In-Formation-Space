@@ -63,7 +63,137 @@ const (
     Domain = "IFS-COE015-ED25519-SOURCE-MANIFEST-V1\n"
     maxFile = 8 << 20
 )
+var keyIDPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{1,63}// Package authority verifies Ed25519-signed source manifests against
+// receiver-controlled trust policy and independently checks certificate bytes.
+//
+// The Ed25519 implementation is the Go standard library, not a Lean proof.
+// No signing key or trusted authority is learned from the untrusted manifest.
+// This package is a separate provenance gate, not neural Ground admission.
+package authority
+
+import (
+    "bytes"
+    "crypto/ed25519"
+    "crypto/sha256"
+    "encoding/base64"
+    "encoding/hex"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "io"
+    "os"
+    "path/filepath"
+    "regexp"
+    "sort"
+    "strings"
+)
+
+const (
+    manifestSchema = "ifs.coe015.source-manifest/v1"
+    signedSchema = "ifs.coe015.signed-source-manifest/v1"
+    policySchema = "ifs.coe015.trust-policy/v1"
+    Domain = "IFS-COE015-ED25519-SOURCE-MANIFEST-V1\n"
+    maxFile = 8 << 20
+)
 var keyIDPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{1,63}$`)
+var modelPattern = regexp.MustCompile(`^[a-z][a-z0-9_]{1,63}// Package authority verifies Ed25519-signed source manifests against
+// receiver-controlled trust policy and independently checks certificate bytes.
+//
+// The Ed25519 implementation is the Go standard library, not a Lean proof.
+// No signing key or trusted authority is learned from the untrusted manifest.
+// This package is a separate provenance gate, not neural Ground admission.
+package authority
+
+import (
+    "bytes"
+    "crypto/ed25519"
+    "crypto/sha256"
+    "encoding/base64"
+    "encoding/hex"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "io"
+    "os"
+    "path/filepath"
+    "regexp"
+    "sort"
+    "strings"
+)
+
+const (
+    manifestSchema = "ifs.coe015.source-manifest/v1"
+    signedSchema = "ifs.coe015.signed-source-manifest/v1"
+    policySchema = "ifs.coe015.trust-policy/v1"
+    Domain = "IFS-COE015-ED25519-SOURCE-MANIFEST-V1\n"
+    maxFile = 8 << 20
+)
+)
+var modelPattern = regexp.MustCompile(`^[a-z][a-z0-9_]{1,63}// Package authority verifies Ed25519-signed source manifests against
+// receiver-controlled trust policy and independently checks certificate bytes.
+//
+// The Ed25519 implementation is the Go standard library, not a Lean proof.
+// No signing key or trusted authority is learned from the untrusted manifest.
+// This package is a separate provenance gate, not neural Ground admission.
+package authority
+
+import (
+    "bytes"
+    "crypto/ed25519"
+    "crypto/sha256"
+    "encoding/base64"
+    "encoding/hex"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "io"
+    "os"
+    "path/filepath"
+    "regexp"
+    "sort"
+    "strings"
+)
+
+const (
+    manifestSchema = "ifs.coe015.source-manifest/v1"
+    signedSchema = "ifs.coe015.signed-source-manifest/v1"
+    policySchema = "ifs.coe015.trust-policy/v1"
+    Domain = "IFS-COE015-ED25519-SOURCE-MANIFEST-V1\n"
+    maxFile = 8 << 20
+)
+var keyIDPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{1,63}$`)
+var modelPattern = regexp.MustCompile(`^[a-z][a-z0-9_]{1,63}// Package authority verifies Ed25519-signed source manifests against
+// receiver-controlled trust policy and independently checks certificate bytes.
+//
+// The Ed25519 implementation is the Go standard library, not a Lean proof.
+// No signing key or trusted authority is learned from the untrusted manifest.
+// This package is a separate provenance gate, not neural Ground admission.
+package authority
+
+import (
+    "bytes"
+    "crypto/ed25519"
+    "crypto/sha256"
+    "encoding/base64"
+    "encoding/hex"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "io"
+    "os"
+    "path/filepath"
+    "regexp"
+    "sort"
+    "strings"
+)
+
+const (
+    manifestSchema = "ifs.coe015.source-manifest/v1"
+    signedSchema = "ifs.coe015.signed-source-manifest/v1"
+    policySchema = "ifs.coe015.trust-policy/v1"
+    Domain = "IFS-COE015-ED25519-SOURCE-MANIFEST-V1\n"
+    maxFile = 8 << 20
+)
 )
 var digestPattern = regexp.MustCompile(`^[0-9a-f]{64}$`)
 
