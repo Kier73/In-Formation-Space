@@ -158,13 +158,14 @@ def verify_acknowledgements(logs: Mapping[str, Any], source: Mapping[str, Any],
 
 def reconstruct(source: Mapping[str, Any], logs: Mapping[str, Any],
                 acknowledgements: Mapping[str, Any], reg: Mapping[str, Any],
-                deliveries: Sequence[Mapping[str, Any]] = ()) -> dict[str, Any]:
+                deliveries: Sequence[Mapping[str, Any]] = (),
+                *, controller_digest: str | None = None) -> dict[str, Any]:
     """Source-vs-observer disagreement is evidence of disagreement, not causation.
 
     No count is emitted for a corrupt/incomplete archive or conflicting readouts.
     An agreed count does not establish that source and observers saw everything.
     """
-    counts = verify_source(source, reg)
+    counts = verify_source(source, reg, controller_digest=controller_digest)
     if not isinstance(logs, Mapping) or set(logs) != set(ACTORS):
         raise CounterError("both observer logs required")
     verified = {a: verify_log(a, logs[a], reg) for a in ACTORS}
