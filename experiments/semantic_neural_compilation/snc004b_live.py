@@ -236,6 +236,7 @@ def _wait_ack(ch: ReliableChannel, seq: int, deadline: float) -> None:
 
 def send(*, address: str, port: int, overlay: bool,
          own_cert: Path, own_key: Path, trusted_server_cert: Path,
+         trust_root: Path | None = None,
          capsule: bytes, model: str, coordinate: str, request_id: str,
          output: Path, nonce: str | None = None) -> dict:
     address = addressing(address, overlay=overlay)
@@ -245,7 +246,7 @@ def send(*, address: str, port: int, overlay: bool,
                          request_id=request_id, nonce=nonce)
     tcp = connect_mutual_tls(
         address, port, SENDER, RECEIVER,
-        tls_context(trusted_server_cert, own_cert, own_key, server=False),
+        tls_context(trust_root or trusted_server_cert, own_cert, own_key, server=False),
         server_hostname=RECEIVER, timeout=8.0, max_frame_size=1 << 20,
     )
     try:
@@ -305,10 +306,11 @@ def send(*, address: str, port: int, overlay: bool,
 
 def serve(*, listener: Any, overlay: bool,
           own_cert: Path, own_key: Path, trusted_client_cert: Path,
+          trust_root: Path | None = None,
           database: Path, policy: Path, output: Path) -> dict:
     tcp = accept_mutual_tls(
         listener, RECEIVER, SENDER,
-        tls_context(trusted_client_cert, own_cert, own_key, server=True),
+        tls_context(trust_root or trusted_client_cert, own_cert, own_key, server=True),
         expected_peer_dns=SENDER, max_frame_size=1 << 20,
     )
     decoder = CapsuleDecoder()
@@ -386,6 +388,7 @@ def main() -> None:
         command.add_argument("--cert", type=Path, required=True)
         command.add_argument("--key", type=Path, required=True)
         command.add_argument("--peer-cert", type=Path, required=True)
+        command.add_argument("--trust-root", type=Path)
     args = parser.parse_args()
     try:
         if args.command == "serve":
@@ -402,7 +405,7 @@ def main() -> None:
                     listener=listener, overlay=args.overlay,
                     own_cert=args.cert, own_key=args.key,
                     trusted_client_cert=args.peer_cert,
-                    database=args.database, policy=args.policy, output=args.output)
+                    trust_root=args.trust_root, database=args.database, policy=args.policy, output=args.output)
                 print(json.dumps({"accepted": result["accepted"],
                                   "nonce": result["nonce"]}), flush=True)
             finally:
@@ -411,7 +414,7 @@ def main() -> None:
             result = send(
                 address=args.connect, port=args.port,
                 overlay=args.overlay, own_cert=args.cert, own_key=args.key,
-                trusted_server_cert=args.peer_cert,
+                trusted_server_cert=args.peer_cert, trust_root=args.trust_root,
                 capsule=args.capsule.read_bytes(),
                 model=args.model, coordinate=args.coordinate,
                 request_id=args.request_id, output=args.output,
