@@ -229,7 +229,7 @@ def verify(internal: Mapping[str, Any], receiver: Mapping[str, Any],
             require(len(hits) == 1, "missing or duplicate interior topology observation")
             obs = hits[0]
             require(set(obs) == {
-                "job_id", "requested_coordinate", "observed_value",
+                "schema", "job_id", "requested_coordinate", "observed_value",
                 "physical_boundary_ports", "logical_observer_hosts",
                 "internal_virtual_interfaces", "internal_link_count",
                 "interpreter_quanta", "internal_payload_bytes", "external_payload_bytes",
