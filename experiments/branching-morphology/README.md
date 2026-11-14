@@ -124,3 +124,17 @@ The next independent test confirms the predicted depth-six candidate is a **genu
 The [proof and boundary conditions](EXACT-DEPTH6-QUINTIC.md), [exact quintic certificate](depth6_phase.py), and [independent tests](test_depth6_phase.py) check **2,483 algebraic interval containment inequalities**, **73 strict corner conditions**, and all six exact boundary hulls. A direct full-endpoint certificate would require 1,140,698 containment inequalities. The local standard-library test suite passes **49/49**.
 
 The exact inherited-hull identities also extend BMO-007's universal stabilization theorem: for **every** later depth `n≥6` and every `θ≥17.917530204°` (with θ<90°), `H_n(θ)=3^(n−5)H_5(θ)`. A strict exterior-tip witness proves the new angle remains a geometric transition for all future depths. This still does not prove an exact n-transition count at arbitrary depth.
+
+## BMO-009: A nested branch tip is exposed at every finite depth
+
+Beyond the exact transition classifications through depth six, a new **all-depth theorem** identifies an exposed hull vertex at *every finite expansion depth*. Let `A_n` be the nested left branch tip at segment endpoint index `(3·5^n+1)/4`. For turning angle `θ` in radians,
+
+```text
+0 < θ² <= 1 / (4 n³ 3^n)
+```
+
+guarantees that `O→A_n` is a strict supporting edge of the complete convex hull: every other endpoint `p` satisfies `cross(O,A_n,p) ≥ 3^n θ/16 > 0`.
+
+The proof uses an integer-moment invariant `S=T−1−2K≥0`, uniquely identifies its extremal nested-tip equality cases at every depth, proves the sharp first-order support gap `3^(n−1)`, and turns that into a real positive-angle guarantee with uniform Taylor bounds. It does **not** prove exposure all the way to the nested-tip root predicted by BMO-007, nor the number of transitions at arbitrary depth.
+
+See the [full mathematical argument](ALL-DEPTH-TIP-EXPOSURE.md), [standalone certificate and moment generator](tip_exposure.py), and [independent tests](test_tip_exposure.py). Run `python experiments/branching-morphology/tip_exposure.py` for a finite JSON audit alongside the universal induction.
