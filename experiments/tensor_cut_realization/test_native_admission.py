@@ -85,5 +85,17 @@ class NativeAdmissionTests(unittest.TestCase):
                                     self.root / "mismatched-result")
 
 
+    def test_complete_four_cut_native_execution_and_dag_reference(self):
+        from .run_native_four import execute_four
+        outcome = execute_four(self.prepared, self.root / "four-native",
+                               self.root / "four-dag-report.json")
+        self.assertEqual(outcome["status"], "native-hypervisor-and-numeric-reference-passed")
+        self.assertEqual(len(outcome["decisions"]), 4)
+        self.assertTrue(all(x["native_replay_confirmed"] for x in outcome["decisions"]))
+        self.assertEqual(outcome["separate_receiver_ground_count"], 4)
+        self.assertEqual(outcome["numerical_verification"]["status"], "passed")
+        self.assertFalse(outcome["network_transport_performed"])
+
+
 if __name__ == "__main__":
     unittest.main()
