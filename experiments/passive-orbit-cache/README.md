@@ -173,3 +173,11 @@ A further integration could treat an SNC exact neural capsule as one
 large object type and use CAG-001 packets to describe its provenance
 and placement. The receiver still must independently verify it
 under its own mathematical policy, as SNC-004A already requires.
+
+
+## Continued orbit experiments
+
+- [PON-002 — signed public-delivery navigation](PON-002.md) verifies bounded Ed25519 root-capability mechanics and exact all-predecessor reconstruction through GitHub raw and jsDelivr public HTTPS, while identifying their shared GitHub source origin.
+- [PON-003 — surviving-origin recovery](PON-003.md) separates two signed publication inventories and exact CIDv1/IPFS raw blocks from flat immutable bucket objects. Hosted tests kill a real origin process, reject substituted bytes, and preserve mathematical identity through a surviving host. An opt-in public R2 and IPFS read-only probe is installed but does not claim externally provisioned origin success until independently configured and observed.
+
+Keep *provider delivery*, *persisted origin storage*, *source/key authority*, and *observer mathematical realization* as separate evidence layers.
