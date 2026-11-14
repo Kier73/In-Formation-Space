@@ -1,0 +1,73 @@
+name: PNF-004 Ground model addressability
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/ground_model_addressability/**'
+      - 'experiments/procedural_neural_formation/formation.py'
+      - '.github/workflows/ground-model-addressability.yml'
+  pull_request:
+    paths:
+      - 'experiments/ground_model_addressability/**'
+      - 'experiments/procedural_neural_formation/formation.py'
+      - '.github/workflows/ground-model-addressability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  functional-recovery:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: '3.11'
+            pythonpath: 'external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+          - os: ubuntu-latest
+            python: '3.13'
+            pythonpath: 'external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+          - os: windows-latest
+            python: '3.13'
+            pythonpath: 'external/E-CPU;external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+    runs-on: '${{ matrix.os }}'
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/Virtual-Ground-Interpreter
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - run: python -m pip install numpy jsonschema
+      - name: Test Ground tasks, permissions, storage integrity and reconstruction
+        env:
+          PYTHONPATH: '${{ matrix.pythonpath }}'
+          OPENBLAS_NUM_THREADS: '1'
+        run: >-
+          python -m unittest experiments.ground_model_addressability.test_ground_model
+          experiments.procedural_neural_formation.test_formation -v
+      - name: Kill initial receiver and reconstruct under a different inference engine
+        env:
+          PYTHONPATH: '${{ matrix.pythonpath }}'
+          OPENBLAS_NUM_THREADS: '1'
+        run: >-
+          python -m experiments.ground_model_addressability.run_benchmark
+          --output pnf004-functional-recovery.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 'pnf004-${{ matrix.os }}-${{ matrix.python }}'
+          path: pnf004-functional-recovery.json
+          if-no-files-found: error

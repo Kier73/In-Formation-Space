@@ -1,0 +1,1279 @@
+{
+  "after": {
+    "benchmark": {
+      "baseline_candidate_attempts": 28,
+      "case_count": 16,
+      "cases": [
+        {
+          "baseline_candidate_attempts": 1,
+          "candidate_count": 2,
+          "family": "int",
+          "features": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "60c206babca777cb07e6c2792e83c105adf2bb5361f88e3691321dc3eb9d4ee4",
+          "id": "a1-c1-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -0.0007200241088867188,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 53,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 0,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 1,
+          "candidate_count": 2,
+          "family": "int",
+          "features": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "bdd0b445a1dbfeae8ebc7a641e81aa5399d7170515df5585fe230007591f05f5",
+          "id": "a1-c1-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -0.0007200241088867188,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 61,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 0,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 1,
+          "candidate_count": 2,
+          "family": "int",
+          "features": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "2f73eb176bdbfce099a2a4a4bce325cd88a560940afcb266b5da8f9c1fe50f84",
+          "id": "a1-c7-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -0.0007200241088867188,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 62,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 0,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 1,
+          "candidate_count": 2,
+          "family": "int",
+          "features": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "92fb6eb2daae58a2af19972cc826a7f928edb14deb50b2140ee1bb1e3c517507",
+          "id": "a1-c7-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -0.0007200241088867188,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 70,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 0,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              180,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "7c6a0efbd078f1b65777185d642e8e9bb837aba97804c3059af94057c63d9826",
+          "id": "a5-c1-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -185.4499387741089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 4,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              252,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "8d3575fe0add6167ba7fe2000a985249ead06b904f84508c54e2faf16f6f9956",
+          "id": "a5-c1-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -259.6296262741089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 7,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              129,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "dca09b2c7c8fce564ce8edd66b11c0bbf1a13e42695360b6606236385085febc",
+          "id": "a5-c7-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -132.9059934616089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 94,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              114,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "17575c596cfcb33f87bfcaa464eb3eecec7b9e8afaa072a6d785cb4da07fd117",
+          "id": "a5-c7-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -117.45189189910889,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 0,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              242,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "c0d77ab685cae04ca8bfc99432e85e3466575c865da11ab9ad97858acbb343c7",
+          "id": "a13-c1-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -249.3268918991089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 91,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              211,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "36e8441dbab32b5701bd6c7960261dec21093a7654c46131e94071f46f1b7b30",
+          "id": "a13-c1-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -217.3884153366089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 94,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              217,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "f1c6ef7120f006f163683180199edb39e72c485dab325dd53424792dc593e97b",
+          "id": "a13-c7-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -223.5700559616089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 24,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              215,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "7758b80864258eba2d7056cc4c5d49946c814490390e4000bc857a729ed75cbe",
+          "id": "a13-c7-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -221.5095090866089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 27,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              214,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "18a1a2cfeb294de38e927e6447c0038592502a33f5bec8fae37bc702eb66b3d5",
+          "id": "a21-c1-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -220.4792356491089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 0,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              187,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "d446007477a8aac1c47b25d10614b4e4ffb48ab882c8aa94a009a9803302324b",
+          "id": "a21-c1-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -192.6618528366089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 86,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              251,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "906807bb14a7b7a32ac0c7de3a972de89ef1b589f1013c4624e27fbe8e59473c",
+          "id": "a21-c7-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -258.5993528366089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 49,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              141,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "e519a23dbb24cddcfc9a6f81f79455823f9f37cd7230f079301e2cc280213620",
+          "id": "a21-c7-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -145.2692747116089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 38,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        }
+      ],
+      "elapsed_ns_local_including_baseline": 80913700,
+      "execution_ground_digest": "a06b0c0b700921a0e6649e4948802e82b0d207dbb6161828e9d7d57abb4849e8",
+      "inference_after_restart": "fresh inference; no cross-process exactly-once claim",
+      "inference_engine": "addressed-scalar",
+      "manifest_digest": "2ced3f3685d608ff4fcf57f056e84648dec4d8d9594dfe074853f78001d63f96",
+      "model_description_bytes": 1067,
+      "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+      "native_handler_calls": 16,
+      "operator_contract_digest": "5cc67d049674bc86a29fef021d77171896e541899ed0005172f80278c16a7671",
+      "parameter_coordinates": [
+        1000000000000,
+        1000000000001
+      ],
+      "parameter_spec_digest": "d240e97aa0ea71e9f8d82062dc4b96cfb0825ce3f1f450f87339f71783e2c249",
+      "persisted_dense_weight_payload_bytes": 0,
+      "ranked_candidate_attempts": 16,
+      "successful_ground_tasks": 16
+    },
+    "phase": "restore",
+    "pid": 5004
+  },
+  "before": {
+    "benchmark": {
+      "baseline_candidate_attempts": 28,
+      "case_count": 16,
+      "cases": [
+        {
+          "baseline_candidate_attempts": 1,
+          "candidate_count": 2,
+          "family": "int",
+          "features": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "60c206babca777cb07e6c2792e83c105adf2bb5361f88e3691321dc3eb9d4ee4",
+          "id": "a1-c1-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -0.0007200241088867188,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 53,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 0,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 1,
+          "candidate_count": 2,
+          "family": "int",
+          "features": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "bdd0b445a1dbfeae8ebc7a641e81aa5399d7170515df5585fe230007591f05f5",
+          "id": "a1-c1-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -0.0007200241088867188,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 61,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 0,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 1,
+          "candidate_count": 2,
+          "family": "int",
+          "features": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "2f73eb176bdbfce099a2a4a4bce325cd88a560940afcb266b5da8f9c1fe50f84",
+          "id": "a1-c7-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -0.0007200241088867188,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 62,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 0,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 1,
+          "candidate_count": 2,
+          "family": "int",
+          "features": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "92fb6eb2daae58a2af19972cc826a7f928edb14deb50b2140ee1bb1e3c517507",
+          "id": "a1-c7-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -0.0007200241088867188,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 70,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 0,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              180,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "7c6a0efbd078f1b65777185d642e8e9bb837aba97804c3059af94057c63d9826",
+          "id": "a5-c1-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -185.4499387741089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 4,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              252,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "8d3575fe0add6167ba7fe2000a985249ead06b904f84508c54e2faf16f6f9956",
+          "id": "a5-c1-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -259.6296262741089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 7,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              129,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "dca09b2c7c8fce564ce8edd66b11c0bbf1a13e42695360b6606236385085febc",
+          "id": "a5-c7-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -132.9059934616089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 94,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              114,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "17575c596cfcb33f87bfcaa464eb3eecec7b9e8afaa072a6d785cb4da07fd117",
+          "id": "a5-c7-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -117.45189189910889,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 0,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              242,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "c0d77ab685cae04ca8bfc99432e85e3466575c865da11ab9ad97858acbb343c7",
+          "id": "a13-c1-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -249.3268918991089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 91,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              211,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "36e8441dbab32b5701bd6c7960261dec21093a7654c46131e94071f46f1b7b30",
+          "id": "a13-c1-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -217.3884153366089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 94,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              217,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "f1c6ef7120f006f163683180199edb39e72c485dab325dd53424792dc593e97b",
+          "id": "a13-c7-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -223.5700559616089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 24,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              215,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "7758b80864258eba2d7056cc4c5d49946c814490390e4000bc857a729ed75cbe",
+          "id": "a13-c7-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -221.5095090866089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 27,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              214,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "18a1a2cfeb294de38e927e6447c0038592502a33f5bec8fae37bc702eb66b3d5",
+          "id": "a21-c1-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -220.4792356491089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 0,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              187,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "d446007477a8aac1c47b25d10614b4e4ffb48ab882c8aa94a009a9803302324b",
+          "id": "a21-c1-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -192.6618528366089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 86,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              251,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "906807bb14a7b7a32ac0c7de3a972de89ef1b589f1013c4624e27fbe8e59473c",
+          "id": "a21-c7-x3",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -258.5993528366089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 49,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        },
+        {
+          "baseline_candidate_attempts": 2,
+          "candidate_count": 2,
+          "family": "lcg",
+          "features": [
+            [
+              141,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "ground_revision": 1,
+          "ground_spec_digest": "e519a23dbb24cddcfc9a6f81f79455823f9f37cd7230f079301e2cc280213620",
+          "id": "a21-c7-x11",
+          "model_result": {
+            "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+            "parameter_value_digests": [
+              "3151e3c297e84b2e13831418bf50731c48b1c2de60263aff20feb0e59c6bd840",
+              "95c70155bf2f8aba29c1d276f884c6ce2c7b81cdbe53e6e694ee3f8ac92afa6e"
+            ],
+            "scores": [
+              -145.2692747116089,
+              -0.0014400482177734375
+            ]
+          },
+          "navigation_coordinate": 1000000000000,
+          "navigation_value": 38,
+          "ranked_candidate_attempts": 1,
+          "selected_index": 1,
+          "status": "admitted",
+          "training_observations": 8,
+          "verification_class": "witness_grounded",
+          "withheld_observations": 8
+        }
+      ],
+      "elapsed_ns_local_including_baseline": 81716300,
+      "execution_ground_digest": "b4bc0b8974bfc0fe14d1d62d175cd7f4a1b0dcde61a1928de6916b1a8dc2ca20",
+      "inference_after_restart": "fresh inference; no cross-process exactly-once claim",
+      "inference_engine": "dense-reference",
+      "manifest_digest": "2ced3f3685d608ff4fcf57f056e84648dec4d8d9594dfe074853f78001d63f96",
+      "model_description_bytes": 1067,
+      "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+      "native_handler_calls": 16,
+      "operator_contract_digest": "9be56d223b3b92e52fc8e1920658cd40642d2760c5500019fb0fbe478f429c57",
+      "parameter_coordinates": [
+        1000000000000,
+        1000000000001
+      ],
+      "parameter_spec_digest": "d240e97aa0ea71e9f8d82062dc4b96cfb0825ce3f1f450f87339f71783e2c249",
+      "persisted_dense_weight_payload_bytes": 0,
+      "ranked_candidate_attempts": 16,
+      "successful_ground_tasks": 16
+    },
+    "phase": "create",
+    "pid": 32348,
+    "policy": {
+      "checkpoint_sha256": "867a8c6173fefa2a16298d88234a7e485f211c8c57e362643ad943abe6df412f",
+      "manifest": {
+        "chunk_size": 4096,
+        "chunks": [
+          {
+            "byte_length": 1067,
+            "index": 0,
+            "page_digest": "4eacba8ea472cd892a37509f206fb5bee5fde6f7b7f29a5892b09f8eb5de7c68"
+          }
+        ],
+        "content_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+        "kind": "mailcpu.computational-object",
+        "manifest_digest": "2ced3f3685d608ff4fcf57f056e84648dec4d8d9594dfe074853f78001d63f96",
+        "media_type": "application/json",
+        "schema_version": 1,
+        "size_bytes": 1067
+      },
+      "manifest_digest": "2ced3f3685d608ff4fcf57f056e84648dec4d8d9594dfe074853f78001d63f96",
+      "model_digest": "7620b155ab8e8f741d8a9d38a148c6e35d6fdbc81639470e40fa8c99d9448b5c",
+      "next_generation": 2
+    }
+  },
+  "dense_model_training_performed": false,
+  "forced_stop_after_checkpoint": true,
+  "generalization_claimed": false,
+  "model_kind": "hand-designed addressable 2->2 ReLU->1 neural ranker",
+  "network_transfer_performed": false,
+  "same_physical_host": true,
+  "schema": "ifs.pnf004.functional-benchmark.v1",
+  "separate_processes": true,
+  "speedup_claimed": false,
+  "stable_fields": [
+    "cases",
+    "model_digest",
+    "manifest_digest",
+    "parameter_spec_digest",
+    "parameter_coordinates"
+  ],
+  "status": "passed"
+}
