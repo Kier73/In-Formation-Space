@@ -79,3 +79,9 @@ See [Exact 60° lattice certificate](EXACT-LATTICE-60.md), [source](lattice60.py
 A second exact follow-up classifies **every convex-hull vertex change** over angles 0° < θ < 90° at *expansion depth two*. The six-vertex hull loses one extreme point at exactly **60°** and another at **arccos(1/4) ≈ 75.5225°**, leaving four extremes. [The phase diagram and algebraic certificate](EXACT-ANGLE-REGIMES.md) demonstrate that no other convex-hull changes occur in that scope: **390 rational-polynomial half-plane checks** and **15 strict-corner checks** certify all three continuous angle intervals without numerical sampling.
 
 Run `python experiments/branching-morphology/angle_transitions.py` to regenerate the certificate. This does not classify internal segment crossings or higher expansion depths.
+
+## Depth-three geometric transitions: BMO-004
+
+The next self-directed investigation increases the grammar expansion depth from two to three. It finds **exactly three convex-hull transitions** on 0° < θ < 90°: a *new algebraic angle* `arccos((2+√46)/12) ≈ 42.9574°`, followed by the same two angles `60°` and `arccos(1/4)` identified at depth two. The hull changes from 7 to 6 to 5 to 4 vertices as θ increases.
+
+The [BMO-004 proof note](EXACT-DEPTH3-REGIMES.md), [exact-arithmetic certificate](depth3_phase.py), and [independent tests](test_depth3_phase.py) use **2,772 half-plane certificates**, **22 convexity checks** and exact arithmetic in `Q(√46)` to cover the full angle intervals. The result is about the outer convex hull, not all internal branch intersections or higher depths. Run `python experiments/branching-morphology/depth3_phase.py` to recreate the exact certificate.
