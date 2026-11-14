@@ -1,0 +1,23 @@
+{
+  "clamp_0_1": [
+    {"left": "-inf", "right": "0", "affines": [["0", "0"]]},
+    {"left": "0", "right": "1", "affines": [["1", "0"]]},
+    {"left": "1", "right": "+inf", "affines": [["0", "1"]]}
+  ],
+  "triangular_bump": [
+    {"left": "-inf", "right": "0", "affines": [["0", "0"]]},
+    {"left": "0", "right": "1/2", "affines": [["1", "0"]]},
+    {"left": "1/2", "right": "1", "affines": [["-1", "1"]]},
+    {"left": "1", "right": "+inf", "affines": [["0", "0"]]}
+  ],
+  "identity": [
+    {"left": "-inf", "right": "+inf", "affines": [["1", "0"]]}
+  ],
+  "constant": [
+    {"left": "-inf", "right": "+inf", "affines": [["0", "7/3"]]}
+  ],
+  "vector_x_abs": [
+    {"left": "-inf", "right": "0", "affines": [["1", "0"], ["-1", "0"]]},
+    {"left": "0", "right": "+inf", "affines": [["1", "0"], ["1", "0"]]}
+  ]
+}
