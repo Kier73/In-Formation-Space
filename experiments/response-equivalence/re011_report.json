@@ -1,0 +1,70 @@
+{
+  "experiment": "RE-011",
+  "model": "deterministic fault-injection fixture",
+  "regimes": {
+    "colluding_silence": {
+      "adversarial_miss_bound": null,
+      "conditional_95pct_one_sided_upper_miss": {
+        "A": 1.0,
+        "B": 1.0,
+        "joint": 1.0
+      },
+      "counts": {
+        "A_non_detection": 60,
+        "A_sham_false_positive": 0,
+        "A_unavailable": 0,
+        "B_non_detection": 60,
+        "B_sham_false_positive": 0,
+        "B_unavailable": 0,
+        "injected": 60,
+        "joint_non_detection": 60,
+        "sham": 20
+      },
+      "independence_between_observers_verified": false,
+      "physical_injections_verified": false
+    },
+    "common_mode_dropouts": {
+      "adversarial_miss_bound": null,
+      "conditional_95pct_one_sided_upper_miss": {
+        "A": 0.30380973,
+        "B": 0.30380973,
+        "joint": 0.30380973
+      },
+      "counts": {
+        "A_non_detection": 12,
+        "A_sham_false_positive": 0,
+        "A_unavailable": 0,
+        "B_non_detection": 12,
+        "B_sham_false_positive": 0,
+        "B_unavailable": 0,
+        "injected": 60,
+        "joint_non_detection": 12,
+        "sham": 20
+      },
+      "independence_between_observers_verified": false,
+      "physical_injections_verified": false
+    },
+    "complementary_dropouts": {
+      "adversarial_miss_bound": null,
+      "conditional_95pct_one_sided_upper_miss": {
+        "A": 0.30380973,
+        "B": 0.30380973,
+        "joint": 0.048702913
+      },
+      "counts": {
+        "A_non_detection": 12,
+        "A_sham_false_positive": 0,
+        "A_unavailable": 0,
+        "B_non_detection": 12,
+        "B_sham_false_positive": 0,
+        "B_unavailable": 0,
+        "injected": 60,
+        "joint_non_detection": 0,
+        "sham": 20
+      },
+      "independence_between_observers_verified": false,
+      "physical_injections_verified": false
+    }
+  },
+  "statistical_interpretation": "conditional IID-only numerical binomial inversion; fixture is not an IID sample"
+}
