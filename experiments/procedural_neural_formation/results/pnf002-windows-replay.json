@@ -1,0 +1,69 @@
+{
+  "archive_sha256": "ef084271afba3ef803dff94de79e8db4d0cb8cd9f71cb684b1e2ea12a5acd98a",
+  "numpy": "2.2.5",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.13.3",
+  "scope": "local replay of exact downloaded CI capsule; same checker implementation; no local socket transfer",
+  "source_ci_run": 43530863142,
+  "verification": {
+    "activation": "gelu_tanh",
+    "capsule_bytes": 44107195,
+    "capsule_sha256": "2536c5142fae1db9de2c8550d6c1ba65e8658bb57cd40caa10e08753472d335b",
+    "coefficient_law": {
+      "coefficient_comparison": "exact-binary32-in-binary64",
+      "floating_point_bitwise_equivalence_claimed": false,
+      "incoming_neurons_checked": 4096,
+      "kernel_accepted": false,
+      "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+      "outgoing_coefficients_checked": 2359296,
+      "status": "passed"
+    },
+    "generated_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+    "generated_dimensions": [
+      768,
+      4096,
+      768
+    ],
+    "generated_outputs": [
+      [
+        3.4358817312063064,
+        1.8910784174797262,
+        6.550091113234247
+      ],
+      [
+        -2.947720887732392,
+        1.0328397410272778,
+        1.5028289174700635
+      ]
+    ],
+    "kernel_accepted": false,
+    "max_absolute_error": 0.0,
+    "output_indices": [
+      0,
+      384,
+      767
+    ],
+    "probe_count": 2,
+    "schema": "ifs.neural-receiver-verification.v1",
+    "source_digest": "cf6f7f38ee402129f27304b758520ceebde0896466c8fd9fe7c0f259b92d661c",
+    "source_dimensions": [
+      768,
+      3072,
+      768
+    ],
+    "source_outputs": [
+      [
+        3.4358817312063064,
+        1.8910784174797262,
+        6.550091113234247
+      ],
+      [
+        -2.947720887732392,
+        1.0328397410272778,
+        1.5028289174700635
+      ]
+    ],
+    "source_provenance_status": "sender-declared-and-content-bound; not independently re-observed",
+    "status": "verified"
+  }
+}
