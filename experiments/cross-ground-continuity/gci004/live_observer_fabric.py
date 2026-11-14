@@ -395,17 +395,28 @@ def run(directory: Path) -> dict[str, Any]:
             return report
         finally:
             for peer,t in sessions.items():
-                try: send(t,peer,'CLOSE',{'done':True})
-                except Exception: pass
+                try:
+                    send(t,peer,'CLOSE',{'done':True})
+                    # Give the remote MailCPU frame decoder a chance to read
+                    # the complete close message before the TLS socket closes.
+                    time.sleep(.06)
+                except Exception:
+                    pass
                 try: t.close()
                 except Exception: pass
+            host_failures = []
             for peer,proc in processes:
                 try: proc.wait(timeout=4.0)
                 except subprocess.TimeoutExpired:
                     proc.kill();proc.wait(timeout=4.0)
                 if proc.returncode:
-                    print('Observer process '+peer+' exited '+str(proc.returncode)+': '+
-                          (keys/f'{peer}.stderr').read_text()[-2000:],file=sys.stderr)
+                    detail = (keys/f'{peer}.stderr').read_text()[-2000:]
+                    host_failures.append(peer + ' (' + str(proc.returncode) + '): ' + detail)
+            if host_failures and sys.exc_info()[0] is None:
+                raise LiveObserverError('authenticated observers did not terminate cleanly: ' +
+                                        '; '.join(host_failures))
+            for detail in host_failures:
+                print('Observer process failure: ' + detail, file=sys.stderr)
 
 
 def main() -> None:
@@ -429,5 +440,6 @@ def main() -> None:
 
 if __name__=='__main__':
     main()
+
 
 
