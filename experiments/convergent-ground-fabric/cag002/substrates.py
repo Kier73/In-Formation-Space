@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 from collections import Counter
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -49,9 +50,12 @@ def record_bytes(path: Path, docs: list[Mapping[str, Any]]) -> None:
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
     content = path.read_bytes()
     require(content.endswith(b"\n") and len(content) <= 80_000, "unbounded or truncated route spool")
-    docs = [json.loads(item) for item in content.splitlines()]
+    lines = content.splitlines()
+    docs = [json.loads(item) for item in lines]
     require(1 <= len(docs) <= 30 and all(isinstance(p, dict) for p in docs),
             "malformed route spool")
+    require(all(cag.canonical(doc) == line for doc, line in zip(docs, lines)),
+            "route spool is not canonical JSONL")
     return docs
 
 
@@ -135,6 +139,10 @@ def reconstruct(source: Mapping[str, Any], blue: Mapping[str, Any],
         "status": "two_real_substrates_local_reconstruction",
         "source_digest": source["bundle_digest"],
         "route_digests": {"jetstream": blue["bundle_digest"], "libp2p": amber["bundle_digest"]},
+        "captured_route_files_sha256": {
+            "jetstream": hashlib.sha256(b"".join(cag.canonical(p) + b"\\n" for p in blue_actual)).hexdigest(),
+            "libp2p": hashlib.sha256(b"".join(cag.canonical(p) + b"\\n" for p in amber_actual)).hexdigest(),
+        },
         "transport_evidence": dict(trace),
         "reference": expected,
         "cases": cases,
