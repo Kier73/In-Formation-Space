@@ -4,9 +4,10 @@
 through different observer projections, Ground representations, logical host
 topologies and realization methods?
 
-**Status:** executable cross-repository experimental extension of CAG-004;
-CI results must be checked separately. A positive finite experiment is NOT a
-general proof of representation invariance or independent physical hosting.
+**Status:** verified bounded experimental integration. The [protected-main
+seven-job run](results/ci-run-43565498985.md) passed on November 14, 2026.
+This is NOT a general proof of representation invariance or independent
+physical hosting.
 
 ## One signed source, no new publisher authority
 
