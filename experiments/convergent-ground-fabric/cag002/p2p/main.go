@@ -97,11 +97,9 @@ func receive(spool string, addressFile string, dropFirstACK bool) error {
 			return
 		}
 		hash := sha256.Sum256(line)
-		_, _ = fmt.Fprintf(s, "ACK:%s
-", hex.EncodeToString(hash[:]))
+		_, _ = fmt.Fprintf(s, "ACK:%s\n", hex.EncodeToString(hash[:]))
 	})
-	if err := os.WriteFile(addressFile, []byte(addr.String()+"
-"), 0600); err != nil {
+	if err := os.WriteFile(addressFile, []byte(addr.String()+"\n"), 0600); err != nil {
 		return err
 	}
 	fmt.Println("cag002 libp2p listener ready (local test only)")
@@ -123,8 +121,7 @@ func send(addressFile, inputFile string) error {
 	if len(trimmed) == 0 || len(trimmed) > maxBytes || !json.Valid(trimmed) {
 		return errors.New("invalid or oversized JSON packet")
 	}
-	trimmed = append(trimmed, '
-')
+	trimmed = append(trimmed, '\n')
 	addrBytes, err := os.ReadFile(addressFile)
 	if err != nil {
 		return err
@@ -156,14 +153,12 @@ func send(addressFile, inputFile string) error {
 	if _, err := stream.Write(trimmed); err != nil {
 		return err
 	}
-	ack, err := bufio.NewReader(stream).ReadString('
-')
+	ack, err := bufio.NewReader(stream).ReadString('\n')
 	if err != nil {
 		return fmt.Errorf("missing libp2p transport ACK: %w", err)
 	}
 	h := sha256.Sum256(trimmed)
-	expected := "ACK:" + hex.EncodeToString(h[:]) + "
-"
+	expected := "ACK:" + hex.EncodeToString(h[:]) + "\n"
 	if ack != expected {
 		return errors.New("libp2p transport ACK does not match sent packet")
 	}
