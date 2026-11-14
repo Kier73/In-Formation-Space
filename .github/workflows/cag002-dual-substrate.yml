@@ -1,0 +1,160 @@
+name: CAG-002 JetStream and libp2p dual-substrate reconstruction
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/convergent-ground-fabric/cag002/**"
+      - ".github/workflows/cag002-dual-substrate.yml"
+  pull_request:
+    paths:
+      - "experiments/convergent-ground-fabric/cag002/**"
+      - ".github/workflows/cag002-dual-substrate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check offline convergence and negative evidence
+        run: |
+          python -m unittest discover -s experiments/convergent-ground-fabric/cag002 -p 'test_substrates.py' -v
+          python -m unittest discover -s experiments/convergent-ground-fabric -p 'test_convergent_fabric.py' -v
+          python -m py_compile experiments/convergent-ground-fabric/cag002/substrates.py
+
+  network_host:
+    needs: tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: false
+      - name: Compile pinned libp2p encrypted-stream host
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd experiments/convergent-ground-fabric/cag002/p2p
+          go mod tidy
+          go build -trimpath -o "$RUNNER_TEMP/cag002-p2p" .
+      - name: Install NATS JetStream client
+        run: python -m pip install --disable-pip-version-check "nats-py>=2.10,<3"
+      - name: Start file-backed JetStream with loopback-only published port
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cag002-nats-store"
+          docker run -d --name "cag002-nats-${GITHUB_RUN_ID}" \
+            -p 127.0.0.1:4222:4222 \
+            -v "$RUNNER_TEMP/cag002-nats-store:/data" \
+            nats:2.11.10 -js -sd /data
+          for i in $(seq 1 60); do
+            if (echo > /dev/tcp/127.0.0.1/4222) >/dev/null 2>&1; then exit 0; fi
+            sleep 0.25
+          done
+          docker logs "cag002-nats-${GITHUB_RUN_ID}"
+          exit 1
+      - name: Test durable broker reconnect and peer-stream crash/ACK recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          python experiments/convergent-ground-fabric/cag002/substrates.py run \
+            --directory evidence/cag002 --p2p-binary "$RUNNER_TEMP/cag002-p2p" \
+            --nats-url nats://127.0.0.1:4222
+          python experiments/convergent-ground-fabric/cag002/substrates.py verify \
+            --directory evidence/cag002
+      - name: Attest producer report from main only
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag002/report.json
+      - name: Publish transport observations for independent verifier
+        uses: actions/upload-artifact@v4
+        with:
+          name: cag002-dual-substrate-evidence
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            evidence/cag002/source.json
+            evidence/cag002/blue-route.json
+            evidence/cag002/amber-route.json
+            evidence/cag002/jetstream-arrivals.jsonl
+            evidence/cag002/libp2p-spool.jsonl
+            evidence/cag002/transport-trace.json
+            evidence/cag002/report.json
+      - name: Stop temporary local JetStream broker
+        if: always()
+        run: docker rm -f "cag002-nats-${GITHUB_RUN_ID}" || true
+
+  verifier_host:
+    needs: [tests, network_host]
+    if: needs.tests.result == 'success' && needs.network_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install GitHub CLI with signer-workflow verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag002-dual-substrate-evidence
+          path: evidence/cag002
+      - name: Verify pinned main-run GitHub artifact attestation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh attestation verify evidence/cag002/report.json \
+            --repo Kier73/In-Formation-Space \
+            --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag002-dual-substrate.yml \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners --format json > /dev/null
+      - name: Reconstruct transport provenance and exact Ground result independently
+        run: |
+          python experiments/convergent-ground-fabric/cag002/substrates.py verify \
+            --directory evidence/cag002
+      - name: Attest separately verified reconstruction
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag002/report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cag002-independent-verifier-report
+          path: evidence/cag002/report.json
+          if-no-files-found: error
+          retention-days: 90
