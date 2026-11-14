@@ -144,3 +144,68 @@ Run the demonstration and tests:
 python bridges/observation-equivalence/demonstration.py
 python -m unittest discover -s bridges/observation-equivalence -p "test_*.py" -v
 ```
+
+
+---
+
+## Finite witness navigation: shortest action path to a meaningful difference
+
+The companion [`distinguishing_navigation.py`](distinguishing_navigation.py)
+extends transition-congruence refinement from *separating state classes* to
+*constructing an exact shortest distinguishing continuation* within an
+explicitly closed finite deterministic model. It does not execute operations
+on remote hosts or claim that model transitions are automatically admitted
+observations.
+
+Given states \(s,t\), a finite action alphabet \(A\), and supplied
+observation tests \(T\), a witness is an action word
+\(w=a_1\dots a_k\) and a test \(q \in T\) satisfying
+\(O(\delta^*(s,w),q) \neq O(\delta^*(t,w),q)\). The navigator returns a
+**shortest** such action word, breaking ties in declared action order.
+A zero-action witness is possible when a test distinguishes the pair now.
+
+### How navigation works
+
+1. Validate the entire declared transition table. Every action must be defined
+   at every supplied state and every successor must stay in the universe.
+2. Construct the **unordered state-pair graph**: an edge for each declared
+   action maps \(\{s,t\}\) to \(\{\delta(s,a),\delta(t,a)\)\).
+3. Mark pairs whose present observations differ. Reverse breadth-first
+   propagation computes the minimum number of actions from *every* pair to
+   any marked pair. The navigation query follows decreasing distances and
+   returns the first differing test, exact final pair and observations.
+4. If no marked pair is reachable, no finite action word can distinguish the
+   pair in this **complete supplied model**. This is exact finite-model
+   observation equivalence, not equivalence of unknown actual hosts.
+
+For \(n\) states, \(m\) actions and \(k\) tests, there are
+\(P=n(n-1)/2\) distinct unordered pairs. Construction requires
+\(O(n(m+k)+P(m+k))\) operations and \(O(n(m+k)+Pm)\) storage in the
+worst case. A shortest witness, when present, has at most \(P-1\) actions.
+`max_pairs` rejects over-budget models rather than emitting a false
+equivalence result. Empty tests intentionally make every pair observationally
+equivalent under the declared contract.
+
+A two-step counterexample illustrates the distinction between current and
+future observability: states `a` and `b` both output 0; the first
+`tick` reaches `x` and `y`, still both outputting 0; the second
+`tick` reaches `c` (output 1) and `d` (output 2). The returned
+witness is `('tick', 'tick')` with its exact final test evidence.
+
+### Reproduce and interpret
+
+```bash
+python -m unittest discover -s bridges/observation-equivalence -p 'test_*.py' -v
+```
+
+The new tests include adversarial incomplete-model rejection, hidden-state
+equivalence, a two-step separating continuation, stable shortest-path tie
+breaking, and 45 seeded randomly generated finite machines checked against a
+**separate exhaustive action-word enumerator**. The independent reference
+checks the Python implementation, not the completeness of an external model.
+
+This provides a possible E-CPU/VGI planning primitive: select an *observation
+intention* that exposes a necessary distinction before imposing a Ground
+translation or host change. Actual execution, authority, provenance,
+revocation, observation costs, and incomplete/non-deterministic models require
+other contracts; neither a witness nor equality here grants them.
