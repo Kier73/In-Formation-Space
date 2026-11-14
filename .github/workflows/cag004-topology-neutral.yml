@@ -8,6 +8,7 @@ on:
       - 'experiments/cross-ground-continuity/gci002/**'
       - 'experiments/cross-ground-continuity/gci003/**'
       - 'experiments/cross-ground-continuity/gci004/**'
+      - 'experiments/cross-ground-continuity/gci005/**'
       - '.github/workflows/cag004-topology-neutral.yml'
   push:
     branches: [main]
@@ -17,6 +18,7 @@ on:
       - 'experiments/cross-ground-continuity/gci002/**'
       - 'experiments/cross-ground-continuity/gci003/**'
       - 'experiments/cross-ground-continuity/gci004/**'
+      - 'experiments/cross-ground-continuity/gci005/**'
       - '.github/workflows/cag004-topology-neutral.yml'
   workflow_dispatch:
 
@@ -54,6 +56,10 @@ jobs:
         run: |
           python -m unittest discover -s experiments/cross-ground-continuity/gci004 -p 'test_fabric_contract.py' -v
           python -m py_compile experiments/cross-ground-continuity/gci004/fabric_contract.py experiments/cross-ground-continuity/gci004/live_observer_fabric.py experiments/cross-ground-continuity/gci004/test_live_report.py
+      - name: Check GCI-005 phase-blind signed disagreement and adversarial receipt contract
+        run: |
+          python -m unittest discover -s experiments/cross-ground-continuity/gci005 -p 'test_contract.py' -v
+          python -m py_compile experiments/cross-ground-continuity/gci005/honesty_contract.py experiments/cross-ground-continuity/gci005/live_disagreement.py experiments/cross-ground-continuity/gci005/test_live_report.py
 
   intent_host:
     needs: tests
@@ -1118,5 +1124,264 @@ jobs:
         with:
           name: gci004-independent-authenticated-observer-audit
           path: evidence/cag004/gci004-audit.json
+          if-no-files-found: error
+          retention-days: 90
+
+  gci005_authenticated_disagreement_host:
+    needs: [gci004_independent_verifier]
+    if: needs.gci004_independent_verifier.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned actual E-CPU TLS transport and discovery fabric
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU-GCI005
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install real E-CPU and cryptographic verifier
+        run: |
+          python -m pip install "cryptography>=43,<47"
+          python -m pip install -e external/E-CPU-GCI005
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-ecpu-eight-edge-orbit-probe
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-vgi-closed-orbit-certificate
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-public-context
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-minimum-context-plan
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci004-authenticated-observer-receipts
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-private-phase
+          path: evidence/cag004
+      - name: Verify original source, Ground, receiver phase and GCI-004 transcript attestations
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json orbit-probe.json closed-orbit-report.json gci003-public.json gci003-plan.json gci004-network.json gci003-private.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Run honest and signed-false reading through real dual E-CPU mTLS observers
+        run: python experiments/cross-ground-continuity/gci005/live_disagreement.py --directory evidence/cag004
+      - name: Attest gci005-real-signed-disagreement on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/gci005-quorum.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gci005-real-signed-disagreement
+          path: evidence/cag004/gci005-quorum.json
+          if-no-files-found: error
+          retention-days: 90
+
+  gci005_phase_blind_auditor:
+    needs: [gci005_authenticated_disagreement_host]
+    if: needs.gci005_authenticated_disagreement_host.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install only mathematical and cryptographic auditor (no E-CPU or VGI)
+        run: python -m pip install "cryptography>=43,<47"
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-ecpu-eight-edge-orbit-probe
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-vgi-closed-orbit-certificate
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-public-context
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-minimum-context-plan
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci004-authenticated-observer-receipts
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci005-real-signed-disagreement
+          path: evidence/cag004
+      - name: Verify every source, trusted Ground and real signed receipt attestation
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json orbit-probe.json closed-orbit-report.json gci003-public.json gci003-plan.json gci004-network.json gci005-quorum.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Verify both real TLS transcripts and adversarial tampering without phase
+        run: |
+          if test -e evidence/cag004/gci003-private.json; then
+            echo "Private phase leaked to independent blind auditor" >&2
+            exit 1
+          fi
+          python experiments/cross-ground-continuity/gci005/test_live_report.py --directory evidence/cag004
+          python experiments/cross-ground-continuity/gci005/honesty_contract.py blind --directory evidence/cag004
+      - name: Attest gci005-phase-blind-disagreement-refusal on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/gci005-blind-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gci005-phase-blind-disagreement-refusal
+          path: evidence/cag004/gci005-blind-audit.json
+          if-no-files-found: error
+          retention-days: 90
+
+  gci005_private_witness_auditor:
+    needs: [gci004_independent_verifier, gci005_phase_blind_auditor]
+    if: needs.gci004_independent_verifier.result == 'success' && needs.gci005_phase_blind_auditor.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install only mathematical and cryptographic verifier, neither E-CPU nor VGI
+        run: python -m pip install "cryptography>=43,<47"
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-ecpu-eight-edge-orbit-probe
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-vgi-closed-orbit-certificate
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-public-context
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-minimum-context-plan
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci004-authenticated-observer-receipts
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-internal-observer-report
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-receiver-observer-report
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci001-vgi-ground-report
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-authorized-measurements
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-phase-blind-realization
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-private-phase
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci005-real-signed-disagreement
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci005-phase-blind-disagreement-refusal
+          path: evidence/cag004
+      - name: Verify previously accepted evidence and phase-blind result provenance
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for file in signed-intent.json issuer-trust.json orbit-probe.json closed-orbit-report.json gci003-public.json gci003-plan.json gci004-network.json internal-report.json receiver-report.json vgi-report.json gci003-measurements.json gci003-result.json gci003-private.json gci005-quorum.json gci005-blind-audit.json; do
+            gh attestation verify "evidence/cag004/$file" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Verify exact previously withheld phase identifies signed false reading
+        run: |
+          python experiments/cross-ground-continuity/gci005/honesty_contract.py witness --directory evidence/cag004
+      - name: Attest gci005-independent-false-signer-witness on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag004/gci005-witness-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gci005-independent-false-signer-witness
+          path: evidence/cag004/gci005-witness-audit.json
           if-no-files-found: error
           retention-days: 90
