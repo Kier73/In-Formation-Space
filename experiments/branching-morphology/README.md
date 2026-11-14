@@ -138,3 +138,21 @@ guarantees that `O→A_n` is a strict supporting edge of the complete convex hul
 The proof uses an integer-moment invariant `S=T−1−2K≥0`, uniquely identifies its extremal nested-tip equality cases at every depth, proves the sharp first-order support gap `3^(n−1)`, and turns that into a real positive-angle guarantee with uniform Taylor bounds. It does **not** prove exposure all the way to the nested-tip root predicted by BMO-007, nor the number of transitions at arbitrary depth.
 
 See the [full mathematical argument](ALL-DEPTH-TIP-EXPOSURE.md), [standalone certificate and moment generator](tip_exposure.py), and [independent tests](test_tip_exposure.py). Run `python experiments/branching-morphology/tip_exposure.py` for a finite JSON audit alongside the universal induction.
+
+## BMO-010: An angle-dependent supporting cone for every depth
+
+The next independent theorem significantly strengthens BMO-009. At **every finite depth** `n≥1`, the nested left tip `A_n` is joined to the origin by a *strictly exposed hull edge* throughout the angle interval
+
+```text
+0 < θ <= π/(4n)   (radians), equivalently 0° < θ <= 45°/n.
+```
+
+The proof controls the **entire normalized histogram of signed branch headings**, not only its total turning moment. The grammar preserves `3^j·count(heading ≤ −j) ≤ path_length` for every `j≥1`, while the nested tip saturates all these inequalities. First-order stochastic dominance, the increasing sine kernel on the stated angular interval, and the exact integer gap from BMO-009 yield the strict bound
+
+```text
+cross(O,A_n,p) >= 2·3^(n−1) sin(θ/2) cos((2n−1/2)θ) > 0
+```
+
+for every other endpoint `p`. At depth six this improves the guaranteed angle from **0.0722° to 7.5°**, over **100 times larger**. This is an all-depth mathematical result, not an extrapolation from finite trees, though the new code independently audits all depth-six endpoints and ten new tests.
+
+Read the [angle-dependent proof](ANGLE-DEPENDENT-SUPPORT-CONE.md), [executable histogram certificate](angular_support_cone.py), and [independent tests](test_angular_support_cone.py). Run `python experiments/branching-morphology/angular_support_cone.py`. The sharp angle of exposure and a universal count of all convex-hull transitions remain open.
