@@ -540,3 +540,76 @@ lake env lean COE012RealLink.lean
 ~~~
 
 The next frontier is a self-contained Lean decoder for the canonical JSON envelope itself, or a proof-bearing external parser independently checkable against the original raw JSON bytes. Separately, physical implementations require numerical error bounds and execution-attestation contracts.
+
+
+## COE-013 — Independent kernel parser of original canonical JSON bytes
+
+The COE-012 proof starts with the original ASCII numeric/sentinel/activation tokens, but still relies on Python to identify the JSON keys, arrays, cell objects, and network layer hierarchy that carry those tokens. COE-013 moves the **entire permitted COE-002 canonical JSON envelope grammar** into a separate kernel-reducible Lean 4.24 parser.
+
+### Complete byte-level structural interpretation
+
+The module lean/COE013Json.lean accepts a list of original file byte codes. It does **not** consume a Python-created dictionary, a parsed model, or a reconstructed activation-cell list. Its bounded, structurally recursive parser recognizes precisely the canonical COE-002 schema layout:
+
+- top-level atomic_cells, network, network_sha256, schema, semantic_atlas, semantic_sha256 fields in their canonical sorted order, with no duplicates or extra fields;
+- the network's layers array and each layer's activation, bias and weights fields, with nested arrays for weight rows;
+- each atomic or semantic cell's affines, left and right fields, with affine slope/offset pairs;
+- unescaped ASCII quoted source tokens, exact punctuation and no formatting whitespace, correct exact schema string and a **single trailing LF** with no further bytes;
+- exactly 64 lowercase hexadecimal symbols for each SHA-256 metadata field.
+
+A successful parse produces the COE-012 WireCert containing the **original token bytes** extracted by Lean. The existing COE-012 decoder then validates and constructs exact rational parameters and endpoint/activation meanings, and the unchanged COEWireCheck verifier rechecks the actual cell partition and network computation. The function acceptBytes returns true only after all three checks pass. The theorem acceptBytes_implies_verified proves, without a parser-soundness axiom, that any accepted original byte stream yields an accepted typed certificate.
+
+This parser deliberately accepts the **restricted canonical ASCII JSON subset** used by the COE-002 certificate producer; it is not a general JSON parser with Unicode escapes, whitespace, arbitrary object key orders, or unconstrained values. Rejecting other JSON encodings is intentional: they are not the producer's canonical bytes. The parser's supported nesting and list lengths are bounded.
+
+### Exact replay of the five original produced byte streams
+
+The separate emit_lean_json_bytes.py adapter reads the original raw bytes from each of the five pinned certificate files and writes only their natural-number byte codes as Lean literal data. Unlike the older bridges, it does **not call any JSON parser** or normalize strings/objects, interpret rationals, or selectively extract cell data. It records the original byte counts and SHA-256 digests as external receipts.
+
+The generated Lean file then proves, for **each of the five actual source files**:
+
+1. The entire raw JSON byte stream parses to a complete canonical COE-002 envelope.
+2. The WireCert extracted **from the whole raw JSON** is structurally identical to the same certificate's independently extracted COE-012 wire-token object.
+3. The exact parsed bytes produce a typed certificate accepted by the pre-existing Lean mathematical verifier.
+
+Each statement is checked by Lean kernel reduction, not by trusting Python to assert that the original JSON was valid. The original seven-job Python, Go, Lean and E-CPU candidate-Ground regression remains independent.
+
+The additional COE013Fixtures module checks a small complete canonical JSON document, then kernel-proves rejection of duplicate keys, extra or reordered fields, wrong schema, a malformed digest, formatting whitespace, incorrect final newline, escaped tokens, reversed infinity sentinel and unreduced rational values. An intentionally false theorem claiming duplicate-key acceptance must separately fail to compile.
+
+### Link to the entire real line
+
+real-lean/COE013RealLink.lean composes a successful original-byte-stream admission with the COE-011 all-real theorem. For every accepted byte stream, output component and ideal real coordinate, there exists the extracted typed certificate whose actual piecewise-affine atlas equals the independently compiled real-valued neural network. Its piecewise interpreter is globally continuous.
+
+There is no sampled-input assumption and no trusted external numeric parser premise in those theorems.
+
+### Precise remaining trust boundary
+
+**Cryptographic hashes are not recomputed in Lean.** The Lean JSON parser checks the digest fields' lowercase 64-hex syntax, not their SHA-256 correctness, nor the equivalence of semantic_atlas to the computed cell atlas. Those still require independently run Python and Go checkers and the pinned trusted source manifest. An adversary can put a syntactically plausible but incorrect 64-digit digest in a byte stream that passes the mathematical network/cell checker; the separate independent provenance and fingerprint checks must reject it.
+
+The external step of transporting original file bytes into a Lean list of natural-number literals is also not formally verified. File byte SHA-256 receipts and cross-checking against separately consumed Python and Go original artifacts provide independent experimental evidence, but not an end-to-end cryptographic theorem inside Lean.
+
+The result remains a proof of **ideal exact rational scalar affine/ReLU computations interpreted over the entire real line**, not numerical GPU correctness, distributed host authentication, or E-CPU Ground admission.
+
+To reproduce with Python 3.11 and Lean 4.24:
+
+~~~bash
+cd experiments/continuous-observation-equivalence
+python produce_certificates.py received-certificates
+python emit_lean_certificates.py received-certificates lean/GeneratedCertificateProofs.lean
+python emit_lean_wire.py received-certificates lean/GeneratedWireProofs.lean
+python emit_lean_json_bytes.py received-certificates lean/GeneratedJSONProofs.lean
+python -m unittest test_lean_json_bytes -v
+cd lean
+lake build
+lake env lean -o .lake/build/lib/lean/GeneratedCertificateProofs.olean GeneratedCertificateProofs.lean
+lake env lean -o .lake/build/lib/lean/GeneratedWireProofs.olean GeneratedWireProofs.lean
+lake env lean GeneratedJSONProofs.lean
+# This deliberately false duplicate-key theorem MUST be rejected:
+lake env lean COE013Invalid.lean
+cd ../real-lean
+cp ../lean/COE*.lean .
+lake update
+lake exe cache get
+lake build COE013RealLink COE011Fixtures
+lake env lean COE013RealLink.lean
+~~~
+
+Next investigations: independently reconstruct or verify SHA-256 under a formal specification, bind a signed exact source manifest to the original file bytes, and construct explicit numerical realization/error contracts for deployed hardware. These are different problems from the now kernel-checked canonical JSON syntax and mathematical semantics.
