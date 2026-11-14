@@ -135,17 +135,41 @@ func TestAdversarialSignatures(t *testing.T){
 }
 func TestRotationAndRollback(t *testing.T) {
     f:=setup(t)
+    original:=f.signed
     f.policy.MinimumVersion=4
-    if _,e:=runTest(t,f,true);e==nil{t.Fatal("old signed epoch replayed after rotation")}
+    if _,e:=runTest(t,f,true);e==nil{t.Fatal("old signed epoch replayed after policy revision")}
+    // Rotate signer set: retire demo-33, admit a distinct new demo-44 key
+    // ONLY from version 4, and require a fresh 2-of-2 authorization.
+    f.policy.Keys[2].State="revoked"
+    f.policy.Keys=append(f.policy.Keys,Key{
+        ID:"demo-44",Algorithm:"ed25519",PublicKey:pub(0x44),
+        State:"active",ValidFrom:4,
+    })
+    f.signed.Manifest.Version=4
+    f.signed=signedFixture(f.signed.Manifest,
+        struct{id string; seed byte}{"demo-22",0x22},
+        struct{id string; seed byte}{"demo-44",0x44})
+    if receipt,e:=runTest(t,f,true);e!=nil{
+        t.Fatalf("authorized two-signer key rotation rejected: %v",e)
+    }else if receipt.VerifiedSigners[1]!="demo-44"{
+        t.Fatalf("new rotated signer absent from verified receipt: %+v",receipt)
+    }
+    // Previously signed artifacts cannot be replayed under the new policy.
+    f.signed=original
+    if _,e:=runTest(t,f,true);e==nil{t.Fatal("old signed manifest replayed after rotation")}
+    // The retired signer is prohibited even on a newly signed version 4.
     f.signed.Manifest.Version=4
     f.signed=signedFixture(f.signed.Manifest,
         struct{id string; seed byte}{"demo-22",0x22},
         struct{id string; seed byte}{"demo-33",0x33})
-    if _,e:=runTest(t,f,true);e!=nil{t.Fatalf("legitimate epoch rotation refused: %v",e)}
-    f.policy.Keys[1].ValidUntil=4
-    if _,e:=runTest(t,f,true);e==nil{t.Fatal("expired signer passed rotation")}
-    f.policy.Keys[1].State="revoked"
-    if _,e:=runTest(t,f,true);e==nil{t.Fatal("revoked signer passed rotation")}
+    if _,e:=runTest(t,f,true);e==nil{t.Fatal("retired signer authorized a new manifest")}
+    // A new key is not valid prior to its declared activation version.
+    f.policy.MinimumVersion=3
+    f.signed.Manifest.Version=3
+    f.signed=signedFixture(f.signed.Manifest,
+        struct{id string; seed byte}{"demo-22",0x22},
+        struct{id string; seed byte}{"demo-44",0x44})
+    if _,e:=runTest(t,f,true);e==nil{t.Fatal("future rotation key accepted before activation")}
 }
 func TestCertificateAndManifestTamper(t *testing.T){
     f:=setup(t)
