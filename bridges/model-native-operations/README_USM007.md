@@ -55,9 +55,13 @@ an arbitrary external effect.
 ## Local reproduction
 
 The existing proof-attention route ledger imports E-CPU's reliable-channel
-types, so install E-CPU from a compatible checkout before running this
-experiment. The recovered source verifier itself remains Python standard
-library and independently checks the mathematical source.
+types and VGI proof types through its proof-action adapter, so install
+**both existing packages** from compatible checkouts before running this
+experiment (the workflow pins both revisions). The recovered source
+verifier itself remains Python standard library and independently checks
+the mathematical source. Only the reused route-epoch implementation needs
+these dependency types; no model or E-CPU Ground runtime is executed by
+the observer job.
 
 ```bash
 python -m unittest discover -s bridges/model-native-operations \
