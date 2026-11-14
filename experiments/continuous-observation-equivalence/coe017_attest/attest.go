@@ -199,7 +199,7 @@ func ParsePolicy(raw []byte)(Policy,error){
  return p,nil
 }
 func isPublicDemoKey(pub []byte)bool{
- for _,b:=range []byte{0x41,0x52,0x63}{
+ for _,b:=range []byte{0x31,0x41,0x52,0x63,0x74,0x85}{
     seed:=bytes.Repeat([]byte{b},ed25519.SeedSize)
     demo:=ed25519.NewKeyFromSeed(seed).Public().(ed25519.PublicKey)
     if bytes.Equal(demo,pub){return true}
