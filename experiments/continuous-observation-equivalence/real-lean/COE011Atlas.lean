@@ -108,7 +108,7 @@ theorem clampReal_fixed (c : Cell) (x : ℝ)
 theorem continuous_clampReal (c : Cell) : Continuous (clampReal c) := by
   cases c with
   | mk lo hi out =>
-    cases lo <;> cases hi <;> dsimp [clampReal] <;> fun_prop
+    cases lo <;> cases hi <;> fun_prop
 
 /-- Select a component from the *actual claimed cell output*, with zero
 padding outside its width, matching the total-component convention in
