@@ -137,6 +137,21 @@ jobs:
           assert certificate["strict_support_bound"] == "cross(O,A_n,p)>=3^n*theta/16>0 for all other endpoints"
           print("All-depth moment-cone premises and finite audits validated")
           PY
+      - name: Verify and retain angle-dependent support-cone certificate
+        run: |
+          python experiments/branching-morphology/angular_support_cone.py > "$RUNNER_TEMP/angular-support-cone.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          record=json.loads((Path(os.environ["RUNNER_TEMP"]) / "angular-support-cone.json").read_text())
+          assert record["experiment"] == "BMO-010"
+          assert len(record["finite_audits"]) == 6
+          assert [x["total_endpoints"] for x in record["finite_audits"]] == [6,26,126,626,3126,15626]
+          assert [x["minimum_support_derivative_gap"] for x in record["finite_audits"]] == [3**n for n in range(6)]
+          assert [x["all_depth_exposure_angle_degrees"] for x in record["finite_audits"]] == [45/n for n in range(1,7)]
+          print("Angle-dependent stochastic support-cone finite audits passed")
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: branching-morphology-py${{ matrix.python-version }}
@@ -148,3 +163,4 @@ jobs:
             ${{ runner.temp }}/all-depth-hull-certificate.json
             ${{ runner.temp }}/depth6-certificate.json
             ${{ runner.temp }}/tip-exposure-certificate.json
+            ${{ runner.temp }}/angular-support-cone.json
