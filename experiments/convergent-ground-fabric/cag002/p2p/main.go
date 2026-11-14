@@ -134,7 +134,7 @@ func send(addressFile, inputFile string) error {
 	if err != nil {
 		return err
 	}
-	host, err := libp2p.New(libp2p.NoListenAddrs(), libp2p.DisableRelay())
+	host, err := libp2p.New(libp2p.NoListenAddrs, libp2p.DisableRelay())
 	if err != nil {
 		return err
 	}
