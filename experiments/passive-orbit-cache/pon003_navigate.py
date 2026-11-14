@@ -110,6 +110,11 @@ class Fetcher:
                 return raw, "retrieved", time.perf_counter_ns() - began
         except HTTPError as exc:
             return None, "http_" + str(exc.code), time.perf_counter_ns() - began
+        except PassiveRejected:
+            # Redirects, unexpected raw-block media types and oversized
+            # replies cannot turn an untrusted origin into authority.
+            # Record denial and permit a separately pinned origin to help.
+            return None, "rejected_response_policy", time.perf_counter_ns() - began
         except (URLError, TimeoutError, OSError) as exc:
             return None, "unavailable", time.perf_counter_ns() - began
 
