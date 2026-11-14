@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
+import os
+from unittest.mock import patch
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
@@ -10,7 +12,8 @@ import unittest
 from independent_certificate_checker import hash_bytes
 from federated_capsule import export_from_host
 from federated_auditor import audit
-from persistent_host import PersistentSemanticHost, POLICY_SCHEMA, canonical
+from persistent_host import PersistentSemanticHost, POLICY_SCHEMA, canonical, HostRejected
+from snc004b_identity import make_identity, inspect_peer, make_endpoint, inspect_endpoint
 from snc004b_live import (
     CapsuleDecoder, WireRejected, addressing, certificate_sha256,
     make_frames, verdict, SCHEMA,
@@ -197,6 +200,43 @@ class SNC004bContract(unittest.TestCase):
                 first["result"]["observation"]["receipt_sha256"],
                 second["result"]["observation"]["receipt_sha256"])
             self.assertEqual(host.count("clamp"), (1, 1))
+
+
+    def test_bootstrap_exact_run_peer_identity_and_overlay_endpoint(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            with patch.dict(os.environ, {
+                "GITHUB_RUN_ID": "424242",
+                "GITHUB_RUN_ATTEMPT": "3",
+            }):
+                make_identity(directory=root, role="server")
+                record = root / "server-bootstrap.json"
+                cert = root / "server-cert.pem"
+                self.assertEqual(
+                    inspect_peer(cert=cert, record=record, expected_role="server")["role"],
+                    "server")
+                make_endpoint(directory=root, ip="100.64.5.6")
+                self.assertEqual(inspect_endpoint(directory=root), "100.64.5.6")
+                with self.assertRaises(HostRejected):
+                    inspect_peer(cert=cert, record=record, expected_role="client")
+                saved = record.read_bytes()
+                forged = json.loads(saved)
+                forged["run_attempt"] = "4"
+                record.write_bytes(canonical(forged))
+                with self.assertRaisesRegex(HostRejected, "wrong run"):
+                    inspect_peer(cert=cert, record=record, expected_role="server")
+                record.write_bytes(saved)
+                endpoint = root / "server-endpoint.json"
+                original = endpoint.read_bytes()
+                injected = json.loads(original)
+                injected["server_ipv4"] = "127.0.0.1"
+                endpoint.write_bytes(canonical(injected))
+                with self.assertRaises(WireRejected):
+                    inspect_endpoint(directory=root)
+                endpoint.write_bytes(original)
+                with self.assertRaises(WireRejected):
+                    make_endpoint(directory=root, ip="8.8.8.8")
+
 
 
 if __name__ == "__main__":
