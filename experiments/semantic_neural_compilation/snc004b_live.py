@@ -289,9 +289,16 @@ def send(*, address: str, port: int, overlay: bool,
             check(response["result"]["origin_document_sha256"] == sha(capsule) and
                   response["result"]["observation"]["receipt"]["request_id"] == request_id,
                   "response not bound to this operation")
+        local_ip = tcp.socket.getsockname()[0]
+        peer_ip = tcp.socket.getpeername()[0]
+        if overlay:
+            addressing(local_ip, overlay=True)
+            check(addressing(peer_ip, overlay=True) == address,
+                  "live peer socket differs from selected Tailscale endpoint")
         report = {
             "schema": CLIENT_REPORT, "mode": "overlay" if overlay else "local",
             "nonce": nonce, "document_sha256": sha(capsule),
+            "local_socket_ipv4": local_ip, "peer_socket_ipv4": peer_ip,
             "bytes_sent_application": len(capsule),
             "sent_frame_count": len(frames),
             "peer_certificate_sha256": actual,
@@ -326,6 +333,11 @@ def serve(*, listener: Any, overlay: bool,
         actual = peer_sha(tcp)
         expected = certificate_sha256(trusted_client_cert)
         check(actual == expected, "live client certificate differs from bootstrap pin")
+        local_ip = tcp.socket.getsockname()[0]
+        peer_ip = tcp.socket.getpeername()[0]
+        if overlay:
+            addressing(local_ip, overlay=True)
+            addressing(peer_ip, overlay=True)
         inbound = channel(tcp, serving=True, response=False)
         outbound = channel(tcp, serving=True, response=True)
         host = PersistentSemanticHost(database, policy)
@@ -347,6 +359,8 @@ def serve(*, listener: Any, overlay: bool,
                         "schema": SERVER_REPORT,
                         "mode": "overlay" if overlay else "local",
                         "nonce": decoder.manifest["nonce"],
+                        "local_socket_ipv4": local_ip,
+                        "peer_socket_ipv4": peer_ip,
                         "document_sha256": sha(decoder.body),
                         "bytes_received_application": len(decoder.body),
                         "received_frame_count": decoder.frames,
