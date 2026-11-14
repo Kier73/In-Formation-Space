@@ -740,3 +740,42 @@ A valid signed digest proves that a holder of an **authorized private key** sign
 The COE-015 signer receipt is an additional provenance contract which can be required alongside the existing COE-014 kernel-checked byte-level SHA-256 and all-real mathematical result. Signing does not replace the mathematical checks, and the signed manifest does not authenticate the full semantic_atlas fingerprint or physical GPU/CPU execution.
 
 The natural next frontier is a combined independently checkable admission receipt that binds the Go Ed25519 authorization result and Lean's source SHA-256/all-real proof to the **same exact received network bytes**, followed by a rigorous externally authenticated key-rotation workflow. The test-only key material must never be treated as an external signing authority.
+
+
+## COE-016 — Exact-received-byte convergence of separate verifier evidence
+
+COE-015 verifies receiver-authorized Ed25519 signatures and actual network bytes; COE-014 independently checks Lean SHA-256 pins and the exact all-real mathematical certificate. A successful status from each isolated checker is *not itself* a proof that all checkers were asked about the same file bytes. COE-016 introduces a fail-closed CI **evidence-convergence** stage to close that experimental gap without replacing any constituent verifier.
+
+A new `same-source-evidence-convergence` job requires success from the same workflow's certificate producer, signed-manifest producer and verifier, independent Python verifier, independent Go verifier, and Lean kernel replay. It downloads their evidence artifacts through the current workflow run and, crucially, **reruns the separate Go Ed25519 verifier** on the exact received certificate directory using the local receiver-owned demonstration policy. It does not trust a producer-supplied signature receipt.
+
+The standalone standard-library Python `coe016_binding.py` examines those reports *and rereads the original certificates itself*. For every required model, it requires:
+
+- Identical SHA-256 of each complete original certificate file in the actual received bytes, Lean byte-literal transport receipt, independent Python report and independent Go report.
+- Identical independently pinned nested-network SHA-256 in the COE-015 signed Go authority receipt, Python checker and Go checker.
+- Identical exact-rational semantic-atlas SHA-256 in the Python and Go independently verified reports.
+- Exactly one successful named COE-014 pinned-network/mutation-rejection status line per model in the successfully completed Lean kernel replay job; missing, duplicated, malformed or unknown lines fail closed.
+- A complete, unchanged five-model file set, two distinct test signers satisfying the 2-of-2 quorum, and explicit non-admission flags.
+
+The new artifact `coe016-test-only-cross-evidence-receipt` reports the agreed file, network and semantic digests, signer information, and scope. Adversarial unit tests mutate original files, individual evidence digests, semantic identities, source sets, Lean pass lines, and authority claims. All must be refused.
+
+### Trust boundary
+
+**This is an authenticated CI-run convergence observation, not a new Lean theorem or a cryptographically self-attesting independent proof bundle.** The evidence records and logs are not themselves signed; the joiner depends on the GitHub Actions runner/workflow provenance and on the separate verifier jobs executing honestly. A malicious or compromised CI environment could forge reports. The Lean transport manifest is emitted by Python before Lean runs; job dependency success and separate kernel output are necessary to interpret it as proof evidence. Files are joined by exact source bytes, not by trusting the manifest's status string alone.
+
+Demonstration signing seeds are public. COE-016 deliberately permits **test-only** mode and reports both `origin_authenticated: false` and `ground_admitted: false`. It does not authorize remote Grounds, production signers, actual hardware numerical realization, or a real-world source identity. The next security step would be a separately checkable, signed cross-verifier receipt with authenticated verifier identities and a monotonic receiver-controlled trust-policy transition, followed by independent receiver reconstruction.
+
+### Local reproduction of the convergence test
+
+~~~bash
+cd experiments/continuous-observation-equivalence
+python -m unittest test_coe016_binding -v
+# For the full positive-path join, reproduce COE-015 and the COE-002/003/014
+# verifier outputs, supplying the original certificate directory and paths:
+python coe016_binding.py --certs received-certificates \
+  --authority joined-authority-receipt.json \
+  --lean joined-lean-evidence/lean-json-replay-manifest.json \
+  --python joined-python-evidence/independent-certificate-report.json \
+  --go joined-go-evidence/go-independent-check-report.json \
+  --lean-log joined-lean-evidence/sha256-pinned-network-replay.txt \
+  --output coe016-bound-source-receipt.json
+~~~
