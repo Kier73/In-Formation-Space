@@ -1,0 +1,69 @@
+name: SNC-002 semantic source transfer over E-CPU mTLS
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - '.github/workflows/snc002-semantic-transfer.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - '.github/workflows/snc002-semantic-transfer.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-and-wire-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: SNC-001 construction regression
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+        run: python -m unittest discover -s experiments/semantic_neural_compilation -p "test_snc001.py" -v
+      - name: SNC-002 negative tests and live TLS identity rejection
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+        run: python -m unittest discover -s experiments/semantic_neural_compilation -p "test_snc002.py" -v
+
+  live-receiver-comparison:
+    needs: source-and-wire-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Same-host separate-process real E-CPU mTLS semantic transfer and parameter baseline
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+        run: |
+          python experiments/semantic_neural_compilation/run_semantic_transit.py \
+            --output snc002-report.json | tee snc002-live-stdout.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc002-mtls-measured-semantic-vs-parameter-transfer
+          path: |
+            snc002-report.json
+            snc002-live-stdout.json
+          if-no-files-found: error
