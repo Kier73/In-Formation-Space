@@ -1,0 +1,73 @@
+name: SNC-003 durable semantic host and observation reuse
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - '.github/workflows/snc003-persistent-host.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - '.github/workflows/snc003-persistent-host.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  durable-host-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '\${{ matrix.python }}'
+      - name: Existing SNC-001 exact semantics regression
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+        run: python -m unittest discover -s experiments/semantic_neural_compilation -p "test_snc001.py" -v
+      - name: SNC-003 persistence and fail-closed tests
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+        run: python -m unittest discover -s experiments/semantic_neural_compilation -p "snc003_tests.py" -v
+
+  real-mtls-host-restart:
+    needs: durable-host-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Live source seed, persistent restart, reference-only request, receipt replay and repeated reuse
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+        run: |
+          python experiments/semantic_neural_compilation/run_persistent_host.py \
+            --output snc003-host-report.json | tee snc003-host-stdout.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc003-durable-mtls-reuse-report
+          path: |
+            snc003-host-report.json
+            snc003-host-stdout.json
+          if-no-files-found: error
