@@ -1,6 +1,6 @@
 # CAG-003 — Signed semantic origin and receiver-local computation admission
 
-**Status:** staged experimental integration. Do not infer full CAG-003 completion from this slice or a green source test.
+**Status:** signed dual-protocol receiver-admission slice verified on protected main in [run 43556985843](results/ci-run-43556985843.md) (all four hosted jobs passed); the independently operated WAN-provider and trust-anchor requirements of the full CAG-003 issue remain open.
 
 This experiment composes CAG-002's real NATS JetStream and go-libp2p loopback protocols with cryptographically signed immutable operation commitments, an **actual E-CPU receiver-owned Virtual Layer Runtime and Hypervisor**, and VGI's finite reconstruction-certificate implementation.
 
