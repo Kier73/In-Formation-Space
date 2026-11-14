@@ -257,3 +257,5 @@ That may mean adding a tool, a proof, a dataset, a question, a failure report, a
 ## Procedural neural formation
 
 - [PNF-001: Checked neural formation from observed or procedural parameters](experiments/procedural_neural_formation/README.md) — constructs wider standalone ReLU/GELU blocks using exact dyadic coefficient checks, E-CPU dependency execution, VGI source-topology obligations, and independent scalar comparisons. The [first live CI record](experiments/procedural_neural_formation/results/ci-run-43528890906.md) verifies a pinned Hugging Face GPT-2 MLP read (18.9 MB) and widening from 3,072 to 4,096 hidden neurons; it makes no whole-model quality or kernel-proof claim.
+
+- [PNF-004: Functional Ground models and persistent addressability](experiments/ground_model_addressability/README.md) — a small addressable neural ranker assists independently verified Ground creation, reconstructs after a forced receiver stop, and preserves model/task identities across dense and scalar inference paths. Uses E-CPU structural memory, M1 objects and native authority; no training-quality or speedup claim.
