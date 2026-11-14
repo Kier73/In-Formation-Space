@@ -215,6 +215,9 @@ def blind_audit(directory: Path) -> dict[str,Any]:
 def witness_audit(directory: Path) -> dict[str,Any]:
     prior=c.verified_report(directory)  # Includes old GCI-003 private witness.
     phase_blind=blind_audit(directory)
+    original_blind=cag.read(directory/"gci005-blind-audit.json")
+    require(original_blind==phase_blind,
+            "privileged witness audit is not bound to the earlier phase-blind report")
     binding,public,_plan=get_binding(directory)
     private=cag.read(directory/"gci003-private.json")
     state=gci3.validate_private(private,public,binding)
