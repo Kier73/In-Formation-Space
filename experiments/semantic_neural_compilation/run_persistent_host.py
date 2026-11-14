@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import json
+from fractions import Fraction
 import re
 import statistics
 import subprocess
@@ -129,8 +130,8 @@ def experiment(out: Path) -> dict:
         warm = []
         for i in range(32):
             result = host.observe(
-                model="clamp", coordinate=str(i % 9) + "/8"
-                if i % 9 else "0", request_id=f"warm{i+1}",
+                model="clamp", coordinate=str(Fraction(i % 9, 8)),
+                request_id=f"warm{i+1}",
             )
             if result["cache_state"] != "memory-reused" or \
                     result["construction_ns"] or result["independent_verification_ns"]:
