@@ -12,10 +12,10 @@ open COE012Wire
 
 def unreduced : WireCert :=
   { layers := [
-      { weights := [["-6/4"]], bias := ["0"], activation := "linear" }]
+      { weights := [[[45, 54, 47, 52]]], bias := [[48]], activation := [108, 105, 110, 101, 97, 114] }]
     cells := [
-      { left := "-inf", right := "+inf",
-        affines := [{ slope := "-3/2", offset := "0" }] }] }
+      { left := [45, 105, 110, 102], right := [43, 105, 110, 102],
+        affines := [{ slope := [45, 51, 47, 50], offset := [48] }] }] }
 
 theorem false_unreduced_admission : acceptWire unreduced = true := by
   decide +kernel
