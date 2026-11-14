@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import os
+from unittest.mock import patch
 import re
 import subprocess
 import sys
@@ -15,6 +17,7 @@ import time
 
 from federated_auditor import audit
 from federated_pipeline import produce, policy_from_local_source
+from snc004b_identity import make_identity, inspect_peer, make_endpoint, inspect_endpoint
 from independent_certificate_checker import hash_bytes
 from persistent_host import POLICY_SCHEMA, canonical
 from run_semantic_transit import test_certificates
@@ -36,9 +39,10 @@ def session(
         "--cert", str(certificates["server_cert"]),
         "--key", str(certificates["server_key"]),
         "--peer-cert", str(certificates["client_cert"]),
-        "--trust-root", str(certificates["ca"]),
         "--output", str(server_report),
     ]
+    if "ca" in certificates:
+        server_cmd.extend(["--trust-root", str(certificates["ca"])])
     process = subprocess.Popen(server_cmd, text=True, bufsize=1,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
@@ -54,9 +58,10 @@ def session(
             "--cert", str(certificates["client_cert"]),
             "--key", str(certificates["client_key"]),
             "--peer-cert", str(certificates["server_cert"]),
-            "--trust-root", str(certificates["ca"]),
             "--output", str(client_report),
         ]
+        if "ca" in certificates:
+            client_cmd.extend(["--trust-root", str(certificates["ca"])])
         sender = subprocess.run(client_cmd, capture_output=True,
                                 text=True, timeout=55, check=False)
         out, err = process.communicate(timeout=55)
@@ -106,6 +111,35 @@ def run(destination: Path) -> dict:
             database=receiver_root / "models.sqlite3", name="accepted",
             expected_success=True,
         )
+        # The manual overlay uses independently generated self-signed,
+        # exact-peer-pinned identities, unlike this first shared-CA test.
+        # Verify that actual handshake mode on loopback as well.
+        with patch.dict(os.environ, {
+            "GITHUB_RUN_ID": os.environ.get("GITHUB_RUN_ID", "12345"),
+            "GITHUB_RUN_ATTEMPT": os.environ.get("GITHUB_RUN_ATTEMPT", "1"),
+        }):
+            make_identity(directory=root / "identity-server", role="server")
+            make_identity(directory=root / "identity-client", role="client")
+            inspect_peer(
+                cert=root / "identity-client/client-cert.pem",
+                record=root / "identity-client/client-bootstrap.json",
+                expected_role="client",
+            )
+            make_endpoint(directory=root / "identity-server", ip="100.64.10.20")
+            if inspect_endpoint(directory=root / "identity-server") != "100.64.10.20":
+                raise RuntimeError("self-signed server endpoint not pinned")
+        independent_certs = {
+            "client_cert": root / "identity-client/client-cert.pem",
+            "client_key": root / "identity-client/client-key.pem",
+            "server_cert": root / "identity-server/server-cert.pem",
+            "server_key": root / "identity-server/server-key.pem",
+        }
+        self_signed = session(
+            root, independent_certs, capsule=capsule,
+            policy=receiver_policy,
+            database=receiver_root / "models-self-signed.sqlite3",
+            name="independent-self-signed", expected_success=True,
+        )
         audited = audit(
             body=capsule.read_bytes(),
             receiver_report=canonical(success["server"]["result"]),
@@ -139,6 +173,13 @@ def run(destination: Path) -> dict:
                     success["server"]["result"]["import"]["independent_certificate_verification_ns"],
                 "receiver_observation_sha256":
                     success["server"]["result"]["observation"]["receipt_sha256"],
+            },
+            "independent_per_host_self_signed_test": {
+                "tls_version": self_signed["client"]["tls_version"],
+                "peer_pin_checked": self_signed["client"]["peer_certificate_sha256"] ==
+                    self_signed["server"]["local_certificate_sha256"],
+                "observation_output": self_signed["server"]["result"]["observation"]["receipt"]["outputs"],
+                "no_shared_test_ca": True,
             },
             "denied": {
                 "accepted": refusal["client"]["response"]["accepted"],
