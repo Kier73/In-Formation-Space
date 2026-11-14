@@ -71,8 +71,8 @@ class PON002Tests(unittest.TestCase):
         records = objects()
         a, _ = run_with({"github": records})
         b, _ = run_with({"jsdelivr": records}, preference=("jsdelivr", "github"))
-        self.assertEqual(a["status"], b["status"] == "verified_reconstruction" and
-                         "verified_reconstruction")
+        self.assertEqual(a["status"], "verified_reconstruction")
+        self.assertEqual(b["status"], "verified_reconstruction")
         self.assertEqual((a["value"], b["value"]), (44, 44))
         self.assertEqual(a["result_digest"], b["result_digest"])
         self.assertEqual(a["verified_objects"], 5)
@@ -170,6 +170,17 @@ class PON002Tests(unittest.TestCase):
             reconstruct(routes=providers_for_commit(COMMIT), grant=grant,
                         pinned_key=pub, minimum_epoch=5, now=now, fetcher=io)
         self.assertEqual(io.calls, [])
+
+    def test_public_provider_urls_pin_full_commit_with_path_separator(self):
+        routes = providers_for_commit(COMMIT)
+        self.assertEqual(routes[0].base_url,
+            "https://raw.githubusercontent.com/Kier73/In-Formation-Space/"
+            + COMMIT + "/experiments/passive-orbit-cache/public/")
+        self.assertEqual(routes[1].base_url,
+            "https://cdn.jsdelivr.net/gh/Kier73/In-Formation-Space@"
+            + COMMIT + "/experiments/passive-orbit-cache/public/")
+        self.assertTrue(routes[0].base_url.endswith(COMMIT +
+            "/experiments/passive-orbit-cache/public/"))
 
     def test_noncanonical_duplicate_or_mutable_public_routes_fail(self):
         urls = [
