@@ -112,6 +112,10 @@ def send_request(
                 response.get("request_id") == request["request_id"] and
                 type(response.get("accepted")) is bool,
                 "invalid or mismatched application response")
+        # The response receiver has just sent its ReliableChannel ACK.
+        # Preserve the live TLS stream long enough for the server to consume
+        # that ACK before TLS closure; transport ACK is not proof authority.
+        time.sleep(.3)
         return {
             "response": response, "client_request_elapsed_ns_local": elapsed,
             "application_request_bytes": len(canonical(request)),
