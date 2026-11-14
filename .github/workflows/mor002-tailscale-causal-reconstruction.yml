@@ -90,7 +90,7 @@ jobs:
 
   client_host:
     needs: tests
-    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -223,7 +223,7 @@ jobs:
 
   server_host:
     needs: tests
-    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -349,7 +349,7 @@ jobs:
 
   observer_host:
     needs: tests
-    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -401,7 +401,7 @@ jobs:
 
   verifier_host:
     needs: [tests, client_host, server_host, observer_host]
-    if: needs.tests.result == 'success' && needs.client_host.result == 'success' && needs.server_host.result == 'success' && needs.observer_host.result == 'success' && github.ref == 'refs/heads/main'
+    if: needs.tests.result == 'success' && needs.client_host.result == 'success' && needs.server_host.result == 'success' && needs.observer_host.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
