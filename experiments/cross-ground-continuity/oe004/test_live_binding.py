@@ -12,8 +12,8 @@ import copy
 import json
 from pathlib import Path
 
-import fabric_contract as fabric
 from witness_binding import build_live_binding, verify_live_binding, digest
+import fabric_contract as fabric
 
 
 def require_refused(label: str, operation) -> None:
