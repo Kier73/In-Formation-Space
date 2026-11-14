@@ -156,3 +156,23 @@ cross(O,A_n,p) >= 2·3^(n−1) sin(θ/2) cos((2n−1/2)θ) > 0
 for every other endpoint `p`. At depth six this improves the guaranteed angle from **0.0722° to 7.5°**, over **100 times larger**. This is an all-depth mathematical result, not an extrapolation from finite trees, though the new code independently audits all depth-six endpoints and ten new tests.
 
 Read the [angle-dependent proof](ANGLE-DEPENDENT-SUPPORT-CONE.md), [executable histogram certificate](angular_support_cone.py), and [independent tests](test_angular_support_cone.py). Run `python experiments/branching-morphology/angular_support_cone.py`. The sharp angle of exposure and a universal count of all convex-hull transitions remain open.
+
+## BMO-011: The averaged-tip phase nearly reaches the candidate transition scale
+
+The angle-dependent support proof can be strengthened again without materializing the tree. Averaging the nested tip's heading distribution first produces a complex phasor whose phase obeys `0<φ_n<θ/2`. This makes the *averaged* sine kernel increasing throughout a larger interval. For **every finite depth `n≥1`**,
+
+```text
+0 < θ <= π/(2n+1) radians
+```
+
+guarantees a strictly exposed origin-to-tip edge. The quantitative lower bound for every competing endpoint `p` is
+
+```text
+cross(O,A_n,p) >= (4·3^n/9) sin(θ/2) cos(nθ) > 0.
+```
+
+This nearly doubles BMO-010's guarantee asymptotically; for depth six, it increases **7.5° to 13.84615°**.
+
+More significantly, define `τ_n` as the *first loss of strict support* of that edge, and let `θ_n` be the first zero of the previously derived nested-tip collinearity polynomial. For `n≥2`, `π/(2n+1)≤τ_n≤θ_n`. Because the prior recurrence proved `nθ_n→π/2`, the **actual geometric first-loss angle** now satisfies `nτ_n→π/2`, without requiring an exact transition count at each depth.
+
+Read the [all-depth phase and asymptotic proof](AVERAGED-SUPPORT-BRACKET.md), [executable audit](averaged_support.py), and [ten independent tests](test_averaged_support.py). The complete local morphology suite passed **78/78**. This is not a proof that every candidate collinearity is the exact exposed-hull transition.
