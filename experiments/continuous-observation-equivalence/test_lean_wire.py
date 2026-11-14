@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from hashlib import sha256
-import json
 import tempfile
 from pathlib import Path
 import unittest
@@ -38,10 +37,10 @@ class WireTransportTests(unittest.TestCase):
         self.assertEqual(render(self.root)[0], code)
 
     def test_fraction_tokens_are_transported_not_normalized(self):
-        self.assertEqual(literal("-6/4"), '"-6/4"')
-        self.assertEqual(literal("1e4"), '"1e4"')
-        self.assertEqual(literal('1"); #eval 42'), json.dumps('1"); #eval 42'))
-        self.assertIn('"2/4"', wire_cell({
+        self.assertEqual(literal("-6/4"), "[45, 54, 47, 52]")
+        self.assertEqual(literal("1e4"), "[49, 101, 52]")
+        self.assertEqual(literal('1"); #eval 42'), "[49, 34, 41, 59, 32, 35, 101, 118, 97, 108, 32, 52, 50]")
+        self.assertIn("[50, 47, 52]", wire_cell({
             "left": "-inf", "right": "+inf",
             "affines": [["2/4", "0"]]
         }))
@@ -49,7 +48,7 @@ class WireTransportTests(unittest.TestCase):
         obj["atomic_cells"][0]["affines"][0][0] = "2/4"
         (self.root / "identity.json").write_bytes(canonical_bytes(obj) + b"\n")
         code, _ = render(self.root)
-        self.assertIn('"2/4"', code)
+        self.assertIn("[50, 47, 52]", code)
         self.assertIn("identity_wire_decoded", code)
         # The Python bridge must not reject a syntactically transported
         # but semantically noncanonical fraction: the Lean decoder does.
@@ -59,7 +58,7 @@ class WireTransportTests(unittest.TestCase):
         obj["atomic_cells"][0]["left"] = "+inf"
         (self.root / "identity.json").write_bytes(canonical_bytes(obj) + b"\n")
         code, _ = render(self.root)
-        self.assertIn('left := "+inf"', code)
+        self.assertIn("left := [43, 105, 110, 102]", code)
 
     def test_pinned_source_substitution_is_denied(self):
         obj = produce(fixtures()["identity"])
