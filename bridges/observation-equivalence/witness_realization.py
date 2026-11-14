@@ -204,8 +204,11 @@ def _path_valid(path: Any, plan: dict[str, Any], lane: str,
         or intent["application_required"] is not False
         or intent["sender_ack_required"] is not False):
         raise ValueError("observation intent is not bound to selected plan")
-    if type(intent["estimated_cost"]) not in (int, float) or intent["estimated_cost"] <= 0:
-        raise ValueError("observation path cost must be positive")
+    total = plan["selected"]["estimated_total_ns"]
+    if type(total) is not int or total <= 0 or total > 2**53:
+        raise ValueError("observation path requires positive exactly float-representable planned cost")
+    if type(intent["estimated_cost"]) not in (int, float) or intent["estimated_cost"] != float(total):
+        raise ValueError("observation path cost differs from selected modeled cost")
     _text(intent["query"], "observation query")
     events = path["events"]
     expected_stages = ["planned", "dispatched", "admitted", "returned",
