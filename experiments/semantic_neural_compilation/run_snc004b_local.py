@@ -16,6 +16,7 @@ import tempfile
 import time
 
 from federated_auditor import audit
+from snc004b_third_audit import third_audit, AuditRejected
 from federated_pipeline import produce, policy_from_local_source
 from snc004b_identity import make_identity, inspect_peer, make_endpoint, inspect_endpoint
 from independent_certificate_checker import hash_bytes
@@ -140,6 +141,33 @@ def run(destination: Path) -> dict:
             database=receiver_root / "models-self-signed.sqlite3",
             name="independent-self-signed", expected_success=True,
         )
+        # Negative control: do not let a same-host loopback run be
+        # relabelled as Tailscale and become an independent-host claim.
+        falsified_client = dict(self_signed["client"], mode="overlay")
+        falsified_server = dict(self_signed["server"], mode="overlay")
+        fabricated_client_path = root / "falsified-client.json"
+        fabricated_server_path = root / "falsified-server.json"
+        fabricated_client_path.write_bytes(canonical(falsified_client))
+        fabricated_server_path.write_bytes(canonical(falsified_server))
+        with patch.dict(os.environ, {
+            "GITHUB_RUN_ID": os.environ.get("GITHUB_RUN_ID", "12345"),
+            "GITHUB_RUN_ATTEMPT": os.environ.get("GITHUB_RUN_ATTEMPT", "1"),
+        }):
+            try:
+                third_audit(
+                    capsule=capsule,
+                    client_path=fabricated_client_path,
+                    server_path=fabricated_server_path,
+                    client_bootstrap=root / "identity-client",
+                    server_bootstrap=root / "identity-server",
+                    expected_source=json.loads((HERE / "examples.json").read_text())["clamp_0_1"],
+                    expected_request_id="live1",
+                )
+            except AuditRejected as exc:
+                if "non-overlay socket endpoints" not in str(exc):
+                    raise RuntimeError("wrong negative overlay audit rejection") from exc
+            else:
+                raise RuntimeError("auditor promoted relabelled loopback traffic to overlay")
         audited = audit(
             body=capsule.read_bytes(),
             receiver_report=canonical(success["server"]["result"]),
@@ -186,6 +214,7 @@ def run(destination: Path) -> dict:
                 "reason": refusal["client"]["response"]["reason"],
                 "durable_success_report_created": False,
             },
+            "mislabelled_loopback_as_overlay_rejected": True,
             "physical_host_count": 1,
             "cross_host_overlay_verified": False,
             "external_execution_authorized": False,
