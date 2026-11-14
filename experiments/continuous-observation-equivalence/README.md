@@ -825,3 +825,53 @@ go run ./cmd/verify -policy demo-policy.json -allow-demo \
 ~~~
 
 The further frontier is independently held, non-demo verifier keys with authenticated authority transitions and replay state reconstructable across genuinely separate receivers, without trusting one local state file or a CI job's self-description.
+
+
+## COE-018 — Independent continuity replay for verifier authority
+
+COE-017 introduced an Ed25519-signed verifier receipt, a receiver-controlled trust policy and a **single local replay checkpoint**. COE-018 asks whether two independently scheduled receivers can reconstruct the *same evolving authority* from an untrusted history of approvals, key rotations and revocations, while continuing to check the **original mathematical evidence bytes**.
+
+The experiment adds the Go `coe017_attest/history` package with a deterministic, domain-separated, canonical JSON authority journal. Every entry carries the COE-017 verified statement SHA-256, original signed envelope SHA-256 and COE-016 convergence receipt SHA-256, an exactly increasing governance sequence, and the digest of its preceding signed entry. Every decision is signed by a quorum of the **then-active receiver-approved keys**, not keys imported from the untrusted history. A rotated policy is approved by the *old* signer quorum and must additionally be signed by an active quorum of the *new* keys under a different Ed25519 domain separator. Source digest pins, issuer, scope and policy mode cannot change through rotation, and old IDs cannot be reused, resurrected or silently removed. Revocation is final for that receipt in the current journal.
+
+### Concrete end-to-end demo
+
+A public nonsecret demo signer constructs three entries from the **actual verified COE-017/016 artifacts**: accept the sequence-3 verifier receipt with signatures from keys `demo-vr-41` and `demo-vr-52`; rotate at sequence 4 to retire `demo-vr-52` and activate `demo-vr-63` with both outgoing and incoming key-quorum signatures; and revoke the receipt at sequence 5 signed by `demo-vr-41` and `demo-vr-63`. This is a **demonstration only**, not a real verifier or external authority credential.
+
+CI keeps the original certificate-producer, Lean, Python, Go and COE-015/017 verification gates. `coe018-journal-producer` transfers the **untrusted** signed journal. Then `coe018-receiver-a` and `coe018-receiver-b` run on separately scheduled GitHub runners. Each independently checks the initial COE-017 signatures and original COE-016/certificate bytes, the complete signed hash chain, old and new policy quorums, and terminal revocation. A final job compares the independently reconstructed canonical receipts byte-for-byte. The verifier is separate from the demo key/signing implementation. Public demo keys are rejected by default unless `-allow-demo` is explicitly supplied.
+
+Tests reject deleted/reordered/repeated events, forged signatures, retired signer use, insufficient new-key proof, source/evidence replacement, altered policy, changed network pins, attempted resurrection, and invalid or missing revocation scope.
+
+### The essential independent-anchor distinction
+
+COE-018 intentionally demonstrates **a rollback counterexample**. If an attacker deletes the terminal signed revocation and changes the journal's self-declared head to the preceding *valid* signed entry, that prefix is still historically authentic; an isolated receiver with no later checkpoint cannot infer that revocation occurred. The package therefore accepts an optional **receiver-supplied expected anchor** with an exact event count and chain head: if that anchor survives independently, the truncated/forked history is rejected. The producer outputs an anchor for demo comparison, but the fact that the producer supplied it does **not** make it a trusted independent witness. All COE-018 receipts explicitly say `external_anchor_authenticated: false`.
+
+Separate GitHub jobs are useful experimental receiver isolation but **do not establish independently administered hosts, secure hardware, real-world signer identity, Byzantine consensus or distributed anti-rollback durability**. A common compromised CI authority, compromised independent genesis policy, colluding active signing quorum, or correlated loss of external checkpoints remains outside the guarantees. No production private key is included. Receipts always say `real_world_identity_authenticated: false` and `ground_admitted: false`. The signed history observes authorized key possession, not mathematical truth beyond the separately successful COE proof chain.
+
+This reuses the *principle* of RE-014's externally anchored journal reconstruction, without importing RE-014's HMAC authority or confusing its physical/statistical assumption claims with COE source-verification authority. The parallel RE-015 work investigates a different authority scope.
+
+### Reproduce
+
+~~~bash
+cd experiments/continuous-observation-equivalence
+# Generate the original certificate, COE-016 and COE-017 artifacts using
+# their respective documented commands or download them from the same CI run.
+cd coe017_attest
+go test -count=1 -v ./history ./cmd/history-demo ./cmd/history-verify
+
+go run ./cmd/history-demo \
+  ../received-verifier-attestation/signed-verifier-receipt.json \
+  ../received-coe016/coe016-bound-source-receipt.json \
+  demo-policy.json demo-state.json ../received-certificates \
+  ../untrusted-governance-artifacts
+
+go run ./cmd/history-verify \
+  -journal ../untrusted-governance-artifacts/untrusted-governance-journal.json \
+  -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+  -evidence ../received-coe016/coe016-bound-source-receipt.json \
+  -policy demo-policy.json -state demo-state.json \
+  -certs ../received-certificates \
+  -expected-anchor ../untrusted-governance-artifacts/producer-claimed-anchor.json \
+  -output coe018-reconstruction.json -allow-demo
+~~~
+
+The next frontier is **truly independent, authenticated, durable witness checkpoints**—potentially with RE-015's witness model and E-CPU transport—but only after distinguishing independent fault domains, externally provisioned keys and equivocation from merely separate GitHub Actions jobs.
