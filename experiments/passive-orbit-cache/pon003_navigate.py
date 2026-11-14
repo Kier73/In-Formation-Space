@@ -264,6 +264,7 @@ def main() -> None:
     parser.add_argument("--r2-public-key", type=Path, required=True)
     parser.add_argument("--ipfs-public-key", type=Path, required=True)
     parser.add_argument("--mode", choices=("local", "public"), required=True)
+    parser.add_argument("--priority", choices=("r2", "ipfs"), default="r2")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     # A real deployment must separately authenticate the pinned keys
@@ -276,9 +277,12 @@ def main() -> None:
         k: bytes.fromhex(getattr(args, k + "_public_key").read_text().strip())
         for k in ("r2", "ipfs")
     }
+    sites = [Origin("r2", args.r2_base, args.mode == "public"),
+             Origin("ipfs", args.ipfs_base, args.mode == "public")]
+    if args.priority == "ipfs":
+        sites.reverse()
     report = reconstruct(
-        origins=[Origin("r2", args.r2_base, args.mode == "public"),
-                 Origin("ipfs", args.ipfs_base, args.mode == "public")],
+        origins=sites,
         receipts=receipts, pinned_keys=pins,
         epoch_floor={"r2": 1, "ipfs": 1},
         now=int(time.time())
