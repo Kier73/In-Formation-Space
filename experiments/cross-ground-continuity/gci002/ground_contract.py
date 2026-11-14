@@ -120,6 +120,113 @@ def expected_affine_map() -> dict[str, Any]:
     }
 
 
+
+def independent_certificate_material(
+    source: Mapping[str, Any], context: str, records: list[dict[str, Any]],
+    finalizations: list[dict[str, Any]], policy: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Reconstruct VGI's canonical evidence, Ground, policy and orbit hashes.
+
+    Implemented only with canonical JSON, independent arithmetic and exact
+    public serialization contracts; does not execute/import VGI or E-CPU.
+    """
+    final_by_state = {f["source_state"]: f for f in finalizations}
+    record_by_state = {r["source_state"]: r for r in records}
+    expected_decisions = {}
+    for state in (f"r{x}" for x in range(8)):
+        record = record_by_state[state]
+        outcome = record["outcomes"][0]
+        raw_decision = {
+            "source_state": state, "action": ACTION,
+            "status": "QUORUM", "quorum": 1, "strict": True,
+            "observed_sources": [SOURCE], "agreeing_sources": [SOURCE],
+            "dissenting_sources": [], "indeterminate_sources": [],
+            "conflicting_sources": [], "missing_sources": [],
+            "outcome": outcome,
+            "agreeing_evidence_ids": [record["evidence_id"]],
+            "observed_evidence_ids": [record["evidence_id"]],
+        }
+        expected_decisions[state] = cag.digest(raw_decision)
+    require(all(final_by_state[s].get("decision_digest") == expected_decisions[s]
+                for s in expected_decisions),
+            "finalization decision digest differs from independent quorum reconstruction")
+    ledger_fingerprint = cag.digest({
+        "format": "VGI-TransitionEvidenceLedger-1",
+        "policy": policy, "evidence": records, "finalizations": finalizations,
+    })
+    metadata = {
+        "gci002_intent_digest": context,
+        "gci002_probe_digest": source["report_digest"],
+        "vgi_evidence_ground_id": GROUND_ID,
+        "vgi_evidence_context_digest": context,
+        "vgi_evidence_policy_digest": cag.digest(policy),
+        "vgi_evidence_ledger_digest": ledger_fingerprint,
+    }
+    ground_observations = [
+        {
+            "source": state, "action": ACTION,
+            "outcomes": record_by_state[state]["outcomes"],
+            "support_count": 1, "evidence": [record_by_state[state]["evidence_id"]],
+        }
+        for state in (f"r{i}" for i in range(8))
+    ]
+    ground_fingerprint = cag.digest({
+        "format": "VGI-TransitionSystem-1",
+        "states": [f"r{i}" for i in range(8)],
+        "actions": [ACTION], "initial_state": "r7",
+        "channels": ["next_state"],
+        "observations": ground_observations,
+        "metadata": metadata,
+    })
+    orbit_policy = {
+        "format": "VGI-OrbitPolicy-1",
+        "system_fingerprint": ground_fingerprint,
+        "actions_by_state": {f"r{i}": ACTION for i in range(8)},
+        "policy_ambiguous_states": {},
+    }
+    clock_time = {"clock_id": CLOCK, "tick": 0,
+                  "basis": "logical_transition_coordinate"}
+    steps = [{
+        "source_state": f"r{r['state']}", "action": ACTION,
+        "target_state": f"r{r['next_state']}",
+        "output": [r["next_state"]],
+        "evidence": [record_by_state[f"r{r['state']}"]["evidence_id"]],
+    } for r in source["observations"]]
+    orbit = {
+        "format": "VGI-OrbitIndex-1",
+        "system_fingerprint": ground_fingerprint,
+        "policy": orbit_policy, "start_state": "r7",
+        "start_time": clock_time,
+        "states": [f"r{r['state']}" for r in source["observations"]] + ["r7"],
+        "steps": steps, "cycle_start_index": 0,
+        "cycle_period": 8, "stop_status": "cycle",
+        "scope": ("logical-time navigation under one fixed state-to-action policy; "
+                  "all indexed edges are known singleton transitions"),
+    }
+    orbit_fingerprint = cag.digest(orbit)
+    traces = []
+    for length in (1, 2, 8, 16):
+        values = [cag.state_at(t) % 8 for t in range(1, length+1)]
+        traces.append({
+            "actions": [ACTION] * length,
+            "state_trace": [f"r{x}" for x in values],
+            "outputs": [[x] for x in values],
+            "final_state": f"r{values[-1]}",
+        })
+    witness_digest = cag.digest({
+        "ground_fingerprint": ground_fingerprint,
+        "context_digest": context,
+        "compiler_id": "vgi.transition-compiler", "compiler_version": 1,
+        "traces": traces,
+    })
+    return {
+        "ground_fingerprint": ground_fingerprint,
+        "orbit_fingerprint": orbit_fingerprint,
+        "policy_fingerprint": cag.digest(orbit_policy),
+        "witness_digest": witness_digest,
+    }
+
+
 def verify_vgi(vgi: Mapping[str, Any], source: Mapping[str, Any],
                statement: Mapping[str, Any]) -> list[dict[str, Any]]:
     verified_probe(source, statement)
@@ -198,6 +305,12 @@ def verify_vgi(vgi: Mapping[str, Any], source: Mapping[str, Any],
     require(len({f["source_state"] for f in final}) == 8,
             "multiple finalizations for one state")
 
+    reconstructed = independent_certificate_material(
+        source, context, records, final, vgi["evidence_policy"])
+    require(vgi["ground_fingerprint"] == reconstructed["ground_fingerprint"] and
+            vgi["orbit_fingerprint"] == reconstructed["orbit_fingerprint"],
+            "VGI Ground or orbit fingerprint cannot be independently reconstructed")
+
     cert = vgi["orbit_certificate"]
     require(type(cert) is dict and cert.get("format") == "VGI-AffineOrbitCertificate-1"
             and cert.get("claim") == "the affine map generates this exact closed fixed-policy OrbitIndex"
@@ -215,9 +328,10 @@ def verify_vgi(vgi: Mapping[str, Any], source: Mapping[str, Any],
     expected_vectors = [{"state":f"r{x}", "vector":[x]} for x in range(8)]
     require(cert.get("state_vectors") == expected_vectors and
             cert.get("verified_edges") == expected_cert_rows(source) and
-            type(vgi["orbit_certificate_fingerprint"]) is str and
-            len(vgi["orbit_certificate_fingerprint"]) == 64,
-            "closed VGI certificate must cover exactly the eight source edges")
+            cert.get("policy_fingerprint") == reconstructed["policy_fingerprint"] and
+            cert.get("transform_fingerprint") == cag.digest(expected_affine_map()) and
+            vgi["orbit_certificate_fingerprint"] == cag.digest(cert),
+            "closed VGI certificate fields or fingerprint differ from independently reconstructed orbit")
 
     reconstruction = vgi["reconstruction_certificate"]
     require(type(reconstruction) is dict and
@@ -231,8 +345,7 @@ def verify_vgi(vgi: Mapping[str, Any], source: Mapping[str, Any],
                 [[ACTION] * t for t in (1, 2, 8, 16)] and
             reconstruction.get("witness_count") == 4 and
             reconstruction.get("max_horizon") == 16 and
-            type(reconstruction.get("witness_digest")) is str and
-            len(reconstruction["witness_digest"]) == 64 and
+            reconstruction.get("witness_digest") == reconstructed["witness_digest"] and
             vgi["reconstruction_digest"] == cag.digest(reconstruction),
             "finite reconstruction certificate or witness scope differs")
 
