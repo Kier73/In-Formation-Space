@@ -69,9 +69,27 @@ The [workflow](../../.github/workflows/native-neural-formation.yml) pins E-CPU
 native decisions and replay fingerprints, numeric errors, DAG snapshots and
 transport evidence. No ephemeral private keys or shard files are retained.
 
-## Scope and next experiment
+## Evidence
 
-### Local evidence
+The first [PNF-003 CI run](https://github.com/Kier73/In-Formation-Space/actions/runs/43560138372)
+passed all three jobs at commit `86de355a8b22eb3012afccd208d31035fe61eec0`.
+Both Python versions passed **15 native/transport/TCR tests**. The live job
+freshly observed the pinned Hugging Face source, constructed the widened block,
+transferred **44,107,195 bytes in 674 authenticated chunks**, and executed its
+four cuts in the separate receiver process. All **1,536** parent output values
+passed comparison (maximum absolute error `2.1316282072803006e-14`); six scalar
+coordinates had maximum absolute error `3.1086244689504383e-15`. Four initial
+handler calls served eight native submissions; replay made no additional calls.
+The denied control made zero native calls.
+
+The [unaltered live JSON report](results/pnf003-ci-native-43560138372.json) was
+extracted from artifact `14099444612`, `pnf-observed-native`, whose downloaded ZIP
+matched GitHub's SHA-256
+`6915eb9a0f7c5bccdb595328a1e185abb784aa23739b98fbad458a6bcfdc25b7`.
+It records the source/generated identities, transport peers, native decisions,
+replay evidence and DAG snapshot. A follow-up adds fresh source-observation
+records directly to future runner reports; this retained initial report is
+unchanged.
 
 The [Windows native report](results/pnf003-local-native.json) records two
 procedural cases and the retained PNF-002 observed capsule (44,107,195 bytes).
@@ -85,6 +103,8 @@ and fresh-source evidence are delegated to the dedicated CI run.
 
 The local PNF-001, capsule and new native suites passed **42 tests**. Socket
 tests run on CI because the workstation sandbox denies loopback binding.
+
+## Scope and next experiment
 
 The sender and receiver are separate processes connected through real E-CPU
 ReliableChannel/mTLS loopback transport. All four native cuts run inside that

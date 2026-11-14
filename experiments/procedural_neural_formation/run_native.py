@@ -29,6 +29,7 @@ def main():
     if args.capsule and not (args.policy and args.expected_source and args.expected_generated):
         parser.error("saved capsule requires --policy and independently configured --expected-source/--expected-generated")
     pairs = []
+    source_evidence = {}
     for activation in ("relu", "gelu_tanh"):
         parent = procedural_block(8, 1024, 8, activation=activation)
         child, certificate = widen(parent, 2048)
@@ -36,6 +37,7 @@ def main():
             parent, child, certificate, {"kind": "procedural", "seed": 31}, [[.5] * 8])))
     if args.live:
         parent, provenance = observe_source()
+        source_evidence["fresh-observed-gpt2"] = provenance
         child, certificate = widen(parent, 4096)
         pairs.append(("fresh-observed-gpt2", pack_pair(parent, child, certificate, provenance,
             [[((i * 7 + k * 3) % 19 - 9) / 16 for i in range(768)] for k in range(2)])))
@@ -58,6 +60,8 @@ def main():
             case = {"name": name, "transfer": transport}
         if native["status"] != "executed":
             raise FormationError("native execution was not admitted")
+        if name in source_evidence:
+            case["source_observation"] = source_evidence[name]
         cases.append(case)
         print(json.dumps({"case": name, "status": native["status"],
             "handler_calls": native["native_handler_calls"], "capsule_bytes": len(raw),
