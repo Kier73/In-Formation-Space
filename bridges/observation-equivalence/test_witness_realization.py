@@ -220,5 +220,29 @@ class SignedWitnessTests(unittest.TestCase):
         self.assertEqual(report["status"], "signed-model-mismatch")
 
 
+    def test_serialized_lifecycle_replays_through_real_observation_path(self):
+        """When checked out in the real repo, reuse the existing event gate."""
+        import sys
+        from pathlib import Path
+        sibling = Path(__file__).resolve().parents[1] / "observation-path"
+        if not (sibling / "observation_path.py").is_file():
+            self.skipTest("standalone source checkout lacks the observation-path sibling")
+        sys.path.insert(0, str(sibling))
+        from observation_path import ObservationIntent, ObservationPath
+        _, runs, _, _, _ = fixture()
+        for lane in ("left", "right"):
+            original = runs[lane]["path"]
+            path = ObservationPath(ObservationIntent(
+                attempt_id=original["attempt_id"], **original["intent"]
+            ))
+            for item in original["events"][1:]:
+                path.append(item["stage"], item["actor"],
+                            clock_value=item["clock_value"],
+                            clock_domain=item["clock_domain"],
+                            evidence_ref=item["evidence_ref"],
+                            details=item["details"])
+            self.assertEqual(path.to_dict(), original)
+
+
 if __name__ == "__main__":
     unittest.main()
