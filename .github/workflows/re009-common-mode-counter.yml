@@ -1,0 +1,192 @@
+name: RE-009 source counter common-mode observation audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re009-common-mode-counter.yml'
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re009-common-mode-counter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Test response-equivalence research suite
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Reproduce deterministic RE-009 report exactly
+        run: |
+          python experiments/response-equivalence/common_mode_counter.py > /tmp/re009.json
+          cmp experiments/response-equivalence/re009_report.json /tmp/re009.json
+      - name: Verify real E-CPU causal integration
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re009_cases.py
+
+  enrollment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Create scoped CI role keys (not real sensor enrollment)
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from common_mode_counter import register
+          reg=register()
+          for name, keys in [('source',['S']), ('A',['A']), ('B',['B']), ('verifier',['S','A','B'])]:
+              dest={'challenge':reg['challenge'],'key_ids':reg['key_ids'],
+                    'keys':{role:reg['keys'][role] for role in keys}}
+              with open('re009-'+name+'-enrollment.json','w',encoding='utf-8') as f:
+                  json.dump(dest,f,sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re009-source-enrollment, path: re009-source-enrollment.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re009-A-enrollment, path: re009-A-enrollment.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re009-B-enrollment, path: re009-B-enrollment.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re009-verifier-enrollment, path: re009-verifier-enrollment.json, retention-days: 1, if-no-files-found: error}
+
+  source:
+    needs: enrollment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re009-source-enrollment}
+      - name: Emit source boundary receipts bound to actual E-CPU controller frame
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY'
+          import json
+          from ecpu_common_mode_hosts import source_host
+          with open('re009-source-enrollment.json',encoding='utf-8') as f: reg=json.load(f)
+          with open('re009-source-public.json','w',encoding='utf-8') as f:
+              json.dump(source_host(reg),f,sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re009-source-public, path: re009-source-public.json, if-no-files-found: error}
+
+  observer-a:
+    needs: [enrollment, source]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re009-A-enrollment}
+      - uses: actions/download-artifact@v4
+        with: {name: re009-source-public}
+      - name: Capture source-bound A evidence and signed acknowledgement
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY'
+          import json
+          from ecpu_common_mode_hosts import observer_host
+          def read(path):
+              with open(path,encoding='utf-8') as f: return json.load(f)
+          out=observer_host('A',read('re009-source-public.json'),read('re009-A-enrollment.json'))
+          with open('re009-A-public.json','w',encoding='utf-8') as f: json.dump(out,f,sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re009-A-public, path: re009-A-public.json, if-no-files-found: error}
+
+  observer-b:
+    needs: [enrollment, source]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re009-B-enrollment}
+      - uses: actions/download-artifact@v4
+        with: {name: re009-source-public}
+      - name: Capture source-bound B evidence and signed acknowledgement
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY'
+          import json
+          from ecpu_common_mode_hosts import observer_host
+          def read(path):
+              with open(path,encoding='utf-8') as f: return json.load(f)
+          out=observer_host('B',read('re009-source-public.json'),read('re009-B-enrollment.json'))
+          with open('re009-B-public.json','w',encoding='utf-8') as f: json.dump(out,f,sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re009-B-public, path: re009-B-public.json, if-no-files-found: error}
+
+  independent-verifier:
+    needs: [tests, enrollment, source, observer-a, observer-b]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re009-verifier-enrollment}
+      - uses: actions/download-artifact@v4
+        with: {name: re009-source-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re009-A-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re009-B-public}
+      - name: Independently reconstruct discrepancy and scoped E-CPU causal claims
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: |
+          python - <<'PY'
+          import json
+          from ecpu_common_mode_hosts import verify
+          def read(path):
+              with open(path,encoding='utf-8') as f: return json.load(f)
+          result=verify(read('re009-source-public.json'),read('re009-A-public.json'),
+                        read('re009-B-public.json'),read('re009-verifier-enrollment.json'))
+          assert result['status']=='source_counter_discrepancy_verified'
+          assert result['counter_reconstruction']['source_observer_discrepancy']==1
+          assert result['counter_reconstruction']['observer_blind_declared_epochs']==[]
+          assert result['physical_common_mode_loss_proved'] is False
+          with open('re009-independent-report.json','w',encoding='utf-8') as f:
+              json.dump(result,f,sort_keys=True)
+          print('RE-009 evidence discrepancy verified; physical causation NOT claimed')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re009-independent-report, path: re009-independent-report.json, if-no-files-found: error}
