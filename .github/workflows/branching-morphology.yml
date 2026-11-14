@@ -122,6 +122,21 @@ jobs:
           assert [x["vertices"] for x in report["boundaries"]] == [4,5,6,7,8,9]
           print("Exact depth-six hull and all-depth stabilization premises validated")
           PY
+      - name: Check and retain all-depth tip exposure premise record
+        run: |
+          python experiments/branching-morphology/tip_exposure.py > "$RUNNER_TEMP/tip-exposure-certificate.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          certificate = json.loads((Path(os.environ["RUNNER_TEMP"]) / "tip-exposure-certificate.json").read_text())
+          audits = certificate["finite_audits"]
+          assert len(audits) == 8
+          assert [x["min_first_order_support_gap"] for x in audits] == [3**n for n in range(8)]
+          assert [x["unique_full_depth_tip_index"] for x in audits] == [(3*5**n+1)//4 for n in range(1,9)]
+          assert certificate["strict_support_bound"] == "cross(O,A_n,p)>=3^n*theta/16>0 for all other endpoints"
+          print("All-depth moment-cone premises and finite audits validated")
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: branching-morphology-py${{ matrix.python-version }}
@@ -132,3 +147,4 @@ jobs:
             ${{ runner.temp }}/depth5-certificate.json
             ${{ runner.temp }}/all-depth-hull-certificate.json
             ${{ runner.temp }}/depth6-certificate.json
+            ${{ runner.temp }}/tip-exposure-certificate.json
