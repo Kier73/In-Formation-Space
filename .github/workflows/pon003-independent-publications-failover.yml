@@ -225,9 +225,9 @@ jobs:
           set -euo pipefail
           sudo install -d -m 0755 /etc/apt/keyrings
           curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
-          sudo chmod go+r /etc/apt/keyrings/github-cli-archive-keyring.gpg
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/github-cli.list] https://cli.github.com/packages stable main" >/dev/null
-          gh --version
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
           for f in publisher-artifacts/r2-origin.tar publisher-artifacts/ipfs-origin.tar evidence/pon003-killed-origin-report.json; do
             gh attestation verify "$f" --repo Kier73/In-Formation-Space \
               --signer-workflow Kier73/In-Formation-Space/.github/workflows/pon003-independent-publications-failover.yml \
