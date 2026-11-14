@@ -55,6 +55,23 @@ These routes are **two separately scheduled job-level information paths through 
 - Delay-tolerant Bundle Protocol (RFC 9171): carry bundles across intermittent contacts. https://www.rfc-editor.org/rfc/rfc9171
 - Cloudflare Durable Objects and WebSockets: an addressable rendezvous observer for outbound-connected clients, with provider trust and quota concerns. https://developers.cloudflare.com/durable-objects/best-practices/websockets/
 
+## Verified hosted result
+
+The first main-branch execution completed successfully: [GitHub Actions run 43553335051](https://github.com/Kier73/In-Formation-Space/actions/runs/43553335051), on squash commit 5df38e85e276d350f2adae4e4fd26608aba30a44.
+
+- jobs: tests, source_host, relay_blue_host, relay_amber_host, verifier_host — **all succeeded**
+- source, blue and amber records: published as separate workflow artifacts; all three subject artifacts passed GitHub CLI attestation verification by the off-route verifier, pinned to the exact main-branch workflow signer
+- final artifact: cag001-independent-convergence-report / report.json
+- exact report file SHA-256: 33065060ffea74eb9cf12ff43f0ef2219946fc972c857866ee8e0f8ff960108f
+- canonical report digest: 9a9bc3a9979e06c77d2b3f5765ca28485a519bd683d6872b2e4f178acf189f94
+- report status: multi_route_eventual_convergence
+- reconstructed value in both routes: 44, with five distinct packet identities
+- blue then amber: unknown_dependency → locally_reconstructed_pure_result
+- amber then blue: unknown_dependency → locally_reconstructed_pure_result
+- local permutation/conflict test suite: 13 test cases passed, including all 120 permutations of the five unique packets
+
+The result was inspected from the retained JSON report, not inferred merely from a green Actions badge. The report and the producer route artifacts are attested by GitHub workflow infrastructure; this does **not** establish physical route diversity, sender honesty, separate cloud providers, or VGI/E-CPU execution authority. The independent verifier recomputes finite pure arithmetic and rejects inconsistent route content. It does not execute remote arbitrary operations.
+
 ## Next discriminating experiment
 
 Replace **one** GitHub artifact route with a genuinely independent provider or self-hosted relay, inject partial outage and restart, and check convergence with the same content-addressed DAG and off-route verifier. Authenticate original publishers and bind the result to E-CPU receiver-local execution admission and VGI proof certificates. Keep a transport-delivery ACK, a host-created computation receipt, a mathematical check and an independent attestation as different evidence tiers.
