@@ -74,11 +74,18 @@ jobs:
           ref: 84f42cffad6548bb772940ffd80331dcb76db122
           path: ecpu
           persist-credentials: false
+      - name: Checkout original VGI proof types required by existing IFS adapter
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: vgi
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Install route-epoch ledger dependencies; do not run E-CPU model
-        run: python -m pip install -e ecpu
+      - name: Install existing route-epoch adapter dependencies; do not run model
+        run: python -m pip install -e ecpu -e vgi/virtual_ground_interpreter
       - name: Test genuine competing process ownership and forged evidence cases
         run: >-
           python -m unittest discover
