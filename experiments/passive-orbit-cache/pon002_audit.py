@@ -14,7 +14,10 @@ import argparse
 import json
 from pathlib import Path
 import re
+import sys
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "convergent-ground-fabric"))
 
 from convergent_fabric import Replica
 from passive_orbit import ROOT_PIN, HERE, checked_manifest, checked_packet, canonical, digest
