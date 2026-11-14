@@ -1,0 +1,109 @@
+name: TCR-003 native E-CPU tensor-cut admission
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/tensor_cut_realization/**'
+      - '.github/workflows/tcr003-native-admission.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/tensor_cut_realization/**'
+      - '.github/workflows/tcr003-native-admission.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONPATH: external/E-CPU
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+
+jobs:
+  native-contract:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - run: python -m pip install numpy
+      - name: Verify actual pinned E-CPU runtime and native admission
+        run: |
+          set -euo pipefail
+          python -c 'from mailcpu import HeadlessOS, VirtualLayerRuntime, OperatorRegistry'
+          python -m unittest experiments.tensor_cut_realization.test_native_admission -v
+          python -m unittest experiments.tensor_cut_realization.test_transit_tensor -v
+
+  pinned-weight-native:
+    needs: native-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install numpy jsonschema
+      - name: Read pinned GPT-2 weights without synthetic fallback
+        run: python -m experiments.tensor_cut_realization.tensor_cut prepare --live --out prepared
+      - name: Run actual Hypervisor operator for one real tensor partition
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import numpy as np
+          from experiments.tensor_cut_realization import tensor_cut as tcr
+          from experiments.tensor_cut_realization import transit_tensor as transport
+          from experiments.tensor_cut_realization.native_admission import NativeCut, accept_partition
+          base=Path('prepared')
+          manifest=tcr._validated_manifest(tcr._read_json(base/'manifest.json'))
+          assert manifest['source_provenance']['kind']=='observed-selected-huggingface-payloads'
+          with np.load(base/'reference.npz',allow_pickle=False) as arc:
+              x=arc['inputs']
+          request=transport.request_for(manifest,0,x,request_id='tcr003-real-source')
+          host=NativeCut(base/'shard-0')
+          result=host.execute(request,sequence=1)
+          assert result['accepted'] and result['hypervisor_action']=='allow'
+          assert result['native_replayed'] is False and host.calls==1
+          accept_partition(manifest,request,result,Path('native-results'))
+          tcr.worker(base/'shard-0',Path('independent-results'))
+          observed,_=tcr._accept(manifest,Path('native-results'),0)
+          reference,_=tcr._accept(manifest,Path('independent-results'),0)
+          error=tcr._compare(observed,reference,'native real-source vs independent shard')
+          report={'schema':'ifs.tcr003.native-live-report.v1',
+                  'status':'pinned-source-native-operator-matched',
+                  'manifest_digest':manifest['digest'],
+                  'source_provenance':manifest['source_provenance'],
+                  'operator_contract_digest':result['operator_contract_digest'],
+                  'hypervisor_action':result['hypervisor_action'],
+                  'max_abs_error':error,
+                  'handler_calls':host.calls,
+                  'network_transport_performed':False,
+                  'separate_host_execution_performed':False}
+          Path('native-tcr003-report.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
+          print(json.dumps({k:v for k,v in report.items() if k!='source_provenance'},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tcr003-pinned-native-evidence
+          path: native-tcr003-report.json
+          if-no-files-found: error
