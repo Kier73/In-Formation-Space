@@ -5,6 +5,8 @@
 
 This continues [BMO-009](ALL-DEPTH-TIP-EXPOSURE.md) by replacing its very small-angle Taylor estimate with a **distributional invariant** preserved by each grammar copy.
 
+**Follow-up (BMO-011):** The [averaged-tip phase theorem](AVERAGED-SUPPORT-BRACKET.md) strengthens this sufficient exposure interval to **0<θ≤π/(2n+1)** and proves the actual first strict-support loss angle obeys **n·τ_n→π/2**. The stochastic tail inequalities below remain a required premise.
+
 ## The result
 
 Let `O` be the origin and `A_n` the nested left tip at endpoint index `a_n=(3·5^n+1)/4`. **For every finite depth `n≥1`, `O→A_n` is a strict supporting edge of the convex hull whenever**
