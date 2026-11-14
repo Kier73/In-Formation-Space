@@ -102,8 +102,26 @@ jobs:
           Path('native-tcr003-report.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
           print(json.dumps({k:v for k,v in report.items() if k!='source_provenance'},sort_keys=True))
           PY
+      - name: Realize all four GPT-2 tensor cuts through native E-CPU Hypervisor and DAG
+        run: |
+          set -euo pipefail
+          python -m experiments.tensor_cut_realization.run_native_four \
+            --prepared prepared --results four-native-results \
+            --out native-four-summary.json --detail native-four-dag-report.json
+          python - <<'PY'
+          import json
+          result=json.load(open("native-four-summary.json"))
+          assert result["status"]=="native-hypervisor-and-numeric-reference-passed"
+          assert len(result["decisions"])==4
+          assert all(x["native_replay_confirmed"] for x in result["decisions"])
+          assert result["numerical_verification"]["status"]=="passed"
+          assert not result["network_transport_performed"]
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: tcr003-pinned-native-evidence
-          path: native-tcr003-report.json
+          path: |
+            native-tcr003-report.json
+            native-four-summary.json
+            native-four-dag-report.json
           if-no-files-found: error
