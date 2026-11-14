@@ -107,6 +107,8 @@ def isDigest (bs : Bytes) : Bool :=
 structure Envelope where
   wire : WireCert
   networkSHA : Bytes
+  /-- Original exact canonical JSON bytes of the nested network object. -/
+  networkRaw : Bytes
   semanticAtlas : List WireCell
   semanticSHA : Bytes
   deriving Repr, DecidableEq
@@ -118,7 +120,12 @@ def document : Reader Envelope := fun input => do
   let rest ← expect [123, 34, 97, 116, 111, 109, 105, 99, 95, 99, 101, 108, 108, 115, 34, 58] input
   let (cells, rest) ← array 4096 cell rest
   let rest ← expect [44, 34, 110, 101, 116, 119, 111, 114, 107, 34, 58, 123, 34, 108, 97, 121, 101, 114, 115, 34, 58] rest
+  let rawLayers := rest
   let (layers, rest) ← array 64 layer rest
+  /- Preserve the raw bytes for exactly the recognized nested network
+  object; its end is the first closing brace before network_sha256. -/
+  let networkRaw := [123, 34, 108, 97, 121, 101, 114, 115, 34, 58] ++
+    rawLayers.take (rawLayers.length - rest.length) ++ [125]
   let rest ← expect [125, 44, 34, 110, 101, 116, 119, 111, 114, 107, 95, 115, 104, 97, 50, 53, 54, 34, 58] rest
   let (networkSHA, rest) ← quotedToken rest
   if !isDigest networkSHA then none else
@@ -130,6 +137,7 @@ def document : Reader Envelope := fun input => do
       let rest ← expect [125] rest
       some ({ wire := { layers := layers, cells := cells },
               networkSHA := networkSHA,
+              networkRaw := networkRaw,
               semanticAtlas := semanticAtlas,
               semanticSHA := semanticSHA }, rest)
 
