@@ -19,7 +19,7 @@ from mailcpu.mtls_transport import accept_mutual_tls, connect_mutual_tls
 from mailcpu.reliability import ReliableChannel, ReliabilityPolicy
 from mailcpu.socket_transport import SocketTransport
 
-from compiler import compile_semantics
+from compiler import AtlasRejected, compile_semantics
 from verifier import verify_capsule, strict_json
 from independent_certificate_checker import json_bytes
 
@@ -170,7 +170,10 @@ def verify_received(raw: bytes, *, kind: str, expected_semantic_sha256: str
             "payload kind/schema substitution")
     started = time.perf_counter_ns()
     if kind == "semantic":
-        generated = compile_semantics(data["semantic_atlas"])
+        try:
+            generated = compile_semantics(data["semantic_atlas"])
+        except AtlasRejected as exc:
+            raise TransitRejected("invalid source semantic atlas: " + str(exc)) from exc
         constructed_ns = time.perf_counter_ns() - started
     else:
         cert = data["generated_certificate"]
