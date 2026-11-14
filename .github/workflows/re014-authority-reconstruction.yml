@@ -1,0 +1,297 @@
+name: RE-014 durable authority reconstruction and revocation
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re014-authority-reconstruction.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re014-authority-reconstruction.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with: {python-version: '${{ matrix.python-version }}'}
+      - name: Verify complete RE-001 through RE-014 suite
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Verify deterministic RE-014 result
+        run: |
+          python experiments/response-equivalence/authority_reconstruction.py > /tmp/re014-reproduced.json
+          cmp /tmp/re014-reproduced.json experiments/response-equivalence/re014_report.json
+      - name: Test authority host adapter against genuine pinned E-CPU temporal implementation
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: python experiments/response-equivalence/ecpu_re014_cases.py
+
+  enrollment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Generate fixture evidence and role-specific CI keys
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from authority_reconstruction import registration,evidence
+          reg=registration(); doc=evidence(reg)
+          def save(p,x):
+              with open(p,'w',encoding='utf-8') as f:json.dump(x,f,sort_keys=True)
+          save('re014-evidence.json',doc)
+          save('re014-verifier-enrollment.json',reg)
+          for role in ('M','P'):
+              save(f're014-{role}-enrollment.json',{'challenge':reg['challenge'],
+                    'key_ids':reg['key_ids'],'keys':{role:reg['keys'][role]}})
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-evidence, path: re014-evidence.json, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-verifier-enrollment-ci, path: re014-verifier-enrollment.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-methodology-key-ci, path: re014-M-enrollment.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-provenance-key-ci, path: re014-P-enrollment.json, retention-days: 1, if-no-files-found: error}
+
+  methodology-M:
+    needs: enrollment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-evidence}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-methodology-key-ci}
+      - name: Sign scoped methodology assumption without other role keys
+        run: |
+          python - <<'PY'
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          with open('request.json','w') as f:json.dump({'evidence':read('re014-evidence.json'),
+                'enrollment':read('re014-M-enrollment.json'),'role':'M'},f)
+          PY
+          python experiments/response-equivalence/ecpu_re014_hosts.py endorse --input request.json --output re014-M.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-methodology-assertion, path: re014-M.json, if-no-files-found: error}
+
+  provenance-P:
+    needs: enrollment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-evidence}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-provenance-key-ci}
+      - name: Sign source/instrument context assertion without methodology key
+        run: |
+          python - <<'PY'
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          with open('request.json','w') as f:json.dump({'evidence':read('re014-evidence.json'),
+                'enrollment':read('re014-P-enrollment.json'),'role':'P'},f)
+          PY
+          python experiments/response-equivalence/ecpu_re014_hosts.py endorse --input request.json --output re014-P.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-provenance-assertion, path: re014-P.json, if-no-files-found: error}
+
+  authority-Q:
+    needs: [enrollment, methodology-M, provenance-P]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-evidence}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-verifier-enrollment-ci}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-methodology-assertion}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-provenance-assertion}
+      - name: Persist SQLite authority history and issue scoped revision 2
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY'
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          with open('request.json','w') as f:json.dump({'evidence':read('re014-evidence.json'),
+                'enrollment':read('re014-verifier-enrollment.json'),
+                'M':read('re014-M.json'),'P':read('re014-P.json')},f)
+          PY
+          python experiments/response-equivalence/ecpu_re014_hosts.py issue --input request.json --output re014-Q.json --db re014-authority.sqlite3
+          python - <<'PY'
+          import json
+          with open('re014-Q.json') as f:r=json.load(f)
+          with open('re014-issue-anchor.json','w') as f:json.dump(r['anchor'],f)
+          assert r['anchor']['count']==3
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-issued-public, path: re014-Q.json, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-issued-sqlite, path: re014-authority.sqlite3, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-issued-head, path: re014-issue-anchor.json, if-no-files-found: error}
+
+  verifier-W:
+    needs: [tests, authority-Q]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-evidence}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-verifier-enrollment-ci}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-issued-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-issued-sqlite}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-issued-head}
+      - name: Reconstruct scope-bound admission from public and SQLite artifacts
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY'
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          with open('request.json','w') as f:json.dump({'evidence':read('re014-evidence.json'),
+            'enrollment':read('re014-verifier-enrollment.json'), 'authority':read('re014-Q.json'),
+            'expected_anchor':read('re014-issue-anchor.json')},f)
+          PY
+          python experiments/response-equivalence/ecpu_re014_hosts.py verify --input request.json --output re014-W-report.json --db re014-authority.sqlite3
+          python - <<'PY'
+          import json
+          with open('re014-W-report.json') as f:r=json.load(f)
+          assert r['authority']['status']=='conditionally_admitted',r
+          assert r['authority']['physical_source_truth_established'] is False
+          assert r['causal_relation']=='Q_before_W'
+          print('Independent evidence and causality replay accepted conditional only')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-issued-independent-verification, path: re014-W-report.json, if-no-files-found: error}
+
+  revoker-R:
+    needs: verifier-W
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-evidence}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-verifier-enrollment-ci}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-issued-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-issued-sqlite}
+      - name: Append durable signed revocation following actual E-CPU causal stamp
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY'
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          with open('request.json','w') as f:json.dump({'evidence':read('re014-evidence.json'),
+                'enrollment':read('re014-verifier-enrollment.json'),'issued':read('re014-Q.json')},f)
+          PY
+          python experiments/response-equivalence/ecpu_re014_hosts.py revoke --input request.json --output re014-R.json --db re014-authority.sqlite3
+          python - <<'PY'
+          import json
+          with open('re014-R.json') as f:r=json.load(f)
+          assert r['anchor']['count']==4
+          with open('re014-revoked-anchor.json','w') as f:json.dump(r['anchor'],f)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-revoked-public, path: re014-R.json, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-revoked-sqlite, path: re014-authority.sqlite3, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-revoked-head, path: re014-revoked-anchor.json, if-no-files-found: error}
+
+  independent-revocation-verifier:
+    needs: revoker-R
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-evidence}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-verifier-enrollment-ci}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-issued-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-revoked-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-revoked-sqlite}
+      - uses: actions/download-artifact@v4
+        with: {name: re014-revoked-head}
+      - name: Recheck revocation, causality and anchored rollback refusal
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY'
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          with open('request.json','w') as f:json.dump({'evidence':read('re014-evidence.json'),
+                'enrollment':read('re014-verifier-enrollment.json'),
+                'authority':read('re014-R.json'),'issued':read('re014-Q.json'),
+                'expected_anchor':read('re014-revoked-anchor.json')},f)
+          PY
+          python experiments/response-equivalence/ecpu_re014_hosts.py verify --input request.json --output re014-revocation-report.json --db re014-authority.sqlite3
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from authority_reconstruction import AuthorityError,replay
+          def read(p):
+              with open(p) as f:return json.load(f)
+          r=read('re014-revocation-report.json')
+          assert r['authority']['status']=='revoked' and r['causal_relation']=='R_before_W',r
+          old=read('re014-Q.json')['transcript']
+          try: replay(old,read('re014-verifier-enrollment.json'),read('re014-evidence.json'),
+                      independently_anchored=read('re014-revoked-anchor.json'))
+          except AuthorityError: pass
+          else:raise AssertionError('old head should be rejected against latest checkpoint')
+          print('Revocation independently reconstructed; old head rejected against newer anchor')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re014-revocation-independent-verification, path: re014-revocation-report.json, if-no-files-found: error}
