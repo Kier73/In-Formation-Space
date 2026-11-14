@@ -108,7 +108,28 @@ theorem clampReal_fixed (c : Cell) (x : ℝ)
 theorem continuous_clampReal (c : Cell) : Continuous (clampReal c) := by
   cases c with
   | mk lo hi out =>
-    cases lo <;> cases hi <;> fun_prop
+      cases lo with
+      | none =>
+          cases hi with
+          | none =>
+              change Continuous (fun x : ℝ => x)
+              exact continuous_id
+          | some u =>
+              change Continuous (fun x : ℝ => min (u : ℝ) x)
+              exact ((continuous_const :
+                Continuous (fun _ : ℝ => (u : ℝ))).min continuous_id)
+      | some l =>
+          cases hi with
+          | none =>
+              change Continuous (fun x : ℝ => max (l : ℝ) x)
+              exact ((continuous_const :
+                Continuous (fun _ : ℝ => (l : ℝ))).max continuous_id)
+          | some u =>
+              change Continuous (fun x : ℝ => min (u : ℝ) (max (l : ℝ) x))
+              exact ((continuous_const :
+                Continuous (fun _ : ℝ => (u : ℝ))).min
+                  ((continuous_const :
+                    Continuous (fun _ : ℝ => (l : ℝ))).max continuous_id))
 
 /-- Select a component from the *actual claimed cell output*, with zero
 padding outside its width, matching the total-component convention in
