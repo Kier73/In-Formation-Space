@@ -26,9 +26,9 @@
     "common_mode_dropouts": {
       "adversarial_miss_bound": null,
       "conditional_95pct_one_sided_upper_miss": {
-        "A": 0.30380973,
-        "B": 0.30380973,
-        "joint": 0.30380973
+        "A": 0.303809731,
+        "B": 0.303809731,
+        "joint": 0.303809731
       },
       "counts": {
         "A_non_detection": 12,
@@ -47,9 +47,9 @@
     "complementary_dropouts": {
       "adversarial_miss_bound": null,
       "conditional_95pct_one_sided_upper_miss": {
-        "A": 0.30380973,
-        "B": 0.30380973,
-        "joint": 0.048702913
+        "A": 0.303809731,
+        "B": 0.303809731,
+        "joint": 0.048702914
       },
       "counts": {
         "A_non_detection": 12,
