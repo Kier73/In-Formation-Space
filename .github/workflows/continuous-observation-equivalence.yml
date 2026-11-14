@@ -217,6 +217,37 @@ jobs:
             cat lean-certificates-proof-output.txt
             exit 1
           fi
+      - name: Test untrusted string-only wire transport
+        working-directory: experiments/continuous-observation-equivalence
+        run: python -m unittest test_lean_wire -v
+      - name: Transport original string tokens separately from rational literals
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python emit_lean_wire.py received-certificates lean/GeneratedWireProofs.lean --manifest lean/lean-wire-replay-manifest.json
+      - name: Kernel-decode wire tokens and prove equality to original five typed certificates
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean -o .lake/build/lib/lean/GeneratedCertificateProofs.olean GeneratedCertificateProofs.lean > lean-certificate-olean-output.txt
+          lake env lean GeneratedWireProofs.lean | tee lean-wire-token-proof-output.txt
+          for name in identity relu_identity zero triangular_bump rescaled_bump; do
+            grep -Fq "'COE012.${name}_wire_decoded' depends on axioms:" lean-wire-token-proof-output.txt
+            grep -Fq "'COE012.${name}_wire_verified' depends on axioms:" lean-wire-token-proof-output.txt
+          done
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' lean-wire-token-proof-output.txt; then
+            cat lean-wire-token-proof-output.txt
+            exit 1
+          fi
+      - name: Require Lean kernel rejection of noncanonical rational wire admission
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          if lake env lean COE012WireInvalid.lean > invalid-wire-token.txt 2>&1; then
+            echo "ERROR: Lean accepted an unreduced wire fraction"
+            exit 1
+          fi
+          cat invalid-wire-token.txt
+          grep -Fq 'Tactic `decide` proved that the proposition' invalid-wire-token.txt
+          grep -Fq 'acceptWire unreduced = true' invalid-wire-token.txt
+          grep -Fq 'is false' invalid-wire-token.txt
       - name: Construct negative certificates without altering source network hashes
         working-directory: experiments/continuous-observation-equivalence
         run: |
@@ -242,5 +273,10 @@ jobs:
             experiments/continuous-observation-equivalence/lean/lean-replay-manifest.json
             experiments/continuous-observation-equivalence/lean/GeneratedCertificateProofs.lean
             experiments/continuous-observation-equivalence/lean/lean-certificates-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/lean-wire-replay-manifest.json
+            experiments/continuous-observation-equivalence/lean/GeneratedWireProofs.lean
+            experiments/continuous-observation-equivalence/lean/lean-certificate-olean-output.txt
+            experiments/continuous-observation-equivalence/lean/lean-wire-token-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/invalid-wire-token.txt
             experiments/continuous-observation-equivalence/lean/negative-*-rejection.txt
           if-no-files-found: error
