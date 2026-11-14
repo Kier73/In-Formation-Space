@@ -13,16 +13,7 @@ error, missing import, or an untrusted test runner's assertion.
 namespace COE011Invalid
 open COEWireCheck
 
-def gappedSplit : Cert :=
-  { layers := [
-      { weights := [[(1 : Rat)]], bias := [0], relu := false }]
-    cells := [
-      { left := none, right := some 0,
-        output := [{ slope := 1, offset := 0 }] },
-      { left := some 1, right := none,
-        output := [{ slope := 1, offset := 0 }] }] }
-
-theorem false_continuous_cover : verify gappedSplit = true := by
+theorem false_continuous_cover : verify COE011Fixtures.gappedSplit = true := by
   decide +kernel
 
 end COE011Invalid
