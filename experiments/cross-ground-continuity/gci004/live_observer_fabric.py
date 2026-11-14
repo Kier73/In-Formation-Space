@@ -152,8 +152,13 @@ def advertisement(peer: str,feature: str,port: int,binding: Mapping[str,str]):
                                      hosts=(host,),links=())
 
 
-def server(peer: str, directory: Path, cert_dir: Path, ready_path: Path) -> None:
+def server(peer: str, directory: Path, cert_dir: Path, ready_path: Path,
+           *, diagnostic_false_reading: bool = False) -> None:
     feature, _dns=c.PEERS[peer]
+    # Isolated adversarial test mode: an authenticated signer lies about a
+    # parity reading. The ordinary GCI-004 host path never enables this.
+    check(not diagnostic_false_reading or peer == 'observer-b',
+          'only GCI-005 diagnostic observer-b may sign an altered reading')
     binding=c.gci3.certificate_binding(directory)
     public=c.cag.read(directory/'gci003-public.json')
     private=c.cag.read(directory/'gci003-private.json')
@@ -216,8 +221,10 @@ def server(peer: str, directory: Path, cert_dir: Path, ready_path: Path) -> None
                             send(t,'coordinator','REJECT',{'code':'challenge-replay'})
                             continue
                         seen_challenges.add(challenge)
-                        payload=c.signed_payload(body,peer,snapshot.digest,
-                                                 c.gci3.feature(feature,state))
+                        observed=c.gci3.feature(feature,state)
+                        if diagnostic_false_reading:
+                            observed ^= 1
+                        payload=c.signed_payload(body,peer,snapshot.digest,observed)
                         receipt={'payload':payload,
                                  'signature_b64':c.sign_receipt(private_key,payload)}
                         send(t,'coordinator','RECEIPT',receipt)
@@ -440,13 +447,18 @@ def main() -> None:
     p.add_argument('--serve',choices=tuple(c.PEERS))
     p.add_argument('--cert-dir',type=Path)
     p.add_argument('--ready-path',type=Path)
+    p.add_argument('--gci005-diagnostic-false-reading',action='store_true')
     args=p.parse_args()
     try:
         if args.serve:
             check(args.cert_dir is not None and args.ready_path is not None,
                   'observer needs configured certificate directory and readiness file')
-            server(args.serve,args.directory,args.cert_dir,args.ready_path)
-        else: run(args.directory)
+            server(args.serve,args.directory,args.cert_dir,args.ready_path,
+                   diagnostic_false_reading=args.gci005_diagnostic_false_reading)
+        else:
+            check(not args.gci005_diagnostic_false_reading,
+                  'diagnostic false reading only supported for an observer server')
+            run(args.directory)
     except Exception as e:
         import traceback
         traceback.print_exc()
