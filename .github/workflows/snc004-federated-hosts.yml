@@ -1,0 +1,149 @@
+name: SNC-004 federated semantic capsule independent hosts
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - '.github/workflows/snc004-federated-hosts.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - '.github/workflows/snc004-federated-hosts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  federation-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - name: SNC-001 original exact ReLU semantic regression
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence
+        run: python -m unittest discover -s experiments/semantic_neural_compilation -p 'test_snc001.py' -v
+      - name: SNC-004 independent authority, replay, tamper and audit tests
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence
+        run: python -m unittest discover -s experiments/semantic_neural_compilation -p 'snc004_tests.py' -v
+
+  producer-host:
+    needs: federation-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: First host constructs, verifies and exports only portable model capsule
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence
+        run: |
+          set -euo pipefail
+          python experiments/semantic_neural_compilation/federated_pipeline.py \
+            producer --directory evidence/producer | tee producer-stdout.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('evidence/producer/producer-report.json').read_text())
+          assert p['status'] == 'untrusted-verified-capsule-export'
+          assert p['producer_policy_not_transmitted']
+          assert p['producer_database_not_transmitted']
+          assert Path('evidence/producer/portable-model.json').is_file()
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004-untrusted-portable-model
+          path: evidence/producer/portable-model.json
+          if-no-files-found: error
+
+  receiver-host:
+    needs: producer-host
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          name: snc004-untrusted-portable-model
+          path: evidence/incoming
+      - name: Independently admit capsule under receiver-owned source pin
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence
+        run: |
+          set -euo pipefail
+          python experiments/semantic_neural_compilation/federated_pipeline.py \
+            receiver --directory evidence/receiver \
+            --capsule evidence/incoming/portable-model.json | tee receiver-stdout.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('evidence/receiver/receiver-report.json').read_text())
+          assert p['import']['status'] == 'admitted-to-local-mathematical-cache'
+          assert p['import']['model_compiler_ran_at_receiver'] is False
+          assert p['observation']['cache_state'] == 'restored-verified'
+          assert p['observation']['receipt']['outputs'] == ['3/4']
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004-independent-receiver-result
+          path: |
+            evidence/receiver/receiver-report.json
+            evidence/receiver/receiver-summary.json
+          if-no-files-found: error
+
+  auditor-host:
+    needs: receiver-host
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: snc004-untrusted-portable-model
+          path: evidence/producer
+      - uses: actions/download-artifact@v4
+        with:
+          name: snc004-independent-receiver-result
+          path: evidence/receiver
+      - name: Third independent runner independently verifies all-real certificate and exact observation
+        env:
+          PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence
+        run: |
+          set -euo pipefail
+          python experiments/semantic_neural_compilation/federated_auditor.py \
+            --capsule evidence/producer/portable-model.json \
+            --receiver-report evidence/receiver/receiver-report.json \
+            --examples experiments/semantic_neural_compilation/examples.json \
+            --model clamp --coordinate 3/4 --request-id import-observe \
+            --output evidence/federation-audit.json | tee independent-audit-stdout.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('evidence/federation-audit.json').read_text())
+          assert report['status']=='independent-full-domain-and-observation-reconstruction'
+          assert report['independent_outputs']==['3/4']
+          assert report['cross_host_network_transport_verified'] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004-independent-third-host-audit
+          path: evidence/federation-audit.json
+          if-no-files-found: error
