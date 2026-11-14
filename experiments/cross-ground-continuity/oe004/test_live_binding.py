@@ -75,8 +75,13 @@ def run(directory: Path) -> None:
     mutate("signed receiver lies about parity", lambda doc:
            doc["requests"][index]["payload"].__setitem__(
                "value", 1 - doc["requests"][index]["payload"]["value"]))
+    other_challenges = [
+        entry["request"]["challenge"]
+        for position, entry in enumerate(network["requests"]) if position != index
+    ]
+    assert other_challenges and other_challenges[0] != network["requests"][index]["request"]["challenge"]
     mutate("replayed request challenge", lambda doc:
-           doc["requests"][index]["request"].__setitem__("challenge", "0" * 32))
+           doc["requests"][index]["request"].__setitem__("challenge", other_challenges[0]))
     mutate("wrong TLS leaf signer", lambda doc:
            doc["discovery"][0].__setitem__(
                "certificate_pem", doc["discovery"][1]["certificate_pem"]))
