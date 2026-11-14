@@ -31,7 +31,7 @@ python -m pip install 'cryptography>=43,<47'
 python -m unittest discover -s bridges/observation-equivalence -p 'test_*.py' -v
 ~~~
 
-Ten new tests cover a synthetic positive receipt and wrong model/cost/request pins, altered signatures, unauthorized authority keys, transplanted approvals, wrong authority policy, missing stages, wrong interpreted values, missing actions, and a validly signed counterexample to the model.
+Twelve new tests cover a synthetic positive receipt and wrong model/cost/request pins, altered signatures, unauthorized authority keys, transplanted approvals, wrong authority policy, missing stages, wrong interpreted values, missing actions, a validly signed counterexample to the model, a drifted planned cost, and a reconstruction of the test fixture through the real ObservationPath class.
 
 The example models a two-action cheap/cheap witness. Its source values are deterministic fixtures, and its keys/authorization are ephemeral test-only claims. This is **not** observed E-CPU host performance.
 
