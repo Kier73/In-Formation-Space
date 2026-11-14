@@ -1,8 +1,8 @@
 """COE-012: wire transport preserves exact strings; Lean owns decoding."""
 from __future__ import annotations
 
-from copy import deepcopy
 from hashlib import sha256
+import json
 import tempfile
 from pathlib import Path
 import unittest
@@ -40,7 +40,7 @@ class WireTransportTests(unittest.TestCase):
     def test_fraction_tokens_are_transported_not_normalized(self):
         self.assertEqual(literal("-6/4"), '"-6/4"')
         self.assertEqual(literal("1e4"), '"1e4"')
-        self.assertEqual(literal('1"); #eval 42'), '"1\\\"); #eval 42"')
+        self.assertEqual(literal('1"); #eval 42'), json.dumps('1"); #eval 42'))
         self.assertIn('"2/4"', wire_cell({
             "left": "-inf", "right": "+inf",
             "affines": [["2/4", "0"]]
