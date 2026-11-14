@@ -76,14 +76,14 @@ def verify_record(report: Mapping[str, Any], binding: Mapping[str,str],
     """Validate real report and receipt signatures WITHOUT reading hidden phase."""
     gci3.check_sealed(report, {"schema","binding","public_digest","plan_digest",
                "source_gci004_report_digest","origin","rounds","scope",
-               "private_phase_not_downloaded","transport_kind"}, SCHEMA)
+               "coordinator_does_not_read_private_phase","transport_kind"}, SCHEMA)
     require(report["binding"]==binding and
             report["public_digest"]==public["report_digest"] and
             report["plan_digest"]==plan["report_digest"] and
             report["scope"]==SCOPE and
             report["origin"]=="gci005-real-ecpu-mtls-disagreement" and
             report["transport_kind"]=="127.0.0.1-tcp-tlsv1.2+" and
-            report["private_phase_not_downloaded"] is True,
+            report["coordinator_does_not_read_private_phase"] is True,
             "source, Ground, scope or private-phase availability claim changed")
     c.gci3.strict_hash(report["source_gci004_report_digest"],"GCI-004 report digest")
     rounds=report.get("rounds")

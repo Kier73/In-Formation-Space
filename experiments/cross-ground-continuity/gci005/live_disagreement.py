@@ -217,7 +217,7 @@ def run(directory: Path) -> dict[str,Any]:
         "source_gci004_report_digest":source["report_digest"],
         "origin":"gci005-real-ecpu-mtls-disagreement",
         "rounds":rounds,"scope":h.SCOPE,
-        "private_phase_not_downloaded":True,
+        "coordinator_does_not_read_private_phase":True,
         "transport_kind":"127.0.0.1-tcp-tlsv1.2+",
     })
     h.verify_record(result,binding,public,plan)
