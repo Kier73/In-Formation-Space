@@ -195,6 +195,7 @@ func Replay(journalRaw,signedRaw,evidenceRaw,initialPolicyRaw,initialStateRaw []
        d.EnvelopeSHA256!=sha(signedRaw){
        return empty,fail("noncontinuous history, unexpected source, or replaced evidence")
     }
+    if d.Sequence<policy.MinimumSequence{return empty,fail("governance decision falls below receiver policy sequence floor")}
     if err:=matchQuorum(entry.OldSignatures,policy,d.Sequence,GovernanceDomain,d);err!=nil{
        return empty,err
     }
