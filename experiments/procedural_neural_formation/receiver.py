@@ -25,15 +25,22 @@ CHUNK = 64 * 1024
 FRAME = 256 * 1024
 
 
-def implementation_digest() -> str:
+def implementation_digest(native_execution: bool = False) -> str:
     root = Path(__file__).parent
-    return sha(b"".join(name.encode() + b"\x00" + (root / name).read_bytes()
-                       for name in ("capsule.py", "formation.py", "verification.py", "receiver.py")))
+    names = ["capsule.py", "formation.py", "verification.py", "receiver.py"]
+    if native_execution:
+        names += ["native_execution.py", "../tensor_cut_realization/tensor_cut.py",
+                  "../tensor_cut_realization/transit_tensor.py",
+                  "../tensor_cut_realization/native_admission.py"]
+    return sha(b"".join(name.encode() + b"\x00" + (root / name).read_bytes() for name in names))
 
 
 class Assembly:
     """One externally pinned request; transport ACK means volatile staging only."""
-    def __init__(self, policy: dict, request_id: str):
+    def __init__(self, policy: dict, request_id: str, *, native_execution: bool = False,
+                 grant_compute: bool = True):
+        if type(native_execution) is not bool or type(grant_compute) is not bool:
+            raise FormationError("receiver native policy must be boolean")
         if type(policy.get("capsule_bytes")) is not int or not 0 < policy["capsule_bytes"] <= MAX_CAPSULE:
             raise FormationError("invalid transfer byte budget")
         self.policy = policy
@@ -42,6 +49,8 @@ class Assembly:
         self.next_index = 0
         self.finished = False
         self.report = None
+        self.native_execution = native_execution
+        self.grant_compute = grant_compute
 
     def accept(self, sequence: int, payload: dict) -> None:
         if self.finished or not isinstance(payload, dict) or payload.get("request_id") != self.request_id:
@@ -71,6 +80,10 @@ class Assembly:
             self.finished = True
             try:
                 self.report = verify_capsule(bytes(self.buffer), self.policy)
+                if self.native_execution:
+                    from .native_execution import execute_capsule
+                    self.report["native_execution"] = execute_capsule(
+                        bytes(self.buffer), self.policy, grant_compute=self.grant_compute)
             except (ValueError, KeyError, TypeError, OverflowError) as exc:
                 self.report = {"status": "rejected", "reason": f"{type(exc).__name__}: {exc}"}
         else:
@@ -78,7 +91,9 @@ class Assembly:
 
 
 def serve(config: dict, ready_path: Path) -> None:
-    assembly = Assembly(config["policy"], config["request_id"])
+    native_execution = config.get("native_execution", False)
+    assembly = Assembly(config["policy"], config["request_id"], native_execution=native_execution,
+                        grant_compute=config.get("grant_compute", True))
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.verify_mode = ssl.CERT_REQUIRED
@@ -89,7 +104,7 @@ def serve(config: dict, ready_path: Path) -> None:
     transport = None
     try:
         ready_path.write_bytes(canonical({"port": listener.getsockname()[1], "pid": os.getpid(),
-                                         "implementation_digest": implementation_digest()}))
+                                         "implementation_digest": implementation_digest(native_execution)}))
         transport = accept_mutual_tls(listener, RECEIVER, SENDER, context, expected_peer_dns=SOURCE_DNS,
                                      max_frame_size=FRAME, send_timeout=10)
         actual_pin = sha(transport.socket.getpeercert(binary_form=True))
@@ -105,7 +120,7 @@ def serve(config: dict, ready_path: Path) -> None:
         if not assembly.finished:
             raise TimeoutError("capsule transfer did not complete")
         response = {"request_id": config["request_id"], "capsule_sha256": config["policy"]["capsule_sha256"],
-                    "receiver_pid": os.getpid(), "implementation_digest": implementation_digest(),
+                    "receiver_pid": os.getpid(), "implementation_digest": implementation_digest(native_execution),
                     "source_certificate_sha256": actual_pin, "chunks": assembly.next_index,
                     "report": assembly.report}
         outgoing.send(response)

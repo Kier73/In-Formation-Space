@@ -1,0 +1,1107 @@
+{
+  "cases": [
+    {
+      "name": "procedural-relu",
+      "native_execution": {
+        "activation": "relu",
+        "capsule_bytes": 218804,
+        "capsule_sha256": "559a1d5d027d9197c921807d0193c2843277103cab841b5231debe6c73b879a0",
+        "cut_model_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+        "dag_restoration_equal": true,
+        "dag_snapshot": {
+          "digest": "d02a60e56a0eaf4b79984309b8b47174b3bc666554ecd455777bbaca0c5987f8",
+          "format": "mailcpu-navigable-computation-dag-v1",
+          "state": {
+            "commits": [
+              {
+                "node_digest": "73c90c265e9398f2b77dedf8fc0893329501ce99ce8bd51f4f17c2458fa110ba",
+                "node_id": "part.0",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                  "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                  "output_digest": "feb3079f6fe060f3e4fe106a2307dd89e45c400d20746bcce252721a2ca59ba0",
+                  "output_shape": [
+                    2,
+                    8
+                  ],
+                  "partition_id": 0,
+                  "partition_tensor_digests": {
+                    "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                    "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                    "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "0a9d44a0c2a8b66765dc6b25d359a3d3ef080fe673779fd6a96b2423b99e3c3f"
+              },
+              {
+                "node_digest": "0e71e8b24c65462afa0e2e20979108b4e271b26d63a4fd8580a0de9c59496b67",
+                "node_id": "part.1",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                  "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                  "output_digest": "56266a4310cc7b18446ba60c3c6f9c60e5c79447403391ee10a07ed8eeb3c215",
+                  "output_shape": [
+                    2,
+                    8
+                  ],
+                  "partition_id": 1,
+                  "partition_tensor_digests": {
+                    "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                    "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                    "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "87ebc0d5a91f77f98fb745b347752374c326cbfd7c1aa066add672ad42f7d640"
+              },
+              {
+                "node_digest": "d07f7017a7fbadfd7b90d352dbeec66d454441e3b220b3cfdb1f6a4254b1e735",
+                "node_id": "part.2",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                  "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                  "output_digest": "feb3079f6fe060f3e4fe106a2307dd89e45c400d20746bcce252721a2ca59ba0",
+                  "output_shape": [
+                    2,
+                    8
+                  ],
+                  "partition_id": 2,
+                  "partition_tensor_digests": {
+                    "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                    "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                    "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "186f76241095808a2636fed9eb0146726740f455c21991ef51eb174c0f2310a8"
+              },
+              {
+                "node_digest": "37d8496bb2f4d4cee474b65862b4005847a83ba7beca7bf14bc478e798ac923d",
+                "node_id": "part.3",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                  "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                  "output_digest": "56266a4310cc7b18446ba60c3c6f9c60e5c79447403391ee10a07ed8eeb3c215",
+                  "output_shape": [
+                    2,
+                    8
+                  ],
+                  "partition_id": 3,
+                  "partition_tensor_digests": {
+                    "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                    "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                    "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "ca7bb5a6d7f75e54c9f2689143f9bcce583bf591524b53d8982f5a7ad04fb719"
+              },
+              {
+                "node_digest": "367dbd67a7bd6276b0b7eafbbd9270989c219c4efd33dbeff3216864a38c641c",
+                "node_id": "reduce",
+                "result": {
+                  "ordered_partition_ids": [
+                    0,
+                    1,
+                    2,
+                    3
+                  ],
+                  "output_digest": "a52c510afb5c255a78a30f9c6d01b33d7feb2adc95dd16bd9afc4221d8e59968"
+                },
+                "result_digest": "c76af622ed89bb4d9d9acd8921c4371a7e19ad3ff2c3f259d7d0dd52d1215cea"
+              },
+              {
+                "node_digest": "3078849182e3cf2adaeb91a84c708c6e210c16e8e7f0a0b5ed83b8f0bb07c662",
+                "node_id": "verify",
+                "result": {
+                  "atol": 1e-09,
+                  "max_abs_dense_error": 0.0,
+                  "max_abs_scalar_error": 0.0,
+                  "rtol": 1e-10,
+                  "source_scalar_error": 0.0,
+                  "status": "passed"
+                },
+                "result_digest": "d49593c5f8201eac8ec3e14e02402a8c14f20dd7456df8d62b9dfdfba3cb2d95"
+              }
+            ],
+            "max_nodes": 256,
+            "nodes": [
+              {
+                "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                "dependencies": [],
+                "digest": "73c90c265e9398f2b77dedf8fc0893329501ce99ce8bd51f4f17c2458fa110ba",
+                "node_id": "part.0",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 0,
+                    "start": 0,
+                    "stop": 512,
+                    "tensor_digests": {
+                      "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                      "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                      "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                    }
+                  },
+                  "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                "dependencies": [],
+                "digest": "0e71e8b24c65462afa0e2e20979108b4e271b26d63a4fd8580a0de9c59496b67",
+                "node_id": "part.1",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 1,
+                    "start": 512,
+                    "stop": 1024,
+                    "tensor_digests": {
+                      "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                      "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                      "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                    }
+                  },
+                  "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                "dependencies": [],
+                "digest": "d07f7017a7fbadfd7b90d352dbeec66d454441e3b220b3cfdb1f6a4254b1e735",
+                "node_id": "part.2",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 2,
+                    "start": 1024,
+                    "stop": 1536,
+                    "tensor_digests": {
+                      "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                      "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                      "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                    }
+                  },
+                  "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                "dependencies": [],
+                "digest": "37d8496bb2f4d4cee474b65862b4005847a83ba7beca7bf14bc478e798ac923d",
+                "node_id": "part.3",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 3,
+                    "start": 1536,
+                    "stop": 2048,
+                    "tensor_digests": {
+                      "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                      "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                      "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                    }
+                  },
+                  "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                "dependencies": [
+                  "part.0",
+                  "part.1",
+                  "part.2",
+                  "part.3"
+                ],
+                "digest": "367dbd67a7bd6276b0b7eafbbd9270989c219c4efd33dbeff3216864a38c641c",
+                "node_id": "reduce",
+                "operation": "tcr.deterministic_reduce",
+                "payload": {
+                  "bias_digest": "ff6e1c5c560e1ca460f9cc5180f3dbf9a9573d1fc75dc87c6ceceeac21521ff8"
+                },
+                "resource": "local.numpy",
+                "revision": 1
+              },
+              {
+                "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                "dependencies": [
+                  "reduce"
+                ],
+                "digest": "3078849182e3cf2adaeb91a84c708c6e210c16e8e7f0a0b5ed83b8f0bb07c662",
+                "node_id": "verify",
+                "operation": "tcr.compare_observation",
+                "payload": {
+                  "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                },
+                "resource": "local.numpy",
+                "revision": 1
+              }
+            ],
+            "version": 1
+          }
+        },
+        "decisions": [
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "b1226fab2f09444b51ede0276d3cac4b60425ccff62b12d48a5aac53add7501d",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 0,
+            "native_replayed": true,
+            "partial_digest": "feb3079f6fe060f3e4fe106a2307dd89e45c400d20746bcce252721a2ca59ba0",
+            "receiver_node": "tcr003-part-0",
+            "request_sha256": "d2c916d9960671011b266ac6ea91e437ead7444071a7c43d2bd4e43316911ebb"
+          },
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "d2e4e74bfb94088776c3ce654900977cc5bcb1a72a00d373757b4de3bf8a18b9",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 1,
+            "native_replayed": true,
+            "partial_digest": "56266a4310cc7b18446ba60c3c6f9c60e5c79447403391ee10a07ed8eeb3c215",
+            "receiver_node": "tcr003-part-1",
+            "request_sha256": "ffe0cd21f33648c1b66bd66c265e5617e60485063be02c561519c6a27858dfcc"
+          },
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "4e485f2f36f7b14a404f831b32d1b17f15feb3fab031ee839219cfc9feeb0352",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 2,
+            "native_replayed": true,
+            "partial_digest": "feb3079f6fe060f3e4fe106a2307dd89e45c400d20746bcce252721a2ca59ba0",
+            "receiver_node": "tcr003-part-2",
+            "request_sha256": "49a7df606893400dca389fd8a2dde513e6a8d171b76d299da43cf3ec5c5e3700"
+          },
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "a55866dc0f387e80755108c9d3b8c346700adfa9fc8386d245b310ccc22c7c23",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 3,
+            "native_replayed": true,
+            "partial_digest": "56266a4310cc7b18446ba60c3c6f9c60e5c79447403391ee10a07ed8eeb3c215",
+            "receiver_node": "tcr003-part-3",
+            "request_sha256": "a9c7e583019f611ae63ab9577d2542f36b80aab9d88cee024fd4e3d9f01007eb"
+          }
+        ],
+        "distinct_ground_content_digests": 1,
+        "durable_replay": false,
+        "generated_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+        "generated_dimensions": [
+          8,
+          2048,
+          8
+        ],
+        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+        "kernel_accepted": false,
+        "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+        "max_abs_parent_dense_error": 0.0,
+        "max_abs_parent_scalar_error": 0.0,
+        "native_cuts_cross_process": false,
+        "native_handler_calls": 4,
+        "native_runtime_count": 4,
+        "numerical_verification": {
+          "atol": 1e-09,
+          "max_abs_dense_error": 0.0,
+          "max_abs_scalar_error": 0.0,
+          "rtol": 1e-10,
+          "source_scalar_error": 0.0,
+          "status": "passed"
+        },
+        "output_coordinates_checked": 16,
+        "output_digest": "a52c510afb5c255a78a30f9c6d01b33d7feb2adc95dd16bd9afc4221d8e59968",
+        "probe_origin": "receiver-owned TCR fixed probes",
+        "scalar_coordinates_checked": 6,
+        "schema": "ifs.pnf.native-realization.v1",
+        "source_digest": "40d3dbf00500a7104bd6a6715e8786cec11fd2d2670b95d70d4a66f0cc53611f",
+        "status": "executed"
+      }
+    },
+    {
+      "name": "procedural-gelu_tanh",
+      "native_execution": {
+        "activation": "gelu_tanh",
+        "capsule_bytes": 218814,
+        "capsule_sha256": "22fb29eabecbc95e3a1e26de177d54b56ccef86324e8d8761bfd6c3f4c0a0b59",
+        "cut_model_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+        "dag_restoration_equal": true,
+        "dag_snapshot": {
+          "digest": "5ca420d08afcc2830dc49d697ef29a656d43aa7f25d059a2377078b771c816c7",
+          "format": "mailcpu-navigable-computation-dag-v1",
+          "state": {
+            "commits": [
+              {
+                "node_digest": "27dd1df831edee6292d8b916f8434f6bb8d6475f854d43f76fd22cc63c67a327",
+                "node_id": "part.0",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                  "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                  "output_digest": "aea85e9355c9404706a487f462ef6cc992399604b54d665dcba9b16e79fb9afa",
+                  "output_shape": [
+                    2,
+                    8
+                  ],
+                  "partition_id": 0,
+                  "partition_tensor_digests": {
+                    "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                    "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                    "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "f2f59b3e16754b3fa18ed7b3498055fe1e90270228ebb03f13cd6a0f4214be3f"
+              },
+              {
+                "node_digest": "f36e923c877bbb8bb17b5435efc5ed98821b1033cfafc7ac3002c785639aa230",
+                "node_id": "part.1",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                  "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                  "output_digest": "6a80f6f15c3f7375ecafd7270b2600957ec1d81d003b9cb773556e8103cd275e",
+                  "output_shape": [
+                    2,
+                    8
+                  ],
+                  "partition_id": 1,
+                  "partition_tensor_digests": {
+                    "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                    "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                    "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "4424ff878bda38cdb3480b7cbd050ef9937ea802ff2a038425903aa4b0323141"
+              },
+              {
+                "node_digest": "8d074d8a70337aef03fbe1978b2efd355726c58cb1b678c7df1bcdee2c20ab22",
+                "node_id": "part.2",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                  "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                  "output_digest": "aea85e9355c9404706a487f462ef6cc992399604b54d665dcba9b16e79fb9afa",
+                  "output_shape": [
+                    2,
+                    8
+                  ],
+                  "partition_id": 2,
+                  "partition_tensor_digests": {
+                    "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                    "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                    "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "c0ea540e849de0c76de475d206faf27ccc1eb8ba33d2fbad58f4096880f6efaf"
+              },
+              {
+                "node_digest": "4dd103f35b4bba2a5c02a201e8e9cd293ceed3973bace6a97bf2b38bb57c20d4",
+                "node_id": "part.3",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                  "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                  "output_digest": "6a80f6f15c3f7375ecafd7270b2600957ec1d81d003b9cb773556e8103cd275e",
+                  "output_shape": [
+                    2,
+                    8
+                  ],
+                  "partition_id": 3,
+                  "partition_tensor_digests": {
+                    "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                    "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                    "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "b51a177211bcc81cda4df1e2a965a304ddb1fc51e60397006129b7187872fa73"
+              },
+              {
+                "node_digest": "7c2cf2ce83454418638d1fec4675e4584a510002d4193e1821278d1b9227d85e",
+                "node_id": "reduce",
+                "result": {
+                  "ordered_partition_ids": [
+                    0,
+                    1,
+                    2,
+                    3
+                  ],
+                  "output_digest": "903b34148911acfa3cada71865cbdd89fc4c851e6153dc694bf25640488f3a55"
+                },
+                "result_digest": "e5baf15852133e6bea9ad6136a6968a3014b5b86cfedd022845d903526138df6"
+              },
+              {
+                "node_digest": "9cebd0bdc7fd3c1d9d3effafbdac098099892b71d4f8dad5e358dbac74ed2b64",
+                "node_id": "verify",
+                "result": {
+                  "atol": 1e-09,
+                  "max_abs_dense_error": 4.440892098500626e-16,
+                  "max_abs_scalar_error": 1.4988010832439613e-15,
+                  "rtol": 1e-10,
+                  "source_scalar_error": 1.7763568394002505e-15,
+                  "status": "passed"
+                },
+                "result_digest": "76d397413064c91432f07999e58c522529f2ce75faa680b759cdbf819cc3abfc"
+              }
+            ],
+            "max_nodes": 256,
+            "nodes": [
+              {
+                "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                "dependencies": [],
+                "digest": "27dd1df831edee6292d8b916f8434f6bb8d6475f854d43f76fd22cc63c67a327",
+                "node_id": "part.0",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 0,
+                    "start": 0,
+                    "stop": 512,
+                    "tensor_digests": {
+                      "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                      "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                      "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                    }
+                  },
+                  "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                "dependencies": [],
+                "digest": "f36e923c877bbb8bb17b5435efc5ed98821b1033cfafc7ac3002c785639aa230",
+                "node_id": "part.1",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 1,
+                    "start": 512,
+                    "stop": 1024,
+                    "tensor_digests": {
+                      "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                      "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                      "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                    }
+                  },
+                  "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                "dependencies": [],
+                "digest": "8d074d8a70337aef03fbe1978b2efd355726c58cb1b678c7df1bcdee2c20ab22",
+                "node_id": "part.2",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 2,
+                    "start": 1024,
+                    "stop": 1536,
+                    "tensor_digests": {
+                      "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                      "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                      "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                    }
+                  },
+                  "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                "dependencies": [],
+                "digest": "4dd103f35b4bba2a5c02a201e8e9cd293ceed3973bace6a97bf2b38bb57c20d4",
+                "node_id": "part.3",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 3,
+                    "start": 1536,
+                    "stop": 2048,
+                    "tensor_digests": {
+                      "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                      "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                      "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                    }
+                  },
+                  "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                "dependencies": [
+                  "part.0",
+                  "part.1",
+                  "part.2",
+                  "part.3"
+                ],
+                "digest": "7c2cf2ce83454418638d1fec4675e4584a510002d4193e1821278d1b9227d85e",
+                "node_id": "reduce",
+                "operation": "tcr.deterministic_reduce",
+                "payload": {
+                  "bias_digest": "ff6e1c5c560e1ca460f9cc5180f3dbf9a9573d1fc75dc87c6ceceeac21521ff8"
+                },
+                "resource": "local.numpy",
+                "revision": 1
+              },
+              {
+                "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                "dependencies": [
+                  "reduce"
+                ],
+                "digest": "9cebd0bdc7fd3c1d9d3effafbdac098099892b71d4f8dad5e358dbac74ed2b64",
+                "node_id": "verify",
+                "operation": "tcr.compare_observation",
+                "payload": {
+                  "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                },
+                "resource": "local.numpy",
+                "revision": 1
+              }
+            ],
+            "version": 1
+          }
+        },
+        "decisions": [
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "52f44968bc00a9f81f93a215a3c210c0f39b322a07d37fb7b80e365c27549e36",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 0,
+            "native_replayed": true,
+            "partial_digest": "aea85e9355c9404706a487f462ef6cc992399604b54d665dcba9b16e79fb9afa",
+            "receiver_node": "tcr003-part-0",
+            "request_sha256": "1f17eda65a968fc7e7f3fa52ad9bc86380633273959c30046740c2149280a2f9"
+          },
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "bc0f9150373d7bce4a3f882a02d9b4233c0abce816d1f6a52661829defb3e76d",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 1,
+            "native_replayed": true,
+            "partial_digest": "6a80f6f15c3f7375ecafd7270b2600957ec1d81d003b9cb773556e8103cd275e",
+            "receiver_node": "tcr003-part-1",
+            "request_sha256": "8682f24594dc511ce3b0eee9ac21e1ef9aead60525966f6fe3c39c60220129a7"
+          },
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "7bc99a08bb6571bea0f1c2c45e8afee5aa87c20dbd309ca70f2a76bc83e3e981",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 2,
+            "native_replayed": true,
+            "partial_digest": "aea85e9355c9404706a487f462ef6cc992399604b54d665dcba9b16e79fb9afa",
+            "receiver_node": "tcr003-part-2",
+            "request_sha256": "596e0025b85755a8f042ebc889e86da4f8f849ac8ff145a53cc177a7a5a67d74"
+          },
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "54e293525fab6cc9350dce622daba885c0aa3781ff369d687544cc5f7bc1b32b",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 3,
+            "native_replayed": true,
+            "partial_digest": "6a80f6f15c3f7375ecafd7270b2600957ec1d81d003b9cb773556e8103cd275e",
+            "receiver_node": "tcr003-part-3",
+            "request_sha256": "a6f6e45fafa5c8283fd40fd16f12189110b1ca50154a0635849495df9528553a"
+          }
+        ],
+        "distinct_ground_content_digests": 1,
+        "durable_replay": false,
+        "generated_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+        "generated_dimensions": [
+          8,
+          2048,
+          8
+        ],
+        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+        "kernel_accepted": false,
+        "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+        "max_abs_parent_dense_error": 8.881784197001252e-16,
+        "max_abs_parent_scalar_error": 1.4988010832439613e-15,
+        "native_cuts_cross_process": false,
+        "native_handler_calls": 4,
+        "native_runtime_count": 4,
+        "numerical_verification": {
+          "atol": 1e-09,
+          "max_abs_dense_error": 4.440892098500626e-16,
+          "max_abs_scalar_error": 1.4988010832439613e-15,
+          "rtol": 1e-10,
+          "source_scalar_error": 1.7763568394002505e-15,
+          "status": "passed"
+        },
+        "output_coordinates_checked": 16,
+        "output_digest": "903b34148911acfa3cada71865cbdd89fc4c851e6153dc694bf25640488f3a55",
+        "probe_origin": "receiver-owned TCR fixed probes",
+        "scalar_coordinates_checked": 6,
+        "schema": "ifs.pnf.native-realization.v1",
+        "source_digest": "ac0af0cdc52931bd45c9fb924a44719d31a81a909933ba6fcdf9307930e2bf9d",
+        "status": "executed"
+      }
+    },
+    {
+      "name": "previously-exported-capsule",
+      "native_execution": {
+        "activation": "gelu_tanh",
+        "capsule_bytes": 44107195,
+        "capsule_sha256": "2536c5142fae1db9de2c8550d6c1ba65e8658bb57cd40caa10e08753472d335b",
+        "cut_model_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+        "dag_restoration_equal": true,
+        "dag_snapshot": {
+          "digest": "29cc34951dfcf46afb02d0ea5da53b0f62b1cead425d76a819acb0c3052eceb0",
+          "format": "mailcpu-navigable-computation-dag-v1",
+          "state": {
+            "commits": [
+              {
+                "node_digest": "08fd44b38fd15b07d12721fc9ec8583f0f93bf6499727b2ffdb20299d5c8d55d",
+                "node_id": "part.0",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+                  "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                  "output_digest": "b1f5c7caec233019f6d59b6dbebf64431aef102e5f5e4b2d8b5759de9b82e9d6",
+                  "output_shape": [
+                    2,
+                    768
+                  ],
+                  "partition_id": 0,
+                  "partition_tensor_digests": {
+                    "down_weight": "1b830d23340f0bbfaed99639f737b905e962a84c8790813ce7ddb02f95310d41",
+                    "up_bias": "99e0ecfc2510b0d271ed264b44363cf48017ca67e5c7a5ed0247591e189398d4",
+                    "up_weight": "27f4365d4596e1a7ed0b8d794dd1084d82c8c2bbdb10c9b74d0677765cb944b4"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "fee8a72a6fd61788a3774d1832fe7253c9ef28fc98c85d8cfc4bfc11a21be558"
+              },
+              {
+                "node_digest": "6cc5680d9e97288d8ece584274bdb519473c89f81e2d48c7efd75d48faecb3b4",
+                "node_id": "part.1",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+                  "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                  "output_digest": "ef0fde86d7ca27f5328ef41ec5fae9a5cb50c05d245508b11cbc4e8f3b343fc8",
+                  "output_shape": [
+                    2,
+                    768
+                  ],
+                  "partition_id": 1,
+                  "partition_tensor_digests": {
+                    "down_weight": "7b9365cea59a1fe672a079457ad24ffe3b2b1b6f37964c3ef7b96bbcf7c0092b",
+                    "up_bias": "168271cb6c68c2fa0030148d42b9fd8b76bf081e7d170f0771a9973af3cafc8d",
+                    "up_weight": "96d2ac69df54130ef2723c3fc2902858b16c343b78a7961d6f5d6366d2c0d252"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "ea624415cebf349b32d82f5b395fb53360d66f39c788c5a28ef1f1b0352249a4"
+              },
+              {
+                "node_digest": "ba10c3771da95da838934f3ba01322201453f02d100bfe9444f7aca4e4b04075",
+                "node_id": "part.2",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+                  "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                  "output_digest": "58755dedcb52f0be85c0251ff895896b74f859e697d1ae93da605fd1937ab8a4",
+                  "output_shape": [
+                    2,
+                    768
+                  ],
+                  "partition_id": 2,
+                  "partition_tensor_digests": {
+                    "down_weight": "c6f6c8c3299dd9b791acae12e116ca4d8686f9c9825164acdb862f353bdc14cc",
+                    "up_bias": "0d85ce475ca7a3b9566257de37dbda93be8fb567cb51cff75d726a20a2d29c31",
+                    "up_weight": "1da41d90131aef05ccbb6faff6519777a0c265f39fc7ed6111d497443893a01e"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "e9a170c040f63e0698dd78d462473092bf9cb0313c915b7af79e718673ce9b9f"
+              },
+              {
+                "node_digest": "90230fb46a0d142ad5fe745c4b07bba8b01f8b0681ce8dcde50c43ecd43b8b82",
+                "node_id": "part.3",
+                "result": {
+                  "arithmetic": "float64-eval-of-float32-parameters",
+                  "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+                  "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                  "output_digest": "b1f5c7caec233019f6d59b6dbebf64431aef102e5f5e4b2d8b5759de9b82e9d6",
+                  "output_shape": [
+                    2,
+                    768
+                  ],
+                  "partition_id": 3,
+                  "partition_tensor_digests": {
+                    "down_weight": "1b830d23340f0bbfaed99639f737b905e962a84c8790813ce7ddb02f95310d41",
+                    "up_bias": "99e0ecfc2510b0d271ed264b44363cf48017ca67e5c7a5ed0247591e189398d4",
+                    "up_weight": "27f4365d4596e1a7ed0b8d794dd1084d82c8c2bbdb10c9b74d0677765cb944b4"
+                  },
+                  "schema": "ifs.tensor-cut-partial-receipt.v1",
+                  "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+                  "status": "complete",
+                  "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                },
+                "result_digest": "bd719b92dc8e588d030702aee9082b5c7dce7ea67e1d7a2dca99bfd5fe0208ac"
+              },
+              {
+                "node_digest": "9794d37ad7ea1231dcdbac746f0bf08dc688e6430e2c3b268c0d2e8936c13df9",
+                "node_id": "reduce",
+                "result": {
+                  "ordered_partition_ids": [
+                    0,
+                    1,
+                    2,
+                    3
+                  ],
+                  "output_digest": "3a0c80ac2b643840086f22a1b5a1e1250899354cdb57d218209282d07f3b4584"
+                },
+                "result_digest": "8d041db312cbbfb96e6aedb57cf9676f9b13d060e0763ce1b0e7464779c32e28"
+              },
+              {
+                "node_digest": "0edcbf7caab1500aa65db96a027194f1b1183c3356041f47e60e68173c48ea57",
+                "node_id": "verify",
+                "result": {
+                  "atol": 1e-09,
+                  "max_abs_dense_error": 1.4210854715202004e-14,
+                  "max_abs_scalar_error": 1.7763568394002505e-15,
+                  "rtol": 1e-10,
+                  "source_scalar_error": 1.3322676295501878e-15,
+                  "status": "passed"
+                },
+                "result_digest": "11c97fcccc504d9151a0299bf37c0f8f64558c731d968e296e65ba42acfe96e3"
+              }
+            ],
+            "max_nodes": 256,
+            "nodes": [
+              {
+                "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                "dependencies": [],
+                "digest": "08fd44b38fd15b07d12721fc9ec8583f0f93bf6499727b2ffdb20299d5c8d55d",
+                "node_id": "part.0",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 0,
+                    "start": 0,
+                    "stop": 1024,
+                    "tensor_digests": {
+                      "down_weight": "1b830d23340f0bbfaed99639f737b905e962a84c8790813ce7ddb02f95310d41",
+                      "up_bias": "99e0ecfc2510b0d271ed264b44363cf48017ca67e5c7a5ed0247591e189398d4",
+                      "up_weight": "27f4365d4596e1a7ed0b8d794dd1084d82c8c2bbdb10c9b74d0677765cb944b4"
+                    }
+                  },
+                  "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                "dependencies": [],
+                "digest": "6cc5680d9e97288d8ece584274bdb519473c89f81e2d48c7efd75d48faecb3b4",
+                "node_id": "part.1",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 1,
+                    "start": 1024,
+                    "stop": 2048,
+                    "tensor_digests": {
+                      "down_weight": "7b9365cea59a1fe672a079457ad24ffe3b2b1b6f37964c3ef7b96bbcf7c0092b",
+                      "up_bias": "168271cb6c68c2fa0030148d42b9fd8b76bf081e7d170f0771a9973af3cafc8d",
+                      "up_weight": "96d2ac69df54130ef2723c3fc2902858b16c343b78a7961d6f5d6366d2c0d252"
+                    }
+                  },
+                  "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                "dependencies": [],
+                "digest": "ba10c3771da95da838934f3ba01322201453f02d100bfe9444f7aca4e4b04075",
+                "node_id": "part.2",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 2,
+                    "start": 2048,
+                    "stop": 3072,
+                    "tensor_digests": {
+                      "down_weight": "c6f6c8c3299dd9b791acae12e116ca4d8686f9c9825164acdb862f353bdc14cc",
+                      "up_bias": "0d85ce475ca7a3b9566257de37dbda93be8fb567cb51cff75d726a20a2d29c31",
+                      "up_weight": "1da41d90131aef05ccbb6faff6519777a0c265f39fc7ed6111d497443893a01e"
+                    }
+                  },
+                  "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                "dependencies": [],
+                "digest": "90230fb46a0d142ad5fe745c4b07bba8b01f8b0681ce8dcde50c43ecd43b8b82",
+                "node_id": "part.3",
+                "operation": "tcr.execute_partition",
+                "payload": {
+                  "partition": {
+                    "id": 3,
+                    "start": 3072,
+                    "stop": 4096,
+                    "tensor_digests": {
+                      "down_weight": "1b830d23340f0bbfaed99639f737b905e962a84c8790813ce7ddb02f95310d41",
+                      "up_bias": "99e0ecfc2510b0d271ed264b44363cf48017ca67e5c7a5ed0247591e189398d4",
+                      "up_weight": "27f4365d4596e1a7ed0b8d794dd1084d82c8c2bbdb10c9b74d0677765cb944b4"
+                    }
+                  },
+                  "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                },
+                "resource": "external.worker",
+                "revision": 1
+              },
+              {
+                "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                "dependencies": [
+                  "part.0",
+                  "part.1",
+                  "part.2",
+                  "part.3"
+                ],
+                "digest": "9794d37ad7ea1231dcdbac746f0bf08dc688e6430e2c3b268c0d2e8936c13df9",
+                "node_id": "reduce",
+                "operation": "tcr.deterministic_reduce",
+                "payload": {
+                  "bias_digest": "780a7ab01792a4ddbc0591c65da9d23124c6f3076289f544505e70cd12e61d3a"
+                },
+                "resource": "local.numpy",
+                "revision": 1
+              },
+              {
+                "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                "dependencies": [
+                  "reduce"
+                ],
+                "digest": "0edcbf7caab1500aa65db96a027194f1b1183c3356041f47e60e68173c48ea57",
+                "node_id": "verify",
+                "operation": "tcr.compare_observation",
+                "payload": {
+                  "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                },
+                "resource": "local.numpy",
+                "revision": 1
+              }
+            ],
+            "version": 1
+          }
+        },
+        "decisions": [
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "ce924d6303e2f9059421b4ff0262fbb18df944be08a1ca8e007e0c1a4d11f945",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 0,
+            "native_replayed": true,
+            "partial_digest": "b1f5c7caec233019f6d59b6dbebf64431aef102e5f5e4b2d8b5759de9b82e9d6",
+            "receiver_node": "tcr003-part-0",
+            "request_sha256": "7cdce1c08377c03b69fbdb1bc9830010664f4ab4e9d3ab4e72e77dc70ba7da41"
+          },
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "669256f93d5a523ba3558e4a19682e779a584f7c022c66ad5dad3d87e5d3de41",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 1,
+            "native_replayed": true,
+            "partial_digest": "ef0fde86d7ca27f5328ef41ec5fae9a5cb50c05d245508b11cbc4e8f3b343fc8",
+            "receiver_node": "tcr003-part-1",
+            "request_sha256": "bfd495109eaf19c975bc6dd9e85dceff503a6b757171268c463e9932dfaed7c4"
+          },
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "d146ff1d968ac197ce5676651b25737135348105ed77bf4661e89be96760f25b",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 2,
+            "native_replayed": true,
+            "partial_digest": "58755dedcb52f0be85c0251ff895896b74f859e697d1ae93da605fd1937ab8a4",
+            "receiver_node": "tcr003-part-2",
+            "request_sha256": "95add4d8dc37b98d7667c1ee5882fc76d55f0b066a25d8d30f3bef1eca5241ee"
+          },
+          {
+            "action": "allow",
+            "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+            "event_fingerprint": "1d01db059b93c271157aa766ed7079cf2a8de214991056da0e0ee6d172ceb7f1",
+            "ground_digest": "50a6a01e29ebb3a7b1f8f9ab763346c990affa25a09b6d30375b74780b24dd60",
+            "handler_calls": 1,
+            "index": 3,
+            "native_replayed": true,
+            "partial_digest": "b1f5c7caec233019f6d59b6dbebf64431aef102e5f5e4b2d8b5759de9b82e9d6",
+            "receiver_node": "tcr003-part-3",
+            "request_sha256": "61a18211bc294838c3e603b41a40fe2818fc8aca0b02efa20d860d655aaf1738"
+          }
+        ],
+        "distinct_ground_content_digests": 1,
+        "durable_replay": false,
+        "generated_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+        "generated_dimensions": [
+          768,
+          4096,
+          768
+        ],
+        "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+        "kernel_accepted": false,
+        "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+        "max_abs_parent_dense_error": 1.4210854715202004e-14,
+        "max_abs_parent_scalar_error": 1.7763568394002505e-15,
+        "native_cuts_cross_process": false,
+        "native_handler_calls": 4,
+        "native_runtime_count": 4,
+        "numerical_verification": {
+          "atol": 1e-09,
+          "max_abs_dense_error": 1.4210854715202004e-14,
+          "max_abs_scalar_error": 1.7763568394002505e-15,
+          "rtol": 1e-10,
+          "source_scalar_error": 1.3322676295501878e-15,
+          "status": "passed"
+        },
+        "output_coordinates_checked": 1536,
+        "output_digest": "3a0c80ac2b643840086f22a1b5a1e1250899354cdb57d218209282d07f3b4584",
+        "probe_origin": "receiver-owned TCR fixed probes",
+        "scalar_coordinates_checked": 6,
+        "schema": "ifs.pnf.native-realization.v1",
+        "source_digest": "cf6f7f38ee402129f27304b758520ceebde0896466c8fd9fe7c0f259b92d661c",
+        "status": "executed"
+      }
+    }
+  ],
+  "denial_control": {
+    "activation": "relu",
+    "capsule_bytes": 218804,
+    "capsule_sha256": "559a1d5d027d9197c921807d0193c2843277103cab841b5231debe6c73b879a0",
+    "cut_model_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+    "decisions": [
+      {
+        "action": "deny",
+        "handler_calls": 0,
+        "index": 0,
+        "receiver_node": "tcr003-part-0"
+      },
+      {
+        "action": "deny",
+        "handler_calls": 0,
+        "index": 1,
+        "receiver_node": "tcr003-part-1"
+      },
+      {
+        "action": "deny",
+        "handler_calls": 0,
+        "index": 2,
+        "receiver_node": "tcr003-part-2"
+      },
+      {
+        "action": "deny",
+        "handler_calls": 0,
+        "index": 3,
+        "receiver_node": "tcr003-part-3"
+      }
+    ],
+    "durable_replay": false,
+    "generated_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+    "generated_dimensions": [
+      8,
+      2048,
+      8
+    ],
+    "kernel_accepted": false,
+    "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+    "native_cuts_cross_process": false,
+    "native_handler_calls": 0,
+    "native_runtime_count": 4,
+    "probe_origin": "receiver-owned TCR fixed probes",
+    "schema": "ifs.pnf.native-realization.v1",
+    "source_digest": "40d3dbf00500a7104bd6a6715e8786cec11fd2d2670b95d70d4a66f0cc53611f",
+    "status": "denied"
+  },
+  "environment": {
+    "numpy": "2.2.5",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.13.3"
+  },
+  "native_cuts_scope": "four receiver-owned runtimes in one process on one physical host",
+  "network_transport_performed": false,
+  "schema": "ifs.pnf003.experiment.v1"
+}

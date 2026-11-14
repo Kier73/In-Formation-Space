@@ -1,0 +1,1339 @@
+{
+  "cases": [
+    {
+      "name": "procedural-relu",
+      "transfer": {
+        "capsule_bytes": 218804,
+        "chunk_count": 4,
+        "chunk_limit": 65536,
+        "durable_recovery_claimed": false,
+        "maximum_transport_frame_bytes": 262144,
+        "receiver": {
+          "capsule_sha256": "559a1d5d027d9197c921807d0193c2843277103cab841b5231debe6c73b879a0",
+          "chunks": 4,
+          "implementation_digest": "81415a4833fc44dd902c3d2a9993e1625df5fcd1dd1bf525da767fd2fedc2931",
+          "receiver_pid": 2838,
+          "report": {
+            "activation": "relu",
+            "capsule_bytes": 218804,
+            "capsule_sha256": "559a1d5d027d9197c921807d0193c2843277103cab841b5231debe6c73b879a0",
+            "coefficient_law": {
+              "coefficient_comparison": "exact-binary32-in-binary64",
+              "floating_point_bitwise_equivalence_claimed": false,
+              "incoming_neurons_checked": 2048,
+              "kernel_accepted": false,
+              "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+              "outgoing_coefficients_checked": 8192,
+              "status": "passed"
+            },
+            "generated_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+            "generated_dimensions": [
+              8,
+              2048,
+              8
+            ],
+            "generated_outputs": [
+              [
+                3.52392578125,
+                -0.0478515625,
+                2.986328125
+              ]
+            ],
+            "kernel_accepted": false,
+            "max_absolute_error": 0.0,
+            "native_execution": {
+              "activation": "relu",
+              "capsule_bytes": 218804,
+              "capsule_sha256": "559a1d5d027d9197c921807d0193c2843277103cab841b5231debe6c73b879a0",
+              "cut_model_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+              "dag_restoration_equal": true,
+              "dag_snapshot": {
+                "digest": "d02a60e56a0eaf4b79984309b8b47174b3bc666554ecd455777bbaca0c5987f8",
+                "format": "mailcpu-navigable-computation-dag-v1",
+                "state": {
+                  "commits": [
+                    {
+                      "node_digest": "73c90c265e9398f2b77dedf8fc0893329501ce99ce8bd51f4f17c2458fa110ba",
+                      "node_id": "part.0",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                        "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                        "output_digest": "feb3079f6fe060f3e4fe106a2307dd89e45c400d20746bcce252721a2ca59ba0",
+                        "output_shape": [
+                          2,
+                          8
+                        ],
+                        "partition_id": 0,
+                        "partition_tensor_digests": {
+                          "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                          "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                          "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "0a9d44a0c2a8b66765dc6b25d359a3d3ef080fe673779fd6a96b2423b99e3c3f"
+                    },
+                    {
+                      "node_digest": "0e71e8b24c65462afa0e2e20979108b4e271b26d63a4fd8580a0de9c59496b67",
+                      "node_id": "part.1",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                        "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                        "output_digest": "56266a4310cc7b18446ba60c3c6f9c60e5c79447403391ee10a07ed8eeb3c215",
+                        "output_shape": [
+                          2,
+                          8
+                        ],
+                        "partition_id": 1,
+                        "partition_tensor_digests": {
+                          "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                          "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                          "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "87ebc0d5a91f77f98fb745b347752374c326cbfd7c1aa066add672ad42f7d640"
+                    },
+                    {
+                      "node_digest": "d07f7017a7fbadfd7b90d352dbeec66d454441e3b220b3cfdb1f6a4254b1e735",
+                      "node_id": "part.2",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                        "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                        "output_digest": "feb3079f6fe060f3e4fe106a2307dd89e45c400d20746bcce252721a2ca59ba0",
+                        "output_shape": [
+                          2,
+                          8
+                        ],
+                        "partition_id": 2,
+                        "partition_tensor_digests": {
+                          "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                          "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                          "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "186f76241095808a2636fed9eb0146726740f455c21991ef51eb174c0f2310a8"
+                    },
+                    {
+                      "node_digest": "37d8496bb2f4d4cee474b65862b4005847a83ba7beca7bf14bc478e798ac923d",
+                      "node_id": "part.3",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                        "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                        "output_digest": "56266a4310cc7b18446ba60c3c6f9c60e5c79447403391ee10a07ed8eeb3c215",
+                        "output_shape": [
+                          2,
+                          8
+                        ],
+                        "partition_id": 3,
+                        "partition_tensor_digests": {
+                          "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                          "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                          "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "ca7bb5a6d7f75e54c9f2689143f9bcce583bf591524b53d8982f5a7ad04fb719"
+                    },
+                    {
+                      "node_digest": "367dbd67a7bd6276b0b7eafbbd9270989c219c4efd33dbeff3216864a38c641c",
+                      "node_id": "reduce",
+                      "result": {
+                        "ordered_partition_ids": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "output_digest": "a52c510afb5c255a78a30f9c6d01b33d7feb2adc95dd16bd9afc4221d8e59968"
+                      },
+                      "result_digest": "c76af622ed89bb4d9d9acd8921c4371a7e19ad3ff2c3f259d7d0dd52d1215cea"
+                    },
+                    {
+                      "node_digest": "3078849182e3cf2adaeb91a84c708c6e210c16e8e7f0a0b5ed83b8f0bb07c662",
+                      "node_id": "verify",
+                      "result": {
+                        "atol": 1e-09,
+                        "max_abs_dense_error": 0.0,
+                        "max_abs_scalar_error": 0.0,
+                        "rtol": 1e-10,
+                        "source_scalar_error": 0.0,
+                        "status": "passed"
+                      },
+                      "result_digest": "d49593c5f8201eac8ec3e14e02402a8c14f20dd7456df8d62b9dfdfba3cb2d95"
+                    }
+                  ],
+                  "max_nodes": 256,
+                  "nodes": [
+                    {
+                      "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                      "dependencies": [],
+                      "digest": "73c90c265e9398f2b77dedf8fc0893329501ce99ce8bd51f4f17c2458fa110ba",
+                      "node_id": "part.0",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 0,
+                          "start": 0,
+                          "stop": 512,
+                          "tensor_digests": {
+                            "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                            "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                            "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                          }
+                        },
+                        "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                      "dependencies": [],
+                      "digest": "0e71e8b24c65462afa0e2e20979108b4e271b26d63a4fd8580a0de9c59496b67",
+                      "node_id": "part.1",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 1,
+                          "start": 512,
+                          "stop": 1024,
+                          "tensor_digests": {
+                            "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                            "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                            "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                          }
+                        },
+                        "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                      "dependencies": [],
+                      "digest": "d07f7017a7fbadfd7b90d352dbeec66d454441e3b220b3cfdb1f6a4254b1e735",
+                      "node_id": "part.2",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 2,
+                          "start": 1024,
+                          "stop": 1536,
+                          "tensor_digests": {
+                            "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                            "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                            "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                          }
+                        },
+                        "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                      "dependencies": [],
+                      "digest": "37d8496bb2f4d4cee474b65862b4005847a83ba7beca7bf14bc478e798ac923d",
+                      "node_id": "part.3",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 3,
+                          "start": 1536,
+                          "stop": 2048,
+                          "tensor_digests": {
+                            "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                            "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                            "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                          }
+                        },
+                        "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                      "dependencies": [
+                        "part.0",
+                        "part.1",
+                        "part.2",
+                        "part.3"
+                      ],
+                      "digest": "367dbd67a7bd6276b0b7eafbbd9270989c219c4efd33dbeff3216864a38c641c",
+                      "node_id": "reduce",
+                      "operation": "tcr.deterministic_reduce",
+                      "payload": {
+                        "bias_digest": "ff6e1c5c560e1ca460f9cc5180f3dbf9a9573d1fc75dc87c6ceceeac21521ff8"
+                      },
+                      "resource": "local.numpy",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+                      "dependencies": [
+                        "reduce"
+                      ],
+                      "digest": "3078849182e3cf2adaeb91a84c708c6e210c16e8e7f0a0b5ed83b8f0bb07c662",
+                      "node_id": "verify",
+                      "operation": "tcr.compare_observation",
+                      "payload": {
+                        "source_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015"
+                      },
+                      "resource": "local.numpy",
+                      "revision": 1
+                    }
+                  ],
+                  "version": 1
+                }
+              },
+              "decisions": [
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "90cc934eea07c235dc4a931ef520a4e1b9db5b1b86cf0458b8ec30acdeb1a53b",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 0,
+                  "native_replayed": true,
+                  "partial_digest": "feb3079f6fe060f3e4fe106a2307dd89e45c400d20746bcce252721a2ca59ba0",
+                  "receiver_node": "tcr003-part-0",
+                  "request_sha256": "d2c916d9960671011b266ac6ea91e437ead7444071a7c43d2bd4e43316911ebb"
+                },
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "5e3363ee096ebaec247f30056c40ada563a99a189bba3ce9acefbcba556d7422",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 1,
+                  "native_replayed": true,
+                  "partial_digest": "56266a4310cc7b18446ba60c3c6f9c60e5c79447403391ee10a07ed8eeb3c215",
+                  "receiver_node": "tcr003-part-1",
+                  "request_sha256": "ffe0cd21f33648c1b66bd66c265e5617e60485063be02c561519c6a27858dfcc"
+                },
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "ea2521e66a4e9632ca5b18f10e83cade73f5814da0611353038b0d0308c92e4d",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 2,
+                  "native_replayed": true,
+                  "partial_digest": "feb3079f6fe060f3e4fe106a2307dd89e45c400d20746bcce252721a2ca59ba0",
+                  "receiver_node": "tcr003-part-2",
+                  "request_sha256": "49a7df606893400dca389fd8a2dde513e6a8d171b76d299da43cf3ec5c5e3700"
+                },
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "801a095535df39ca6464b77c7b0470e09e2ac7c8c8fcd20a66fd7fddd243de42",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 3,
+                  "native_replayed": true,
+                  "partial_digest": "56266a4310cc7b18446ba60c3c6f9c60e5c79447403391ee10a07ed8eeb3c215",
+                  "receiver_node": "tcr003-part-3",
+                  "request_sha256": "a9c7e583019f611ae63ab9577d2542f36b80aab9d88cee024fd4e3d9f01007eb"
+                }
+              ],
+              "distinct_ground_content_digests": 1,
+              "durable_replay": false,
+              "generated_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+              "generated_dimensions": [
+                8,
+                2048,
+                8
+              ],
+              "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+              "kernel_accepted": false,
+              "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+              "max_abs_parent_dense_error": 0.0,
+              "max_abs_parent_scalar_error": 0.0,
+              "native_cuts_cross_process": false,
+              "native_handler_calls": 4,
+              "native_runtime_count": 4,
+              "numerical_verification": {
+                "atol": 1e-09,
+                "max_abs_dense_error": 0.0,
+                "max_abs_scalar_error": 0.0,
+                "rtol": 1e-10,
+                "source_scalar_error": 0.0,
+                "status": "passed"
+              },
+              "output_coordinates_checked": 16,
+              "output_digest": "a52c510afb5c255a78a30f9c6d01b33d7feb2adc95dd16bd9afc4221d8e59968",
+              "probe_origin": "receiver-owned TCR fixed probes",
+              "scalar_coordinates_checked": 6,
+              "schema": "ifs.pnf.native-realization.v1",
+              "source_digest": "40d3dbf00500a7104bd6a6715e8786cec11fd2d2670b95d70d4a66f0cc53611f",
+              "status": "executed"
+            },
+            "output_indices": [
+              0,
+              4,
+              7
+            ],
+            "probe_count": 1,
+            "schema": "ifs.neural-receiver-verification.v1",
+            "source_digest": "40d3dbf00500a7104bd6a6715e8786cec11fd2d2670b95d70d4a66f0cc53611f",
+            "source_dimensions": [
+              8,
+              1024,
+              8
+            ],
+            "source_outputs": [
+              [
+                3.52392578125,
+                -0.0478515625,
+                2.986328125
+              ]
+            ],
+            "source_provenance_status": "sender-declared-and-content-bound; not independently re-observed",
+            "status": "verified"
+          },
+          "request_id": "144b561fc50347598438b3f9d27734f3",
+          "source_certificate_sha256": "247adb347fe59b5c60d4cd10e9cd17a3af33ed2ab0cd36c551269d98e5eba6e5"
+        },
+        "receiver_certificate_sha256": "abe74f5b1ce208e1e0546eb0bdf5dc988987a315b0e90c78ebde42c95e3aefc5",
+        "receiver_pid": 2838,
+        "request_id": "144b561fc50347598438b3f9d27734f3",
+        "same_physical_host": true,
+        "sender_pid": 2831,
+        "shared_parameter_file_used": false,
+        "source_certificate_sha256": "247adb347fe59b5c60d4cd10e9cd17a3af33ed2ab0cd36c551269d98e5eba6e5",
+        "transport": "E-CPU ReliableChannel over mutual TLS"
+      }
+    },
+    {
+      "name": "procedural-gelu_tanh",
+      "transfer": {
+        "capsule_bytes": 218814,
+        "chunk_count": 4,
+        "chunk_limit": 65536,
+        "durable_recovery_claimed": false,
+        "maximum_transport_frame_bytes": 262144,
+        "receiver": {
+          "capsule_sha256": "22fb29eabecbc95e3a1e26de177d54b56ccef86324e8d8761bfd6c3f4c0a0b59",
+          "chunks": 4,
+          "implementation_digest": "81415a4833fc44dd902c3d2a9993e1625df5fcd1dd1bf525da767fd2fedc2931",
+          "receiver_pid": 2844,
+          "report": {
+            "activation": "gelu_tanh",
+            "capsule_bytes": 218814,
+            "capsule_sha256": "22fb29eabecbc95e3a1e26de177d54b56ccef86324e8d8761bfd6c3f4c0a0b59",
+            "coefficient_law": {
+              "coefficient_comparison": "exact-binary32-in-binary64",
+              "floating_point_bitwise_equivalence_claimed": false,
+              "incoming_neurons_checked": 2048,
+              "kernel_accepted": false,
+              "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+              "outgoing_coefficients_checked": 8192,
+              "status": "passed"
+            },
+            "generated_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+            "generated_dimensions": [
+              8,
+              2048,
+              8
+            ],
+            "generated_outputs": [
+              [
+                4.129237064765393,
+                0.666535087666045,
+                2.0245589242437836
+              ]
+            ],
+            "kernel_accepted": false,
+            "max_absolute_error": 0.0,
+            "native_execution": {
+              "activation": "gelu_tanh",
+              "capsule_bytes": 218814,
+              "capsule_sha256": "22fb29eabecbc95e3a1e26de177d54b56ccef86324e8d8761bfd6c3f4c0a0b59",
+              "cut_model_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+              "dag_restoration_equal": true,
+              "dag_snapshot": {
+                "digest": "df8747d25e6ddb5263c2493f744b676c98fd782297471b5bdc6535302b7ed94a",
+                "format": "mailcpu-navigable-computation-dag-v1",
+                "state": {
+                  "commits": [
+                    {
+                      "node_digest": "27dd1df831edee6292d8b916f8434f6bb8d6475f854d43f76fd22cc63c67a327",
+                      "node_id": "part.0",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                        "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                        "output_digest": "bbcb6998ba40b81d269b112a1669a388c9955d2918d7d47bd966e2de162924e1",
+                        "output_shape": [
+                          2,
+                          8
+                        ],
+                        "partition_id": 0,
+                        "partition_tensor_digests": {
+                          "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                          "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                          "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "92052c57d3fc7918b35ecc8cc230f5d4b3fa7298edf8fa9a3f4ff777721d7b3e"
+                    },
+                    {
+                      "node_digest": "f36e923c877bbb8bb17b5435efc5ed98821b1033cfafc7ac3002c785639aa230",
+                      "node_id": "part.1",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                        "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                        "output_digest": "d21f2f75b94a980d58ad54098a2b660b089403c399e6a74fa124264a552592c7",
+                        "output_shape": [
+                          2,
+                          8
+                        ],
+                        "partition_id": 1,
+                        "partition_tensor_digests": {
+                          "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                          "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                          "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "c3141c9120e57ec1f71e05b35c32bd292c369fff7170382f5d131107dc6602bc"
+                    },
+                    {
+                      "node_digest": "8d074d8a70337aef03fbe1978b2efd355726c58cb1b678c7df1bcdee2c20ab22",
+                      "node_id": "part.2",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                        "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                        "output_digest": "bbcb6998ba40b81d269b112a1669a388c9955d2918d7d47bd966e2de162924e1",
+                        "output_shape": [
+                          2,
+                          8
+                        ],
+                        "partition_id": 2,
+                        "partition_tensor_digests": {
+                          "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                          "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                          "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "faef10144fe2eb8451670209ec4139b56aefd0b6278b17723021698b8a3f317f"
+                    },
+                    {
+                      "node_digest": "4dd103f35b4bba2a5c02a201e8e9cd293ceed3973bace6a97bf2b38bb57c20d4",
+                      "node_id": "part.3",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+                        "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                        "output_digest": "d21f2f75b94a980d58ad54098a2b660b089403c399e6a74fa124264a552592c7",
+                        "output_shape": [
+                          2,
+                          8
+                        ],
+                        "partition_id": 3,
+                        "partition_tensor_digests": {
+                          "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                          "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                          "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "333199ee30f660232d147a9999cbfb19a7c9d2c9ed93655654a2190c7096f231"
+                    },
+                    {
+                      "node_digest": "7c2cf2ce83454418638d1fec4675e4584a510002d4193e1821278d1b9227d85e",
+                      "node_id": "reduce",
+                      "result": {
+                        "ordered_partition_ids": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "output_digest": "49482319b614009287342c8f7cbb1daedcbe44f5474ccb752b95e27aa46f3918"
+                      },
+                      "result_digest": "47065b63751ac94cac170a0e0e7805f470a6a877e42ea5d76b9115040d781e3d"
+                    },
+                    {
+                      "node_digest": "9cebd0bdc7fd3c1d9d3effafbdac098099892b71d4f8dad5e358dbac74ed2b64",
+                      "node_id": "verify",
+                      "result": {
+                        "atol": 1e-09,
+                        "max_abs_dense_error": 6.217248937900877e-15,
+                        "max_abs_scalar_error": 1.4432899320127035e-15,
+                        "rtol": 1e-10,
+                        "source_scalar_error": 6.661338147750939e-16,
+                        "status": "passed"
+                      },
+                      "result_digest": "562a8a844bfade62d89c2ba702a9b21d21e099cc4a7ef8fcb057f5afea7a6089"
+                    }
+                  ],
+                  "max_nodes": 256,
+                  "nodes": [
+                    {
+                      "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                      "dependencies": [],
+                      "digest": "27dd1df831edee6292d8b916f8434f6bb8d6475f854d43f76fd22cc63c67a327",
+                      "node_id": "part.0",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 0,
+                          "start": 0,
+                          "stop": 512,
+                          "tensor_digests": {
+                            "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                            "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                            "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                          }
+                        },
+                        "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                      "dependencies": [],
+                      "digest": "f36e923c877bbb8bb17b5435efc5ed98821b1033cfafc7ac3002c785639aa230",
+                      "node_id": "part.1",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 1,
+                          "start": 512,
+                          "stop": 1024,
+                          "tensor_digests": {
+                            "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                            "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                            "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                          }
+                        },
+                        "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                      "dependencies": [],
+                      "digest": "8d074d8a70337aef03fbe1978b2efd355726c58cb1b678c7df1bcdee2c20ab22",
+                      "node_id": "part.2",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 2,
+                          "start": 1024,
+                          "stop": 1536,
+                          "tensor_digests": {
+                            "down_weight": "d7cc0824c9ff0c3f4f64ba87b22782e94043f84a851c3c98da39555a5bc4fa9c",
+                            "up_bias": "a45ccfc721d21de429b67dbd7702c21bb35e6a5df4bede40f1b2b889b3cfdeda",
+                            "up_weight": "c7b349cc2cc7e6b67daf3bb258ebac1ef7da02985040e425c1c92825ecb5a920"
+                          }
+                        },
+                        "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                      "dependencies": [],
+                      "digest": "4dd103f35b4bba2a5c02a201e8e9cd293ceed3973bace6a97bf2b38bb57c20d4",
+                      "node_id": "part.3",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 3,
+                          "start": 1536,
+                          "stop": 2048,
+                          "tensor_digests": {
+                            "down_weight": "714d28b4a770948f2ba22f567a0085a50c5fa26a9523f92cb443a75134ef0d8a",
+                            "up_bias": "d6f85704baed5fdfff0d95f1fb2ffec9b54792441835970fe152bd606585be18",
+                            "up_weight": "286e5a3ef8833eec51204bcc55890d1d15a9092866fbd6cebc4f91275facbf3d"
+                          }
+                        },
+                        "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                      "dependencies": [
+                        "part.0",
+                        "part.1",
+                        "part.2",
+                        "part.3"
+                      ],
+                      "digest": "7c2cf2ce83454418638d1fec4675e4584a510002d4193e1821278d1b9227d85e",
+                      "node_id": "reduce",
+                      "operation": "tcr.deterministic_reduce",
+                      "payload": {
+                        "bias_digest": "ff6e1c5c560e1ca460f9cc5180f3dbf9a9573d1fc75dc87c6ceceeac21521ff8"
+                      },
+                      "resource": "local.numpy",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+                      "dependencies": [
+                        "reduce"
+                      ],
+                      "digest": "9cebd0bdc7fd3c1d9d3effafbdac098099892b71d4f8dad5e358dbac74ed2b64",
+                      "node_id": "verify",
+                      "operation": "tcr.compare_observation",
+                      "payload": {
+                        "source_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e"
+                      },
+                      "resource": "local.numpy",
+                      "revision": 1
+                    }
+                  ],
+                  "version": 1
+                }
+              },
+              "decisions": [
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "021f23640fa3f76593c09f0550037554d9c24c162628699ec968cb8251973ce0",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 0,
+                  "native_replayed": true,
+                  "partial_digest": "bbcb6998ba40b81d269b112a1669a388c9955d2918d7d47bd966e2de162924e1",
+                  "receiver_node": "tcr003-part-0",
+                  "request_sha256": "1f17eda65a968fc7e7f3fa52ad9bc86380633273959c30046740c2149280a2f9"
+                },
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "e8f61138350f686b57d228ff3117914891e155cc992f164d7f9bd98ed5acbca3",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 1,
+                  "native_replayed": true,
+                  "partial_digest": "d21f2f75b94a980d58ad54098a2b660b089403c399e6a74fa124264a552592c7",
+                  "receiver_node": "tcr003-part-1",
+                  "request_sha256": "8682f24594dc511ce3b0eee9ac21e1ef9aead60525966f6fe3c39c60220129a7"
+                },
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "28415f4b7185f59818f4338e446e99015ff35f438b6804b2dfde87447a5c0c48",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 2,
+                  "native_replayed": true,
+                  "partial_digest": "bbcb6998ba40b81d269b112a1669a388c9955d2918d7d47bd966e2de162924e1",
+                  "receiver_node": "tcr003-part-2",
+                  "request_sha256": "596e0025b85755a8f042ebc889e86da4f8f849ac8ff145a53cc177a7a5a67d74"
+                },
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "7a50b545250011d2739be96e324fc45913e6ea9ad2113e67e6cc6761605b4a41",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 3,
+                  "native_replayed": true,
+                  "partial_digest": "d21f2f75b94a980d58ad54098a2b660b089403c399e6a74fa124264a552592c7",
+                  "receiver_node": "tcr003-part-3",
+                  "request_sha256": "a6f6e45fafa5c8283fd40fd16f12189110b1ca50154a0635849495df9528553a"
+                }
+              ],
+              "distinct_ground_content_digests": 1,
+              "durable_replay": false,
+              "generated_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+              "generated_dimensions": [
+                8,
+                2048,
+                8
+              ],
+              "input_digest": "b6d57c34d94093c37112e15794d222c514ff8a678dcc23715f4d8804e534c0f8",
+              "kernel_accepted": false,
+              "manifest_digest": "442eeff11c0e1698acd501e7fb30e5427a2f5814318abeff91b650d31e7bf5a4",
+              "max_abs_parent_dense_error": 3.552713678800501e-15,
+              "max_abs_parent_scalar_error": 1.4432899320127035e-15,
+              "native_cuts_cross_process": false,
+              "native_handler_calls": 4,
+              "native_runtime_count": 4,
+              "numerical_verification": {
+                "atol": 1e-09,
+                "max_abs_dense_error": 6.217248937900877e-15,
+                "max_abs_scalar_error": 1.4432899320127035e-15,
+                "rtol": 1e-10,
+                "source_scalar_error": 6.661338147750939e-16,
+                "status": "passed"
+              },
+              "output_coordinates_checked": 16,
+              "output_digest": "49482319b614009287342c8f7cbb1daedcbe44f5474ccb752b95e27aa46f3918",
+              "probe_origin": "receiver-owned TCR fixed probes",
+              "scalar_coordinates_checked": 6,
+              "schema": "ifs.pnf.native-realization.v1",
+              "source_digest": "ac0af0cdc52931bd45c9fb924a44719d31a81a909933ba6fcdf9307930e2bf9d",
+              "status": "executed"
+            },
+            "output_indices": [
+              0,
+              4,
+              7
+            ],
+            "probe_count": 1,
+            "schema": "ifs.neural-receiver-verification.v1",
+            "source_digest": "ac0af0cdc52931bd45c9fb924a44719d31a81a909933ba6fcdf9307930e2bf9d",
+            "source_dimensions": [
+              8,
+              1024,
+              8
+            ],
+            "source_outputs": [
+              [
+                4.129237064765393,
+                0.666535087666045,
+                2.0245589242437836
+              ]
+            ],
+            "source_provenance_status": "sender-declared-and-content-bound; not independently re-observed",
+            "status": "verified"
+          },
+          "request_id": "661a42f96c9b405a83066aa0e16a7930",
+          "source_certificate_sha256": "0e735520cef1da173cd87de181fd1e4fdaf58ba063af86c8672e454e868d23f5"
+        },
+        "receiver_certificate_sha256": "7dac52f59f81fd0b0cc148b441da8d50c97aa4bc342dd14e6673083a9e1db8f2",
+        "receiver_pid": 2844,
+        "request_id": "661a42f96c9b405a83066aa0e16a7930",
+        "same_physical_host": true,
+        "sender_pid": 2831,
+        "shared_parameter_file_used": false,
+        "source_certificate_sha256": "0e735520cef1da173cd87de181fd1e4fdaf58ba063af86c8672e454e868d23f5",
+        "transport": "E-CPU ReliableChannel over mutual TLS"
+      }
+    },
+    {
+      "name": "fresh-observed-gpt2",
+      "transfer": {
+        "capsule_bytes": 44107195,
+        "chunk_count": 674,
+        "chunk_limit": 65536,
+        "durable_recovery_claimed": false,
+        "maximum_transport_frame_bytes": 262144,
+        "receiver": {
+          "capsule_sha256": "2536c5142fae1db9de2c8550d6c1ba65e8658bb57cd40caa10e08753472d335b",
+          "chunks": 674,
+          "implementation_digest": "81415a4833fc44dd902c3d2a9993e1625df5fcd1dd1bf525da767fd2fedc2931",
+          "receiver_pid": 2850,
+          "report": {
+            "activation": "gelu_tanh",
+            "capsule_bytes": 44107195,
+            "capsule_sha256": "2536c5142fae1db9de2c8550d6c1ba65e8658bb57cd40caa10e08753472d335b",
+            "coefficient_law": {
+              "coefficient_comparison": "exact-binary32-in-binary64",
+              "floating_point_bitwise_equivalence_claimed": false,
+              "incoming_neurons_checked": 4096,
+              "kernel_accepted": false,
+              "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+              "outgoing_coefficients_checked": 2359296,
+              "status": "passed"
+            },
+            "generated_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+            "generated_dimensions": [
+              768,
+              4096,
+              768
+            ],
+            "generated_outputs": [
+              [
+                3.4358817312063064,
+                1.891078417479726,
+                6.550091113234248
+              ],
+              [
+                -2.947720887732392,
+                1.0328397410272776,
+                1.5028289174700635
+              ]
+            ],
+            "kernel_accepted": false,
+            "max_absolute_error": 0.0,
+            "native_execution": {
+              "activation": "gelu_tanh",
+              "capsule_bytes": 44107195,
+              "capsule_sha256": "2536c5142fae1db9de2c8550d6c1ba65e8658bb57cd40caa10e08753472d335b",
+              "cut_model_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+              "dag_restoration_equal": true,
+              "dag_snapshot": {
+                "digest": "2db177e9ac232051c476ca097c3be82dc2542f69dfc01c62c162c7c01585f3d8",
+                "format": "mailcpu-navigable-computation-dag-v1",
+                "state": {
+                  "commits": [
+                    {
+                      "node_digest": "08fd44b38fd15b07d12721fc9ec8583f0f93bf6499727b2ffdb20299d5c8d55d",
+                      "node_id": "part.0",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+                        "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                        "output_digest": "cb47e3340eadac5391263b99361dc2ca54ecea91f8cae2f117468d62e9a8d2c6",
+                        "output_shape": [
+                          2,
+                          768
+                        ],
+                        "partition_id": 0,
+                        "partition_tensor_digests": {
+                          "down_weight": "1b830d23340f0bbfaed99639f737b905e962a84c8790813ce7ddb02f95310d41",
+                          "up_bias": "99e0ecfc2510b0d271ed264b44363cf48017ca67e5c7a5ed0247591e189398d4",
+                          "up_weight": "27f4365d4596e1a7ed0b8d794dd1084d82c8c2bbdb10c9b74d0677765cb944b4"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "16b19bf628f29c2891e06f4c5ae5c19455671d5931c53db27c239a2e39a172fd"
+                    },
+                    {
+                      "node_digest": "6cc5680d9e97288d8ece584274bdb519473c89f81e2d48c7efd75d48faecb3b4",
+                      "node_id": "part.1",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+                        "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                        "output_digest": "6571e19ed8761ec316398f36c7dff779b01e18e0fb404dd315746a60b9d882fb",
+                        "output_shape": [
+                          2,
+                          768
+                        ],
+                        "partition_id": 1,
+                        "partition_tensor_digests": {
+                          "down_weight": "7b9365cea59a1fe672a079457ad24ffe3b2b1b6f37964c3ef7b96bbcf7c0092b",
+                          "up_bias": "168271cb6c68c2fa0030148d42b9fd8b76bf081e7d170f0771a9973af3cafc8d",
+                          "up_weight": "96d2ac69df54130ef2723c3fc2902858b16c343b78a7961d6f5d6366d2c0d252"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "9f10d34444bec1a8e8e60f0d2cbc2aa7bc30bac9cd6b7c023fffa05b79213443"
+                    },
+                    {
+                      "node_digest": "ba10c3771da95da838934f3ba01322201453f02d100bfe9444f7aca4e4b04075",
+                      "node_id": "part.2",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+                        "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                        "output_digest": "e8fc3de68bcc9d4b113cfafacfa62722cce5e864b3731558faeb3e5c443a2d4f",
+                        "output_shape": [
+                          2,
+                          768
+                        ],
+                        "partition_id": 2,
+                        "partition_tensor_digests": {
+                          "down_weight": "c6f6c8c3299dd9b791acae12e116ca4d8686f9c9825164acdb862f353bdc14cc",
+                          "up_bias": "0d85ce475ca7a3b9566257de37dbda93be8fb567cb51cff75d726a20a2d29c31",
+                          "up_weight": "1da41d90131aef05ccbb6faff6519777a0c265f39fc7ed6111d497443893a01e"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "006d6fd527056a8524891d45e254ae1d0307ff9d2ecd69f423c9c7870cfbe86e"
+                    },
+                    {
+                      "node_digest": "90230fb46a0d142ad5fe745c4b07bba8b01f8b0681ce8dcde50c43ecd43b8b82",
+                      "node_id": "part.3",
+                      "result": {
+                        "arithmetic": "float64-eval-of-float32-parameters",
+                        "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+                        "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                        "output_digest": "cb47e3340eadac5391263b99361dc2ca54ecea91f8cae2f117468d62e9a8d2c6",
+                        "output_shape": [
+                          2,
+                          768
+                        ],
+                        "partition_id": 3,
+                        "partition_tensor_digests": {
+                          "down_weight": "1b830d23340f0bbfaed99639f737b905e962a84c8790813ce7ddb02f95310d41",
+                          "up_bias": "99e0ecfc2510b0d271ed264b44363cf48017ca67e5c7a5ed0247591e189398d4",
+                          "up_weight": "27f4365d4596e1a7ed0b8d794dd1084d82c8c2bbdb10c9b74d0677765cb944b4"
+                        },
+                        "schema": "ifs.tensor-cut-partial-receipt.v1",
+                        "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+                        "status": "complete",
+                        "worker_trust": "unsigned artifact; no hardware or transport attestation"
+                      },
+                      "result_digest": "51dcfc14fa521abfbc3385d2de56f8ac6a31f1631467a2164f5733c0ebca8f63"
+                    },
+                    {
+                      "node_digest": "9794d37ad7ea1231dcdbac746f0bf08dc688e6430e2c3b268c0d2e8936c13df9",
+                      "node_id": "reduce",
+                      "result": {
+                        "ordered_partition_ids": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "output_digest": "8c445866bca9843cd7e7e6fb0c7eb9d740a63c4e3e07678204ca894c4d110aef"
+                      },
+                      "result_digest": "a1dc0c347c26910d4629fd371392ed31045a1e7f3b346670665c729aa69b7c7b"
+                    },
+                    {
+                      "node_digest": "0edcbf7caab1500aa65db96a027194f1b1183c3356041f47e60e68173c48ea57",
+                      "node_id": "verify",
+                      "result": {
+                        "atol": 1e-09,
+                        "max_abs_dense_error": 2.1316282072803006e-14,
+                        "max_abs_scalar_error": 3.1086244689504383e-15,
+                        "rtol": 1e-10,
+                        "source_scalar_error": 4.440892098500626e-15,
+                        "status": "passed"
+                      },
+                      "result_digest": "dbac6b5e8b021b27c774569c1199170fa274c017fc59ae92c607bc9a1d3d310f"
+                    }
+                  ],
+                  "max_nodes": 256,
+                  "nodes": [
+                    {
+                      "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                      "dependencies": [],
+                      "digest": "08fd44b38fd15b07d12721fc9ec8583f0f93bf6499727b2ffdb20299d5c8d55d",
+                      "node_id": "part.0",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 0,
+                          "start": 0,
+                          "stop": 1024,
+                          "tensor_digests": {
+                            "down_weight": "1b830d23340f0bbfaed99639f737b905e962a84c8790813ce7ddb02f95310d41",
+                            "up_bias": "99e0ecfc2510b0d271ed264b44363cf48017ca67e5c7a5ed0247591e189398d4",
+                            "up_weight": "27f4365d4596e1a7ed0b8d794dd1084d82c8c2bbdb10c9b74d0677765cb944b4"
+                          }
+                        },
+                        "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                      "dependencies": [],
+                      "digest": "6cc5680d9e97288d8ece584274bdb519473c89f81e2d48c7efd75d48faecb3b4",
+                      "node_id": "part.1",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 1,
+                          "start": 1024,
+                          "stop": 2048,
+                          "tensor_digests": {
+                            "down_weight": "7b9365cea59a1fe672a079457ad24ffe3b2b1b6f37964c3ef7b96bbcf7c0092b",
+                            "up_bias": "168271cb6c68c2fa0030148d42b9fd8b76bf081e7d170f0771a9973af3cafc8d",
+                            "up_weight": "96d2ac69df54130ef2723c3fc2902858b16c343b78a7961d6f5d6366d2c0d252"
+                          }
+                        },
+                        "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                      "dependencies": [],
+                      "digest": "ba10c3771da95da838934f3ba01322201453f02d100bfe9444f7aca4e4b04075",
+                      "node_id": "part.2",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 2,
+                          "start": 2048,
+                          "stop": 3072,
+                          "tensor_digests": {
+                            "down_weight": "c6f6c8c3299dd9b791acae12e116ca4d8686f9c9825164acdb862f353bdc14cc",
+                            "up_bias": "0d85ce475ca7a3b9566257de37dbda93be8fb567cb51cff75d726a20a2d29c31",
+                            "up_weight": "1da41d90131aef05ccbb6faff6519777a0c265f39fc7ed6111d497443893a01e"
+                          }
+                        },
+                        "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                      "dependencies": [],
+                      "digest": "90230fb46a0d142ad5fe745c4b07bba8b01f8b0681ce8dcde50c43ecd43b8b82",
+                      "node_id": "part.3",
+                      "operation": "tcr.execute_partition",
+                      "payload": {
+                        "partition": {
+                          "id": 3,
+                          "start": 3072,
+                          "stop": 4096,
+                          "tensor_digests": {
+                            "down_weight": "1b830d23340f0bbfaed99639f737b905e962a84c8790813ce7ddb02f95310d41",
+                            "up_bias": "99e0ecfc2510b0d271ed264b44363cf48017ca67e5c7a5ed0247591e189398d4",
+                            "up_weight": "27f4365d4596e1a7ed0b8d794dd1084d82c8c2bbdb10c9b74d0677765cb944b4"
+                          }
+                        },
+                        "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                      },
+                      "resource": "external.worker",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                      "dependencies": [
+                        "part.0",
+                        "part.1",
+                        "part.2",
+                        "part.3"
+                      ],
+                      "digest": "9794d37ad7ea1231dcdbac746f0bf08dc688e6430e2c3b268c0d2e8936c13df9",
+                      "node_id": "reduce",
+                      "operation": "tcr.deterministic_reduce",
+                      "payload": {
+                        "bias_digest": "780a7ab01792a4ddbc0591c65da9d23124c6f3076289f544505e70cd12e61d3a"
+                      },
+                      "resource": "local.numpy",
+                      "revision": 1
+                    },
+                    {
+                      "context_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+                      "dependencies": [
+                        "reduce"
+                      ],
+                      "digest": "0edcbf7caab1500aa65db96a027194f1b1183c3356041f47e60e68173c48ea57",
+                      "node_id": "verify",
+                      "operation": "tcr.compare_observation",
+                      "payload": {
+                        "source_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054"
+                      },
+                      "resource": "local.numpy",
+                      "revision": 1
+                    }
+                  ],
+                  "version": 1
+                }
+              },
+              "decisions": [
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "a688c46a79b2d5082c834cb19027825ff49faafc69ecbcdcebbfc1574e93450a",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 0,
+                  "native_replayed": true,
+                  "partial_digest": "cb47e3340eadac5391263b99361dc2ca54ecea91f8cae2f117468d62e9a8d2c6",
+                  "receiver_node": "tcr003-part-0",
+                  "request_sha256": "7cdce1c08377c03b69fbdb1bc9830010664f4ab4e9d3ab4e72e77dc70ba7da41"
+                },
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "6c412cb783b3f3c81af7a749aa96c7d1cec203cfc53007d8ab9b8c0508b6f244",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 1,
+                  "native_replayed": true,
+                  "partial_digest": "6571e19ed8761ec316398f36c7dff779b01e18e0fb404dd315746a60b9d882fb",
+                  "receiver_node": "tcr003-part-1",
+                  "request_sha256": "bfd495109eaf19c975bc6dd9e85dceff503a6b757171268c463e9932dfaed7c4"
+                },
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "970afd4c06c77d679addecd62d3fe26c4fba5ba4f3672b7cad6fe9a24c152b94",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 2,
+                  "native_replayed": true,
+                  "partial_digest": "e8fc3de68bcc9d4b113cfafacfa62722cce5e864b3731558faeb3e5c443a2d4f",
+                  "receiver_node": "tcr003-part-2",
+                  "request_sha256": "95add4d8dc37b98d7667c1ee5882fc76d55f0b066a25d8d30f3bef1eca5241ee"
+                },
+                {
+                  "action": "allow",
+                  "contract_digest": "6746388971c032ff09b076dbf5acec3d091840b75df9f7522a56fc4d006f842b",
+                  "event_fingerprint": "e526463ec647f9c1983fde812bbb90a15bbfc971ea6eb9363a274b30aa5ae84f",
+                  "ground_digest": "5b4d02abb2e5f039b9a548909a44d689c19147a8accfebf29b5515ce9ad56414",
+                  "handler_calls": 1,
+                  "index": 3,
+                  "native_replayed": true,
+                  "partial_digest": "cb47e3340eadac5391263b99361dc2ca54ecea91f8cae2f117468d62e9a8d2c6",
+                  "receiver_node": "tcr003-part-3",
+                  "request_sha256": "61a18211bc294838c3e603b41a40fe2818fc8aca0b02efa20d860d655aaf1738"
+                }
+              ],
+              "distinct_ground_content_digests": 1,
+              "durable_replay": false,
+              "generated_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+              "generated_dimensions": [
+                768,
+                4096,
+                768
+              ],
+              "input_digest": "cbbab564c170a01a72a593c08fc6cbf832d8c6bfc5a06487a56e1438e4e47a32",
+              "kernel_accepted": false,
+              "manifest_digest": "217175a34fcebbac346e914ea90bc84931bb683fe543a11cee8b8fc9abbf5a39",
+              "max_abs_parent_dense_error": 2.1316282072803006e-14,
+              "max_abs_parent_scalar_error": 3.1086244689504383e-15,
+              "native_cuts_cross_process": false,
+              "native_handler_calls": 4,
+              "native_runtime_count": 4,
+              "numerical_verification": {
+                "atol": 1e-09,
+                "max_abs_dense_error": 2.1316282072803006e-14,
+                "max_abs_scalar_error": 3.1086244689504383e-15,
+                "rtol": 1e-10,
+                "source_scalar_error": 4.440892098500626e-15,
+                "status": "passed"
+              },
+              "output_coordinates_checked": 1536,
+              "output_digest": "8c445866bca9843cd7e7e6fb0c7eb9d740a63c4e3e07678204ca894c4d110aef",
+              "probe_origin": "receiver-owned TCR fixed probes",
+              "scalar_coordinates_checked": 6,
+              "schema": "ifs.pnf.native-realization.v1",
+              "source_digest": "cf6f7f38ee402129f27304b758520ceebde0896466c8fd9fe7c0f259b92d661c",
+              "status": "executed"
+            },
+            "output_indices": [
+              0,
+              384,
+              767
+            ],
+            "probe_count": 2,
+            "schema": "ifs.neural-receiver-verification.v1",
+            "source_digest": "cf6f7f38ee402129f27304b758520ceebde0896466c8fd9fe7c0f259b92d661c",
+            "source_dimensions": [
+              768,
+              3072,
+              768
+            ],
+            "source_outputs": [
+              [
+                3.4358817312063064,
+                1.891078417479726,
+                6.550091113234248
+              ],
+              [
+                -2.947720887732392,
+                1.0328397410272776,
+                1.5028289174700635
+              ]
+            ],
+            "source_provenance_status": "sender-declared-and-content-bound; not independently re-observed",
+            "status": "verified"
+          },
+          "request_id": "9fdf40d73523459aa9ac24649353d85b",
+          "source_certificate_sha256": "9c1f394ff176f0e918c30c0d64c38e46f3d11ed5be23df4ff038a142445663fc"
+        },
+        "receiver_certificate_sha256": "63ca1823beb7dce6a5161b8f5c5e92cd45e257da35016e57c3c84360dc4d29a2",
+        "receiver_pid": 2850,
+        "request_id": "9fdf40d73523459aa9ac24649353d85b",
+        "same_physical_host": true,
+        "sender_pid": 2831,
+        "shared_parameter_file_used": false,
+        "source_certificate_sha256": "9c1f394ff176f0e918c30c0d64c38e46f3d11ed5be23df4ff038a142445663fc",
+        "transport": "E-CPU ReliableChannel over mutual TLS"
+      }
+    }
+  ],
+  "denial_control": {
+    "activation": "relu",
+    "capsule_bytes": 218804,
+    "capsule_sha256": "559a1d5d027d9197c921807d0193c2843277103cab841b5231debe6c73b879a0",
+    "cut_model_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+    "decisions": [
+      {
+        "action": "deny",
+        "handler_calls": 0,
+        "index": 0,
+        "receiver_node": "tcr003-part-0"
+      },
+      {
+        "action": "deny",
+        "handler_calls": 0,
+        "index": 1,
+        "receiver_node": "tcr003-part-1"
+      },
+      {
+        "action": "deny",
+        "handler_calls": 0,
+        "index": 2,
+        "receiver_node": "tcr003-part-2"
+      },
+      {
+        "action": "deny",
+        "handler_calls": 0,
+        "index": 3,
+        "receiver_node": "tcr003-part-3"
+      }
+    ],
+    "durable_replay": false,
+    "generated_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+    "generated_dimensions": [
+      8,
+      2048,
+      8
+    ],
+    "kernel_accepted": false,
+    "manifest_digest": "72b2d17d6d89007b6595a4448a55322a6d4709bbe57c4441f8133df54f9d9295",
+    "native_cuts_cross_process": false,
+    "native_handler_calls": 0,
+    "native_runtime_count": 4,
+    "probe_origin": "receiver-owned TCR fixed probes",
+    "schema": "ifs.pnf.native-realization.v1",
+    "source_digest": "40d3dbf00500a7104bd6a6715e8786cec11fd2d2670b95d70d4a66f0cc53611f",
+    "status": "denied"
+  },
+  "environment": {
+    "numpy": "2.4.6",
+    "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+    "python": "3.11.18"
+  },
+  "native_cuts_scope": "four receiver-owned runtimes in one process on one physical host",
+  "network_transport_performed": true,
+  "schema": "ifs.pnf003.experiment.v1"
+}
