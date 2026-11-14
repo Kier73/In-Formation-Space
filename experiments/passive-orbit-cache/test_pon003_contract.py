@@ -189,6 +189,49 @@ class PON003(unittest.TestCase):
         with self.assertRaises(PassiveRejected):
             inventory(fake)
 
+    def test_untrusted_gateway_redirect_or_bad_raw_media_type_falls_back(self):
+        address = inventory(publisher_source())[0]
+        r2 = Origin("r2", "http://127.0.0.1:12345/")
+        ipfs = Origin("ipfs", "http://127.0.0.1:12346/")
+        bad_redirect = Fetcher()
+        class Redirect:
+            def open(self, request, timeout=None):
+                raise PassiveRejected("passive host redirect prohibited")
+        bad_redirect.opener = Redirect()
+        data, status, _ = bad_redirect.read(r2, address, max_bytes=12000)
+        self.assertIsNone(data)
+        self.assertEqual(status, "rejected_response_policy")
+        class WrongMIME:
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                return False
+            status = 200
+            headers = {"Content-Type": "text/html"}
+        class Opener:
+            def open(self, request, timeout=None):
+                return WrongMIME()
+        invalid_type = Fetcher()
+        invalid_type.opener = Opener()
+        data, status, _ = invalid_type.read(ipfs, address, max_bytes=12000)
+        self.assertIsNone(data)
+        self.assertEqual(status, "rejected_response_policy")
+
+    def test_manual_public_probe_rejects_unprovisioned_domains_before_request(self):
+        from pon003_public_probe import probe
+        with TemporaryDirectory() as d:
+            root = Path(d)
+            produce(kind="r2", output=root/"r2", epoch=4, now=TIME)
+            produce(kind="ipfs", output=root/"ipfs", epoch=4, now=TIME)
+            with self.assertRaises(PassiveRejected):
+                probe(r2_base="http://untrusted.invalid/",
+                      ipfs_base="https://ipfs.io/",
+                      r2_dir=root/"r2", ipfs_dir=root/"ipfs")
+            with self.assertRaises(PassiveRejected):
+                probe(r2_base="https://bucket.example.r2.dev/",
+                      ipfs_base="http://127.0.0.1:8090/",
+                      r2_dir=root/"r2", ipfs_dir=root/"ipfs")
+
     def test_raw_cid_host_only_accepts_exact_block_paths(self):
         with TemporaryDirectory() as d:
             root=Path(d)
