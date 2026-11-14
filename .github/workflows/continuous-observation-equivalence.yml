@@ -237,6 +237,26 @@ jobs:
             cat lean-wire-token-proof-output.txt
             exit 1
           fi
+      - name: Test direct raw JSON byte transport without Python JSON interpretation
+        working-directory: experiments/continuous-observation-equivalence
+        run: python -m unittest test_lean_json_bytes -v
+      - name: Carry complete original canonical JSON file bytes into Lean
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python emit_lean_json_bytes.py received-certificates lean/GeneratedJSONProofs.lean --manifest lean/lean-json-replay-manifest.json
+      - name: Kernel-parse entire original JSON structure for all five certificates
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean -o .lake/build/lib/lean/GeneratedWireProofs.olean GeneratedWireProofs.lean > lean-wire-olean-output.txt
+          lake env lean GeneratedJSONProofs.lean | tee lean-json-byte-proof-output.txt
+          for name in identity relu_identity zero triangular_bump rescaled_bump; do
+            grep -Fq "'COE013.${name}_json_wire' depends on axioms:" lean-json-byte-proof-output.txt
+            grep -Fq "'COE013.${name}_json_admitted' depends on axioms:" lean-json-byte-proof-output.txt
+          done
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' lean-json-byte-proof-output.txt; then
+            cat lean-json-byte-proof-output.txt
+            exit 1
+          fi
       - name: Require Lean kernel rejection of noncanonical rational wire admission
         working-directory: experiments/continuous-observation-equivalence/lean
         run: |
@@ -277,6 +297,10 @@ jobs:
             experiments/continuous-observation-equivalence/lean/GeneratedWireProofs.lean
             experiments/continuous-observation-equivalence/lean/lean-certificate-olean-output.txt
             experiments/continuous-observation-equivalence/lean/lean-wire-token-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/lean-json-replay-manifest.json
+            experiments/continuous-observation-equivalence/lean/GeneratedJSONProofs.lean
+            experiments/continuous-observation-equivalence/lean/lean-json-byte-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/lean-wire-olean-output.txt
             experiments/continuous-observation-equivalence/lean/invalid-wire-token.txt
             experiments/continuous-observation-equivalence/lean/negative-*-rejection.txt
           if-no-files-found: error
