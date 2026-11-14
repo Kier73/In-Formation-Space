@@ -89,6 +89,21 @@ jobs:
           assert [x["hull_vertices"] for x in report["exact_boundaries"]] == [4,5,6,7,8]
           print("Depth-five continuous-angle proof certificate validated")
           PY
+      - name: Generate and validate all-depth hull law prerequisite record
+        run: |
+          python experiments/branching-morphology/all_depth_law.py > "$RUNNER_TEMP/all-depth-hull-certificate.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          record = json.loads((Path(os.environ["RUNNER_TEMP"]) / "all-depth-hull-certificate.json").read_text())
+          homothety = record["homothety"]
+          assert homothety["certified_scale_equalities"] == 15
+          assert homothety["vertex_polynomial_equalities"] == 89
+          assert homothety["sigma_outside_witness"]["bernstein_signs_on_sigma_to_one"] == [0,1,1,1,1]
+          assert len(record["candidate_recurrence"]["illustrations"]) == 11
+          print("Validated prerequisites for all-depth hull absorption induction")
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: branching-morphology-py${{ matrix.python-version }}
@@ -97,3 +112,4 @@ jobs:
             ${{ runner.temp }}/measurements.json
             ${{ runner.temp }}/depth4-certificate.json
             ${{ runner.temp }}/depth5-certificate.json
+            ${{ runner.temp }}/all-depth-hull-certificate.json
