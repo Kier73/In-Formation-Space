@@ -109,7 +109,7 @@ structure Envelope where
   networkSHA : Bytes
   semanticAtlas : List WireCell
   semanticSHA : Bytes
-  deriving Repr
+  deriving Repr, DecidableEq
 
 /-- Entire COE-002 canonical JSON field order. A misspelled key, extra
     key, wrong array nesting, duplicate, spacing or trailing garbage is
@@ -159,7 +159,7 @@ theorem acceptBytes_implies_verified (raw : Bytes)
         simpa [hp] using h
       obtain ⟨cert, hdecode, hverify⟩ :=
         acceptWire_implies_verified env.wire hwire
-      exact ⟨env, cert, hp, hdecode, hverify⟩
+      exact ⟨env, cert, rfl, hdecode, hverify⟩
 
 /-- Malformed envelope, unknown field, trailing LF and wrong digest
     grammar are checked by kernel reduction on small genuine byte arrays. -/
