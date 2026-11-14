@@ -51,7 +51,7 @@ jobs:
         run: lake exe cache get
       - name: Compile independent real semantics and original COE proof chain
         working-directory: experiments/continuous-observation-equivalence/real-lean
-        run: lake build COE012RealLink
+        run: lake build COE012RealLink COE011Fixtures
       - name: Kernel-check real continuity, exact casts and dense uniqueness
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
