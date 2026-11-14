@@ -1,0 +1,136 @@
+name: IHP-009 GitHub OIDC claim observation and independent attestation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ihp009-oidc-claims-evidence.yml"
+      - "experiments/tailscale-federation-readiness/gh_oidc_claims.py"
+      - "experiments/tailscale-federation-readiness/test_gh_oidc_claims.py"
+      - "experiments/tailscale-federation-readiness/IHP-009.md"
+  pull_request:
+    paths:
+      - ".github/workflows/ihp009-oidc-claims-evidence.yml"
+      - "experiments/tailscale-federation-readiness/gh_oidc_claims.py"
+      - "experiments/tailscale-federation-readiness/test_gh_oidc_claims.py"
+      - "experiments/tailscale-federation-readiness/IHP-009.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run IHP-009 redaction and independent verification tests
+        run: |
+          python -m unittest discover \
+            -s experiments/tailscale-federation-readiness \
+            -p 'test_gh_oidc_claims.py' -v
+      - name: Compile IHP-009 script
+        run: python -m py_compile experiments/tailscale-federation-readiness/gh_oidc_claims.py
+
+  claims_host:
+    needs: tests
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install GitHub OIDC signature verification dependency
+        run: python -m pip install --disable-pip-version-check "PyJWT[crypto]>=2.10,<3"
+      - name: Request and validate GitHub OIDC token; retain bounded claims only
+        env:
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python experiments/tailscale-federation-readiness/gh_oidc_claims.py \
+            observe --output-dir evidence/ihp009
+      - name: Attest the bounded OIDC claim record
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/ihp009/claims.json
+          predicate-type: https://kier73.github.io/in-formation-space/ihp009-oidc-claims/v1
+          predicate-path: evidence/ihp009/claims.predicate.json
+      - name: Preserve claim evidence, not the raw JWT
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp009-signed-github-oidc-claims
+          path: |
+            evidence/ihp009/claims.json
+            evidence/ihp009/claims.predicate.json
+          if-no-files-found: error
+          retention-days: 90
+
+  verifier_host:
+    needs: [tests, claims_host]
+    if: needs.tests.result == 'success' && needs.claims_host.result == 'success' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install GitHub CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Download attested bounded GitHub OIDC claim record
+        uses: actions/download-artifact@v4
+        with:
+          name: ihp009-signed-github-oidc-claims
+          path: evidence/claims
+      - name: Independently verify GitHub attestation and reconstruct claim context
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          python experiments/tailscale-federation-readiness/gh_oidc_claims.py verify \
+            --record evidence/claims/claims.json \
+            --predicate evidence/claims/claims.predicate.json \
+            --output-dir evidence/verifier
+      - name: Attest independent OIDC claim report
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/verifier/report.json
+          predicate-type: https://kier73.github.io/in-formation-space/ihp009-oidc-claims-report/v1
+          predicate-path: evidence/verifier/report.predicate.json
+      - name: Preserve independently attested OIDC claim report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ihp009-independent-oidc-claims-report
+          path: |
+            evidence/verifier/report.json
+            evidence/verifier/report.predicate.json
+          if-no-files-found: error
+          retention-days: 90
