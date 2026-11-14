@@ -37,6 +37,7 @@ jobs:
           set -euo pipefail
           python -m unittest discover -s experiments/passive-orbit-cache -p 'test_pon002*.py' -v
           python -m py_compile experiments/passive-orbit-cache/pon002_orbit.py experiments/passive-orbit-cache/pon002_audit.py
+          python experiments/passive-orbit-cache/pon002_audit.py --help > /dev/null
       - name: Preserve PON-001 and CAG-001 source verifier regressions
         run: |
           set -euo pipefail
