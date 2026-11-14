@@ -139,7 +139,21 @@ def compete(
             expected_owner_generation=1,
         )
     except ProofActionRouteEpochError as exc:
-        # CAS conflict and already-superseded owner are both safe refusals.
+        # Do not treat *any* ledger error as a valid fencing result: a failed
+        # contender is only "superseded" if the *authoritative* ledger now
+        # shows a different live owner at exactly generation two.
+        current = ProofActionRouteEpochLedger(
+            SQLiteRouteEpochLedgerStore(database)
+        ).active_epoch
+        if (current is None or current["epoch_id"] != EPOCH
+                or current["owner_generation"] != 2
+                or current["owner_id"] == owner_id
+                or not current["owner_id"].startswith("replacement-receiver-")
+                or "compare-and-swap conflict" not in str(exc)
+                and "expected owner does not match" not in str(exc)):
+            raise ModelPublicationRefused(
+                "claim refused without evidence of a competing owner generation"
+            ) from exc
         return {
             "owner_id": owner_id, "outcome": "superseded",
             "reason": type(exc).__name__, "publication": None,
@@ -156,6 +170,12 @@ def compete(
     )
     if not isinstance(ticket, str) or not ticket.startswith("urn:sha256:"):
         raise ModelPublicationRefused("claimed owner did not obtain an execution ticket")
+    # Re-read the authoritative store immediately before producing the local
+    # logical publication record, never trusting the contender's cached view.
+    latest = ProofActionRouteEpochLedger(SQLiteRouteEpochLedgerStore(database))
+    latest.assert_active(
+        EPOCH, active["route_digest"], owner_id=owner_id, owner_generation=2,
+    )
     # A logical publication record, not an external side effect. Its admission
     # is the durable ledger event, whose owner and ticket can be audited.
     return {
