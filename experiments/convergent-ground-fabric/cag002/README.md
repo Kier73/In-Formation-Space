@@ -2,7 +2,7 @@
 
 **Question:** Can one finite, content-addressed operation DAG survive disconnection, retransmission, and observer-host replacement when its descriptions arrive over *different network protocols*, yet produce the same verified pure result independently of route order?
 
-**Status:** experimental, pending full hosted integration result. CAG-002 extends [CAG-001](../README.md) and is deliberately not a demonstration of Tailscale, WAN traversal, provider-independent failure domains, or E-CPU runtime authorization.
+**Status:** hosted dual-protocol integration and independent GitHub verifier passed (November 14, 2026 UTC). CAG-002 extends [CAG-001](../README.md) and is deliberately not a demonstration of Tailscale, WAN traversal, provider-independent failure domains, or E-CPU runtime authorization.
 
 ## Two physical protocol implementations
 
@@ -47,6 +47,33 @@ Requires Go 1.25+, Docker, Python 3.11+, network access for go-libp2p and nats-p
     docker rm -f cag002-local
 
 The hosted [CAG-002 workflow](../../../.github/workflows/cag002-dual-substrate.yml) performs this sequence automatically on its single integration runner and runs a separate verifier job only on main. To prevent overstating evidence, the hosted output uses status two_real_substrates_local_reconstruction, **not** multi_provider_federation.
+
+## Verified hosted result
+
+**Main Actions:** [CAG-002 run 43555010037](https://github.com/Kier73/In-Formation-Space/actions/runs/43555010037)  
+**Implementation:** [PR #194](https://github.com/Kier73/In-Formation-Space/pull/194), merged commit 0ef122744629449e624c3b5bd273dcae30b87f0a.  
+**Jobs:** tests, network_host, verifier_host — all passed. The independent verifier checked the report's GitHub artifact attestation against the protected main CAG-002 signer workflow, replayed the captured route files, reconstructed the exact report, and independently attested it.
+
+| Protocol observation | Retained outcome |
+|---|---|
+| NATS JetStream blue route | File-backed stream, publication before consumer connected, durable consumer reconnect, missing ACK and explicit redelivery |
+| libp2p amber route | Encrypted Go libp2p stream, fsynced receiver spool, first ACK deliberately lost, successful retransmission, restarted listener and new ephemeral peer ID |
+| JetStream deliveries | 5 packets, 3 unique descriptions |
+| libp2p deliveries | 5 packets, 3 unique descriptions |
+| JetStream then libp2p | Unknown dependency after route 1; result 44 after route 2 |
+| libp2p then JetStream | Unknown dependency after route 1; result 44 after route 2 |
+| Semantic result identity | 5 distinct operation packets, same result digest for both route orders |
+
+Exact content evidence retained in this run:
+
+- Independent report JSON SHA-256: d0fce20caa18e62ea23c9a8793d62b2cb564305ae928fd54862fe8c50a62df36
+- Canonical report digest: b09206dedc97b333710e513b0c57984e27114fefdb1d89427d231441eb12f566
+- Captured JetStream JSONL SHA-256: aaeeebbf2e7775dff01c64836610e6c1cb3595329d9dad8e5a6a9e224be51f93
+- Captured libp2p JSONL SHA-256: 37ea23ccdc4b618836ab6c47b521c2a585ccbb061c2673c0f08ccb42372d1e2a
+
+The report embeds both capture hashes. Independent replay enforces canonical JSONL, packet/source membership, both route closures, duplicate-idempotent semantic interpretation, and matching report digest. Dependency resolution is retained in the cag002-go-dependency-lock Actions artifact. The hosted run used nats-py 2.16.0, nats-server 2.11.10 and pinned go-libp2p v0.44.0.
+
+**Important limits:** both live network transports operated over loopback on a single GitHub-hosted runner; NATS ran in Docker and the libp2p listener was a separate Go process. The verifier ran in another GitHub-hosted job but authenticated and replayed a transcript supplied by the first host; it did not independently observe packets on the wire. The experiment establishes protocol-diverse, interruptible information carriage and finite result reconstruction under this fixture, not separate network operators, a circuit relay, E-CPU Hypervisor admission, VGI proof authority or arbitrary exactly-once side effects.
 
 ## Next frontier
 
