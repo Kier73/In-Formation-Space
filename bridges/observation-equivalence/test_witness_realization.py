@@ -192,6 +192,14 @@ class SignedWitnessTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "interpreted output"):
             verify_realization(plan, damaged, **params)
 
+    def test_planned_cost_cannot_drift_from_signed_witness(self):
+        plan, runs, params, _, _ = fixture()
+        modified = copy.deepcopy(runs)
+        modified["left"]["path"]["intent"]["estimated_cost"] = 1.0
+        modified["left"]["path"]["events"][0]["details"]["estimated_cost"] = 1.0
+        with self.assertRaisesRegex(ValueError, "cost differs"):
+            verify_realization(plan, modified, **params)
+
     def test_missing_action_or_discontinuous_trace_is_refused(self):
         plan, runs, params, receiver_privs, _ = fixture()
         damaged = copy.deepcopy(runs)
