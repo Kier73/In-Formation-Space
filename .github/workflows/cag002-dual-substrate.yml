@@ -55,6 +55,15 @@ jobs:
           cd experiments/convergent-ground-fabric/cag002/p2p
           go mod tidy
           go build -trimpath -o "$RUNNER_TEMP/cag002-p2p" .
+      - name: Preserve resolved Go dependency lockfiles from the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: cag002-go-dependency-lock
+          path: |
+            experiments/convergent-ground-fabric/cag002/p2p/go.mod
+            experiments/convergent-ground-fabric/cag002/p2p/go.sum
+          if-no-files-found: error
+          retention-days: 90
       - name: Install NATS JetStream client
         run: python -m pip install --disable-pip-version-check "nats-py>=2.10,<3"
       - name: Start file-backed JetStream with loopback-only published port
