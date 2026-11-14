@@ -1,0 +1,157 @@
+{
+  "experiment": "RE-010",
+  "latent_worlds_with_identical_public_evidence": [
+    "real_undetected_event_epoch_3",
+    "origin_role_fabricated_event_epoch_3"
+  ],
+  "origin_claims_four": {
+    "conditional_on_origin_truthfulness_and_completeness": "candidate observer omission",
+    "cross_host_elapsed": null,
+    "global_event_completeness_proved": false,
+    "identity_conflict_epochs": [],
+    "observer_only_epochs": [],
+    "observer_reported_total": 3,
+    "origin_completeness_verified": false,
+    "origin_only_epochs": [
+      3
+    ],
+    "origin_reported_total": 4,
+    "origin_sensor_independence_verified": false,
+    "physical_common_mode_loss_proved": false,
+    "physical_occurrence_verified": false,
+    "schema": "in-formation.response-re010-origin/0.1",
+    "source_observer": {
+      "causation_proved": false,
+      "cross_host_elapsed": null,
+      "observed_epochs": [
+        1,
+        4,
+        6
+      ],
+      "observed_total": 3,
+      "observer_blind_declared_epochs": [],
+      "physical_common_mode_loss_proved": false,
+      "physical_event_completeness_proved": false,
+      "schema": "in-formation.response-re009-source/0.1",
+      "source_claimed_total": 4,
+      "source_observer_discrepancy": 1,
+      "source_truthfulness_proved": false,
+      "status": "source_observer_disagreement",
+      "verified_observer_acknowledgements": [
+        "A",
+        "B"
+      ],
+      "windows": [
+        {
+          "end_exclusive": 4,
+          "observer_reported_distinct_events": 1,
+          "source_claimed_events": 2,
+          "source_minus_observers": 1,
+          "start": 0
+        },
+        {
+          "end_exclusive": 8,
+          "observer_reported_distinct_events": 2,
+          "source_claimed_events": 2,
+          "source_minus_observers": 0,
+          "start": 4
+        }
+      ]
+    },
+    "source_origin_windows": [
+      {
+        "end_exclusive": 4,
+        "observer_reported": 1,
+        "origin_claimed": 2,
+        "source_claimed": 2,
+        "source_minus_origin": 0,
+        "start": 0
+      },
+      {
+        "end_exclusive": 8,
+        "observer_reported": 2,
+        "origin_claimed": 2,
+        "source_claimed": 2,
+        "source_minus_origin": 0,
+        "start": 4
+      }
+    ],
+    "source_reported_total": 4,
+    "status": "origin_corrob_source_claim_not_observer_readout"
+  },
+  "origin_claims_three": {
+    "conditional_on_origin_truthfulness_and_completeness": "candidate source overcount",
+    "cross_host_elapsed": null,
+    "global_event_completeness_proved": false,
+    "identity_conflict_epochs": [],
+    "observer_only_epochs": [],
+    "observer_reported_total": 3,
+    "origin_completeness_verified": false,
+    "origin_only_epochs": [],
+    "origin_reported_total": 3,
+    "origin_sensor_independence_verified": false,
+    "physical_common_mode_loss_proved": false,
+    "physical_occurrence_verified": false,
+    "schema": "in-formation.response-re010-origin/0.1",
+    "source_observer": {
+      "causation_proved": false,
+      "cross_host_elapsed": null,
+      "observed_epochs": [
+        1,
+        4,
+        6
+      ],
+      "observed_total": 3,
+      "observer_blind_declared_epochs": [],
+      "physical_common_mode_loss_proved": false,
+      "physical_event_completeness_proved": false,
+      "schema": "in-formation.response-re009-source/0.1",
+      "source_claimed_total": 4,
+      "source_observer_discrepancy": 1,
+      "source_truthfulness_proved": false,
+      "status": "source_observer_disagreement",
+      "verified_observer_acknowledgements": [
+        "A",
+        "B"
+      ],
+      "windows": [
+        {
+          "end_exclusive": 4,
+          "observer_reported_distinct_events": 1,
+          "source_claimed_events": 2,
+          "source_minus_observers": 1,
+          "start": 0
+        },
+        {
+          "end_exclusive": 8,
+          "observer_reported_distinct_events": 2,
+          "source_claimed_events": 2,
+          "source_minus_observers": 0,
+          "start": 4
+        }
+      ]
+    },
+    "source_origin_windows": [
+      {
+        "end_exclusive": 4,
+        "observer_reported": 1,
+        "origin_claimed": 1,
+        "source_claimed": 2,
+        "source_minus_origin": 1,
+        "start": 0
+      },
+      {
+        "end_exclusive": 8,
+        "observer_reported": 2,
+        "origin_claimed": 2,
+        "source_claimed": 2,
+        "source_minus_origin": 0,
+        "start": 4
+      }
+    ],
+    "source_reported_total": 4,
+    "status": "origin_corrob_observer_claim_not_source_count"
+  },
+  "physical_world_distinguished_by_records": false,
+  "same_signed_evidence_under_both_latent_worlds": true
+}
