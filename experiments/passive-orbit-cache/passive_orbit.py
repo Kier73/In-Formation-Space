@@ -128,7 +128,8 @@ class Route:
                     "public substrate must be immutable/repository-owned raw objects")
             # Requires a full SHA, never a branch or mutable ref.
             middle = parsed.path[len(SOURCE_REPOSITORY):-len(PUBLIC_PATH)]
-            require(HASH.fullmatch(middle) is not None, "public revision must be immutable SHA")
+            require(re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", middle) is not None,
+                    "public revision must be immutable Git commit SHA")
         else:
             require(parsed.scheme == "http" and
                     parsed.hostname == "127.0.0.1" and
