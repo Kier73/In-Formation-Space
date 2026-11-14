@@ -154,7 +154,13 @@ func TestNegativeMutations(t *testing.T){
   {"wrong-head",func(f *fixture){f.journal.Anchor.Head=strings.Repeat("f",64)}},
   {"duplicate-signer",func(f *fixture){f.journal.Entries[0].OldSignatures[1]=f.journal.Entries[0].OldSignatures[0]}},
   {"missing-governance-quorum",func(f *fixture){f.journal.Entries[1].OldSignatures=f.journal.Entries[1].OldSignatures[:1]}},
-  {"revoked-governance-signer",func(f *fixture){f.journal.Entries[0].OldSignatures=DemoSign(f.journal.Entries[0].Decision,GovernanceDomain,0x31,0x52)}},
+  {"revoked-governance-signer",func(f *fixture){
+    decision:=f.journal.Entries[0].Decision
+    revoked:=DemoSign(decision,GovernanceDomain,0x63)[0]
+    revoked.KeyID="demo-vr-31" // Historic receiver policy binds this ID to seed 0x63.
+    stillActive:=DemoSign(decision,GovernanceDomain,0x52)[0]
+    f.journal.Entries[0].OldSignatures=[]attest.Signature{revoked,stillActive}
+  }},
   {"forged-signature",func(f *fixture){f.journal.Entries[2].OldSignatures[0].Value=base64.StdEncoding.EncodeToString(make([]byte,64))}},
   {"new-key-quorum-missing",func(f *fixture){f.journal.Entries[1].NewSignatures=f.journal.Entries[1].NewSignatures[:1]}},
   {"reused-old-new-proof",func(f *fixture){f.journal.Entries[1].NewSignatures=f.journal.Entries[1].OldSignatures}},
@@ -251,4 +257,20 @@ func TestTwoValidForksRequireWitnessAnchor(t *testing.T){
  }
  rejected(t,fork,&original.journal.Anchor)
  rejected(t,original,&fork.journal.Anchor)
+}
+
+func TestProductionPoliciesRejectAllPublicTestKeys(t *testing.T){
+ f:=buildFixture(t)
+ for _,seed:=range []byte{0x31,0x41,0x52,0x63,0x74,0x85}{
+  t.Run(hexByte(seed),func(t *testing.T){
+   var policy attest.Policy
+   if e:=json.Unmarshal(f.policy,&policy);e!=nil{t.Fatal(e)}
+   policy.Mode="production"
+   policy.Keys[1].PublicKey=testingKey(seed)
+   raw,e:=Canonical(policy);if e!=nil{t.Fatal(e)}
+   if _,e=attest.ParsePolicy(raw);e==nil{
+    t.Fatal("known public test-only seed incorrectly admitted as production trust key")
+   }
+  })
+ }
 }
