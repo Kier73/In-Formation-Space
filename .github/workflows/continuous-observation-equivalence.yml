@@ -51,6 +51,85 @@ jobs:
           path: experiments/continuous-observation-equivalence/certificate-artifacts/*.json
           if-no-files-found: error
 
+  signed-manifest-producer:
+    needs: certificate-producer
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Download untrusted original certificate claims
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Generate public TEST-ONLY multi-signed source manifest
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: go run ./cmd/demo ../received-certificates ../unsigned-authority-claims
+      - name: Transfer untrusted multi-signed demo manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe015-untrusted-signed-manifest
+          path: experiments/continuous-observation-equivalence/unsigned-authority-claims/signed-manifest.json
+          if-no-files-found: error
+
+  signed-manifest-verifier:
+    needs: [certificate-producer, signed-manifest-producer]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Receive original certificate bytes from producer
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Receive untrusted signed source-manifest artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coe015-untrusted-signed-manifest
+          path: experiments/continuous-observation-equivalence/received-authority-claims
+      - name: Test Ed25519 signature quorum, key rotation, revocation and byte tampering
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: go test -count=1 -v ./...
+      - name: Verify signed authority against RECEIVER-owned test public-key policy and original bytes
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: |
+          go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-authority-claims/signed-manifest.json \
+            -certs ../received-certificates \
+            -allow-demo \
+            -report signed-authority-receipt.json
+          grep -Fq '"ground_admitted":false' signed-authority-receipt.json
+          grep -Fq '"origin_authenticated":false' signed-authority-receipt.json
+          grep -Fq '"policy_mode":"test-only"' signed-authority-receipt.json
+      - name: Require demonstration policy to be REFUSED without explicit opt-in
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: |
+          if go run ./cmd/verify \
+             -policy demo-policy.json \
+             -signed ../received-authority-claims/signed-manifest.json \
+             -certs ../received-certificates \
+             > demo-authority-refusal.txt 2>&1; then
+            echo 'ERROR: public demo keys were silently accepted as production authority'
+            exit 1
+          fi
+          grep -Fq 'demo keys are not production authority' demo-authority-refusal.txt
+      - name: Preserve independent source authorization evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe015-demo-signature-authority-evidence
+          path: |
+            experiments/continuous-observation-equivalence/coe015_auth/signed-authority-receipt.json
+            experiments/continuous-observation-equivalence/coe015_auth/demo-authority-refusal.txt
+          if-no-files-found: error
+
   certificate-checker:
     needs: certificate-producer
     runs-on: ubuntu-24.04
