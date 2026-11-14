@@ -109,7 +109,7 @@ class DualSubstrateVerifierTests(unittest.TestCase):
     def test_noncanonical_route_capture_is_refused(self):
         with tempfile.TemporaryDirectory() as temp:
             path = pathlib.Path(temp) / "arrivals.jsonl"
-            path.write_bytes(b' { "schema": "fake" }\\n')
+            path.write_bytes(b' { "schema": "fake" }\n')
             with self.assertRaisesRegex(s.SubstrateError, "canonical JSONL"):
                 s.read_jsonl(path)
 
