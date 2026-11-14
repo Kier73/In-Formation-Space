@@ -222,10 +222,15 @@ def server(peer: str, directory: Path, cert_dir: Path, ready_path: Path) -> None
                                  'signature_b64':c.sign_receipt(private_key,payload)}
                         send(t,'coordinator','RECEIPT',receipt)
                     elif op=='CLOSE':
-                        # Application-level close acknowledgement prevents an
-                        # SSL socket shutdown from tearing a partial MailCPU
-                        # frame out from under the remote decoder.
+                        # Keep the actual E-CPU framed stream open for the
+                        # coordinator to consume CLOSED before any EOF. The
+                        # transport services bytes before parsing frames, so
+                        # peer EOF with queued complete bytes can be refused.
                         send(t,'coordinator','CLOSED',{'done':True})
+                    elif op=='BYE':
+                        # The coordinator does not close this stream until the
+                        # observer process has consumed this final token.
+                        check(body=={'done':True},'invalid final close token')
                         break
                     else:
                         send(t,'coordinator','REJECT',{'code':'unknown-operator'})
@@ -405,10 +410,12 @@ def run(directory: Path) -> dict[str, Any]:
                     reply=receive(t,'CLOSED',timeout=5.0)
                     if reply is None or reply[0]!='CLOSED' or reply[1]!={'done':True}:
                         clean_closes.append(peer + ': no explicit MailCPU close receipt')
+                    else:
+                        # Release the observer only after CLOSED was already
+                        # decoded, but keep the socket open until its exit.
+                        send(t,peer,'BYE',{'done':True})
                 except Exception as exc:
                     clean_closes.append(peer + ': ' + str(exc))
-                try: t.close()
-                except Exception: pass
             host_failures = []
             for peer,proc in processes:
                 try: proc.wait(timeout=4.0)
@@ -417,6 +424,9 @@ def run(directory: Path) -> dict[str, Any]:
                 if proc.returncode:
                     detail = (keys/f'{peer}.stderr').read_text()[-2000:]
                     host_failures.append(peer + ' (' + str(proc.returncode) + '): ' + detail)
+            for t in sessions.values():
+                try: t.close()
+                except Exception: pass
             if (host_failures or clean_closes) and sys.exc_info()[0] is None:
                 raise LiveObserverError('authenticated observers did not terminate cleanly: ' +
                                         '; '.join(host_failures + clean_closes))
@@ -445,6 +455,7 @@ def main() -> None:
 
 if __name__=='__main__':
     main()
+
 
 
 
