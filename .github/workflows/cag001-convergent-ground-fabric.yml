@@ -1,0 +1,192 @@
+name: CAG-001 convergent Ground fabric over two asynchronous artifact routes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/convergent-ground-fabric/**"
+      - ".github/workflows/cag001-convergent-ground-fabric.yml"
+  pull_request:
+    paths:
+      - "experiments/convergent-ground-fabric/**"
+      - ".github/workflows/cag001-convergent-ground-fabric.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run permutation, replay, fork and route integrity regressions
+        run: |
+          python -m unittest discover -s experiments/convergent-ground-fabric -p 'test_convergent_fabric.py' -v
+          python -m py_compile experiments/convergent-ground-fabric/convergent_fabric.py
+
+  source_host:
+    needs: tests
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Construct source Ground and exact-operation DAG
+        run: |
+          python experiments/convergent-ground-fabric/convergent_fabric.py source --out evidence/source.json
+      - name: Attest the exact source Ground bytes
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/source.json
+      - name: Publish source artifact for independent relay jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cag001-source
+          path: evidence/source.json
+          if-no-files-found: error
+          retention-days: 30
+
+  relay_blue_host:
+    needs: [tests, source_host]
+    if: needs.tests.result == 'success' && needs.source_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag001-source
+          path: evidence/source
+      - name: Carry out-of-order and duplicate operations through blue route
+        run: |
+          python experiments/convergent-ground-fabric/convergent_fabric.py relay \
+            --source evidence/source/source.json --route blue --out evidence/blue.json
+      - name: Attest exact blue route packet bundle
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/blue.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cag001-blue-route
+          path: evidence/blue.json
+          if-no-files-found: error
+          retention-days: 30
+
+  relay_amber_host:
+    needs: [tests, source_host]
+    if: needs.tests.result == 'success' && needs.source_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag001-source
+          path: evidence/source
+      - name: Carry complementary operations through amber route
+        run: |
+          python experiments/convergent-ground-fabric/convergent_fabric.py relay \
+            --source evidence/source/source.json --route amber --out evidence/amber.json
+      - name: Attest exact amber route packet bundle
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/amber.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cag001-amber-route
+          path: evidence/amber.json
+          if-no-files-found: error
+          retention-days: 30
+
+  verifier_host:
+    needs: [tests, source_host, relay_blue_host, relay_amber_host]
+    if: needs.tests.result == 'success' && needs.source_host.result == 'success' && needs.relay_blue_host.result == 'success' && needs.relay_amber_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install GitHub CLI for attestation verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag001-source
+          path: evidence/source
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag001-blue-route
+          path: evidence/blue
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag001-amber-route
+          path: evidence/amber
+      - name: Independently verify GitHub provenance of exact route artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in evidence/source/source.json evidence/blue/blue.json evidence/amber/amber.json; do
+            gh attestation verify "$f" --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag001-convergent-ground-fabric.yml \
+              --source-ref refs/heads/main \
+              --deny-self-hosted-runners --format json > /dev/null
+          done
+      - name: Recompute the Ground and compare both delivery orders
+        run: |
+          python experiments/convergent-ground-fabric/convergent_fabric.py verify \
+            --source evidence/source/source.json \
+            --blue evidence/blue/blue.json \
+            --amber evidence/amber/amber.json \
+            --out evidence/report.json
+      - name: Attest independent convergence reconstruction
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cag001-independent-convergence-report
+          path: evidence/report.json
+          if-no-files-found: error
+          retention-days: 90
