@@ -104,6 +104,24 @@ jobs:
           assert len(record["candidate_recurrence"]["illustrations"]) == 11
           print("Validated prerequisites for all-depth hull absorption induction")
           PY
+      - name: Generate and validate exact depth-six proof record
+        run: |
+          python experiments/branching-morphology/depth6_phase.py > "$RUNNER_TEMP/depth6-certificate.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads((Path(os.environ["RUNNER_TEMP"]) / "depth6-certificate.json").read_text())
+          assert report["symbolic_endpoints"] == 15626
+          assert report["exact_containment_checks"] == 2483
+          assert report["exact_corner_checks"] == 73
+          assert report["inherited_hull_regimes"] == 9
+          assert report["inherited_vertex_polynomial_identifications"] == 63
+          assert report["outside_tip_witness_bernstein_signs"] == [0,1,1,1,1,1]
+          assert [x["vertices"] for x in report["regimes"]] == [4,5,6,7,7,8,8,9,9,10]
+          assert [x["vertices"] for x in report["boundaries"]] == [4,5,6,7,8,9]
+          print("Exact depth-six hull and all-depth stabilization premises validated")
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: branching-morphology-py${{ matrix.python-version }}
@@ -113,3 +131,4 @@ jobs:
             ${{ runner.temp }}/depth4-certificate.json
             ${{ runner.temp }}/depth5-certificate.json
             ${{ runner.temp }}/all-depth-hull-certificate.json
+            ${{ runner.temp }}/depth6-certificate.json
