@@ -73,6 +73,22 @@ jobs:
           assert [x["hull_vertices"] for x in record["regimes"]] == [4, 5, 6, 7, 7, 8]
           print("Exact depth-four interval certificate validated")
           PY
+      - name: Generate and validate exact depth-five proof record
+        run: |
+          python experiments/branching-morphology/depth5_phase.py > "$RUNNER_TEMP/depth5-certificate.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads((Path(os.environ["RUNNER_TEMP"]) / "depth5-certificate.json").read_text())
+          assert report["symbolic_endpoints"] == 3126
+          assert report["certified_halfplane_checks"] == 1659
+          assert report["strict_convexity_checks"] == 54
+          assert report["naive_all_endpoints_checks"] == 168804
+          assert [x["hull_vertices"] for x in report["continuous_regimes"]] == [4,5,6,7,7,8,8,9]
+          assert [x["hull_vertices"] for x in report["exact_boundaries"]] == [4,5,6,7,8]
+          print("Depth-five continuous-angle proof certificate validated")
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: branching-morphology-py${{ matrix.python-version }}
@@ -80,3 +96,4 @@ jobs:
             ${{ runner.temp }}/canopies.svg
             ${{ runner.temp }}/measurements.json
             ${{ runner.temp }}/depth4-certificate.json
+            ${{ runner.temp }}/depth5-certificate.json

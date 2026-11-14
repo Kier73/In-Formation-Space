@@ -93,3 +93,11 @@ At depth four, a fourth exact convex-hull change appears at **arccos(rho) ≈ 29
 The [recursive proof note](EXACT-DEPTH4-RECURSIVE.md), [exact-arithmetic certificate](depth4_phase.py) and [tests](test_depth4_phase.py) avoid checking all 626 endpoints against every candidate hull edge. Instead, they transform **only the previously certified depth-three hull vertices** through the grammar's five affine copies. That reduces **23,162** endpoint/edge checks to **1,007** exact interval inequalities. The certificate covers every angle between 0° and 90° and includes a counterexample to a misleading floating-point scan: one purported extra vertex is provably collinear for all angles.
 
 Run `python experiments/branching-morphology/depth4_phase.py` to reproduce the proof record. The branch retains the same independence from other research programs.
+
+## BMO-006: Exact depth-five transitions and a quartic root
+
+The same fixed grammar at **five expansions** has exactly five outer-hull transitions across 0° < θ < 90°. A new transition appears at **arccos(sigma) ≈ 22.309473247°**, where sigma is the unique root in (23/25,93/100) of `864c⁴−288c³−696c²+136c+65=0`. The four earlier transition angles remain, and the strict hull vertex count moves through **9, 8, 7, 6, 5, 4** as θ increases.
+
+The [exact depth-five proof](EXACT-DEPTH5-RECURSIVE.md), [certificate program](depth5_phase.py), and [independent tests](test_depth5_phase.py) carry the previous depth's extreme vertices through five affine copies. Rather than testing all **3,126 endpoints** in every interval, only **16–36 inherited candidates** are needed. The all-angle certificate checks **1,659** exact containment inequalities and **54** strict convexity conditions (versus **168,804** naive containment checks), including rational, quadratic, cubic and quartic boundaries. This is a reduction in proof obligations, not a benchmark of runtime speed.
+
+Run `python experiments/branching-morphology/depth5_phase.py` to generate a machine-readable certificate. The five-stage transition sequence is evidence for, but **not a proof of**, a universal n-transition law at depth n.
