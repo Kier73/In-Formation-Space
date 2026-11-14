@@ -56,6 +56,9 @@ def inspect_workflow(document: dict[str, Any], name: str) -> dict[str, Any]:
         require(isinstance(job, dict), f"{name}: missing {role}")
         require("github.ref == 'refs/heads/main'" in str(job.get("if", "")),
                 f"{name}/{role}: live execution must be restricted to main")
+        if name == "MOR-002":
+            require("github.event_name == 'workflow_dispatch'" in str(job.get("if", "")),
+                    f"{name}/{role}: live peer execution must require manual dispatch")
         require(job.get("permissions", {}).get("id-token") == "write",
                 f"{name}/{role}: Tailscale OIDC requires id-token: write")
         steps = job.get("steps", [])
@@ -103,6 +106,9 @@ def inspect_workflow(document: dict[str, Any], name: str) -> dict[str, Any]:
                     f"{name}/{role}: advertised and bound addresses must come from Tailscale")
     for role in ("verifier_host", "observer_host"):
         if role in jobs:
+            if name == "MOR-002":
+                require("github.event_name == 'workflow_dispatch'" in str(jobs[role].get("if", "")),
+                        f"{name}/{role}: independent live verification requires manual dispatch")
             steps = jobs[role].get("steps", [])
             require(not any("tailscale/github-action@" in str(s.get("uses", "")) for s in steps),
                     f"{name}/{role}: independent observer/verifier must remain off-tailnet")
