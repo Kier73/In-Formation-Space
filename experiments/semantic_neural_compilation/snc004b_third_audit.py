@@ -12,7 +12,7 @@ from pathlib import Path
 from federated_auditor import audit
 from persistent_host import canonical, require, sha
 from snc004b_identity import inspect_endpoint, inspect_peer, certificate_sha256
-from snc004b_live import CLIENT_REPORT, SERVER_REPORT, RESPONSE_SCHEMA
+from snc004b_live import CLIENT_REPORT, SERVER_REPORT, RESPONSE_SCHEMA, addressing
 
 
 class AuditRejected(ValueError):
@@ -41,7 +41,7 @@ def third_audit(*, capsule: Path, client_path: Path,
     inspect_peer(cert=sender_cert,
                  record=client_bootstrap / "client-bootstrap.json",
                  expected_role="client")
-    inspect_endpoint(directory=server_bootstrap)
+    advertised_server = inspect_endpoint(directory=server_bootstrap)
 
     check(client["local_certificate_sha256"] ==
           certificate_sha256(sender_cert) ==
@@ -49,6 +49,16 @@ def third_audit(*, capsule: Path, client_path: Path,
     check(server["local_certificate_sha256"] ==
           certificate_sha256(receiver_cert) ==
           client["peer_certificate_sha256"], "server TLS public certificate mismatch")
+    try:
+        client_local = addressing(client["local_socket_ipv4"], overlay=True)
+        client_remote = addressing(client["peer_socket_ipv4"], overlay=True)
+        server_local = addressing(server["local_socket_ipv4"], overlay=True)
+        server_remote = addressing(server["peer_socket_ipv4"], overlay=True)
+    except (KeyError, ValueError) as exc:
+        raise AuditRejected("missing or non-overlay socket endpoints") from exc
+    check(client_remote == server_local == advertised_server and
+          client_local == server_remote and client_local != server_local,
+          "reciprocal peer TCP addresses do not match advertised Tailscale path")
     check(client["tls_version"] in ("TLSv1.2", "TLSv1.3") and
           server["tls_version"] in ("TLSv1.2", "TLSv1.3"),
           "mutual TLS was not negotiated")
@@ -92,6 +102,9 @@ def third_audit(*, capsule: Path, client_path: Path,
         "sender_and_receiver_certificate_fingerprints_match_bootstrap": True,
         "client_server_nonce_matches": True,
         "both_hosts_report_overlay_mode": True,
+        "reciprocal_overlay_socket_addresses_match": True,
+        "client_socket_ipv4": client_local,
+        "server_socket_ipv4": server_local,
         "distinct_hosted_runner_jobs": True,
         "distinct_physical_hosts_attested": False,
         "external_source_issuer_verified": False,
