@@ -422,8 +422,11 @@ def main() -> None:
             server(args.serve,args.directory,args.cert_dir,args.ready_path)
         else: run(args.directory)
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         p.exit(1,f'GCI-004 live fabric error: {type(e).__name__}: {e}\n')
 
 
 if __name__=='__main__':
     main()
+
