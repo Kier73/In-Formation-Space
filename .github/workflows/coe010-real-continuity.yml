@@ -51,7 +51,7 @@ jobs:
         run: lake exe cache get
       - name: Compile independent real semantics and original COE proof chain
         working-directory: experiments/continuous-observation-equivalence/real-lean
-        run: lake build COE010Network
+        run: lake build COE011Fixtures
       - name: Kernel-check real continuity, exact casts and dense uniqueness
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
@@ -70,6 +70,47 @@ jobs:
             cat real-network-soundness.txt
             exit 1
           fi
+      - name: Kernel-check the actual certificate cells on all real coordinates
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          lake env lean COE011Atlas.lean | tee real-atlas-soundness.txt
+          grep -Fq "'COE011Atlas.verifiedCellRealSound' depends on axioms: [propext, Classical.choice, Quot.sound]" real-atlas-soundness.txt
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-atlas-soundness.txt; then
+            cat real-atlas-soundness.txt
+            exit 1
+          fi
+      - name: Kernel-check direct piecewise real certificate interpretation and continuity
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          lake env lean COE011Coverage.lean | tee real-piecewise-network-soundness.txt
+          for theorem in verifiedRealCover overlappingCellsAgree piecewiseReal_eq_network continuous_piecewiseReal piecewiseReal_at_rational; do
+            grep -Fq "'COE011Coverage.${theorem}' depends on axioms: [propext, Classical.choice, Quot.sound]" real-piecewise-network-soundness.txt
+          done
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-piecewise-network-soundness.txt; then
+            cat real-piecewise-network-soundness.txt
+            exit 1
+          fi
+      - name: Kernel-check exact two-cell seam fixture and real interpretation
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          lake env lean COE011Fixtures.lean | tee real-piecewise-fixtures.txt
+          grep -Fq "'COE011Fixtures.identitySplitReal' depends on axioms: [propext, Classical.choice, Quot.sound]" real-piecewise-fixtures.txt
+          grep -Fq "'COE011Fixtures.gappedSplitRejected' depends on axioms: [propext, Classical.choice, Quot.sound]" real-piecewise-fixtures.txt
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-piecewise-fixtures.txt; then
+            cat real-piecewise-fixtures.txt
+            exit 1
+          fi
+      - name: Require kernel rejection of a gapped activation-cell cover
+        working-directory: experiments/continuous-observation-equivalence/real-lean
+        run: |
+          if lake env lean COE011Invalid.lean > invalid-piecewise-cover.txt 2>&1; then
+            echo "ERROR: Lean accepted a gapped rational activation-cell cover"
+            exit 1
+          fi
+          cat invalid-piecewise-cover.txt
+          grep -Fq 'Tactic `decide` proved that the proposition' invalid-piecewise-cover.txt
+          grep -Fq 'verify COE011Fixtures.gappedSplit = true' invalid-piecewise-cover.txt
+          grep -Fq 'is false' invalid-piecewise-cover.txt
       - name: Require rejection of a false all-real ReLU observation
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
@@ -86,5 +127,9 @@ jobs:
             experiments/continuous-observation-equivalence/real-lean/rational-source-sha256.txt
             experiments/continuous-observation-equivalence/real-lean/real-extension-proof-output.txt
             experiments/continuous-observation-equivalence/real-lean/real-network-soundness.txt
+            experiments/continuous-observation-equivalence/real-lean/real-atlas-soundness.txt
+            experiments/continuous-observation-equivalence/real-lean/real-piecewise-network-soundness.txt
+            experiments/continuous-observation-equivalence/real-lean/real-piecewise-fixtures.txt
+            experiments/continuous-observation-equivalence/real-lean/invalid-piecewise-cover.txt
             experiments/continuous-observation-equivalence/real-lean/invalid-real-extension.txt
           if-no-files-found: error

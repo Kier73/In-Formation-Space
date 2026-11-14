@@ -423,3 +423,61 @@ lake env lean COE010Invalid.lean
 This theorem establishes a **unique continuous ideal real-number interpretation** for every accepted typed certificate's rational outputs. It does **not** yet prove that a separately serialized **real-valued piecewise atlas parser** exactly implements the same function at an irrational coordinate. Such an atlas needs a real-interval membership theorem or a continuous-atlas realization proof. It also does **not** verify the Python JSON-to-Lean translator, authenticated source authority, E-CPU Ground admission, or floating-point GPU execution. A physical implementation would need separate error bounds and realization contracts.
 
 A natural next investigation is to define a piecewise real affine observer directly from the accepted cells, prove its continuity across all exact breakpoints, and use COE-010's uniqueness theorem to identify that observer with the compiled source real network. That would connect the retained cell atlas itself—not only its unique continuous mathematical meaning—to every irrational coordinate.
+
+
+## COE-011 — Direct all-real interpretation of actual certified activation cells
+
+COE-010 established that a certificate accepted by the typed Lean verifier has a **unique continuous ideal real-valued network interpretation**, determined by agreement on all rational inputs. However, that theorem compiled the network's original rational weights, not the activation-cell atlas that the certificate actually retained.
+
+COE-011 makes the missing bridge explicit: the **rational-affine expressions and rational interval endpoints in the certified cells themselves** are interpreted at arbitrary real inputs and proved to realize the same ideal source network.
+
+### Local cell-to-network soundness (COE011Atlas.lean)
+
+For every accepted typed certificate, every cell within it, every output component and every real coordinate in that cell's closed real interval, the certificate's claimed affine expression at that coordinate equals the compiled source real neural network.
+
+The proof does not merely infer equality from global rational observations. It defines rational and real **clamps** into the cell's exact rational interval, proves their compatibility under rational-to-real casting, and proves that every clamped rational point lies in the original cell. COE-009 then forces the claimed affine expression to match direct numeric network evaluation at every clamped rational coordinate. Both *clamped real* expressions are continuous (the affine output, exact clamp and compiled neural function are all continuous). The COE-010 density theorem proves that these continuous functions agree at **all** real arguments. On the cell itself, clamping is the identity. This gives a direct, kernel-checkable theorem for the retained cell description at **all real inputs**, including irrational coordinates and rational boundary cutpoints.
+
+### Global real coverage and deterministic piecewise interpretation (COE011Coverage.lean)
+
+The exact Boolean verifier requires a finite ordered interval chain spanning negative to positive infinity, with exact shared rational endpoints between adjacent cells. A structural induction over that **actual accepted chain** proves that every real coordinate belongs to at least one cell's closed real interval; the proof does not enumerate or sample real numbers.
+
+The firstRealCell selector is a mathematical ordered search over the actual retained cell list, choosing the **first** cell whose closed interval contains x. The piecewiseReal function evaluates that chosen cell's own affine output expression at x; it returns zero when no matching cell exists, with correctness guaranteed only when the original verifier accepts the certificate. This is an explicit atlas interpretation, not a restatement of the full-network evaluator.
+
+The universal Lean theorems establish:
+
+- verifiedRealCover: every real coordinate, rational or irrational, is covered by a declared closed cell of an accepted certificate.
+- overlappingCellsAgree: any two accepted cells containing the same real coordinate have equal claimed output expressions at that coordinate, including at shared cutpoints.
+- piecewiseReal_eq_network: the *actual first-matching-cell atlas interpreter* equals the independently compiled continuous real source network at **every** real coordinate and output component.
+- continuous_piecewiseReal: the atlas interpreter is globally continuous, despite being specified by a conditional cell-selection procedure.
+- piecewiseReal_at_rational: at every exact rational coordinate the real atlas agrees with COE-009's independently proved certificate observations.
+
+These are theorems quantified over arbitrary certificates accepted by the typed Lean verifier, not only the fixed example models.
+
+### Adversarial and constructive controls
+
+The positive identitySplit certificate has the source map x ↦ x, one claimed affine cell from negative infinity through zero, and a second from zero through positive infinity. Lean kernel reduction checks the certificate is accepted; the real atlas theorem proves the resulting piecewise interpretation agrees with the ideal network at **all** real inputs and is continuous.
+
+The negative gappedSplit certificate keeps the same correct identity source network and cell affine expressions, but makes the first cell end at zero and the second begin at one. Its claim of verifier acceptance must **fail under Lean's kernel reduction**; the negative CI gate checks for a proof-tactic rejection rather than accepting a syntax/import failure.
+
+The existing seven-job COE Python/Go/Lean/E-CPU candidate-Ground regression and pinned Mathlib proof checks remain separate acceptance gates.
+
+### Exact scope and remaining trust boundary
+
+The real evaluator is **noncomputable** because exact ordering of arbitrary real numbers cannot generally be decided by a finite program. Its value is a mathematically well-defined ideal function, not an implemented floating-point predictor or network runtime. For each accepted **typed** certificate, the formalization now relates its retained cell atlas to the ideal source network for the entire real line. This does not prove an independently serialized JSON-to-Lean conversion correct, authenticate the source, certify E-CPU Ground admission or distributed execution, validate any GPU/CPU approximation, or extend beyond the supported finite scalar-input rational affine/ReLU family. The proofs rely only on the standard reported Lean foundational axioms; CI rejects admitted proof holes and native-decide axioms.
+
+To reproduce the proof using the pinned Lean 4.24 / Mathlib revision:
+
+~~~bash
+cd experiments/continuous-observation-equivalence/real-lean
+cp ../lean/COE*.lean .
+lake update
+lake exe cache get
+lake build COE011Fixtures
+lake env lean COE011Atlas.lean
+lake env lean COE011Coverage.lean
+lake env lean COE011Fixtures.lean
+# A deliberately false complete-cover claim MUST fail:
+lake env lean COE011Invalid.lean
+~~~
+
+A natural follow-up is to reduce the remaining serialization and realization trust boundary: validate the exact JSON rational-token parser against a formally verified decoding contract, and separately specify numerical approximation error bounds for implementations that observe or execute the proven ideal real-valued interpretation.
