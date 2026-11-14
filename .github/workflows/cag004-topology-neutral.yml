@@ -1121,13 +1121,13 @@ jobs:
           python experiments/cross-ground-continuity/gci004/fabric_contract.py verify --directory evidence/cag004
       - name: Project actual GCI-004 signed parity observation into OE-003 witness Ground
         run: |
-          python experiments/cross-ground-continuity/oe004/witness_binding.py \\
-            --directory evidence/cag004 \\
+          python experiments/cross-ground-continuity/oe004/witness_binding.py \
+            --directory evidence/cag004 \
             --output evidence/cag004/oe004-witness.json
-          python experiments/cross-ground-continuity/oe004/witness_binding.py \\
-            --directory evidence/cag004 \\
+          python experiments/cross-ground-continuity/oe004/witness_binding.py \
+            --directory evidence/cag004 \
             --verify evidence/cag004/oe004-witness.json
-          python experiments/cross-ground-continuity/oe004/test_live_binding.py \\
+          python experiments/cross-ground-continuity/oe004/test_live_binding.py \
             --directory evidence/cag004
       - name: Attest reconstructed OE-004 observation-fiber witness on main
         if: github.ref == 'refs/heads/main'
