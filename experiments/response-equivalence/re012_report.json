@@ -1,0 +1,149 @@
+{
+  "baseline_window": {
+    "adversarial_detection_guarantee": null,
+    "certificate_digest": "7d0332f2044961538dd061c84c91bc01201a9edb90f9cbcdd53bc7c1fe5a9ba5",
+    "future_stationarity_established": false,
+    "hardware_identity_verified": false,
+    "hypothetical_simultaneous_95pct_upper": 0.105752066022,
+    "monitor_plan_digest": "f04be5b8494b0d1d5ae64af1bafbfccf234050678cb0f2a930396425d1cb5bf6",
+    "physical_detection_guarantee": null,
+    "reasons": [],
+    "reported_edge_fraction": 0.166666666667,
+    "reported_joint_misses": 0,
+    "sampling_assumptions_explicitly_accepted": true,
+    "schema": "in-formation.response-re012/0.1",
+    "source_truthfulness_verified": false,
+    "status": "conditionally_applicable",
+    "window": 1
+  },
+  "calibration": {
+    "assumptions": [
+      "iid_trials_within_each_stratum",
+      "stationary_stratum_response",
+      "representative_source_injections",
+      "true_enrolled_sensor_identity",
+      "trusted_population_labels_and_weights"
+    ],
+    "baseline_edge_weight": "1/5",
+    "baseline_seals": {
+      "A": "cd090e3a00d066e641849badd75a39586b770826eef6e03d022c3fc314297c5f",
+      "B": "684c0fd675561ae35aa594e0808ebc126420f07b03941be49e581d3fc9409aee",
+      "S": "fac4d2dfe3207522093d3101945fc1d5219009a0b0fa55d03dedfd3fb5ec3448"
+    },
+    "calibration_counts": {
+      "edge": {
+        "joint_misses": 0,
+        "n": 12
+      },
+      "ordinary": {
+        "joint_misses": 0,
+        "n": 48
+      }
+    },
+    "claim_scope": "synthetic-stratified-joint-nondetection",
+    "conditional_weighted_upper": 0.112107922157,
+    "firmware": {
+      "A": "detector-1",
+      "B": "detector-1"
+    },
+    "limits": {
+      "edge": 0.264648469397,
+      "ordinary": 0.073972785347
+    },
+    "max_conditional_miss": 0.15,
+    "max_edge_weight": 0.3,
+    "max_local_latency_ms": 50,
+    "max_observed_joint_miss_fraction": "1/12",
+    "sensors": {
+      "A": "fixture-A@1",
+      "B": "fixture-B@1"
+    },
+    "valid_window_range": [
+      1,
+      5
+    ]
+  },
+  "latency_shift": {
+    "adversarial_detection_guarantee": null,
+    "certificate_digest": "7d0332f2044961538dd061c84c91bc01201a9edb90f9cbcdd53bc7c1fe5a9ba5",
+    "future_stationarity_established": false,
+    "hardware_identity_verified": false,
+    "hypothetical_simultaneous_95pct_upper": 0.105752066022,
+    "monitor_plan_digest": "f04be5b8494b0d1d5ae64af1bafbfccf234050678cb0f2a930396425d1cb5bf6",
+    "physical_detection_guarantee": null,
+    "reasons": [
+      "latency_envelope_exceeded"
+    ],
+    "reported_edge_fraction": 0.166666666667,
+    "reported_joint_misses": 0,
+    "sampling_assumptions_explicitly_accepted": true,
+    "schema": "in-formation.response-re012/0.1",
+    "source_truthfulness_verified": false,
+    "status": "suspended",
+    "window": 1
+  },
+  "limits": [
+    "CI synthetic records do not establish IID sampling or physical truth",
+    "a signed false health report is indistinguishable from an honest report",
+    "passing windows cannot exclude unobserved out-of-support events"
+  ],
+  "population_shift": {
+    "adversarial_detection_guarantee": null,
+    "certificate_digest": "7d0332f2044961538dd061c84c91bc01201a9edb90f9cbcdd53bc7c1fe5a9ba5",
+    "future_stationarity_established": false,
+    "hardware_identity_verified": false,
+    "hypothetical_simultaneous_95pct_upper": 0.201089908047,
+    "monitor_plan_digest": "2bbe34eecb3e1cbfeda0cb3bcd3999918f8afbfcf080b8fc7d2a9cfc34ea7012",
+    "physical_detection_guarantee": null,
+    "reasons": [
+      "conditional_performance_limit_exceeded",
+      "event_population_shift"
+    ],
+    "reported_edge_fraction": 0.666666666667,
+    "reported_joint_misses": 0,
+    "sampling_assumptions_explicitly_accepted": true,
+    "schema": "in-formation.response-re012/0.1",
+    "source_truthfulness_verified": false,
+    "status": "suspended",
+    "window": 2
+  },
+  "schema": "in-formation.response-re012/0.1",
+  "sensor_replacement": {
+    "adversarial_detection_guarantee": null,
+    "certificate_digest": "7d0332f2044961538dd061c84c91bc01201a9edb90f9cbcdd53bc7c1fe5a9ba5",
+    "future_stationarity_established": false,
+    "hardware_identity_verified": false,
+    "hypothetical_simultaneous_95pct_upper": 0.105752066022,
+    "monitor_plan_digest": "f04be5b8494b0d1d5ae64af1bafbfccf234050678cb0f2a930396425d1cb5bf6",
+    "physical_detection_guarantee": null,
+    "reasons": [
+      "sensor_configuration_changed"
+    ],
+    "reported_edge_fraction": 0.166666666667,
+    "reported_joint_misses": 0,
+    "sampling_assumptions_explicitly_accepted": true,
+    "schema": "in-formation.response-re012/0.1",
+    "source_truthfulness_verified": false,
+    "status": "suspended",
+    "window": 1
+  },
+  "targeted_common_mode": {
+    "adversarial_detection_guarantee": null,
+    "certificate_digest": "7d0332f2044961538dd061c84c91bc01201a9edb90f9cbcdd53bc7c1fe5a9ba5",
+    "future_stationarity_established": false,
+    "hardware_identity_verified": false,
+    "hypothetical_simultaneous_95pct_upper": 0.105752066022,
+    "monitor_plan_digest": "1bb2f372a0abfa8f4439747e1051e1fb476afb654cea333aec6e3c5216883997",
+    "physical_detection_guarantee": null,
+    "reasons": [
+      "observed_joint_miss_trigger"
+    ],
+    "reported_edge_fraction": 0.166666666667,
+    "reported_joint_misses": 2,
+    "sampling_assumptions_explicitly_accepted": true,
+    "schema": "in-formation.response-re012/0.1",
+    "source_truthfulness_verified": false,
+    "status": "suspended",
+    "window": 1
+  }
+}
