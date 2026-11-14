@@ -73,3 +73,9 @@ Do not interpret this as evidence about actual botany, vascular structures, evol
 A special case admits a stronger result than the finite measurements above. At a **60°** turning angle, an integer triangular-lattice recurrence and a finite 25-point hull-containment certificate establish, by induction, that the canopy's **convex hull scales exactly by 3 at every expansion depth n ≥ 2**. Its hull/bounding-box fraction is exactly **19/36**, and its width/height ratio is exactly **1/√3**. This does not generalize to the other sampled angles.
 
 See [Exact 60° lattice certificate](EXACT-LATTICE-60.md), [source](lattice60.py), and [independent reconstruction tests](test_lattice60.py). Run `python experiments/branching-morphology/lattice60.py` for the machine-readable certificate.
+
+## Exact angle transitions: BMO-003
+
+A second exact follow-up classifies **every convex-hull vertex change** over angles 0° < θ < 90° at *expansion depth two*. The six-vertex hull loses one extreme point at exactly **60°** and another at **arccos(1/4) ≈ 75.5225°**, leaving four extremes. [The phase diagram and algebraic certificate](EXACT-ANGLE-REGIMES.md) demonstrate that no other convex-hull changes occur in that scope: **390 rational-polynomial half-plane checks** and **15 strict-corner checks** certify all three continuous angle intervals without numerical sampling.
+
+Run `python experiments/branching-morphology/angle_transitions.py` to regenerate the certificate. This does not classify internal segment crossings or higher expansion depths.
