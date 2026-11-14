@@ -1,0 +1,55 @@
+{
+  "experiment": "same-grammar-different-canopies",
+  "rule": "F[+F]F[-F]F",
+  "axiom": "F",
+  "iterations": 4,
+  "segment_length": 1,
+  "note": "Independent panel fit; raw geometry in records, no biological validation",
+  "records": [
+    {
+      "angle_degrees": 12.0,
+      "segments": 625,
+      "width": 13.715161,
+      "height": 81.0,
+      "aspect_width_over_height": 0.169323,
+      "hull_area": 582.008341,
+      "hull_fraction_of_bbox": 0.523894
+    },
+    {
+      "angle_degrees": 20.0,
+      "segments": 625,
+      "width": 21.964491,
+      "height": 81.0,
+      "aspect_width_over_height": 0.271167,
+      "hull_area": 936.635093,
+      "hull_fraction_of_bbox": 0.526459
+    },
+    {
+      "angle_degrees": 30.0,
+      "segments": 625,
+      "width": 30.696152,
+      "height": 81.0,
+      "aspect_width_over_height": 0.378965,
+      "hull_area": 1315.150888,
+      "hull_fraction_of_bbox": 0.52894
+    },
+    {
+      "angle_degrees": 42.0,
+      "segments": 625,
+      "width": 39.061574,
+      "height": 81.0,
+      "aspect_width_over_height": 0.482242,
+      "hull_area": 1666.086061,
+      "hull_fraction_of_bbox": 0.526578
+    },
+    {
+      "angle_degrees": 60.0,
+      "segments": 625,
+      "width": 46.765372,
+      "height": 81.0,
+      "aspect_width_over_height": 0.57735,
+      "hull_area": 1999.219645,
+      "hull_fraction_of_bbox": 0.527778
+    }
+  ]
+}
