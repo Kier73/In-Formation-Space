@@ -36,6 +36,7 @@ def session(
         "--cert", str(certificates["server_cert"]),
         "--key", str(certificates["server_key"]),
         "--peer-cert", str(certificates["client_cert"]),
+        "--trust-root", str(certificates["ca"]),
         "--output", str(server_report),
     ]
     process = subprocess.Popen(server_cmd, text=True, bufsize=1,
@@ -53,6 +54,7 @@ def session(
             "--cert", str(certificates["client_cert"]),
             "--key", str(certificates["client_key"]),
             "--peer-cert", str(certificates["server_cert"]),
+            "--trust-root", str(certificates["ca"]),
             "--output", str(client_report),
         ]
         sender = subprocess.run(client_cmd, capture_output=True,
