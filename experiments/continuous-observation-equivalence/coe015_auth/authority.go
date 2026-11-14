@@ -31,6 +31,40 @@ const (
     maxFile = 8 << 20
 )
 var keyIDPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{1,63}$`)
+var modelPattern = regexp.MustCompile(`^[a-z][a-z0-9_]{1,63}// Package authority verifies Ed25519-signed source manifests against
+// receiver-controlled trust policy and independently checks certificate bytes.
+//
+// The Ed25519 implementation is the Go standard library, not a Lean proof.
+// No signing key or trusted authority is learned from the untrusted manifest.
+// This package is a separate provenance gate, not neural Ground admission.
+package authority
+
+import (
+    "bytes"
+    "crypto/ed25519"
+    "crypto/sha256"
+    "encoding/base64"
+    "encoding/hex"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "io"
+    "os"
+    "path/filepath"
+    "regexp"
+    "sort"
+    "strings"
+)
+
+const (
+    manifestSchema = "ifs.coe015.source-manifest/v1"
+    signedSchema = "ifs.coe015.signed-source-manifest/v1"
+    policySchema = "ifs.coe015.trust-policy/v1"
+    Domain = "IFS-COE015-ED25519-SOURCE-MANIFEST-V1\n"
+    maxFile = 8 << 20
+)
+var keyIDPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{1,63}$`)
+)
 var digestPattern = regexp.MustCompile(`^[0-9a-f]{64}$`)
 
 type Manifest struct {
@@ -124,7 +158,7 @@ func StrictPolicy(raw []byte) (Policy,error) {
         return p,reject("invalid source set")
     }
     for name,h:=range p.ExpectedNetworks{
-        if !keyIDPattern.MatchString(name)||!digestPattern.MatchString(h){return p,reject("invalid expected source record")}
+        if !modelPattern.MatchString(name)||!digestPattern.MatchString(h){return p,reject("invalid expected source record")}
     }
     seen:=make(map[string]bool)
     for _,k:=range p.Keys{
@@ -238,7 +272,7 @@ func Verify(signedBytes,policyBytes []byte,certificateDir string,allowTest bool)
         Authority:policy.Authority,ManifestVersion:signed.Manifest.Version,
         VerifiedSigners:signers,Threshold:policy.Threshold,
         NetworkHashes:networks,PolicyMode:policy.Mode,
-        OriginAuthenticated:policy.Mode=="production",GroundAdmitted:false,
+        OriginAuthenticated:false,GroundAdmitted:false,
         TrustScope:"Ed25519 verifier trust is limited to externally managed receiver policy; proof of human/host identity is not established",
     }
     return receipt,nil
