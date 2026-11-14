@@ -1,0 +1,101 @@
+{
+  "conditional_reissue": {
+    "counts": {
+      "edge": {
+        "joint_misses": 0,
+        "n": 24
+      },
+      "ordinary": {
+        "joint_misses": 0,
+        "n": 24
+      },
+      "sham": {
+        "false_positive": 0,
+        "n": 20
+      }
+    },
+    "history": [
+      {
+        "digest": "7d0332f2044961538dd061c84c91bc01201a9edb90f9cbcdd53bc7c1fe5a9ba5",
+        "invalidation": "f4b85199e16857d3a1bcaba8196d2beba7f5fb3d3e58991dd296607c3a9d9c67",
+        "revision": 1,
+        "status": "suspended"
+      },
+      {
+        "digest": "c809dcb915c4ff257336d10d52625b4c12576b268e1ea229c0f689e054c723f9",
+        "revision": 2,
+        "scope": "passive",
+        "status": "conditionally_issued"
+      }
+    ],
+    "physical_detection_guarantee": null,
+    "protocol": "passive",
+    "status": "conditional_revision_issued",
+    "upper": 0.142473597723
+  },
+  "experiment": "RE-013",
+  "limits": [
+    "fixture event source and sensors only",
+    "CI HMACs do not attest hardware",
+    "conditional IID/physical assumptions not established",
+    "stimulated and passive response claims have different scopes"
+  ],
+  "original_status": "suspended",
+  "renewal_plans": {
+    "passive": {
+      "actions": [
+        "ordinary_passive",
+        "ordinary_passive",
+        "ordinary_passive",
+        "edge_passive",
+        "edge_passive",
+        "edge_passive",
+        "sham",
+        "sham"
+      ],
+      "claim_scope": "fixture-passive-stratified-detection",
+      "cost_model": "fixed synthetic per-batch accounting, not measured elapsed time",
+      "intervention_cost": 0,
+      "observation_cost": 68,
+      "predicted_positive_counts": {
+        "edge": 24,
+        "ordinary": 24
+      },
+      "predicted_sham_count": 20,
+      "predicted_zero_miss_upper": 0.142473597723,
+      "protocol": "passive",
+      "status": "planned_only"
+    },
+    "stimulated": {
+      "actions": [
+        "ordinary_stimulated",
+        "ordinary_stimulated",
+        "ordinary_stimulated",
+        "edge_stimulated",
+        "edge_stimulated",
+        "edge_stimulated",
+        "sham",
+        "sham"
+      ],
+      "claim_scope": "fixture-stimulated-stratified-detection",
+      "cost_model": "fixed synthetic per-batch accounting, not measured elapsed time",
+      "intervention_cost": 15,
+      "observation_cost": 50,
+      "predicted_positive_counts": {
+        "edge": 24,
+        "ordinary": 24
+      },
+      "predicted_sham_count": 20,
+      "predicted_zero_miss_upper": 0.142473597723,
+      "protocol": "stimulated",
+      "status": "planned_only"
+    }
+  },
+  "status": "synthetic_exact_regression",
+  "without_assumption": {
+    "reasons": [
+      "statistical_and_physical_assumptions_unestablished"
+    ],
+    "status": "renewal_not_admitted"
+  }
+}

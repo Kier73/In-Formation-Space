@@ -51,6 +51,85 @@ jobs:
           path: experiments/continuous-observation-equivalence/certificate-artifacts/*.json
           if-no-files-found: error
 
+  signed-manifest-producer:
+    needs: certificate-producer
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Download untrusted original certificate claims
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Generate public TEST-ONLY multi-signed source manifest
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: go run ./cmd/demo ../received-certificates ../unsigned-authority-claims
+      - name: Transfer untrusted multi-signed demo manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe015-untrusted-signed-manifest
+          path: experiments/continuous-observation-equivalence/unsigned-authority-claims/signed-manifest.json
+          if-no-files-found: error
+
+  signed-manifest-verifier:
+    needs: [certificate-producer, signed-manifest-producer]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Receive original certificate bytes from producer
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Receive untrusted signed source-manifest artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coe015-untrusted-signed-manifest
+          path: experiments/continuous-observation-equivalence/received-authority-claims
+      - name: Test Ed25519 signature quorum, key rotation, revocation and byte tampering
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: go test -count=1 -v ./...
+      - name: Verify signed authority against RECEIVER-owned test public-key policy and original bytes
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: |
+          go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-authority-claims/signed-manifest.json \
+            -certs ../received-certificates \
+            -allow-demo \
+            -report signed-authority-receipt.json
+          grep -Fq '"ground_admitted":false' signed-authority-receipt.json
+          grep -Fq '"origin_authenticated":false' signed-authority-receipt.json
+          grep -Fq '"policy_mode":"test-only"' signed-authority-receipt.json
+      - name: Require demonstration policy to be REFUSED without explicit opt-in
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: |
+          if go run ./cmd/verify \
+             -policy demo-policy.json \
+             -signed ../received-authority-claims/signed-manifest.json \
+             -certs ../received-certificates \
+             > demo-authority-refusal.txt 2>&1; then
+            echo 'ERROR: public demo keys were silently accepted as production authority'
+            exit 1
+          fi
+          grep -Fq 'demo keys are not production authority' demo-authority-refusal.txt
+      - name: Preserve independent source authorization evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe015-demo-signature-authority-evidence
+          path: |
+            experiments/continuous-observation-equivalence/coe015_auth/signed-authority-receipt.json
+            experiments/continuous-observation-equivalence/coe015_auth/demo-authority-refusal.txt
+          if-no-files-found: error
+
   certificate-checker:
     needs: certificate-producer
     runs-on: ubuntu-24.04
@@ -217,6 +296,91 @@ jobs:
             cat lean-certificates-proof-output.txt
             exit 1
           fi
+      - name: Test untrusted string-only wire transport
+        working-directory: experiments/continuous-observation-equivalence
+        run: python -m unittest test_lean_wire -v
+      - name: Transport original string tokens separately from rational literals
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python emit_lean_wire.py received-certificates lean/GeneratedWireProofs.lean --manifest lean/lean-wire-replay-manifest.json
+      - name: Kernel-decode wire tokens and prove equality to original five typed certificates
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean -o .lake/build/lib/lean/GeneratedCertificateProofs.olean GeneratedCertificateProofs.lean > lean-certificate-olean-output.txt
+          lake env lean GeneratedWireProofs.lean | tee lean-wire-token-proof-output.txt
+          for name in identity relu_identity zero triangular_bump rescaled_bump; do
+            grep -Fq "'COE012.${name}_wire_decoded' depends on axioms:" lean-wire-token-proof-output.txt
+            grep -Fq "'COE012.${name}_wire_verified' depends on axioms:" lean-wire-token-proof-output.txt
+          done
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' lean-wire-token-proof-output.txt; then
+            cat lean-wire-token-proof-output.txt
+            exit 1
+          fi
+      - name: Test direct raw JSON byte transport without Python JSON interpretation
+        working-directory: experiments/continuous-observation-equivalence
+        run: python -m unittest test_lean_json_bytes -v
+      - name: Carry complete original canonical JSON file bytes into Lean
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python emit_lean_json_bytes.py received-certificates lean/GeneratedJSONProofs.lean --manifest lean/lean-json-replay-manifest.json
+      - name: Kernel-parse entire original JSON structure for all five certificates
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean -o .lake/build/lib/lean/GeneratedWireProofs.olean GeneratedWireProofs.lean > lean-wire-olean-output.txt
+          lake env lean GeneratedJSONProofs.lean | tee lean-json-byte-proof-output.txt
+          for name in identity relu_identity zero triangular_bump rescaled_bump; do
+            grep -Fq "'COE013.${name}_json_wire' does not depend on any axioms" lean-json-byte-proof-output.txt
+            grep -Fq "'COE013.${name}_json_admitted' depends on axioms: [propext, Classical.choice, Quot.sound]" lean-json-byte-proof-output.txt
+          done
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' lean-json-byte-proof-output.txt; then
+            cat lean-json-byte-proof-output.txt
+            exit 1
+          fi
+      - name: Verify pure Lean SHA-256 against five standard reference vectors
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean --run COE014Vectors.lean | tee sha256-reference-vectors.txt
+          for name in empty abc fox multi thousand; do
+            grep -Fq "SHA-256 ${name}: PASS" sha256-reference-vectors.txt
+          done
+      - name: Generate raw-network hash and adversarial mutation replay
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python emit_lean_hash_replay.py received-certificates lean/GeneratedHashReplay.lean
+      - name: Independently reconstruct pinned SHA-256 on five original networks
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          lake env lean -o .lake/build/lib/lean/GeneratedJSONProofs.olean GeneratedJSONProofs.lean > lean-json-olean-output.txt
+          lake env lean --run GeneratedHashReplay.lean | tee sha256-pinned-network-replay.txt
+          for name in identity relu_identity zero triangular_bump rescaled_bump; do
+            grep -Fq "COE-014 ${name}: original network SHA-256 and pin PASS" sha256-pinned-network-replay.txt
+          done
+          if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' sha256-pinned-network-replay.txt; then
+            cat sha256-pinned-network-replay.txt
+            exit 1
+          fi
+      - name: Require kernel rejection of malformed duplicate-key JSON proof
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          if lake env lean COE013Invalid.lean > invalid-json-byte-proof.txt 2>&1; then
+            echo "ERROR: Lean accepted duplicate JSON keys"
+            exit 1
+          fi
+          cat invalid-json-byte-proof.txt
+          grep -Fq 'Tactic `decide` proved that the proposition' invalid-json-byte-proof.txt
+          grep -Fq 'parseEnvelope duplicateKey ≠ none' invalid-json-byte-proof.txt
+          grep -Fq 'is false' invalid-json-byte-proof.txt
+      - name: Require Lean kernel rejection of noncanonical rational wire admission
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          if lake env lean COE012WireInvalid.lean > invalid-wire-token.txt 2>&1; then
+            echo "ERROR: Lean accepted an unreduced wire fraction"
+            exit 1
+          fi
+          cat invalid-wire-token.txt
+          grep -Fq 'Tactic `decide` proved that the proposition' invalid-wire-token.txt
+          grep -Fq 'acceptWire unreduced = true' invalid-wire-token.txt
+          grep -Fq 'is false' invalid-wire-token.txt
       - name: Construct negative certificates without altering source network hashes
         working-directory: experiments/continuous-observation-equivalence
         run: |
@@ -242,5 +406,402 @@ jobs:
             experiments/continuous-observation-equivalence/lean/lean-replay-manifest.json
             experiments/continuous-observation-equivalence/lean/GeneratedCertificateProofs.lean
             experiments/continuous-observation-equivalence/lean/lean-certificates-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/lean-wire-replay-manifest.json
+            experiments/continuous-observation-equivalence/lean/GeneratedWireProofs.lean
+            experiments/continuous-observation-equivalence/lean/lean-certificate-olean-output.txt
+            experiments/continuous-observation-equivalence/lean/lean-wire-token-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/lean-json-replay-manifest.json
+            experiments/continuous-observation-equivalence/lean/GeneratedJSONProofs.lean
+            experiments/continuous-observation-equivalence/lean/lean-json-byte-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/sha256-reference-vectors.txt
+            experiments/continuous-observation-equivalence/lean/GeneratedHashReplay.lean
+            experiments/continuous-observation-equivalence/lean/lean-json-olean-output.txt
+            experiments/continuous-observation-equivalence/lean/sha256-pinned-network-replay.txt
+            experiments/continuous-observation-equivalence/lean/invalid-json-byte-proof.txt
+            experiments/continuous-observation-equivalence/lean/lean-wire-olean-output.txt
+            experiments/continuous-observation-equivalence/lean/invalid-wire-token.txt
             experiments/continuous-observation-equivalence/lean/negative-*-rejection.txt
           if-no-files-found: error
+
+  same-source-evidence-convergence:
+    # One CI run binds four independent verdicts to the same original files.
+    # Previous jobs must succeed; this stage is NOT proof of external identity
+    # and deliberately cannot convert public demo signatures into Ground authority.
+    needs: [certificate-producer, signed-manifest-producer, signed-manifest-verifier,
+            certificate-checker, go-certificate-checker, lean-certificate-replay]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Receive exact original untrusted certificate files
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - name: Receive untrusted signed source manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: coe015-untrusted-signed-manifest
+          path: experiments/continuous-observation-equivalence/received-authority-claims
+      - name: Receive completed independent Lean kernel evidence from this workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: coe007-lean-certificate-replay
+          path: experiments/continuous-observation-equivalence/joined-lean-evidence
+      - name: Receive separately verified Python mathematical evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: coe002-independent-checker-report
+          path: experiments/continuous-observation-equivalence/joined-python-evidence
+      - name: Receive separately verified Go mathematical evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: coe003-go-independent-checker-report
+          path: experiments/continuous-observation-equivalence/joined-go-evidence
+      - name: Re-verify Ed25519 under a local receiver-controlled TEST policy
+        working-directory: experiments/continuous-observation-equivalence/coe015_auth
+        run: |
+          go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-authority-claims/signed-manifest.json \
+            -certs ../received-certificates \
+            -allow-demo \
+            -report ../joined-authority-receipt.json
+      - name: Adversarially test exact-byte cross-evidence convergence
+        working-directory: experiments/continuous-observation-equivalence
+        run: python -m unittest test_coe016_binding -v
+      - name: Reject divergent original bytes, semantics, pins or proof records
+        working-directory: experiments/continuous-observation-equivalence
+        run: |
+          python coe016_binding.py \
+            --certs received-certificates \
+            --authority joined-authority-receipt.json \
+            --lean joined-lean-evidence/lean-json-replay-manifest.json \
+            --python joined-python-evidence/independent-certificate-report.json \
+            --go joined-go-evidence/go-independent-check-report.json \
+            --lean-log joined-lean-evidence/sha256-pinned-network-replay.txt \
+            --output coe016-bound-source-receipt.json
+      - name: Retain explicitly non-admitting cross-evidence receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/coe016-bound-source-receipt.json
+          if-no-files-found: error
+
+  verifier-attestation-producer:
+    # Public test-key signer receives the finished COE-016 join and original files.
+    needs: [same-source-evidence-convergence, certificate-producer]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - name: Produce PUBLIC TEST-ONLY verifier-key signature claims
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/demo \
+            ../received-coe016/coe016-bound-source-receipt.json \
+            ../received-certificates \
+            ../untrusted-verifier-attestation
+      - name: Transfer untrusted signed verifier receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/untrusted-verifier-attestation/signed-verifier-receipt.json
+          if-no-files-found: error
+
+  verifier-attestation-receiver:
+    # A separately hosted receiver independently chooses policy and replay
+    # checkpoint, recomputes original-byte hashes, and rejects stale identities.
+    needs: [same-source-evidence-convergence, certificate-producer, verifier-attestation-producer]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/received-verifier-attestation
+      - name: Adversarially test signer possession, quorum, rotation, revocation and replay
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: go test -count=1 -v ./...
+      - name: Initialize independent receiver-owned demonstration state
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: cp demo-state.json receiver-state.json
+      - name: Reject PUBLIC demo keys by default
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          if go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -certs ../received-certificates \
+            -state receiver-state.json -report coe017-receiver-result.json \
+            > refusal.txt 2>&1; then
+            echo 'ERROR: public test-only verifier keys were accepted by default'
+            exit 1
+          fi
+          grep -Fq 'public demonstration verifier keys are not production identity' refusal.txt
+      - name: Verify source and signer identity under receiver-owned test policy
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -certs ../received-certificates \
+            -state receiver-state.json -report coe017-receiver-result.json \
+            -allow-demo
+          grep -Fq '"ground_admitted":false' coe017-receiver-result.json
+          grep -Fq '"real_world_identity_authenticated":false' coe017-receiver-result.json
+          grep -Fq '"key_possession_verified":true' coe017-receiver-result.json
+          grep -Fq '"last_sequence":3' receiver-state.json
+      - name: Require replay refusal after local state progression
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          if go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -certs ../received-certificates \
+            -state receiver-state.json -report repeated-receipt.json \
+            -allow-demo > replay-refusal.txt 2>&1; then
+            echo 'ERROR: repeated verifier receipt was accepted'
+            exit 1
+          fi
+          grep -Fq 'stale/replayed sequence' replay-refusal.txt
+      - name: Preserve receiver-scoped key and state observation
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe017-demo-receiver-verifier-evidence
+          path: |
+            experiments/continuous-observation-equivalence/coe017_attest/coe017-receiver-result.json
+            experiments/continuous-observation-equivalence/coe017_attest/receiver-state.json
+            experiments/continuous-observation-equivalence/coe017_attest/refusal.txt
+            experiments/continuous-observation-equivalence/coe017_attest/replay-refusal.txt
+          if-no-files-found: error
+
+  coe018-journal-producer:
+    needs: [certificate-producer, same-source-evidence-convergence, verifier-attestation-producer]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/received-verifier-attestation
+      - name: Make untrusted PUBLIC TEST-ONLY signed acceptance, key rotation and revocation
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/history-demo \
+            ../received-verifier-attestation/signed-verifier-receipt.json \
+            ../received-coe016/coe016-bound-source-receipt.json \
+            demo-policy.json demo-state.json ../received-certificates \
+            ../untrusted-governance-artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coe018-public-demo-untrusted-journal
+          path: experiments/continuous-observation-equivalence/untrusted-governance-artifacts/*.json
+          if-no-files-found: error
+
+  coe018-receiver-a:
+    needs: [coe018-journal-producer, certificate-producer, verifier-attestation-producer, same-source-evidence-convergence]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/received-verifier-attestation
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe018-public-demo-untrusted-journal
+          path: experiments/continuous-observation-equivalence/received-governance
+      - name: Test signed history, new-key proofs, revocation, fork and rollback
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: go test -count=1 -v ./history ./cmd/history-demo ./cmd/history-verify
+      - name: Refuse public demonstration keys without explicit opt-in
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          if go run ./cmd/history-verify \
+            -journal ../received-governance/untrusted-governance-journal.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -policy demo-policy.json -state demo-state.json \
+            -certs ../received-certificates \
+            -expected-anchor ../received-governance/producer-claimed-anchor.json \
+            -output receiver-a.json > refused-demo.txt 2>&1; then
+            echo 'ERROR: public demo keys silently accepted'
+            exit 1
+          fi
+          grep -Fq 'demo authority refused without opt-in' refused-demo.txt
+      - name: Independently reconstruct verified byte-bound authority history
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/history-verify \
+            -journal ../received-governance/untrusted-governance-journal.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -policy demo-policy.json -state demo-state.json \
+            -certs ../received-certificates \
+            -expected-anchor ../received-governance/producer-claimed-anchor.json \
+            -output receiver-a.json -allow-demo
+          grep -Fq '"status":"revoked-under-policy"' receiver-a.json
+          grep -Fq '"external_anchor_authenticated":false' receiver-a.json
+          grep -Fq '"ground_admitted":false' receiver-a.json
+          grep -Fq '"real_world_identity_authenticated":false' receiver-a.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coe018-receiver-a-reconstruction
+          path: experiments/continuous-observation-equivalence/coe017_attest/receiver-a.json
+          if-no-files-found: error
+
+  coe018-receiver-b:
+    needs: [coe018-journal-producer, certificate-producer, verifier-attestation-producer, same-source-evidence-convergence]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/received-verifier-attestation
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe018-public-demo-untrusted-journal
+          path: experiments/continuous-observation-equivalence/received-governance
+      - name: Independently reconstruct the SAME source and authenticated decisions
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/history-verify \
+            -journal ../received-governance/untrusted-governance-journal.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -policy demo-policy.json -state demo-state.json \
+            -certs ../received-certificates \
+            -expected-anchor ../received-governance/producer-claimed-anchor.json \
+            -output receiver-b.json -allow-demo
+          grep -Fq '"status":"revoked-under-policy"' receiver-b.json
+          grep -Fq '"external_anchor_authenticated":false' receiver-b.json
+          grep -Fq '"ground_admitted":false' receiver-b.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coe018-receiver-b-reconstruction
+          path: experiments/continuous-observation-equivalence/coe017_attest/receiver-b.json
+          if-no-files-found: error
+
+  coe018-independent-receiver-convergence:
+    needs: [coe018-receiver-a, coe018-receiver-b]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe018-receiver-a-reconstruction
+          path: receiver-a
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe018-receiver-b-reconstruction
+          path: receiver-b
+      - name: Compare separately produced authority states without trusting either summary
+        run: |
+          cmp receiver-a/receiver-a.json receiver-b/receiver-b.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("receiver-a/receiver-a.json").read_bytes())
+          assert r["schema"] == "ifs.coe018.independent-authority-replay/v1"
+          assert r["journal_count"] == 3 and r["final_sequence"] == 5
+          assert r["status"] == "revoked-under-policy" and r["receipt_revoked"] is True
+          assert r["active_signers"] == ["demo-vr-41", "demo-vr-74"]
+          assert r["compared_expected_anchor"] is True
+          assert r["external_anchor_authenticated"] is False
+          assert r["real_world_identity_authenticated"] is False
+          assert r["ground_admitted"] is False
+          print("COE-018: independently reconstructed verifier decisions agree")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coe018-independent-receiver-comparison
+          path: |
+            receiver-a/receiver-a.json
+            receiver-b/receiver-b.json
+          if-no-files-found: error
+
+  coe018-authority-unit:
+    # Fast exact-head feedback, independent of the long Lean proving chain.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - name: Go authority journal and adversarial independence/replay matrix
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: go test -count=1 -v ./history ./cmd/history-demo ./cmd/history-verify

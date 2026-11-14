@@ -1,0 +1,92 @@
+{
+  "experiment": "RE-009",
+  "indistinguishable_latent_worlds": [
+    "event-at-epoch-3-both-observers-miss-it",
+    "no-event-at-epoch-3-source-counter-overstates-events"
+  ],
+  "physical_truth_selected_from_public_records": false,
+  "proposal": {
+    "action": "request_independent_event_origin_evidence",
+    "outcome": "planned_only_not_historical_measurement",
+    "target_window": [
+      0,
+      4
+    ]
+  },
+  "source_counter_excess": {
+    "causation_proved": false,
+    "cross_host_elapsed": null,
+    "observed_epochs": [
+      1,
+      4,
+      6
+    ],
+    "observed_total": 3,
+    "observer_blind_declared_epochs": [],
+    "physical_common_mode_loss_proved": false,
+    "physical_event_completeness_proved": false,
+    "schema": "in-formation.response-re009-source/0.1",
+    "source_claimed_total": 4,
+    "source_observer_discrepancy": 1,
+    "source_truthfulness_proved": false,
+    "status": "source_observer_disagreement",
+    "verified_observer_acknowledgements": [
+      "A",
+      "B"
+    ],
+    "windows": [
+      {
+        "end_exclusive": 4,
+        "observer_reported_distinct_events": 1,
+        "source_claimed_events": 2,
+        "source_minus_observers": 1,
+        "start": 0
+      },
+      {
+        "end_exclusive": 8,
+        "observer_reported_distinct_events": 2,
+        "source_claimed_events": 2,
+        "source_minus_observers": 0,
+        "start": 4
+      }
+    ]
+  },
+  "source_counter_matches_observers": {
+    "causation_proved": false,
+    "cross_host_elapsed": null,
+    "observed_epochs": [
+      1,
+      4,
+      6
+    ],
+    "observed_total": 3,
+    "observer_blind_declared_epochs": [],
+    "physical_common_mode_loss_proved": false,
+    "physical_event_completeness_proved": false,
+    "schema": "in-formation.response-re009-source/0.1",
+    "source_claimed_total": 3,
+    "source_observer_discrepancy": 0,
+    "source_truthfulness_proved": false,
+    "status": "source_observer_counts_agree",
+    "verified_observer_acknowledgements": [
+      "A",
+      "B"
+    ],
+    "windows": [
+      {
+        "end_exclusive": 4,
+        "observer_reported_distinct_events": 1,
+        "source_claimed_events": 1,
+        "source_minus_observers": 0,
+        "start": 0
+      },
+      {
+        "end_exclusive": 8,
+        "observer_reported_distinct_events": 2,
+        "source_claimed_events": 2,
+        "source_minus_observers": 0,
+        "start": 4
+      }
+    ]
+  }
+}

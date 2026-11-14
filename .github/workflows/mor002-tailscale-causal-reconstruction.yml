@@ -7,12 +7,14 @@ on:
       - "bridges/observation-path/direct_mtls_operation_path.py"
       - "experiments/multi-observer-causal-reconstruction/mor002*"
       - "experiments/multi-observer-causal-reconstruction/test_mor002_overlay.py"
+      - "experiments/tailscale-federation-readiness/**"
       - ".github/workflows/mor002-tailscale-causal-reconstruction.yml"
   pull_request:
     paths:
       - "bridges/observation-path/direct_mtls_operation_path.py"
       - "experiments/multi-observer-causal-reconstruction/mor002*"
       - "experiments/multi-observer-causal-reconstruction/test_mor002_overlay.py"
+      - "experiments/tailscale-federation-readiness/**"
       - ".github/workflows/mor002-tailscale-causal-reconstruction.yml"
   workflow_dispatch:
 
@@ -37,6 +39,20 @@ jobs:
           python-version: "3.11"
       - name: Install test and schema dependencies
         run: python -m pip install --disable-pip-version-check "cryptography>=42,<47" "jsonschema>=4,<5" "PyYAML>=6,<7"
+      - name: Audit fail-closed IHP-006 and MOR-002 federation contracts
+        run: |
+          python -m unittest discover \
+            -s experiments/tailscale-federation-readiness \
+            -p 'test_contract_audit.py' -v
+          python experiments/tailscale-federation-readiness/contract_audit.py \
+            --report "$RUNNER_TEMP/federation-contract.json"
+      - name: Preserve source-only federation audit (not live network evidence)
+        uses: actions/upload-artifact@v4
+        with:
+          name: federation-source-contract-audit
+          path: ${{ runner.temp }}/federation-contract.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Compile MOR-002 and direct mTLS implementation
         env:
           PYTHONPATH: external/E-CPU:bridges/observation-path
@@ -74,7 +90,7 @@ jobs:
 
   client_host:
     needs: tests
-    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -207,7 +223,7 @@ jobs:
 
   server_host:
     needs: tests
-    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -333,7 +349,7 @@ jobs:
 
   observer_host:
     needs: tests
-    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main'
+    if: needs.tests.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -385,7 +401,7 @@ jobs:
 
   verifier_host:
     needs: [tests, client_host, server_host, observer_host]
-    if: needs.tests.result == 'success' && needs.client_host.result == 'success' && needs.server_host.result == 'success' && needs.observer_host.result == 'success' && github.ref == 'refs/heads/main'
+    if: needs.tests.result == 'success' && needs.client_host.result == 'success' && needs.server_host.result == 'success' && needs.observer_host.result == 'success' && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:

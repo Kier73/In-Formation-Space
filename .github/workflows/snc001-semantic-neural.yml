@@ -1,0 +1,57 @@
+name: SNC-001 semantic-to-neural compilation
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - 'experiments/continuous-observation-equivalence/**'
+      - '.github/workflows/snc001-semantic-neural.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/semantic_neural_compilation/**'
+      - 'experiments/continuous-observation-equivalence/**'
+      - '.github/workflows/snc001-semantic-neural.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  construct:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit and adversarial semantic-construction tests
+        working-directory: experiments/semantic_neural_compilation
+        run: python -m unittest discover -s . -p 'test_*.py' -v
+      - name: Emit five untrusted portable neural capsules
+        run: python experiments/semantic_neural_compilation/run_experiment.py --output-dir snc-results
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc001-unverified-capsules
+          path: snc-results/
+          if-no-files-found: error
+
+  receive-and-verify:
+    needs: construct
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          name: snc001-unverified-capsules
+          path: snc-received/
+      - name: Independently verify transferred source and generated neural semantics
+        run: python experiments/semantic_neural_compilation/verify_artifacts.py --capsules snc-received/capsules | tee snc001-receiver-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc001-independent-receiver-report
+          path: snc001-receiver-report.json
+          if-no-files-found: error

@@ -1,0 +1,68 @@
+name = "coe_real_continuous_extension"
+version = "0.1.0"
+defaultTargets = ["COE010Real", "COE010Network", "COE011Atlas", "COE011Coverage", "COE011Fixtures", "COE012Wire", "COE012RealLink", "COE013Json", "COE013RealLink", "COE014SHA256", "COE014Provenance", "COE014RealLink"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "f897ebcf72cd16f89ab4577d0c826cd14afaafc7"
+
+[[lean_lib]]
+name = "COE010Real"
+
+[[lean_lib]]
+name = "COECellSoundness"
+
+[[lean_lib]]
+name = "COERationalRoot"
+
+[[lean_lib]]
+name = "COEWireCheck"
+
+[[lean_lib]]
+name = "COE008Soundness"
+
+[[lean_lib]]
+name = "COE008Evaluation"
+
+[[lean_lib]]
+name = "COE009Endpoint"
+
+[[lean_lib]]
+name = "COE009Evaluation"
+
+[[lean_lib]]
+name = "COE009Coverage"
+
+[[lean_lib]]
+name = "COE010Network"
+
+[[lean_lib]]
+name = "COE011Atlas"
+
+[[lean_lib]]
+name = "COE011Coverage"
+
+[[lean_lib]]
+name = "COE011Fixtures"
+
+[[lean_lib]]
+name = "COE012Wire"
+
+[[lean_lib]]
+name = "COE012RealLink"
+
+[[lean_lib]]
+name = "COE013Json"
+
+[[lean_lib]]
+name = "COE013RealLink"
+
+[[lean_lib]]
+name = "COE014SHA256"
+
+[[lean_lib]]
+name = "COE014Provenance"
+
+[[lean_lib]]
+name = "COE014RealLink"

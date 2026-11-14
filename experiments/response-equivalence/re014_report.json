@@ -1,0 +1,20 @@
+{
+  "after_approvals": "conditionally_admitted",
+  "after_revocation": "revoked",
+  "approval_roles": [
+    "M",
+    "P"
+  ],
+  "before": "pending_authority",
+  "certificate_digest": "c809dcb915c4ff257336d10d52625b4c12576b268e1ea229c0f689e054c723f9",
+  "experiment": "RE-014",
+  "fresh_authority_approval_proves_physical_truth": false,
+  "history": [
+    "endorse:M",
+    "endorse:P",
+    "issue:V",
+    "revoke:R"
+  ],
+  "rollback_requires_external_anchor": true,
+  "scope": "fixture-passive-stratified-detection"
+}

@@ -1,5 +1,9 @@
 # PNF-002: portable generated models and a separate E-CPU receiver
 
+**Verified milestone:** the [first live CI run](results/ci-run-43530863142.md)
+transferred and checked the observed/generated pair successfully. A subsequent
+Windows reconstruction of its exact downloaded capsule is also retained.
+
 PNF-001 checked widening inside one process and retained hashes. PNF-002 exports
 the actual binary32 parameters, sends them through E-CPU ReliableChannel over
 mutual TLS, and reconstructs and checks both source and generated models in a
@@ -69,6 +73,13 @@ durable restart/retry recovery, offline signed receipt authenticity, or external
 proof-kernel acceptance. The receiver verifies the content-bound relationship;
 it does not independently re-observe Hugging Face or authenticate its publisher.
 
+The workflow additionally sends the exported capsule through GitHub artifact
+storage to a separately scheduled Windows/Python 3.13 replay job. That job pins
+the expected source and generated model identities in its checked-in workflow,
+not from the producer's sidecar, and reconstructs the arrays again. This is
+cross-runner artifact replay; the actual E-CPU mTLS transfer remains the earlier
+Linux process-to-process session. These two evidence scopes are kept separate.
+
 ## Two concrete paths
 
 | Starting coefficients | Source block | Generated block | External payload read |
@@ -133,9 +144,41 @@ socket tests reached receiver startup but failed at connection with `WinError
 10013` (sandbox permissions); they were not skipped or represented as passed.
 The Linux CI run is required to establish actual transfer success.
 
+After the initial successful CI, the actual 44,107,195-byte capsule was downloaded
+and checked on the local Windows environment (Python 3.13, NumPy 2.2.5). Its SHA-256
+matched the CI log and its archive matched GitHub's artifact digest. Full
+coefficient verification and the source/generated scalar comparison passed.
+This replay did not require or establish a local socket connection. The later
+export-policy test adds an explicit negative control for independently configured
+model identities.
+
+## Relationship to subsequent repository work
+
+Current source examined: IFS `005af23e9adb180ff86485a9c9434815590405df`.
+
+- [SNC-001](../semantic_neural_compilation/README.md) already constructs exact
+  rational ReLU parameters from a specified piecewise-affine behavior.
+  [SNC-003](../semantic_neural_compilation/SNC-003.md) adds durable semantic
+  hosting and source-policy checks. This is a concrete route from **behavioral
+  description to activation structure and parameters**, stronger than trying to
+  infer a unique model from architecture alone, within its one-input function
+  language. PNF retains the complementary observed/binary32 realization path.
+- [SNC-004B](../semantic_neural_compilation/SNC-004B.md) has a dedicated overlay
+  protocol and third-host audit, with separate federation prerequisites. Its
+  protocol is useful future integration material; PNF does not claim its
+  cross-host route has been executed here.
+- [TCR-003 native admission](../tensor_cut_realization/native_admission.py)
+  now registers resident tensor-cut handlers through E-CPU's real
+  `VirtualLayerRuntime`, `HeadlessOS`, and receiver-local Hypervisor capability.
+  The next PNF integration should provision a verified generated realization,
+  then let that receiver authority admit observation requests. Capsule delivery
+  or successful coefficient verification alone must not grant execution rights.
+
 ## Next experiment
 
 Move the receiver to a separately hosted machine with an independently provisioned
 policy and authenticated identity. Add durable staging and a receipt outbox so
 loss after the final chunk or after verification can be recovered without
 silently treating a transport ACK as accepted model execution.
+Compose with SNC's existing persistence and TCR's native admission where their
+contracts fit, rather than inventing another authority or hosting abstraction.

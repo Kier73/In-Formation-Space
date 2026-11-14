@@ -1,0 +1,266 @@
+name: PON-003 independently signed origins and actual listener-loss recovery
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/passive-orbit-cache/**'
+      - '.github/workflows/pon003-independent-publications-failover.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/passive-orbit-cache/**'
+      - '.github/workflows/pon003-independent-publications-failover.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - run: python -m pip install --disable-pip-version-check 'cryptography>=42,<47'
+      - name: Raw CID, publisher keys, epoch, corruption, and read-only transport contracts
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s experiments/passive-orbit-cache -p 'test_pon003*.py' -v
+          python -m py_compile experiments/passive-orbit-cache/pon003_*.py
+          python experiments/passive-orbit-cache/pon003_audit.py --help > /dev/null
+      - name: Prior PON-002 authority and causal retrieval contracts
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s experiments/passive-orbit-cache -p 'test_pon002*.py' -v
+
+  bucket_publisher:
+    needs: contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install --disable-pip-version-check 'cryptography>=42,<47'
+      - name: Independently publish immutable object-origin bundle and discard private key
+        run: |
+          set -euo pipefail
+          python experiments/passive-orbit-cache/pon003_origin.py \
+            --kind r2 --output staging/r2 | tee bucket-publisher-stdout.json
+          test ! -e staging/r2/private-key.pem
+          tar -cf r2-origin.tar -C staging r2
+          test -s r2-origin.tar
+      - name: Attest exact R2-style origin bundle produced by this hosted job
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: r2-origin.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pon003-bucket-origin
+          path: r2-origin.tar
+          if-no-files-found: error
+          retention-days: 60
+
+  block_publisher:
+    needs: contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install --disable-pip-version-check 'cryptography>=42,<47'
+      - name: Independently publish CIDv1 raw-block-origin bundle and discard private key
+        run: |
+          set -euo pipefail
+          python experiments/passive-orbit-cache/pon003_origin.py \
+            --kind ipfs --output staging/ipfs | tee block-publisher-stdout.json
+          test ! -e staging/ipfs/private-key.pem
+          tar -cf ipfs-origin.tar -C staging ipfs
+          test -s ipfs-origin.tar
+      - name: Attest exact CIDv1 origin bundle produced by this hosted job
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: ipfs-origin.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pon003-ipfs-origin
+          path: ipfs-origin.tar
+          if-no-files-found: error
+          retention-days: 60
+
+  receiver_loss_experiment:
+    needs: [bucket_publisher, block_publisher]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install --disable-pip-version-check 'cryptography>=42,<47'
+      - uses: actions/download-artifact@v4
+        with:
+          name: pon003-bucket-origin
+          path: publisher-artifacts
+      - uses: actions/download-artifact@v4
+        with:
+          name: pon003-ipfs-origin
+          path: publisher-artifacts
+      - name: Independently authenticate both publishing jobs on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: '${{ github.token }}'
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/github-cli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh
+          for f in publisher-artifacts/r2-origin.tar publisher-artifacts/ipfs-origin.tar; do
+            gh attestation verify "$f" --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/pon003-independent-publications-failover.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners \
+              --format json > /dev/null
+          done
+      - name: Stage independently signed source object bundles
+        run: |
+          set -euo pipefail
+          mkdir -p restored
+          tar -xf publisher-artifacts/r2-origin.tar -C restored
+          tar -xf publisher-artifacts/ipfs-origin.tar -C restored
+          test -f restored/r2/receipt.json
+          test -f restored/ipfs/receipt.json
+      - name: Real HTTP servers, altered bytes, actual process kill, then complete absence
+        run: |
+          set -euo pipefail
+          python experiments/passive-orbit-cache/run_pon003_recovery.py \
+            --r2-dir restored/r2 --ipfs-dir restored/ipfs \
+            --output evidence/pon003-killed-origin-report.json \
+            | tee pon003-loss-stdout.json
+          python - <<'PY'
+          import json
+          x=json.load(open("evidence/pon003-killed-origin-report.json"))
+          assert x["status"]=="two-separately-published-origin-contracts-with-kill-recovery"
+          assert x["baseline"]["value"]==44
+          assert x["tampered_origin"]["value"]==44
+          assert x["bucket_origin_killed"]["value"]==44
+          assert x["both_origins_killed"]["status"]=="unresolved"
+          assert x["physical_origin_machine_count"]==1
+          assert x["public_origin_success_verified"] is False
+          PY
+      - name: Attest observer-produced loss evidence on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/pon003-killed-origin-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pon003-observed-origin-kill
+          path: evidence/pon003-killed-origin-report.json
+          if-no-files-found: error
+          retention-days: 60
+
+  third_observer_audit:
+    needs: [receiver_loss_experiment, bucket_publisher, block_publisher]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check 'cryptography>=42,<47'
+      - uses: actions/download-artifact@v4
+        with:
+          name: pon003-bucket-origin
+          path: publisher-artifacts
+      - uses: actions/download-artifact@v4
+        with:
+          name: pon003-ipfs-origin
+          path: publisher-artifacts
+      - uses: actions/download-artifact@v4
+        with:
+          name: pon003-observed-origin-kill
+          path: evidence
+      - name: Independently verify publication and observer artifact provenance on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: '${{ github.token }}'
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+          for f in publisher-artifacts/r2-origin.tar publisher-artifacts/ipfs-origin.tar evidence/pon003-killed-origin-report.json; do
+            gh attestation verify "$f" --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/pon003-independent-publications-failover.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners \
+              --format json > /dev/null
+          done
+      - name: Verify separately pinned publisher signatures and independently recompute arithmetic
+        run: |
+          set -euo pipefail
+          mkdir -p restored
+          tar -xf publisher-artifacts/r2-origin.tar -C restored
+          tar -xf publisher-artifacts/ipfs-origin.tar -C restored
+          python experiments/passive-orbit-cache/pon003_audit.py \
+            --r2-dir restored/r2 --ipfs-dir restored/ipfs \
+            --report evidence/pon003-killed-origin-report.json \
+            --output evidence/pon003-independent-audit.json \
+            | tee pon003-auditor-stdout.json
+          python - <<'PY'
+          import json
+          x=json.load(open("evidence/pon003-independent-audit.json"))
+          assert x["status"]=="signed-dual-origin-local-kill-and-independent-reconstruction"
+          assert x["expected_pure_value"]==44
+          assert x["independent_storage_operators_verified_live"] is False
+          assert x["public_r2_object_verified"] is False
+          PY
+      - name: Attest independent mathematical audit on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/pon003-independent-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pon003-independent-source-audit
+          path: evidence/pon003-independent-audit.json
+          if-no-files-found: error
+          retention-days: 60

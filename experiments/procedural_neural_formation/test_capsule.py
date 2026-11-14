@@ -3,6 +3,8 @@ import base64
 import copy
 from dataclasses import replace
 import json
+from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -45,6 +47,19 @@ class CapsuleTests(unittest.TestCase):
             result = verify_capsule(self.raw, self.policy)
         self.assertEqual(result["status"], "verified")
         self.assertFalse(result["kernel_accepted"])
+
+    def test_export_replay_requires_independent_model_pins(self):
+        from .replay_export import replay
+        with tempfile.TemporaryDirectory() as directory:
+            capsule, policy = Path(directory) / "model.pnf", Path(directory) / "policy.json"
+            capsule.write_bytes(self.raw)
+            policy.write_text(json.dumps(self.policy))
+            result = replay(capsule, policy, expected_source=self.policy["source_digest"],
+                            expected_generated=self.policy["generated_digest"])
+            self.assertEqual(result["verification"]["status"], "verified")
+            with self.assertRaisesRegex(FormationError, "independently configured"):
+                replay(capsule, policy, expected_source="0" * 64,
+                       expected_generated=self.policy["generated_digest"])
 
     def test_both_activations_survive(self):
         source = replace(self.source, activation="relu")

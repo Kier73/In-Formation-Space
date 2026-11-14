@@ -1,0 +1,321 @@
+name: SNC-004B live E-CPU capsule over dedicated Tailscale mTLS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  client_host:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Refuse missing dedicated SNC-004B federation identity
+        env:
+          SNC004B_TS_OAUTH_CLIENT_ID: ${{ secrets.SNC004B_TS_OAUTH_CLIENT_ID }}
+          SNC004B_TS_AUDIENCE: ${{ secrets.SNC004B_TS_AUDIENCE }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$SNC004B_TS_OAUTH_CLIENT_ID" || -z "$SNC004B_TS_AUDIENCE" ]]; then
+            echo "SNC-004B requires dedicated OIDC federation; no public-IP, loopback, or artifact payload fallback"
+            exit 1
+          fi
+      - name: Generate per-run client leaf and local private key
+        run: |
+          set -euo pipefail
+          python experiments/semantic_neural_compilation/snc004b_identity.py \
+            prepare --directory evidence/client --role client
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004b-client-bootstrap
+          path: |
+            evidence/client/client-cert.pem
+            evidence/client/client-bootstrap.json
+          if-no-files-found: error
+      - uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          oauth-client-id: ${{ secrets.SNC004B_TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.SNC004B_TS_AUDIENCE }}
+          tags: tag:snc004b-semantic-ci
+          version: 1.104.6
+      - name: Confirm client overlay identity
+        run: |
+          set -euo pipefail
+          test -n "$(tailscale ip -4)"
+          tailscale status
+      - name: Independently construct and retain exact source capsule
+        run: |
+          set -euo pipefail
+          python experiments/semantic_neural_compilation/federated_pipeline.py \
+            producer --directory evidence/client/model
+      - name: Wait for server public certificate and overlay endpoint (no payload)
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if gh run download "$GITHUB_RUN_ID" -R "$GITHUB_REPOSITORY" \
+              -n snc004b-server-bootstrap -D evidence/server-public >/dev/null 2>&1; then
+              break
+            fi
+            rm -rf evidence/server-public
+            if (( i == 90 )); then echo "Server bootstrap unavailable"; exit 1; fi
+            sleep 2
+          done
+          python experiments/semantic_neural_compilation/snc004b_identity.py \
+            inspect-endpoint --directory evidence/server-public
+      - name: Wait for server listener readiness marker
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if gh run download "$GITHUB_RUN_ID" -R "$GITHUB_REPOSITORY" \
+              -n snc004b-server-ready -D evidence/server-ready >/dev/null 2>&1; then
+              break
+            fi
+            rm -rf evidence/server-ready
+            if (( i == 90 )); then echo "Server did not become ready"; exit 1; fi
+            sleep 2
+          done
+          test -f evidence/server-ready/ready.txt
+      - name: Send model ONLY across E-CPU mutual-TLS reliable channel
+        run: |
+          set -euo pipefail
+          endpoint="$(python experiments/semantic_neural_compilation/snc004b_identity.py \
+            inspect-endpoint --directory evidence/server-public | python -c 'import json,sys; print(json.load(sys.stdin)["ip"])')"
+          python experiments/semantic_neural_compilation/snc004b_live.py \
+            send --overlay --connect "$endpoint" --port 41768 \
+            --cert evidence/client/client-cert.pem --key evidence/client/client-key.pem \
+            --peer-cert evidence/server-public/server-cert.pem \
+            --capsule evidence/client/model/portable-model.json \
+            --model clamp --coordinate 3/4 --request-id snc004b-observation \
+            --output evidence/client/client-report.json
+          python - <<'PY'
+          import json
+          r=json.load(open("evidence/client/client-report.json"))
+          assert r["mode"]=="overlay" and r["response"]["accepted"] is True
+          assert r["response"]["result"]["observation"]["receipt"]["outputs"]==["3/4"]
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004b-client-evidence
+          path: |
+            evidence/client/client-report.json
+            evidence/client/model/portable-model.json
+          if-no-files-found: error
+
+  server_host:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Refuse missing dedicated SNC-004B federation identity
+        env:
+          SNC004B_TS_OAUTH_CLIENT_ID: ${{ secrets.SNC004B_TS_OAUTH_CLIENT_ID }}
+          SNC004B_TS_AUDIENCE: ${{ secrets.SNC004B_TS_AUDIENCE }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$SNC004B_TS_OAUTH_CLIENT_ID" || -z "$SNC004B_TS_AUDIENCE" ]]; then
+            echo "SNC-004B requires dedicated OIDC federation; refusing external or loopback fallback"
+            exit 1
+          fi
+      - name: Generate independently hosted server certificate and private key
+        run: |
+          set -euo pipefail
+          python experiments/semantic_neural_compilation/snc004b_identity.py \
+            prepare --directory evidence/server --role server
+      - uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c
+        with:
+          oauth-client-id: ${{ secrets.SNC004B_TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.SNC004B_TS_AUDIENCE }}
+          tags: tag:snc004b-semantic-ci
+          version: 1.104.6
+      - name: Advertise only the Tailscale listener address
+        run: |
+          set -euo pipefail
+          overlay="$(tailscale ip -4)"
+          python experiments/semantic_neural_compilation/snc004b_identity.py \
+            publish-endpoint --directory evidence/server --ip "$overlay"
+          tailscale status
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004b-server-bootstrap
+          path: |
+            evidence/server/server-cert.pem
+            evidence/server/server-bootstrap.json
+            evidence/server/server-endpoint.json
+          if-no-files-found: error
+      - name: Wait for client public bootstrap and verify its run identity
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if gh run download "$GITHUB_RUN_ID" -R "$GITHUB_REPOSITORY" \
+              -n snc004b-client-bootstrap -D evidence/client-public >/dev/null 2>&1; then
+              break
+            fi
+            rm -rf evidence/client-public
+            if (( i == 90 )); then echo "Client certificate bootstrap unavailable"; exit 1; fi
+            sleep 2
+          done
+          python experiments/semantic_neural_compilation/snc004b_identity.py \
+            inspect-peer --directory evidence/client-public --role client
+      - name: Create independent receiver-owned source policy
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from federated_pipeline import policy_from_local_source
+          path=Path("evidence/server/receiver-policy.json")
+          policy_from_local_source(path,"clamp_0_1","clamp")
+          PY
+      - name: Start E-CPU TLS listener exclusively on Tailscale address
+        run: |
+          set -euo pipefail
+          overlay="$(tailscale ip -4)"
+          python experiments/semantic_neural_compilation/snc004b_identity.py \
+            publish-endpoint --directory evidence/server --ip "$overlay" >/dev/null
+          nohup bash -c '
+            python experiments/semantic_neural_compilation/snc004b_live.py \
+              serve --overlay --bind "$1" --port 41768 \
+              --cert evidence/server/server-cert.pem --key evidence/server/server-key.pem \
+              --peer-cert evidence/client-public/client-cert.pem \
+              --database evidence/server/recipient.sqlite3 \
+              --policy evidence/server/receiver-policy.json \
+              --output evidence/server/server-report.json
+            echo "$?" > evidence/server/exit-code
+          ' _ "$overlay" > evidence/server/serve.log 2>&1 < /dev/null &
+          echo "$!" > evidence/server/serve.pid
+          for i in $(seq 1 100); do
+            if grep -q '^LISTEN_PORT=41768' evidence/server/serve.log; then
+              echo "ready" > evidence/server/ready.txt
+              break
+            fi
+            if [[ -f evidence/server/exit-code ]]; then
+              cat evidence/server/serve.log
+              exit 1
+            fi
+            sleep 0.2
+          done
+          test -f evidence/server/ready.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004b-server-ready
+          path: evidence/server/ready.txt
+          if-no-files-found: error
+      - name: Require durable recipient report and successful socket session
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 190); do
+            if [[ -f evidence/server/exit-code ]]; then break; fi
+            sleep 1
+          done
+          test -f evidence/server/exit-code
+          cat evidence/server/serve.log
+          test "$(cat evidence/server/exit-code)" = "0"
+          test -f evidence/server/server-report.json
+          python - <<'PY'
+          import json
+          s=json.load(open("evidence/server/server-report.json"))
+          assert s["mode"]=="overlay" and s["report_durable_before_final_ack"] is True
+          assert s["result"]["observation"]["receipt"]["outputs"]==["3/4"]
+          assert s["result"]["import"]["external_execution_authorized"] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004b-server-evidence
+          path: evidence/server/server-report.json
+          if-no-files-found: error
+
+  independent_auditor:
+    needs: [client_host, server_host]
+    if: needs.client_host.result == 'success' && needs.server_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    env:
+      PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: snc004b-client-bootstrap
+          path: evidence/client-bootstrap
+      - uses: actions/download-artifact@v4
+        with:
+          name: snc004b-server-bootstrap
+          path: evidence/server-bootstrap
+      - uses: actions/download-artifact@v4
+        with:
+          name: snc004b-client-evidence
+          path: evidence/client
+      - uses: actions/download-artifact@v4
+        with:
+          name: snc004b-server-evidence
+          path: evidence/server
+      - name: Independently reconstruct two mTLS identities, matched wire digest and exact all-real certificate
+        run: |
+          set -euo pipefail
+          python experiments/semantic_neural_compilation/snc004b_third_audit.py \
+            --capsule evidence/client/model/portable-model.json \
+            --client-report evidence/client/client-report.json \
+            --server-report evidence/server/server-report.json \
+            --client-bootstrap evidence/client-bootstrap \
+            --server-bootstrap evidence/server-bootstrap \
+            --examples experiments/semantic_neural_compilation/examples.json \
+            --output evidence/snc004b-audit.json | tee snc004b-third-audit-stdout.json
+          python - <<'PY'
+          import json
+          x=json.load(open("evidence/snc004b-audit.json"))
+          assert x["status"]=="matched-overlay-mtls-and-mathematical-reconstruction"
+          assert x["observation_outputs"]==["3/4"]
+          assert x["distinct_physical_hosts_attested"] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snc004b-independent-overlay-audit
+          path: evidence/snc004b-audit.json
+          if-no-files-found: error

@@ -1,0 +1,206 @@
+name: PON-002 signed orbit across GitHub and jsDelivr public providers
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/passive-orbit-cache/**'
+      - 'experiments/convergent-ground-fabric/convergent_fabric.py'
+      - '.github/workflows/pon002-dual-public-providers.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/passive-orbit-cache/**'
+      - 'experiments/convergent-ground-fabric/convergent_fabric.py'
+      - '.github/workflows/pon002-dual-public-providers.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  signed-orbit-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - name: Install pinned-range Ed25519 verifier dependency
+        run: python -m pip install --disable-pip-version-check 'cryptography>=42,<47'
+      - name: Receiver-owned signed root, expiry, tampering and adaptive dependency tests
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s experiments/passive-orbit-cache -p 'test_pon002*.py' -v
+          python -m py_compile experiments/passive-orbit-cache/pon002_orbit.py experiments/passive-orbit-cache/pon002_audit.py
+          python experiments/passive-orbit-cache/pon002_audit.py --help > /dev/null
+      - name: Preserve PON-001 and CAG-001 source verifier regressions
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s experiments/passive-orbit-cache -p 'test_passive_orbit.py' -v
+          python -m unittest discover -s experiments/convergent-ground-fabric -p 'test_convergent_fabric.py' -v
+
+  github-public-host:
+    needs: signed-orbit-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install --disable-pip-version-check 'cryptography>=42,<47'
+      - name: Retrieve every required object from real GitHub raw public HTTPS
+        env:
+          PON_COMMIT: '${{ github.event.pull_request.head.sha || github.sha }}'
+        run: |
+          set -euo pipefail
+          python experiments/passive-orbit-cache/pon002_orbit.py \
+            --commit "$PON_COMMIT" --provider github \
+            --report evidence/github-provider.json | tee github-observation-stdout.json
+          python - <<'PY'
+          import json
+          with open("evidence/github-provider.json") as f: r=json.load(f)
+          assert r["provider"]=="github"
+          assert r["orbit"]["status"]=="verified_reconstruction"
+          assert r["orbit"]["value"]==44
+          assert r["orbit"]["verified_objects"]==5
+          assert all(v["provider"]=="github" for v in r["orbit"]["delivery_by_object"].values())
+          PY
+      - name: Attest exact provider observation on main, not PR
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/github-provider.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pon002-github-public-observation
+          path: evidence/github-provider.json
+          retention-days: 60
+          if-no-files-found: error
+
+  jsdelivr-public-host:
+    needs: signed-orbit-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install --disable-pip-version-check 'cryptography>=42,<47'
+      - name: Retrieve every required object from real jsDelivr CDN public HTTPS
+        env:
+          PON_COMMIT: '${{ github.event.pull_request.head.sha || github.sha }}'
+        run: |
+          set -euo pipefail
+          python experiments/passive-orbit-cache/pon002_orbit.py \
+            --commit "$PON_COMMIT" --provider jsdelivr \
+            --report evidence/jsdelivr-provider.json | tee jsdelivr-observation-stdout.json
+          python - <<'PY'
+          import json
+          with open("evidence/jsdelivr-provider.json") as f: r=json.load(f)
+          assert r["provider"]=="jsdelivr"
+          assert r["orbit"]["status"]=="verified_reconstruction"
+          assert r["orbit"]["value"]==44
+          assert r["orbit"]["verified_objects"]==5
+          assert all(v["provider"]=="jsdelivr" for v in r["orbit"]["delivery_by_object"].values())
+          PY
+      - name: Attest exact provider observation on main, not PR
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/jsdelivr-provider.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pon002-jsdelivr-public-observation
+          path: evidence/jsdelivr-provider.json
+          retention-days: 60
+          if-no-files-found: error
+
+  independent-orbit-auditor:
+    needs: [github-public-host, jsdelivr-public-host]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check 'cryptography>=42,<47'
+      - uses: actions/download-artifact@v4
+        with:
+          name: pon002-github-public-observation
+          path: evidence/github
+      - uses: actions/download-artifact@v4
+        with:
+          name: pon002-jsdelivr-public-observation
+          path: evidence/jsdelivr
+      - name: Verify GitHub signed provenance of both hosted reports on main only
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        shell: bash
+        env:
+          GH_TOKEN: '${{ github.token }}'
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh
+          for file in evidence/github/github-provider.json evidence/jsdelivr/jsdelivr-provider.json; do
+            gh attestation verify "$file" --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/pon002-dual-public-providers.yml \
+              --source-ref refs/heads/main --deny-self-hosted-runners \
+              --format json > /dev/null
+          done
+      - name: Recompute the exact deterministic operation from a trusted checked-in source
+        env:
+          PON_COMMIT: '${{ github.event.pull_request.head.sha || github.sha }}'
+        run: |
+          set -euo pipefail
+          python experiments/passive-orbit-cache/pon002_audit.py \
+            --github-report evidence/github/github-provider.json \
+            --jsdelivr-report evidence/jsdelivr/jsdelivr-provider.json \
+            --commit "$PON_COMMIT" \
+            --output evidence/pon002-third-host-audit.json | tee pon002-audit-stdout.json
+          python - <<'PY'
+          import json
+          with open("evidence/pon002-third-host-audit.json") as f: r=json.load(f)
+          assert r["status"]=="two-public-delivery-operators-converged-on-receiver-verified-orbit"
+          assert r["verified_result"]==44
+          assert r["distinct_delivery_operators"]==["GitHub","jsDelivr"]
+          assert r["distinct_source_origins"]==1
+          assert r["real_provider_storage_independence_proven"] is False
+          PY
+      - name: Attest independently reconstructed audit on main only
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/pon002-third-host-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pon002-independent-reconstruction
+          path: evidence/pon002-third-host-audit.json
+          retention-days: 60
+          if-no-files-found: error

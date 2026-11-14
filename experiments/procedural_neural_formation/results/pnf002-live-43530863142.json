@@ -1,0 +1,362 @@
+{
+  "cases": [
+    {
+      "provenance": {
+        "kind": "procedural",
+        "rule": "PCG64-dyadic-coefficients",
+        "seed": 31
+      },
+      "transfer": {
+        "capsule_bytes": 218917,
+        "chunk_count": 4,
+        "chunk_limit": 65536,
+        "durable_recovery_claimed": false,
+        "maximum_transport_frame_bytes": 262144,
+        "receiver": {
+          "capsule_sha256": "0188ea9cecf0df08a6a126e3ebf46cf0a8100e0b64d0343b1159eda3b445602d",
+          "chunks": 4,
+          "implementation_digest": "f113ff4b4e25557ca9b2bbf4cee429ddc45449b6fc94efc5f7fc802c84dd0a41",
+          "receiver_pid": 2907,
+          "report": {
+            "activation": "relu",
+            "capsule_bytes": 218917,
+            "capsule_sha256": "0188ea9cecf0df08a6a126e3ebf46cf0a8100e0b64d0343b1159eda3b445602d",
+            "coefficient_law": {
+              "coefficient_comparison": "exact-binary32-in-binary64",
+              "floating_point_bitwise_equivalence_claimed": false,
+              "incoming_neurons_checked": 2048,
+              "kernel_accepted": false,
+              "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+              "outgoing_coefficients_checked": 8192,
+              "status": "passed"
+            },
+            "generated_digest": "4ce282bf3e41c91c8b2a801036aba0722bd9ef2bb8b1fc8c9142ccc22a481015",
+            "generated_dimensions": [
+              8,
+              2048,
+              8
+            ],
+            "generated_outputs": [
+              [
+                -1.58251953125,
+                -2.1954345703125,
+                1.70269775390625
+              ],
+              [
+                -0.775634765625,
+                -0.53759765625,
+                -0.42022705078125
+              ]
+            ],
+            "kernel_accepted": false,
+            "max_absolute_error": 0.0,
+            "output_indices": [
+              0,
+              4,
+              7
+            ],
+            "probe_count": 2,
+            "schema": "ifs.neural-receiver-verification.v1",
+            "source_digest": "40d3dbf00500a7104bd6a6715e8786cec11fd2d2670b95d70d4a66f0cc53611f",
+            "source_dimensions": [
+              8,
+              1024,
+              8
+            ],
+            "source_outputs": [
+              [
+                -1.58251953125,
+                -2.1954345703125,
+                1.70269775390625
+              ],
+              [
+                -0.775634765625,
+                -0.53759765625,
+                -0.42022705078125
+              ]
+            ],
+            "source_provenance_status": "sender-declared-and-content-bound; not independently re-observed",
+            "status": "verified"
+          },
+          "request_id": "2f22c4e070d449a9ac0d726c0083438f",
+          "source_certificate_sha256": "21ddab1816605fc2775620ed85a10e02cc509a8367714223745508d394468ae4"
+        },
+        "receiver_certificate_sha256": "4488752366b6431504f413be703359b10e48135120b2c25c14e2713819dd1fc5",
+        "receiver_pid": 2907,
+        "request_id": "2f22c4e070d449a9ac0d726c0083438f",
+        "same_physical_host": true,
+        "sender_pid": 2900,
+        "shared_parameter_file_used": false,
+        "source_certificate_sha256": "21ddab1816605fc2775620ed85a10e02cc509a8367714223745508d394468ae4",
+        "transport": "E-CPU ReliableChannel over mutual TLS"
+      }
+    },
+    {
+      "provenance": {
+        "kind": "procedural",
+        "rule": "PCG64-dyadic-coefficients",
+        "seed": 31
+      },
+      "transfer": {
+        "capsule_bytes": 218927,
+        "chunk_count": 4,
+        "chunk_limit": 65536,
+        "durable_recovery_claimed": false,
+        "maximum_transport_frame_bytes": 262144,
+        "receiver": {
+          "capsule_sha256": "0f0453c0c49ccf38592a715423da8dc726b33374169804c99843a93e4a17d43f",
+          "chunks": 4,
+          "implementation_digest": "f113ff4b4e25557ca9b2bbf4cee429ddc45449b6fc94efc5f7fc802c84dd0a41",
+          "receiver_pid": 2913,
+          "report": {
+            "activation": "gelu_tanh",
+            "capsule_bytes": 218927,
+            "capsule_sha256": "0f0453c0c49ccf38592a715423da8dc726b33374169804c99843a93e4a17d43f",
+            "coefficient_law": {
+              "coefficient_comparison": "exact-binary32-in-binary64",
+              "floating_point_bitwise_equivalence_claimed": false,
+              "incoming_neurons_checked": 2048,
+              "kernel_accepted": false,
+              "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+              "outgoing_coefficients_checked": 8192,
+              "status": "passed"
+            },
+            "generated_digest": "9686aa9b708baa4b8c1818cd9581e0a95dc0178d205f032070e7fba1f1ede11e",
+            "generated_dimensions": [
+              8,
+              2048,
+              8
+            ],
+            "generated_outputs": [
+              [
+                -0.906061802335641,
+                -1.2974428885740625,
+                2.0292255159408548
+              ],
+              [
+                0.38245651112694345,
+                0.44439093114329,
+                -0.049205448664767365
+              ]
+            ],
+            "kernel_accepted": false,
+            "max_absolute_error": 0.0,
+            "output_indices": [
+              0,
+              4,
+              7
+            ],
+            "probe_count": 2,
+            "schema": "ifs.neural-receiver-verification.v1",
+            "source_digest": "ac0af0cdc52931bd45c9fb924a44719d31a81a909933ba6fcdf9307930e2bf9d",
+            "source_dimensions": [
+              8,
+              1024,
+              8
+            ],
+            "source_outputs": [
+              [
+                -0.906061802335641,
+                -1.2974428885740625,
+                2.0292255159408548
+              ],
+              [
+                0.38245651112694345,
+                0.44439093114329,
+                -0.049205448664767365
+              ]
+            ],
+            "source_provenance_status": "sender-declared-and-content-bound; not independently re-observed",
+            "status": "verified"
+          },
+          "request_id": "1e8c9f03eacb4e81ad07714f972b092e",
+          "source_certificate_sha256": "8a651d96730f62e8a5131b1daf851854baabf9ee7df204a8f6ca40c8249da445"
+        },
+        "receiver_certificate_sha256": "46e310ebe6df762ae6e49ca4c0cd25fac8bc8f089d15a0eb0f1b469f8998cbe3",
+        "receiver_pid": 2913,
+        "request_id": "1e8c9f03eacb4e81ad07714f972b092e",
+        "same_physical_host": true,
+        "sender_pid": 2900,
+        "shared_parameter_file_used": false,
+        "source_certificate_sha256": "8a651d96730f62e8a5131b1daf851854baabf9ee7df204a8f6ca40c8249da445",
+        "transport": "E-CPU ReliableChannel over mutual TLS"
+      }
+    },
+    {
+      "provenance": {
+        "kind": "observed-selected-huggingface-payloads",
+        "license_id": "mit",
+        "repository": "openai-community/gpt2",
+        "revision": "607a30d783dfa663caf39e06633721c8d4cfcd7e",
+        "source_graph_digest": "a8c52b85bf8110108a2438c1bfda03f04b27ffac75241d4fa8ba7783ca841c3a",
+        "source_graph_operation_count": 150,
+        "source_vgi_kernel_accepted": 0,
+        "source_vgi_unverified_obligations": 654,
+        "tensor_evidence": [
+          {
+            "absolute_byte_range": [
+              115560403,
+              124997586
+            ],
+            "dtype": "F32",
+            "name": "h.0.mlp.c_fc.weight",
+            "payload_sha256": "534d05221a3d2e0b68a64c7b26e58fb39afcfd20adf1c6bef55bd100adb834a6",
+            "payload_sha256_scope": "complete-selected-tensor-payload",
+            "shape": [
+              768,
+              3072
+            ],
+            "shard": "model.safetensors",
+            "shard_header_sha256": "6201ba7dfaf69457803f802c211019e95f0c1a99a1f5387dcb53e500e5e30e85",
+            "shard_size_bytes": 548105171,
+            "size_bytes": 9437184
+          },
+          {
+            "absolute_byte_range": [
+              18956243,
+              18968530
+            ],
+            "dtype": "F32",
+            "name": "h.0.mlp.c_fc.bias",
+            "payload_sha256": "d71a74a230d32edd0a3e2562ba65a4cbc8ca1d1ff918a5f53468b0d096ad0086",
+            "payload_sha256_scope": "complete-selected-tensor-payload",
+            "shape": [
+              3072
+            ],
+            "shard": "model.safetensors",
+            "shard_header_sha256": "6201ba7dfaf69457803f802c211019e95f0c1a99a1f5387dcb53e500e5e30e85",
+            "shard_size_bytes": 548105171,
+            "size_bytes": 12288
+          },
+          {
+            "absolute_byte_range": [
+              531590099,
+              541027282
+            ],
+            "dtype": "F32",
+            "name": "h.0.mlp.c_proj.weight",
+            "payload_sha256": "f4c17b36a51b9ae77a93ee6dd767512626076da8295342d8a760cf4aa0880993",
+            "payload_sha256_scope": "complete-selected-tensor-payload",
+            "shape": [
+              3072,
+              768
+            ],
+            "shard": "model.safetensors",
+            "shard_header_sha256": "6201ba7dfaf69457803f802c211019e95f0c1a99a1f5387dcb53e500e5e30e85",
+            "shard_size_bytes": 548105171,
+            "size_bytes": 9437184
+          },
+          {
+            "absolute_byte_range": [
+              263347155,
+              263350226
+            ],
+            "dtype": "F32",
+            "name": "h.0.mlp.c_proj.bias",
+            "payload_sha256": "10a0e86f0d29a95ba16fa1a2cf5cca3ccc9b8c5cc21e82ed3169f40101e459be",
+            "payload_sha256_scope": "complete-selected-tensor-payload",
+            "shape": [
+              768
+            ],
+            "shard": "model.safetensors",
+            "shard_header_sha256": "6201ba7dfaf69457803f802c211019e95f0c1a99a1f5387dcb53e500e5e30e85",
+            "shard_size_bytes": 548105171,
+            "size_bytes": 3072
+          }
+        ]
+      },
+      "transfer": {
+        "capsule_bytes": 44107195,
+        "chunk_count": 674,
+        "chunk_limit": 65536,
+        "durable_recovery_claimed": false,
+        "maximum_transport_frame_bytes": 262144,
+        "receiver": {
+          "capsule_sha256": "2536c5142fae1db9de2c8550d6c1ba65e8658bb57cd40caa10e08753472d335b",
+          "chunks": 674,
+          "implementation_digest": "f113ff4b4e25557ca9b2bbf4cee429ddc45449b6fc94efc5f7fc802c84dd0a41",
+          "receiver_pid": 2920,
+          "report": {
+            "activation": "gelu_tanh",
+            "capsule_bytes": 44107195,
+            "capsule_sha256": "2536c5142fae1db9de2c8550d6c1ba65e8658bb57cd40caa10e08753472d335b",
+            "coefficient_law": {
+              "coefficient_comparison": "exact-binary32-in-binary64",
+              "floating_point_bitwise_equivalence_claimed": false,
+              "incoming_neurons_checked": 4096,
+              "kernel_accepted": false,
+              "meaning": "algebraic-function-preservation-under-shared-elementwise-activation",
+              "outgoing_coefficients_checked": 2359296,
+              "status": "passed"
+            },
+            "generated_digest": "901376007bd5792d39354636ad4fdea50bc81272d2875fba095dac5869b68054",
+            "generated_dimensions": [
+              768,
+              4096,
+              768
+            ],
+            "generated_outputs": [
+              [
+                3.4358817312063064,
+                1.891078417479726,
+                6.550091113234248
+              ],
+              [
+                -2.947720887732392,
+                1.0328397410272776,
+                1.5028289174700635
+              ]
+            ],
+            "kernel_accepted": false,
+            "max_absolute_error": 0.0,
+            "output_indices": [
+              0,
+              384,
+              767
+            ],
+            "probe_count": 2,
+            "schema": "ifs.neural-receiver-verification.v1",
+            "source_digest": "cf6f7f38ee402129f27304b758520ceebde0896466c8fd9fe7c0f259b92d661c",
+            "source_dimensions": [
+              768,
+              3072,
+              768
+            ],
+            "source_outputs": [
+              [
+                3.4358817312063064,
+                1.891078417479726,
+                6.550091113234248
+              ],
+              [
+                -2.947720887732392,
+                1.0328397410272776,
+                1.5028289174700635
+              ]
+            ],
+            "source_provenance_status": "sender-declared-and-content-bound; not independently re-observed",
+            "status": "verified"
+          },
+          "request_id": "d8c262a63da24e63a4c235bcfa89b36d",
+          "source_certificate_sha256": "a9dfa20643c8f67c34ad15edcf0873324b617b28512006dbaa8991fdb74fb16f"
+        },
+        "receiver_certificate_sha256": "d4f99e4424d912fd122cf970ca0d992cbb18bef8b9b2de1684c504094a9c79a6",
+        "receiver_pid": 2920,
+        "request_id": "d8c262a63da24e63a4c235bcfa89b36d",
+        "same_physical_host": true,
+        "sender_pid": 2900,
+        "shared_parameter_file_used": false,
+        "source_certificate_sha256": "a9dfa20643c8f67c34ad15edcf0873324b617b28512006dbaa8991fdb74fb16f",
+        "transport": "E-CPU ReliableChannel over mutual TLS"
+      }
+    }
+  ],
+  "environment": {
+    "numpy": "2.4.6",
+    "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+    "python": "3.11.18"
+  },
+  "persisted_final_capsule": true,
+  "schema": "ifs.portable-neural-transfer-experiment.v1",
+  "scope": "separate processes over actual loopback mTLS sockets; one physical host"
+}
