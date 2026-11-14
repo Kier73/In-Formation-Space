@@ -1,0 +1,78 @@
+name: PON-001 public passive orbit and temporary host navigation
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/passive-orbit-cache/**'
+      - 'experiments/convergent-ground-fabric/convergent_fabric.py'
+      - '.github/workflows/pon001-public-passive-orbit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/passive-orbit-cache/**'
+      - 'experiments/convergent-ground-fabric/convergent_fabric.py'
+      - '.github/workflows/pon001-public-passive-orbit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  passive-host-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - name: PON-001 verified public fixture, leases, alternate routes and malicious object tests
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s experiments/passive-orbit-cache -p 'test_passive_orbit.py' -v
+          python -m py_compile experiments/passive-orbit-cache/passive_orbit.py
+      - name: Existing CAG-001 permutation and convergence regressions
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s experiments/convergent-ground-fabric -p 'test_convergent_fabric.py' -v
+
+  public-immutable-get-and-lease:
+    needs: passive-host-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Fetch pinned objects through real public HTTPS and temporary lease expiration
+        env:
+          PUBLIC_COMMIT: '${{ github.event.pull_request.head.sha || github.sha }}'
+        run: |
+          set -euo pipefail
+          test -n "$PUBLIC_COMMIT"
+          python experiments/passive-orbit-cache/run_public_passive.py \
+            --public-ref "$PUBLIC_COMMIT" \
+            --output pon001-real-public-route.json | tee pon001-stdout.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('pon001-real-public-route.json').read_text())
+          assert r['status']=='public-https-and-expiring-holder-navigation-verified'
+          assert r['mixed_route']['value']==r['after_expiration']['value']==44
+          assert r['actual_public_https_get'] is True
+          assert r['after_expiration']['source_by_semantic_id']['final']=='public'
+          assert r['mixed_route']['reconstruction_digest']==r['after_expiration']['reconstruction_digest']
+          assert r['public_host_executed_operations'] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pon001-verified-public-passive-routes
+          path: |
+            pon001-real-public-route.json
+            pon001-stdout.json
+          if-no-files-found: error
