@@ -1,0 +1,124 @@
+name: USM-007 fenced model result publication via existing IFS route epochs
+
+on:
+  push:
+    paths:
+      - 'bridges/model-native-operations/model_route_fencing.py'
+      - 'bridges/model-native-operations/test_model_route_fencing.py'
+      - 'bridges/model-native-operations/README_USM007.md'
+      - '.github/workflows/model-route-fencing.yml'
+  pull_request:
+    paths:
+      - 'bridges/model-native-operations/model_route_fencing.py'
+      - 'bridges/model-native-operations/test_model_route_fencing.py'
+      - 'bridges/model-native-operations/README_USM007.md'
+      - '.github/workflows/model-route-fencing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  remote-quorum-model-producer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout exact model-operated E-CPU distributed-lineage implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 84f42cffad6548bb772940ffd80331dcb76db122
+          path: ecpu
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install E-CPU in producer only
+        run: python -m pip install -e ecpu
+      - name: Run real model-operated E-CPU receiver recovery and native remote lineage
+        run: |
+          cd ecpu
+          python -m examples.model_distributed_lineage demo --output ../usm006-original-evidence.json
+      - name: Select original recovered receiver operation evidence for publication
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          whole = json.loads(Path('usm006-original-evidence.json').read_text())
+          assert whole['single_physical_failure_domain'] is True
+          assert whole['authorities_survived_receiver_restart'] is True
+          assert whole['offline_reconstructed_quorum_generation'] == 2
+          evidence = whole['recovered_model']
+          assert evidence['result']['semantic_reentries'] == 0
+          Path('usm007-recovered-ground-source.json').write_text(
+              json.dumps(evidence, sort_keys=True, indent=2) + '\n'
+          )
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: usm007-original-model-operation-evidence
+          path: usm007-recovered-ground-source.json
+          if-no-files-found: error
+
+  two-contender-fencing-observer:
+    runs-on: ubuntu-latest
+    needs: remote-quorum-model-producer
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout E-CPU type dependency for existing IFS route-epoch ledger
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 84f42cffad6548bb772940ffd80331dcb76db122
+          path: ecpu
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install route-epoch ledger dependencies; do not run E-CPU model
+        run: python -m pip install -e ecpu
+      - name: Test genuine competing process ownership and forged evidence cases
+        run: >-
+          python -m unittest discover
+          -s bridges/model-native-operations
+          -p 'test_model_route_fencing.py' -v
+      - name: Fetch producer evidence from distinct hosted job
+        uses: actions/download-artifact@v4
+        with:
+          name: usm007-original-model-operation-evidence
+          path: producer-evidence
+      - name: Independently reconstruct Ground, then race two replacement publishers
+        run: >-
+          python bridges/model-native-operations/model_route_fencing.py demo
+          --source producer-evidence/usm007-recovered-ground-source.json
+          --output usm007-fenced-model-result.json
+      - name: Check exactly one owner claim and one durable execution authorization
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          doc = json.loads(Path('usm007-fenced-model-result.json').read_text())
+          expected = hashlib.sha256(json.dumps(
+              {k:v for k,v in doc.items() if k != 'report_digest'},
+              sort_keys=True, separators=(',', ':'), allow_nan=False
+          ).encode()).hexdigest()
+          assert doc['report_digest'] == expected
+          assert doc['prior_model_recovery_verified'] is True
+          assert doc['one_owner_claim'] is True
+          assert doc['one_execution_authorization'] is True
+          assert doc['stale_receiver_refused'] is True
+          assert sorted(x['outcome'] for x in doc['contenders']) == [
+              'authorized', 'superseded'
+          ]
+          assert doc['single_host_authority'] is True
+          assert doc['remote_quorum_fencing_verified'] is False
+          print('Model Ground publication admitted under exactly one IFS route owner')
+          PY
+      - name: Retain separate route fencing experiment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: usm007-fenced-model-publication
+          path: usm007-fenced-model-result.json
+          if-no-files-found: error
