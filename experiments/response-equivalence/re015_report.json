@@ -1,0 +1,15 @@
+{
+  "after_revocation": "revoked",
+  "after_rotation": "conditionally_admitted",
+  "compromised_old_key_can_revoke": false,
+  "experiment": "RE-015",
+  "history_length": 2,
+  "independent_external_witnesses_are_fixture_roles": true,
+  "initial": "conditionally_admitted",
+  "physical_authority_attested": false,
+  "reconstructed_without_issuer_key": true,
+  "witnesses": [
+    "W1",
+    "W2"
+  ]
+}
