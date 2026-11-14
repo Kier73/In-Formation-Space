@@ -250,10 +250,10 @@ def verify_receipt(root: Path) -> dict[str, Any]:
     require(original.get("publisher") == origin, "receiver source authentication receipt differs")
     expected = compute(source_inputs(root))
     ecpu = original.get("ecpu", {})
-    require(ecpu.get("first_action") == "ALLOW"
+    require(ecpu.get("first_action") == "allow"
             and ecpu.get("first_executed") is True
             and ecpu.get("replayed") is True
-            and ecpu.get("denied_action") == "DENY"
+            and ecpu.get("denied_action") == "deny"
             and ecpu.get("denied_executed") is False
             and ecpu.get("handler_invocations") == 1
             and ecpu.get("journal_verified") is True,
