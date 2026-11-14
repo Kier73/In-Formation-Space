@@ -57,6 +57,8 @@ class DetectionCalibrationTests(unittest.TestCase):
         self.assertEqual(a['A'],b['A'])
         self.assertEqual(a['B'],b['B'])
         self.assertLess(a['joint'], b['joint'])
+        self.assertGreaterEqual(a['joint'],upper_binomial_miss(0,60))
+        self.assertGreaterEqual(b['joint'],upper_binomial_miss(12,60))
         self.assertNotEqual(b['joint'], b['A']*b['B'])
         self.assertFalse(common['independence_between_observers_verified'])
 
