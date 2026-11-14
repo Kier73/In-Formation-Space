@@ -6,6 +6,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
+# Existing RE workflows use only the standard library. RE-015's dedicated CI
+# installs cryptography and MUST exercise these tests. Optional discoverers
+# without the dependency skip this module instead of failing unrelated suites.
+try:
+    import cryptography  # noqa: F401
+except ImportError:
+    raise unittest.SkipTest('RE-015 Ed25519 tests require cryptography; run the dedicated RE-015 workflow')
+
 from credential_continuity import (
     ContinuityError, _base_context, _event_body, append_journal, append_replica,
     checkpoint_body, demo, empty_ledger, enrollment, export_journal, fixture,
