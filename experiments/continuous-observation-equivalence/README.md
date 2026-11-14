@@ -676,3 +676,67 @@ lake env lean COE014RealLink.lean
 ~~~
 
 The next frontier is authentic source signatures or independent authority claims, verified key distribution, a formal refinement relation between the pure-Lean SHA algorithm and an external cryptographic specification, and separately numerical execution/error contracts.
+
+
+## COE-015 — Ed25519 signed source manifests, key rotation and receiver-controlled authority
+
+COE-014 kernel-checks the exact mathematical meaning of a canonical certificate and independently recomputes its original nested network SHA-256 against a receiver-owned allowlist. This establishes **integrity under an approved digest policy**, but it does not determine whether a purported origin actually authorized those digests.
+
+COE-015 adds a separate **Go standard-library Ed25519 signature verification gate** for an explicitly identified source manifest. The cryptographic signature checker is a separate executable, **not a Lean proof of Ed25519**. The mathematical COE-014 SHA-256 and all-real atlas proof chain remains independent and unchanged.
+
+### Signed object and scope of authorization
+
+The signed body is a canonical JSON manifest containing a domain-separated schema, an authority identifier, a monotonically increasing manifest version, and the complete model-ID-to-network-SHA-256 mapping. Signatures cover a fixed protocol prefix followed by the complete canonical manifest bytes. The signed-envelope verifier rejects duplicate keys, unknown fields, altered signatures and noncanonical encodings.
+
+Most importantly, the **public keys are not taken from the signed envelope**. The receiver supplies a distinct trust policy with an authority name, authorized Ed25519 public keys, their active/revoked status, per-key valid version ranges, the required signature threshold, a minimum permitted manifest version, and independently pinned expected network SHA-256 identities.
+
+The verifier requires all authorized signatures to be valid, from distinct allowed signers, sorted by key ID, and to satisfy the configured quorum. Unknown, revoked, not-yet-active or expired signing keys cause rejection even when the cryptographic signature verifies. A previously signed lower-version manifest cannot pass a policy whose minimum version has advanced. Altering a policy requires independent receiver review and deployment; the manifest itself cannot rotate trust anchors.
+
+The exact original certificate bytes are checked separately. The independent Go verifier recomputes each contained network SHA-256 from the canonical original network object, checks its claimed digest, and compares it with **both** the signed manifest and the receiver policy. File-set substitutions, modified model values and incorrect digest fields are rejected.
+
+### CI demonstrates behavior, not real-world ownership
+
+The new signed-manifest-producer job creates a sample two-signature Ed25519 manifest from the same original certificates sent to COE's existing mathematical and independent byte checkers. It uses **public deterministic testing seeds**. The associated demo-policy.json contains only the corresponding public keys, with one earlier key explicitly revoked and two current keys required at a 2-of-2 threshold for version 3.
+
+The separate signed-manifest-verifier CI job receives this untrusted signed artifact, checks it using the policy independently checked out of the repository, then runs adversarial Go tests. These cover wrong and duplicate signers, forged or corrupted signatures, unauthorized key replacement, revoked keys, premature/expired keys, insufficient quorum, manifest tampering, policy substitutions, network-byte tampering, certificate-file substitutions, rollback and version rotation.
+
+A deliberate safety control requires the CLI to **reject the public demonstration policy by default**. Test-only keys work only if the receiving operator passes the explicit demonstration opt-in flag. The CLI returns an independent receipt with the signers, authority label, policy mode, checked source network hashes and explicit Ground-not-admitted status. It never claims that the demonstration proves an external human or organization controls a source key.
+
+No private production signing key is included in the repository. To use the verifier outside this demonstration, an operator must furnish independently managed private keys for signing and a receiver-owned, reviewed production trust policy containing the corresponding public keys. Trust-anchor distribution, account ownership, key custody, transparency logs and external identity authentication are out of scope here.
+
+### Running COE-015
+
+The demo producer and verifier use Go 1.23 standard-library dependencies only:
+
+~~~bash
+cd experiments/continuous-observation-equivalence
+python produce_certificates.py certificate-artifacts
+
+cd coe015_auth
+go test -count=1 -v ./...
+go run ./cmd/demo ../certificate-artifacts ../demo-manifest-artifacts
+
+# This must FAIL: test keys are not production authority.
+go run ./cmd/verify \
+  -policy demo-policy.json \
+  -signed ../demo-manifest-artifacts/signed-manifest.json \
+  -certs ../certificate-artifacts
+
+# Explicitly authorized test-only verification.
+go run ./cmd/verify \
+  -policy demo-policy.json \
+  -signed ../demo-manifest-artifacts/signed-manifest.json \
+  -certs ../certificate-artifacts \
+  -allow-demo \
+  -report demo-verifier-receipt.json
+~~~
+
+### Cryptographic and mathematical limits
+
+This experiment verifies Ed25519 signatures using Go's maintained standard-library implementation. It does **not** formally refine Go's cryptography implementation in Lean or prove the computational hardness assumptions behind Ed25519. It does not independently attest a human's identity or grant computational Ground authority.
+
+A valid signed digest proves that a holder of an **authorized private key** signed the versioned source manifest, provided the receiver's policy and signature implementation are trustworthy. Without an independently provisioned trust anchor, it cannot establish who that key holder is.
+
+The COE-015 signer receipt is an additional provenance contract which can be required alongside the existing COE-014 kernel-checked byte-level SHA-256 and all-real mathematical result. Signing does not replace the mathematical checks, and the signed manifest does not authenticate the full semantic_atlas fingerprint or physical GPU/CPU execution.
+
+The natural next frontier is a combined independently checkable admission receipt that binds the Go Ed25519 authorization result and Lean's source SHA-256/all-real proof to the **same exact received network bytes**, followed by a rigorous externally authenticated key-rotation workflow. The test-only key material must never be treated as an external signing authority.
