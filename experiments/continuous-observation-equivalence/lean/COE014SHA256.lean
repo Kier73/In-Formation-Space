@@ -132,7 +132,7 @@ def digestHex (bytes : ByteList) : Option ByteList :=
 
 /-- SHA-256 rejects raw input that is not a list of valid octets. -/
 example : pad [256] = none := by decide +kernel
-example : pad [0, 255] |>.isSome = true := by decide +kernel
+example : (pad [0, 255]).isSome = true := by decide +kernel
 example : (pad []).map Array.size = some 64 := by decide +kernel
 example : (pad (List.replicate 56 0)).map Array.size = some 128 := by decide +kernel
 example : hexEncode [0, 15, 16, 255] = [48,48,48,102,49,48,102,102] := by
