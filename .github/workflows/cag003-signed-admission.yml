@@ -1,0 +1,254 @@
+name: CAG-003 signed dual-transport Ground admission through E-CPU and VGI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/convergent-ground-fabric/cag003/**"
+      - ".github/workflows/cag003-signed-admission.yml"
+  pull_request:
+    paths:
+      - "experiments/convergent-ground-fabric/cag003/**"
+      - ".github/workflows/cag003-signed-admission.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Ed25519 verification dependency
+        run: python -m pip install "cryptography>=43,<47"
+      - name: Run signed publisher attack and strict data-shape tests
+        run: |
+          python -m unittest discover -s experiments/convergent-ground-fabric/cag003 -p 'test_signed_ground.py' -v
+          python -m unittest discover -s experiments/convergent-ground-fabric/cag002 -p 'test_substrates.py' -v
+          python -m py_compile experiments/convergent-ground-fabric/cag003/signed_ground.py experiments/convergent-ground-fabric/cag003/admission.py
+
+  network_publisher:
+    needs: tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: false
+      - name: Build known CAG-002 libp2p host
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd experiments/convergent-ground-fabric/cag002/p2p
+          go mod tidy
+          go build -trimpath -o "$RUNNER_TEMP/cag003-p2p" .
+      - name: Install signed evidence and JetStream client dependencies
+        run: python -m pip install "cryptography>=43,<47" "nats-py==2.16.0"
+      - name: Start isolated file-backed NATS JetStream broker
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cag003-nats-data"
+          docker run -d --name "cag003-nats-${GITHUB_RUN_ID}" \
+            -p 127.0.0.1:4222:4222 \
+            -v "$RUNNER_TEMP/cag003-nats-data:/data" \
+            nats:2.11.10 -js -sd /data
+          for attempt in $(seq 1 60); do
+            if (echo > /dev/tcp/127.0.0.1/4222) >/dev/null 2>&1; then exit 0; fi
+            sleep 0.25
+          done
+          docker logs "cag003-nats-${GITHUB_RUN_ID}"
+          exit 1
+      - name: Capture two real protocol deliveries and issue signed publisher intent
+        shell: bash
+        run: |
+          set -euo pipefail
+          python experiments/convergent-ground-fabric/cag002/substrates.py run \
+            --directory evidence/cag003 --p2p-binary "$RUNNER_TEMP/cag003-p2p"
+          python experiments/convergent-ground-fabric/cag003/signed_ground.py issue \
+            --directory evidence/cag003
+          python experiments/convergent-ground-fabric/cag003/signed_ground.py verify \
+            --directory evidence/cag003
+      - name: Attest publisher trust bootstrap on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag003/publisher-trust.json
+      - name: Attest signed semantic commitment on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag003/signed-intent.json
+      - name: Attest actual transport reconstruction report on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag003/report.json
+      - name: Upload captured network and cryptographic inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cag003-publisher-transport-evidence
+          if-no-files-found: error
+          retention-days: 90
+          path: evidence/cag003/**
+      - name: Stop local NATS broker
+        if: always()
+        run: docker rm -f "cag003-nats-${GITHUB_RUN_ID}" || true
+
+  receiver_host:
+    needs: [tests, network_publisher]
+    if: needs.tests.result == 'success' && needs.network_publisher.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out pinned E-CPU receiver runtime
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+      - name: Check out pinned VGI Ground verifier
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install actual E-CPU and VGI implementations and signature checker
+        run: |
+          python -m pip install "cryptography>=43,<47"
+          python -m pip install -e external/E-CPU
+          python -m pip install -e external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag003-publisher-transport-evidence
+          path: evidence/cag003
+      - name: Install recent GitHub CLI for producer provenance check
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Check GitHub-provenance trust root, signature and producer report
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in publisher-trust.json signed-intent.json report.json; do
+            gh attestation verify "evidence/cag003/$name" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag003-signed-admission.yml \
+              --source-ref refs/heads/main \
+              --deny-self-hosted-runners --format json > /dev/null
+          done
+      - name: Verify publisher then execute only through real receiver-owned Hypervisor
+        run: |
+          python experiments/convergent-ground-fabric/cag003/admission.py admit \
+            --directory evidence/cag003
+          python experiments/convergent-ground-fabric/cag003/admission.py verify \
+            --directory evidence/cag003
+      - name: Attest admitted receiver receipt on main
+        if: github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag003/admission-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cag003-receiver-admission-report
+          path: evidence/cag003/admission-report.json
+          if-no-files-found: error
+          retention-days: 90
+
+  verifier_host:
+    needs: [tests, network_publisher, receiver_host]
+    if: needs.tests.result == 'success' && needs.network_publisher.result == 'success' && needs.receiver_host.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/Virtual-Ground-Interpreter
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install verifier-only dependencies
+        run: |
+          python -m pip install "cryptography>=43,<47"
+          python -m pip install -e external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag003-publisher-transport-evidence
+          path: evidence/cag003
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag003-receiver-admission-report
+          path: evidence/cag003
+      - name: Install GitHub CLI for independent signer verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
+          sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+          sudo apt-get update && sudo apt-get install --yes gh && gh --version
+      - name: Verify source trust, signature, transport and receiver attestations
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in publisher-trust.json signed-intent.json report.json admission-report.json; do
+            gh attestation verify "evidence/cag003/$name" \
+              --repo Kier73/In-Formation-Space \
+              --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag003-signed-admission.yml \
+              --source-ref refs/heads/main \
+              --deny-self-hosted-runners --format json > /dev/null
+          done
+      - name: Independently validate source signature, finite CAG and VGI evidence
+        run: |
+          python experiments/convergent-ground-fabric/cag003/admission.py verify \
+            --directory evidence/cag003
+      - name: Attest off-host verification of the receiver receipt
+        uses: actions/attest@v4
+        with:
+          subject-path: evidence/cag003/admission-report.json
