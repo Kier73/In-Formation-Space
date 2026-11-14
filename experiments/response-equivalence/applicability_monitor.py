@@ -142,13 +142,35 @@ def plan(reg: Mapping[str,Any], *, window: int=1, mode: str='baseline',
                                                 for i in range(WINDOW_SIZE)]})
 
 
+def observer_plan_preview(rec: Any, reg: Mapping[str,Any]) -> dict[str,Any]:
+    """Only public shape/digest check. Source HMAC admission is verifier-only.
+
+    A scoped A/B producer cannot verify S's MAC without learning S's private
+    signing key. The producer may prepare a provisional response, while the
+    independent verifier later verifies S's MAC using a separately held key.
+    """
+    if not isinstance(rec,dict) or set(rec)!=CLAIM_FIELDS | {'mac','digest'}:
+        raise ApplicabilityError('untrusted source plan envelope invalid')
+    if (rec['schema']!=SCHEMA or rec['kind']!='monitor_plan' or rec['role']!='S' or
+            rec['challenge']!=reg['challenge'] or rec['key_id']!=reg['key_ids']['S'] or
+            not isinstance(rec['body'],dict) or
+            not isinstance(rec['mac'],str) or len(rec['mac'])!=64 or
+            rec['digest']!=sha({k:v for k,v in rec.items() if k!='digest'})):
+        raise ApplicabilityError('untrusted source plan digest/identity invalid')
+    return rec['body']
+
+
 def observer(reg: Mapping[str,Any], plan_receipt: Mapping[str,Any], role: str,
              *, sensor: str|None=None, firmware: str|None=None,
              miss_slots: tuple[int,...]=(), late_slots: tuple[int,...]=(),
-             refused_slots: tuple[int,...]=()) -> dict[str,Any]:
+             refused_slots: tuple[int,...]=(),
+             defer_source_mac_to_verifier: bool=False) -> dict[str,Any]:
     if role not in ('A','B'):
         raise ApplicabilityError('invalid observer role')
-    plan_body=verify_signed(plan_receipt,reg,'S','monitor_plan')
+    if type(defer_source_mac_to_verifier) is not bool:
+        raise ApplicabilityError('deferred source verification flag must be Boolean')
+    plan_body=(observer_plan_preview(plan_receipt,reg) if defer_source_mac_to_verifier else
+               verify_signed(plan_receipt,reg,'S','monitor_plan'))
     if any(type(i) is not int or i not in range(WINDOW_SIZE)
            for i in (*miss_slots,*late_slots,*refused_slots)):
         raise ApplicabilityError('invalid declared fault slot')
