@@ -6,13 +6,13 @@ on:
       - 'bridges/observation-equivalence/**'
       - 'bridges/observation-path/witness_cost_binding.py'
       - 'bridges/observation-path/test_witness_cost_binding.py'
-      - 'bridges/observation-path/witness_cost_binding.py'
-      - 'bridges/observation-path/test_witness_cost_binding.py'
       - '.github/workflows/observation-witness-navigation.yml'
   push:
     branches: [main]
     paths:
       - 'bridges/observation-equivalence/**'
+      - 'bridges/observation-path/witness_cost_binding.py'
+      - 'bridges/observation-path/test_witness_cost_binding.py'
       - '.github/workflows/observation-witness-navigation.yml'
   workflow_dispatch:
 
