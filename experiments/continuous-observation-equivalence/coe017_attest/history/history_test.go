@@ -57,7 +57,7 @@ func buildFixture(t *testing.T)fixture{
   Schema:"ifs.coe017.receiver-policy/v1",Mode:"test-only",
   Issuer:"ifs-coe017-demo-verifier",Context:"continuous-observation-equivalence",
   MinimumSequence:3,Threshold:2,Keys:[]attest.Key{
-   {ID:"demo-vr-31",Algorithm:"ed25519",PublicKey:testingKey(0x31),State:"revoked",ValidFrom:1},
+   {ID:"demo-vr-31",Algorithm:"ed25519",PublicKey:testingKey(0x63),State:"revoked",ValidFrom:1},
    {ID:"demo-vr-41",Algorithm:"ed25519",PublicKey:testingKey(0x41),State:"active",ValidFrom:3},
    {ID:"demo-vr-52",Algorithm:"ed25519",PublicKey:testingKey(0x52),State:"active",ValidFrom:3},
   },
@@ -123,7 +123,7 @@ func TestTwoIndependentReplaysAndExplicitlyBoundedClaims(t *testing.T){
     a.RealWorldIdentityAuthenticated||a.GroundAdmitted||
     a.JournalCount!=3||a.FinalSequence!=5||
     len(a.ActiveSigners)!=2||a.ActiveSigners[0]!="demo-vr-41"||
-    a.ActiveSigners[1]!="demo-vr-63"{
+    a.ActiveSigners[1]!="demo-vr-74"{
     t.Fatalf("unexpected reconstructed authority: %+v",a)
  }
 }
@@ -162,7 +162,7 @@ func TestNegativeMutations(t *testing.T){
   {"new-policy-changes-network-pin",func(f *fixture){f.journal.Entries[1].Decision.NextPolicy.ExpectedNetworkSHA256["identity"]=strings.Repeat("0",64)}},
   {"unrevoked-retired-signer",func(f *fixture){f.journal.Entries[2].OldSignatures=DemoSign(f.journal.Entries[2].Decision,GovernanceDomain,0x41,0x52)}},
   {"resurrect-revoked-key",func(f *fixture){f.journal.Entries[1].Decision.NextPolicy.Keys[0].State="active"}},
-  {"replace-existing-public-key",func(f *fixture){f.journal.Entries[1].Decision.NextPolicy.Keys[1].PublicKey=testingKey(0x74)}},
+  {"replace-existing-public-key",func(f *fixture){f.journal.Entries[1].Decision.NextPolicy.Keys[1].PublicKey=testingKey(0x85)}},
   {"lower-governance-quorum",func(f *fixture){f.journal.Entries[1].Decision.NextPolicy.Threshold=1}},
   {"unscoped-revocation",func(f *fixture){f.journal.Entries[2].Decision.Reason="unknown-reason"}},
   {"wrong-evidence-hash",func(f *fixture){f.journal.Entries[0].Decision.EvidenceSHA256=strings.Repeat("f",64)}},
@@ -225,7 +225,7 @@ func TestTwoValidForksRequireWitnessAnchor(t *testing.T){
  next.MinimumSequence=5
  next.Keys=append([]attest.Key{},lastPolicy.Keys...)
  next.Keys=append(next.Keys,attest.Key{
-  ID:"demo-vr-74",Algorithm:"ed25519",PublicKey:testingKey(0x74),
+  ID:"demo-vr-85",Algorithm:"ed25519",PublicKey:testingKey(0x85),
   State:"active",ValidFrom:5,
  })
  priorBytes,e:=Canonical(fork.journal.Entries[1]);if e!=nil{t.Fatal(e)}
@@ -237,8 +237,8 @@ func TestTwoValidForksRequireWitnessAnchor(t *testing.T){
  d.Reason=""
  alternative:=Entry{
   Decision:d,
-  OldSignatures:DemoSign(d,GovernanceDomain,0x41,0x63),
-  NewSignatures:DemoSign(d,NewKeyProofDomain,0x41,0x74),
+  OldSignatures:DemoSign(d,GovernanceDomain,0x41,0x74),
+  NewSignatures:DemoSign(d,NewKeyProofDomain,0x41,0x85),
  }
  fork.journal.Entries[2]=alternative
  encoded,e:=Canonical(alternative);if e!=nil{t.Fatal(e)}
