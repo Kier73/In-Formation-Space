@@ -11,7 +11,6 @@ import json
 from pathlib import Path
 from typing import Any, Mapping
 
-from mailcpu.temporal import CausalRelation, CausalStamp, ClockDomain, TemporalContext, TemporalProfile
 from authority_reconstruction import (
     AuthorityError, _key, append, create_store, evidence_id, export, replay, sign_event,
 )
@@ -21,11 +20,13 @@ HOST_SCHEMA = 'in-formation.response-re014-ecpu/0.1'
 ROSTER = {'Q':0, 'R':0, 'W':0}
 
 
-def _clock(actor: str) -> TemporalContext:
+def _clock(actor: str):
+    from mailcpu.temporal import ClockDomain, TemporalContext, TemporalProfile
     return TemporalContext(actor, TemporalProfile(frozenset({ClockDomain.CAUSAL})), vector=dict(ROSTER))
 
 
-def _stamp(frame: Any, actor: str) -> CausalStamp:
+def _stamp(frame: Any, actor: str):
+    from mailcpu.temporal import CausalStamp
     if not isinstance(frame, dict) or frame.get('actor_id') != actor or \
         not isinstance(frame.get('causal'), dict):
         raise AuthorityError('E-CPU frame actor or causal data invalid')
@@ -83,6 +84,7 @@ def issue_host(reg: Mapping[str,Any], doc: Mapping[str,Any],
 
 def revoke_host(issued: Mapping[str,Any], reg: Mapping[str,Any], doc: Mapping[str,Any],
                 db_path: str|Path, *, reason: str='instrument_replaced') -> dict[str,Any]:
+    from mailcpu.temporal import CausalRelation
     initial=_verify_binding(issued,reg,doc)
     if issued['role']!='Q' or export(db_path)!=issued['transcript']:
         raise AuthorityError('revocation must follow exact issued journal')
@@ -100,6 +102,7 @@ def verify_host(bundle: Mapping[str,Any], reg: Mapping[str,Any],
                 doc: Mapping[str,Any], *, sqlite_path: str|Path|None=None,
                 expected_anchor: Mapping[str,Any]|None=None,
                 parent_issued: Mapping[str,Any]|None=None) -> dict[str,Any]:
+    from mailcpu.temporal import CausalRelation
     stamp=_verify_binding(bundle,reg,doc)
     if sqlite_path is not None and export(sqlite_path)!=bundle['transcript']:
         raise AuthorityError('durable SQLite reconstruction differs from published journal')
