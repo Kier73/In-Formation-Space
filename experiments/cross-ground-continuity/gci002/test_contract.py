@@ -52,16 +52,31 @@ def fixture():
         "ground_id":c.GROUND_ID, "context_digest":context,
         "allowed_sources":[c.SOURCE], "quorum":1, "strict":True,
     }
-    ground_fp, orbit_fp, cert_fp = ("a"*64, "b"*64, "c"*64)
+    # Reconstruct real VGI quorum-decision digests independently rather than
+    # allowing a dummy fingerprint to make negative tests pass vacuously.
+    for record, final in zip(recs, finals):
+        raw = {
+            "source_state": record["source_state"], "action": c.ACTION,
+            "status": "QUORUM", "quorum": 1, "strict": True,
+            "observed_sources": [c.SOURCE], "agreeing_sources": [c.SOURCE],
+            "dissenting_sources": [], "indeterminate_sources": [],
+            "conflicting_sources": [], "missing_sources": [],
+            "outcome": record["outcomes"][0],
+            "agreeing_evidence_ids": [record["evidence_id"]],
+            "observed_evidence_ids": [record["evidence_id"]],
+        }
+        final["decision_digest"] = c.cag.digest(raw)
+    reconstructed = c.independent_certificate_material(source, context, recs, finals, policy)
+    ground_fp, orbit_fp = reconstructed["ground_fingerprint"], reconstructed["orbit_fingerprint"]
     cert = {
         "format":"VGI-AffineOrbitCertificate-1",
         "claim":"the affine map generates this exact closed fixed-policy OrbitIndex",
         "orbit_fingerprint":orbit_fp, "ground_fingerprint":ground_fp,
-        "policy_fingerprint":"d"*64, "clock_id":c.CLOCK,
+        "policy_fingerprint":reconstructed["policy_fingerprint"], "clock_id":c.CLOCK,
         "start_time":{"clock_id":c.CLOCK,"tick":0,
                       "basis":"logical_transition_coordinate"},
         "start_state":"r7", "cycle_start_index":0, "cycle_period":8,
-        "transform": c.expected_affine_map(), "transform_fingerprint":"e"*64,
+        "transform": c.expected_affine_map(), "transform_fingerprint":c.cag.digest(c.expected_affine_map()),
         "state_vectors":[{"state":f"r{x}","vector":[x]} for x in range(8)],
         "verified_edges":c.expected_cert_rows(source),
     }
@@ -71,8 +86,9 @@ def fixture():
         "compiler_id":"vgi.transition-compiler", "compiler_version":1,
         "ground_fingerprint":ground_fp, "context_digest":context,
         "action_sequences":[[c.ACTION]*n for n in (1,2,8,16)],
-        "witness_count":4, "max_horizon":16, "witness_digest":"f"*64,
+        "witness_count":4, "max_horizon":16, "witness_digest":reconstructed["witness_digest"],
     }
+    cert_fp = c.cag.digest(cert)
     vgi = c.seal({
         "schema":c.VGI_SCHEMA, "source_digest":context,
         "orbit_source_report_digest":source["report_digest"],
@@ -110,6 +126,30 @@ def reseal(report):
 
 
 class GCI002ContractTests(unittest.TestCase):
+    def test_independently_reconstructed_valid_certificate_fixture(self):
+        statement, source, vgi = fixture()
+        matched = c.verify_vgi(vgi, source, statement)
+        self.assertEqual(len(matched), 4)
+        self.assertEqual(len(vgi["orbit_certificate"]["verified_edges"]), 8)
+
+    def test_tampered_finalization_digest_rejected_even_after_rehash(self):
+        statement, source, vgi = fixture()
+        vgi["finalizations"][0]["decision_digest"] = "a"*64
+        reseal(vgi)
+        with self.assertRaisesRegex(c.ContinuityRefusal, "decision digest"):
+            c.verify_vgi(vgi, source, statement)
+
+    def test_false_orbit_fingerprint_rejected_even_after_rehash(self):
+        statement, source, vgi = fixture()
+        vgi["orbit_fingerprint"] = "a"*64
+        vgi["orbit_certificate"]["orbit_fingerprint"] = "a"*64
+        vgi["orbit_certificate_fingerprint"] = c.cag.digest(vgi["orbit_certificate"])
+        for row in vgi["observations"]:
+            row["closed_certificate_fingerprint"] = vgi["orbit_certificate_fingerprint"]
+        reseal(vgi)
+        with self.assertRaisesRegex(c.ContinuityRefusal, "fingerprint"):
+            c.verify_vgi(vgi, source, statement)
+
     def test_real_source_arithmetic_and_complete_cycle(self):
         statement, source, _ = fixture()
         c.verified_probe(source, statement)
