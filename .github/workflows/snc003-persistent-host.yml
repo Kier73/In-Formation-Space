@@ -33,7 +33,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: '\${{ matrix.python }}'
+          python-version: '${{ matrix.python }}'
       - name: Existing SNC-001 exact semantics regression
         env:
           PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
