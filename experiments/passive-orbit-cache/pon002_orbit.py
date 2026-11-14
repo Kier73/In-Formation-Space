@@ -131,9 +131,9 @@ class Provider:
         require(type(self.revision) is str and SHA.fullmatch(self.revision) is not None,
                 "public provider must use full immutable Git commit")
         expected = (
-            GITHUB_BASE + self.revision + PUBLIC_PATH.lstrip("/")
+            GITHUB_BASE + self.revision + PUBLIC_PATH
             if self.kind == "github" else
-            JSDELIVR_BASE + self.revision + PUBLIC_PATH.lstrip("/")
+            JSDELIVR_BASE + self.revision + PUBLIC_PATH
         )
         require(self.base_url == expected and parsed.scheme == "https" and
                 parsed.hostname == ("raw.githubusercontent.com" if self.kind == "github"
@@ -156,9 +156,9 @@ def providers_for_commit(commit: str, *, preference: tuple[str, str] =
     require(set(preference) == {"github", "jsdelivr"} and len(preference) == 2,
             "unknown public provider preference")
     providers = {
-        "github": Provider("github", GITHUB_BASE + commit + PUBLIC_PATH.lstrip("/"),
+        "github": Provider("github", GITHUB_BASE + commit + PUBLIC_PATH,
                            "github", commit),
-        "jsdelivr": Provider("jsdelivr", JSDELIVR_BASE + commit + PUBLIC_PATH.lstrip("/"),
+        "jsdelivr": Provider("jsdelivr", JSDELIVR_BASE + commit + PUBLIC_PATH,
                              "jsdelivr", commit),
     }
     return [providers[p] for p in preference]
