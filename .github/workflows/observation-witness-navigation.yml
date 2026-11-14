@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - 'bridges/observation-equivalence/**'
+      - 'bridges/observation-path/witness_cost_binding.py'
+      - 'bridges/observation-path/test_witness_cost_binding.py'
+      - 'bridges/observation-path/witness_cost_binding.py'
+      - 'bridges/observation-path/test_witness_cost_binding.py'
       - '.github/workflows/observation-witness-navigation.yml'
   push:
     branches: [main]
@@ -29,3 +33,5 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Check exact finite-model counterexamples and prior equivalence regressions
         run: python -m unittest discover -s bridges/observation-equivalence -p 'test_*.py' -v
+      - name: Check source-reconstructed operation span cost policy binding
+        run: python -m unittest discover -s bridges/observation-path -p 'test_witness_cost_binding.py' -v
