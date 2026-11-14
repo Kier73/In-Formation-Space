@@ -493,3 +493,117 @@ jobs:
           name: coe016-test-only-cross-evidence-receipt
           path: experiments/continuous-observation-equivalence/coe016-bound-source-receipt.json
           if-no-files-found: error
+
+  verifier-attestation-producer:
+    # Public test-key signer receives the finished COE-016 join and original files.
+    needs: [same-source-evidence-convergence, certificate-producer]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - name: Produce PUBLIC TEST-ONLY verifier-key signature claims
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/demo \
+            ../received-coe016/coe016-bound-source-receipt.json \
+            ../received-certificates \
+            ../untrusted-verifier-attestation
+      - name: Transfer untrusted signed verifier receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/untrusted-verifier-attestation/signed-verifier-receipt.json
+          if-no-files-found: error
+
+  verifier-attestation-receiver:
+    # A separately hosted receiver independently chooses policy and replay
+    # checkpoint, recomputes original-byte hashes, and rejects stale identities.
+    needs: [same-source-evidence-convergence, certificate-producer, verifier-attestation-producer]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.23'
+          cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe002-producer-certificates
+          path: experiments/continuous-observation-equivalence/received-certificates
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe016-test-only-cross-evidence-receipt
+          path: experiments/continuous-observation-equivalence/received-coe016
+      - uses: actions/download-artifact@v4
+        with:
+          name: coe017-public-demo-untrusted-verifier-attestation
+          path: experiments/continuous-observation-equivalence/received-verifier-attestation
+      - name: Adversarially test signer possession, quorum, rotation, revocation and replay
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: go test -count=1 -v ./...
+      - name: Initialize independent receiver-owned demonstration state
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: cp demo-state.json receiver-state.json
+      - name: Reject PUBLIC demo keys by default
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          if go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -certs ../received-certificates \
+            -state receiver-state.json -report coe017-receiver-result.json \
+            > refusal.txt 2>&1; then
+            echo 'ERROR: public test-only verifier keys were accepted by default'
+            exit 1
+          fi
+          grep -Fq 'public demonstration verifier keys are not production identity' refusal.txt
+      - name: Verify source and signer identity under receiver-owned test policy
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -certs ../received-certificates \
+            -state receiver-state.json -report coe017-receiver-result.json \
+            -allow-demo
+          grep -Fq '"ground_admitted":false' coe017-receiver-result.json
+          grep -Fq '"real_world_identity_authenticated":false' coe017-receiver-result.json
+          grep -Fq '"key_possession_verified":true' coe017-receiver-result.json
+          grep -Fq '"last_sequence":3' receiver-state.json
+      - name: Require replay refusal after local state progression
+        working-directory: experiments/continuous-observation-equivalence/coe017_attest
+        run: |
+          if go run ./cmd/verify \
+            -policy demo-policy.json \
+            -signed ../received-verifier-attestation/signed-verifier-receipt.json \
+            -evidence ../received-coe016/coe016-bound-source-receipt.json \
+            -certs ../received-certificates \
+            -state receiver-state.json -report repeated-receipt.json \
+            -allow-demo > replay-refusal.txt 2>&1; then
+            echo 'ERROR: repeated verifier receipt was accepted'
+            exit 1
+          fi
+          grep -Fq 'stale/replayed sequence' replay-refusal.txt
+      - name: Preserve receiver-scoped key and state observation
+        uses: actions/upload-artifact@v4
+        with:
+          name: coe017-demo-receiver-verifier-evidence
+          path: |
+            experiments/continuous-observation-equivalence/coe017_attest/coe017-receiver-result.json
+            experiments/continuous-observation-equivalence/coe017_attest/receiver-state.json
+            experiments/continuous-observation-equivalence/coe017_attest/refusal.txt
+            experiments/continuous-observation-equivalence/coe017_attest/replay-refusal.txt
+          if-no-files-found: error
