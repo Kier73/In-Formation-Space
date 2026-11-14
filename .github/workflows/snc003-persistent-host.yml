@@ -62,8 +62,10 @@ jobs:
         env:
           PYTHONPATH: experiments/semantic_neural_compilation:experiments/continuous-observation-equivalence:external/E-CPU
         run: |
+          set -euo pipefail
           python experiments/semantic_neural_compilation/run_persistent_host.py \
             --output snc003-host-report.json | tee snc003-host-stdout.json
+          python -c 'import json; r=json.load(open("snc003-host-report.json")); assert r["status"]=="all-lifecycle-gates-verified" and r["persisted_model_count"]==1 and r["committed_observation_count"]==35'
       - uses: actions/upload-artifact@v4
         with:
           name: snc003-durable-mtls-reuse-report
