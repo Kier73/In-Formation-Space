@@ -52,8 +52,13 @@ theorem pinned_implies_accepted (raw : Bytes)
   | none =>
       simp [hp] at h
   | some env =>
-      have hw : acceptWire env.wire = true := by
-        simpa only [Bool.and_eq_true] using h |>.1.1
+      have ha : (acceptWire env.wire && hashMatchesHeader env &&
+          isPinnedNetwork env.networkSHA) = true := by
+        simpa [hp] using h
+      have hab : (acceptWire env.wire && hashMatchesHeader env) = true :=
+        (Bool.and_eq_true.mp ha).1
+      have hw : acceptWire env.wire = true :=
+        (Bool.and_eq_true.mp hab).1
       simpa [acceptBytes, hp] using hw
 
 /-- Crucial provenance contract: when this stronger gate accepts, Lean
@@ -74,15 +79,22 @@ theorem pinned_bytes_witness (raw : Bytes)
   | none =>
       simp [hp] at h
   | some env =>
-      have hparts : acceptWire env.wire = true ∧
-          hashMatchesHeader env = true ∧
-          isPinnedNetwork env.networkSHA = true := by
-        simpa only [Bool.and_eq_true] using h
+      have ha : (acceptWire env.wire && hashMatchesHeader env &&
+          isPinnedNetwork env.networkSHA) = true := by
+        simpa [hp] using h
+      have hpin : isPinnedNetwork env.networkSHA = true :=
+        (Bool.and_eq_true.mp ha).2
+      have hab : (acceptWire env.wire && hashMatchesHeader env) = true :=
+        (Bool.and_eq_true.mp ha).1
+      have hw : acceptWire env.wire = true :=
+        (Bool.and_eq_true.mp hab).1
+      have hh : hashMatchesHeader env = true :=
+        (Bool.and_eq_true.mp hab).2
       obtain ⟨cert, hd, hv⟩ :=
-        acceptWire_implies_verified env.wire hparts.1
+        acceptWire_implies_verified env.wire hw
       have hhash : digestHex env.networkRaw = some env.networkSHA := by
-        simpa [hashMatchesHeader] using hparts.2.1
-      exact ⟨env, cert, rfl, hhash, hparts.2.2, hd, hv⟩
+        simpa [hashMatchesHeader] using hh
+      exact ⟨env, cert, rfl, hhash, hpin, hd, hv⟩
 
 #print axioms COE014Provenance.pinned_implies_accepted
 #print axioms COE014Provenance.pinned_bytes_witness
