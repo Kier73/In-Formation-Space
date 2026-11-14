@@ -250,8 +250,8 @@ jobs:
           lake env lean -o .lake/build/lib/lean/GeneratedWireProofs.olean GeneratedWireProofs.lean > lean-wire-olean-output.txt
           lake env lean GeneratedJSONProofs.lean | tee lean-json-byte-proof-output.txt
           for name in identity relu_identity zero triangular_bump rescaled_bump; do
-            grep -Fq "'COE013.${name}_json_wire' depends on axioms:" lean-json-byte-proof-output.txt
-            grep -Fq "'COE013.${name}_json_admitted' depends on axioms:" lean-json-byte-proof-output.txt
+            grep -Fq "'COE013.${name}_json_wire' does not depend on any axioms" lean-json-byte-proof-output.txt
+            grep -Fq "'COE013.${name}_json_admitted' depends on axioms: [propext, Classical.choice, Quot.sound]" lean-json-byte-proof-output.txt
           done
           if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' lean-json-byte-proof-output.txt; then
             cat lean-json-byte-proof-output.txt
