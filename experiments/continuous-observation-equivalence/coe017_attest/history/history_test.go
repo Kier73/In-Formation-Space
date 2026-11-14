@@ -111,7 +111,7 @@ func TestTwoIndependentReplaysAndExplicitlyBoundedClaims(t *testing.T){
  f:=buildFixture(t)
  a,e:=f.verify(t,&f.journal.Anchor,true);if e!=nil{t.Fatal(e)}
  b,e:=f.verify(t,&f.journal.Anchor,true);if e!=nil{t.Fatal(e)}
- if a!=b && (a.JournalHead!=b.JournalHead || a.FinalPolicySHA256!=b.FinalPolicySHA256){
+ if a.JournalHead!=b.JournalHead||a.FinalPolicySHA256!=b.FinalPolicySHA256||a.Status!=b.Status{
   t.Fatal("independent receiver reconstruction diverged")
  }
  if a.Status!="revoked-under-policy"||!a.ReceiptRevoked||
