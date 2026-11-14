@@ -101,3 +101,18 @@ The same fixed grammar at **five expansions** has exactly five outer-hull transi
 The [exact depth-five proof](EXACT-DEPTH5-RECURSIVE.md), [certificate program](depth5_phase.py), and [independent tests](test_depth5_phase.py) carry the previous depth's extreme vertices through five affine copies. Rather than testing all **3,126 endpoints** in every interval, only **16–36 inherited candidates** are needed. The all-angle certificate checks **1,659** exact containment inequalities and **54** strict convexity conditions (versus **168,804** naive containment checks), including rational, quadratic, cubic and quartic boundaries. This is a reduction in proof obligations, not a benchmark of runtime speed.
 
 Run `python experiments/branching-morphology/depth5_phase.py` to generate a machine-readable certificate. The five-stage transition sequence is evidence for, but **not a proof of**, a universal n-transition law at depth n.
+
+## BMO-007: All-future-depth hull stabilization
+
+The earlier finite-depth sequence admits a rigorous **all-depth consequence**. The five-copy grammar has a scale-covariant convex-hull recurrence: if `H_(k+1)=3H_k` at a turning angle, every later hull scales by 3 again. Exact polynomial comparison of **15 inherited hull regimes** (89 extreme-vertex correspondences), backed by the BMO-003–006 interval certificates, proves
+
+```text
+H_n(theta) = 3^(n-4) H_4(theta)  for every n>=5,
+whenever arccos(sigma) <= theta < 90 degrees,
+```
+
+where `sigma` is the depth-five quartic transition cosine (~0.925...). Hence all five previously certified transition angles persist in *every* future depth; **no new outer-hull transition can appear above ~22.30947°**. A strict exterior-point witness proves that the newest angle is also a persistent transition, without claiming its future vertex-count increment.
+
+The independent [proof note](ALL-DEPTH-STABILIZATION.md), [executable prerequisite certificate](all_depth_law.py), and [tests](test_all_depth_law.py) also derive an exact recurrence for the collinearity of nested branch tips at every depth. The recurrence's first positive-angle zero decreases strictly and satisfies `n*theta_n -> pi/2` in radians. **Those roots at depths six and above are candidates, not yet proven exposed-hull transitions.**
+
+Run `python experiments/branching-morphology/all_depth_law.py` to regenerate the exact finite premises and numerical candidate illustrations.
