@@ -9,7 +9,7 @@ import argparse
 import time
 from pathlib import Path
 
-import contract as c
+import ground_contract as c
 from mailcpu.law_certifier import lcg_navigate
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 import copy
 import unittest
 
-import contract as c
+import ground_contract as c
 
 
 def fixture():

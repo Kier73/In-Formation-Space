@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-import contract as c
+import ground_contract as c
 from vgi.affine import AffineOrbitCertificate, ModularAffineMap
 from vgi.evidence import (
     ObservedOutcome, TransitionEvidencePolicy, TransitionEvidence,

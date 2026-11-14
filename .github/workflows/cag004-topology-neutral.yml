@@ -41,7 +41,7 @@ jobs:
       - name: Exercise GCI-002 orbit-source and observer-refusal adversarial controls
         run: |
           python -m unittest discover -s experiments/cross-ground-continuity/gci002 -p 'test_contract.py' -v
-          python -m py_compile experiments/cross-ground-continuity/gci002/contract.py experiments/cross-ground-continuity/gci002/ecpu_orbit_probe.py experiments/cross-ground-continuity/gci002/vgi_closed_orbit.py
+          python -m py_compile experiments/cross-ground-continuity/gci002/ground_contract.py experiments/cross-ground-continuity/gci002/ecpu_orbit_probe.py experiments/cross-ground-continuity/gci002/vgi_closed_orbit.py
 
   intent_host:
     needs: tests
@@ -547,7 +547,7 @@ jobs:
           done
       - name: Reconstruct all CAG-004, GCI-001, GCI-002 source and certificate claims without source runtimes
         run: |
-          python experiments/cross-ground-continuity/gci002/contract.py verify --directory evidence/cag004
+          python experiments/cross-ground-continuity/gci002/ground_contract.py verify --directory evidence/cag004
       - name: Attest independent eight-edge closure and observer refusal on main
         if: github.ref == 'refs/heads/main'
         uses: actions/attest@v4

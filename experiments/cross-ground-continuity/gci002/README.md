@@ -87,7 +87,7 @@ python -m unittest discover -s experiments/cross-ground-continuity/gci002 -p 'te
 ```
 
 Hosted workflow: [CAG-004 / GCI-001 / GCI-002](../../../.github/workflows/cag004-topology-neutral.yml).
-Pinned E-CPU/VGI revisions: see `contract.py` and the workflow.
+Pinned E-CPU/VGI revisions: see `ground_contract.py` and the workflow.
 The real host paths are exercised only when the jobs run; these
 runtime-free tests by themselves do not establish the hosted result.
 
