@@ -230,7 +230,7 @@ def start_peer(binary: Path, workdir: Path, *, drop_first_ack: bool) -> tuple[su
     proc = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT)
     deadline = time.monotonic() + 18
     while time.monotonic() < deadline:
-        if addr.exists() and addr.read_text().strip().endswith(tuple(str(i) for i in range(10))):
+        if addr.exists() and "/ip4/127.0.0.1/tcp/" in addr.read_text() and "/p2p/" in addr.read_text():
             return proc, log
         if proc.poll() is not None:
             break
