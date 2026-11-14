@@ -6,8 +6,9 @@
   "history_length": 2,
   "independent_external_witnesses_are_fixture_roles": true,
   "initial": "conditionally_admitted",
+  "legacy_re014_hmac_key_still_required": true,
   "physical_authority_attested": false,
-  "reconstructed_without_issuer_key": true,
+  "reconstructed_without_original_issuer_process": true,
   "witnesses": [
     "W1",
     "W2"
