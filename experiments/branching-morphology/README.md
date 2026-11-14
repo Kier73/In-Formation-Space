@@ -116,3 +116,11 @@ where `sigma` is the depth-five quartic transition cosine (~0.925...). Hence all
 The independent [proof note](ALL-DEPTH-STABILIZATION.md), [executable prerequisite certificate](all_depth_law.py), and [tests](test_all_depth_law.py) also derive an exact recurrence for the collinearity of nested branch tips at every depth. The recurrence's first positive-angle zero decreases strictly and satisfies `n*theta_n -> pi/2` in radians. **Those roots at depths six and above are candidates, not yet proven exposed-hull transitions.**
 
 Run `python experiments/branching-morphology/all_depth_law.py` to regenerate the exact finite premises and numerical candidate illustrations.
+
+## BMO-008: The sixth exact hull transition and an enlarged all-depth sector
+
+The next independent test confirms the predicted depth-six candidate is a **genuine exposed convex-hull transition** at `arccos(lambda) ≈ 17.917530204°`. Here `lambda` is the unique root of `5184c⁵−1728c⁴−5472c³+1248c²+1108c−97=0` in `(0.951,0.952)`. The depth-six hull has exactly six transition angles in 0° < θ < 90°, and its vertices progress through **10, 9, 8, 7, 6, 5, 4** as θ increases.
+
+The [proof and boundary conditions](EXACT-DEPTH6-QUINTIC.md), [exact quintic certificate](depth6_phase.py), and [independent tests](test_depth6_phase.py) check **2,483 algebraic interval containment inequalities**, **73 strict corner conditions**, and all six exact boundary hulls. A direct full-endpoint certificate would require 1,140,698 containment inequalities. The local standard-library test suite passes **49/49**.
+
+The exact inherited-hull identities also extend BMO-007's universal stabilization theorem: for **every** later depth `n≥6` and every `θ≥17.917530204°` (with θ<90°), `H_n(θ)=3^(n−5)H_5(θ)`. A strict exterior-tip witness proves the new angle remains a geometric transition for all future depths. This still does not prove an exact n-transition count at arbitrary depth.
