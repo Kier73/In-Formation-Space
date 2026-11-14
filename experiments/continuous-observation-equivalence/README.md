@@ -779,3 +779,49 @@ python coe016_binding.py --certs received-certificates \
   --lean-log joined-lean-evidence/sha256-pinned-network-replay.txt \
   --output coe016-bound-source-receipt.json
 ~~~
+
+
+## COE-017 — Policy-scoped verifier signing keys, receiver replay state, and exact evidence bytes
+
+COE-016 establishes that separate Python, Go, Lean and Ed25519 verification reports in one CI workflow agree on the same original certificate files. But the joined receipt was unsigned: a detached receiver of that JSON artifact alone could not attribute it to a verifier signing key or distinguish newly authorized evidence from stale replays.
+
+COE-017 adds **a distinct verification-attestation protocol**, separate from COE-015's source-manifest signing keys. A new Go standard-library Ed25519 signer makes a canonical, domain-separated statement about the exact bytes of the COE-016 convergence receipt. That statement includes issuer, application context, monotonic sequence, whole-receipt SHA-256, a map of complete original certificate SHA-256 digests, nested source-network SHA-256 digests and the independently agreed semantic-atlas SHA-256 digests.
+
+The separate CI `verifier-attestation-producer` job receives COE-016 evidence, regenerates the source file hashes, and produces a **PUBLIC TEST-ONLY 2-of-2 signature** using two explicitly nonsecret Ed25519 seeds. This is deliberately distinct from the source-owner keys used in COE-015. The `verifier-attestation-receiver` runs on another hosted runner, downloads those untrusted artifacts and independently supplies its own public-key trust policy, network digest allowlist, and **local replay state**.
+
+The receiver's Go code checks canonical JSON; duplicate-key/unknown-field refusal; domain separation; actual Ed25519 signatures; distinct signers and public keys; key revocation, activation/expiry, rotation and quorum; exact COE-016 receipt SHA-256; original full certificate file hashes; actual nested network bytes and their receiver-owned network SHA-256 pins; semantic digest agreement with the signed statement; and a strictly increasing statement sequence above the receiver-owned policy floor. Only upon success does the CLI atomically replace the local receiver checkpoint. Replaying the same receipt against that checkpoint fails. Tests demonstrate a two-signer migration from the old pair to a new authorized signer, with refusal of retired and prematurely activated keys.
+
+**Bounded security statement:** the receiver verifies control of authorized **demonstration signing keys** and checks received byte identities. It does not establish the real-world identity of any human, independent organization, physical host, or model owner. Any bearer can reproduce the public demonstration keys. This is not a Lean proof of Ed25519 or an independent derivation of the underlying mathematical result; the latter remains with the previous checkers, and the COE-016 record remains dependent on trusted CI execution. A signed verifier receipt cannot promote `ground_admitted` or `real_world_identity_authenticated` to true.
+
+The receiver replay checkpoint is persisted **only to one local filesystem**. An isolated fresh receiver using the original seed checkpoint cannot know what another host already accepted. There is no distributed compare-and-swap, consensus, authenticated witness log or crash-consistent multi-writer journal here. An attacker who can rewrite both the receiver's independently provisioned policy and its state can bypass this experiment's replay controls. Future deployment requires external key custody, protected policy distribution, and an independently durable authority log. The new CI job never deploys a production private key.
+
+### Reproduce
+
+~~~bash
+cd experiments/continuous-observation-equivalence
+python produce_certificates.py received-certificates
+# First generate a valid COE-016 convergence receipt from the separate
+# verifier evidence as documented under COE-016. Then:
+cd coe017_attest
+go test -count=1 -v ./...
+go run ./cmd/demo ../coe016-bound-source-receipt.json ../received-certificates ../demo-attestations
+cp demo-state.json receiver-state.json
+
+# Must reject public test keys by default:
+go run ./cmd/verify -policy demo-policy.json \
+  -signed ../demo-attestations/signed-verifier-receipt.json \
+  -evidence ../coe016-bound-source-receipt.json \
+  -certs ../received-certificates -state receiver-state.json \
+  -report receiver-result.json
+
+# Explicit public-key demonstration acceptance, then checkpoint advancement:
+go run ./cmd/verify -policy demo-policy.json -allow-demo \
+  -signed ../demo-attestations/signed-verifier-receipt.json \
+  -evidence ../coe016-bound-source-receipt.json \
+  -certs ../received-certificates -state receiver-state.json \
+  -report receiver-result.json
+
+# Running that last command again must fail with stale/replayed sequence.
+~~~
+
+The further frontier is independently held, non-demo verifier keys with authenticated authority transitions and replay state reconstructable across genuinely separate receivers, without trusting one local state file or a CI job's self-description.
