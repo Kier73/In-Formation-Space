@@ -1,0 +1,242 @@
+name: RE-013 active recalibration, scoped revisions and real E-CPU causal verification
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re013-active-recalibration.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re013-active-recalibration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify RE-001 through RE-013
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Check deterministic revision history and zero-assumption refusal
+        run: |
+          python experiments/response-equivalence/active_recalibration.py > /tmp/re013-report.json
+          cmp experiments/response-equivalence/re013_report.json /tmp/re013-report.json
+      - name: Verify real pinned E-CPU temporal adapter
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re013_cases.py
+
+  enrollment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Enroll role-specific CI keys and preissue synthetic suspended predecessor
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from active_recalibration import registration,old_fixture
+          reg=registration()
+          old=old_fixture(reg)
+          bundles={'V':reg, **{role:{'challenge':reg['challenge'],
+                     'key_ids':reg['key_ids'], 'keys':{role:reg['keys'][role]}}
+                     for role in ('S','A','B')}}
+          for role,doc in bundles.items():
+              with open(f're013-enrollment-{role}.json','w') as f:json.dump(doc,f,sort_keys=True)
+          with open('re013-prior.json','w') as f:json.dump(old,f,sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re013-prior-public, path: re013-prior.json, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re013-S-enrollment-ci, path: re013-enrollment-S.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re013-A-enrollment-ci, path: re013-enrollment-A.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re013-B-enrollment-ci, path: re013-enrollment-B.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re013-V-enrollment-ci, path: re013-enrollment-V.json, retention-days: 1, if-no-files-found: error}
+
+  source-host:
+    needs: enrollment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-prior-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-S-enrollment-ci}
+      - name: Source issues scoped plan and genuine E-CPU causal frame
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re013-source-input.json
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          print(json.dumps({'enrollment':read('re013-enrollment-S.json'),
+                            'prior':read('re013-prior.json'),'protocol':'passive'}))
+          PY
+          python experiments/response-equivalence/ecpu_re013_hosts.py --source < /tmp/re013-source-input.json > re013-source.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re013-source-public, path: re013-source.json, if-no-files-found: error}
+
+  observer-a:
+    needs: [source-host, enrollment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-source-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-A-enrollment-ci}
+      - name: A independently signs exact batch results and E-CPU stamp
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re013-A-input.json
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          print(json.dumps({'source':read('re013-source.json'),
+                            'enrollment':read('re013-enrollment-A.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re013_hosts.py --A < /tmp/re013-A-input.json > re013-A.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re013-A-public, path: re013-A.json, if-no-files-found: error}
+
+  observer-b:
+    needs: [source-host, enrollment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-source-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-B-enrollment-ci}
+      - name: B independently signs exact batch results and E-CPU stamp
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re013-B-input.json
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          print(json.dumps({'source':read('re013-source.json'),
+                            'enrollment':read('re013-enrollment-B.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re013_hosts.py --B < /tmp/re013-B-input.json > re013-B.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re013-B-public, path: re013-B.json, if-no-files-found: error}
+
+  independent-verifier:
+    needs: [tests, enrollment, source-host, observer-a, observer-b]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-prior-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-source-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-A-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-B-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-V-enrollment-ci}
+      - name: Reconstruct only from public evidence and issue scoped revision
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re013-verifier-input.json
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          print(json.dumps({'source':read('re013-source.json'),
+                'A':read('re013-A.json'),'B':read('re013-B.json'),
+                'prior':read('re013-prior.json'),
+                'enrollment':read('re013-enrollment-V.json'),
+                'assumptions_accepted':True}))
+          PY
+          python experiments/response-equivalence/ecpu_re013_hosts.py --verify < /tmp/re013-verifier-input.json > re013-independent-result.json
+          python - <<'PY'
+          import json
+          with open('re013-independent-result.json') as f:r=json.load(f)
+          assert r['renewal']['status']=='conditional_revision_issued',r
+          assert r['renewal']['original_certificate_restored'] is False,r
+          assert r['renewal']['protocol']=='passive',r
+          assert r['renewal']['physical_detection_guarantee'] is None,r
+          assert r['causal_relations']=={'S_before_A':'before','S_before_B':'before','A_concurrent_B':'concurrent'},r
+          print('Conditional revision issued; physical source truth remains unverified')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re013-independent-result-public, path: re013-independent-result.json, if-no-files-found: error}
+
+  independent-replay:
+    needs: [independent-verifier, enrollment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-prior-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-source-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-A-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-B-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-V-enrollment-ci}
+      - uses: actions/download-artifact@v4
+        with: {name: re013-independent-result-public}
+      - name: Recompute revision 2 in fresh job and ensure default refuses unproved assumptions
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from active_recalibration import verify_revision,evaluate
+          def read(p):
+              with open(p) as f:return json.load(f)
+          source=read('re013-source.json')
+          a=read('re013-A.json')['report'];b=read('re013-B.json')['report']
+          prior=read('re013-prior.json');reg=read('re013-enrollment-V.json')
+          received=read('re013-independent-result.json')['renewal']
+          contents=verify_revision(reg,prior,source['plan'],a,b,received,
+                 assumptions_accepted=True,expected_protocol='passive')
+          assert contents['revision']==2 and contents['predecessor_status']=='suspended'
+          default=evaluate(reg,prior,source['plan'],a,b)
+          assert default['new_certificate'] is None
+          print('Fresh-job independent evidence replay succeeded; default admission denied')
+          PY
