@@ -85,3 +85,11 @@ Run `python experiments/branching-morphology/angle_transitions.py` to regenerate
 The next self-directed investigation increases the grammar expansion depth from two to three. It finds **exactly three convex-hull transitions** on 0° < θ < 90°: a *new algebraic angle* `arccos((2+√46)/12) ≈ 42.9574°`, followed by the same two angles `60°` and `arccos(1/4)` identified at depth two. The hull changes from 7 to 6 to 5 to 4 vertices as θ increases.
 
 The [BMO-004 proof note](EXACT-DEPTH3-REGIMES.md), [exact-arithmetic certificate](depth3_phase.py), and [independent tests](test_depth3_phase.py) use **2,772 half-plane certificates**, **22 convexity checks** and exact arithmetic in `Q(√46)` to cover the full angle intervals. The result is about the outer convex hull, not all internal branch intersections or higher depths. Run `python experiments/branching-morphology/depth3_phase.py` to recreate the exact certificate.
+
+## BMO-005: Recursive depth-four proof and a cubic-angle transition
+
+At depth four, a fourth exact convex-hull change appears at **arccos(rho) ≈ 29.465468°**, where `rho` is the unique root in `(0.87,0.88)` of `144c³−48c²−80c+11=0`. The depth-four hull changes through 8, 7, 6, 5 and 4 vertices as the angle increases. The three previously certified transitions persist at their earlier exact angles.
+
+The [recursive proof note](EXACT-DEPTH4-RECURSIVE.md), [exact-arithmetic certificate](depth4_phase.py) and [tests](test_depth4_phase.py) avoid checking all 626 endpoints against every candidate hull edge. Instead, they transform **only the previously certified depth-three hull vertices** through the grammar's five affine copies. That reduces **23,162** endpoint/edge checks to **1,007** exact interval inequalities. The certificate covers every angle between 0° and 90° and includes a counterexample to a misleading floating-point scan: one purported extra vertex is provably collinear for all angles.
+
+Run `python experiments/branching-morphology/depth4_phase.py` to reproduce the proof record. The branch retains the same independence from other research programs.
