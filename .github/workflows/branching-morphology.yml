@@ -58,9 +58,25 @@ jobs:
                   assert math.isclose(observed[name], reference[name], rel_tol=1e-7, abs_tol=1e-4), (name, observed, reference)
           print("SVG parses and measured geometry agrees with retained observations")
           PY
+      - name: Generate and validate exact depth-four proof record
+        run: |
+          python experiments/branching-morphology/depth4_phase.py > "$RUNNER_TEMP/depth4-certificate.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          record = json.loads((Path(os.environ["RUNNER_TEMP"]) / "depth4-certificate.json").read_text())
+          assert record["symbolic_endpoints"] == 626
+          assert record["exact_halfplane_constraints"] == 1007
+          assert record["exact_strict_convexity_checks"] == 37
+          assert len(record["boundaries"]) == 4
+          assert [x["hull_vertices"] for x in record["regimes"]] == [4, 5, 6, 7, 7, 8]
+          print("Exact depth-four interval certificate validated")
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: branching-morphology-py${{ matrix.python-version }}
           path: |
             ${{ runner.temp }}/canopies.svg
             ${{ runner.temp }}/measurements.json
+            ${{ runner.temp }}/depth4-certificate.json
