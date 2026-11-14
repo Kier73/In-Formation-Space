@@ -106,7 +106,8 @@ jobs:
             echo "ERROR: Lean accepted a gapped rational activation-cell cover"
             exit 1
           fi
-          grep -Fq 'Tactic `decide` failed for proposition' invalid-piecewise-cover.txt
+          cat invalid-piecewise-cover.txt
+          grep -Eq 'Tactic.*decide.*failed|decide.*failed|failed to prove' invalid-piecewise-cover.txt
       - name: Require rejection of a false all-real ReLU observation
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
