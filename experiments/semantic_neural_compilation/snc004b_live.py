@@ -56,6 +56,13 @@ def check(valid: bool, reason: str) -> None:
         raise WireRejected(reason)
 
 
+def wire_fields(value: object, expected: set[str], label: str) -> dict:
+    try:
+        return exact_object(value, expected, label)
+    except HostRejected as exc:
+        raise WireRejected("malformed " + label + " fields") from exc
+
+
 def addressing(host: str, *, overlay: bool) -> str:
     """Never use public or loopback IPs for an overlay-labelled experiment."""
     try:
@@ -127,9 +134,9 @@ class CapsuleDecoder:
         check(self.frames < MAX_CHUNKS + 2, "frame budget exhausted")
         self.frames += 1
         if self.manifest is None:
-            obj = exact_object(frame, {"phase", "manifest"}, "start frame")
+            obj = wire_fields(frame, {"phase", "manifest"}, "start frame")
             check(obj["phase"] == "begin", "missing begin")
-            man = exact_object(obj["manifest"], {
+            man = wire_fields(obj["manifest"], {
                 "schema", "kind", "model", "coordinate", "request_id",
                 "nonce", "byte_length", "sha256", "chunks",
             }, "manifest")
