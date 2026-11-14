@@ -45,7 +45,7 @@ def render(directory: Path) -> str:
         "def flipAt (raw : Bytes) (offset value : Nat) : Bytes :=",
         "  raw.take offset ++ [value] ++ raw.drop (offset + 1)",
         "",
-        "def verifyOne (name : String) (raw : Bytes) (networkIndex replacement headerIndex : Nat) : IO Unit := do",
+        "def verifyOne (name : String) (raw : Bytes) (networkIndex replacement headerIndex headerReplacement : Nat) : IO Unit := do",
         "  if !(acceptPinnedBytes raw) then",
         "    throw (IO.userError s!\"{name}: source provenance rejected\")",
         "  let changedNetwork := flipAt raw networkIndex replacement",
@@ -56,7 +56,7 @@ def render(directory: Path) -> str:
         "        throw (IO.userError s!\"{name}: modified network incorrectly preserved SHA-256\")",
         "  if acceptPinnedBytes changedNetwork then",
         "    throw (IO.userError s!\"{name}: modified network incorrectly passed manifest\")",
-        "  let forgedHeader := flipAt raw headerIndex 48",
+        "  let forgedHeader := flipAt raw headerIndex headerReplacement",
         "  match parseEnvelope forgedHeader with",
         "  | none => throw (IO.userError s!\"{name}: forged header was not syntactically valid\")",
         "  | some env =>",
@@ -76,14 +76,6 @@ def render(directory: Path) -> str:
         # A forged header must ALWAYS differ from the source: choose ASCII
         # digit 0 or 1 depending on the current first digest nibble.
         headerReplacement = 49 if raw[j] == 48 else 48
-        # Include a dedicated invocation of verifyOne for each source; its
-        # header replacement is passed separately from the network value.
-        lines[lines.index("def verifyOne (name : String) (raw : Bytes) (networkIndex replacement headerIndex : Nat) : IO Unit := do")] = (
-            "def verifyOne (name : String) (raw : Bytes) (networkIndex replacement headerIndex headerReplacement : Nat) : IO Unit := do"
-        )
-        lines[lines.index("  let forgedHeader := flipAt raw headerIndex 48")] = (
-            "  let forgedHeader := flipAt raw headerIndex headerReplacement"
-        )
         lines.append(
             f'  COE014Replay.verifyOne "{name}" COE013.{name}_raw {i} {replacement} {j} {headerReplacement}'
         )
