@@ -44,7 +44,7 @@ Contract-only tests:
 
 Full live proof is in [the GCI-004/GCI-005 combined workflow](../../../.github/workflows/cag004-topology-neutral.yml). The live signed-transcript tamper tests run inside the blind verifier job with actual host outputs, not synthetic signatures.
 
-**Status:** hosted experiment in verification. A completed main-branch run is necessary before describing the result as independently verified.
+**Verified main evidence:** [20-job run #43616685083](results/ci-run-43616685083.md) passed on November 14, 2026. The [preceding pull-request run](results/pr-run-43615952653.md) also passed all 20 jobs. These establish the finite two-observer diagnostic result, not independent physical federation.
 
 ## Next question
 

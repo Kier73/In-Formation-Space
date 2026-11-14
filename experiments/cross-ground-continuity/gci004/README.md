@@ -4,6 +4,8 @@
 
 This experiment directly extends [GCI-003](../gci003/README.md) on the **same signed CAG-004 intention**, same eight-edge VGI evidence-admitted Ground and same hidden logical phase. It introduces a networked, receiver-authorized observation substrate without equating every network path with a processor.
 
+**Verified main evidence:** [17-job run #43613944702](results/ci-run-43613944702.md) passed on November 14, 2026; this establishes the bounded local-TLS experiment, not independent physical federation.
+
 ## What is actually built
 
 - **Three independent observer OS processes** on one Ubuntu GitHub-hosted runner, accessed through **real loopback TCP mutual TLS**, using E-CPU's real `mailcpu.mtls_transport.connect_mutual_tls`, `accept_mutual_tls`, `SocketTransport`/`Message` framing.
