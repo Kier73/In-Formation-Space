@@ -1,0 +1,10 @@
+{
+  "experiment": "RE-016",
+  "future_receipts": 2,
+  "historical_status": "revoked",
+  "historical_validation_mode": "attested_prior_legacy_replay",
+  "legacy_secrets_needed_for_public_verifier": false,
+  "old_hmac_replayed_by_public_verifier": false,
+  "physical_assumptions_verified": false,
+  "retirement_attested": true
+}

@@ -1,0 +1,256 @@
+name: RE-016 public migration and independent E-CPU replay
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re016-public-migration.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re016-public-migration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - name: Test full response-equivalence suite including public-secret-free replay
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Deterministic RE-016 report reconstructs byte-for-byte
+        run: |
+          python experiments/response-equivalence/public_migration.py > /tmp/re016-report.json
+          cmp experiments/response-equivalence/re016_report.json /tmp/re016-report.json
+      - name: Verify genuine pinned E-CPU host adapter
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re016_cases.py
+
+  enrollment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - name: Create ONE synthetic trust genesis and temporary role-scoped CI keys
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from public_migration import hosted_material
+          m=hosted_material(deterministic=False)
+          with open('re016-ceremony-secret.json','w') as f:
+              json.dump({'ceremony':m['ceremony']},f,sort_keys=True)
+          for role,key in m['signer_keys'].items():
+              with open(f're016-private-{role}.json','w') as f:
+                  json.dump({'private_key':key},f)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re016-legacy-ceremony-only, path: re016-ceremony-secret.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re016-scoped-R1, path: re016-private-R1.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re016-scoped-W1, path: re016-private-W1.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re016-scoped-W2, path: re016-private-W2.json, retention-days: 1, if-no-files-found: error}
+
+  ceremony:
+    needs: [tests, enrollment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - uses: actions/download-artifact@v4
+        with: {name: re016-legacy-ceremony-only}
+      - name: Reverify full RE-014 HMAC basis ONCE and publish redacted history with genuine E-CPU stamp
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python experiments/response-equivalence/ecpu_re016_hosts.py --ceremony < re016-ceremony-secret.json > re016-ceremony-public.json
+          python - <<'PY'
+          import json
+          with open('re016-ceremony-public.json') as f: doc=json.load(f)
+          assert doc['historical_hmac_replay_performed_in_this_job'] is True
+          assert 'keys' not in doc['public_history']['registration']
+          assert 'baseline' not in doc
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re016-ceremony-public, path: re016-ceremony-public.json, if-no-files-found: error}
+
+  signers:
+    needs: [ceremony, enrollment]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        role: ['R1','W1','W2']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - uses: actions/download-artifact@v4
+        with: {name: re016-ceremony-public}
+      - uses: actions/download-artifact@v4
+        with: {name: 're016-scoped-${{ matrix.role }}'}
+      - name: Independently sign migration and E-CPU causal binding without legacy keys
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+          ROLE: ${{ matrix.role }}
+        run: |
+          python - <<'PY' > /tmp/re016-signer-input.json
+          import json,os
+          def read(path):
+              with open(path) as f: return json.load(f)
+          role=os.environ['ROLE']
+          print(json.dumps({'ceremony':read('re016-ceremony-public.json'),
+                            'private_key':read(f're016-private-{role}.json')['private_key']}))
+          PY
+          python experiments/response-equivalence/ecpu_re016_hosts.py --${ROLE} < /tmp/re016-signer-input.json > re016-signer-${ROLE}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: re016-signer-${{ matrix.role }}-public
+          path: re016-signer-${{ matrix.role }}.json
+          if-no-files-found: error
+
+  pinning:
+    needs: signers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - uses: actions/download-artifact@v4
+        with: {name: re016-ceremony-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-signer-R1-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-signer-W1-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-signer-W2-public}
+      - name: Assemble signed migration and retain separate public latest-head artifact
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re016-assemble-input.json
+          import json
+          def read(p):
+              with open(p) as f: return json.load(f)
+          print(json.dumps({'ceremony':read('re016-ceremony-public.json'),
+            'signers':{r:read(f're016-signer-{r}.json') for r in ('R1','W1','W2')}}))
+          PY
+          python experiments/response-equivalence/ecpu_re016_hosts.py --assemble < /tmp/re016-assemble-input.json > re016-retained-pin-and-manifest.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re016-retained-migration-head-public, path: re016-retained-pin-and-manifest.json, if-no-files-found: error}
+
+  public-verifier:
+    needs: pinning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - uses: actions/download-artifact@v4
+        with: {name: re016-ceremony-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-signer-R1-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-signer-W1-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-signer-W2-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-retained-migration-head-public}
+      - name: Reconstruct public evidence with real E-CPU causal order and NO legacy HMAC keys
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re016-verify-input.json
+          import json
+          def read(p):
+              with open(p) as f:return json.load(f)
+          print(json.dumps({'ceremony':read('re016-ceremony-public.json'),
+            'signers':{r:read(f're016-signer-{r}.json') for r in ('R1','W1','W2')},
+            'pin':read('re016-retained-pin-and-manifest.json')['retained_pin']}))
+          PY
+          python experiments/response-equivalence/ecpu_re016_hosts.py --verify < /tmp/re016-verify-input.json > re016-public-verifier-result.json
+          python - <<'PY'
+          import json
+          with open('re016-public-verifier-result.json') as f: result=json.load(f)
+          assert result['result']['status']=='revoked'
+          assert result['result']['historical_validation_mode']=='attested_prior_legacy_replay'
+          assert result['result']['historical_hmac_reexecuted'] is False
+          assert result['legacy_key_material_used'] is False
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re016-public-verifier-result, path: re016-public-verifier-result.json, if-no-files-found: error}
+
+  independent-replay:
+    needs: public-verifier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - uses: actions/download-artifact@v4
+        with: {name: re016-ceremony-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-signer-R1-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-signer-W1-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-signer-W2-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-retained-migration-head-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re016-public-verifier-result}
+      - name: Recheck all public evidence in a fresh host without HMAC secrets
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re016-replay-input.json
+          import json
+          def read(p):
+              with open(p) as f: return json.load(f)
+          print(json.dumps({'ceremony':read('re016-ceremony-public.json'),
+            'signers':{r:read(f're016-signer-{r}.json') for r in ('R1','W1','W2')},
+            'pin':read('re016-retained-pin-and-manifest.json')['retained_pin'],
+            'received':read('re016-public-verifier-result.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re016_hosts.py --replay < /tmp/re016-replay-input.json > re016-independent-replay-result.json
+          python - <<'PY'
+          import json
+          with open('re016-independent-replay-result.json') as f:result=json.load(f)
+          assert result['status']=='independently_replayed_public_attestation'
+          assert result['historic_hmac_reverified'] is False
+          assert result['certificate_status']=='revoked'
+          PY
