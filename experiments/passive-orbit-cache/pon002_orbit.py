@@ -285,6 +285,7 @@ def reconstruct(*, routes: list[Provider], grant: dict,
                                            r.kind != "temporary"}),
         "delivery_operators": sorted({r.operator for r in routes if
                                       r.kind != "temporary"}),
+        "public_git_commit": next(iter(public_revisions)) if public_revisions else None,
         "passive_hosts_executed_arithmetic": False,
         "externally_authenticated_issuer": False,
         "external_effects_authorized": False,
@@ -306,15 +307,24 @@ def main() -> None:
     now = int(time.time())
     grant = grant_root(signer=signer, manifest_sha=ROOT_PIN, epoch=1,
                        valid_from=now - 15, valid_until=now + 900)
+    # The provider jobs deliberately use exactly one real HTTPS operator each.
+    # An unavailable provider must fail that job; automatic silent substitution
+    # would destroy evidence of independent delivery path availability.
+    route = [p for p in providers_for_commit(args.commit) if p.kind == args.provider]
+    pub = public_key_bytes(signer)
     result = reconstruct(
-        routes=providers_for_commit(args.commit,
-                                    preference=(args.provider,
-                                                "jsdelivr" if args.provider == "github" else "github")),
-        grant=grant, pinned_key=public_key_bytes(signer),
+        routes=route, grant=grant, pinned_key=pub,
         minimum_epoch=1, now=now,
     )
+    envelope = {
+        "schema": "in-formation.pon002-provider-report/0.1",
+        "provider": args.provider, "public_git_commit": args.commit,
+        "issuer_public_key_hex": pub.hex(), "capability": grant,
+        "receiver_min_epoch": 1, "observed_at_unix": now,
+        "orbit": result,
+    }
     args.report.parent.mkdir(parents=True, exist_ok=True)
-    args.report.write_bytes(canonical(result) + b"\n")
+    args.report.write_bytes(canonical(envelope) + b"\n")
     print(json.dumps({
         "status": result["status"], "value": result["value"],
         "requested_provider": args.provider,
