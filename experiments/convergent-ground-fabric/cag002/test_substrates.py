@@ -96,6 +96,23 @@ class DualSubstrateVerifierTests(unittest.TestCase):
         self.assertEqual([x["final"] for x in a["cases"]],
                          [x["final"] for x in b["cases"]])
 
+    def test_exact_route_capture_hash_changes_under_duplicate_replay(self):
+        source, blue, amber, trace, jet, peer = fixture()
+        first = s.reconstruct(source, blue, amber, trace, jet, peer)
+        self.assertEqual(set(first["captured_route_files_sha256"]), {"jetstream", "libp2p"})
+        jet.append(jet[0])
+        second = s.reconstruct(source, blue, amber, trace, jet, peer)
+        self.assertNotEqual(first["captured_route_files_sha256"]["jetstream"],
+                            second["captured_route_files_sha256"]["jetstream"])
+        self.assertEqual(first["reference"], second["reference"])
+
+    def test_noncanonical_route_capture_is_refused(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = pathlib.Path(temp) / "arrivals.jsonl"
+            path.write_bytes(b' { "schema": "fake" }\\n')
+            with self.assertRaisesRegex(s.SubstrateError, "canonical JSONL"):
+                s.read_jsonl(path)
+
     def test_offline_verifier_rejects_altered_report(self):
         source, blue, amber, trace, jet, peer = fixture()
         with tempfile.TemporaryDirectory() as temp:
