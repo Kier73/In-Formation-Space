@@ -1,0 +1,66 @@
+name: Branching morphology
+
+on:
+  pull_request:
+    paths:
+      - "experiments/branching-morphology/**"
+      - ".github/workflows/branching-morphology.yml"
+  push:
+    branches: [main]
+    paths:
+      - "experiments/branching-morphology/**"
+      - ".github/workflows/branching-morphology.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  atlas-and-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run standard-library contract tests
+        run: python -m unittest discover -s experiments/branching-morphology -p 'test_*.py' -v
+      - name: Generate deterministic morphology atlas
+        run: |
+          python experiments/branching-morphology/canopy.py \
+            --svg "$RUNNER_TEMP/canopies.svg" \
+            --json "$RUNNER_TEMP/measurements.json" > /dev/null
+      - name: Validate SVG and compare numeric observations
+        run: |
+          python - <<'PY'
+          import json
+          import math
+          import os
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          svg = ET.parse(root / "canopies.svg").getroot()
+          assert svg.tag == "{http://www.w3.org/2000/svg}svg"
+          expected = json.loads(Path("experiments/branching-morphology/results/default-measurements.json").read_text())
+          actual = json.loads((root / "measurements.json").read_text())
+          assert actual["rule"] == expected["rule"]
+          assert actual["iterations"] == expected["iterations"]
+          assert len(actual["records"]) == len(expected["records"]) == 5
+          for observed, reference in zip(actual["records"], expected["records"]):
+              assert observed["angle_degrees"] == reference["angle_degrees"]
+              assert observed["segments"] == reference["segments"] == 625
+              for name in ("width", "height", "aspect_width_over_height", "hull_area", "hull_fraction_of_bbox"):
+                  assert math.isclose(observed[name], reference[name], rel_tol=1e-7, abs_tol=1e-4), (name, observed, reference)
+          print("SVG parses and measured geometry agrees with retained observations")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: branching-morphology-py${{ matrix.python-version }}
+          path: |
+            ${{ runner.temp }}/canopies.svg
+            ${{ runner.temp }}/measurements.json
