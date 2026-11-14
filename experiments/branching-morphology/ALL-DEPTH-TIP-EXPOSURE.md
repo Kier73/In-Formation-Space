@@ -4,6 +4,8 @@
 
 The earlier [all-depth stabilization work](ALL-DEPTH-STABILIZATION.md) and [depth-six quintic certificate](EXACT-DEPTH6-QUINTIC.md) established that known hull transitions persist. This follow-up asks a different question: **must the recursively nested branch tip eventually become a genuine exposed hull vertex at every depth, rather than remain a merely internal collinearity?**
 
+**Follow-up (BMO-010):** The [angle-dependent heading-distribution theorem](ANGLE-DEPENDENT-SUPPORT-CONE.md) strengthens the sufficient interval below to **0 < θ ≤ π/(4n)** at every depth, without changing the correctness of this original small-angle proof.
+
 ## Theorem: a quantitative, all-depth supporting edge
 
 Write `O` for the origin and `A_n` for turtle endpoint number `a_n=(3·5^n+1)/4` after depth `n≥1`. Let `H_n(θ)` be the convex hull of *all* endpoints of the drawing.
