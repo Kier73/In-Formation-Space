@@ -6,6 +6,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
+# Older RE workflows are standard-library-only; the dedicated RE-016 workflow
+# installs cryptography and MUST run every test in this module. Preserve those
+# older suites' independence of a new optional Ed25519 dependency.
+try:
+    import cryptography  # noqa: F401
+except ImportError:
+    raise unittest.SkipTest('RE-016 public-key tests require cryptography; use the dedicated RE-016 workflow')
+
 from public_migration import (
     MigrationError, attest_migration, append_future_archive, create_future_archive,
     export_future_archive, fixture, future_body, future_pin, hosted_material, pin,
