@@ -124,6 +124,7 @@ func StrictPolicy(raw []byte) (Policy,error) {
         if !modelPattern.MatchString(name)||!digestPattern.MatchString(h){return p,reject("invalid expected source record")}
     }
     seen:=make(map[string]bool)
+    seenPublic:=make(map[string]bool)
     for _,k:=range p.Keys{
         if !keyIDPattern.MatchString(k.ID)||seen[k.ID]||k.Algorithm!="ed25519" || (k.State!="active"&&k.State!="revoked") ||k.ValidFrom==0 ||(k.ValidUntil!=0 && k.ValidUntil<=k.ValidFrom){
             return p,reject("invalid, duplicate or unsupported trusted key record")
@@ -131,6 +132,9 @@ func StrictPolicy(raw []byte) (Policy,error) {
         seen[k.ID]=true
         pk,e:=base64.StdEncoding.Strict().DecodeString(k.PublicKey)
         if e!=nil||len(pk)!=ed25519.PublicKeySize{return p,reject("invalid trusted Ed25519 public key")}
+        canonicalPublic:=base64.StdEncoding.EncodeToString(pk)
+        if seenPublic[canonicalPublic]{return p,reject("duplicate trusted public key could bypass signature threshold")}
+        seenPublic[canonicalPublic]=true
     }
     return p,nil
 }
