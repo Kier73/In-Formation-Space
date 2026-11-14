@@ -161,7 +161,7 @@ class CapsuleDecoder:
             return
 
         if len(self.fragments) < self.manifest["chunks"]:
-            obj = exact_object(frame, {"phase", "index", "hex"}, "chunk")
+            obj = wire_fields(frame, {"phase", "index", "hex"}, "chunk")
             check(obj["phase"] == "chunk" and
                   type(obj["index"]) is int and obj["index"] == len(self.fragments),
                   "out-of-order chunk")
@@ -185,7 +185,7 @@ class CapsuleDecoder:
                 self.body = body
             return
 
-        obj = exact_object(frame, {"phase", "manifest_sha256"}, "terminal frame")
+        obj = wire_fields(frame, {"phase", "manifest_sha256"}, "terminal frame")
         check(obj["phase"] == "finish" and
               obj["manifest_sha256"] == sha(canonical(self.manifest)),
               "terminal commitment mismatch")
