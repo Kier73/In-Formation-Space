@@ -312,8 +312,8 @@ def run(directory: Path) -> dict[str, Any]:
                     'request_payload_bytes':nreq,'response_payload_bytes':nresp,
                     'negotiated_tls':transport.socket.version(),
                     'channel_binding_verified':True})
-            check(len(directory_fabric.active_snapshots())==3 and
-                len(directory_fabric.hosts())==3,
+            check(len(directory_fabric.active_snapshots)==3 and
+                len(directory_fabric.hosts)==3,
                 'actual E-CPU authenticated fabric directory did not admit all three peers')
             # Deliberately disallowed feature. It must be rejected by peer's
             # receiver-local exact plan check, *not* routed to a generic probe.
@@ -429,4 +429,5 @@ def main() -> None:
 
 if __name__=='__main__':
     main()
+
 
