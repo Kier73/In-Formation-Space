@@ -139,16 +139,22 @@ class SNC002WireTests(unittest.TestCase):
         source = canonical({"schema": SCHEMA, "kind": "semantic",
                             "semantic_atlas": EXAMPLES["triangular_bump"],
                             "padding": "x" * (CHUNK * 2)})
-        # This is protocol-visible but NOT a semantically valid payload.
-        # Framing must support independent assembly without promoting it.
-        with self.assertRaises(TransitRejected):
-            make_frames(source, mode="semantic")
-        source = payload()
+        # The wire is opaque: it must safely reassemble this multi-frame
+        # document, but the application must separately refuse its extra key.
         frames = make_frames(source, mode="semantic")
+        self.assertGreater(len(frames), 3)
         dec = Decoder()
         dec.ingest(frames[0])
+        dec.ingest(frames[1])
         with self.assertRaises(TransitRejected):
             dec.ingest(frames[-1])
+        full = Decoder()
+        for frame in frames:
+            full.ingest(frame)
+        self.assertEqual(full.document, source)
+        with self.assertRaises(TransitRejected):
+            verify_received(full.document, kind="semantic",
+                            expected_semantic_sha256=hash_bytes(EXAMPLES["triangular_bump"]))
 
     def test_receiver_requires_source_identity(self):
         with self.assertRaises(TransitRejected):
