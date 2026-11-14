@@ -15,7 +15,7 @@ floating-point comparisons.
 -/
 
 namespace COE011Atlas
-open COEWireCheck COE009Endpoint COE009Evaluation COE010Real COE010Network
+open COEWireCheck COE008Evaluation COE009Endpoint COE009Evaluation COE010Real COE010Network
 
 /-- Rational and real versions of a bounded-cell projection. The bounds
 are *the actual exact rational endpoints stored in the certificate*. -/
@@ -108,7 +108,7 @@ theorem clampReal_fixed (c : Cell) (x : ℝ)
 theorem continuous_clampReal (c : Cell) : Continuous (clampReal c) := by
   cases c with
   | mk lo hi out =>
-    cases lo <;> cases hi <;> simp [clampReal] <;> fun_prop
+    cases lo <;> cases hi <;> dsimp [clampReal] <;> fun_prop
 
 /-- Select a component from the *actual claimed cell output*, with zero
 padding outside its width, matching the total-component convention in
