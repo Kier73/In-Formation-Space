@@ -25,6 +25,26 @@ class ECPUApplicabilityTests(unittest.TestCase):
         self.assertEqual(res['applicability']['status'],'conditionally_applicable')
         self.assertFalse(res['physical_sensor_identity_verified'])
 
+    def test_scoped_observer_only_has_own_signing_key(self):
+        # Separate hosted jobs receive only A/B keys; no source MAC key.
+        scoped={'challenge':self.reg['challenge'],'key_ids':self.reg['key_ids'],
+                'keys':{'A':self.reg['keys']['A']}}
+        a=observer_host(self.s,scoped,'A')
+        self.assertEqual(verify(self.s,a,self.b,self.reg,
+                         assumptions_accepted=True)['applicability']['status'],
+                         'conditionally_applicable')
+
+    def test_provisional_source_plan_requires_verifier_mac_check(self):
+        scoped={'challenge':self.reg['challenge'],'key_ids':self.reg['key_ids'],
+                'keys':{'B':self.reg['keys']['B']}}
+        tampered=copy.deepcopy(self.s)
+        tampered['plan']['body']['slots'][0]['stratum']='edge'
+        tampered['plan']['digest']=sha({k:v for k,v in tampered['plan'].items() if k!='digest'})
+        tampered['digest']=sha({k:v for k,v in tampered.items() if k!='digest'})
+        provisional=observer_host(tampered,scoped,'B')
+        with self.assertRaisesRegex(ApplicabilityError,'binding mismatched|HMAC'):
+            verify(tampered,self.a,provisional,self.reg)
+
     def test_changed_sensor_id_remains_signed_but_suspended(self):
         replaced=observer_host(self.s,self.reg,'A',sensor='new-hardware')
         res=verify(self.s,replaced,self.b,self.reg,assumptions_accepted=True)
