@@ -108,7 +108,9 @@ jobs:
             exit 1
           fi
           cat invalid-piecewise-cover.txt
-          grep -Eq 'Tactic.*decide.*failed|decide.*failed|failed to prove' invalid-piecewise-cover.txt
+          grep -Fq 'Tactic `decide` proved that the proposition' invalid-piecewise-cover.txt
+          grep -Fq 'verify COE011Fixtures.gappedSplit = true' invalid-piecewise-cover.txt
+          grep -Fq 'is false' invalid-piecewise-cover.txt
       - name: Require rejection of a false all-real ReLU observation
         working-directory: experiments/continuous-observation-equivalence/real-lean
         run: |
