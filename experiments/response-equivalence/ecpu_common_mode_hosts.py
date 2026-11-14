@@ -62,7 +62,8 @@ def verify(source_doc: Mapping[str, Any], a_doc: Mapping[str, Any],
     native = verify_ecpu(source_doc["controller"], a, b, reg)
     result = reconstruct(source_doc["source"], {"A": a["log"], "B": b["log"]},
                          {"A": a_doc["ack"], "B": b_doc["ack"]}, reg,
-                         [a["delivery"]])
+                         [a["delivery"]],
+                         controller_digest=source_doc["controller"]["digest"])
     if (result["status"] != "source_observer_disagreement" or
         result["source_observer_discrepancy"] != 1 or
         result["observer_blind_declared_epochs"] or
