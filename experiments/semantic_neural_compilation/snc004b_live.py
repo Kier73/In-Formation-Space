@@ -405,7 +405,10 @@ def main() -> None:
             check(not args.overlay or args.port == PORT,
                   "overlay listener must use dedicated SNC-004B port")
             listener = SocketTransport.listen(address, args.port)
-            listener.settimeout(TIMEOUT)
+            # Hosted runners may become ready at different times.
+            # Only the network *accept* budget is extended in overlay mode;
+            # authenticated application frames retain their smaller deadline.
+            listener.settimeout(150.0 if args.overlay else TIMEOUT)
             try:
                 print("LISTEN_PORT=" + str(listener.getsockname()[1]), flush=True)
                 result = serve(
