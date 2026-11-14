@@ -76,7 +76,7 @@ jobs:
           from experiments.tensor_cut_realization.native_admission import NativeCut, accept_partition
           base=Path('prepared')
           manifest=tcr._validated_manifest(tcr._read_json(base/'manifest.json'))
-          assert manifest['source_provenance']['kind']=='observed-selected-huggingface-payloads'
+          assert manifest['source_provenance']['kind']=='observed-selected-hub-payloads'
           with np.load(base/'reference.npz',allow_pickle=False) as arc:
               x=arc['inputs']
           request=transport.request_for(manifest,0,x,request_id='tcr003-real-source')
