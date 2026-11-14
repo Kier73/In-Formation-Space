@@ -257,6 +257,17 @@ jobs:
             cat lean-json-byte-proof-output.txt
             exit 1
           fi
+      - name: Require kernel rejection of malformed duplicate-key JSON proof
+        working-directory: experiments/continuous-observation-equivalence/lean
+        run: |
+          if lake env lean COE013Invalid.lean > invalid-json-byte-proof.txt 2>&1; then
+            echo "ERROR: Lean accepted duplicate JSON keys"
+            exit 1
+          fi
+          cat invalid-json-byte-proof.txt
+          grep -Fq 'Tactic `decide` proved that the proposition' invalid-json-byte-proof.txt
+          grep -Fq 'parseEnvelope duplicateKey ≠ none' invalid-json-byte-proof.txt
+          grep -Fq 'is false' invalid-json-byte-proof.txt
       - name: Require Lean kernel rejection of noncanonical rational wire admission
         working-directory: experiments/continuous-observation-equivalence/lean
         run: |
@@ -300,6 +311,7 @@ jobs:
             experiments/continuous-observation-equivalence/lean/lean-json-replay-manifest.json
             experiments/continuous-observation-equivalence/lean/GeneratedJSONProofs.lean
             experiments/continuous-observation-equivalence/lean/lean-json-byte-proof-output.txt
+            experiments/continuous-observation-equivalence/lean/invalid-json-byte-proof.txt
             experiments/continuous-observation-equivalence/lean/lean-wire-olean-output.txt
             experiments/continuous-observation-equivalence/lean/invalid-wire-token.txt
             experiments/continuous-observation-equivalence/lean/negative-*-rejection.txt
