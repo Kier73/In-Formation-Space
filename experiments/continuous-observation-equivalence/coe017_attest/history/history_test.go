@@ -96,7 +96,11 @@ func cloneFixture(t *testing.T,f fixture)fixture{
  t.Helper()
  copy:=f
  raw,e:=Canonical(f.journal);if e!=nil{t.Fatal(e)}
- if e=json.Unmarshal(raw,&copy.journal);e!=nil{t.Fatal(e)}
+ // Never unmarshal into a shallow-copied slice: that overwrites the original
+ // fixture's shared backing array and can contaminate later subtests.
+ var independent Journal
+ if e=json.Unmarshal(raw,&independent);e!=nil{t.Fatal(e)}
+ copy.journal=independent
  copy.evidence=append([]byte{},f.evidence...)
  copy.signed=append([]byte{},f.signed...)
  copy.state=append([]byte{},f.state...)
