@@ -53,6 +53,12 @@ cost_weight  = -(1 + (word_1 mod 1024)) / 1048576
 score        = error_weight * ReLU(residual) + cost_weight * ReLU(complexity)
 ```
 
+The 1,067-byte description is not the full persistent footprint: the checkpoint
+also stores the parameter law, task observations, receipts, read cache and
+execution ledger; M1 storage pads its page. Reports separately measure the
+checkpoint and page-backing files. Zero persisted dense arrays does not mean
+zero parameter information or zero reconstruction cost.
+
 The input encoder accepts bounded nonnegative integer feature pairs. Candidate
 laws are fitted from the first four observations. Ranking features use only
 the first eight: summed absolute residual and a simple complexity indicator.

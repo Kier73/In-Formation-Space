@@ -597,7 +597,7 @@
           "withheld_observations": 8
         }
       ],
-      "elapsed_ns_local_including_baseline": 80913700,
+      "elapsed_ns_local_including_baseline": 72479000,
       "execution_ground_digest": "a06b0c0b700921a0e6649e4948802e82b0d207dbb6161828e9d7d57abb4849e8",
       "inference_after_restart": "fresh inference; no cross-process exactly-once claim",
       "inference_engine": "addressed-scalar",
@@ -616,7 +616,7 @@
       "successful_ground_tasks": 16
     },
     "phase": "restore",
-    "pid": 5004
+    "pid": 27492
   },
   "before": {
     "benchmark": {
@@ -1216,7 +1216,7 @@
           "withheld_observations": 8
         }
       ],
-      "elapsed_ns_local_including_baseline": 81716300,
+      "elapsed_ns_local_including_baseline": 83748700,
       "execution_ground_digest": "b4bc0b8974bfc0fe14d1d62d175cd7f4a1b0dcde61a1928de6916b1a8dc2ca20",
       "inference_after_restart": "fresh inference; no cross-process exactly-once claim",
       "inference_engine": "dense-reference",
@@ -1234,8 +1234,14 @@
       "ranked_candidate_attempts": 16,
       "successful_ground_tasks": 16
     },
+    "persisted_storage": {
+      "checkpoint_file_bytes": 1930922,
+      "includes": "checkpoint includes laws, observations, receipts, read cache and execution ledger",
+      "model_description_bytes": 1067,
+      "page_backing_file_bytes": 4096
+    },
     "phase": "create",
-    "pid": 32348,
+    "pid": 23432,
     "policy": {
       "checkpoint_sha256": "867a8c6173fefa2a16298d88234a7e485f211c8c57e362643ad943abe6df412f",
       "manifest": {

@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   functional-recovery:
+    name: '${{ matrix.os }} / Python ${{ matrix.python }}'
     strategy:
       fail-fast: false
       matrix:
@@ -47,6 +48,7 @@ jobs:
           repository: Kier73/Virtual-Ground-Interpreter
           ref: 093f11e458aff1c223d639ede413000619767ba6
           path: external/Virtual-Ground-Interpreter
+          sparse-checkout: virtual_ground_interpreter
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:

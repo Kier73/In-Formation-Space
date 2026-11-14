@@ -71,6 +71,12 @@ def worker(root, phase, policy_path, ready):
     result = {"pid": os.getpid(), "phase": phase, "benchmark": outcome}
     if phase == "create":
         result["policy"] = host.save()
+        result["persisted_storage"] = {
+            "checkpoint_file_bytes": (root / "system.json").stat().st_size,
+            "page_backing_file_bytes": sum(p.stat().st_size for p in (root / "pages").rglob("*") if p.is_file()),
+            "model_description_bytes": host.manifest.size_bytes,
+            "includes": "checkpoint includes laws, observations, receipts, read cache and execution ledger",
+        }
     # Publish a complete result before the supervisor terminates this process.
     staging = ready.with_suffix(".tmp")
     with staging.open("wb") as stream:
