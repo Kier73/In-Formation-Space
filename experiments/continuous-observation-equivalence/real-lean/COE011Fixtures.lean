@@ -35,6 +35,24 @@ theorem identitySplitContinuous :
     Continuous (piecewiseReal identitySplit 0) :=
   continuous_piecewiseReal identitySplit 0 identitySplitAccepted
 
+/-- The same source network and output laws, but with a real gap
+between the first right endpoint 0 and second left endpoint 1. The
+original executable certificate checker must reject this profile,
+and that rejection itself is proved by kernel reduction. -/
+def gappedSplit : Cert :=
+  { layers := [
+      { weights := [[(1 : Rat)]], bias := [0], relu := false }]
+    cells := [
+      { left := none, right := some 0,
+        output := [{ slope := 1, offset := 0 }] },
+      { left := some 1, right := none,
+        output := [{ slope := 1, offset := 0 }] }] }
+
+theorem gappedSplitRejected : verify gappedSplit = false := by
+  decide +kernel
+
+#print axioms COE011Fixtures.gappedSplitRejected
+
 #print axioms COE011Fixtures.identitySplitAccepted
 #print axioms COE011Fixtures.identitySplitReal
 #print axioms COE011Fixtures.identitySplitContinuous
