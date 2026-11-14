@@ -124,6 +124,7 @@ func TestAdversarialSignatures(t *testing.T){
         {"policy-replaces-hash",func(f *fixture){f.policy.ExpectedNetworks["identity"]=strings.Repeat("a",64)}},
         {"higher-threshold",func(f *fixture){f.policy.Threshold=3}},
         {"duplicate-trusted-key",func(f *fixture){f.policy.Keys[2].ID="demo-22"}},
+        {"duplicate-public-key-distinct-ids",func(f *fixture){f.policy.Keys[2].PublicKey=pub(0x22)}},
     }
     for _,tc:=range tests {
         t.Run(tc.name,func(t *testing.T){
