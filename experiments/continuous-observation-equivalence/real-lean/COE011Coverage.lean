@@ -11,7 +11,7 @@ input agree with the independently constructed continuous source network.
 -/
 
 namespace COE011Coverage
-open COEWireCheck COE011Atlas COE010Real COE010Network
+open COEWireCheck COE008Evaluation COE011Atlas COE010Real COE010Network
 
 /-- Follow the actual verified rational endpoint chain as a chain of
 closed REAL intervals. The argument works for an arbitrary real x and
