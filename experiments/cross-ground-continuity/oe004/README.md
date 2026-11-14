@@ -34,10 +34,14 @@ authorization of the exact requested feature, policy and Ground.
 ## Components
 
 - [`witness_binding.py`](witness_binding.py) uses the existing
-  [OE-003 plan/verification machinery](../../../bridges/observation-equivalence/witness_realization.py)
+  [OE-001/002 cost-aware finite navigator](../../../bridges/observation-equivalence/costed_navigation.py)
   to construct a zero-action, one-test `parity` distinguishing witness.
-  The test's **1 unit** is GCI-003's declared symbolic cost, *not* measured
-  nanoseconds. It independently rechecks GCI-004 before reading the result.
+  OE-004 uses its own typed, digest-bound **symbolic-cost plan** rather than
+  reusing OE-003's nanosecond-named field for a different unit. The test's
+  **1 unit** is GCI-003's declared symbolic cost, *not* measured nanoseconds.
+  The independent verifier reconstructs the entire OE-004 plan from the
+  previously verified GCI-003 candidate Ground, then rechecks GCI-004's
+  source receipt before using its result.
 - [`test_witness_binding.py`](test_witness_binding.py) tests finite witness
   construction, exact model/policy pinning, incomplete or invalid candidate
   universes, false uniqueness and invalid observations.
@@ -62,7 +66,7 @@ The authorized observation is
  O_{parity}(s)=s\bmod 2.
 \]
 
-A minimum-cost zero-action OE-003 plan finds a pair \(a,b\in C\) with
+A minimum-cost zero-action OE-004 plan using the OE-001/002 navigator finds a pair \(a,b\in C\) with
 \(O(a)\ne O(b)\). This proves that one parity read is capable of separating
 **those two possible states** under the model, not that it identifies every
 element of \(C\). For the single actually signed return \(v\), OE-004
