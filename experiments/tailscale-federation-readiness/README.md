@@ -14,7 +14,7 @@ The local Python contract audit checks both existing workflow files for:
 - Real E-CPU mTLS client, signed server endpoint, and server binding to the Tailscale IPv4
 - Independent verifier and observer jobs remaining outside the tailnet
 
-The audit emits a deterministic JSON report with workflow SHA-256 hashes and required **secret names only**. It cannot read GitHub secrets or Tailscale admin settings; it does not exercise TCP, mTLS or ReliableChannel. The existing MOR-002 tests job runs this audit and mutation tests. Source-contract success must never be described as live overlay success.
+The audit emits a deterministic JSON report with workflow SHA-256 hashes and required **secret names only**. It cannot read GitHub secrets or Tailscale admin settings; it does not exercise TCP, mTLS or ReliableChannel. The existing MOR-002 tests job runs this audit and mutation tests. **Only an explicit workflow_dispatch from main can start the MOR-002 live peer, observer and verifier jobs; routine push and PR events run tests only.** Source-contract success must never be described as live overlay success.
 
 ## Required administrator setup
 
