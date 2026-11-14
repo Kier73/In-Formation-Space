@@ -50,7 +50,7 @@ Run the focused state-complete tests:
     python -m pip install 'cryptography>=43,<47'
     python -m unittest discover -s experiments/cross-ground-continuity/gci003 -p 'test_intention_model.py' -v
 
-The complete hosted proof follows [.github/workflows/cag004-topology-neutral.yml](../../../.github/workflows/cag004-topology-neutral.yml). A successful workflow must be checked before calling the hosted experiment verified. Source records, each host report and the final audit are retained as separate artifacts.
+The complete hosted proof follows [.github/workflows/cag004-topology-neutral.yml](../../../.github/workflows/cag004-topology-neutral.yml). The [main-branch, 15-job GCI-003 evidence record](results/ci-run-43608615402.md) passed on November 14, 2026; this establishes only the stated eight-state experimental scope. Source records, each host report and the final audit are retained as separate artifacts.
 
 This is an eight-state research experiment. It does not establish universal observational equivalence, real-world sensing, autonomous provider authority, independent physical host domains, or measured performance acceleration.
 
