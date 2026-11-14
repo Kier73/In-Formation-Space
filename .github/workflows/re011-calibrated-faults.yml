@@ -1,0 +1,190 @@
+name: RE-011 controlled detection calibration and common-mode fault injection
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re011-calibrated-faults.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/response-equivalence/**'
+      - '.github/workflows/re011-calibrated-faults.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run full RE regression suite
+        run: python -m unittest discover -s experiments/response-equivalence -p 'test_*.py' -v
+      - name: Verify deterministic calibration report
+        run: |
+          python experiments/response-equivalence/detection_calibration.py > /tmp/re011-reproduced.json
+          cmp experiments/response-equivalence/re011_report.json /tmp/re011-reproduced.json
+      - name: Verify actual pinned E-CPU causal handoff
+        env:
+          PYTHONPATH: external/E-CPU:experiments/response-equivalence
+        run: python experiments/response-equivalence/ecpu_re011_cases.py
+
+  enrollment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Create test-only ephemeral per-role keys
+        run: |
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'experiments/response-equivalence')
+          from detection_calibration import enrollment
+          reg=enrollment()
+          for role in ('S','A','B'):
+              scoped={'challenge':reg['challenge'],'key_ids':reg['key_ids'],
+                      'keys':{role:reg['keys'][role]}}
+              with open('re011-enrollment-'+role+'.json','w',encoding='utf-8') as f:
+                  json.dump(scoped,f,sort_keys=True)
+          with open('re011-verifier-enrollment.json','w',encoding='utf-8') as f:
+              json.dump(reg,f,sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re011-S-ci-key, path: re011-enrollment-S.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re011-A-ci-key, path: re011-enrollment-A.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re011-B-ci-key, path: re011-enrollment-B.json, retention-days: 1, if-no-files-found: error}
+      - uses: actions/upload-artifact@v4
+        with: {name: re011-verifier-ci-keys, path: re011-verifier-enrollment.json, retention-days: 1, if-no-files-found: error}
+
+  instrumented-source:
+    needs: enrollment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re011-S-ci-key}
+      - name: Source S generates 60 synthetic event challenges and 20 shams
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re011-source-request.json
+          import json
+          with open('re011-enrollment-S.json',encoding='utf-8') as f: reg=json.load(f)
+          print(json.dumps({'enrollment':reg}))
+          PY
+          python experiments/response-equivalence/ecpu_re011_hosts.py --source < /tmp/re011-source-request.json > re011-source.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re011-source-public, path: re011-source.json, if-no-files-found: error}
+
+  observer-a:
+    needs: [instrumented-source, enrollment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re011-A-ci-key}
+      - uses: actions/download-artifact@v4
+        with: {name: re011-source-public}
+      - name: A generates own signed observations and genuine E-CPU receipt
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re011-A-request.json
+          import json
+          def load(p):
+              with open(p,encoding='utf-8') as f:return json.load(f)
+          print(json.dumps({'enrollment':load('re011-enrollment-A.json'), 'source':load('re011-source.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re011_hosts.py --A < /tmp/re011-A-request.json > re011-A.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re011-A-public, path: re011-A.json, if-no-files-found: error}
+
+  observer-b:
+    needs: [instrumented-source, enrollment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re011-B-ci-key}
+      - uses: actions/download-artifact@v4
+        with: {name: re011-source-public}
+      - name: B independently generates signed observations and E-CPU receipt
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re011-B-request.json
+          import json
+          def load(p):
+              with open(p,encoding='utf-8') as f:return json.load(f)
+          print(json.dumps({'enrollment':load('re011-enrollment-B.json'), 'source':load('re011-source.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re011_hosts.py --B < /tmp/re011-B-request.json > re011-B.json
+      - uses: actions/upload-artifact@v4
+        with: {name: re011-B-public, path: re011-B.json, if-no-files-found: error}
+
+  independent-verifier:
+    needs: [tests, instrumented-source, observer-a, observer-b, enrollment]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {repository: Kier73/E-CPU, ref: c99af8c927fcbb7ff6f7e8a2d6489fd1489e7b65, path: external/E-CPU}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with: {name: re011-verifier-ci-keys}
+      - uses: actions/download-artifact@v4
+        with: {name: re011-source-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re011-A-public}
+      - uses: actions/download-artifact@v4
+        with: {name: re011-B-public}
+      - name: Reconstruct only from signed public records and E-CPU causal stamps
+        env: {PYTHONPATH: 'external/E-CPU:experiments/response-equivalence'}
+        run: |
+          python - <<'PY' > /tmp/re011-verifier-request.json
+          import json
+          def load(p):
+              with open(p,encoding='utf-8') as f:return json.load(f)
+          print(json.dumps({'enrollment':load('re011-verifier-enrollment.json'),
+                            'source':load('re011-source.json'),
+                            'A':load('re011-A.json'),'B':load('re011-B.json')}))
+          PY
+          python experiments/response-equivalence/ecpu_re011_hosts.py --verify < /tmp/re011-verifier-request.json > re011-verifier-report.json
+          python - <<'PY'
+          import json
+          with open('re011-verifier-report.json',encoding='utf-8') as f:r=json.load(f)
+          assert r['causal_relations']=={'S_before_A':'before','S_before_B':'before','A_concurrent_B':'concurrent'}
+          assert r['calibration']['counts']['joint_non_detection']==12
+          assert r['calibration']['iid_binomial_bounds_assumed'] is False
+          assert r['physical_detection_guarantee'] is None
+          print('Accepted scoped verification; no physical or adversarial guarantee')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: re011-independent-report, path: re011-verifier-report.json, if-no-files-found: error}
