@@ -85,24 +85,24 @@ def decodeActivation (bytes : Token) : Option Bool :=
 structure WireAffine where
   slope : Token
   offset : Token
-  deriving Repr
+  deriving Repr, DecidableEq
 
 structure WireLayer where
   weights : List (List Token)
   bias : List Token
   activation : Token
-  deriving Repr
+  deriving Repr, DecidableEq
 
 structure WireCell where
   left : Token
   right : Token
   affines : List WireAffine
-  deriving Repr
+  deriving Repr, DecidableEq
 
 structure WireCert where
   layers : List WireLayer
   cells : List WireCell
-  deriving Repr
+  deriving Repr, DecidableEq
 
 def decodeAffine (a : WireAffine) : Option Affine := do
   let slope ← parseRatToken a.slope
