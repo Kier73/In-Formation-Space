@@ -212,3 +212,43 @@ func TestWitnessAnchorConflict(t *testing.T){
  wrong=f.journal.Anchor;wrong.Count=2
  rejected(t,f,&wrong)
 }
+
+
+func TestTwoValidForksRequireWitnessAnchor(t *testing.T){
+ // Both histories have legitimate signatures from demo keys. One revokes;
+ // the other rotates again. Their common valid prefix is not sufficient to
+ // decide which branch a remote witness saw most recently.
+ original:=buildFixture(t)
+ fork:=cloneFixture(t,original)
+ lastPolicy:=*fork.journal.Entries[1].Decision.NextPolicy
+ next:=lastPolicy
+ next.MinimumSequence=5
+ next.Keys=append([]attest.Key{},lastPolicy.Keys...)
+ next.Keys=append(next.Keys,attest.Key{
+  ID:"demo-vr-74",Algorithm:"ed25519",PublicKey:testingKey(0x74),
+  State:"active",ValidFrom:5,
+ })
+ priorBytes,e:=Canonical(fork.journal.Entries[1]);if e!=nil{t.Fatal(e)}
+ d:=fork.journal.Entries[2].Decision
+ d.Kind="rotate"
+ d.Sequence=5
+ d.Previous=sha(priorBytes)
+ d.NextPolicy=&next
+ d.Reason=""
+ alternative:=Entry{
+  Decision:d,
+  OldSignatures:DemoSign(d,GovernanceDomain,0x41,0x63),
+  NewSignatures:DemoSign(d,NewKeyProofDomain,0x41,0x74),
+ }
+ fork.journal.Entries[2]=alternative
+ encoded,e:=Canonical(alternative);if e!=nil{t.Fatal(e)}
+ fork.journal.Anchor=Anchor{Schema:AnchorSchema,Count:3,Head:sha(encoded)}
+ revoked,e:=original.verify(t,nil,true);if e!=nil{t.Fatal(e)}
+ rotated,e:=fork.verify(t,nil,true);if e!=nil{t.Fatal(e)}
+ if revoked.Status!="revoked-under-policy"||rotated.Status!="active-under-policy"||
+    revoked.JournalHead==rotated.JournalHead{
+    t.Fatalf("valid fork must make unanchored receiver decisions diverge: revoked=%+v rotated=%+v",revoked,rotated)
+ }
+ rejected(t,fork,&original.journal.Anchor)
+ rejected(t,original,&fork.journal.Anchor)
+}
