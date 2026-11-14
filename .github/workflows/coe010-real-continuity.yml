@@ -95,6 +95,7 @@ jobs:
         run: |
           lake env lean COE011Fixtures.lean | tee real-piecewise-fixtures.txt
           grep -Fq "'COE011Fixtures.identitySplitReal' depends on axioms: [propext, Classical.choice, Quot.sound]" real-piecewise-fixtures.txt
+          grep -Fq "'COE011Fixtures.gappedSplitRejected' depends on axioms: [propext, Classical.choice, Quot.sound]" real-piecewise-fixtures.txt
           if grep -Eq 'sorryAx|Lean.ofReduceBool|error:' real-piecewise-fixtures.txt; then
             cat real-piecewise-fixtures.txt
             exit 1
