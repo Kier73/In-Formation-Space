@@ -10,7 +10,7 @@ No native_decide is used in the mathematical provenance theorem.
 namespace COE014Vectors
 open COE014SHA256
 
-def matches (input : List Nat) (expected : List Nat) : Bool :=
+def matchesVector (input : List Nat) (expected : List Nat) : Bool :=
   digestHex input == some expected
 
 /-- These checks exercise zero blocks, one-block ASCII, multi-block
@@ -24,7 +24,7 @@ def main : IO Unit := do
     ("thousand", List.replicate 1000 97, [52, 49, 101, 100, 101, 99, 101, 52, 50, 100, 54, 51, 101, 56, 100, 57, 98, 102, 53, 49, 53, 97, 57, 98, 97, 54, 57, 51, 50, 101, 49, 99, 50, 48, 99, 98, 99, 57, 102, 53, 97, 53, 100, 49, 51, 52, 54, 52, 53, 97, 100, 98, 53, 100, 98, 49, 98, 57, 55, 51, 55, 101, 97, 51])
   ]
   for (name, input, expected) in vectors do
-    if matches input expected then
+    if matchesVector input expected then
       IO.println s!"SHA-256 {name}: PASS"
     else
       throw (IO.userError s!"SHA-256 {name}: FAIL")
