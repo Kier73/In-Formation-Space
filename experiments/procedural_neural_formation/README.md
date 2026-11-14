@@ -101,6 +101,12 @@ The parameter and oracle budgets are accounting guards, not measured peak-RAM
 guarantees. The E-CPU checkpoint carries descriptions and receipts, not executable
 tensor buffers, so restoring it alone does not restore model inference state.
 
+## Native execution continuation
+
+[PNF-003](NATIVE-REALIZATION-003.md) connects the portable capsule receiver to
+TCR's existing native E-CPU operator: four receiver-owned cuts, capability
+denial, exact replay, and comparison with both generated and parent blocks.
+
 ## Next experiments
 
 1. Encode a generated block as a portable realization with a generated-source

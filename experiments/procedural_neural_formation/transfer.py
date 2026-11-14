@@ -51,14 +51,16 @@ def certificates(directory: Path) -> dict:
     return files
 
 
-def transfer_pair(raw: bytes, policy: dict, *, expected_receiver_pin: str | None = None) -> dict:
+def transfer_pair(raw: bytes, policy: dict, *, expected_receiver_pin: str | None = None,
+                  native_execution: bool = False, grant_compute: bool = True) -> dict:
     """Start a fresh interpreter, authenticate it, transfer chunks, validate its receipt."""
     with tempfile.TemporaryDirectory(prefix="pnf-receiver-") as temporary:
         directory = Path(temporary)
         certs = certificates(directory)
         request_id = uuid.uuid4().hex
         config = {"policy": policy, "request_id": request_id, "certificate": certs["receiver_certificate"],
-                  "private_key": certs["receiver_key"], "ca": certs["ca"], "source_certificate_sha256": certs["source_pin"]}
+                  "private_key": certs["receiver_key"], "ca": certs["ca"], "source_certificate_sha256": certs["source_pin"],
+                  "native_execution": native_execution, "grant_compute": grant_compute}
         config_path, ready_path = directory / "policy.json", directory / "ready.json"
         config_path.write_bytes(canonical(config))
         process = subprocess.Popen([sys.executable, "-m", "experiments.procedural_neural_formation.receiver",
@@ -81,7 +83,7 @@ def transfer_pair(raw: bytes, policy: dict, *, expected_receiver_pin: str | None
                     time.sleep(0.01)
             if ready is None or ready["pid"] != process.pid or process.pid == os.getpid():
                 raise RuntimeError("separate receiver did not become ready")
-            expected_impl = implementation_digest()
+            expected_impl = implementation_digest(native_execution)
             if ready["implementation_digest"] != expected_impl:
                 raise FormationError("receiver implementation mismatch")
             context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=certs["ca"])
@@ -126,6 +128,12 @@ def transfer_pair(raw: bytes, policy: dict, *, expected_receiver_pin: str | None
                 raise FormationError("invalid receiver result status")
             if report["status"] == "verified" and any(report.get(k) != v for k, v in policy.items()):
                 raise FormationError("receiver result does not bind the configured model pair")
+            if report["status"] == "verified" and native_execution:
+                native = report.get("native_execution", {})
+                if (native.get("status") != ("executed" if grant_compute else "denied")
+                        or any(native.get(k) != v for k, v in policy.items())
+                        or native.get("cut_model_digest") != policy["generated_digest"]):
+                    raise FormationError("receiver native result does not bind local execution policy")
             stdout, stderr = process.communicate(timeout=20)
             if process.returncode != 0:
                 raise RuntimeError(f"receiver process failed: {stdout} {stderr}")

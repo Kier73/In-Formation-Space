@@ -1,0 +1,94 @@
+name: PNF-003 receiver native realization
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/procedural_neural_formation/**'
+      - 'experiments/tensor_cut_realization/**'
+      - '.github/workflows/native-neural-formation.yml'
+  pull_request:
+    paths:
+      - 'experiments/procedural_neural_formation/**'
+      - 'experiments/tensor_cut_realization/**'
+      - '.github/workflows/native-neural-formation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - run: python -m pip install numpy jsonschema
+      - name: Test actual native runtime, forgery controls and socket delivery
+        env:
+          PYTHONPATH: external/E-CPU
+          OPENBLAS_NUM_THREADS: '1'
+        run: >-
+          python -m unittest experiments.procedural_neural_formation.test_native_execution
+          experiments.procedural_neural_formation.test_native_transfer
+          experiments.tensor_cut_realization.test_native_admission -v
+      - name: Transfer procedural models and exercise receiver authority
+        env:
+          PYTHONPATH: external/E-CPU
+          OPENBLAS_NUM_THREADS: '1'
+        run: >-
+          python -m experiments.procedural_neural_formation.run_native
+          --output pnf-native-procedural.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 'pnf-native-procedural-${{ matrix.python }}'
+          path: pnf-native-procedural.json
+          if-no-files-found: error
+
+  observed-native:
+    needs: native-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 3b57adcc2baaaa7e56e4bab943946f4e87e95c65
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: 093f11e458aff1c223d639ede413000619767ba6
+          path: external/Virtual-Ground-Interpreter
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install numpy jsonschema
+      - name: Observe selected HF tensors, construct, deliver and execute native cuts
+        env:
+          PYTHONPATH: 'external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter'
+          OPENBLAS_NUM_THREADS: '1'
+        run: >-
+          python -m experiments.procedural_neural_formation.run_native --live
+          --output pnf-observed-native.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnf-observed-native
+          path: pnf-observed-native.json
+          if-no-files-found: error
