@@ -1,6 +1,6 @@
 name = "coe_real_continuous_extension"
 version = "0.1.0"
-defaultTargets = ["COE010Real", "COE010Network", "COE011Atlas", "COE011Coverage", "COE011Fixtures"]
+defaultTargets = ["COE010Real", "COE010Network", "COE011Atlas", "COE011Coverage", "COE011Fixtures", "COE012Wire", "COE012RealLink"]
 
 [[require]]
 name = "mathlib"
@@ -45,3 +45,9 @@ name = "COE011Coverage"
 
 [[lean_lib]]
 name = "COE011Fixtures"
+
+[[lean_lib]]
+name = "COE012Wire"
+
+[[lean_lib]]
+name = "COE012RealLink"
