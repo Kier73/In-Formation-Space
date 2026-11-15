@@ -1,0 +1,26 @@
+name: IWI-001 exact intention navigation
+on:
+  push:
+    paths:
+      - "experiments/intention-without-identification/**"
+      - ".github/workflows/intention-without-identification.yml"
+  pull_request:
+    paths:
+      - "experiments/intention-without-identification/**"
+      - ".github/workflows/intention-without-identification.yml"
+  workflow_dispatch:
+jobs:
+  finite-belief-certificate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 22]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Verify the exhaustive models and certificates
+        run: node --test experiments/intention-without-identification/test_experiment.js
