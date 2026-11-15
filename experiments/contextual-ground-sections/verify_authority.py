@@ -101,8 +101,15 @@ def ledger(trust: dict, policies: list[dict]) -> list[str]:
 def verify_round(trust: dict, log: list[dict], policy_digest: str,
                  earlier: dict, before: dict, request: dict, responses: list[dict],
                  after: dict, now: int) -> dict:
+    checkpoint(trust, earlier)
     checkpoint(trust, before)
     checkpoint(trust, after)
+    e, b = earlier["body"], before["body"]
+    require(e["counter"] == b["counter"] and
+            e["last_receipt"] == b["last_receipt"] and
+            e["policy_version"] <= b["policy_version"] and
+            e["last_time"] <= b["last_time"],
+            "receiver checkpoint ancestry mismatch")
     signed(request, [trust["receiver"]], 1)
     policy = next(p for p in log if digest(p["body"]) == policy_digest)
     b, q = before["body"], request["body"]
