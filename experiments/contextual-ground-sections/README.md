@@ -37,7 +37,7 @@ Because p is prime, each constraint has exactly three possible types:
 - a_e=1, b_e!=0: no x is allowed.
 - a_e!=1: exactly one x=(-b_e)/(a_e-1) mod p is allowed.
 
-Intersect these constraints. For one connected graph, there are **exactly 0, 1, or p global sections**. This is a theorem for this *particular affine-field model*, not for arbitrary Grounds. The solver is linear in vertices plus edges (ignoring finite-field arithmetic costs); unlike the independent oracle, it never enumerates p^|V| assignments. Primality checking is a separate simple trial-division input guard; this is not a cryptographic field implementation.
+Intersect these constraints. For one connected graph, there are **exactly 0, 1, or p global sections**. This is a theorem for this *particular affine-field model*, not for arbitrary Grounds. The graph traversal and cycle-equation pass uses O(|V|+|E|) field operations; deterministic ordering adds O(|V| log |V| + |E| log |E|) sorting cost. Unlike the independent oracle, the solver never enumerates p^|V| assignments. Primality checking is a separate simple trial-division input guard; this is not a cryptographic field implementation.
 
 ## Four experiments: exact F_5 counterexamples
 
@@ -120,7 +120,7 @@ Three graph variants differ only in the chosen cycle translations:
 | One fixed-point cycle | 1 | A loop forces x = 65,516 |
 | An additional translation loop | 0 | x -> x+1 fixes no point |
 
-The independent verifier checks every edge/map and cycle/conclusion relation for the full graph. No state assignment is enumerated. The naive ambient assignment space has **65521^1024** possible coordinate tuples, but spanning-tree propagation and exact cycle constraints classify all of them at once, with work proportional to graph size in this model. This directly tests a constrained interpretation of "navigation rather than iteration": the implementation computes a certificate for an entire family of states without visiting every member. It does *not* prove constant-time global computation, physical substrate independence, or an actual speedup compared with optimized production solvers.
+The independent verifier checks every edge/map and cycle/conclusion relation for the full graph. No state assignment is enumerated. The naive ambient assignment space has **65521^1024** possible coordinate tuples, but spanning-tree propagation and exact cycle constraints classify all of them at once, with graph-traversal work linear in vertices and edges plus canonical sorting. This directly tests a constrained interpretation of "navigation rather than iteration": the implementation computes a certificate for an entire family of states without visiting every member. It does *not* prove constant-time global computation, physical substrate independence, or an actual speedup compared with optimized production solvers.
 
     node experiments/contextual-ground-sections/scale.js 1024
     node --test experiments/contextual-ground-sections/test_scale.js
