@@ -85,7 +85,8 @@ function verify(report) {
   }
   if(reached.size!==vs.length) reject("tree disconnected");
 
-  const expectedCycleEdges=es.map(e=>e.id).filter(id=>!tree.includes(id));
+  const treeSet=new Set(tree);
+  const expectedCycleEdges=es.map(e=>e.id).filter(id=>!treeSet.has(id));
   if(report.cycles.length!==expectedCycleEdges.length ||
      report.cycles.some((c,i)=>!c || c.edge!==expectedCycleEdges[i]))
     reject("missing or extra cycles");
