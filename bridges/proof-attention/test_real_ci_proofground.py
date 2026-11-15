@@ -91,12 +91,12 @@ class RealResearchInvariantTests(unittest.TestCase):
         dag = report["native_research_dag"]
         self.assertEqual(dag["snapshot"]["format"],
                          "mailcpu-navigable-computation-dag-v1")
-        self.assertEqual(dag["next_ready_operation"], "python-ci-regression")
+        self.assertEqual(dag["next_ready_operation"], "python.ci.regression")
         self.assertEqual(dag["external_kernel_status"],
                          "receipt-absent-uncommitted")
         self.assertEqual(set(dag["committed_observation_steps"]), {
-            "ci-observation", "integer-antisymmetry",
-            "numerical-projection", "proof-attention"
+            "ci.observation", "integer.antisymmetry",
+            "numerical.projection", "proof.attention"
         })
         self.assertEqual(len(dag["snapshot"]["state"]["commits"]), 4)
         self.assertEqual([case["depth"] for case in report["repair_checks"]],
@@ -116,7 +116,7 @@ class RealResearchInvariantTests(unittest.TestCase):
         self.assertEqual(graph.snapshot(), snapshot)
         self.assertEqual(
             {item.node_id for item in graph.ready_nodes()},
-            {"python-ci-regression"},
+            {"python.ci.regression"},
         )
         altered = deepcopy(snapshot)
         altered["state"]["commits"][1]["result"]["source_observation_digest"] = (
@@ -129,8 +129,8 @@ class RealResearchInvariantTests(unittest.TestCase):
         report = investigate(source_observation())
         snapshot = report["native_research_dag"]["snapshot"]
         committed = {x["node_id"] for x in snapshot["state"]["commits"]}
-        self.assertNotIn("python-ci-regression", committed)
-        self.assertNotIn("external-proof-kernel", committed)
+        self.assertNotIn("python.ci.regression", committed)
+        self.assertNotIn("external.proof.kernel", committed)
         self.assertEqual(report["ground_summary"]["kernel_accepted_obligations"], 0)
 
     def test_forged_ci_failure_cannot_replace_source_evidence(self):
