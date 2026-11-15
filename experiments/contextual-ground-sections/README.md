@@ -227,6 +227,21 @@ The suite compares exact algebraic counts against a structurally distinct oracle
 Replace *declared* map domains with authority-checked observations from E-CPU or VGI, using a pinned Ground revision, receiver-specific evidence and freshness rules. Map uncertainty must then be tied to verified source constraints rather than an arbitrary independent ensemble. Explore coupled constraints between pending maps and other non-affine observation families. CGS-005 does not solve those problems.
 
 
+## CGS-006: independent reconstruction of uncertain-world certificates
+
+The new [uncertain-world verifier](uncertain_verifier.js) rechecks the *accepted* graph using CGS-003, but does **not import** the [CGS-005 analysis implementation](uncertain.js). Rather than constructing cycle holonomies, it substitutes each candidate affine edge equation directly into the root-to-vertex charts:
+
+    candidate_a * P_u(x) + candidate_b = P_v(x) (mod p).
+
+It solves these equations by extended Euclid, counts exact map alternatives per root, and reconstructs the claims from scratch. An `all-affine` domain is retained as a symbolic group-count factor, so the verifier also handles the 1,024-context / 128-pending-link case without enumerating the immense completion space.
+
+It checks the stated counts, possible-root cardinality, target-result invariance, classification, evidence-state labels, declared source revisions, example outputs and the important `can_admit=false` distinction. Deliberately mutated world counts, results, revisions, and authority flags fail closed. The verifier also checks results for all 36 pairs of F_3 singleton affine-map alternatives.
+
+    node --test experiments/contextual-ground-sections/test_uncertain_verifier.js
+
+Five independent-verifier test groups passed in the in-session JavaScript V8 execution harness. As before, these two versions are independent mathematical implementations in **one JavaScript runtime**, not independent network authorities or evidence of physical measurements. A self-consistent *false premise* remains self-consistent and therefore requires source authentication in a subsequent E-CPU/VGI experiment.
+
+
 ## Relationship to prior mathematics and other projects
 
 Global sections and their obstruction by local compatibility are established in the sheaf-theoretic contextuality literature; cycle consistency and group synchronization are established in graph theory and geometry. **Do not claim that those ideas are first discovered here.**
