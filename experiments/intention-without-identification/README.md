@@ -69,3 +69,7 @@ No third-party implementation was copied. Results pertain only to the declared f
 ## IWI-002: uncertainty over the transition law
 
 The companion [IWI-002 report](IWI-002.md) reuses this solver to certify strategies across an immutable ensemble of candidate Ground laws. Individually solvable laws can be jointly impossible under indistinguishable observations; one safe diagnostic can restore robust realization. Synthetic observations are still not admitted E-CPU evidence.
+
+## IWI-003: incomplete but persistent transition and observation laws
+
+[Read the IWI-003 finite-law experiment](IWI-003.md): a lazy strong planner preserves unknown transition and output assignments across time, distinguishes static unknowns from fresh adversarial effects, and verifies a one-step reset against 2^24 possible complete Grounds without enumerating unused transitions. A separate exact global oracle checks a five-step conditional plan and an unbounded negative case. All models are synthetic pending authenticated receiver evidence.
