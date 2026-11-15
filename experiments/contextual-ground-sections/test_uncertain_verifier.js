@@ -74,7 +74,7 @@ test("independent auditor rejects forged counts, examples and authority",()=>{
   }
 });
 
-test("independent direct equations agree with arithmetic verifier for all 216 F_3 triangles",()=>{
+test("independent direct equations agree with arithmetic verifier for all 36 two-edge F_3 map combinations",()=>{
   const r=solve(3,["A","B","C"],[
     {id:"ab",from:"A",to:"B",a:1,b:0},
     {id:"bc",from:"B",to:"C",a:1,b:0}
