@@ -139,3 +139,12 @@ test("deterministic evidence-acquisition result reconstructs without source modi
  const s=JSON.parse(fs.readFileSync(path.join(__dirname,"results","evidence_acquisition.json"),"utf8"));
  assert.deepEqual(q.study(),s);
 });
+
+test("externally pinned intention rejects a downgraded horizon or query budget",()=>{
+ const f=q.fixtures.prohibited,r=q.plan(f.model,f.caps,f.horizon,f.queries);
+ assert.equal(q.verify(f.model,f.caps,r,{executionHorizon:3,maxQueries:1}).verified,true);
+ const weakened=copy(r);weakened.executionHorizon=0;
+ assert.throws(()=>q.verify(f.model,f.caps,weakened,{executionHorizon:3,maxQueries:1}));
+ const lowered=copy(r);lowered.maxQueries=0;
+ assert.throws(()=>q.verify(f.model,f.caps,lowered,{executionHorizon:3,maxQueries:1}));
+});
