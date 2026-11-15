@@ -148,3 +148,20 @@ test("externally pinned intention rejects a downgraded horizon or query budget",
  const lowered=copy(r);lowered.maxQueries=0;
  assert.throws(()=>q.verify(f.model,f.caps,lowered,{executionHorizon:3,maxQueries:1}));
 });
+
+test("evidence demand is task-relative: irrelevant permissions do not increase minimum cost",()=>{
+ const f=q.fixtures.needed,m=copy(f.model);
+ m.next[4][4]=[4,6]; // extra independent unknown unreachable on successful execution
+ const relevant={key:"t:0:1",cost:2,scope:"offline-static-law-cell"};
+ const unrelated={key:"t:4:4",cost:1,scope:"offline-static-law-cell"};
+ const none=q.plan(m,[],3,2);
+ const extraOnly=q.plan(m,[unrelated],3,2);
+ const necessary=q.plan(m,[relevant],3,2);
+ const both=q.plan(m,[unrelated,relevant],3,2);
+ assert.equal(none.status,"UNRESOLVED_WITHIN_DECLARED_BOUNDS");
+ assert.equal(extraOnly.status,"UNRESOLVED_WITHIN_DECLARED_BOUNDS");
+ assert.equal(necessary.minimumWorstEvidenceCost,2);
+ assert.equal(both.minimumWorstEvidenceCost,2);
+ assert.equal(both.tree.key,"t:0:1");
+ assert.equal(q.verify(m,[unrelated,relevant],both,{executionHorizon:3,maxQueries:2}).verified,true);
+});
