@@ -127,6 +127,106 @@ The independent verifier checks every edge/map and cycle/conclusion relation for
 
 The CLI prints elapsed local solver-plus-verifier time to permit reproducible measurements; the exact result record intentionally excludes environment-dependent elapsed times. No statistically controlled hardware speed comparison is claimed. The program accepts 4–8,192 contexts in this fixture family, but the tested default is 1,024. The independent verifier has a different modular inversion algorithm from the producer; this is mathematical implementation diversity on one JavaScript runtime, not a separate machine trust boundary.
 
+## CGS-005: exact navigation across *uncertain* observer paths
+
+The preceding experiments assumed every edge's affine map was specified. CGS-005 introduces an explicitly **open mathematical evidence state**: the confirmed-base graph stays fixed, while pending links each carry a declared set of *possible* translations. A missing map is not treated as the identity or silently dropped. An expired map is not implicitly trusted; a contested edge retains all declared candidate maps without selecting a witness by preference. **No actual signature or transport receipt is verified by this model.**
+
+Source: [uncertain.js](uncertain.js), [direct-assignment oracle](test_uncertain.js), and the [replayable scenarios](demo_uncertain.js). The accepted base is first rechecked by the independent CGS-003 verifier, but this only validates *mathematics*, not the authenticity of the base's claimed observations.
+
+**Declared input.** The accepted graph must be connected and have the existing verified affine certificate. Each pending edge names an existing pair of vertices, an evidence-state label (`missing`, `contested`, `expired`, or `unconfirmed`), a declared source revision, and exactly one of:
+
+- a finite nonempty **set** of distinct invertible affine maps;
+- the symbolic domain **all-affine**, meaning every member of AGL(1,F_p), without allocating all p(p-1) maps.
+
+Domains are independent *modelling choices* for this experiment; an observer's real signed testimony may correlate several edges, so the world counts must not be interpreted as physical likelihoods. A label like `contested` is retained metadata, **not** proof that any signer exists or that any map has been authenticated.
+
+### Mathematical identity: count worlds without enumerating worlds
+
+Given the original connected Ground's root-to-vertex maps P_v, each pending candidate map T_e induces a root-space holonomy
+
+    H_e = inverse(P_v) o T_e o P_u.
+
+For each pending domain D_i define the number of possible maps fixing root x:
+
+    F_i(x) = #{ T in D_i : H_i(x) = x }
+
+and the number of maps with identity holonomy:
+
+    I_i = #{ T in D_i : H_i = identity }.
+
+If the accepted base admits all p root states, the number of feasible (completion, root-value) pairs is
+
+    S = sum over x in F_p of product_i F_i(x).
+
+Every completion has either 0, 1, or p global sections, by CGS-001. Let A be the number of fully flat completions and B the number with exactly one section. Then
+
+    A = product_i I_i
+    S = B + p*A
+    B = S - p*A
+    consistent_completions = A+B = S-(p-1)*A
+    inconsistent_completions = product_i |D_i| - A - B.
+
+If the accepted base admits exactly one root x0, every completion admits at most one section, and
+
+    consistent_completions = product_i F_i(x0).
+
+If the accepted base has **no** sections, adding pending constraints cannot repair it; all completions remain contradictory.
+
+For an unconstrained all-affine domain, group multiplication/conjugation is a bijection, giving:
+
+    |D_i| = p*(p-1)
+    I_i = 1
+    F_i(x) = p-1 (same for all x).
+
+A finite domain contributes a constant I_i plus a sparse correction at its nonidentity fixed points. The implementation computes S from the product of constant contributions for ordinary x, with exact corrections at the union of exceptional roots. It does **not** enumerate the Cartesian product of pending domains or the assignment space of observer states. This is an algebraic count of declared possible worlds, not a new general complexity result for arbitrary constraint systems.
+
+### Intention-relative decisions
+
+An intention is scoped to one vertex and a specified projection: exact state, parity, threshold, or a constant value. It is evaluated over every root that survives **at least one consistent completion**.
+
+| Classification | Interpretation |
+| --- | --- |
+| `refuse-inconsistent` | No declared completion contains a global state |
+| `conditional` | Some completions admit a state and some do not; no unconditional result |
+| `undetermined` | All completions are consistent, but the intention varies |
+| `robust` | All completions are consistent and the intention is constant |
+
+The report *also* exposes `output_invariant_on_consistent_worlds`, which may be true even in `conditional` cases: agreement among the surviving worlds cannot hide the existence of contradictory ones. `can_admit` is **always false**, even if the mathematics is robust, because this experiment has no independent authority/signer validation. This is the crucial distinction between *proved agreement under a declared model* and *authorization to realize a live output*.
+
+### Controlled examples over F_5
+
+| Scenario | Complete worlds | Consistent | Contradictory | Result |
+| --- | ---: | ---: | ---: | --- |
+| One all-affine missing chord | 20 | 16 | 4 | Conditional |
+| Two all-affine missing chords | 400 | 76 | 324 | Conditional |
+| Contested map fixes root 0 or root 2 | 2 | 2 | 0 | Parity=0 is robust; exact root is unknown |
+| Contested scale or conflicting translation | 2 | 1 | 1 | Conditional |
+| One fully specified candidate fixing root 0 | 1 | 1 | 0 | Mathematically robust; not authenticated |
+
+The third example is an *intention-relative compression*: multiple legitimate internal root states can imply one external answer, even while their full state cannot be reconstructed. It is not a magical recovery of the hidden phase.
+
+### Large implicit world-space
+
+A deterministic test uses a 1,024-observer, 2,045-accepted-edge connected atlas over F_65521, adds **128 unobserved all-affine edges**, and computes the exact completion counts and intention status. The Cartesian product of possible edge-map sets has
+
+    [65521 * 65520]^128
+
+members (1,233 decimal digits), yet **zero completion combinations and zero joint vertex assignments are enumerated**. The computation uses symbolic affine-group counts and sparse root constraints. The original accepted graph certificate is checked independently.
+
+This does **not** show that missing evidence can be replaced by proof: the result is `conditional` precisely because some completions are contradictory.
+
+Reproduce:
+
+    node --test experiments/contextual-ground-sections/test_uncertain.js
+    node experiments/contextual-ground-sections/demo_uncertain.js
+
+The suite compares exact algebraic counts against a structurally distinct oracle that enumerates **each small completion** and independently enumerates **all vertex assignments** (not the producer's root-cycle formula). It additionally tests forged base reports, invalid domains, all four evidence-state labels, contradictory fixed points, and the 1,024-context/128-unknown-edge construction. Exact deterministic outputs are retained in [results/uncertain-worlds.json](results/uncertain-worlds.json).
+
+### Next substantive experiment
+
+Replace *declared* map domains with authority-checked observations from E-CPU or VGI, using a pinned Ground revision, receiver-specific evidence and freshness rules. Map uncertainty must then be tied to verified source constraints rather than an arbitrary independent ensemble. Explore coupled constraints between pending maps and other non-affine observation families. CGS-005 does not solve those problems.
+
+
 ## Relationship to prior mathematics and other projects
 
 Global sections and their obstruction by local compatibility are established in the sheaf-theoretic contextuality literature; cycle consistency and group synchronization are established in graph theory and geometry. **Do not claim that those ideas are first discovered here.**
