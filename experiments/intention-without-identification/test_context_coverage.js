@@ -190,3 +190,48 @@ test("cross-epoch continuity entry point rechecks receipts rather than trusting 
   status:"CONDITIONAL_COMPLETE_FINITE_COVERAGE"};
  assert.throws(()=>c.compareVerifiedEpochBundles(f.base,a,forged,f.publicKey,contract));
 });
+
+test("one intention-scoped signed law cell resolves the erased-diagnostic fixture under stated assumptions",()=>{
+ const f=fixtures(),base=p.fixtures.unknowable;
+ for(const value of [2,3]){
+  const source=c.exact(q.restrict(base,"t:0:1",value));
+  const scope=f.scope(source,12,"scoped-"+value);
+  const signed=c.collectSelected(source,scope,["t:0:1"],f.privateKey);
+  assert.equal(signed.receipts.length,1);
+  const cert=c.verifySelected(base,scope,["t:0:1"],signed,f.publicKey,contract);
+  assert.equal(cert.status,"CONDITIONAL_INTENTION_SCOPED_CELL_REPORTS");
+  assert.equal(cert.signedCellCount,1);
+  assert.equal(cert.fullTableFingerprintReconstructed,false);
+  assert.equal(cert.completeGroundCoverageClaimed,false);
+  assert.equal(cert.vgiGroundAdmitted,false);
+  const result=p.solve(cert.proposedPartialModel,2);
+  assert.equal(result.minimumWorstCase,2);
+  assert.equal(p.verify(cert.proposedPartialModel,result).verified,true);
+  assert.throws(()=>c.verifyBundle(base,scope,signed,f.publicKey,contract));
+ }
+});
+test("selected-cell signatures cannot be broadened to different cells or contexts",()=>{
+ const f=fixtures(),base=p.fixtures.unknowable;
+ const source=c.exact(q.restrict(base,"t:0:1",2));
+ const scope=f.scope(source,3,"selected-integrity");
+ const signed=c.collectSelected(source,scope,["t:0:1"],f.privateKey);
+ const verified=c.verifySelected(base,scope,["t:0:1"],signed,f.publicKey,contract);
+ assert.equal(verified.signedCellCount,1);
+ assert.throws(()=>c.verifySelected(base,scope,["t:0:2"],signed,f.publicKey,contract));
+ assert.throws(()=>c.verifySelected(base,{...scope,epoch:4},["t:0:1"],signed,f.publicKey,contract));
+ const fake=clone(signed);fake.receipts[0].payload.value=3;
+ assert.throws(()=>c.verifySelected(base,scope,["t:0:1"],fake,f.publicKey,contract));
+ const missing=clone(signed);missing.receipts=[];
+ assert.throws(()=>c.verifySelected(base,scope,["t:0:1"],missing,f.publicKey,contract));
+ assert.throws(()=>c.collectSelected(source,scope,["t:0:1","t:0:1"],f.privateKey));
+});
+test("partial cell coverage is not a cross-epoch complete-table certificate",()=>{
+ const f=fixtures(),base=p.fixtures.unknowable;
+ const source=c.exact(q.restrict(base,"t:0:1",2));
+ const scope=f.scope(source,7,"limited-coverage");
+ const partialBundle=c.collectSelected(source,scope,["t:0:1"],f.privateKey);
+ assert.throws(()=>c.compareVerifiedEpochBundles(base,
+   {scope,bundle:partialBundle},
+   {scope:{...scope,epoch:8,runId:"limited-coverage-2"},bundle:partialBundle},
+   f.publicKey,contract));
+});
