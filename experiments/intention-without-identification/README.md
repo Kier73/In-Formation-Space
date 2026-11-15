@@ -77,3 +77,7 @@ The companion [IWI-002 report](IWI-002.md) reuses this solver to certify strateg
 ## IWI-004: evidence-directed Ground construction
 
 [Read IWI-004](IWI-004.md): exact minimum-worst-case evidence acquisition when an incomplete static Ground prevents guaranteed execution, with signed-sample versus complete-law-coverage separation, full-revision conflict refusal, and a read-only ECDSA feature-receipt bridge to IFS GCI-004/005. The symbolic offline law oracle is an explicit hypothesis; actual E-CPU observations are **not** promoted to universal transition restrictions.
+
+## IWI-005: finite coverage, context and restart epistemic horizons
+
+[Read the IWI-005 report](IWI-005.md) and its [exact countermodels](results/coverage_counterexamples.json). The experiment distinguishes a complete signed **synthetic finite transition table within a pinned context/epoch** from unjustified claims of physical-law truth, stability across host recovery, or future invariance. An independent verifier checks every state/action/output cell, Ed25519 table receipts, signer context, epoch and run identity. Separate Node test worker processes demonstrate matching reported tables and refusal of conflicting tables under the same signing identity. A mathematical finite-prefix witness shows why any finite time history remains consistent with later divergence. All coverage conclusions are **conditional on externally justified completeness, controlled state access, faithful measurement and stationarity premises**; no E-CPU or VGI native admission occurs.
