@@ -94,8 +94,12 @@ function plan(model,caps,horizon=5,maxQueries=2,limits={}){
   possibleCompleteLaws:m.possibleLaws,
   stats:{acquisitionStates:states,executionChecks}};
 }
-function verify(model,caps,r){
+function verify(model,caps,r,expected={}){
  const m=p.validate(model),catalogue=validateCaps(model,caps);
+ if(expected.executionHorizon!==undefined && r?.executionHorizon!==expected.executionHorizon)
+   throw Error("execution intention horizon mismatch");
+ if(expected.maxQueries!==undefined && r?.maxQueries!==expected.maxQueries)
+   throw Error("authorized acquisition budget mismatch");
  if(!r||r.schema!=="IWI-004/acquisition-v1"||r.entitlement!==entitlement||
   canon(r.baseModel)!==canon(m)||canon(r.catalogue)!==canon(catalogue)||
   r.possibleCompleteLaws!==m.possibleLaws||
