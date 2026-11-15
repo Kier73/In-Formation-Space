@@ -5,8 +5,10 @@
 const p=require("./partial_ground.js");
 function certificate(input,report) {
  const model=p.validate(input);
- if(report.status!=="certain-within-horizon")
+ if(report.status!=="certain-within-horizon"){
+  p.verify(input,report);
   return {status:"not-applicable-no-winning-policy",reason:"support is only certified for winning policies"};
+ }
  p.verify(input,report);
  const keys=new Set();
  let leafCount=0;
