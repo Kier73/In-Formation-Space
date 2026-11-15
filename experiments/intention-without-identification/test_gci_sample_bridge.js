@@ -58,3 +58,10 @@ test("invalid ECDSA signer or mutated request schema is refused",()=>{
  const noncanonical=clone(f);noncanonical.receipt.signature_b64="***";
  assert.throws(()=>bridge.verifyGciSample(noncanonical));
 });
+
+test("independent Python GCI canonical request vector matches byte digest",()=>{
+ const request=fixture().request;
+ const pythonCanonical='{"binding":{"intention":"IWI-004","source":"ground-v1"},"challenge":"challenge-123","feature":"parity","phase_commitment":"commitment-abc","schema":"in-formation.gci004-observation-request/0.1","task_id":"test-task"}';
+ assert.equal(bridge.canonical(request),pythonCanonical);
+ assert.equal(bridge.digest(request),"4d477f0fb22b79626f8beaf33539b9dc7d7c286bb378f69635bcd59d850388d8");
+});
