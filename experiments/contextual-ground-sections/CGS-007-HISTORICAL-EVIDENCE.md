@@ -66,6 +66,16 @@ The hosted replay consumes the actual GCI-005 artifacts, and its [10-mutation su
 
 **Verification status:** the older GCI-005 main run succeeded, but CGS-007's newly authored GitHub Actions replay has not yet passed. No claim of new hosted verification is made before it runs. Successful evidence would be retained under the cgs007-historical-receipt-ground-reconstruction artifact name.
 
+## Direct archived-source experiment — November 15, 2026
+
+In addition to writing the new CI workflow, the GitHub connector retrieved the original eight public artifact ZIPs from historical run #43616685083 into the analysis environment. The saved [direct check record](results/cgs007-direct-archive-results.json) binds the complete SHA-256 digests of the source quorum report, public context and earlier blind audit.
+
+Actual **Python 3.13.5 / cryptography 46.0.4** and a second **Node 22.16.0** recheck independently succeeded for the downloaded original records, checking canonical seals, four ECDSA-signed receipt payloads, the in-run CA and two distinct leaf signing keys, exact request digests, the Ground binding, public commitment and previous blind verdict. The original observer signatures reported **[1,1]** in the admitted round and **[1,0]** in the conflict/refusal round. The two original ephemeral CA certificates expired at **2026-11-15 16:52:14Z and 16:52:15Z**, after the historical replay instant **2026-11-14 16:54:29Z** and before the direct check. They were valid then and not valid now.
+
+The public context had threshold bit **0**, leaving **[0,1,2,3]** possible phases. The honestly agreed signed parity was **1**, retaining **[1,3]**. Independent logarithmic modular composition gave the same projected output parity **1** for both phases after 10^15+137 transitions. The conflicting round remained refused.
+
+This is **direct cryptographic and mathematical inspection of GitHub-downloaded original artifacts**. It does **not** mean the new end-to-end hosted replay passed; per-file GH artifact-attestation verification was not performed in the local analysis environment, and the new source-bound GitHub-hosted replay remains its own gate. No active peer authority or private phase was inferred.
+
 ## Trust limits and next frontier
 
 The source used genuine loopback TLS between distinct OS processes and leaf keys **under one test CA, one GitHub runner and one administrative domain**, not separate physical/administrative roots or externally verified sensor truth. GitHub artifact attestations bind published evidence to workflow/commit, not to independently controlled sensor reality.
