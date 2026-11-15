@@ -30,17 +30,21 @@ function future(s,k){
   return (out[0]*s+out[1])%8;
 }
 function yParity(s){
-  return (3*future(s,1000000000137)+11)%2;
+  return (3*future(s,1000000000000137)+11)%2;
 }
-function verifyHistorical(bridge,publicSource,quorum){
+function verifyHistorical(bridge,publicSource,quorum,blind){
   check(bridge.schema==="ifs.cgs007-historical-observer-constraint/0.1",
         "unexpected bridge schema");
-  sealed(publicSource);sealed(quorum);
+  sealed(publicSource);sealed(quorum);sealed(blind);
   const original=(quorum.rounds||[]);
   check(original.length===2 && bridge.rounds?.length===2,"missing paired rounds");
   check(bridge.source_signed_report_digest===quorum.report_digest &&
         bridge.source_public_digest===publicSource.report_digest &&
         bridge.source_ground_fingerprint===quorum.binding?.ground_fingerprint &&
+        bridge.source_intention_digest===quorum.binding?.source_digest &&
+        bridge.source_blind_audit_digest===blind.report_digest &&
+        blind.gci005_report_digest===quorum.report_digest &&
+        blind.source_digest===quorum.binding?.source_digest &&
         bridge.current_authority===false &&
         bridge.private_phase_consumed===false,
         "bridge source binding or admission status differs");
@@ -49,7 +53,9 @@ function verifyHistorical(bridge,publicSource,quorum){
         bridge.source_commit==="90e719ae6efab12107ee8de2b77afe5e73dd35b2",
         "unrecognized historical source");
   const eventTime=new Date(bridge.evidence_validation_time);
-  check(!Number.isNaN(eventTime.getTime()),"invalid event time");
+  check(!Number.isNaN(eventTime.getTime()) &&
+        eventTime.toISOString()==="2026-11-14T16:54:29.000Z",
+        "invalid or unpinned historical validation time");
   const threshold=publicSource.observer?.value;
   check(Number.isInteger(threshold) && [0,1].includes(threshold) &&
         bridge.initial_threshold_bit===threshold,
@@ -104,6 +110,10 @@ function verifyHistorical(bridge,publicSource,quorum){
     check(round.receipts[0].request.challenge===round.receipts[1].request.challenge,
           "paired challenges differ");
     const status=i===0?"ADMITTED_AGREEMENT":"REFUSED_DISAGREEMENT";
+    check(round.scenario===["honest-agreement","signed-false-reading"][i] &&
+          blind.rounds?.[i]?.verdict===status &&
+          JSON.stringify(blind.rounds[i].peer_readings)===JSON.stringify(results),
+          "original phase-blind audit does not bind signed readings");
     check(given.receipt_status===status &&
           round.verdict.status===status &&
           ((results[0]===results[1])===(i===0)),
@@ -125,7 +135,7 @@ function verifyHistorical(bridge,publicSource,quorum){
 }
 module.exports={verifyHistorical,sortedJSON,digest,future,yParity};
 if(require.main===module){
-  if(process.argv.length!==5)refuse("usage: node verify_historical_projection.js BRIDGE PUBLIC QUORUM");
+  if(process.argv.length!==6)refuse("usage: node verify_historical_projection.js BRIDGE PUBLIC QUORUM BLIND");
   const files=process.argv.slice(2).map(x=>JSON.parse(fs.readFileSync(x,"utf8")));
   process.stdout.write(JSON.stringify(verifyHistorical(...files),null,2)+"\n");
 }
