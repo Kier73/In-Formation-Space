@@ -217,4 +217,9 @@ function demonstration() {
 }
 module.exports = {mod, prime, multiply, inverse, apply, solve, assignment,
   decide, changeCharts, bruteForce, fixtures, demonstration};
-if (require.main === module) process.stdout.write(JSON.stringify(demonstration(), null, 2) + "\n");
+if (require.main === module) {
+  const output = process.argv.includes("--certificates")
+    ? fixtures().map(f => solve(5, f.vertices, f.edges, "A"))
+    : demonstration();
+  process.stdout.write(JSON.stringify(output, null, 2) + "\n");
+}
