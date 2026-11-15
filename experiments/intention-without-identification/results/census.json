@@ -1,0 +1,306 @@
+{
+  "experiment": "IWI-001",
+  "modelClass": "three states / two actions / binary post-action output",
+  "census": {
+    "total": 5832,
+    "adaptiveWinning": 3656,
+    "blindWinning": 3128,
+    "adaptiveOnly": 528,
+    "individuallyReachable": 3960,
+    "individualButNoAdaptive": 304
+  },
+  "examples": {
+    "funnel": {
+      "model": {
+        "n": 3,
+        "start": 7,
+        "goal": 1,
+        "output": [
+          0,
+          0,
+          0
+        ],
+        "next": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "rootRank": 1,
+      "rank": [
+        -1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "policy": [
+        -1,
+        -1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "blind": {
+        "word": [
+          1
+        ],
+        "closure": null
+      },
+      "individual": [
+        {
+          "state": 0,
+          "distance": 0
+        },
+        {
+          "state": 1,
+          "distance": 1
+        },
+        {
+          "state": 2,
+          "distance": 1
+        }
+      ],
+      "transcripts": {
+        "rows": [
+          {
+            "origin": 0,
+            "final": 0,
+            "transcript": [
+              [
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "origin": 1,
+            "final": 0,
+            "transcript": [
+              [
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "origin": 2,
+            "final": 0,
+            "transcript": [
+              [
+                1,
+                0
+              ]
+            ]
+          }
+        ],
+        "ambiguousOrigins": [
+          [
+            0,
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "branch": {
+      "model": {
+        "n": 3,
+        "start": 7,
+        "goal": 1,
+        "output": [
+          1,
+          1,
+          0
+        ],
+        "next": [
+          [
+            0,
+            2,
+            1
+          ],
+          [
+            1,
+            0,
+            0
+          ]
+        ]
+      },
+      "rootRank": 3,
+      "rank": [
+        -1,
+        0,
+        1,
+        2,
+        1,
+        3,
+        1,
+        3
+      ],
+      "policy": [
+        -1,
+        -1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "blind": {
+        "word": null,
+        "closure": [
+          3,
+          5,
+          7
+        ]
+      },
+      "individual": [
+        {
+          "state": 0,
+          "distance": 0
+        },
+        {
+          "state": 1,
+          "distance": 1
+        },
+        {
+          "state": 2,
+          "distance": 1
+        }
+      ],
+      "transcripts": {
+        "rows": [
+          {
+            "origin": 0,
+            "final": 0,
+            "transcript": [
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                1
+              ]
+            ]
+          },
+          {
+            "origin": 1,
+            "final": 0,
+            "transcript": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          },
+          {
+            "origin": 2,
+            "final": 0,
+            "transcript": [
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          }
+        ],
+        "ambiguousOrigins": []
+      }
+    },
+    "erased": {
+      "model": {
+        "n": 3,
+        "start": 7,
+        "goal": 1,
+        "output": [
+          0,
+          0,
+          0
+        ],
+        "next": [
+          [
+            0,
+            2,
+            1
+          ],
+          [
+            1,
+            0,
+            0
+          ]
+        ]
+      },
+      "rootRank": -1,
+      "rank": [
+        -1,
+        0,
+        1,
+        -1,
+        1,
+        -1,
+        1,
+        -1
+      ],
+      "policy": [
+        -1,
+        -1,
+        1,
+        -1,
+        1,
+        -1,
+        1,
+        -1
+      ],
+      "blind": {
+        "word": null,
+        "closure": [
+          3,
+          5,
+          7
+        ]
+      },
+      "individual": [
+        {
+          "state": 0,
+          "distance": 0
+        },
+        {
+          "state": 1,
+          "distance": 1
+        },
+        {
+          "state": 2,
+          "distance": 1
+        }
+      ],
+      "transcripts": null
+    }
+  }
+}
