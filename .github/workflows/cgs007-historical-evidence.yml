@@ -139,6 +139,14 @@ jobs:
             evidence/cag004/gci005-quorum.json \
             evidence/cag004/gci005-blind-audit.json \
             > evidence/cgs007/secondary-reconstruction.json
+      - name: Mutation audit over real signed source artifacts, not synthetic fixtures
+        run: |
+          node experiments/contextual-ground-sections/test_historical_artifact.js \
+            evidence/cgs007/historical-bridge.json \
+            evidence/cag004/gci003-public.json \
+            evidence/cag004/gci005-quorum.json \
+            evidence/cag004/gci005-blind-audit.json \
+            > evidence/cgs007/adversarial-replay.json
       - name: Attest new replay outputs on main
         if: github.ref == 'refs/heads/main'
         uses: actions/attest@v4
@@ -146,6 +154,7 @@ jobs:
           subject-path: |
             evidence/cgs007/historical-bridge.json
             evidence/cgs007/secondary-reconstruction.json
+            evidence/cgs007/adversarial-replay.json
       - uses: actions/upload-artifact@v4
         with:
           name: cgs007-historical-receipt-ground-reconstruction
