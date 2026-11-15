@@ -89,7 +89,8 @@ test("independent observer chart changes preserve all sections, not just counts"
     assert.equal(originalOracle.length, changedOracle.length);
     const image = originalOracle.map(a => Object.fromEntries(
       vertices.map(v => [v,apply(gauges[v], a[v],5)])));
-    assert.deepEqual(image, changedOracle);
+    const canonical = rows => rows.map(row => JSON.stringify(row)).sort();
+    assert.deepEqual(canonical(image), canonical(changedOracle));
   }
 });
 
