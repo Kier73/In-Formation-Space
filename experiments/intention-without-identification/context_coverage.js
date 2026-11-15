@@ -140,6 +140,13 @@ function compareEpochs(first,second){
   unknownBetweenEpochs:true,unknownFutureEpochs:true,
   independentPhysicalAttestation:false};
 }
+function compareVerifiedEpochBundles(baseModel,first,second,publicKeyPem,contract){
+ if(!first||!second||!first.scope||!second.scope||!first.bundle||!second.bundle)
+  throw Error("signed epoch bundles required");
+ const earlier=verifyBundle(baseModel,first.scope,first.bundle,publicKeyPem,contract);
+ const later=verifyBundle(baseModel,second.scope,second.bundle,publicKeyPem,contract);
+ return compareEpochs(earlier,later);
+}
 function indistinguishableCountermodels(base,observedCells,sequence){
  const m=partial.validate(base);
  if(!Array.isArray(observedCells)||!Array.isArray(sequence))throw Error("invalid countermodel input");
@@ -180,5 +187,5 @@ function finitePrefixCounterexample(length){
   claim:"no finite prefix alone certifies stability at unobserved future indices"};
 }
 module.exports={schema,canonical,sha,exact,fingerprint,scopeCheck,fullKeys,
- collect,contractCheck,verifyBundle,compareEpochs,indistinguishableCountermodels,
+ collect,contractCheck,verifyBundle,compareEpochs,compareVerifiedEpochBundles,indistinguishableCountermodels,
  finitePrefixCounterexample};
