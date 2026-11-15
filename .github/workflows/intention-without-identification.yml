@@ -23,4 +23,4 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Verify the exhaustive models and certificates
-        run: node --test experiments/intention-without-identification/test_experiment.js
+        run: node --test experiments/intention-without-identification/test_experiment.js experiments/intention-without-identification/test_uncertain_ground.js
