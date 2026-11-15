@@ -121,6 +121,80 @@ function verifyBundle(baseModel,expectedScope,bundle,publicKeyPem,contract){
   coveragePremises:"closed states/actions + controlled source state + faithful output + stationary within pinned epoch; assumptions, not empirical proofs",
   nativeGroundAdmitted:false,externalEffectsAuthorized:false};
 }
+// An intention-scoped receipt collection covers only externally requested cells.
+// It can refine a mathematical candidate under the same declared trusted premises,
+// but cannot reconstruct or verify the fingerprint of a *complete* unknown table.
+function selectedIndices(model,keys){
+ const all=fullKeys(model);
+ if(!Array.isArray(keys)||!keys.length)throw Error("select nonempty cell set");
+ let prior=-1;
+ return keys.map(key=>{
+  const i=all.indexOf(key);
+  if(i<0||i<=prior)throw Error("unrecognized, duplicate or unsorted requested cell");
+  prior=i;return i;
+ });
+}
+function collectSelected(model,scope,keys,privateKey){
+ const m=exact(model);
+ scopeCheck(scope);
+ if(scope.tableFingerprint!==fingerprint(model))throw Error("declared source fingerprint differs from model");
+ const ids=selectedIndices(m,keys),all=fullKeys(m);
+ const receipts=ids.map(index=>{
+  const cell=all[index],payload={schema,scope,index,cell,value:cellValue(m,cell),
+   nonce:scope.runId+":"+index,kind:"controlled-state-action-sample"};
+  return {payload,signature:crypto.sign(null,Buffer.from(canonical(payload),"utf8"),privateKey).toString("base64")};
+ });
+ return {schema:"IWI-005/selected-cell-bundle-v1",scope,requestedKeys:keys,receipts};
+}
+function verifySelected(base,expectedScope,requiredKeys,bundle,publicKeyPem,contract){
+ const m=partial.validate(base);
+ scopeCheck(expectedScope);contractCheck(contract);
+ const indices=selectedIndices(m,requiredKeys),all=fullKeys(m);
+ if(!bundle||bundle.schema!=="IWI-005/selected-cell-bundle-v1"||
+    canonical(bundle.scope)!==canonical(expectedScope)||
+    canonical(bundle.requestedKeys)!==canonical(requiredKeys)||
+    !Array.isArray(bundle.receipts)||bundle.receipts.length!==indices.length)
+  throw Error("selected coverage scope, request, or length mismatch");
+ let key;
+ try{key=crypto.createPublicKey(publicKeyPem);
+  if(key.asymmetricKeyType!=="ed25519")throw Error("invalid type");
+ }catch{throw Error("invalid pinned signer identity");}
+ const next=m.next.map(row=>row.map(v=>v.slice())),output=m.output.map(v=>v.slice());
+ for(let j=0;j<indices.length;j++){
+  const index=indices[j],cell=all[index],receipt=bundle.receipts[j],r=receipt?.payload;
+  if(!r||typeof receipt.signature!=="string"||
+   Object.keys(r).sort().join(",")!=="cell,index,kind,nonce,schema,scope,value"||
+   r.schema!==schema||r.kind!=="controlled-state-action-sample"||
+   r.index!==index||r.cell!==cell||r.nonce!==expectedScope.runId+":"+index||
+   canonical(r.scope)!==canonical(expectedScope)||!Number.isSafeInteger(r.value))
+    throw Error("false selected-cell scope or record");
+  let signed=false;
+  if(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(receipt.signature)){
+   try{signed=crypto.verify(null,Buffer.from(canonical(r),"utf8"),key,
+     Buffer.from(receipt.signature,"base64"));}catch{signed=false;}
+  }
+  if(!signed)throw Error("unverified selected-cell signature");
+  const parts=cell.split(":");
+  if(parts[0]==="t"){
+   const a=+parts[1],s=+parts[2];
+   if(!m.next[a][s].includes(r.value))throw Error("out-of-domain transition");
+   next[a][s]=[r.value];
+  }else{
+   const s=+parts[1];
+   if(!m.output[s].includes(r.value))throw Error("out-of-domain output");
+   output[s]=[r.value];
+  }
+ }
+ return {schema:"IWI-005/selected-cell-certificate-v1",
+  status:"CONDITIONAL_INTENTION_SCOPED_CELL_REPORTS",scope:expectedScope,
+  requestedKeys:requiredKeys.slice(),signedCellCount:indices.length,
+  proposedPartialModel:{n:m.n,start:m.start,goal:m.goal,next,output},
+  reportedCompleteTableFingerprint:expectedScope.tableFingerprint,
+  fullTableFingerprintReconstructed:false,
+  completeGroundCoverageClaimed:false,externalEffectsAuthorized:false,
+  vgiGroundAdmitted:false,
+  trustLimit:"selected source-table reads and externally asserted stationary/controlled-source contract; not physical law verification"};
+}
 function compareEpochs(first,second){
  if(first?.status!=="CONDITIONAL_COMPLETE_FINITE_COVERAGE"||
     second?.status!=="CONDITIONAL_COMPLETE_FINITE_COVERAGE")
@@ -187,5 +261,5 @@ function finitePrefixCounterexample(length){
   claim:"no finite prefix alone certifies stability at unobserved future indices"};
 }
 module.exports={schema,canonical,sha,exact,fingerprint,scopeCheck,fullKeys,
- collect,contractCheck,verifyBundle,compareEpochs,compareVerifiedEpochBundles,indistinguishableCountermodels,
+ collect,collectSelected,verifySelected,contractCheck,verifyBundle,compareEpochs,compareVerifiedEpochBundles,indistinguishableCountermodels,
  finitePrefixCounterexample};
