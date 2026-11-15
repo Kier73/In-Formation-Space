@@ -199,38 +199,38 @@ def _navigate_native_research_dag(
     context = _digest(observation)
     source = observation["source"]
     steps = [
-        ("ci-observation", (), "research.observe-ci-failure", {
+        ("ci.observation", (), "research.observe-ci-failure", {
             "source_job": source["job_url"],
             "source_sha": source["head_sha"],
             "actual": source["observed"],
         }),
-        ("integer-antisymmetry", ("ci-observation",),
+        ("integer.antisymmetry", ("ci.observation",),
          "research.check-exact-difference-coefficients", {
             "checks_digest": _digest(checks),
             "all_coefficients_cancelled": all(
                 item["exact_sine_coefficients"] == [] for item in checks
             ),
         }),
-        ("numerical-projection", ("integer-antisymmetry",),
+        ("numerical.projection", ("integer.antisymmetry",),
          "research.check-zero-term-evaluation", {
             "checks_digest": _digest(checks),
             "all_crosses_exactly_zero": all(
                 item["numerical_cross"] == 0.0 for item in checks
             ),
         }),
-        ("proof-attention", ("numerical-projection",),
+        ("proof.attention", ("numerical.projection",),
          "research.navigate-vgi-proof-ground", {
             "root_obligation_id": root_id,
             "plan_digest": plan["plan_digest"],
             "unverified_reachable": plan["summary"]["unverified_reachable_count"],
         }),
-        ("python-ci-regression", ("proof-attention",),
+        ("python.ci.regression", ("proof.attention",),
          "research.require-python-3.11-and-3.13-verification", {
             "required_interpreters": ["3.11", "3.13"],
             "previous_failed_job": source["job_url"],
             "check_status": "not-executed-in-this-evidence",
         }),
-        ("external-proof-kernel", ("python-ci-regression",),
+        ("external.proof.kernel", ("python.ci.regression",),
          "research.require-independent-proof-receipt", {
             "checker_receipt_available": False,
             "kernel_authority": "external",
@@ -264,12 +264,12 @@ def _navigate_native_research_dag(
     if (restored.snapshot() != snapshot
             or set(restored.committed_nodes) != {item[0] for item in checked}
             or {item.node_id for item in restored.ready_nodes()}
-            != {"python-ci-regression"}):
+            != {"python.ci.regression"}):
         raise RealInvariantError("native E-CPU research evidence cannot be reconstructed")
     return {
         "snapshot": snapshot,
         "committed_observation_steps": list(restored.committed_nodes),
-        "next_ready_operation": "python-ci-regression",
+        "next_ready_operation": "python.ci.regression",
         "external_kernel_status": "receipt-absent-uncommitted",
     }
 
