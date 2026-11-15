@@ -78,11 +78,11 @@ The distribution describes *artificially independent, uniform affine holonomies*
 
 Requires **Node.js 20+**, standard library only:
 
-    node --test experiments/contextual-ground-sections/test_sections.js
+    node --test experiments/contextual-ground-sections/test_sections.js experiments/contextual-ground-sections/test_verifier.js
     node experiments/contextual-ground-sections/sections.js
     node experiments/contextual-ground-sections/ensemble.js
 
-The tests include:
+The main solver tests include:
 
 - an independent brute-force oracle enumerating every assignment over each small test graph;
 - all 216 labelled three-edge triangles over F_3;
@@ -91,7 +91,21 @@ The tests include:
 - reversal of every edge, adversarial incompatible fixed points, witness removal, and refusal on empty Grounds;
 - invalid primes, disconnected graphs, invalid transport maps, and an intention-relative query that must remain unknown when outputs differ.
 
+The independent verifier adds five more test groups, including 216 full certificate reconstructions and 14 deliberate report mutations.
+
 The brute oracle is bounded and intentionally uses the direct edge equations rather than the spanning-tree theorem. Passing these finite tests is evidence of implementation agreement in these cases, not a machine-checked universal theorem. The mathematical proof above is separate from program execution. See [the retained results](results/finite-results.json) and [GitHub Actions](../../.github/workflows/contextual-ground-sections.yml).
+
+## CGS-003: a separately implemented verifier for portable section claims
+
+The primary solver emits a **complete certificate record**: typed edges, its chosen spanning tree, root-to-vertex maps, every non-tree cycle holonomy, fixed-point constraints, chart-flatness, section count and any finite obstruction witness. None of these entries is trusted solely because the producer emitted it.
+
+The standalone [verifier](verifier.js) uses an independently implemented modular inverse (**extended Euclidean algorithm**, versus the producer's modular exponentiation). It checks edge normalization, graph connectivity, every tree-edge map equation, every non-tree holonomy, every fixed-point constraint and the final classification. Replaying its claims is polynomial in graph size and does not require enumerating all field assignments. A deliberately mutated chart, edge, cycle, witness, or conclusion is rejected. The 14 adversarial mutation cases in the test suite exercise these checks; a larger hostile input audit remains open.
+
+    node experiments/contextual-ground-sections/sections.js --certificates > certificates.json
+    node experiments/contextual-ground-sections/verifier.js certificates.json
+    node --test experiments/contextual-ground-sections/test_verifier.js
+
+These are **mathematical consistency certificates**. They are *not signed or provenance-bound*, and a self-consistent certificate can describe a fictitious graph. An external witness of the graph's source and authority would be required for an authenticated E-CPU/VGI Ground. No claim is made that the two JavaScript implementations constitute different trust domains.
 
 ## Relationship to prior mathematics and other projects
 
