@@ -65,3 +65,7 @@ The important future experiment is to replace the fully trusted transition table
 - [Trial 08 in this repository](../description-to-realization/trials/trial-08-intervention-aware-attention/README.md) plans state-mutating observations to determine a **fixed initial query**; IWI-001 instead certifies a **final-state goal** that may erase origin identity.
 
 No third-party implementation was copied. Results pertain only to the declared finite model class and certified code behavior.
+
+## IWI-002: uncertainty over the transition law
+
+The companion [IWI-002 report](IWI-002.md) reuses this solver to certify strategies across an immutable ensemble of candidate Ground laws. Individually solvable laws can be jointly impossible under indistinguishable observations; one safe diagnostic can restore robust realization. Synthetic observations are still not admitted E-CPU evidence.
