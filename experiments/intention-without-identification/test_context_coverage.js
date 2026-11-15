@@ -156,3 +156,21 @@ test("two actual OS child processes produce separately checkable signed tables",
    "REFUSED_TRANSITION_DISAGREEMENT");
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test("signed completeness remains conditional, including for a consistently dishonest source",()=>{
+ const f=fixtures();
+ const dishonest=certify(f,f.beta,1,"dishonest-but-signed");
+ assert.equal(dishonest.status,"CONDITIONAL_COMPLETE_FINITE_COVERAGE");
+ assert.equal(dishonest.modelFingerprint,c.fingerprint(f.beta));
+ assert.equal(dishonest.nativeGroundAdmitted,false);
+ // No physical source witness is supplied here; a signature cannot prove this table is true.
+ assert.notDeepEqual(dishonest.proposedModel,f.alpha);
+});
+test("retained mathematical countermodels can be reproduced without signing keys",()=>{
+ const f=fixtures();
+ const doc=JSON.parse(fs.readFileSync(path.join(__dirname,"results","coverage_counterexamples.json"),"utf8"));
+ assert.equal(doc.completeCoverageCells,f.alpha.n*(f.alpha.next.length+1));
+ assert.deepEqual(doc.indistinguishablePair,
+  c.indistinguishableCountermodels(f.base,["o:0","o:2","t:1:2"],[0,3]));
+ assert.deepEqual(doc.finitePrefixChallenges,[0,1,16,1024].map(c.finitePrefixCounterexample));
+});
