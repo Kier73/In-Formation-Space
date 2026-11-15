@@ -71,7 +71,7 @@ jobs:
           assert report["ground_summary"]["unverified_obligations"] == 3
           assert report["ground_summary"]["kernel_accepted_obligations"] == 0
           assert report["native_research_dag"]["next_ready_operation"] == (
-              "python-ci-regression"
+              "python.ci.regression"
           )
           assert report["external_kernel_receipt_admitted"] is False
           assert report["merge_authorized"] is False
