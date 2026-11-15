@@ -1,0 +1,36 @@
+name: Contextual Ground Sections (CGS-001)
+
+on:
+  pull_request:
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/contextual-ground-sections.yml"
+  push:
+    branches: [main]
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/contextual-ground-sections.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-sections:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ["20", "22"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Independent finite-field oracle and chart-change tests
+        run: node --test experiments/contextual-ground-sections/test_sections.js
+      - name: Reconstruct four counterexamples
+        run: node experiments/contextual-ground-sections/sections.js
+      - name: Reconstruct exact ensemble distribution
+        run: node experiments/contextual-ground-sections/ensemble.js
