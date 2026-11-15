@@ -242,6 +242,10 @@ It checks the stated counts, possible-root cardinality, target-result invariance
 Five independent-verifier test groups passed in the in-session JavaScript V8 execution harness. As before, these two versions are independent mathematical implementations in **one JavaScript runtime**, not independent network authorities or evidence of physical measurements. A self-consistent *false premise* remains self-consistent and therefore requires source authentication in a subsequent E-CPU/VGI experiment.
 
 
+## CGS-007: historical signed E-CPU evidence to intention-relative Ground
+
+The [CGS-007 historical evidence experiment](CGS-007-HISTORICAL-EVIDENCE.md) reuses GCI-005's actual signed E-CPU loopback-mTLS observation artifacts, pinned to successful November 14, 2026 main CI run #43616685083. A new *historical*, time-scoped certificate verifier preserves the original current-time default for live credentials. A phase-blind adapter narrows the GCI-002 eight-state VGI Ground using authenticated parity while deliberately refusing conflicting signed reports. An independent Node implementation checks the same ECDSA receipts and far-horizon mathematical intention. Existing source evidence was successful; **new CGS-007 archive replay CI is pending**, and historical signatures confer no current execution authority. The model does not identify the eight-state Ground with CGS-001's prime finite-field graphs.
+
 ## Relationship to prior mathematics and other projects
 
 Global sections and their obstruction by local compatibility are established in the sheaf-theoretic contextuality literature; cycle consistency and group synchronization are established in graph theory and geometry. **Do not claim that those ideas are first discovered here.**
