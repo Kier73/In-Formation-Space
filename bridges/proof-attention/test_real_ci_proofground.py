@@ -13,6 +13,7 @@ from research_ci_proofground import (
 )
 from proof_attention import build_proof_attention_plan
 from vgi.proof import ProofEnvironment, ProofGround, ProofObligation
+from mailcpu.computation_dag import NavigableComputationDAG, ComputationDAGError
 
 
 def source_observation():
@@ -82,11 +83,22 @@ class RealResearchInvariantTests(unittest.TestCase):
         self.assertEqual(report["observation_digest"], _digest(source))
         self.assertEqual(report["source_head_sha"], source["source"]["head_sha"])
         self.assertEqual(report["native_research_execution"],
-                         "VGI ProofGround + IFS proof attention + repaired source call")
+                         "E-CPU computation DAG + VGI ProofGround + IFS proof attention + repaired source call")
         self.assertEqual(report["research_action"],
                          "run-regression-tests-on-python-3.11-and-3.13")
         self.assertFalse(report["external_kernel_receipt_admitted"])
         self.assertFalse(report["merge_authorized"])
+        dag = report["native_research_dag"]
+        self.assertEqual(dag["snapshot"]["format"],
+                         "mailcpu-navigable-computation-dag-v1")
+        self.assertEqual(dag["next_ready_operation"], "python-ci-regression")
+        self.assertEqual(dag["external_kernel_status"],
+                         "receipt-absent-uncommitted")
+        self.assertEqual(set(dag["committed_observation_steps"]), {
+            "ci-observation", "integer-antisymmetry",
+            "numerical-projection", "proof-attention"
+        })
+        self.assertEqual(len(dag["snapshot"]["state"]["commits"]), 4)
         self.assertEqual([case["depth"] for case in report["repair_checks"]],
                          [1, 2, 3, 4, 5, 6])
         self.assertTrue(all(
@@ -95,6 +107,31 @@ class RealResearchInvariantTests(unittest.TestCase):
             and case["identity_holds_at_test_angle"] is True
             for case in report["repair_checks"]
         ))
+
+    def test_dag_checkpoint_reconstruction_refuses_forged_evidence(self):
+        source = source_observation()
+        report = investigate(source)
+        snapshot = deepcopy(report["native_research_dag"]["snapshot"])
+        graph = NavigableComputationDAG.from_snapshot(snapshot)
+        self.assertEqual(graph.snapshot(), snapshot)
+        self.assertEqual(
+            {item.node_id for item in graph.ready_nodes()},
+            {"python-ci-regression"},
+        )
+        altered = deepcopy(snapshot)
+        altered["state"]["commits"][1]["result"]["source_observation_digest"] = (
+            "0" * 64
+        )
+        with self.assertRaises(ComputationDAGError):
+            NavigableComputationDAG.from_snapshot(altered)
+
+    def test_external_proof_and_python_ci_do_not_receive_synthetic_commits(self):
+        report = investigate(source_observation())
+        snapshot = report["native_research_dag"]["snapshot"]
+        committed = {x["node_id"] for x in snapshot["state"]["commits"]}
+        self.assertNotIn("python-ci-regression", committed)
+        self.assertNotIn("external-proof-kernel", committed)
+        self.assertEqual(report["ground_summary"]["kernel_accepted_obligations"], 0)
 
     def test_forged_ci_failure_cannot_replace_source_evidence(self):
         source = source_observation()
