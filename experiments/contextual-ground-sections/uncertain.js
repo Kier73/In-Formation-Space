@@ -172,7 +172,8 @@ function analyze(record, pending, target) {
     output_invariant_on_consistent_worlds:determined,
     classification,
     // Operational admissibility is stricter than mathematical feasibility.
-    can_admit:classification==="robust" && es.length===0,
+    mathematically_invariant:classification==="robust",
+    can_admit:false, // no external authenticity/authority proof in this experiment
     epistemic_scope:"declared alternatives; unsigned, unauthenticated, and unmeasured"
   };
 }
