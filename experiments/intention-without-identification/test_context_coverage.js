@@ -174,3 +174,19 @@ test("retained mathematical countermodels can be reproduced without signing keys
   c.indistinguishableCountermodels(f.base,["o:0","o:2","t:1:2"],[0,3]));
  assert.deepEqual(doc.finitePrefixChallenges,[0,1,16,1024].map(c.finitePrefixCounterexample));
 });
+
+test("cross-epoch continuity entry point rechecks receipts rather than trusting a forged status object",()=>{
+ const f=fixtures();
+ const firstScope=f.scope(f.alpha,4,"signed-epoch-4");
+ const secondScope=f.scope(f.alpha,5,"signed-epoch-5");
+ const a={scope:firstScope,bundle:c.collect(f.alpha,firstScope,f.privateKey)};
+ const b={scope:secondScope,bundle:c.collect(f.alpha,secondScope,f.privateKey)};
+ const checked=c.compareVerifiedEpochBundles(f.base,a,b,f.publicKey,contract);
+ assert.equal(checked.status,"CONDITIONALLY_CONSISTENT_ACROSS_EPOCHS");
+ const changed=clone(b);changed.bundle.receipts[0].payload.value=6;
+ assert.throws(()=>c.compareVerifiedEpochBundles(f.base,a,changed,f.publicKey,contract));
+ const forged={scope:secondScope,
+  bundle:{schema:"IWI-005/coverage-bundle-v1",scope:secondScope,receipts:[]},
+  status:"CONDITIONAL_COMPLETE_FINITE_COVERAGE"};
+ assert.throws(()=>c.compareVerifiedEpochBundles(f.base,a,forged,f.publicKey,contract));
+});
