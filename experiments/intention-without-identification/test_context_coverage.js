@@ -68,7 +68,7 @@ test("correctly signed reports cannot be moved to a different context or epoch",
 test("tampered signed values, wrong identity or wrong complete-law fingerprint fail closed",()=>{
  const f=fixtures(),scope=f.scope(f.alpha,1,"test-run-4");
  const signed=c.collect(f.alpha,scope,f.privateKey);
- const changed=clone(signed);changed.receipts[8].payload.value=6;
+ const changed=clone(signed);changed.receipts[8].payload.value=0;
  assert.throws(()=>c.verifyBundle(f.base,scope,changed,f.publicKey,contract));
  const outsider=crypto.generateKeyPairSync("ed25519");
  assert.throws(()=>c.verifyBundle(f.base,scope,signed,
