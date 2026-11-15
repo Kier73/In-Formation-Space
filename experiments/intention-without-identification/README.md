@@ -73,3 +73,7 @@ The companion [IWI-002 report](IWI-002.md) reuses this solver to certify strateg
 ## IWI-003: incomplete but persistent transition and observation laws
 
 [Read the IWI-003 finite-law experiment](IWI-003.md): a lazy strong planner preserves unknown transition and output assignments across time, distinguishes static unknowns from fresh adversarial effects, and verifies a one-step reset against 2^24 possible complete Grounds without enumerating unused transitions. A separate exact global oracle checks a five-step conditional plan and an unbounded negative case. All models are synthetic pending authenticated receiver evidence.
+
+## IWI-004: evidence-directed Ground construction
+
+[Read IWI-004](IWI-004.md): exact minimum-worst-case evidence acquisition when an incomplete static Ground prevents guaranteed execution, with signed-sample versus complete-law-coverage separation, full-revision conflict refusal, and a read-only ECDSA feature-receipt bridge to IFS GCI-004/005. The symbolic offline law oracle is an explicit hypothesis; actual E-CPU observations are **not** promoted to universal transition restrictions.
