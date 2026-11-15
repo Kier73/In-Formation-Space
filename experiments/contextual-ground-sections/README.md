@@ -246,6 +246,10 @@ Five independent-verifier test groups passed in the in-session JavaScript V8 exe
 
 The [CGS-007 historical evidence experiment](CGS-007-HISTORICAL-EVIDENCE.md) reuses GCI-005's actual signed E-CPU loopback-mTLS observation artifacts, pinned to successful November 14, 2026 main CI run #43616685083. A new *historical*, time-scoped certificate verifier preserves the original current-time default for live credentials. A phase-blind adapter narrows the GCI-002 eight-state VGI Ground using authenticated parity while deliberately refusing conflicting signed reports. An independent Node implementation checks the same ECDSA receipts and far-horizon mathematical intention. Existing source evidence was successful; **new CGS-007 archive replay CI is pending**, and historical signatures confer no current execution authority. The model does not identify the eight-state Ground with CGS-001's prime finite-field graphs.
 
+## CGS-008: receiver-fresh Ground authority
+
+The [CGS-008 authority protocol](CGS-008-FRESH-AUTHORITY.md) adds a separate current-authority experiment: two distinctly keyed Ed25519 root signers, hash-chained versioned Ground policies, observer revocation, signed receiver freshness checkpoints, challenge-bound signed parity receipts, and refusal of stale, contradictory or replayed claims. A public-only synthetic transcript is audited by a separately implemented Python verifier, including adversarial mutations. It **does not** claim independent administrations, a durable anti-rollback store, real E-CPU transport, or sensor truth. Its key distinction is that historical authenticity, mathematical sufficiency and current authority are independent verdicts.
+
 ## Relationship to prior mathematics and other projects
 
 Global sections and their obstruction by local compatibility are established in the sheaf-theoretic contextuality literature; cycle consistency and group synchronization are established in graph theory and geometry. **Do not claim that those ideas are first discovered here.**
