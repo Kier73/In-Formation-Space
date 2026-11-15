@@ -21,6 +21,7 @@ from vgi.proof import (
     ProofEnvironment, ProofGround, ProofHyperTransition, ProofObligation,
 )
 from proof_attention import build_proof_attention_plan
+from mailcpu.computation_dag import ComputationNode, NavigableComputationDAG
 
 MORPH_DIR = Path(__file__).resolve().parents[2] / "experiments" / "branching-morphology"
 if str(MORPH_DIR) not in sys.path:
@@ -184,6 +185,95 @@ def build_ground(observation: Mapping[str, Any]) -> tuple[ProofGround, str]:
     return ground, root.fingerprint
 
 
+def _navigate_native_research_dag(
+    observation: Mapping[str, Any],
+    root_id: str,
+    plan: Mapping[str, Any],
+    checks: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Commit checked stages through E-CPU, leaving external authority pending.
+
+    The graph proves the ordered source/evidence *workflow* can be
+    reconstructed; it is not a theorem-proving oracle or a kernel receipt.
+    """
+    context = _digest(observation)
+    source = observation["source"]
+    steps = [
+        ("ci-observation", (), "research.observe-ci-failure", {
+            "source_job": source["job_url"],
+            "source_sha": source["head_sha"],
+            "actual": source["observed"],
+        }),
+        ("integer-antisymmetry", ("ci-observation",),
+         "research.check-exact-difference-coefficients", {
+            "checks_digest": _digest(checks),
+            "all_coefficients_cancelled": all(
+                item["exact_sine_coefficients"] == [] for item in checks
+            ),
+        }),
+        ("numerical-projection", ("integer-antisymmetry",),
+         "research.check-zero-term-evaluation", {
+            "checks_digest": _digest(checks),
+            "all_crosses_exactly_zero": all(
+                item["numerical_cross"] == 0.0 for item in checks
+            ),
+        }),
+        ("proof-attention", ("numerical-projection",),
+         "research.navigate-vgi-proof-ground", {
+            "root_obligation_id": root_id,
+            "plan_digest": plan["plan_digest"],
+            "unverified_reachable": plan["summary"]["unverified_reachable_count"],
+        }),
+        ("python-ci-regression", ("proof-attention",),
+         "research.require-python-3.11-and-3.13-verification", {
+            "required_interpreters": ["3.11", "3.13"],
+            "previous_failed_job": source["job_url"],
+            "check_status": "not-executed-in-this-evidence",
+        }),
+        ("external-proof-kernel", ("python-ci-regression",),
+         "research.require-independent-proof-receipt", {
+            "checker_receipt_available": False,
+            "kernel_authority": "external",
+        }),
+    ]
+    nodes = [
+        ComputationNode(
+            node_id=node_id,
+            revision=1,
+            operation=operation,
+            resource=source["test_path"],
+            context_digest=context,
+            dependencies=parents,
+            payload=payload,
+        )
+        for node_id, parents, operation, payload in steps
+    ]
+    graph = NavigableComputationDAG(nodes)
+    checked = steps[:4]
+    for node_id, _parents, operation, payload in checked:
+        if node_id not in {item.node_id for item in graph.ready_nodes()}:
+            raise RealInvariantError("native E-CPU research dependency was not ready")
+        if graph.commit(node_id, {
+            "operation": operation,
+            "evidence_digest": _digest(payload),
+            "source_observation_digest": context,
+        }):
+            raise RealInvariantError("unexpected duplicate evidence commit")
+    snapshot = graph.snapshot()
+    restored = NavigableComputationDAG.from_snapshot(snapshot)
+    if (restored.snapshot() != snapshot
+            or set(restored.committed_nodes) != {item[0] for item in checked}
+            or {item.node_id for item in restored.ready_nodes()}
+            != {"python-ci-regression"}):
+        raise RealInvariantError("native E-CPU research evidence cannot be reconstructed")
+    return {
+        "snapshot": snapshot,
+        "committed_observation_steps": list(restored.committed_nodes),
+        "next_ready_operation": "python-ci-regression",
+        "external_kernel_status": "receipt-absent-uncommitted",
+    }
+
+
 def investigate(observation: Mapping[str, Any]) -> dict[str, Any]:
     """Exercise repaired exact computation and ask IFS to navigate the proof."""
     source = _check_source(observation)
@@ -216,6 +306,7 @@ def investigate(observation: Mapping[str, Any]) -> dict[str, Any]:
             "numerical_cross": numerical,
             "identity_holds_at_test_angle": True,
         })
+    native_research = _navigate_native_research_dag(source, root, plan, checks)
     core = {
         "schema": SCHEMA,
         "observation_digest": _digest(source),
@@ -227,11 +318,12 @@ def investigate(observation: Mapping[str, Any]) -> dict[str, Any]:
         "root_obligation_id": root,
         "ground_summary": ground.summary(),
         "proof_attention_plan": plan,
+        "native_research_dag": native_research,
         "repair_checks": checks,
         "checked_interpreter": sys.version.split()[0],
         "external_kernel_receipt_admitted": False,
         "source_attestation": "transcribed public CI log, not a signed GitHub receipt",
-        "native_research_execution": "VGI ProofGround + IFS proof attention + repaired source call",
+        "native_research_execution": "E-CPU computation DAG + VGI ProofGround + IFS proof attention + repaired source call",
         "research_action": "run-regression-tests-on-python-3.11-and-3.13",
         "merge_authorized": False,
     }
