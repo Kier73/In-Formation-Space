@@ -5,6 +5,10 @@ on:
       - "experiments/intention-without-identification/partial_ground.js"
       - "experiments/intention-without-identification/global_oracle.js"
       - "experiments/intention-without-identification/test_partial_ground.js"
+      - "experiments/intention-without-identification/test_support_certificate.js"
+      - "experiments/intention-without-identification/support_certificate.js"
+      - "experiments/intention-without-identification/results/support_certificate.json"
+      - "experiments/intention-without-identification/IWI-003-PROOF.md"
       - "experiments/intention-without-identification/results/partial_ground.json"
       - "experiments/intention-without-identification/IWI-003.md"
       - ".github/workflows/intention-without-identification-partial.yml"
@@ -31,4 +35,4 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Verify bounded and globally exhaustive strategies
-        run: node --test experiments/intention-without-identification/test_partial_ground.js
+        run: node --test experiments/intention-without-identification/test_partial_ground.js experiments/intention-without-identification/test_support_certificate.js
