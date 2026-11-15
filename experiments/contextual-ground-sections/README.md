@@ -81,6 +81,7 @@ Requires **Node.js 20+**, standard library only:
     node --test experiments/contextual-ground-sections/test_sections.js experiments/contextual-ground-sections/test_verifier.js
     node experiments/contextual-ground-sections/sections.js
     node experiments/contextual-ground-sections/ensemble.js
+    node experiments/contextual-ground-sections/scale.js 1024
 
 The main solver tests include:
 
@@ -91,7 +92,7 @@ The main solver tests include:
 - reversal of every edge, adversarial incompatible fixed points, witness removal, and refusal on empty Grounds;
 - invalid primes, disconnected graphs, invalid transport maps, and an intention-relative query that must remain unknown when outputs differ.
 
-The independent verifier adds five more test groups, including 216 full certificate reconstructions and 14 deliberate report mutations.
+The independent verifier adds five more test groups, including 216 full certificate reconstructions and 14 deliberate report mutations. Four additional scaling test groups reconstruct the larger charts and check sample edge equations.
 
 The brute oracle is bounded and intentionally uses the direct edge equations rather than the spanning-tree theorem. Passing these finite tests is evidence of implementation agreement in these cases, not a machine-checked universal theorem. The mathematical proof above is separate from program execution. See [the retained results](results/finite-results.json) and [GitHub Actions](../../.github/workflows/contextual-ground-sections.yml).
 
@@ -106,6 +107,25 @@ The standalone [verifier](verifier.js) uses an independently implemented modular
     node --test experiments/contextual-ground-sections/test_verifier.js
 
 These are **mathematical consistency certificates**. They are *not signed or provenance-bound*, and a self-consistent certificate can describe a fictitious graph. An external witness of the graph's source and authority would be required for an authenticated E-CPU/VGI Ground. No claim is made that the two JavaScript implementations constitute different trust domains.
+
+## CGS-004: navigate a huge implicit Ground without enumerating its assignments
+
+The [scaling construction](scale.js) builds 1,024 distinct virtual observer contexts over F_65521. It gives each observer an invertible coordinate chart, derives 1,023 chain links plus 1,022 extra paths (2,045 declared edges), and uses exactly **1,022 fundamental cycles**. This is a deterministic software graph, not 1,024 processes or physical computers.
+
+Three graph variants differ only in the chosen cycle translations:
+
+| Synthetic Ground | Root solutions | Why |
+| --- | ---: | --- |
+| Flat charts | 65,521 | Every loop is the identity |
+| One fixed-point cycle | 1 | A loop forces x = 65,516 |
+| An additional translation loop | 0 | x -> x+1 fixes no point |
+
+The independent verifier checks every edge/map and cycle/conclusion relation for the full graph. No state assignment is enumerated. The naive ambient assignment space has **65521^1024** possible coordinate tuples, but spanning-tree propagation and exact cycle constraints classify all of them at once, with work proportional to graph size in this model. This directly tests a constrained interpretation of "navigation rather than iteration": the implementation computes a certificate for an entire family of states without visiting every member. It does *not* prove constant-time global computation, physical substrate independence, or an actual speedup compared with optimized production solvers.
+
+    node experiments/contextual-ground-sections/scale.js 1024
+    node --test experiments/contextual-ground-sections/test_scale.js
+
+The CLI prints elapsed local solver-plus-verifier time to permit reproducible measurements; the exact result record intentionally excludes environment-dependent elapsed times. No statistically controlled hardware speed comparison is claimed. The program accepts 4–8,192 contexts in this fixture family, but the tested default is 1,024. The independent verifier has a different modular inversion algorithm from the producer; this is mathematical implementation diversity on one JavaScript runtime, not a separate machine trust boundary.
 
 ## Relationship to prior mathematics and other projects
 
