@@ -1,0 +1,33 @@
+name: AKS-003 native quorum attention receiver hard-kill
+
+on:
+  push:
+    paths:
+      - 'experiments/attention_ground_sufficiency/**'
+      - '.github/workflows/aks003.yml'
+  pull_request:
+    paths:
+      - 'experiments/attention_ground_sufficiency/**'
+      - '.github/workflows/aks003.yml'
+  workflow_dispatch:
+
+jobs:
+  native-hard-kill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned E-CPU native authority and Hypervisor
+        run: python -m pip install 'git+https://github.com/Kier73/E-CPU.git@6fd416facdb2aefd6fc7d66a06b014e3d31b5a52'
+      - name: Require actual native E-CPU M1, M3, quorum, and Virtual Layer
+        run: |
+          python -c 'from mailcpu.computational_objects import ComputationalObjectStore; from mailcpu.computational_session import ComputationalSessionStore; from mailcpu.recovery_lineage import RecoveryLineageCoordinator; from mailcpu import HeadlessOS, VirtualLayerRuntime, HypervisorPolicy; print("native E-CPU imports succeeded")'
+      - name: Execute exact probe oracle, filesystem corruption, hard-kill and fresh Hypervisor receiver
+        run: python -m unittest discover -s experiments/attention_ground_sufficiency -p 'test_aks003.py' -v
