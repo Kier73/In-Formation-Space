@@ -81,6 +81,7 @@ class NativeReuseTests(unittest.TestCase):
                 self.assertEqual(sample["unknown_pair_count"], 34)
                 self.assertEqual(len(sample["evidence_ids"]), 2)
                 self.assertFalse(sample["universal_law_proven"])
+                self.assertRegex(sample["native_ground_fingerprint"], r"^[0-9a-f]{64}$")
                 self.assertEqual(sample["candidate_branch"], target)
                 result = conditionally_resolve_from_vgi(
                     ledger, expected_ground_id=GROUND_ID, expected_context_digest=CTX,
