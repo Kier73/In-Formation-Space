@@ -347,8 +347,9 @@ def recover_artifact(*, pins: VerifiedSourcePins,
         raise NativeReuseRefused("noncanonical recovered payload")
     report = verify_artifact(artifact, pins=pins)
     return {
+        **report,
         "schema": "IWI-006/recovered-v1", "status": "RECOVERED_SIGNED_OBSERVATIONS",
-        **report, "state_digest": manifest.state_digest,
+        "state_digest": manifest.state_digest,
         "reexecuted_receivers": False,
         "reexecuted_observations": False,
         "source_phase_stationarity_proven": False,
