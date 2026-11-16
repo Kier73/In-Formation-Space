@@ -165,9 +165,14 @@ def run(source:Path,*,requests:int=24,workers:int=3,
                 if telemetry['peer_certificate_sha256']!=cert_sha256(receiver_cert):
                     raise TemporalGroundRefused('TLS peer differs from pinned host')
                 receipt=answer['certificate']
+                if receipt['digest'] != hash_object(
+                        {a:b for a,b in receipt.items() if a!='digest'}):
+                    raise TemporalGroundRefused('altered source certificate body')
                 if receipt['digest'] not in checked:
                     verify_preparation(operator,receipt)
-                    checked[receipt['digest']]=True
+                    checked[receipt['digest']]=json.dumps(receipt,sort_keys=True)
+                elif json.dumps(receipt,sort_keys=True)!=checked[receipt['digest']]:
+                    raise TemporalGroundRefused('cached certificate identity collision')
                 expected=navigate_verified(receipt,tick)
                 if answer['result']!=expected:
                     raise TemporalGroundRefused('independent distant-time result differs')
