@@ -271,7 +271,33 @@ def demonstrate(path: Path) -> list[dict[str, Any]]:
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Query the pinned OpenWorm synaptic Ground')
     parser.add_argument('--source', type=Path, default=Path(__file__).parent / 'data' / 'herm_full_edgelist.csv')
+    parser.add_argument('--from-node', dest='from_node', help='e.g., ASHL')
+    parser.add_argument('--to-node', dest='to_node', help='e.g., AVAL')
+    parser.add_argument('--steps', type=int, help='exact graph transition count, 1..8')
+    parser.add_argument('--kind', choices=['chemical', 'electrical'], default='chemical')
+    parser.add_argument('--top-n', type=int, default=6)
     args = parser.parse_args()
-    print(json.dumps(demonstrate(args.source), indent=2))
+    if args.from_node is None and args.to_node is None and args.steps is None:
+        print(json.dumps(demonstrate(args.source), indent=2))
+    else:
+        if args.from_node is None or args.to_node is None or args.steps is None:
+            parser.error('custom query requires --from-node, --to-node and --steps together')
+        from query_attribution import attribute
+        ground = ConnectomeGround.from_csv(args.source.read_bytes())
+        intention = Query(args.from_node, args.to_node, args.steps, args.kind)
+        plan = ground.plan(intention)
+        receipt = ground.run(plan)
+        result = attribute(ground, plan, receipt, top_n=args.top_n)
+        print(json.dumps({
+            'model': plan['model'], 'query': intention.encode(),
+            'source_git_blob': ground.source_blob, 'ground_digest': ground.fingerprint,
+            'transfer_exact': receipt['transfer'],
+            'layered_nodes': plan['layered_nodes'],
+            'selected_stage_edges': receipt['selected_edge_evaluations'],
+            'full_reference_stage_edge_visits': receipt['all_graph_edge_evaluations_reference'],
+            'topology_index_probes': plan['index_probes'],
+            'ranked_mediator_stages': result['stages'],
+            'verified': True, 'biological_firing_prediction': False,
+        }, indent=2))
