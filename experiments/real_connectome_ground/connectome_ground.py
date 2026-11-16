@@ -252,13 +252,15 @@ def native_ecpu_stage_dag(ground: ConnectomeGround, plan: dict[str, Any], receip
 
 def demonstrate(path: Path) -> list[dict[str, Any]]:
     ground = ConnectomeGround.from_csv(path.read_bytes())
+    from query_attribution import attribute
     result = []
     for q in (Query('ASHL', 'AVAL', 3), Query('ASER', 'AVBL', 3),
               Query('AWCL', 'AIYL', 2), Query('ASHL', 'AVAR', 3)):
         plan = ground.plan(q)
         receipt = ground.run(plan)
         ground.verify(plan, receipt)
-        result.append({'query': q.encode(), 'transfer': receipt['transfer'],
+        mechanism = attribute(ground, plan, receipt, top_n=5)
+        result.append({'top_mediator_stages': mechanism['stages'], 'query': q.encode(), 'transfer': receipt['transfer'],
                        'selected_nodes': receipt['active_node_labels'],
                        'selected_stage_edges': receipt['selected_edge_evaluations'],
                        'full_reference_edges': receipt['all_graph_edge_evaluations_reference'],
