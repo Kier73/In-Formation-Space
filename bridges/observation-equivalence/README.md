@@ -144,3 +144,181 @@ Run the demonstration and tests:
 python bridges/observation-equivalence/demonstration.py
 python -m unittest discover -s bridges/observation-equivalence -p "test_*.py" -v
 ```
+
+
+---
+
+## Finite witness navigation: shortest action path to a meaningful difference
+
+The companion [`distinguishing_navigation.py`](distinguishing_navigation.py)
+extends transition-congruence refinement from *separating state classes* to
+*constructing an exact shortest distinguishing continuation* within an
+explicitly closed finite deterministic model. It does not execute operations
+on remote hosts or claim that model transitions are automatically admitted
+observations.
+
+Given states \(s,t\), a finite action alphabet \(A\), and supplied
+observation tests \(T\), a witness is an action word
+\(w=a_1\dots a_k\) and a test \(q \in T\) satisfying
+\(O(\delta^*(s,w),q) \neq O(\delta^*(t,w),q)\). The navigator returns a
+**shortest** such action word, breaking ties in declared action order.
+A zero-action witness is possible when a test distinguishes the pair now.
+
+### How navigation works
+
+1. Validate the entire declared transition table. Every action must be defined
+   at every supplied state and every successor must stay in the universe.
+2. Construct the **unordered state-pair graph**: an edge for each declared
+   action maps \(\{s,t\}\) to \(\{\delta(s,a),\delta(t,a)\)\).
+3. Mark pairs whose present observations differ. Reverse breadth-first
+   propagation computes the minimum number of actions from *every* pair to
+   any marked pair. The navigation query follows decreasing distances and
+   returns the first differing test, exact final pair and observations.
+4. If no marked pair is reachable, no finite action word can distinguish the
+   pair in this **complete supplied model**. This is exact finite-model
+   observation equivalence, not equivalence of unknown actual hosts.
+
+For \(n\) states, \(m\) actions and \(k\) tests, there are
+\(P=n(n-1)/2\) distinct unordered pairs. Construction requires
+\(O(n(m+k)+P(m+k))\) operations and \(O(n(m+k)+Pm)\) storage in the
+worst case. A shortest witness, when present, has at most \(P-1\) actions.
+`max_pairs` rejects over-budget models rather than emitting a false
+equivalence result. Empty tests intentionally make every pair observationally
+equivalent under the declared contract.
+
+A two-step counterexample illustrates the distinction between current and
+future observability: states `a` and `b` both output 0; the first
+`tick` reaches `x` and `y`, still both outputting 0; the second
+`tick` reaches `c` (output 1) and `d` (output 2). The returned
+witness is `('tick', 'tick')` with its exact final test evidence.
+
+### Reproduce and interpret
+
+```bash
+python -m unittest discover -s bridges/observation-equivalence -p 'test_*.py' -v
+```
+
+The new tests include adversarial incomplete-model rejection, hidden-state
+equivalence, a two-step separating continuation, stable shortest-path tie
+breaking, and 45 seeded randomly generated finite machines checked against a
+**separate exhaustive action-word enumerator**. The independent reference
+checks the Python implementation, not the completeness of an external model.
+
+This provides a possible E-CPU/VGI planning primitive: select an *observation
+intention* that exposes a necessary distinction before imposing a Ground
+translation or host change. Actual execution, authority, provenance,
+revocation, observation costs, and incomplete/non-deterministic models require
+other contracts; neither a witness nor equality here grants them.
+
+
+### Cost-aware observation navigation
+
+[`costed_navigation.py`](costed_navigation.py) adds a second planning
+objective on the **same completely supplied deterministic model**:
+minimize the sum of the costs of intervening with actions along an action
+word **and the cost of one terminal differentiating observation test**.
+
+Caller-supplied `action_costs` and `test_costs` must be ordered
+nonnegative Python integers aligned with declared actions and tests.
+Costs are **assumptions**, not automatically measured elapsed time, host
+authority, energy, money, risk, or trustworthy operational metadata.
+Intermediate observations are neither performed nor charged. In
+particular, an action can modify the hypothetical state: this is an
+**active intervention plan**, not a passive observation of unchanged
+states.
+
+The costed navigator runs a reverse multi-source Dijkstra search over
+unordered pairs. Each already-distinguishable pair is a seed whose
+distance equals the cheapest differentiating test. Each reverse action
+edge carries its declared cost, and the distance tie break prefers
+fewer actions. A greedy descent in declared action order reconstructs
+the lexicographically first minimum-cost/minimum-length action word;
+terminal test ties use declared test order. Zero-cost cycles are safe:
+the secondary strictly-decreasing action count prevents infinite
+reconstructions. For a finite pair graph with \(P=n(n-1)/2\), \(m\)
+actions and \(k\) tests, a single cost policy is planned in
+\(O(Pk + Pm\log P)\) time and \(O(Pm)\) additional space
+(assuming unit-cost integer arithmetic), and returns either a finite
+witness or model-relative equivalence. A small `max_pairs` budget
+rejects a model before an equivalence result is produced.
+
+**Counterexample to length-as-cost:** given states `a` and `b`,
+an `expensive` action (cost 10) distinguishes them in one step, while
+two `cheap` actions (cost 2 each) distinguish them in two steps.
+Both require one final test costing 1. Shortest-action navigation
+returns `('expensive',)` with total cost 11; cost-aware navigation
+returns `('cheap', 'cheap')` with total cost 5. This is an exact
+modeled cost comparison, not a claim of measured speedup.
+
+The tests include 80 seeded small random transition models, independently
+checking the selected action word and test against exhaustive enumeration,
+plus zero-cost cycles, cheapest-test selection and invalid-cost rejection.
+Run with the same `unittest discover` command above.
+
+Future binding of a cost policy to E-CPU operation spans or VGI observation
+receipts must separately authenticate its provenance, units, validity epoch,
+execution semantics, and source/receiver context. An optimized *plan*
+cannot by itself authorize or prove an external host execution.
+
+
+### OE-002 — Source-reconstructed empirical cost proposals
+
+[The operation-span witness binding](../observation-path/witness_cost_binding.py)
+connects the costed navigator to this repository's real
+[`OperationSpanRecorder`](../observation-path/operation_spans.py) and
+`validate_operation_cost_profiles` contracts. Its input is the **original
+span collection**, its independently rebuildable cost-profile report, an
+ordered mapping from navigation action/test labels to concrete operation IDs,
+one declared clock actor and segment, and an explicit operator opt-in.
+
+The adapter **does not run** an E-CPU operation, VGI observation, or network
+request. It constructs an **untrusted planning proposal**, not an authority
+decision. Importantly, a source-content SHA-256 alone does not authenticate the
+origin of a measurement. No producer-issued profile can select costs until
+the verifier independently rebuilds it from the supplied spans.
+
+**Conservative selection:** only successful measured synchronous spans
+from the requested actor/segment are eligible. Each selected operation must
+have at least the declared sample count and the profile's own
+`descriptive_only` readiness; a failed or regressed span for the selected
+operation/context causes refusal. The operation's **nearest-rank p95 in
+nanoseconds** is used as an *assumed additive planning cost* for one declared
+action or one terminal observation test. The policy names its clock context,
+metric, operation bindings, original span digests and profile digest, and
+carries the status `untrusted-operator-opt-in-proposal-only`. It requires an
+explicit opt-in again upon reconstruction and when handing the costs to the
+navigator.
+
+A useful exact counterexample now has a second kind of evidence. When
+successful synthetic measured spans for `action.expensive`,
+`action.cheap` and `test.read` yield respective p95s of 10, 2 and 1
+nanoseconds in a single supplied actor/segment, the planner selects
+`cheap, cheap` over a one-step `expensive` path. Unlike the earlier
+purely caller-declared numbers, these values are **derived from concrete
+operation-span documents** and can be independently reconstructed. Those
+particular spans use a deterministic injected test clock and do **not**
+represent observed E-CPU host performance.
+
+Run source-binding and navigator tests:
+
+```bash
+python -m unittest discover -s bridges/observation-equivalence -p 'test_*.py' -v
+python -m unittest discover -s bridges/observation-path -p 'test_witness_cost_binding.py' -v
+```
+
+The second suite includes reconstruction from source spans, an active
+cost-vs-hop discrepancy, mandatory opt-in, insufficient samples, wrong host
+or clock segment, failed calls, regressed time, tampered/rehashed report and
+proposal contents, duplicate labels, and mismatched navigator action/test
+orders. The project's existing span recorder/profile logic remains the sole
+authority for *structural* validation and sample reconstruction.
+
+**Interpretation caveats:** the p95 is descriptive, neither an upper bound
+nor a forecast; summing independent p95 observations does not establish the
+95th percentile of a composed path. Different operation contexts, effects,
+queuing, concurrency, retries, implementation revisions, and temporal
+segments can change the relevant cost. The strict one-actor/segment policy is
+an initial comparable subset, not a universal cross-substrate price system.
+No plan is counted as an E-CPU/VGI execution receipt. The next bridge must
+bind dispatch, admitted evidence, authorized interpretation and observed
+result to the selected witness under receiver-owned policy and provenance.
