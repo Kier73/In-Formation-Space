@@ -9,6 +9,9 @@ on:
       - 'experiments/cross-ground-continuity/gci003/**'
       - 'experiments/cross-ground-continuity/gci004/**'
       - 'experiments/cross-ground-continuity/gci005/**'
+      - 'experiments/intention-without-identification/native_gci_lineage.py'
+      - 'experiments/intention-without-identification/test_native_gci_lineage.py'
+      - 'experiments/intention-without-identification/IWI-006.md'
       - '.github/workflows/cag004-topology-neutral.yml'
   push:
     branches: [main]
@@ -19,6 +22,9 @@ on:
       - 'experiments/cross-ground-continuity/gci003/**'
       - 'experiments/cross-ground-continuity/gci004/**'
       - 'experiments/cross-ground-continuity/gci005/**'
+      - 'experiments/intention-without-identification/native_gci_lineage.py'
+      - 'experiments/intention-without-identification/test_native_gci_lineage.py'
+      - 'experiments/intention-without-identification/IWI-006.md'
       - '.github/workflows/cag004-topology-neutral.yml'
   workflow_dispatch:
 
@@ -1385,3 +1391,102 @@ jobs:
           path: evidence/cag004/gci005-witness-audit.json
           if-no-files-found: error
           retention-days: 90
+
+  iwi006_signed_vgi_quorum_recovery:
+    needs: [gci005_phase_blind_auditor]
+    if: needs.gci005_phase_blind_auditor.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 6fd416facdb2aefd6fc7d66a06b014e3d31b5a52
+          path: external/E-CPU-IWI006
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: e6e1900782aeede18a4de9046511bbba234dbc6e
+          path: external/VGI-IWI006
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install native E-CPU VGI and GCI-005 dependencies
+        run: |
+          python -m pip install "cryptography>=43,<47"
+          python -m pip install -e external/E-CPU-IWI006
+          python -m pip install -e external/VGI-IWI006/virtual_ground_interpreter
+      - uses: actions/download-artifact@v4
+        with:
+          name: cag004-signed-intention
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-ecpu-eight-edge-orbit-probe
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci002-vgi-closed-orbit-certificate
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-public-context
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci003-minimum-context-plan
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci004-authenticated-observer-receipts
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci005-real-signed-disagreement
+          path: evidence/cag004
+      - uses: actions/download-artifact@v4
+        with:
+          name: gci005-phase-blind-disagreement-refusal
+          path: evidence/cag004
+      - name: Require upstream attested host reports on main
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in signed-intent.json issuer-trust.json orbit-probe.json closed-orbit-report.json gci003-public.json gci003-plan.json gci004-network.json gci005-quorum.json gci005-blind-audit.json; do
+            gh attestation verify "evidence/cag004/$f" --repo Kier73/In-Formation-Space --signer-workflow Kier73/In-Formation-Space/.github/workflows/cag004-topology-neutral.yml --source-ref refs/heads/main --deny-self-hosted-runners --format json >/dev/null
+          done
+      - name: Confirm previous blind audit and build explicitly CI-only trust pins
+        run: |
+          python experiments/intention-without-identification/prepare_ci_pins.py --directory evidence/cag004 --out evidence/iwi006-ci-pins.json
+      - name: Native GCI-005 to VGI finalization to E-CPU majority and process recovery
+        env:
+          IWI006_EVIDENCE_DIRECTORY: evidence/cag004
+          IWI006_PINS: evidence/iwi006-ci-pins.json
+        run: |
+          python -m unittest discover -s experiments/intention-without-identification -p 'test_native_gci_lineage.py' -v
+      - name: Reseal and recover without original E-CPU observers
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/iwi006-durable
+          python experiments/intention-without-identification/native_gci_lineage.py seal --directory evidence/cag004 --pins evidence/iwi006-ci-pins.json --durable evidence/iwi006-durable > evidence/iwi006-sealed.json
+          python experiments/intention-without-identification/native_gci_lineage.py recover --pins evidence/iwi006-ci-pins.json --durable evidence/iwi006-durable > evidence/iwi006-recovered.json
+          python -c "import json; a=json.load(open('evidence/iwi006-sealed.json')); b=json.load(open('evidence/iwi006-recovered.json')); assert a['state_digest']==b['state_digest'] and b['decisions']==['AUTHORIZED','CONFLICT'] and b['reexecuted_receivers'] is False"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iwi006-native-vgi-quorum-reconstruction
+          path: |
+            evidence/iwi006-sealed.json
+            evidence/iwi006-recovered.json
+          retention-days: 90
+          if-no-files-found: error
