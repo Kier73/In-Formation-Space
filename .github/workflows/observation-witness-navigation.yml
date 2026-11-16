@@ -31,6 +31,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install Ed25519 verifier dependency for OE-003
+        run: python -m pip install 'cryptography>=43,<47'
       - name: Check exact finite-model counterexamples and prior equivalence regressions
         run: python -m unittest discover -s bridges/observation-equivalence -p 'test_*.py' -v
       - name: Check source-reconstructed operation span cost policy binding
