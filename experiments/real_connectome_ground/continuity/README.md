@@ -38,6 +38,7 @@ python -m unittest discover -s experiments/real_connectome_ground -p 'test_*.py'
 
 STORE="$(mktemp -d)"
 BASE="experiments/real_connectome_ground/continuity/continuity.py"
+export PYTHONPATH="experiments/real_connectome_ground:${PYTHONPATH:-}"
 
 python "$BASE" --store "$STORE" init
 # Save the emitted SHA-256 'head' OUTSIDE the writable Chronicle store.
