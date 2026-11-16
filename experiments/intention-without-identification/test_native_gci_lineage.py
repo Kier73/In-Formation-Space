@@ -78,6 +78,25 @@ class ActualSignedReceiptToVGITests(unittest.TestCase):
         with self.assertRaises(Exception):
             b.verify_artifact(changed, pins=self.pins)
 
+    def test_resealed_outer_report_cannot_rescue_bad_ecdsa_source_signature(self) -> None:
+        # Changing both source JSON and the outer report digest defeats a
+        # digest-only consistency checker. The original GCI-005 source
+        # verifier must *still* inspect the original ECDSA receipt bytes.
+        raw = copy.deepcopy(self.report)
+        raw["rounds"][0]["receipts"][0]["signature_b64"] = (
+            raw["rounds"][0]["receipts"][1]["signature_b64"]
+        )
+        raw.pop("report_digest")
+        forged = b.h.c.sealed(raw)
+        forged_pins = dataclasses.replace(
+            self.pins, gci005_digest=forged["report_digest"]
+        )
+        with self.assertRaises(Exception):
+            b.reconstruct(
+                forged, self.binding, self.public, self.plan,
+                self.network, pins=forged_pins,
+            )
+
     def test_native_vgi_finalization_cannot_be_forged_in_artifact(self) -> None:
         changed = copy.deepcopy(self.artifact)
         changed["vgi_observation_events"][1]["vgi_finalization"] = "AUTHORIZED"
