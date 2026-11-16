@@ -72,3 +72,37 @@ For CI, run \`cog004-family-discovery.yml\` on Python 3.11 and 3.13; the native 
 The [high-order learner](high_order_capability.py) reuses COG-003's source-witness ledger, actively seeks finite-field rank, infers previously unprovided polynomial degrees/coefficients and checks independent out-of-basis challenges. A three-degree synthetic audit recovered **300/300** true target functions, compared with **93/300** for equal-budget random probing; held-out results **30,000/30,000**. The local benchmark and exact numerical evidence are in [COG005-local-audit.json](results/COG005-local-audit.json). End-to-end cost includes learning and proof, not just sparse observation.
 
 The [observer adapter](native_atlas_observer.py) delegates permitted pure realization to the **existing E-CPU-native `NativeInferenceHost`** from the VP repository; it never replaces E-CPU's Hypervisor. The [dedicated workflow](../../.github/workflows/cog005-high-order-observer.yml) tests mathematical programs and provenance on Python 3.11/3.13, then carries a source-pinned plan between three independent GitHub runner jobs: planner, E-CPU-native receiver, and independently recomputing verifier. These are transport and process boundaries, **not** proof of physical-network arithmetic, signed remote execution, or M3 quorum recovery. Native checks must pass on the exact head before such an execution claim is made. The follow-on is to reuse IFS SRH-007/008 mTLS and E-CPU recovery lineage for independently qualified nonlinear observation and durable rehome.
+
+## COG-006 — Generate the structure of capability, not source code
+
+[COG-006: evidence-compiled cognitive Grounds](COG-006.md) opens a second,
+semantic/relational axis of the capability atlas inspired by
+[huggingface/pybot](https://github.com/huggingface/pybot). It
+**does not generate Python handlers**. A typed graph compiler enumerates
+possible inference pathways (direct, steps-then-sum, first-step) and an
+evidence-linked, actively acquired version space selects the one explaining
+the admitted observations. The promoted path then answers new source records;
+a later intention composes it with a typed unit conversion and retained
+conversation referent.
+
+The exact finite-model audit uses synthetic fact Grounds of
+128, 4,096 and 65,536 records. After two witnessed examples, 3,000 sampled
+held-out queries were correct under the declared sum-of-steps task law; each
+realization visits one source record and two Ground operators. Source
+construction, acquisition and query costs are reported **separately** in
+[COG006-local-audit.json](results/COG006-local-audit.json).
+The [source](cognitive_grounds.py), [test suite](test_cognitive_grounds.py)
+and [replay program](run_cognitive_grounds.py) include contradictory evidence
+refusal, task-relative memory ablation, full event replay and a separate
+fresh-Python-process continuation with external high-water pins. A native
+test imports the repository's existing observation-equivalence refinement
+instead of duplicating it.
+
+This is **neither general conversational intelligence nor a benchmark of
+PyBot**; typed intentions and source knowledge are supplied by the
+experiment. The [dedicated workflow](../../.github/workflows/cog006-cognitive-grounds.yml)
+runs Python 3.11/3.13 tests and cross-job handoff. A GitHub artifact is not
+an authenticated E-CPU observer, and its pins do not confer independent
+authority. Next: acquire language-to-intention structures from actual
+observations, compare to pinned PyBot behavior, and realize selected programs
+through E-CPU's existing Hypervisor/mTLS/M3 infrastructure.
