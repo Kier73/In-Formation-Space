@@ -34,6 +34,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export PYTHONPATH="experiments/real_connectome_ground:${PYTHONPATH:-}"
           STORE="$(mktemp -d)"
           BASE="experiments/real_connectome_ground/continuity/continuity.py"
           FIRST="$(python "$BASE" --store "$STORE" init)"
