@@ -24,6 +24,7 @@ from mailcpu import (
     DistributedRecoveryLineageCoordinator,
     RecoveryLineageAuthority,
     RecoveryLineagePeerClient,
+    RecoveryLineageTransportError,
     RecoveryStateManifest,
     SeedCommitMembership,
 )
@@ -80,10 +81,20 @@ def open_distributed(membership: SeedCommitMembership, owner_journal: Path,
                     ep["dns"] == dns and ep["host"] == "127.0.0.1" and
                     type(ep["port"]) is int and 0 < ep["port"] <= 65535,
                     "authority endpoint configuration is not pinned")
-            peers[member] = RecoveryLineagePeerClient.connect_mutual_tls(
-                membership, member, ep["host"], ep["port"], ctx,
-                server_hostname=dns, timeout=2.0, handshake_timeout=2.0,
-            )
+            # The prior owner may have been SIGKILLed while the service
+            # still served its TLS stream. Give the same journalled service a
+            # bounded reconnect opportunity; never change peer identity.
+            for attempt in range(5):
+                try:
+                    peers[member] = RecoveryLineagePeerClient.connect_mutual_tls(
+                        membership, member, ep["host"], ep["port"], ctx,
+                        server_hostname=dns, timeout=2.0, handshake_timeout=2.0,
+                    )
+                    break
+                except RecoveryLineageTransportError:
+                    if attempt == 4:
+                        raise
+                    time.sleep(.15 * (attempt + 1))
         owner = RecoveryLineageAuthority(membership, "A", owner_journal)
         return DistributedRecoveryLineageCoordinator(
             membership, {"A": owner, **peers})
@@ -182,8 +193,9 @@ def recover_from_quorum(archive: Path, trust_file: Path,
         require(manifest_bytes == existing.canonical(manifest_snapshot),
                 "manifest archive is not canonical")
         manifest = RecoveryStateManifest.from_snapshot(manifest_snapshot)
-        require(manifest.digest == root and manifest.generation == generation,
-                "archive manifest disagrees with quorum root")
+        require(manifest.digest == root and manifest.generation == generation and
+                manifest.capture_cut == "cgs008:checkpoint_after" + str(generation),
+                "archive manifest disagrees with quorum root or expected cut")
         state_bytes = stored_path(
             archive, "objects", manifest.state_digest).read_bytes()
         manifest.verify_payload(state_bytes)
