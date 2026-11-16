@@ -29,6 +29,8 @@ jobs:
         run: python experiments/real_connectome_ground/connectome_ground.py
       - name: Navigate a direct targeted biological-cone query
         run: python experiments/real_connectome_ground/connectome_ground.py --from-node AWCL --to-node AIYL --steps 2 --top-n 4
+      - name: Measure separate Ground index, navigation, realization and full-oracle costs
+        run: python experiments/real_connectome_ground/benchmark.py --repeats 3
 
   native-ecpu-dag:
     runs-on: ubuntu-latest
