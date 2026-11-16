@@ -10,7 +10,7 @@ The correct next step is integration, not new consensus machinery.
 |---|---|---|
 | [E-CPU recovery lineage](https://github.com/Kier73/E-CPU/blob/6fd416facdb2aefd6fc7d66a06b014e3d31b5a52/docs/RECOVERY_LINEAGE.md) | `RecoveryStateManifest`, `RecoveryLineageCoordinator`, `RecoveryLineageAuthority`, durable strict-majority seed-commit journals | **Actual checkpoint freshness authority**, no rewrite |
 | [E-CPU recovery-lineage service](https://github.com/Kier73/E-CPU/blob/6fd416facdb2aefd6fc7d66a06b014e3d31b5a52/docs/RECOVERY_LINEAGE_SERVICE.md) | Separate persistent member services with mTLS authentication, reconnection after process restart, protected member journals | Future deployment path for separate failure domains |
-| [IFS durable route-epoch store](../proof-attention/sqlite_route_epoch_store.py) | `BEGIN IMMEDIATE` SQLite compare-and-swap and event audit after process restart | Alternative for **one local host only**, not a multi-host quorum |
+| [IFS durable route-epoch store](../../bridges/proof-attention/sqlite_route_epoch_store.py) | `BEGIN IMMEDIATE` SQLite compare-and-swap and event audit after process restart | Alternative for **one local host only**, not a multi-host quorum |
 | [IFS signed authority history](../continuous-observation-equivalence/coe017_attest/history/history.go) | Receiver-owned signed history, key revocations and event replay | Complements policy/observation interpretation; cannot alone detect wholesale rollback |
 | [CGS-008](README.md) | Two-root Ed25519 policy revisions, receiver-signed checkpoint, fresh observer challenge and refusal after conflicting readings | **Meaning and evidence** of the candidate state; no duplicated journal consensus |
 
@@ -41,11 +41,11 @@ In the controlled experiment, two committed generations correspond to the origin
 
 [The CGS-009 workflow](../../.github/workflows/cgs009-ecpu-recovery.yml) installs the *pinned E-CPU package* in Linux jobs on Python 3.11 and 3.13, runs E-CPU's **existing native recovery lineage tests**, generates a fresh signed CGS-008 transcript with Node 22, and runs [eight integration test groups](test_ecpu_quorum_bridge.py), each CLI stage in a distinct process.
 
-The cases verify:
+The CGS-009 integration cases verify:
 - exact first/second E-CPU commit quorums and restart recovery of generation 2;
 - refusal of a fully valid but older generation-1 checkpoint;
 - refusal of reading or sealing with only one of three anchor journals;
-- partial minority prepare followed by an exact retry with majority;
+- missing read quorum refusing first, followed by a successful re-attempt once a majority is available;
 - byte-for-byte state and manifest tampering refusal;
 - tampered policy signature refusal even with an intact committed quorum;
 - refusal of occupied generations and generation skips;
