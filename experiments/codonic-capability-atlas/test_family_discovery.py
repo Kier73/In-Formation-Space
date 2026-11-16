@@ -201,4 +201,16 @@ class FamilyDiscoveryTests(unittest.TestCase):
             self.assertFalse(native["combined_dense_materialized"])
 
 
+    def test_opaque_names_do_not_provide_a_family_metric(self):
+        from capability_atlas import point_label, encode
+        source=gather(4)
+        affine=identify(source,"alpha")
+        address=encode(affine.ground)
+        self.assertNotEqual(point_label("opaque-seed-one",address),
+                            point_label("opaque-seed-two",address))
+        self.assertEqual(identify(source,"alpha"),affine)
+        self.assertEqual(identify(source,"beta").family,
+                         "quadratic-shear-before-affine")
+
+
 if __name__=="__main__":unittest.main()
