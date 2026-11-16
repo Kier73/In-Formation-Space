@@ -1,3 +1,5 @@
+> **2026-11-16 continuity amendment:** The original RCG-002 body/sensorimotor interpretation is superseded by [RCG-003 correction](RCG-003-CORRECTION.md). **Body = observer-host/communication substrate; mind = procedural, source-grounded synthetic AI processing.** The existing RCG-001 source and RCG-002 ledger remain unchanged. Current research: [adaptive fabric and real local IPC experiment](adaptive_fabric/README.md) with [v2 curriculum](training_tracks_v2.json). Synthetic route costs do not constitute real TLS or network measurements.
+
 # RCG-002 persistent research state
 
 Updated: 2026-11-16. This is an inspectable **checkpoint of research intentions**, not a claim that a continuously running learner has been created.

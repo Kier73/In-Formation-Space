@@ -1,3 +1,5 @@
+> **2026-11-16 semantic correction (RCG-003):** In the E-CPU objective, the **body is observer-hosts and computation-bearing communication paths**, not biological sensing, actuation or sensorimotor behavior. The **mind is procedural/synthetic computational Grounds and adaptive verified inference**. The OpenWorm connectome is a structural dataset for synthetic tasks, not a biological embodiment target. Read [RCG-003 correction](RCG-003-CORRECTION.md), [adaptive fabric](adaptive_fabric/README.md) and [training curriculum v2](training_tracks_v2.json). This v1 document remains for historical evidence, not a current development directive.
+
 # RCG-002 — Persistent connectome Ground and embodied virtual intelligence
 
 **Location:** \`experiments/real_connectome_ground/continuity/\`  

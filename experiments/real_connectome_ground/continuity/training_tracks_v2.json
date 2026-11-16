@@ -1,0 +1,146 @@
+{
+  "schema": "ifs.adaptive-fabric-virtual-intelligence-training-opportunities.v2",
+  "program": "observer-host-fabric-body-and-procedural-ground-mind",
+  "status": "research-opportunities-not-autonomous-agents",
+  "supersedes": "ifs.embodied-virtual-intelligence-training-opportunities.v1",
+  "legacy_archive": "legacy_training_tracks_v1.json",
+  "principle": "Body=observer-hosts and communication paths used for in-transit computation. Mind=source-grounded procedural computation, synthetic training and verified navigation. Biological connectome is optional topology data, never an intended organism simulator.",
+  "opportunities": [
+    {
+      "id": "body.fabric-telemetry-and-path-cost-learning.v2",
+      "order": 1,
+      "domain": "body",
+      "status": "proposed",
+      "description": "Train models of computation, serialization, queueing, latency and reliability for eligible observer-host pathways using synthetic telemetry initially; replace with measured E-CPU receipts later.",
+      "data": "source-pinned synthetic query Ground and generated transport-state contexts",
+      "target": "predict route cost under fluctuating communication conditions",
+      "candidate": "identified exact rational path-cost estimator; later learned contextual classifier",
+      "metrics": [
+        "held-out path-cost prediction error",
+        "route regret",
+        "communication bytes",
+        "host variance"
+      ],
+      "promotion": "receiver-owned source and independently verified synthetic telemetry",
+      "requires": [
+        "pinned_source",
+        "independently_verified_queries"
+      ],
+      "scope": "computation-through-observer-host-communication-not-biological-embodiment"
+    },
+    {
+      "id": "mind.synthetic-neural-ground-synthesis.v2",
+      "order": 2,
+      "domain": "mind",
+      "status": "proposed",
+      "description": "Construct neural operator Grounds from synthetic, task-labeled datasets using existing PNF/SNC compilers; retain semantics, source identity and verification separately.",
+      "data": "synthetic tasks derived from a pinned heterogeneous graph, plus typed operator expressions",
+      "target": "verified task-dependent computation and transfer predictions",
+      "candidate": "PNF widening, SNC exact compiler, or source-pinned sparse model with typed certificates",
+      "metrics": [
+        "independent reference agreement",
+        "held-out task error",
+        "distinct functions",
+        "artifact bytes",
+        "realized work"
+      ],
+      "promotion": "model identity not inferred from logical parameter count",
+      "requires": [
+        "pinned_source",
+        "independently_verified_queries"
+      ],
+      "scope": "computation-through-observer-host-communication-not-biological-embodiment"
+    },
+    {
+      "id": "body.authenticated-in-transit-realization.v2",
+      "order": 3,
+      "domain": "body",
+      "status": "proposed",
+      "description": "Execute selected synthetic neural operators through existing E-CPU Transit/mTLS, under receiver-local admission, with independent output verification; refuse simulated routes as evidence.",
+      "data": "versioned model Ground, receiver capabilities, authenticated TCP/TLS events",
+      "target": "qualified remote computation over actual observer-host paths",
+      "candidate": "E-CPU Transit, ReliableChannel, Hypervisor, TCR-002 tensor-cut worker",
+      "metrics": [
+        "end-to-end latency",
+        "bytes",
+        "authorized completion",
+        "path diversity",
+        "verified receipts"
+      ],
+      "promotion": "must supply native E-CPU execution evidence",
+      "requires": [
+        "authenticated_transit",
+        "host_authority_evidence"
+      ],
+      "scope": "computation-through-observer-host-communication-not-biological-embodiment"
+    },
+    {
+      "id": "mind.adaptive-structural-navigation.v2",
+      "order": 4,
+      "domain": "mind",
+      "status": "proposed",
+      "description": "Learn to choose query-relative subspaces, operator demands and host placements using evidence-aware costs while retaining exact Ground verification.",
+      "data": "held-out query families, cost observations and source Ground identity",
+      "target": "correct task result with lower measured total cost",
+      "candidate": "VGI typed navigation, IFS RCN routing, evidence path resolver",
+      "metrics": [
+        "oracle agreement",
+        "false equivalence",
+        "planning cost",
+        "retained bytes",
+        "abstentions"
+      ],
+      "promotion": "learned selection is only a proposal until checked",
+      "requires": [
+        "varied_query_corpus",
+        "independently_verified_queries"
+      ],
+      "scope": "computation-through-observer-host-communication-not-biological-embodiment"
+    },
+    {
+      "id": "body.rehome-continuous-virtual-computation.v2",
+      "order": 5,
+      "domain": "body",
+      "status": "proposed",
+      "description": "Keep model state and structural memory continuous across host departure, route change and replacement, without double-applying effects.",
+      "data": "durable M3 high-water, M1 objects, route epochs, lost-peer faults",
+      "target": "recoverable no-replay distributed computation",
+      "candidate": "existing E-CPU recovery lineage, quorum, computation DAG and transit directory",
+      "metrics": [
+        "duplicate effects",
+        "recovery latency",
+        "failed-host repair",
+        "authority refusal"
+      ],
+      "promotion": "requires actual crash/rehome evidence not synthetic labels",
+      "requires": [
+        "authenticated_transit",
+        "durable_recovery_lineage",
+        "host_authority_evidence"
+      ],
+      "scope": "computation-through-observer-host-communication-not-biological-embodiment"
+    },
+    {
+      "id": "mind.combinatorial-expert-capacity-v2",
+      "order": 6,
+      "domain": "mind",
+      "status": "proposed",
+      "description": "Test whether procedural generation yields genuinely different information-bearing functions rather than just new parameter addresses; scale learned or source-verified diversity, not labels.",
+      "data": "distinct verified expert tensors, task semantics, withheld synthetic tasks",
+      "target": "measurable capability per byte and realized operation",
+      "candidate": "VP-005 navigable experts, MWS/HFG source snapshots, VGI equivalence",
+      "metrics": [
+        "number of distinct observed functions",
+        "held-out task score",
+        "active computation",
+        "source bits"
+      ],
+      "promotion": "count semantic distinctions and independent evidence, not only logical experts",
+      "requires": [
+        "distinct_verified_parameter_content",
+        "held_out_synthetic_tasks"
+      ],
+      "scope": "computation-through-observer-host-communication-not-biological-embodiment"
+    }
+  ]
+}
