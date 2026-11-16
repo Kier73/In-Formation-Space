@@ -51,3 +51,15 @@ The source is vendored with its Git blob fingerprint and OpenWorm MIT attributio
 First: external stimuli/actual recorded neural activity (FlyVis or OpenWorm response data), synaptic signs and cell dynamics as **new evidence-backed Ground dimensions**; then ask which selected, source-pinned subcircuit reproduces reference dynamics under a task-defined error tolerance. Causal-cone reachability for a linear, bounded-horizon model is exact; general spiking systems may require context/state and cannot be presumed to use this closed cone without proof.
 
 Second: connect selected stage operations to E-CPU observer-host Transport/Virtual Layer, signed receipts, and state recovery using existing IFS ObservationPath/VGI authority integration. Do not misrepresent a mathematical local optimization as a remote path executing neuron arithmetic.
+
+## Persistent structure and embodied learning (RCG-002)
+
+The [continuity/](continuity/) subfolder retains source-pinned query capsules as
+content-addressed, append-only records with independent full-connectome audits
+and explicitly **externally pinned** high-water roots. Its
+[training curriculum](continuity/training_tracks.json) distinguishes body
+(sensors, biologically calibrated dynamics, action and E-CPU observer-host recovery)
+from mind (query navigation, Ground equivalence, memory and task-aware policy).
+[Development checkpoint](continuity/STATE.md) and [reproduction guide](continuity/README.md)
+identify what is built, what remains unknown, and the next evidence required.
+No trained behavior or physiological equivalence is asserted by the new folder.
