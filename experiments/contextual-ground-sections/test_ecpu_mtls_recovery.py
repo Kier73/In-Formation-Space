@@ -142,6 +142,24 @@ class RealECPUHardkillTests(unittest.TestCase):
         self.assertTrue(result["source_ed25519_verified"])
         self.assertTrue(result["requires_fresh_challenge"])
         self.assertFalse(result["current_execution_authorized"])
+        evidence_dir = os.getenv("CGS010_EVIDENCE_DIR")
+        if evidence_dir:
+            destination = Path(evidence_dir)
+            destination.mkdir(parents=True, exist_ok=True)
+            (destination / "recovered-state.json").write_text(
+                json.dumps({
+                    "schema": "ifs.cgs010-live-hardkill-evidence/0.1",
+                    "source": "freshly Ed25519-signed CGS-008 public transcript",
+                    "receiver_process": "hard-killed while E-CPU mTLS streams were alive",
+                    "authority_processes": ["B", "C"],
+                    "quorum_source": "original E-CPU durable recovery lineage",
+                    "sealed": sealed["sealed"],
+                    "recovered": result,
+                    "original_checkpoint_path_given_to_successor": False,
+                    "private_keys_in_report": False,
+                    "historical_signatures_not_live_authority": True,
+                    "separate_physical_failure_domains": False,
+                }, sort_keys=True, indent=2) + "\n", encoding="utf8")
 
     def test_fully_authentic_older_manifest_cannot_override_quorum_root(self):
         sealed = self._seal_and_hard_kill()
