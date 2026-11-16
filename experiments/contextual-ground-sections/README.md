@@ -250,6 +250,10 @@ The [CGS-007 historical evidence experiment](CGS-007-HISTORICAL-EVIDENCE.md) reu
 
 The [CGS-008 authority protocol](CGS-008-FRESH-AUTHORITY.md) adds a separate current-authority experiment: two distinctly keyed Ed25519 root signers, hash-chained versioned Ground policies, observer revocation, signed receiver freshness checkpoints, challenge-bound signed parity receipts, and refusal of stale, contradictory or replayed claims. A public-only synthetic transcript is audited by a separately implemented Python verifier, including adversarial mutations. It **does not** claim independent administrations, a durable anti-rollback store, real E-CPU transport, or sensor truth. Its key distinction is that historical authenticity, mathematical sufficiency and current authority are independent verdicts.
 
+## CGS-009: original E-CPU quorum recovery, not another checkpoint algorithm
+
+The [CGS-009 reuse experiment](CGS-009-ECPU-QUORUM-REUSE.md) connects the independently Ed25519-verified CGS-008 receiver checkpoint to **E-CPU's already implemented** `RecoveryStateManifest`, `RecoveryLineageCoordinator`, and fsynced seed-commit authority journals. It anchors the exact serialized receiver state in a fixed-membership majority before admitting later restore. The test suite opens the durable journals in separate OS processes and attempts to restore the still-valid, now-superseded signed checkpoint; only the quorum high-water is eligible. One-host triple-journal testing is **not** proof of independent administrative failure domains, and current effect authorization still requires a fresh challenge. The original E-CPU recovery algorithm is **reused**, not rewritten. New hosted CI remains pending.
+
 ## Relationship to prior mathematics and other projects
 
 Global sections and their obstruction by local compatibility are established in the sheaf-theoretic contextuality literature; cycle consistency and group synchronization are established in graph theory and geometry. **Do not claim that those ideas are first discovered here.**
