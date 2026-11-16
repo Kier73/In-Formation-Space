@@ -163,6 +163,31 @@ class NativeReuseTests(unittest.TestCase):
         with self.assertRaises(EvidenceError):
             TransitionEvidenceLedger.from_dict(data)
 
+
+    def test_real_ecpu_sab002_retains_finite_witness_not_universal_law(self):
+        from mailcpu.active_ground_discovery import (
+            ObservedCodeHost, ProbeAuthority, discover,
+        )
+        from mailcpu.law_certifier import lcg_navigate
+        mod, multiplier, increment, start = 17, 3, 5, 2
+        def true_value(t):
+            return lcg_navigate(multiplier, increment, mod, start, t)
+        hidden = 100
+        # A deceptive source follows the law at all SAB-002's probe coordinates
+        # but differs at a later, untested point.
+        def finite_deceiver(t):
+            value = true_value(t)
+            return (value + int(t == hidden)) % mod
+        host = ObservedCodeHost(
+            "synthetic-host", "controlled-synthetic-observer", mod,
+            "permitted-probe", 200, finite_deceiver,
+        )
+        permission = ProbeAuthority(frozenset({"synthetic-host"}), "permitted-probe")
+        candidate = discover(host, permission, coordinate=5)
+        self.assertEqual(candidate.verification, "finite_witness_only")
+        self.assertNotEqual(candidate.navigate(hidden), finite_deceiver(hidden))
+        self.assertEqual(candidate.ground_digest, candidate.ground_digest)
+
     def test_no_new_authority_or_physical_execution_claim(self):
         result = conditionally_resolve_from_vgi(
             build_ledger(), expected_ground_id=GROUND_ID, expected_context_digest=CTX,
