@@ -91,7 +91,54 @@ class AngularSupportingConeTests(unittest.TestCase):
         self.assertEqual(cone.first_order_gap(cone.nested_tip_headings(4),4),0)
         for n in range(1,7):
             a = cone.nested_tip_headings(n)
+            # The old float double sum failed on Python 3.11, producing
+            # 8.881784197001252e-16 rather than the exact identity zero.
+            self.assertEqual(cone.cross_sine_coefficients(a, a), ())
             self.assertEqual(cone.cross_from_histograms(a,a,cone.guaranteed_angle(n)),0.)
+
+    def test_exact_signed_frequency_coefficients_against_independent_float_sum(self):
+        # Integer antisymmetric pairing is exact; sine projection is only
+        # numerical when a nonzero coefficient actually exists.
+        cases = (
+            (((0, 2), (-1, 1)), ((1, 2), (0, 1))),
+            (((-2, 1), (0, 1)), ((-1, 3), (0, 2))),
+            (((1, 1), (3, 2)), ((0, 2), (2, 1))),
+        )
+        for a, b in cases:
+            for angle in (0.01, 0.1, 0.4):
+                with self.subTest(a=a, b=b, angle=angle):
+                    direct = sum(
+                        na * nb * math.sin((kb - ka) * angle)
+                        for ka, na in a for kb, nb in b
+                    )
+                    exact = cone.cross_sine_coefficients(a, b)
+                    self.assertEqual(exact, cone.cross_sine_coefficients(a, b))
+                    self.assertAlmostEqual(
+                        cone.cross_from_histograms(a, b, angle), direct,
+                        delta=1e-12 * max(1.0, abs(direct)),
+                    )
+                    self.assertAlmostEqual(
+                        cone.cross_from_histograms(b, a, angle), -direct,
+                        delta=1e-12 * max(1.0, abs(direct)),
+                    )
+
+    def test_self_cross_exactly_zero_for_repeated_heading_multiplicities(self):
+        for a in (
+            ((0, 1),), ((-1, 5), (0, 2), (1, 3)),
+            ((-2, 2), (-1, 1), (0, 3), (1, 4), (2, 2)),
+        ):
+            self.assertEqual(cone.cross_sine_coefficients(a, a), ())
+            for angle in (0.0, 0.1, 1.2):
+                self.assertEqual(cone.cross_from_histograms(a, a, angle), 0.0)
+
+    def test_heading_histogram_identity_rejects_non_integer_multiplicities(self):
+        for bad in (
+            (((0, 1.5),), ((1, 2),)),
+            (((True, 1),), ((1, 2),)),
+            (((0, -1),), ((0, 1),)),
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                cone.cross_sine_coefficients(*bad)
 
     def test_closed_form_tip_distribution_at_large_depth(self):
         n = 1000

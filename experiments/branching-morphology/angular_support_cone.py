@@ -72,10 +72,45 @@ def quantitative_cross_lower_bound(depth: int, theta: float) -> float:
             * math.cos((2 * depth - 0.5) * theta))
 
 
+def cross_sine_coefficients(a, b):
+    """Exact integer coefficients of the oriented sine-difference expansion.
+
+    Write cross(a,b,theta) = sum_(d>0) c[d]*sin(d*theta).  For each
+    positive heading difference d, c[d] is the *integer* count of
+    (b-heading minus a-heading)==d minus its antisymmetric partner -d.
+
+    Cancellation is performed in Z, before any floating-point sin call.
+    Thus cross(a,a,theta) is identically zero, not merely close to zero,
+    regardless of depth, angle, interpreter or summation order.
+    """
+    weights = {}
+    for hist in (a, b):
+        for heading, multiplicity in hist:
+            if (type(heading) is not int or type(multiplicity) is not int
+                    or multiplicity < 0):
+                raise ValueError("heading histograms require nonnegative integer counts")
+    for ka, na in a:
+        for kb, nb in b:
+            difference = kb - ka
+            if difference:
+                weights[difference] = weights.get(difference, 0) + na * nb
+    return tuple(
+        (d, weights.get(d, 0) - weights.get(-d, 0))
+        for d in sorted({abs(offset) for offset in weights})
+        if weights.get(d, 0) != weights.get(-d, 0)
+    )
+
+
 def cross_from_histograms(a, b, theta):
-    """Independent trigonometric oriented cross of two heading multisets."""
-    return sum(na * nb * math.sin((kb - ka) * theta)
-               for ka, na in a for kb, nb in b)
+    """Oriented cross with exact integer antisymmetry before numeric evaluation.
+
+    The trigonometric projection remains floating-point for nonzero terms;
+    no approximate float is used as a mathematical proof of zero.
+    """
+    return math.fsum(
+        coefficient * math.sin(difference * theta)
+        for difference, coefficient in cross_sine_coefficients(a, b)
+    )
 
 
 def audit_depth(depth: int, *, numeric_probe: bool = True) -> dict:

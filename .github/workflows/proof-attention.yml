@@ -52,3 +52,34 @@ jobs:
           -s bridges/proof-attention
           -p 'test_*.py'
           -v
+      - name: Use E-CPU/VGI/IFS to navigate the observed Python 3.11 invariant failure
+        env:
+          PYTHONPATH: bridges/proof-attention:bridges/observation-path:external/E-CPU:external/Virtual-Ground-Interpreter/virtual_ground_interpreter
+        run: >-
+          python bridges/proof-attention/research_ci_proofground.py
+          --output "$RUNNER_TEMP/usm011-real-ci-proof-navigation.json"
+      - name: Check recorded research direction has no synthetic kernel or CI acceptance
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads(
+              (Path(os.environ["RUNNER_TEMP"]) /
+               "usm011-real-ci-proof-navigation.json").read_text()
+          )
+          assert report["ground_summary"]["unverified_obligations"] == 3
+          assert report["ground_summary"]["kernel_accepted_obligations"] == 0
+          assert report["native_research_dag"]["next_ready_operation"] == (
+              "python.ci.regression"
+          )
+          assert report["external_kernel_receipt_admitted"] is False
+          assert report["merge_authorized"] is False
+          print("Real CI failure was navigated; verification remains an obligation")
+          PY
+      - name: Retain actual failure, VGI/IFS frontier, and native E-CPU evidence DAG
+        uses: actions/upload-artifact@v4
+        with:
+          name: usm011-actual-ci-proof-obligations
+          path: ${{ runner.temp }}/usm011-real-ci-proof-navigation.json
+          if-no-files-found: error

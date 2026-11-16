@@ -1,0 +1,36 @@
+{
+  "schema": "in-formation-space.real-ci-invariant-observation.v1",
+  "source": {
+    "repository": "Kier73/In-Formation-Space",
+    "workflow": "Branching morphology",
+    "run_id": 43629648833,
+    "job_id": 132553219461,
+    "run_url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43629648833",
+    "job_url": "https://github.com/Kier73/In-Formation-Space/actions/runs/43629648833/job/132553219461",
+    "head_sha": "7e7f86d7074eb676e2e022cd620b4b1a814c5873",
+    "python_version": "3.11.18",
+    "job_conclusion": "failure",
+    "test_name": "test_angular_support_cone.AngularSupportingConeTests.test_fake_path_counterexample_is_not_in_grammar_cone",
+    "test_path": "experiments/branching-morphology/test_angular_support_cone.py",
+    "assertion_line": 94,
+    "expected": "0.0",
+    "observed": "8.881784197001252e-16",
+    "inspected_depths": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "failing_depth": "not emitted by unittest",
+    "observation": "floating-point double sum did not preserve the exact self-cross cancellation"
+  },
+  "classification": {
+    "underlying_mathematical_statement": "cross(H,H,theta) = 0 for every integer heading histogram H and finite theta",
+    "established_by_ci": "The unmodified test asserted exact 0.0 and received 8.881784197001252e-16 on Python 3.11",
+    "not_established_by_ci": "A failure of the underlying exact symbolic identity",
+    "planned_method": "Pair equal-and-opposite sine-frequency terms in exact integer arithmetic before floating evaluation",
+    "external_kernel_receipt_available": false
+  }
+}
