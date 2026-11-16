@@ -153,7 +153,7 @@ class TemporalGroundTests(unittest.TestCase):
         self.assertEqual(far['value_mod_p'],665424168)
 
     def test_real_pinned_original_connectome_in_ci(self):
-        path=Path(__file__).resolve().parents[1]/'data'/'herm_full_edgelist.csv'
+        path=Path(__file__).resolve().parents[2]/'data'/'herm_full_edgelist.csv'
         if not path.is_file():
             self.skipTest('pinned OpenWorm file is only in repository, not fixture runtime')
         g=ConnectomeGround.from_csv(path.read_bytes())
