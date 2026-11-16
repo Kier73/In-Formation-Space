@@ -69,7 +69,7 @@ class CGS009QuorumRecoveryTests(unittest.TestCase):
         error = self.command("recover", 1, ("anchor-A",), success=False)
         self.assertIn("quorum", error.lower())
 
-    def test_minority_prepare_can_be_completed_by_exact_retry(self):
+    def test_insufficient_read_quorum_refuses_until_majority_returns(self):
         first_error = self.command("seal", 1, ("anchor-A",), success=False)
         self.assertIn("quorum", first_error.lower())
         accepted = self.command("seal", 1, ("anchor-A", "anchor-B"))
