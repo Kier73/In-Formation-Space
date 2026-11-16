@@ -38,3 +38,10 @@ Updated: 2026-11-16. This is an inspectable **checkpoint of research intentions*
 A worthwhile alternative is **Body track 3**, actual calibrated physiology, but it must remain explicitly pending until a source-pinned stimulus-response dataset and compatible identity mapping are admitted. A biological connectome is not automatically a trained cognitive agent.
 
 **Continuity invariant:** Keep source observations, constructed Grounds, inferred hypotheses, trained representations, authorized actions and externally verified outcomes distinguishable as separate typed evidence. Longer-lived virtual intelligence should be built by accumulating qualified structure, not asserting identity or memory from unverified labels.
+
+
+## Initial local persistence footprint (fixture, not full OpenWorm data)
+
+On the 20-record source-derived compact fixture used by \`test_connectome_ground.py\`, Python 3.13 produced one source manifest and one AWCL → AIYL, two-transition query capsule. After a fresh Chronicle instance independently audited the Ground, the retained **two immutable objects + complete ledger** occupied **3,715 bytes**: 615 bytes for the two-record hash-linked lineage and 2,583 bytes for the query capsule (remainder source manifest). That one local audit took about **1.08 ms** in this environment.
+
+This is a **small-fixture measurement**, not the storage or latency of the complete connectome, external replication, trained weights, an E-CPU virtual machine, or HTTP/TLS observer-host transport. The complete upstream CSV remains separately versioned in RCG-001. Recording the counts and object digests allows the persistent representation to be measured again after source or code changes.
