@@ -5,6 +5,32 @@
   "field": 257,
   "full_family_address_bits": 297,
   "indexed_unique_experts": 281474976710656,
+  "learning_cost": [
+    {
+      "max_degree": 8,
+      "median_evidence_admission_us": 191.42,
+      "median_exact_inference_us": 254.97,
+      "median_probe_planning_us": 1229.59,
+      "median_source_trace_bytes": 2964,
+      "observations_per_task": 12
+    },
+    {
+      "max_degree": 16,
+      "median_evidence_admission_us": 327.97,
+      "median_exact_inference_us": 1055.35,
+      "median_probe_planning_us": 2765.69,
+      "median_source_trace_bytes": 4740,
+      "observations_per_task": 20
+    },
+    {
+      "max_degree": 32,
+      "median_evidence_admission_us": 648.5,
+      "median_exact_inference_us": 5574.87,
+      "median_probe_planning_us": 7672.51,
+      "median_source_trace_bytes": 8300,
+      "observations_per_task": 36
+    }
+  ],
   "max_polynomial_degree": 32,
   "native_ecpu_validation": "separate mandatory CI gate, not included in local measurements",
   "schema": "COG005/scalable-functional-capacity-audit/v1",
@@ -38,21 +64,21 @@
     {
       "logical_experts": 128,
       "materialized_experts": 8,
-      "median_local_us": 350.11,
+      "median_local_us": 356.3,
       "plan_route_bytes": 336,
       "result_bytes": 495
     },
     {
       "logical_experts": 1048576,
       "materialized_experts": 8,
-      "median_local_us": 355.61,
+      "median_local_us": 351.73,
       "plan_route_bytes": 372,
       "result_bytes": 501
     },
     {
       "logical_experts": 281474976710656,
       "materialized_experts": 8,
-      "median_local_us": 371.82,
+      "median_local_us": 396.78,
       "plan_route_bytes": 453,
       "result_bytes": 500
     }
