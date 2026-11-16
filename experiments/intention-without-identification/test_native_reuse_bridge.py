@@ -121,7 +121,7 @@ class NativeReuseTests(unittest.TestCase):
                     ledger, expected_ground_id=GROUND_ID, expected_context_digest=CTX,
                 )
 
-    def test_authenticated_label_disagreement_stays_conflicted(self):
+    def test_declared_source_disagreement_stays_conflicted(self):
         ledger = build_ledger(2, 3)
         self.assertEqual(ledger.decision(SOURCE_STATE, ACTION).status, "CONFLICT")
         with self.assertRaises(ReuseRefused):
@@ -186,7 +186,7 @@ class NativeReuseTests(unittest.TestCase):
         candidate = discover(host, permission, coordinate=5)
         self.assertEqual(candidate.verification, "finite_witness_only")
         self.assertNotEqual(candidate.navigate(hidden), finite_deceiver(hidden))
-        self.assertEqual(candidate.ground_digest, candidate.ground_digest)
+        self.assertEqual(len(candidate.witness), 8)
 
     def test_no_new_authority_or_physical_execution_claim(self):
         result = conditionally_resolve_from_vgi(
