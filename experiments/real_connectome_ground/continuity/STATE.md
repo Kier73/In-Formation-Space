@@ -1,0 +1,40 @@
+# RCG-002 persistent research state
+
+Updated: 2026-11-16. This is an inspectable **checkpoint of research intentions**, not a claim that a continuously running learner has been created.
+
+| Phase | Evidence retained | Status | Next action |
+| --- | --- | --- | --- |
+| RCG-001 original connectome | OpenWorm c302 at \`d542a44\`, Git blob \`89ffc2a2...\` and original file in parent branch | Implemented as parent draft PR #248 | Merge after original full-source and native CI pass |
+| RCG-001 query-specific Ground | Exact structural cones, independently reconstructed transfers, attribution and edge-count budgets | Implemented mathematically | Add real stimulus/response evidence in a separate model version |
+| RCG-002 persistence | Immutable content-addressed source/query capsules and SHA-256 append-only high-water | Implemented and locally tested | Anchor externally held head in the already existing E-CPU M3 recovery authority |
+| RCG-002 learning opportunity registry | Body and mind proposed objectives, baseline/evaluation/provenance gates | Documented, not trained | Begin source-grounded structural readout comparison; withhold different query pairs |
+| Body physiology | No compatible recorded stimuli, signed dynamics or validated cross-dataset neuron map yet | Unresolved | Pin a real response dataset and independently validate neuron identities and timestamps |
+| Mind generalization | No trained policy or held-out task benchmarks from this program yet | Unresolved | Evaluate exact-vs-learned query navigation under measured end-to-end cost |
+| Embodiment/federation | Existing E-CPU transport and M3 primitives identified, not invoked by this Chronicle | Integration to do | Restore source-pinned Ground on a distinct authenticated observer and verify high-water |
+
+## Reconstructable source
+
+- Owner: [OpenWorm c302](https://github.com/openworm/c302).
+- Exact upstream revision: \`d542a44bf2662f79e0ad23342a959a181a920877\`.
+- Source data: \`c302/data/herm_full_edgelist.csv\` / IFS \`../data/herm_full_edgelist.csv\`.
+- Git blob SHA-1: \`89ffc2a2d9e1934ddc462d51032acead5e4cfc91\`.
+- Observed records: 7,379 directed typed edges, 448 labels, 4,681 chemical and 2,698 electrical.
+- Original data expresses positive connection counts, not learned neural weights or physiological response signs.
+- Mathematical query law: exact-horizon, unsigned, globally out-strength-normalized transfer.
+- Runtime state anchor: \`Chronicle.verify(expected_head=...)\` requires independently retained SHA-256 high-water. No public or ephemeral observer can invent an authoritative high-water from its own file content.
+
+## Repeatable checkpoints
+
+1. Run \`python -m unittest discover -s experiments/real_connectome_ground -p 'test_*.py' -v\`. Hosted tests require the full original source.
+2. Initialize a Chronicle, retain its source record high-water separately, append a new question and retain the revised high-water.
+3. Reopen the store (ideally a fresh process), reconstruct the selected causal Ground and independently re-evaluate every capsule using \`audit\`.
+4. When available, bind the Chronicle head to E-CPU M3/quorum as an admitted observation, not a substitute for native authenticated recovery.
+5. Treat each proposal in \`training_tracks.json\` as pending until its prerequisites have been observed; run held-out tests and emit separately versioned learned-model receipts before claiming training success.
+
+## Research choices
+
+**Preferred next work:** Body track 1 — learn to predict task-specific structural transfer while retaining the exact whole-graph oracle as a gate; and Mind track 2 — train or select a navigation policy that reduces total query cost while refusing any changed exact result.
+
+A worthwhile alternative is **Body track 3**, actual calibrated physiology, but it must remain explicitly pending until a source-pinned stimulus-response dataset and compatible identity mapping are admitted. A biological connectome is not automatically a trained cognitive agent.
+
+**Continuity invariant:** Keep source observations, constructed Grounds, inferred hypotheses, trained representations, authorized actions and externally verified outcomes distinguishable as separate typed evidence. Longer-lived virtual intelligence should be built by accumulating qualified structure, not asserting identity or memory from unverified labels.
