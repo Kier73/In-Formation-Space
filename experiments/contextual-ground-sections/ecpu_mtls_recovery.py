@@ -223,7 +223,7 @@ def recover_from_quorum(archive: Path, trust_file: Path,
         cp = body["checkpoint"]["body"]
         require(cp["policy_version"] == generation and
                 cp["counter"] == generation and
-                cp["last_receipt"] != existing.sha(b""),
+                cp["last_receipt"] != independent.ZERO,
                 "restored policy/counter/receipt inconsistent")
         return {
             "schema": SCHEMA,
