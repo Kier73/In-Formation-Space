@@ -1,0 +1,17 @@
+{
+  "schema": "ifs.rcg004.local-bounded-stress.v1",
+  "source_kind": "deterministic synthetic 1024-vertex graph, NOT OpenWorm",
+  "nodes": 1024,
+  "chemical_edges": 8172,
+  "recurrence_degree": 1024,
+  "prepared_sequence_length": 2048,
+  "field": 1000000007,
+  "far_logical_tick": 72057594037928020,
+  "far_value_mod_p": 506709502,
+  "polynomial_products": 60,
+  "prep_s": 1.95,
+  "verification_s": 1.772,
+  "navigation_s": 11.373,
+  "runtime": "local Python 3.13; no network, Hypervisor, native E-CPU, external source",
+  "scope": "exact finite-field topology dynamics; no claim of pretrained intelligence or biological spiking dynamics"
+}
