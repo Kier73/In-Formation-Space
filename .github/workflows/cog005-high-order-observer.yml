@@ -1,0 +1,98 @@
+name: COG-005 high-order capability atlas and native E-CPU observer handoff
+on:
+  push:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog005-high-order-observer.yml'
+  pull_request:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog005-high-order-observer.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-algebra-and-provenance:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Complete exact capability suite and refusals
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_*.py' -v
+      - name: Deterministic rank-aided learning and 2^48 indexed expert benchmark
+        run: python experiments/codonic-capability-atlas/run_high_order_capability.py
+
+  observer-plan:
+    runs-on: ubuntu-latest
+    outputs:
+      head: ${{ steps.plan.outputs.head }}
+      fingerprint: ${{ steps.plan.outputs.fingerprint }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate 32nd-order law source evidence and independently derive claim
+        id: plan
+        run: |
+          python experiments/codonic-capability-atlas/native_atlas_observer.py plan --file plan.json --github-output "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog005-source-plan
+          path: plan.json
+          if-no-files-found: error
+
+  native-ecpu-receiver:
+    needs: observer-plan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned actual E-CPU and VP-003 receiver implementation
+        run: |
+          python -m pip install 'git+https://github.com/Kier73/E-CPU.git@6fd416facdb2aefd6fc7d66a06b014e3d31b5a52'
+          git clone --quiet https://github.com/Kier73/E-CPU-Virtual-Processor.git vp-source
+          git -C vp-source checkout --detach 60c57dade11021f74fb36e72d18d782374589c70
+      - uses: actions/download-artifact@v4
+        with:
+          name: cog005-source-plan
+      - name: Native authenticated-local-policy Hypervisor realization and semantic replay
+        env:
+          PYTHONPATH: ${{ github.workspace }}/vp-source:${{ github.workspace }}/experiments/codonic-capability-atlas
+          SOURCE_HEAD: ${{ needs.observer-plan.outputs.head }}
+          SOURCE_FINGERPRINT: ${{ needs.observer-plan.outputs.fingerprint }}
+        run: |
+          python -c 'from mailcpu import HeadlessOS, VirtualLayerRuntime; from vp.native_inference import NativeInferenceHost; print("Native E-CPU Hypervisor imports verified")'
+          python experiments/codonic-capability-atlas/native_atlas_observer.py execute --file plan.json --out report.json --expected-head "$SOURCE_HEAD" --expected-fingerprint "$SOURCE_FINGERPRINT"
+          python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_native_atlas_observer.py' -v
+          python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_high_order_capability.py' -v
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog005-native-observer-report
+          path: report.json
+          if-no-files-found: error
+
+  independent-replacement-observer:
+    needs: [observer-plan,native-ecpu-receiver]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cog005-native-observer-report
+      - name: Source-pinned independent recomputation in another ephemeral job
+        env:
+          SOURCE_HEAD: ${{ needs.observer-plan.outputs.head }}
+          SOURCE_FINGERPRINT: ${{ needs.observer-plan.outputs.fingerprint }}
+        run: |
+          python experiments/codonic-capability-atlas/native_atlas_observer.py verify --file report.json --expected-head "$SOURCE_HEAD" --expected-fingerprint "$SOURCE_FINGERPRINT"
