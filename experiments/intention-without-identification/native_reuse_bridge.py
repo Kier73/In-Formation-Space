@@ -16,6 +16,7 @@ import hashlib
 from typing import Any
 
 from vgi.evidence import TransitionEvidenceLedger
+from vgi.transitions import GroundTransitionSystem
 from mailcpu.intention_sufficiency import (
     FiniteGround, FiniteState, MeasurementCapability, plan_sufficiency,
     verify_sufficiency_plan, resolve_sufficiency, verify_sufficiency_resolution,
@@ -64,7 +65,12 @@ def project_finalized_native_transition(
     )
     if ground.status(SOURCE_STATE, ACTION) != "known":
         raise ReuseRefused("reconstructed Ground still has unresolved transition")
-    step = ground.step(SOURCE_STATE, ACTION)
+    # Native VGI round-trip reconstruction prevents relying on a transient object
+    # with a different declared Ground identity.
+    reconstructed = GroundTransitionSystem.from_json(ground.to_json())
+    if reconstructed.fingerprint != ground.fingerprint:
+        raise ReuseRefused("native VGI Ground reconstruction fingerprint mismatch")
+    step = reconstructed.step(SOURCE_STATE, ACTION)
     if step.target not in ("s2", "s3") or step.output != (0,):
         raise ReuseRefused("observed transition outside declared hypothesis class")
     decision = verified.decision(SOURCE_STATE, ACTION)
@@ -80,6 +86,7 @@ def project_finalized_native_transition(
         "context_digest": verified.policy.context_digest,
         "ground_id": verified.policy.ground_id,
         "evidence_ledger_digest": verified.fingerprint,
+        "native_ground_fingerprint": reconstructed.fingerprint,
         "decision_digest": decision.digest,
         "evidence_ids": list(step.evidence),
         "ground_complete": ground.complete,
