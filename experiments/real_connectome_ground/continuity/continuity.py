@@ -212,11 +212,17 @@ class Chronicle:
             return self.verify()[-1]
         return self._append('source', value, expected_head=expected_head)
 
+    def _verified_object(self, event: dict[str, Any]) -> dict[str, Any]:
+        raw = (self.objects / (event['object'] + '.json')).read_bytes()
+        if _hash(raw) != event['object']:
+            raise ContinuityRefused('retained object changed after ledger verification')
+        return _load_json(raw)
+
     def read_event(self, index: int) -> dict[str, Any]:
         history = self.verify()
         if type(index) is not int or not 0 <= index < len(history):
             raise ContinuityRefused('no retained record exists at selected position')
-        return _load_json((self.objects / (history[index]['object'] + '.json')).read_bytes())
+        return self._verified_object(history[index])
 
     def query(self, ground: ConnectomeGround, request: Query, *, expected_head: str) -> dict[str, Any]:
         history = self.verify(expected_head=expected_head)
@@ -241,11 +247,11 @@ class Chronicle:
     def audit(self, ground: ConnectomeGround, *, expected_head: str) -> dict[str, Any]:
         """Independently re-execute every persisted query under the pinned source."""
         history = self.verify(expected_head=expected_head)
-        if not history or self.read_event(0) != source_manifest(ground):
+        if not history or self._verified_object(history[0]) != source_manifest(ground):
             raise ContinuityRefused('persistent source differs from admissible original Ground')
         counts = {'source': 1, 'query': 0, 'training-plan': 0}
         for index, entry in enumerate(history[1:], start=1):
-            capsule = self.read_event(index)
+            capsule = self._verified_object(entry)
             if entry['kind'] == 'query':
                 try:
                     query = Query(**capsule['query'])
