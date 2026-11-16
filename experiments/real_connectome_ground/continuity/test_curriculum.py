@@ -29,6 +29,13 @@ class CurriculumEvidenceGates(unittest.TestCase):
             self.assertEqual(status['body.dynamics-with-calibrated-signals.v1']['status'], 'blocked')
             self.assertTrue(all(not r['trained_model_exists'] for r in report['opportunities']))
             self.assertEqual(report['ground'], g.fingerprint)
+            # Three observations of one pair must not satisfy a varied-corpus gate.
+            current = result['head']
+            for _ in range(2):
+                current = store.query(g, Query('AWCL', 'AIYL', 2), expected_head=current)['head']
+            repeat_report = assess(g, store, expected_head=current, curricula=COURSES)
+            by_id = {row['id']: row for row in repeat_report['opportunities']}
+            self.assertEqual(by_id['mind.observation-valued-navigation-policy.v1']['status'], 'blocked')
 
     def test_forged_curriculum_refused(self):
         g = fixture()
