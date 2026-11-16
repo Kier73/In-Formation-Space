@@ -53,7 +53,7 @@ class AuthenticatedTemporalTests(unittest.TestCase):
 
     def test_real_pinned_multi_receiver_mtls_and_hard_loss(self):
         from experiments.real_connectome_ground.continuity.temporal_fabric.run_temporal_fabric import run
-        source=Path(__file__).resolve().parents[1]/'data'/'herm_full_edgelist.csv'
+        source=Path(__file__).resolve().parents[2]/'data'/'herm_full_edgelist.csv'
         self.assertTrue(source.is_file(),'native hosted test requires original pinned source')
         report=run(source,requests=8,workers=3)
         self.assertEqual(report['requests'],8)
