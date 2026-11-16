@@ -115,7 +115,8 @@ def persist_candidate(archive: Path, bundle: dict, manifest: RecoveryStateManife
 
 
 def seal_two(bundle_path: Path, archive: Path, trust_file: Path,
-             owner_journal: Path, tls_dir: Path, endpoints_file: Path) -> dict:
+             owner_journal: Path, tls_dir: Path, endpoints_file: Path, *,
+             ready_file: Path | None = None, hold_for_hard_kill: bool = False) -> dict:
     """One live owner process commits both original signed CGS-008 generations."""
     trust = read_trust(trust_file)
     bundle = existing.load_bundle(bundle_path)
@@ -143,8 +144,17 @@ def seal_two(bundle_path: Path, archive: Path, trust_file: Path,
                 "decision_members": sorted(d.member_id for d in proof.decisions),
                 "state_digest": manifest.state_digest,
             })
-        return {"sealed": result, "checkpoint_files_on_owner": 0,
-                "quorum_protocol": "mailcpu.DistributedRecoveryLineageCoordinator"}
+        report = {"sealed": result, "checkpoint_files_on_owner": 0,
+                  "quorum_protocol": "mailcpu.DistributedRecoveryLineageCoordinator"}
+        if ready_file is not None:
+            existing.atomic_create(ready_file, existing.canonical(report))
+        if hold_for_hard_kill:
+            require(ready_file is not None, "hard-kill test requires durable readiness")
+            print(json.dumps(report, sort_keys=True), flush=True)
+            # Preserve authenticated E-CPU streams so SIGKILL severs them.
+            while True:
+                time.sleep(0.2)
+        return report
     finally:
         coordinator.close()
 
@@ -237,15 +247,11 @@ def main() -> None:
     args = p.parse_args()
     if args.command == "seal-two":
         require(args.bundle is not None, "initial owner needs the public signed source")
-        report = seal_two(args.bundle, args.archive, args.trust, args.owner_journal,
-                          args.tls_dir, args.endpoints)
-        if args.ready_file is not None:
-            existing.atomic_create(
-                args.ready_file, existing.canonical(report))
+        report = seal_two(
+            args.bundle, args.archive, args.trust, args.owner_journal,
+            args.tls_dir, args.endpoints,
+            ready_file=args.ready_file, hold_for_hard_kill=args.hard_kill_ready)
         print(json.dumps(report, sort_keys=True), flush=True)
-        if args.hard_kill_ready:
-            while True:
-                time.sleep(0.2)
     else:
         require(args.bundle is None, "replacement must NOT receive prior source bundle")
         report = recover_from_quorum(
