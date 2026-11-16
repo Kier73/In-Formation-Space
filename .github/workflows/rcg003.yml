@@ -21,6 +21,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install procedural-neural formation's existing NumPy dependency
+        run: python -m pip install 'numpy>=1.26,<3'
+      - name: Require original IFS PNF neural realization, not a mock
+        run: python -c 'from experiments.procedural_neural_formation.formation import Block, evaluate, widen; print("native PNF import succeeded")'
       - name: Check exact synthetic training and separate-process local observer
         env:
           PYTHONPATH: experiments/real_connectome_ground:experiments/real_connectome_ground/continuity

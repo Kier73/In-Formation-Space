@@ -87,3 +87,22 @@ record from real path traffic. Compare local, mTLS and job-artifact paths under
 matched task/byte conditions; force failed hosts and rehome using E-CPU's
 existing M3 quorum/route-epoch authority. Then, with SNC/PNF, produce actual
 synthetic trainable neural operators rather than solely fitting route latency.
+
+## Procedural neural policy realization (PNF reuse)
+
+`neural_policy_ground.py` consumes the **fitted synthetic cost coefficients**
+and compiles them to an actual four-input, four-hidden-ReLU, six-output
+`experiments.procedural_neural_formation.formation.Block`. The four inputs are
+strictly nonnegative source/transport features; the hidden identity ReLU units
+retain them, and the learned cost matrix supplies the output coefficients.
+Non-F32-exact coefficients refuse instead of silently changing mathematical
+semantics. Each output is independently checked against the rational cost
+estimator for held-out source-derived tasks. Existing PNF `widen` is then used
+to generate a seven-hidden-unit alternative, requiring unchanged output and the
+native PNF conservation certificate. This is a **small neural realization of a
+trained synthetic route-cost model**, not a pretrained network or evidence of
+intelligence growing with logical parameter count.
+
+Hosted CI **requires** actual PNF imports and NumPy. Local environments without
+the original repository package skip this native PNF gate and cannot claim its
+success. This integration does not embed, emulate or replace PNF's verifier.
