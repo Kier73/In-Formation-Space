@@ -81,3 +81,8 @@ The companion [IWI-002 report](IWI-002.md) reuses this solver to certify strateg
 ## IWI-005: finite coverage, context and restart epistemic horizons
 
 [Read the IWI-005 report](IWI-005.md) and its [exact countermodels](results/coverage_counterexamples.json). The experiment distinguishes a complete signed **synthetic finite transition table within a pinned context/epoch** from unjustified claims of physical-law truth, stability across host recovery, or future invariance. An independent verifier checks every state/action/output cell, Ed25519 table receipts, signer context, epoch and run identity. Separate Node test worker processes demonstrate matching reported tables and refusal of conflicting tables under the same signing identity. A mathematical finite-prefix witness shows why any finite time history remains consistent with later divergence. All coverage conclusions are **conditional on externally justified completeness, controlled state access, faithful measurement and stationarity premises**; no E-CPU or VGI native admission occurs.
+
+
+## Integration with earlier E-CPU, VGI and IFS capabilities
+
+[Native reuse audit and proof-of-composition](IWI-NATIVE-REUSE.md): IWI is not intended to supersede E-CPU SAB-002/IOS-001/SAB-007, VGI's TransitionEvidenceLedger, or IFS GCI-002–005/RE-008. A dedicated Python adapter and test now call the **actual upstream VGI finalization and E-CPU IOS planner/resolver** to prove one conditional, intention-relative handoff. The unfinished frontier is establishing stationarity/coverage of an external physical source, not reimplementing evidence authority or generic observation planning.
