@@ -1,0 +1,74 @@
+name: USM-003 independently reconstructed model-operated E-CPU
+
+on:
+  push:
+    paths:
+      - 'bridges/model-native-operations/**'
+      - '.github/workflows/model-native-operations.yml'
+  pull_request:
+    paths:
+      - 'bridges/model-native-operations/**'
+      - '.github/workflows/model-native-operations.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ecpu-model-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout independent experiment
+        uses: actions/checkout@v4
+      - name: Checkout exact E-CPU system-call implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 8d1a5be2337ae948cd84ea94f278de73b4ceb163
+          path: ecpu
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install admitted E-CPU software in producer only
+        run: python -m pip install -e ecpu
+      - name: Run actual subprocess model-to-E-CPU operation sessions
+        env:
+          PYTHONPATH: ecpu
+        run: python bridges/model-native-operations/run_ecpu_producer.py
+      - name: Transfer only bounded operation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: usm003-ecpu-model-operation-source
+          path: usm003-source-bundle.json
+          if-no-files-found: error
+
+  independent-verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: ecpu-model-host
+    steps:
+      - name: Checkout verifier without E-CPU
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Independently test reconstruction and forged evidence
+        run: python -m unittest discover -s bridges/model-native-operations -p 'test_*.py' -v
+      - name: Receive evidence from separate producer host
+        uses: actions/download-artifact@v4
+        with:
+          name: usm003-ecpu-model-operation-source
+          path: producer-evidence
+      - name: Independently reconstruct source and complete receiver trace
+        run: >-
+          python bridges/model-native-operations/independent_verify.py
+          producer-evidence/usm003-source-bundle.json
+          --output usm003-verifier-report.json
+      - name: Retain verifier evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: usm003-independent-observer-report
+          path: usm003-verifier-report.json
+          if-no-files-found: error
