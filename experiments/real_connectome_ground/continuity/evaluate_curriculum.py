@@ -18,10 +18,19 @@ def assess(ground: ConnectomeGround, chronicle: Chronicle, *, expected_head: str
     courses = curricula.get('opportunities')
     if not isinstance(courses, list) or len(courses) != 6:
         raise ContinuityRefused('curriculum must contain six explicit opportunities')
+    # Repeated observations of the same pair are not a varied training corpus.
+    query_pairs = set()
+    for event in chronicle.verify(expected_head=expected_head)[1:]:
+        if event['kind'] != 'query':
+            continue
+        entry = chronicle._verified_object(event)
+        if entry.get('schema') == 'ifs.real-connectome-continuity.v1.query-capsule.v1':
+            request = entry['query']
+            query_pairs.add((request['source'], request['target']))
     evidence = {
         'pinned_source': True,
         'independently_verified_queries': audit['counts']['query'] > 0,
-        'varied_query_corpus': audit['counts']['query'] >= 3,
+        'varied_query_corpus': len(query_pairs) >= 3,
         # Do not infer these from local source or self-reported labels.
         'external_behavioral_or_neural_measurements': False,
         'identity_alignment': False,
