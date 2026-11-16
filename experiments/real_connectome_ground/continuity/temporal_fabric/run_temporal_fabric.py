@@ -147,7 +147,7 @@ def run(source:Path,*,requests:int=24,workers:int=3,
                     'kind':'chemical',
                     'tick':tick,
                 }
-                origin_cert,origin_key=certs[worker_name(0)]
+                origin_cert,origin_key=certs['tcr002-origin']
                 answer,telemetry=send_once(
                     '127.0.0.1',ports[chosen],chosen,request,
                     root/'tls/ca.crt',origin_cert,origin_key)
