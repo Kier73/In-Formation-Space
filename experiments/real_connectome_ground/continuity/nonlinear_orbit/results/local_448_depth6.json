@@ -1,0 +1,89 @@
+{
+  "common_vector_annihilator_verified": true,
+  "depth": 6,
+  "dimension": 448,
+  "edges": 3559,
+  "field": 1000000007,
+  "independent_readout_agreement": true,
+  "independent_scalar_observers": [
+    {
+      "degree": 448,
+      "navigate_ns": 2211213960,
+      "prepare_ns": 379904651,
+      "target": "V0001",
+      "value_mod_p": 502776029,
+      "verify_ns": 313944712
+    },
+    {
+      "degree": 448,
+      "navigate_ns": 2249080633,
+      "prepare_ns": 348072083,
+      "target": "V0064",
+      "value_mod_p": 120044207,
+      "verify_ns": 328815550
+    },
+    {
+      "degree": 448,
+      "navigate_ns": 2175978032,
+      "prepare_ns": 343634058,
+      "target": "V0128",
+      "value_mod_p": 896250471,
+      "verify_ns": 317515357
+    },
+    {
+      "degree": 448,
+      "navigate_ns": 2176136587,
+      "prepare_ns": 352262410,
+      "target": "V0192",
+      "value_mod_p": 669091789,
+      "verify_ns": 324133621
+    },
+    {
+      "degree": 448,
+      "navigate_ns": 2240865173,
+      "prepare_ns": 355214011,
+      "target": "V0256",
+      "value_mod_p": 639434005,
+      "verify_ns": 313594985
+    },
+    {
+      "degree": 448,
+      "navigate_ns": 2286005122,
+      "prepare_ns": 366088365,
+      "target": "V0320",
+      "value_mod_p": 662316272,
+      "verify_ns": 338120407
+    },
+    {
+      "degree": 448,
+      "navigate_ns": 2207326050,
+      "prepare_ns": 357401271,
+      "target": "V0384",
+      "value_mod_p": 742223843,
+      "verify_ns": 331494461
+    }
+  ],
+  "measured_navigation_ratio_separate_over_shared": 7.166,
+  "nonlinear_readout_algebraic_degree_upper_bound": 64,
+  "observed_tick": 72057594037928009,
+  "output_mod_p": 822711578,
+  "polynomial_multiplications": 60,
+  "python": "3.13.5",
+  "recurrence_degree": 448,
+  "requested_readout_coordinates": [
+    "V0001",
+    "V0064",
+    "V0128",
+    "V0192",
+    "V0256",
+    "V0320",
+    "V0384"
+  ],
+  "schema": "ifs.rcg005.shared-vector-benchmark.v1",
+  "separate_scalar_comparison_included": true,
+  "shared_navigation_ns": 2169573506,
+  "shared_prepare_ns": 491619369,
+  "shared_verify_ns": 185182636,
+  "source": "deterministic-synthetic-graph-not-OpenWorm-biological-simulation",
+  "sum_independent_navigation_ns": 15546605557
+}

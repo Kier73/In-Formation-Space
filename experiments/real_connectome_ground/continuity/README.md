@@ -82,3 +82,8 @@ A **training intention** is not a **trained model**. A fitted graph whose only l
 \`test_continuity.py\` covers reopening a store, independent whole-graph reconstruction, object tampering, missing objects, torn tails, concurrent writer refusal, stale trusted heads, source changes and source-inconsistent but freshly hashed observations. \`test_curriculum.py\` refuses false curriculum promotion. Full-original-source tests run in GitHub CI; local fixture tests alone are insufficient.
 
 A successful local test is not an E-CPU host-authenticated event or a peer-replicated recovery certificate. For cross-observer durable state use the actual existing E-CPU recovery services rather than interpreting this simple local Chronicle as a substitute.
+
+
+## RCG-005 — nonlinearly conjugated observer-host computation (2026-11-16)
+
+[RCG-005 nonlinear_orbit](nonlinear_orbit/README.md) extends the corrected **body = E-CPU observer-hosts/communication paths; mind = procedural synthetic neural Grounds** architecture. The real source-pinned connectome supplies a heterogeneous topology, not animal dynamics. An exact full-vector Krylov annihilator makes multiple nonlinear readouts share one distant-time polynomial navigation, and [training curriculum v4](training_tracks_v4.json) records measured-transport and evidence-gated development directions. The executable local Ground, independent receiver-checkable capsule, scaling experiments and a native E-CPU mTLS four-host hard-kill/rehome gate are in the new subfolder. It introduces **no** parallel transport, Hypervisor, quorum, scheduler or durable Chronicle; mTLS and full original-source hosted checks remain pending exact-head CI.

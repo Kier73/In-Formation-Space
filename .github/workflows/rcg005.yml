@@ -1,0 +1,119 @@
+name: RCG-005 nonlinear procedural neural Ground and authenticated observer fabric
+
+on:
+  push:
+    paths:
+      - 'experiments/real_connectome_ground/continuity/nonlinear_orbit/**'
+      - '.github/workflows/rcg005.yml'
+      - 'experiments/real_connectome_ground/continuity/temporal_fabric/**'
+  pull_request:
+    paths:
+      - 'experiments/real_connectome_ground/continuity/nonlinear_orbit/**'
+      - '.github/workflows/rcg005.yml'
+      - 'experiments/real_connectome_ground/continuity/temporal_fabric/**'
+  workflow_dispatch:
+
+jobs:
+  mathematical-source-and-stress:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    env:
+      PYTHONPATH: experiments/real_connectome_ground:experiments/real_connectome_ground/continuity/temporal_fabric:experiments/real_connectome_ground/continuity/nonlinear_orbit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Check full OpenWorm source byte identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=experiments/real_connectome_ground/data/herm_full_edgelist.csv
+          test "$(git hash-object "$SRC")" = '89ffc2a2d9e1934ddc462d51032acead5e4cfc91'
+      - name: All nonlinear, adversarial, full-source mathematical and portable-process tests
+        run: python -m unittest discover -s experiments/real_connectome_ground/continuity/nonlinear_orbit -p 'test_*.py' -v
+      - name: Stress a shared all-vector recurrence on 448 source-sized synthetic nodes
+        run: python experiments/real_connectome_ground/continuity/nonlinear_orbit/benchmark.py --nodes 448 --depth 3 --skip-scalar-comparison
+      - name: Stress 448 synthetic nodes, seven latent coordinates
+        if: matrix.python-version == '3.13'
+        run: python experiments/real_connectome_ground/continuity/nonlinear_orbit/benchmark.py --nodes 448 --depth 6 --skip-scalar-comparison
+      - name: Stress 1024 synthetic nodes, exact polynomial depth three
+        if: matrix.python-version == '3.13'
+        run: python experiments/real_connectome_ground/continuity/nonlinear_orbit/benchmark.py --nodes 1024 --depth 3 --skip-scalar-comparison
+
+  produce-source-bound-artifact:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: experiments/real_connectome_ground:experiments/real_connectome_ground/continuity/temporal_fabric:experiments/real_connectome_ground/continuity/nonlinear_orbit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Produce certified nonlinear Ground from pinned original bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=experiments/real_connectome_ground/data/herm_full_edgelist.csv
+          test "$(git hash-object "$SRC")" = '89ffc2a2d9e1934ddc462d51032acead5e4cfc91'
+          PIN="$(sha256sum "$SRC" | cut -d' ' -f1)"
+          python -m capsule prepare --source "$SRC" --expected-source-sha256 "$PIN" --out /tmp/certificate.json
+          mkdir -p stage
+          cp /tmp/certificate.json stage/certificate.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rcg005-untrusted-source-capsule
+          path: stage/certificate.json
+          retention-days: 7
+
+  fresh-observer-independent-receiver:
+    needs: produce-source-bound-artifact
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: experiments/real_connectome_ground:experiments/real_connectome_ground/continuity/temporal_fabric:experiments/real_connectome_ground/continuity/nonlinear_orbit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          name: rcg005-untrusted-source-capsule
+          path: received
+      - name: Independently verify mathematical Ground and distant-time output
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=experiments/real_connectome_ground/data/herm_full_edgelist.csv
+          test "$(git hash-object "$SRC")" = '89ffc2a2d9e1934ddc462d51032acead5e4cfc91'
+          PIN="$(sha256sum "$SRC" | cut -d' ' -f1)"
+          python -m capsule verify --source "$SRC" --expected-source-sha256 "$PIN" \
+            --certificate received/certificate.json --tick 72057594037928009 --out /tmp/navigation.json
+          python -m capsule replay --source "$SRC" --expected-source-sha256 "$PIN" \
+            --certificate received/certificate.json --result /tmp/navigation.json --out /tmp/verified.json
+          cmp /tmp/navigation.json /tmp/verified.json
+
+  real-native-ecpu-mtls-multi-host:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: experiments/real_connectome_ground:experiments/real_connectome_ground/continuity/temporal_fabric:experiments/real_connectome_ground/continuity/nonlinear_orbit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install actual pinned E-CPU APIs rather than transport mocks
+        run: python -m pip install 'git+https://github.com/Kier73/E-CPU.git@6fd416facdb2aefd6fc7d66a06b014e3d31b5a52'
+      - name: Source and native module preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=experiments/real_connectome_ground/data/herm_full_edgelist.csv
+          test "$(git hash-object "$SRC")" = '89ffc2a2d9e1934ddc462d51032acead5e4cfc91'
+          python -c 'import mailcpu; from mailcpu.mtls_transport import connect_mutual_tls; from mailcpu.reliability import ReliableChannel'
+          openssl version
+      - name: Require authenticated worker startup, hard kill, rehome and independent mathematical matching
+        run: python -m unittest discover -s experiments/real_connectome_ground/continuity/nonlinear_orbit -p 'test_distributed_run.py' -v
