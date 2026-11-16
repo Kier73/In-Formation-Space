@@ -50,3 +50,8 @@ Local 2026-11-16 result: **14 mathematical tests passed**; **1 native VGI test s
 5. Monitor true capacity growth: distinguish algebraic reachable functions, retained algorithmic information, learned task adaptation and measured realization costs.
 
 This repository folder is intended to remain a stable, inspectable research Ground for successive agents and revisions; it does not claim that geometry alone performs arbitrary neural arithmetic for free.
+## COG-003 — Discover capabilities from geometric observations
+
+[COG-003](COG-003.md) advances beyond choosing from the fixed COG-002 policy grammar. It reconstructs **previously unregistered** invertible affine Grounds from rank-sufficient observed input/output pairs; one further independent observation checks consistency. The discovered Grounds are fed directly through the original COG-001 region compiler and COG-002 contextual VersionSpace, with exact VGI verification in pinned native CI.
+
+The deterministic local ablation across 100 seeded synthetic tasks reconstructed both unknown transformations in **100/100 geometry-directed** cases versus **4/100 random** cases with the same four-observation budget per context, using a pool dominated by collinear source states. The second stage identified a composed contextual policy with **300/300** held-out comparisons. These targets belong to the admitted affine class, and finite samples never prove that an arbitrary external observer follows this law globally. See [the local audit](results/COG003-local-audit.json), [implementation](structural_discovery.py), [tests](test_structural_discovery.py), and [run command](run_discovery.py).
