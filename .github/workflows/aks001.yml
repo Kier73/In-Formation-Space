@@ -1,0 +1,27 @@
+name: AKS-001 exact attention Ground and refusals
+
+on:
+  push:
+    paths:
+      - 'experiments/attention_ground_sufficiency/**'
+      - '.github/workflows/aks001.yml'
+  pull_request:
+    paths:
+      - 'experiments/attention_ground_sufficiency/**'
+      - '.github/workflows/aks001.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-attention:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Exact algebra and provenance refusals
+        run: python -m unittest discover -s experiments/attention_ground_sufficiency -p 'test_attention_ground.py' -v
