@@ -1,0 +1,11 @@
+{
+  "schema": "ifs.pgt005.current-local-audit.v1",
+  "new_tests_passed": 4,
+  "native_tests_skipped_local": 4,
+  "previous_pgt004_tests_passed": 8,
+  "previous_pgt003_tests_passed": 12,
+  "github_native_suite_status": "unverified",
+  "source_root_pinned_in_native_subject_and_context": true,
+  "native_ios003_live_session_executed_local": false,
+  "note": "Tool environment does not contain mailcpu; Github Actions exact-head integration required. Policy hook is not production Hypervisor."
+}
