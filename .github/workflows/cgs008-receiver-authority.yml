@@ -1,0 +1,100 @@
+name: CGS-008 receiver-fresh authority and revocation
+
+on:
+  pull_request:
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/cgs008-receiver-authority.yml"
+  push:
+    branches: [main]
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/cgs008-receiver-authority.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ["20", "22"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Real Ed25519 signed authority, revocation, fork and anti-replay tests
+        run: node --test experiments/contextual-ground-sections/test_authority.js
+
+  signed-transcript-source:
+    needs: node-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Issue two distinct test-root policies and receiver-signed observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/cgs008
+          node experiments/contextual-ground-sections/demo_authority.js > evidence/cgs008/public-transcript.json
+          node - <<'NODE'
+          const fs=require("node:fs");
+          const b=JSON.parse(fs.readFileSync("evidence/cgs008/public-transcript.json"));
+          if(b.outcomes.first.status!=="ADMITTED_AGREEMENT"||
+             b.outcomes.second.status!=="REFUSED_DISAGREEMENT"||
+             b.outcomes.history.current_authority!==false)
+            process.exit(1);
+          console.log("Issued a bounded public-only signed transcript");
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cgs008-public-only-authority-transcript
+          path: evidence/cgs008/public-transcript.json
+          retention-days: 90
+          if-no-files-found: error
+
+  independent-python-auditor:
+    needs: signed-transcript-source
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install separate verifier's Ed25519 implementation
+        run: python -m pip install "cryptography>=43,<47"
+      - uses: actions/download-artifact@v4
+        with:
+          name: cgs008-public-only-authority-transcript
+          path: evidence/cgs008
+      - name: Independently reconstruct Ed25519 chain, checkpoint and both rounds
+        shell: bash
+        run: |
+          set -euo pipefail
+          python experiments/contextual-ground-sections/verify_authority.py \
+            evidence/cgs008/public-transcript.json > evidence/cgs008/independent-audit.json
+      - name: Reject 15 malicious transcript mutations with zero private keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          python experiments/contextual-ground-sections/test_public_bundle.py \
+            evidence/cgs008/public-transcript.json > evidence/cgs008/adversarial-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cgs008-independent-audit-results
+          path: |
+            evidence/cgs008/independent-audit.json
+            evidence/cgs008/adversarial-audit.json
+          retention-days: 90
+          if-no-files-found: error

@@ -1,0 +1,73 @@
+{
+  "schema": "ifs.cgs008-local-evidence/0.1",
+  "date": "2026-11-15",
+  "evidence_tier": "locally executed synthetic Ed25519 signatures; no independent administrative roots or hosted CI attestation",
+  "environment": {
+    "node": "v22.16.0",
+    "python": "3.13.5",
+    "cryptography": "46.0.4"
+  },
+  "node_protocol_test_groups": {
+    "passed": 8,
+    "failed": 0
+  },
+  "independent_python_public_transcript": {
+    "status": "passed",
+    "public_only": true,
+    "distinct_root_keys": 2,
+    "policy_epochs": 2,
+    "signed_observer_receipts": 4
+  },
+  "adversarial_python_transcript_mutations": {
+    "rejected": 15,
+    "accepted": 0,
+    "private_keys_supplied": false
+  },
+  "scenarios": [
+    {
+      "policy_version": 1,
+      "observer_ids": [
+        "alice",
+        "bob"
+      ],
+      "parity": [
+        1,
+        1
+      ],
+      "verdict": "ADMITTED_AGREEMENT",
+      "receiver_counter_after": 1
+    },
+    {
+      "policy_version": 2,
+      "observer_ids": [
+        "alice",
+        "charlie"
+      ],
+      "revoked_observer": "bob",
+      "parity": [
+        1,
+        0
+      ],
+      "verdict": "REFUSED_DISAGREEMENT",
+      "receiver_counter_after": 2
+    },
+    {
+      "kind": "historical-old-receipt",
+      "signature_valid": true,
+      "current_execution_authority": false,
+      "physical_emission_time_proven": false
+    },
+    {
+      "kind": "signed-checkpoint-rollback-counterexample",
+      "older_checkpoint_cryptographically_valid": true,
+      "outside_latest_state_anchor_required": true
+    }
+  ],
+  "dependencies": [
+    "trusted externally provisioned root and receiver public keys",
+    "trusted receiver clock",
+    "latest durable checkpoint or external anchor",
+    "atomic commit and cross-process fencing not yet implemented"
+  ],
+  "github_actions": "queued separately; no hosted verification claimed"
+}
