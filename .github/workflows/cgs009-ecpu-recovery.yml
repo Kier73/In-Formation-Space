@@ -1,0 +1,86 @@
+name: CGS-009 reuse E-CPU quorum recovery for receiver state
+
+on:
+  pull_request:
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/cgs009-ecpu-recovery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/cgs009-ecpu-recovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-ecpu-lineage:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin original E-CPU recovery lineage instead of duplicating it
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 6fd416facdb2aefd6fc7d66a06b014e3d31b5a52
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned E-CPU, Python Ed25519 verifier, and pytest
+        run: |
+          python -m pip install -e external/E-CPU
+          python -m pip install "cryptography>=43,<47" pytest
+      - name: Existing E-CPU quorum tests are the authority, not a new simulation
+        run: python -m pytest external/E-CPU/tests/test_recovery_lineage.py -q
+      - name: Seal signed CGS-008 receiver states and recover in new processes using actual E-CPU durable journals
+        run: python -m unittest discover -s experiments/contextual-ground-sections -p 'test_ecpu_quorum_bridge.py' -v
+      - name: Preserve an independently regenerated two-generation recovery sample
+        if: matrix.python == '3.11'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/cgs009/anchored
+          node experiments/contextual-ground-sections/demo_authority.js > evidence/cgs009/public-bundle.json
+          python experiments/contextual-ground-sections/verify_authority.py evidence/cgs009/public-bundle.json > evidence/cgs009/independent-ed25519-check.json
+          python experiments/contextual-ground-sections/ecpu_quorum_bridge.py seal \
+            --bundle evidence/cgs009/public-bundle.json \
+            --workspace evidence/cgs009/anchored --generation 1 > evidence/cgs009/sealed1.json
+          python experiments/contextual-ground-sections/ecpu_quorum_bridge.py seal \
+            --bundle evidence/cgs009/public-bundle.json \
+            --workspace evidence/cgs009/anchored --generation 2 > evidence/cgs009/sealed2.json
+          python experiments/contextual-ground-sections/ecpu_quorum_bridge.py recover \
+            --bundle evidence/cgs009/public-bundle.json \
+            --workspace evidence/cgs009/anchored --generation 2 > evidence/cgs009/recovered.json
+          if python experiments/contextual-ground-sections/ecpu_quorum_bridge.py recover \
+            --bundle evidence/cgs009/public-bundle.json \
+            --workspace evidence/cgs009/anchored --generation 1 > evidence/cgs009/stale-log.txt 2>&1; then
+            echo "Old signed state was accepted; FAIL" >&2; exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: matrix.python == '3.11'
+        with:
+          name: cgs009-quorum-anchored-cgs008-state
+          path: |
+            evidence/cgs009/public-bundle.json
+            evidence/cgs009/independent-ed25519-check.json
+            evidence/cgs009/sealed1.json
+            evidence/cgs009/sealed2.json
+            evidence/cgs009/recovered.json
+            evidence/cgs009/stale-log.txt
+            evidence/cgs009/anchored/state-1.json
+            evidence/cgs009/anchored/state-2.json
+            evidence/cgs009/anchored/manifest-1.json
+            evidence/cgs009/anchored/manifest-2.json
+          retention-days: 90
+          if-no-files-found: error
