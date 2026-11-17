@@ -86,3 +86,7 @@ The companion [IWI-002 report](IWI-002.md) reuses this solver to certify strateg
 ## Integration with earlier E-CPU, VGI and IFS capabilities
 
 [Native reuse audit and proof-of-composition](IWI-NATIVE-REUSE.md): IWI is not intended to supersede E-CPU SAB-002/IOS-001/SAB-007, VGI's TransitionEvidenceLedger, or IFS GCI-002–005/RE-008. A dedicated Python adapter and test now call the **actual upstream VGI finalization and E-CPU IOS planner/resolver** to prove one conditional, intention-relative handoff. The unfinished frontier is establishing stationarity/coverage of an external physical source, not reimplementing evidence authority or generic observation planning.
+
+## IWI-006: reuse live GCI-005 signed observations and E-CPU quorum lineage
+
+[IWI-006 full research report](IWI-006.md) now documents the **actual native bridge**, using the existing GCI-005 phase-blind signed X.509/ECDSA receiver receipts, VGI ChannelExchange/Encounter/TransitionEvidenceLedger finalization and partial Ground reconstruction, and E-CPU SAB-007 AtomicGroundEvidenceStore plus RecoveryLineageCoordinator. The agreeing pair must be VGI AUTHORIZED and the signed disagreement must be VGI CONFLICT with no admitted edge. A separately executed recovery process revalidates original signatures and VGI evidence from a quorum-sealed state root without receiver reexecution. The imported events are request-scoped **feature observations**, not verified physical transition laws. The existing GCI hosted workflow now has a dedicated downstream job; **live verification is pending**.
