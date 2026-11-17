@@ -72,3 +72,68 @@ For CI, run \`cog004-family-discovery.yml\` on Python 3.11 and 3.13; the native 
 The [high-order learner](high_order_capability.py) reuses COG-003's source-witness ledger, actively seeks finite-field rank, infers previously unprovided polynomial degrees/coefficients and checks independent out-of-basis challenges. A three-degree synthetic audit recovered **300/300** true target functions, compared with **93/300** for equal-budget random probing; held-out results **30,000/30,000**. The local benchmark and exact numerical evidence are in [COG005-local-audit.json](results/COG005-local-audit.json). End-to-end cost includes learning and proof, not just sparse observation.
 
 The [observer adapter](native_atlas_observer.py) delegates permitted pure realization to the **existing E-CPU-native `NativeInferenceHost`** from the VP repository; it never replaces E-CPU's Hypervisor. The [dedicated workflow](../../.github/workflows/cog005-high-order-observer.yml) tests mathematical programs and provenance on Python 3.11/3.13, then carries a source-pinned plan between three independent GitHub runner jobs: planner, E-CPU-native receiver, and independently recomputing verifier. These are transport and process boundaries, **not** proof of physical-network arithmetic, signed remote execution, or M3 quorum recovery. Native checks must pass on the exact head before such an execution claim is made. The follow-on is to reuse IFS SRH-007/008 mTLS and E-CPU recovery lineage for independently qualified nonlinear observation and durable rehome.
+
+## COG-006 — Generate the structure of capability, not source code
+
+[COG-006: evidence-compiled cognitive Grounds](COG-006.md) opens a second,
+semantic/relational axis of the capability atlas inspired by
+[huggingface/pybot](https://github.com/huggingface/pybot). It
+**does not generate Python handlers**. A typed graph compiler enumerates
+possible inference pathways (direct, steps-then-sum, first-step) and an
+evidence-linked, actively acquired version space selects the one explaining
+the admitted observations. The promoted path then answers new source records;
+a later intention composes it with a typed unit conversion and retained
+conversation referent.
+
+The exact finite-model audit uses synthetic fact Grounds of
+128, 4,096 and 65,536 records. After two witnessed examples, 3,000 sampled
+held-out queries were correct under the declared sum-of-steps task law; each
+realization visits one source record and two Ground operators. Source
+construction, acquisition and query costs are reported **separately** in
+[COG006-local-audit.json](results/COG006-local-audit.json).
+The [source](cognitive_grounds.py), [test suite](test_cognitive_grounds.py)
+and [replay program](run_cognitive_grounds.py) include contradictory evidence
+refusal, task-relative memory ablation, full event replay and a separate
+fresh-Python-process continuation with external high-water pins. A native
+test imports the repository's existing observation-equivalence refinement
+instead of duplicating it.
+
+This is **neither general conversational intelligence nor a benchmark of
+PyBot**; typed intentions and source knowledge are supplied by the
+experiment. The [dedicated workflow](../../.github/workflows/cog006-cognitive-grounds.yml)
+runs Python 3.11/3.13 tests and cross-job handoff. A GitHub artifact is not
+an authenticated E-CPU observer, and its pins do not confer independent
+authority. Next: acquire language-to-intention structures from actual
+observations, compare to pinned PyBot behavior, and realize selected programs
+through E-CPU's existing Hypervisor/mTLS/M3 infrastructure.
+
+## COG-007 — predictive semantic memory from counterexamples
+
+[COG-007](COG-007.md) learns the coarsest **future-behavior-preserving** finite cognitive state from black-box COG-006 turn observations, with actively acquired distinguishing continuations, independent exhaustive finite conformance, an external-pin checked structural handoff, and source-pinned real PyBot observation probes in hosted CI. For 512 synthetic source subjects with eight task-distinct durations, 1,537 explicit source states reduce to **25** exact predictive states under the duration-answer contract; adding `who` restores subject identity distinctions. This is not natural-language/PyBot equivalence, global intelligence, or E-CPU host authentication. Reproduction: `python experiments/codonic-capability-atlas/run_predictive_state.py audit`; tests: `test_predictive_state.py`.
+
+## COG-008 — Provisional cognitive Grounds from black-box observations
+
+[COG-008](COG-008.md) removes COG-007's complete-state conformance oracle from the *learner*: the candidate is constructed from an explicit, content-addressed membership ledger using COG-007's existing observation-table engine; task-directed future queries falsify insufficient predictive states and lead to structural revisions. Every candidate remains **provisional**, with unobserved continuations marked unknown. The exhaustive finite-model checker remains outside learning as a synthetic measurement.
+
+The local audit includes 512 named synthetic subjects with eight distinct duration classes: **9 → 25** proposed states after one observed counterexample and 64,529 unique membership queries. The independently checked 512-subject synthetic source had 1,537 reachable states and 794,629 checked product-transition edges. Under an identity-sensitive contract the learner discovers that name recall requires a more discriminating **97-state** Ground for 32 subjects. Six audited settings pass 3,000/3,000 held-out symbolic continuations, with independently verified complete finite synthetic conformance. A restricted-query negative control passes its small challenge set but **fails** complete conformance, establishing why sampled evidence must not be promoted to global equivalence.
+
+The [implementation](partial_observation.py), [tests](test_partial_observation.py), [audit runner](run_partial_observation.py), and [audit evidence](results/COG008-local-audit.json) also cover immutable source epochs, drift rechecks, rehashed/changed receipt refusal, external source pins, and zero-source-call cold-process replay. The [separate pinned PyBot membership collector](pybot_membership.py) runs against real PyBot only in hosted CI and retains original module/reply outputs for independent re-acquisition. No PyBot generalization, mTLS host authentication, M3 quorum, or E-CPU-native realization has been established by these tests.
+
+The dedicated [COG-008 workflow](../../.github/workflows/cog008-partial-observer.yml) runs Python 3.11/3.13, independent process handoff, and the pinned external PyBot observation/replay gates. Its exact-head results are separate from local successes.
+
+
+## COG-009 — source-qualified, signed multi-observer cognitive Grounds
+
+[COG-009](COG-009.md) connects the **existing COG-008 partial-observation learner** to three real, separate worker processes, whose finite behavioral probes and Ed25519-signed observations are bound to independently enrolled public keys, source epochs, typed requests and append-only receipts. A two-distinct-source agreement is required for a provisional membership result; disagreements are preserved, and an unavailable third witness leaves the result **unknown**. A hard-killed worker is replaced, and earlier committed observations are not re-executed. A fresh verifier checks every source signature and reconstructs the learned model without any worker private keys or host calls.
+
+**Direct test:** with 32 source-defined synthetic subjects (eight behaviorally distinct durations), the source-bound COG-008 learner acquired **4,529** membership observations, reconstructed **25 predictive states**, and retained **9,193 signed host receipts**. An independent *post-learning* finite reference checked **3,589** transitions, and a separate Python process replayed all 9,193 signatures and all COG-008 membership labels without new host activity. The retained evidence bundle was **11.5 MB**; evidence has real storage and verification cost. Local focus tests: **10 passed, one native E-CPU test skipped** because `mailcpu` is unavailable locally. The dedicated [COG-009 workflow](../../.github/workflows/cog009-signed-observer-grounds.yml) requires the actual pinned E-CPU SAB-003 qualification test, and separate prepare/fresh-verifier jobs; GitHub CI must not be reported as passed until its exact head is checked.
+
+A signed **agreement is not proof of truth**: two colluding signing sources in the negative control report the same wrong value and remain provisional, while the independent synthetic reference detects the error. The worker processes share one machine and source law, and this is not native mTLS Transit, Hypervisor grant, M3/quorum recovery or proof of general PyBot behavior. The next natural connection is E-CPU's existing authenticated ReliableChannel and RecoveryLineage, not replacement infrastructure.
+
+## COG-010 — Intention-conditioned transit navigation
+
+[COG-010](COG-010.md) joins the **acquired** COG-009 predictive Ground to E-CPU's *existing* intention-relative observation sufficiency (IOS-001) and genuine typed observer/measurement fabric (IOS-002/003), rather than implementing a parallel planner or transport. A projection of learned cognitive states identifies three task-relative outcomes: **READY** (answer without reading a host), **MEASURE** (request exactly the permitted minute observation to determine the different, seconds-valued target), and **REFUSE** (the offered projection cannot distinguish differing repeat responses).
+
+The local signed-stdio three-worker experiment deliberately kills and replaces a host while preserving source disagreement as \`unknown\`. At 32 synthetic subjects and eight distinct durations it uses a **25-state** learned cognitive Ground with **4,529** prior membership observations, resolves a seconds result after the required signed minute observation, and reconstructs the result in a separate process using zero new host calls. A learned Mealy/program-phase finite orbit has ten reachable states, sufficient to address logical coordinate \`10**30+11\` without replaying the intermediate transitions. This is *mathematical navigation*, not physically executed intermediate network operations.
+
+The [direct audit](results/COG010-direct-audit.json), [bridge](intention_transit.py), [tests](test_intention_transit.py), [native mTLS test](test_native_ecpu_transit.py) and [reproducer](run_intention_transit.py) retain evidence and precise measurement scope. Local full COG-006→010 regression: **59 tests; 54 passed, 5 native-dependent skipped**. The [CI workflow](../../.github/workflows/cog010-intention-transit.yml) hard-requires a pinned actual E-CPU native IOS-001/002/003 path, including real mutual TLS and ReliableChannel, rather than treating local skips as success. That path is **not verified until the exact-head hosted CI is green**. The needed one-word E-CPU IOS-003 provider bug fix is separately proposed in [E-CPU PR #169](https://github.com/Kier73/E-CPU/pull/169).

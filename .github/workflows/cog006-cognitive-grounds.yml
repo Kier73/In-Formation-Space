@@ -1,0 +1,78 @@
+name: COG-006 evidence-compiled cognitive Grounds
+
+on:
+  push:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog006-cognitive-grounds.yml'
+  pull_request:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog006-cognitive-grounds.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-structural-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Require the existing IFS observation-equivalence engine
+        run: test -f bridges/observation-equivalence/transition_congruence.py
+      - name: Execute typed synthesis, memory, refusal and real IFS quotient tests
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_cognitive_grounds.py' -v
+      - name: Reproduce mathematical and cost audit
+        run: python experiments/codonic-capability-atlas/run_cognitive_grounds.py audit > cog006-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog006-audit-${{ matrix.python-version }}
+          path: cog006-audit.json
+
+  observer-a-prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile learned capability and checkpoint a multi-turn session
+        run: python experiments/codonic-capability-atlas/run_cognitive_grounds.py prepare --path handoff.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog006-history
+          path: handoff.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog006-external-test-pin
+          path: handoff.json.pins.json
+          if-no-files-found: error
+
+  observer-b-rehydrate:
+    needs: observer-a-prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cog006-history
+      - uses: actions/download-artifact@v4
+        with:
+          name: cog006-external-test-pin
+      - name: Independently reconstruct and demand a new unit-converted follow-up
+        run: |
+          python experiments/codonic-capability-atlas/run_cognitive_grounds.py resume --path handoff.json --pins handoff.json.pins.json > continued.json
+          python -c 'import json;d=json.load(open("continued.json"));assert d["value"]==960 and d["unit"]=="seconds"'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog006-fresh-observer-continuation
+          path: continued.json
