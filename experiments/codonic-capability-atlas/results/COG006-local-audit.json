@@ -1,0 +1,73 @@
+{
+  "cold_restoration_equal": true,
+  "induction": "active finite version-space identification of relational programs",
+  "measurements": [
+    {
+      "active_discovery_ms": 2.192,
+      "ground_construction_ms": 0.642,
+      "heldout_correct": 1000,
+      "heldout_queries": 1000,
+      "median_single_ground_query_us": 11.157,
+      "observation_examples": 2,
+      "program_operator_visits": 2,
+      "selected_source_facts_per_query": 1,
+      "source_fact_count": 128,
+      "source_root": "20f12e027304338850c6017dcf34517fff829e8daa564a7ce9cba4a2aeaf77fb",
+      "typed_candidates_before": 3,
+      "viable_after": 1
+    },
+    {
+      "active_discovery_ms": 1.791,
+      "ground_construction_ms": 70.27,
+      "heldout_correct": 1000,
+      "heldout_queries": 1000,
+      "median_single_ground_query_us": 11.227,
+      "observation_examples": 2,
+      "program_operator_visits": 2,
+      "selected_source_facts_per_query": 1,
+      "source_fact_count": 4096,
+      "source_root": "883231e5bc44a5550bcf8800f0a78f111c3044bdbd66b23a9ad777ad79a4a2c2",
+      "typed_candidates_before": 3,
+      "viable_after": 1
+    },
+    {
+      "active_discovery_ms": 2.188,
+      "ground_construction_ms": 483.888,
+      "heldout_correct": 1000,
+      "heldout_queries": 1000,
+      "median_single_ground_query_us": 11.618,
+      "observation_examples": 2,
+      "program_operator_visits": 2,
+      "selected_source_facts_per_query": 1,
+      "source_fact_count": 65536,
+      "source_root": "b449d687881c38de11de6a541558251af80948c4c381210d18adeeab0f6a00fc",
+      "typed_candidates_before": 3,
+      "viable_after": 1
+    }
+  ],
+  "memory_anchored_result": {
+    "basis_program": "840850a7209a205ae653a5ac22f637f093999718f2d9f8657e96c997e642da6c",
+    "program": "8083c95a910cd477983df288abb7df3b3e12aadb455387a2e6aad4a18f4c56cf",
+    "source_evidence": [
+      "synthetic-case-000777"
+    ],
+    "status": "verified_within_ground",
+    "subject": "procedure_000777",
+    "unit": "seconds",
+    "value": 960
+  },
+  "memoryless_ablated_result": {
+    "reason": "no_prior_referent",
+    "status": "unresolved"
+  },
+  "not_claimed": [
+    "natural-language understanding",
+    "PyBot benchmark parity",
+    "universal program learning",
+    "authenticated remote observer",
+    "E-CPU Hypervisor realization",
+    "physical substrate independence"
+  ],
+  "project": "typed structural capability inference, not source-code generation",
+  "schema": "COG-006/reproducible-metrics/v1"
+}
