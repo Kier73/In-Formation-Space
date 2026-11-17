@@ -1,0 +1,114 @@
+name: COG-007 Predictive cognitive Ground discovery
+on:
+  push:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog007-predictive-cognitive-grounds.yml'
+  pull_request:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog007-predictive-cognitive-grounds.yml'
+  workflow_dispatch:
+
+jobs:
+  finite-cognitive-synthesis:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Black-box active state learning, exact conformance, and native IFS transition-congruence test
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_predictive_state.py' -v
+      - name: Run deterministic scale and holdout experiment
+        run: python experiments/codonic-capability-atlas/run_predictive_state.py audit
+
+  prepare-cognitive-checkpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Acquire structural Ground and retain a semantic continuation
+        run: python experiments/codonic-capability-atlas/run_predictive_state.py prepare --path cognitive-checkpoint.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog007-source-ground
+          path: cognitive-checkpoint.json
+          if-no-files-found: error
+      - name: Output external head independent of checkpoint artifact
+        id: pins
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          p=json.load(open('cognitive-checkpoint.pins.json'))
+          print('checkpoint='+p['checkpoint_digest'])
+          print('machine='+p['machine_digest'])
+          PY
+    outputs:
+      checkpoint: ${{ steps.pins.outputs.checkpoint }}
+      machine: ${{ steps.pins.outputs.machine }}
+
+  fresh-receiver:
+    needs: prepare-cognitive-checkpoint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/download-artifact@v4
+        with: {name: cog007-source-ground}
+      - name: Materialize externally pinned heads without trusting the artifact as its own pin
+        env:
+          CHECKPOINT: ${{ needs.prepare-cognitive-checkpoint.outputs.checkpoint }}
+          MACHINE: ${{ needs.prepare-cognitive-checkpoint.outputs.machine }}
+        run: |
+          python - <<'PY'
+          import json,os
+          with open('cognitive-checkpoint.pins.json','w') as f:
+            json.dump({'checkpoint_digest':os.environ['CHECKPOINT'],
+                       'machine_digest':os.environ['MACHINE']},f)
+          PY
+      - name: Reconstruct and independently check retained structure; continue without oracle replay
+        run: python experiments/codonic-capability-atlas/run_predictive_state.py resume --path cognitive-checkpoint.json
+
+  actual-pybot-source-probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: huggingface/pybot
+          ref: 7d63c7fbebb44c7e466e5c8b5c1f341ab767929e
+          path: external/pybot
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Capture real PyBot conversation outputs as independent behavioral evidence
+        run: python experiments/codonic-capability-atlas/pybot_behavior_probe.py --pybot-root external/pybot --out pybot-observations.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog007-pinned-pybot-traces
+          path: pybot-observations.json
+          if-no-files-found: error
+
+  independent-pybot-observer:
+    needs: actual-pybot-source-probe
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: huggingface/pybot
+          ref: 7d63c7fbebb44c7e466e5c8b5c1f341ab767929e
+          path: external/pybot
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/download-artifact@v4
+        with: {name: cog007-pinned-pybot-traces}
+      - name: Independently replay the same source behavior, without claiming full equivalence
+        run: python experiments/codonic-capability-atlas/pybot_behavior_probe.py --pybot-root external/pybot --expected pybot-observations.json --out independent-pybot-observations.json
