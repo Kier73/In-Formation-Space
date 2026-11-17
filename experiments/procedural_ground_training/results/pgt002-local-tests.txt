@@ -1,0 +1,22 @@
+test_all_four_ground_families_match_native_ios001 (test_native_transfer.NativeECPUTransferTests.test_all_four_ground_families_match_native_ios001) ... skipped 'native E-CPU is hard-required in hosted CI'
+test_distant_coordinate_matches_native_lcg_without_intermediate_trajectory (test_native_transfer.NativeECPUTransferTests.test_distant_coordinate_matches_native_lcg_without_intermediate_trajectory) ... skipped 'native E-CPU is hard-required in hosted CI'
+test_affine_long_time_composition_matches_sequential_short (test_transfer.MathematicalSourceTests.test_affine_long_time_composition_matches_sequential_short) ... ok
+test_finite_graph_navigation_matches_explicit_transitions (test_transfer.MathematicalSourceTests.test_finite_graph_navigation_matches_explicit_transitions) ... ok
+test_four_world_families_have_admitted_finite_labels (test_transfer.MathematicalSourceTests.test_four_world_families_have_admitted_finite_labels) ... ok
+test_semantic_identity_disregards_row_permutation_and_split_id (test_transfer.MathematicalSourceTests.test_semantic_identity_disregards_row_permutation_and_split_id) ... ok
+test_training_split_semantic_deduplication (test_transfer.MathematicalSourceTests.test_training_split_semantic_deduplication) ... ok
+test_two_hidden_worlds_are_observationally_identical_but_have_different_truth (test_transfer.MathematicalSourceTests.test_two_hidden_worlds_are_observationally_identical_but_have_different_truth) ... ok
+test_actual_source_can_falsify_unique_candidate_without_trusting_it (test_transfer.ObservationContractTests.test_actual_source_can_falsify_unique_candidate_without_trusting_it) ... ok
+test_counterexample_oracle_audit_discloses_its_extra_power (test_transfer.ObservationContractTests.test_counterexample_oracle_audit_discloses_its_extra_power) ... ok
+test_opaque_observer_rejects_duplicate_or_invalid_coordinates (test_transfer.ObservationContractTests.test_opaque_observer_rejects_duplicate_or_invalid_coordinates) ... ok
+test_report_active_methods_outperform_equal_observation_budget_random (test_transfer.ObservationContractTests.test_report_active_methods_outperform_equal_observation_budget_random) ... ok
+test_version_space_uses_only_public_feature_projections_and_queried_targets (test_transfer.ObservationContractTests.test_version_space_uses_only_public_feature_projections_and_queried_targets) ... ok
+test_checkpoint_is_actual_learned_tensors_and_rejects_tampering (test_transfer.TrainedParameterTests.test_checkpoint_is_actual_learned_tensors_and_rejects_tampering) ... ok
+test_complete_train_eval_report_records_both_success_and_failure (test_transfer.TrainedParameterTests.test_complete_train_eval_report_records_both_success_and_failure) ... ok
+test_http_replaced_origin_verifies_same_model_outputs_and_refuses_corruption (test_transfer.TrainedParameterTests.test_http_replaced_origin_verifies_same_model_outputs_and_refuses_corruption) ... ok
+test_new_process_restores_model_without_source_or_training_optimizer (test_transfer.TrainedParameterTests.test_new_process_restores_model_without_source_or_training_optimizer) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 2.619s
+
+OK (skipped=2)

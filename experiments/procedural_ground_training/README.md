@@ -79,3 +79,7 @@ The manifest has source, architecture, encoder, training schedule, and SHA-256 o
 4. Return verified model proposals to E-CPU Hypervisor + IOS-003 `ReliableChannel` under receiver-owned permissions; checkpoint learned weights and replay evidence through existing M1/M3 rather than rewriting authority.
 
 Relevant public research: [Shinnick et al. on modular learned algorithmic structures](https://arxiv.org/abs/2505.22308) and [Kang et al. on synthetic-data composition pitfalls](https://aclanthology.org/2025.emnlp-main.544/). These are context, not citations for the experimental numbers above.
+
+## Continuation: PGT-002
+
+[PGT-002 — Cross-family procedural training under partial observations](PGT-002.md) extends PGT-001 to three training Ground families and a fully withheld finite-automaton family, with actual trained weights, a zero-overlap semantic split, stronger exact-planner/partial-planner controls, active observation versus random controls, and a strict candidate-versus-admission distinction. The neural student does **not** outperform the exact partial-only baseline in-family; the information gain comes from counterexample-directed or version-space-directed observation under declared evidence contracts. Native E-CPU cross-check and HTTP artifact recovery gates are retained.
