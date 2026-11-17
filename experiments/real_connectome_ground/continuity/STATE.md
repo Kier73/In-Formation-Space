@@ -58,3 +58,11 @@ This is a **small-fixture measurement**, not the storage or latency of the compl
 - Local 448-node, 3,559-edge synthetic: nonlinear depth six, seven latent readouts, t=2^56+73: 2.170 s one shared jump vs 15.547 s seven individual jumps; measures navigation only. 1024-node 8,172-edge depth six shared jump 11.487 s. No claim of learning biological dynamics or arbitrary neural time navigation.
 - [training_tracks_v4.json](training_tracks_v4.json) corrects the development roadmap toward authentic observer-host costs, learned qualified path choice, algebraically certified model construction and M1/M3 continuity; earlier track versions are retained historically.
 - E-CPU mTLS native hard-kill/rehome is an **unverified hosted CI gate**, not locally completed. Shared mathematical certificates and source-independent receiver validation do not constitute network authorization. Do not merge stacked PRs before parent/native checks are reviewed.
+
+
+## RCG-006 observation-relative Ground checkpoint (2026-11-16)
+
+- **Added** `continuity/observer_quotient/`: synthetic observational signature learner, complete source-column intertwining verifier, direct-source negative control, reversible procedural neural readout reuse, bounded portable process capsules, tests, and scale measurements.
+- **Verified locally** on a compact source-derived fixture: 131,072 generated addressed states, 1,048,576 directed procedural connections, 16 exact observer classes; 4.895s learning, 4.727s deep proof, ~27ms mean eight far-time observations; see `observer_quotient/results/local_stress_131072.json` for exact nanoseconds, source SHA and limitations.
+- **Not yet verified**: full original OpenWorm source CI, live authenticated E-CPU host execution of quotient demands, M1/M3 receiver-authoritative persistence, failures across independent host domains, or trained general-purpose intelligence.
+- **Next**: transport receiver-owned quotient/observation capsules through the existing E-CPU mTLS and Hypervisor, collect measured route cost and recovery evidence, then train qualified path placement without weakening Ground proof.
