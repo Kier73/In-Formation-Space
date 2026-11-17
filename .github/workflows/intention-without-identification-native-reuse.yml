@@ -1,0 +1,49 @@
+name: IWI native evidence and intention reuse
+on:
+  pull_request:
+    paths:
+      - 'experiments/intention-without-identification/native_reuse_bridge.py'
+      - 'experiments/intention-without-identification/test_native_reuse_bridge.py'
+      - 'experiments/intention-without-identification/IWI-NATIVE-REUSE.md'
+      - '.github/workflows/intention-without-identification-native-reuse.yml'
+  push:
+    paths:
+      - 'experiments/intention-without-identification/native_reuse_bridge.py'
+      - 'experiments/intention-without-identification/test_native_reuse_bridge.py'
+      - 'experiments/intention-without-identification/IWI-NATIVE-REUSE.md'
+      - '.github/workflows/intention-without-identification-native-reuse.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-native-interfaces:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.13']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reuse exact E-CPU source revision
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 6fd416facdb2aefd6fc7d66a06b014e3d31b5a52
+          path: external/E-CPU
+      - name: Reuse exact VGI source revision
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: e6e1900782aeede18a4de9046511bbba234dbc6e
+          path: external/VGI
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install native E-CPU and VGI without extra service dependencies
+        run: |
+          python -m pip install -e external/E-CPU
+          python -m pip install -e external/VGI/virtual_ground_interpreter
+      - name: Native evidence finalization and intention resolution test
+        run: python -m unittest discover -s experiments/intention-without-identification -p 'test_native_reuse_bridge.py' -v
