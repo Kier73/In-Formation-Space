@@ -1,0 +1,38 @@
+name: IWI-005 context-scoped finite coverage
+on:
+  push:
+    paths:
+      - "experiments/intention-without-identification/context_coverage.js"
+      - "experiments/intention-without-identification/coverage_worker.js"
+      - "experiments/intention-without-identification/test_context_coverage.js"
+      - "experiments/intention-without-identification/results/coverage_counterexamples.json"
+      - "experiments/intention-without-identification/IWI-005.md"
+      - ".github/workflows/intention-without-identification-coverage.yml"
+  pull_request:
+    paths:
+      - "experiments/intention-without-identification/context_coverage.js"
+      - "experiments/intention-without-identification/coverage_worker.js"
+      - "experiments/intention-without-identification/test_context_coverage.js"
+      - "experiments/intention-without-identification/results/coverage_counterexamples.json"
+      - "experiments/intention-without-identification/IWI-005.md"
+      - ".github/workflows/intention-without-identification-coverage.yml"
+  workflow_dispatch:
+jobs:
+  coverage-and-separate-process-check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 22]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Native Node finite coverage, signing and subprocess regression
+        run: >
+          node --test
+          experiments/intention-without-identification/test_context_coverage.js
+          experiments/intention-without-identification/test_evidence_directed.js
+          experiments/intention-without-identification/test_gci_sample_bridge.js

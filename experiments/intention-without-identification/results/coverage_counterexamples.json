@@ -1,0 +1,194 @@
+{
+  "experiment": "IWI-005",
+  "model": "synthetic seven-state IWI-003 fixture",
+  "assumptions": "permanently static within a covered epoch only if contract premises are true",
+  "completeCoverageCells": 42,
+  "indistinguishablePair": {
+    "unobservedCell": "t:0:1",
+    "allowedValues": [
+      2,
+      3
+    ],
+    "retainedObservationsEquivalent": true,
+    "candidateA": {
+      "n": 7,
+      "start": [
+        1
+      ],
+      "goal": [
+        0
+      ],
+      "next": [
+        [
+          0,
+          2,
+          6,
+          6,
+          6,
+          6,
+          6
+        ],
+        [
+          0,
+          6,
+          4,
+          5,
+          6,
+          6,
+          6
+        ],
+        [
+          0,
+          6,
+          6,
+          6,
+          1,
+          1,
+          6
+        ],
+        [
+          0,
+          6,
+          0,
+          6,
+          6,
+          6,
+          6
+        ],
+        [
+          0,
+          6,
+          6,
+          0,
+          6,
+          6,
+          6
+        ]
+      ],
+      "output": [
+        3,
+        0,
+        0,
+        0,
+        1,
+        2,
+        0
+      ]
+    },
+    "candidateB": {
+      "n": 7,
+      "start": [
+        1
+      ],
+      "goal": [
+        0
+      ],
+      "next": [
+        [
+          0,
+          3,
+          6,
+          6,
+          6,
+          6,
+          6
+        ],
+        [
+          0,
+          6,
+          4,
+          5,
+          6,
+          6,
+          6
+        ],
+        [
+          0,
+          6,
+          6,
+          6,
+          1,
+          1,
+          6
+        ],
+        [
+          0,
+          6,
+          0,
+          6,
+          6,
+          6,
+          6
+        ],
+        [
+          0,
+          6,
+          6,
+          0,
+          6,
+          6,
+          6
+        ]
+      ],
+      "output": [
+        3,
+        0,
+        0,
+        0,
+        1,
+        2,
+        0
+      ]
+    },
+    "outcomeA": {
+      "trace": [
+        2,
+        0
+      ],
+      "terminalState": 0,
+      "goal": true
+    },
+    "outcomeB": {
+      "trace": [
+        3,
+        6
+      ],
+      "terminalState": 6,
+      "goal": false
+    }
+  },
+  "finitePrefixChallenges": [
+    {
+      "observedPrefixLength": 0,
+      "agreeOnEveryObservedIndex": true,
+      "firstPossibleDivergence": 0,
+      "stableSystemAtNext": 0,
+      "changedSystemAtNext": 1,
+      "claim": "no finite prefix alone certifies stability at unobserved future indices"
+    },
+    {
+      "observedPrefixLength": 1,
+      "agreeOnEveryObservedIndex": true,
+      "firstPossibleDivergence": 1,
+      "stableSystemAtNext": 0,
+      "changedSystemAtNext": 1,
+      "claim": "no finite prefix alone certifies stability at unobserved future indices"
+    },
+    {
+      "observedPrefixLength": 16,
+      "agreeOnEveryObservedIndex": true,
+      "firstPossibleDivergence": 16,
+      "stableSystemAtNext": 0,
+      "changedSystemAtNext": 1,
+      "claim": "no finite prefix alone certifies stability at unobserved future indices"
+    },
+    {
+      "observedPrefixLength": 1024,
+      "agreeOnEveryObservedIndex": true,
+      "firstPossibleDivergence": 1024,
+      "stableSystemAtNext": 0,
+      "changedSystemAtNext": 1,
+      "claim": "no finite prefix alone certifies stability at unobserved future indices"
+    }
+  ]
+}
