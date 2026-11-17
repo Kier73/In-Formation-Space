@@ -69,3 +69,24 @@ No third-party implementation was copied. Results pertain only to the declared f
 ## IWI-002: uncertainty over the transition law
 
 The companion [IWI-002 report](IWI-002.md) reuses this solver to certify strategies across an immutable ensemble of candidate Ground laws. Individually solvable laws can be jointly impossible under indistinguishable observations; one safe diagnostic can restore robust realization. Synthetic observations are still not admitted E-CPU evidence.
+
+## IWI-003: incomplete but persistent transition and observation laws
+
+[Read the IWI-003 finite-law experiment](IWI-003.md): a lazy strong planner preserves unknown transition and output assignments across time, distinguishes static unknowns from fresh adversarial effects, and verifies a one-step reset against 2^24 possible complete Grounds without enumerating unused transitions. A separate exact global oracle checks a five-step conditional plan and an unbounded negative case. All models are synthetic pending authenticated receiver evidence.
+
+## IWI-004: evidence-directed Ground construction
+
+[Read IWI-004](IWI-004.md): exact minimum-worst-case evidence acquisition when an incomplete static Ground prevents guaranteed execution, with signed-sample versus complete-law-coverage separation, full-revision conflict refusal, and a read-only ECDSA feature-receipt bridge to IFS GCI-004/005. The symbolic offline law oracle is an explicit hypothesis; actual E-CPU observations are **not** promoted to universal transition restrictions.
+
+## IWI-005: finite coverage, context and restart epistemic horizons
+
+[Read the IWI-005 report](IWI-005.md) and its [exact countermodels](results/coverage_counterexamples.json). The experiment distinguishes a complete signed **synthetic finite transition table within a pinned context/epoch** from unjustified claims of physical-law truth, stability across host recovery, or future invariance. An independent verifier checks every state/action/output cell, Ed25519 table receipts, signer context, epoch and run identity. Separate Node test worker processes demonstrate matching reported tables and refusal of conflicting tables under the same signing identity. A mathematical finite-prefix witness shows why any finite time history remains consistent with later divergence. All coverage conclusions are **conditional on externally justified completeness, controlled state access, faithful measurement and stationarity premises**; no E-CPU or VGI native admission occurs.
+
+
+## Integration with earlier E-CPU, VGI and IFS capabilities
+
+[Native reuse audit and proof-of-composition](IWI-NATIVE-REUSE.md): IWI is not intended to supersede E-CPU SAB-002/IOS-001/SAB-007, VGI's TransitionEvidenceLedger, or IFS GCI-002–005/RE-008. A dedicated Python adapter and test now call the **actual upstream VGI finalization and E-CPU IOS planner/resolver** to prove one conditional, intention-relative handoff. The unfinished frontier is establishing stationarity/coverage of an external physical source, not reimplementing evidence authority or generic observation planning.
+
+## IWI-006: reuse live GCI-005 signed observations and E-CPU quorum lineage
+
+[IWI-006 full research report](IWI-006.md) now documents the **actual native bridge**, using the existing GCI-005 phase-blind signed X.509/ECDSA receiver receipts, VGI ChannelExchange/Encounter/TransitionEvidenceLedger finalization and partial Ground reconstruction, and E-CPU SAB-007 AtomicGroundEvidenceStore plus RecoveryLineageCoordinator. The agreeing pair must be VGI AUTHORIZED and the signed disagreement must be VGI CONFLICT with no admitted edge. A separately executed recovery process revalidates original signatures and VGI evidence from a quorum-sealed state root without receiver reexecution. The imported events are request-scoped **feature observations**, not verified physical transition laws. The existing GCI hosted workflow now has a dedicated downstream job; **live verification is pending**.

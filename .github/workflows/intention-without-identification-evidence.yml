@@ -1,0 +1,33 @@
+name: IWI-004 evidence-directed Ground construction
+on:
+  push:
+    paths:
+      - "experiments/intention-without-identification/**"
+      - ".github/workflows/intention-without-identification-evidence.yml"
+  pull_request:
+    paths:
+      - "experiments/intention-without-identification/**"
+      - ".github/workflows/intention-without-identification-evidence.yml"
+  workflow_dispatch:
+jobs:
+  evidence-directed-finite-ground:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 22]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Test all IWI mathematical and cryptographic contracts
+        run: >
+          node --test
+          experiments/intention-without-identification/test_experiment.js
+          experiments/intention-without-identification/test_uncertain_ground.js
+          experiments/intention-without-identification/test_partial_ground.js
+          experiments/intention-without-identification/test_support_certificate.js
+          experiments/intention-without-identification/test_evidence_directed.js
+          experiments/intention-without-identification/test_gci_sample_bridge.js

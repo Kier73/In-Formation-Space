@@ -1,0 +1,32 @@
+{
+  "experiment": "IWI-003-SUPPORT",
+  "claim": "conservative trace-local unknown-cell support of verified policies",
+  "cases": {
+    "remembered": {
+      "status": "verified-sufficient-support",
+      "keys": [
+        "t:0:1"
+      ],
+      "supportCellCount": 1,
+      "possibleSupportAssignments": "2",
+      "unresolvedUnusedCells": 0,
+      "fullCompleteLaws": "2",
+      "terminalObservationLeaves": 2,
+      "minimumWorstCase": 5
+    },
+    "erased_diagnostic": {
+      "status": "not-applicable-no-winning-policy",
+      "reason": "support is only certified for winning policies"
+    },
+    "unvisited_24_unknown_cells": {
+      "status": "verified-sufficient-support",
+      "keys": [],
+      "supportCellCount": 0,
+      "possibleSupportAssignments": "1",
+      "unresolvedUnusedCells": 24,
+      "fullCompleteLaws": "16777216",
+      "terminalObservationLeaves": 1,
+      "minimumWorstCase": 1
+    }
+  }
+}

@@ -1,0 +1,38 @@
+name: IWI-003 lazy partial Grounds
+on:
+  push:
+    paths:
+      - "experiments/intention-without-identification/partial_ground.js"
+      - "experiments/intention-without-identification/global_oracle.js"
+      - "experiments/intention-without-identification/test_partial_ground.js"
+      - "experiments/intention-without-identification/test_support_certificate.js"
+      - "experiments/intention-without-identification/support_certificate.js"
+      - "experiments/intention-without-identification/results/support_certificate.json"
+      - "experiments/intention-without-identification/IWI-003-PROOF.md"
+      - "experiments/intention-without-identification/results/partial_ground.json"
+      - "experiments/intention-without-identification/IWI-003.md"
+      - ".github/workflows/intention-without-identification-partial.yml"
+  pull_request:
+    paths:
+      - "experiments/intention-without-identification/partial_ground.js"
+      - "experiments/intention-without-identification/global_oracle.js"
+      - "experiments/intention-without-identification/test_partial_ground.js"
+      - "experiments/intention-without-identification/results/partial_ground.json"
+      - "experiments/intention-without-identification/IWI-003.md"
+      - ".github/workflows/intention-without-identification-partial.yml"
+  workflow_dispatch:
+jobs:
+  static-law-certificate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 22]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Verify bounded and globally exhaustive strategies
+        run: node --test experiments/intention-without-identification/test_partial_ground.js experiments/intention-without-identification/test_support_certificate.js
