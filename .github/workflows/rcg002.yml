@@ -1,0 +1,50 @@
+name: RCG-002 persistent connectome Ground and body/mind evidence gates
+
+on:
+  push:
+    paths:
+      - 'experiments/real_connectome_ground/**'
+      - '.github/workflows/rcg002.yml'
+  pull_request:
+    paths:
+      - 'experiments/real_connectome_ground/**'
+      - '.github/workflows/rcg002.yml'
+  workflow_dispatch:
+
+jobs:
+  durable-ground:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Require real original biological source bytes
+        shell: bash
+        run: |
+          test -s experiments/real_connectome_ground/data/herm_full_edgelist.csv
+          python -c 'from pathlib import Path; import hashlib; p=Path("experiments/real_connectome_ground/data/herm_full_edgelist.csv"); raw=p.read_bytes(); assert hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\0"+raw).hexdigest()=="89ffc2a2d9e1934ddc462d51032acead5e4cfc91"'
+      - name: Full real Ground, persistence, curriculum, tamper and oracle tests
+        run: python -m unittest discover -s experiments/real_connectome_ground -p 'test_*.py' -v
+      - name: Actual source / restored observer / externally pinned query / whole-graph audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="experiments/real_connectome_ground:${PYTHONPATH:-}"
+          STORE="$(mktemp -d)"
+          BASE="experiments/real_connectome_ground/continuity/continuity.py"
+          FIRST="$(python "$BASE" --store "$STORE" init)"
+          HEAD="$(python -c 'import json,sys; print(json.loads(sys.argv[1])["head"])' "$FIRST")"
+          SECOND="$(python "$BASE" --store "$STORE" --expected-head "$HEAD" --from-node AWCL --to-node AIYL --steps 2 query)"
+          CURRENT="$(python -c 'import json,sys; print(json.loads(sys.argv[1])["head"])' "$SECOND")"
+          python "$BASE" --store "$STORE" --expected-head "$CURRENT" audit
+          python "$BASE" --store "$STORE" --expected-head "$CURRENT" verify
+          # Stale head must refuse, including after the source-backed query is durable.
+          if python "$BASE" --store "$STORE" --expected-head "$HEAD" verify; then
+            echo "FAIL: stale continuity root was accepted"
+            exit 1
+          fi

@@ -1,0 +1,105 @@
+{
+  "schema": "ifs.rcg004.observer-fabric-virtual-intelligence-training-v3",
+  "status": "proposals-and-experiments-not-autonomous-trained-intelligence",
+  "supersedes_training_policy": "RCG-003 training_tracks_v2.json remains historical; v3 prioritizes actual observer-host substrates and certified temporal/semantic operators",
+  "distinction": {
+    "body": "Qualified observer-hosts, E-CPU Transit/TLS/APIs/GitHub, path costs, source-backed state and recovery; no biological sensorimotor interpretation",
+    "mind": "Procedurally generated and source-pinned model Grounds, exact and learned navigation, evidence-guided policies, task verification"
+  },
+  "tasks": [
+    {
+      "id": "body.verified-host-path-cost-model",
+      "phase": "in-development-native-ci",
+      "source": "RCG-004 E-CPU mTLS/Reporter and RCG-003 synthetic path policy",
+      "training": "Fit path execution cost from timestamped actual E-CPU sender measurements under changing payload, clock domain, route, queue and fault modes; retain a clean test split by host/epoch",
+      "baselines": [
+        "fixed host",
+        "RCG-003 synthetic linear model",
+        "EWMA with forced exploration"
+      ],
+      "metrics": [
+        "held-out actual latency p50 p95",
+        "total authenticated bytes",
+        "correctness admissions",
+        "failure/recovery intervals",
+        "regret only against contemporaneously observed alternatives"
+      ],
+      "promotion": "No synthetic delay score or in-process checksum becomes a network performance or authorization claim"
+    },
+    {
+      "id": "mind.certified-source-observable-navigator",
+      "phase": "local-math-verified",
+      "source": "OpenWorm c302 source pin; E-CPU law_certifier.berlekamp_massey; VGI typed temporal operator",
+      "training": "Generate real/source-derived temporal operator tasks and learn to select direct recurrence, sparse iteration, or verified dense map as a task-relative realization",
+      "baselines": [
+        "n-step sparse iterator",
+        "VGI dense affine power",
+        "scalar finite-field recurrence"
+      ],
+      "metrics": [
+        "verified error count (must be zero)",
+        "operator preparation amortization",
+        "query logical horizon",
+        "retained Ground bytes",
+        "latency and peak memory"
+      ],
+      "promotion": "Only a receiver-owned n-residual Cayley-Hamilton check promotes a fitted recurrence to a certified temporal Ground"
+    },
+    {
+      "id": "mind.synthetic-operator-composition",
+      "phase": "proposed",
+      "source": "E-CPU MWS/HFG, IFS PNF and neural_graph_bridge, VP source-addressed experts",
+      "training": "Generate heterogeneous composable networks from admitted operator certificates, train task policies for selecting qualified observation slices, and compare to reference model semantics",
+      "baselines": [
+        "full graph operator realization",
+        "naive sparse DAG",
+        "source-pinned pretrained reference where compatible"
+      ],
+      "metrics": [
+        "held-out task accuracy",
+        "matched model source weights",
+        "peak memory and wire bytes",
+        "correctness certificate coverage",
+        "task latency"
+      ],
+      "promotion": "No assertion that sparse synthetics or additional expert labels supply pretrained neural knowledge"
+    },
+    {
+      "id": "body.m3-transit-continuity-and-host-rehome",
+      "phase": "proposed",
+      "source": "E-CPU M1/M3 RecoveryLineageCoordinator, pure operators and Transit quorum",
+      "training": "Adapt host placement after actual process kills and reassignment epochs; preserve exactly-once semantic effect and prevent old stale revisions from publishing",
+      "baselines": [
+        "single-host restart",
+        "RCG004 in-memory replay-fenced receiver",
+        "existing E-CPU host rehome"
+      ],
+      "metrics": [
+        "crash cut coverage",
+        "duplicate effect count",
+        "quorum root continuity",
+        "stale submission rejection",
+        "recovered state bytes and time"
+      ],
+      "promotion": "Require native executable E-CPU authority tests, authenticated hosts and real durable checkpoints"
+    },
+    {
+      "id": "mind.cross-ground-equivalence-model",
+      "phase": "proposed",
+      "source": "VGI observer-relative quotients, IFS response-equivalence, RCG004 scalar certified recurrences",
+      "training": "Learn when an observer-relative quotient, recurrence or cached Ground suffices for a requested output across source, representation and host changes",
+      "baselines": [
+        "full source evaluation",
+        "VGI typed operator chain",
+        "RCG004 all-time recurrence"
+      ],
+      "metrics": [
+        "false-equivalence accepts (must be zero)",
+        "unresolved/refusal calibration",
+        "source revision mismatches",
+        "reconstruction cost vs preparation cost"
+      ],
+      "promotion": "Predicted equivalence is only a proposal until validated under the typed observer contract"
+    }
+  ]
+}

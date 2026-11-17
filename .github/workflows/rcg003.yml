@@ -1,0 +1,41 @@
+name: RCG-003 synthetic adaptive observer fabric
+on:
+  push:
+    paths:
+      - 'experiments/real_connectome_ground/continuity/**'
+      - '.github/workflows/rcg003.yml'
+  pull_request:
+    paths:
+      - 'experiments/real_connectome_ground/continuity/**'
+      - '.github/workflows/rcg003.yml'
+  workflow_dispatch:
+jobs:
+  synthetic-fabric:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install procedural-neural formation's existing NumPy dependency
+        run: python -m pip install 'numpy>=1.26,<3'
+      - name: Require original IFS PNF neural realization, not a mock
+        run: python -c 'from experiments.procedural_neural_formation.formation import Block, evaluate, widen; print("native PNF import succeeded")'
+      - name: Check exact synthetic training and separate-process local observer
+        env:
+          PYTHONPATH: experiments/real_connectome_ground:experiments/real_connectome_ground/continuity
+        run: python -m unittest discover -s experiments/real_connectome_ground/continuity/adaptive_fabric -p 'test_*.py' -v
+      - name: Train on real source topology and check held-out exact reference
+        env:
+          PYTHONPATH: experiments/real_connectome_ground:experiments/real_connectome_ground/continuity
+        run: |
+          python experiments/real_connectome_ground/continuity/adaptive_fabric/fabric_policy.py --train 18 --test 12 --seed 61 --output rcg003-study.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rcg003-study-${{ matrix.python-version }}
+          path: rcg003-study.json
+          if-no-files-found: error
