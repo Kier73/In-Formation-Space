@@ -32,7 +32,7 @@ State/action widths are independent. Channel outputs remain Z/8Z. Unknown and am
 
 Executed on Windows / Python 3.14: 325 tests passed; 4,772 finite Signal8 verification cases passed; delayed-six direct/compiled comparison passed all 10 cases; nine comparisons against the pinned old compiler produced identical width-one program dictionaries and initial memory. Hosted CI is not claimed in this snapshot. The Signal8 semantic Ground and fingerprint are unchanged.
 
-Implementation publication: [VGI PR #32](https://github.com/Kier73/Virtual-Ground-Interpreter/pull/32), head `917604271ff88da16e5a30f765e3977f0855be60`. Status remains local-verified until the exact published head completes its required checks.
+Implementation publication: [VGI PR #32](https://github.com/Kier73/Virtual-Ground-Interpreter/pull/32), head `abc6be4cedb4986d055b1b42d29a165cac60d53d`. The final manifest was corrected for Windows staging line endings; all 152 published active-package files exactly match the verified local bytes, and all 151 manifest entries validate. Status remains local-verified while exact-head hosted checks are queued/in progress. The coordination edition is [IFS PR #269](https://github.com/Kier73/In-Formation-Space/pull/269).
 
 ## Consolidated build goals
 
