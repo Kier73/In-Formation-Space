@@ -1,0 +1,71 @@
+name: PGT-003 learned cost-aware observation navigation
+on:
+  pull_request:
+    paths:
+      - 'experiments/procedural_ground_navigation/**'
+      - '.github/workflows/pgt003-observation-navigator.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/procedural_ground_navigation/**'
+      - '.github/workflows/pgt003-observation-navigator.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-policy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: b1aaebbee533c5296cc37c348f96d2f9b5b59456
+          path: external/cog009
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install numpy torch cryptography
+      - name: Run new signed-host, neural-model and safety tests
+        env:
+          PYTHONPATH: 'experiments/procedural_ground_navigation:experiments/procedural_ground_training:external/cog009/experiments/codonic-capability-atlas'
+        run: |
+          python -m unittest discover -s experiments/procedural_ground_navigation -p 'test_navigation.py' -v
+          python experiments/procedural_ground_navigation/run_experiment.py --cases 400 --results experiments/procedural_ground_navigation/results --mode receiver
+      - name: Run existing PGT-001 / PGT-002 regressions
+        env:
+          PYTHONPATH: 'experiments/procedural_ground_navigation:experiments/procedural_ground_training:external/cog009/experiments/codonic-capability-atlas'
+        run: python -m unittest discover -s experiments/procedural_ground_training -p 'test_transfer.py' -v
+  native-ecpu:
+    runs-on: ubuntu-latest
+    needs: local-policy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: b1aaebbee533c5296cc37c348f96d2f9b5b59456
+          path: external/cog009
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 393462c6e0dafba8e0ee22946ae44227c5c6e4e6
+          path: external/ecpu
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install pytest numpy torch cryptography
+      - name: Require exact E-CPU IOS-001/law conformance (do not allow skips)
+        env:
+          PGT003_REQUIRE_NATIVE: '1'
+          PYTHONPATH: 'external/ecpu:experiments/procedural_ground_navigation:experiments/procedural_ground_training:external/cog009/experiments/codonic-capability-atlas'
+        run: |
+          python -m unittest discover -s experiments/procedural_ground_navigation -p 'test_native_ecpu.py' -v
+          python -m pytest external/ecpu/tests/test_intention_sufficiency.py external/ecpu/tests/test_intention_measurement_fabric.py -q
