@@ -1,0 +1,157 @@
+{
+  "schema": "ifs.rcg006.benchmark.v1",
+  "comparison_scope": "exact mathematical intertwining for all finite-field initial vectors and all ticks; synthetic generated network",
+  "non_claims": "no trained neural parameters, no pretrained AI performance, no native E-CPU/TLS network measurement, no unbounded physical-free computation",
+  "source_blob": "8a01e4d5457fc5f3bfb8d79386e873f29fdcb76d",
+  "source_ground": "e0ab2f9dbb2e7b1314441e507038b8af6852f7e63783ef8d124d4b5275d6d102",
+  "source_is_original_openworm_release": false,
+  "observed_classes": 16,
+  "training_horizon": 8,
+  "retained_certificate_bytes": 3421,
+  "compressed_partition_base64_bytes": 984,
+  "eager_micro_edge_table_stored": false,
+  "synthetic_directed_edge_records_defined": 1048576,
+  "timing_ns": {
+    "construction": 58437,
+    "observation_discovery": 4895403841,
+    "independent_full_edge_and_observation_replay": 4726804380
+  },
+  "synthetic_expansion": {
+    "schema": "ifs.rcg006.observer-quotient.v1.expanded.v1",
+    "source_ground": "e0ab2f9dbb2e7b1314441e507038b8af6852f7e63783ef8d124d4b5275d6d102",
+    "source_blob": "8a01e4d5457fc5f3bfb8d79386e873f29fdcb76d",
+    "field": 1000000007,
+    "groups": 16,
+    "copies": 8192,
+    "seed": 73,
+    "microstate_count": 131072,
+    "directed_edge_count": 1048576,
+    "law": "source-synapse-statistics-to-two-ring-successors-4-edges-each-v1",
+    "addressing": "source-pinned-affine-permutation-of-microstates-v1",
+    "scope": "synthetic-sparse-ground-not-the-original-connectome-dynamics",
+    "weights": [
+      [
+        26,
+        23
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        42,
+        34
+      ],
+      [
+        7,
+        19
+      ],
+      [
+        47,
+        14
+      ],
+      [
+        13,
+        11
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ]
+  },
+  "queries": [
+    {
+      "source_micro": 0,
+      "source_class": 6,
+      "value_mod_p": 860822625,
+      "navigation_ns": 28022119,
+      "polynomial_products": 60
+    },
+    {
+      "source_micro": 1,
+      "source_class": 8,
+      "value_mod_p": 327949169,
+      "navigation_ns": 27210251,
+      "polynomial_products": 60
+    },
+    {
+      "source_micro": 1237,
+      "source_class": 8,
+      "value_mod_p": 327949169,
+      "navigation_ns": 26702964,
+      "polynomial_products": 60
+    },
+    {
+      "source_micro": 9156,
+      "source_class": 9,
+      "value_mod_p": 321531800,
+      "navigation_ns": 26901745,
+      "polynomial_products": 60
+    },
+    {
+      "source_micro": 17075,
+      "source_class": 10,
+      "value_mod_p": 499245480,
+      "navigation_ns": 27059072,
+      "polynomial_products": 60
+    },
+    {
+      "source_micro": 24994,
+      "source_class": 12,
+      "value_mod_p": 550932288,
+      "navigation_ns": 26881995,
+      "polynomial_products": 60
+    },
+    {
+      "source_micro": 32913,
+      "source_class": 14,
+      "value_mod_p": 174046747,
+      "navigation_ns": 26726019,
+      "polynomial_products": 60
+    },
+    {
+      "source_micro": 40832,
+      "source_class": 15,
+      "value_mod_p": 731588378,
+      "navigation_ns": 26679508,
+      "polynomial_products": 60
+    }
+  ]
+}
