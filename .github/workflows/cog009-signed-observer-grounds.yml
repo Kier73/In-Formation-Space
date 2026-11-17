@@ -1,0 +1,108 @@
+name: COG-009 signed multi-observer cognitive Ground and native E-CPU qualification
+on:
+  push:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog009-signed-observer-grounds.yml'
+  pull_request:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog009-signed-observer-grounds.yml'
+  workflow_dispatch:
+
+jobs:
+  multi-process-signature-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - name: Actual child processes, Ed25519 signatures, quorum disagreement, fault and replay
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_multi_observer_fabric.py' -v
+      - name: Check original COG-008 partially observed Ground learning regression
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_partial_observation.py' -v
+
+  native-ecpu-substrate-qualification:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned actual E-CPU qualification authority
+        run: python -m pip install 'cryptography>=43,<47' 'git+https://github.com/Kier73/E-CPU.git@6fd416facdb2aefd6fc7d66a06b014e3d31b5a52'
+      - name: Mandatory native authority import (no silent skip)
+        run: python -c 'from mailcpu.runtime_qualification import QualificationPolicy,SubprocessQualificationEndpoint,qualify,verify_report; print("Actual E-CPU SAB003 qualification imports confirmed")'
+      - name: Real E-CPU probes test the COG009 observer worker over process restarts
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_native_ecpu_qualification.py' -v
+
+  signed-observation-preparation:
+    runs-on: ubuntu-latest
+    outputs:
+      pins: ${{ steps.pin.outputs.pins }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - name: Build multi-observer evidence and an acquired predictive Ground; kill/restart a host
+        run: |
+          python experiments/codonic-capability-atlas/run_multi_observer_fabric.py prepare \
+            --subjects 32 --durations 8 \
+            --bundle signed-bundle.json --trust pinned-public-keys.json \
+            --pins pins.json --private-dir "$RUNNER_TEMP/cog009-host-private-keys" \
+            > preparation-report.json
+      - name: Export high-water pins separately from the checkpoint artifact
+        id: pin
+        shell: bash
+        run: echo "pins=$(cat pins.json)" >> "$GITHUB_OUTPUT"
+      - name: Retain only signed observations and enrolled public keys, NEVER private keys
+        uses: actions/upload-artifact@v4
+        with:
+          name: cog009-signed-ground
+          path: |
+            signed-bundle.json
+            pinned-public-keys.json
+            preparation-report.json
+          if-no-files-found: error
+
+  independent-fresh-receiver:
+    needs: signed-observation-preparation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - run: python -m pip install 'cryptography>=43,<47'
+      - uses: actions/download-artifact@v4
+        with: {name: cog009-signed-ground}
+      - name: Reconstruct public-key trust pins from *independent job output*, not bundle
+        env:
+          COG009_EXTERNAL_PINS: ${{ needs.signed-observation-preparation.outputs.pins }}
+        run: |
+          python - <<'PY'
+          import json,os
+          with open('pins.json','w') as f:
+              json.dump(json.loads(os.environ['COG009_EXTERNAL_PINS']),f)
+          PY
+      - name: Independently verify every Ed25519 receipt and reconstruct COG008 state without private keys or host calls
+        run: |
+          python experiments/codonic-capability-atlas/run_multi_observer_fabric.py resume \
+            --bundle signed-bundle.json --trust pinned-public-keys.json --pins pins.json \
+            > independent-recovery-report.json
+          cat independent-recovery-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog009-offline-verification
+          path: independent-recovery-report.json
+          if-no-files-found: error
