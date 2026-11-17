@@ -4,11 +4,35 @@ Snapshot: 2026-11-16 America/Toronto (source collection crossed 2026-11-17 UTC).
 
 Purpose: turn stated restrictions, TODOs and capability gaps into build goals, and connect them to work already present. A current non-capability is a development target, not a verdict of impossibility. Evidence and authority contracts describe how a goal can be established; deleting them would not establish it.
 
+## Integration progress — 2026-11-17
+
+This dated entry updates the original audit below without changing its historical source pins.
+
+| Goal / gap | Action and observed status | Evidence |
+|---|---|---|
+| Finite Ground alphabets larger than eight | VGI PR32 is now merged; verified current main includes the previously tested compiler expansion. | [VGI PR32](https://github.com/Kier73/Virtual-Ground-Interpreter/pull/32), main `7a3c4a368d1d24044a6c06a317c26ef316513e6d` |
+| Shared development inventory | This ledger is merged into IFS. | [IFS PR269](https://github.com/Kier73/In-Formation-Space/pull/269), merge `3ee123b4750dcf07fb5b7e181652f80e17b15ff3` |
+| Receiver-owned measurement installation | Integrated the existing IOS-003 typo fix and added a constructor regression. Native contracts install; invalid contracts refuse without reading private state. | [E-CPU PR169](https://github.com/Kier73/E-CPU/pull/169), merge `c410a2a39fb6b5247b25b9d11a1fe80ef015e7e8` |
+| Tensor verification remains tied to original intention | Fixed callback mutation of operands/accumulator redefining the independent oracle. All three regression variants reproduced acceptance of incorrect results before the fix. | [E-CPU PR154](https://github.com/Kier73/E-CPU/pull/154), head `5f19d540032dd3b03bd572942c1f6242b8ac140b` |
+| Interrupted tensor products retain completed work | Added ordered, plan-bound verified-prefix checkpoints to the existing tiled E-GPU coordinator. Recovery rechecks retained receipts and dispatches only the suffix; a test resumes on a different host and replays a complete checkpoint with no dispatch. | Same PR154; implementation and recovery documentation published, **not merged** |
+
+### Executed checks and remaining integration gates
+
+- Windows/Python 3.14: **19 passed** across intention sufficiency, observer bridge and non-network measurement tests. Three real mTLS tests were excluded because the execution sandbox prohibits sockets. Constructor regression failed with the original NameError before correction.
+- Tensor/E-GPU checks: **31 passed**, one real-socket recovery test excluded. Covered persisted interruption, changed host, exact suffix continuation, no-dispatch completed replay, changed-plan refusal, rehashed false arithmetic rejection, and dispatch/persistence mutation isolation.
+- The three updated tensor source/test/document files were fetched from the published head and compared byte-for-byte with the tested local texts.
+- Fresh tensor hosted CI is queued/pending as of this entry. Earlier hosted focused tensor checks passed, but broader repository regression/conformance gates failed. PR154 remains draft. No full-suite, physical path, independent-process recovery or authenticated network result is claimed by the local tensor recovery tests.
+- Existing audit PR155 contains additional regression repairs. It was inspected but not merged wholesale; its changes and the wider baseline need separate validation.
+
+### Next connected work
+
+Integrate the verified tensor coordinator after resolving the broader baseline; connect its checkpoint callback to an atomic durable journal and the existing frontier/receiver operation-identity contracts. Current full-prefix snapshots grow with completed work and can have quadratic cumulative serialization cost. The recovered receipt values are independently verified mathematical evidence, not new authority or cryptographic proof of host provenance. Bounded concurrent dispatch, real authenticated host recovery, and measured non-reference path substrates remain active development goals.
+
 ## Scope and reading guide
 
 The four actively developed public repositories are E-CPU, Virtual-Ground-Interpreter, In-Formation-Space and E-CPU-Virtual-Processor. Virtual-Layer-Dynamics was also inspected: its current tree contains only LICENSE, with no executable or documentation claims to inventory. Account discovery returned 18 accessible repositories; private legacy repositories were not included in this public-project audit. This is an explicit scope choice, not a claim that their capabilities are absent.
 
-All 1,012 mainline Markdown paths were retrieved (624 unique blobs), including VGI historical Builds. Also inspected: 139 changed Markdown documents at 66 exact open-PR heads, three open issues, and current E-CPU/VGI/IFS/VP source/configuration candidates. PR and issue text is author-reported evidence, not independently observed test success. The only newly executed implementation validation in this pass is the VGI change below.
+All 1,012 mainline Markdown paths were retrieved (624 unique blobs), including VGI historical Builds. Also inspected: 139 changed Markdown documents at 66 exact open-PR heads, three open issues, and current E-CPU/VGI/IFS/VP source/configuration candidates. PR and issue text is author-reported evidence, not independently observed test success. The original audit's implementation validation is the VGI change below; subsequent validation is recorded in the dated integration entry above.
 
 The curated goals consolidate overlapping statements. The source appendix preserves lexical candidates and TODO/next-work sections, including historical and already-superseded claims. It is intentionally broader than a verified backlog: a lexical match is not proof that a capability is missing. Implicit gaps, untracked work, unexamined private repositories, branch code outside the inspected documents and future commits may add or resolve items. No finite text scan proves semantic exhaustiveness.
 
