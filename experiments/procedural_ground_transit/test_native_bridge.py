@@ -34,6 +34,12 @@ class NativeAuthorityIntegration(unittest.TestCase):
             blocked=plan_sufficiency(model,0,(),authority_for(root))
             self.assertEqual(blocked['status'],'REFUSE')
         self.assertEqual(exact_target_status(6,{},root)['status'],'REFUSE')
+        # A different synthetic source, even under the identical finite
+        # hypothesis language, cannot reuse the model or native observer.
+        from native_contract import contract_at
+        self.assertNotEqual(model_at(2,root).digest,model_at(2,'b'*64).digest)
+        self.assertNotEqual(contract_at(2,root).digest,contract_at(2,'b'*64).digest)
+        self.assertNotEqual(authority_for(root),authority_for('b'*64))
 
     @require_native
     def test_live_native_mtls_remote_provider_and_signed_http_stdio_offline(self):
