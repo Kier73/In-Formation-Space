@@ -41,6 +41,8 @@ jobs:
             external/ecpu/tests/test_intention_observer_bridge.py \
             external/ecpu/tests/test_intention_measurement_fabric.py \
             external/ecpu/tests/test_intent_embedding.py
+      - name: Require existing PGT-004 native HTTP/stdio structural embedding tests
+        run: python -m unittest discover -s experiments/procedural_ground_paths -p 'test_native_ecpu.py' -v
       - name: Strict cross-process native IOS-003 + learned HTTP/stdio integration
         run: python -m unittest discover -s experiments/procedural_ground_transit -p 'test_*.py' -v
       - name: Existing live signed HTTP and stdio regression
