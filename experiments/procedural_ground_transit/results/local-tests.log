@@ -1,0 +1,13 @@
+test_ios001_probe_contract_replans_and_unavailable_features_refuse (test_native_bridge.NativeAuthorityIntegration.test_ios001_probe_contract_replans_and_unavailable_features_refuse) ... skipped 'E-CPU not installed locally; strict CI must run'
+test_live_native_mtls_remote_provider_and_signed_http_stdio_offline (test_native_bridge.NativeAuthorityIntegration.test_live_native_mtls_remote_provider_and_signed_http_stdio_offline) ... skipped 'E-CPU not installed locally; strict CI must run'
+test_native_refusal_under_dissent_and_recovery_without_replaying_accepted_source (test_native_bridge.NativeAuthorityIntegration.test_native_refusal_under_dissent_and_recovery_without_replaying_accepted_source) ... skipped 'E-CPU not installed locally; strict CI must run'
+test_out_of_family_false_candidate_cannot_be_admitted (test_native_bridge.NativeAuthorityIntegration.test_out_of_family_false_candidate_cannot_be_admitted) ... skipped 'E-CPU not installed locally; strict CI must run'
+test_actual_http_and_stdio_queries_retained_and_independently_verified (test_protocol.ProtocolStructure.test_actual_http_and_stdio_queries_retained_and_independently_verified) ... ok
+test_generated_tls_certs_distinguish_real_ca_and_two_dns_peer_identities (test_protocol.ProtocolStructure.test_generated_tls_certs_distinguish_real_ca_and_two_dns_peer_identities) ... ok
+test_learned_query_requires_no_hidden_source_value_to_choose (test_protocol.ProtocolStructure.test_learned_query_requires_no_hidden_source_value_to_choose) ... ok
+test_source_outside_hypothesis_family_has_false_conditional_candidate (test_protocol.ProtocolStructure.test_source_outside_hypothesis_family_has_false_conditional_candidate) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.879s
+
+OK (skipped=4)
