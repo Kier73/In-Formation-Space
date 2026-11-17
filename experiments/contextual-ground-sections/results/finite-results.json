@@ -1,0 +1,155 @@
+{
+  "experiment": "CGS-001",
+  "date": "2026-11-15",
+  "evidence_tier": "synthetic finite exact computation; not network or physical observation",
+  "model": "invertible affine maps over prime finite fields",
+  "five_state_counterexamples": [
+    {
+      "case": "flat",
+      "flat": true,
+      "status": "all",
+      "section_count": 5,
+      "root_value": null,
+      "cycles": [
+        {
+          "edge": "bc",
+          "holonomy": [
+            1,
+            0
+          ],
+          "constraint": {
+            "kind": "any"
+          }
+        }
+      ],
+      "obstruction_edges": []
+    },
+    {
+      "case": "translation-obstruction",
+      "flat": false,
+      "status": "empty",
+      "section_count": 0,
+      "root_value": null,
+      "cycles": [
+        {
+          "edge": "bc",
+          "holonomy": [
+            1,
+            4
+          ],
+          "constraint": {
+            "kind": "none"
+          }
+        }
+      ],
+      "obstruction_edges": [
+        "bc"
+      ]
+    },
+    {
+      "case": "nonflat-but-realizable",
+      "flat": false,
+      "status": "singleton",
+      "section_count": 1,
+      "root_value": 0,
+      "cycles": [
+        {
+          "edge": "bc",
+          "holonomy": [
+            3,
+            0
+          ],
+          "constraint": {
+            "kind": "point",
+            "value": 0
+          }
+        }
+      ],
+      "obstruction_edges": []
+    },
+    {
+      "case": "incompatible-fixed-points",
+      "flat": false,
+      "status": "empty",
+      "section_count": 0,
+      "root_value": null,
+      "cycles": [
+        {
+          "edge": "bc",
+          "holonomy": [
+            3,
+            0
+          ],
+          "constraint": {
+            "kind": "point",
+            "value": 0
+          }
+        },
+        {
+          "edge": "bd",
+          "holonomy": [
+            3,
+            3
+          ],
+          "constraint": {
+            "kind": "point",
+            "value": 1
+          }
+        }
+      ],
+      "obstruction_edges": [
+        "bc",
+        "bd"
+      ]
+    }
+  ],
+  "exhaustive_three_vertex_triangles": {
+    "field": 3,
+    "checked": 216,
+    "status_counts": {
+      "all": 36,
+      "singleton": 108,
+      "empty": 72
+    },
+    "checked_against": "direct exhaustive vertex assignments"
+  },
+  "uniform_independent_holonomy_ensemble": {
+    "p3_k1": {
+      "field": 3,
+      "independent_cycles": 1,
+      "distribution": "uniform independent AGL(1,F_p)",
+      "total": "6",
+      "all": "1",
+      "singleton": "3",
+      "empty": "2"
+    },
+    "p5_k1": {
+      "field": 5,
+      "independent_cycles": 1,
+      "distribution": "uniform independent AGL(1,F_p)",
+      "total": "20",
+      "all": "1",
+      "singleton": "15",
+      "empty": "4"
+    },
+    "p5_k2": {
+      "field": 5,
+      "independent_cycles": 2,
+      "distribution": "uniform independent AGL(1,F_p)",
+      "total": "400",
+      "all": "1",
+      "singleton": "75",
+      "empty": "324"
+    },
+    "p5_k3": {
+      "field": 5,
+      "independent_cycles": 3,
+      "distribution": "uniform independent AGL(1,F_p)",
+      "total": "8000",
+      "all": "1",
+      "singleton": "315",
+      "empty": "7684"
+    }
+  },
+  "caveat": "Ensemble distribution is a synthetic group-label distribution, not an observed fault model."
+}

@@ -1,0 +1,44 @@
+name: Contextual Ground Sections (CGS-001)
+
+on:
+  pull_request:
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/contextual-ground-sections.yml"
+  push:
+    branches: [main]
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/contextual-ground-sections.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-sections:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ["20", "22"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Independent finite-field oracle and chart-change tests
+        run: node --test experiments/contextual-ground-sections/test_sections.js experiments/contextual-ground-sections/test_verifier.js experiments/contextual-ground-sections/test_scale.js experiments/contextual-ground-sections/test_uncertain.js experiments/contextual-ground-sections/test_uncertain_verifier.js
+      - name: Reconstruct four counterexamples
+        run: node experiments/contextual-ground-sections/sections.js
+      - name: Reconstruct exact ensemble distribution
+        run: node experiments/contextual-ground-sections/ensemble.js
+      - name: Independently verify serialized portable certificates
+        run: |
+          node experiments/contextual-ground-sections/sections.js --certificates > cgs-certificates.json
+          node experiments/contextual-ground-sections/verifier.js cgs-certificates.json
+      - name: Reconstruct 1024-observer finite Ground without enumerating states
+        run: node experiments/contextual-ground-sections/scale.js 1024
+      - name: Reconstruct exact uncertain-world counts, without enumerating completions
+        run: node experiments/contextual-ground-sections/demo_uncertain.js

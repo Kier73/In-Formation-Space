@@ -7,6 +7,7 @@ independent verifier needs the public source Ground, but NOT the private phase.
 from __future__ import annotations
 
 import argparse
+import datetime
 import re
 import sys
 from pathlib import Path
@@ -72,7 +73,8 @@ def get_binding(directory: Path) -> tuple[dict,dict,dict]:
 
 
 def verify_record(report: Mapping[str, Any], binding: Mapping[str,str],
-                  public: Mapping[str,Any], plan: Mapping[str,Any]) -> dict[str,Any]:
+                  public: Mapping[str,Any], plan: Mapping[str,Any], *,
+                  certificate_time: datetime.datetime | None = None) -> dict[str,Any]:
     """Validate real report and receipt signatures WITHOUT reading hidden phase."""
     gci3.check_sealed(report, {"schema","binding","public_digest","plan_digest",
                "source_gci004_report_digest","origin","rounds","scope",
@@ -129,7 +131,8 @@ def verify_record(report: Mapping[str, Any], binding: Mapping[str,str],
             require(item["peer_id"]==peer and
                     item["dns"]==c.PEERS[peer][1] and item["feature"]==FEATURE,
                     "unexpected peer feature or DNS identity")
-            cert=c.check_cert(item["certificate_pem"],ca,item["dns"])
+            cert=c.check_cert(item["certificate_pem"],ca,item["dns"],
+                              validation_time=certificate_time)
             pub=cert.public_key().public_bytes(
                 serialization.Encoding.DER,
                 serialization.PublicFormat.SubjectPublicKeyInfo)

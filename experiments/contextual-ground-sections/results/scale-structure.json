@@ -1,0 +1,44 @@
+{
+  "experiment": "CGS-004",
+  "date": "2026-11-15",
+  "evidence_tier": "deterministic synthetic finite-field construction and exact internal mathematical verification",
+  "construction": "1024 virtual observer coordinate charts over F_65521; 2045 path labels; 1022 fundamental cycles",
+  "oracle": "separately implemented extended-Euclidean certificate verifier (not an independent host or source attestation)",
+  "structural_results": [
+    {
+      "mode": "flat",
+      "field": 65521,
+      "vertices": 1024,
+      "edges": 2045,
+      "fundamental_cycles": 1022,
+      "section_count": 65521,
+      "flat": true,
+      "independent_arithmetic_verifier": true,
+      "enumerated_assignments": 0
+    },
+    {
+      "mode": "pinned",
+      "field": 65521,
+      "vertices": 1024,
+      "edges": 2045,
+      "fundamental_cycles": 1022,
+      "section_count": 1,
+      "flat": false,
+      "independent_arithmetic_verifier": true,
+      "enumerated_assignments": 0
+    },
+    {
+      "mode": "empty",
+      "field": 65521,
+      "vertices": 1024,
+      "edges": 2045,
+      "fundamental_cycles": 1022,
+      "section_count": 0,
+      "flat": false,
+      "independent_arithmetic_verifier": true,
+      "enumerated_assignments": 0
+    }
+  ],
+  "omitted": "elapsed runtime is environment dependent and printed only by CLI",
+  "caveat": "No live E-CPU/VGI host and no physical network, cryptographic receipt, or production performance comparison."
+}
