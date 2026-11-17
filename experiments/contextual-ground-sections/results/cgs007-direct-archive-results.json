@@ -1,0 +1,74 @@
+{
+  "schema": "ifs.cgs007-direct-archival-check/0.1",
+  "source_run_id": 43616685083,
+  "source_commit": "90e719ae6efab12107ee8de2b77afe5e73dd35b2",
+  "historical_check_at": "2026-11-14T16:54:29Z",
+  "direct_local_check_date": "2026-11-15",
+  "source_quorum_digest": "0095edfe600ce1f86a28fcf5aab0b077bf454e90c07fa303505a458aa39362ff",
+  "source_public_digest": "d49adae111dd401d1d7226cbbdea84770840214fd61647e448deb81483cee3ad",
+  "source_blind_digest": "a4e2562b9fca037b327cd5d8ed5c6d109b3190dd495fab518512f15d314ce923",
+  "source_ground_fingerprint": "13bbaf7b706e8575335a49b1b89128b0941b11e4d8ac5f1ec3b42fdb379686f2",
+  "checks_performed": [
+    "exact canonical SHA-256 document seals on three original public records",
+    "ephemeral CA self signatures and leaf X509 signatures",
+    "historical issuer and leaf validity windows",
+    "strict signed ECDSA payload bytes for four actual observer receipts",
+    "request digest, phase commitment, Ground binding and peer snapshot identity",
+    "original blind audit peer values and admitted/refused verdicts",
+    "independent modular affine composition for the 10^15+137 intention"
+  ],
+  "rounds": [
+    {
+      "scenario": "honest-agreement",
+      "peer_values": [
+        1,
+        1
+      ],
+      "source_verdict": "ADMITTED_AGREEMENT",
+      "ecdsa_receipt_signatures_checked": 2,
+      "distinct_leaf_public_keys": true,
+      "issuer_valid_at_run_completion": true,
+      "issuer_valid_at_direct_check": false,
+      "issuer_expires_at": "2026-11-15T16:52:14Z"
+    },
+    {
+      "scenario": "signed-false-reading",
+      "peer_values": [
+        1,
+        0
+      ],
+      "source_verdict": "REFUSED_DISAGREEMENT",
+      "ecdsa_receipt_signatures_checked": 2,
+      "distinct_leaf_public_keys": true,
+      "issuer_valid_at_run_completion": true,
+      "issuer_valid_at_direct_check": false,
+      "issuer_expires_at": "2026-11-15T16:52:15Z"
+    }
+  ],
+  "original_threshold_bit": 0,
+  "original_candidate_phases": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "honest_signed_parity": 1,
+  "remaining_possible_phases": [
+    1,
+    3
+  ],
+  "future_output_parities": [
+    1,
+    1
+  ],
+  "disputed_round_authorized_reduction": false,
+  "private_phase_used": false,
+  "current_execution_authority": false,
+  "full_gh_attestation_verification_performed_locally": false,
+  "local_environment": {
+    "python": "3.13.5",
+    "cryptography": "46.0.4",
+    "node": "v22.16.0"
+  },
+  "scope": "Direct local mathematical and cryptographic verification of GitHub-downloaded historical artifacts; separate hosted workflow attestation replay still pending"
+}

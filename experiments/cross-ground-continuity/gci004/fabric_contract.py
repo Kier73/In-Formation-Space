@@ -65,8 +65,14 @@ def require_positive_ns(value: Any, label: str) -> None:
     require(type(value) is int and 0 <= value < 10**12, label + ' is not a measured finite nanosecond count')
 
 
-def check_cert(cert_pem: str, ca_pem: str, dns: str) -> x509.Certificate:
-    """Independently validate in-run test CA and leaf signature, scope, SAN and validity."""
+def check_cert(cert_pem: str, ca_pem: str, dns: str, *,
+               validation_time: datetime.datetime | None = None) -> x509.Certificate:
+    """Check TLS signer, CA and validity at a declared UTC instant.
+
+    Default: actual current UTC time, as required for a live connection.
+    A historical caller MUST independently establish the time and provenance;
+    a caller-supplied date is not itself trusted evidence of observation time.
+    """
     require(type(cert_pem) is str and type(ca_pem) is str, 'X.509 certificate must be PEM text')
     ca = x509.load_pem_x509_certificate(ca_pem.encode())
     cert = x509.load_pem_x509_certificate(cert_pem.encode())
@@ -86,7 +92,12 @@ def check_cert(cert_pem: str, ca_pem: str, dns: str) -> x509.Certificate:
             'peer subject differs from authenticated DNS name')
     eku = cert.extensions.get_extension_for_class(x509.ExtendedKeyUsage).value
     require(ExtendedKeyUsageOID.SERVER_AUTH in eku, 'peer certificate lacks server TLS role')
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = (datetime.datetime.now(datetime.timezone.utc)
+           if validation_time is None else validation_time)
+    require(isinstance(now, datetime.datetime) and
+            now.tzinfo is not None and now.utcoffset() is not None,
+            'certificate check requires timezone-aware time')
+    now = now.astimezone(datetime.timezone.utc)
     require(cert.not_valid_before_utc <= now <= cert.not_valid_after_utc and
             ca.not_valid_before_utc <= now <= ca.not_valid_after_utc,
             'certificate validity period failed')

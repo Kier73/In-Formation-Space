@@ -242,6 +242,22 @@ It checks the stated counts, possible-root cardinality, target-result invariance
 Five independent-verifier test groups passed in the in-session JavaScript V8 execution harness. As before, these two versions are independent mathematical implementations in **one JavaScript runtime**, not independent network authorities or evidence of physical measurements. A self-consistent *false premise* remains self-consistent and therefore requires source authentication in a subsequent E-CPU/VGI experiment.
 
 
+## CGS-007: historical signed E-CPU evidence to intention-relative Ground
+
+The [CGS-007 historical evidence experiment](CGS-007-HISTORICAL-EVIDENCE.md) reuses GCI-005's actual signed E-CPU loopback-mTLS observation artifacts, pinned to successful November 14, 2026 main CI run #43616685083. A new *historical*, time-scoped certificate verifier preserves the original current-time default for live credentials. A phase-blind adapter narrows the GCI-002 eight-state VGI Ground using authenticated parity while deliberately refusing conflicting signed reports. An independent Node implementation checks the same ECDSA receipts and far-horizon mathematical intention. Existing source evidence was successful; **new CGS-007 archive replay CI is pending**, and historical signatures confer no current execution authority. The model does not identify the eight-state Ground with CGS-001's prime finite-field graphs.
+
+## CGS-008: receiver-fresh Ground authority
+
+The [CGS-008 authority protocol](CGS-008-FRESH-AUTHORITY.md) adds a separate current-authority experiment: two distinctly keyed Ed25519 root signers, hash-chained versioned Ground policies, observer revocation, signed receiver freshness checkpoints, challenge-bound signed parity receipts, and refusal of stale, contradictory or replayed claims. A public-only synthetic transcript is audited by a separately implemented Python verifier, including adversarial mutations. It **does not** claim independent administrations, a durable anti-rollback store, real E-CPU transport, or sensor truth. Its key distinction is that historical authenticity, mathematical sufficiency and current authority are independent verdicts.
+
+## CGS-009: original E-CPU quorum recovery, not another checkpoint algorithm
+
+The [CGS-009 reuse experiment](CGS-009-ECPU-QUORUM-REUSE.md) connects the independently Ed25519-verified CGS-008 receiver checkpoint to **E-CPU's already implemented** `RecoveryStateManifest`, `RecoveryLineageCoordinator`, and fsynced seed-commit authority journals. It anchors the exact serialized receiver state in a fixed-membership majority before admitting later restore. The test suite opens the durable journals in separate OS processes and attempts to restore the still-valid, now-superseded signed checkpoint; only the quorum high-water is eligible. One-host triple-journal testing is **not** proof of independent administrative failure domains, and current effect authorization still requires a fresh challenge. The original E-CPU recovery algorithm is **reused**, not rewritten. New hosted CI remains pending.
+
+## CGS-010: original mTLS authority services and checkpoint-free hard-kill recovery
+
+The [CGS-010 hard-kill integration](CGS-010-REAL-MTLS-RECOVERY.md) reuses **E-CPU's existing recovery-lineage authority services** rather than duplicating consensus. Two independent OS processes serve B/C durable journals over real mutual-TLS sockets. The first owner/receiver commits two CGS-008 Ed25519-signed Ground generations and is forcibly killed while the authenticated streams are active. A replacement process receives no checkpoint file, no source-bundle argument, and no generation hint; it requests the quorum's latest committed root and verifies only the matching archived state. Adversarial tests cover valid but stale manifests, archive corruption or loss, wrong TLS identities, authority restart and outage, bootstrap substitution, and preservation of revocation. **CI for this new integration is a separate pending gate; all processes are still on one test runner, not separate machines.**
+
 ## Relationship to prior mathematics and other projects
 
 Global sections and their obstruction by local compatibility are established in the sheaf-theoretic contextuality literature; cycle consistency and group synchronization are established in graph theory and geometry. **Do not claim that those ideas are first discovered here.**
