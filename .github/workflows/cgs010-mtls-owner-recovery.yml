@@ -1,0 +1,68 @@
+name: CGS-010 hard-kill receiver recovery against real E-CPU mTLS authority services
+
+on:
+  pull_request:
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/cgs010-mtls-owner-recovery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "experiments/contextual-ground-sections/**"
+      - ".github/workflows/cgs010-mtls-owner-recovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hardkill-recovery:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use the original E-CPU recovery-service runtime and tests
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 6fd416facdb2aefd6fc7d66a06b014e3d31b5a52
+          path: external/E-CPU
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned E-CPU runtime and original cryptography verifier
+        run: |
+          python -m pip install -e external/E-CPU
+          python -m pip install "cryptography>=43,<47" pytest
+          openssl version
+      - name: Run upstream E-CPU mutual TLS authority service and owner-crash tests
+        run: python -m pytest external/E-CPU/tests/test_recovery_lineage_service.py -q
+      - name: Test original E-CPU hard-failure recovery at process boundary
+        run: python -m pytest external/E-CPU/tests/test_recovery_lineage_process.py -q
+      - name: Original E-CPU quorum ledger and typed manifest regression
+        run: python -m pytest external/E-CPU/tests/test_recovery_lineage.py -q
+      - name: Test CGS-008 Ed25519 checkpoint with two remote live E-CPU authority processes, kill and independent restore
+        shell: bash
+        env:
+          CGS010_EVIDENCE_DIR: evidence/cgs010
+        run: |
+          set -euo pipefail
+          python -m py_compile experiments/contextual-ground-sections/ecpu_mtls_recovery.py \
+              experiments/contextual-ground-sections/test_ecpu_mtls_recovery.py
+          python -m unittest discover -s experiments/contextual-ground-sections \
+            -p 'test_ecpu_mtls_recovery.py' -v
+      - name: Preserve nonsecret evidence from the true hard-kill experiment
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cgs010-hardkill-quorum-mtls-evidence
+          path: evidence/cgs010/recovered-state.json
+          retention-days: 90
+          if-no-files-found: error

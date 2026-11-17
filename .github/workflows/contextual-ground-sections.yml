@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Independent finite-field oracle and chart-change tests
-        run: node --test experiments/contextual-ground-sections/test_sections.js experiments/contextual-ground-sections/test_verifier.js experiments/contextual-ground-sections/test_scale.js
+        run: node --test experiments/contextual-ground-sections/test_sections.js experiments/contextual-ground-sections/test_verifier.js experiments/contextual-ground-sections/test_scale.js experiments/contextual-ground-sections/test_uncertain.js experiments/contextual-ground-sections/test_uncertain_verifier.js
       - name: Reconstruct four counterexamples
         run: node experiments/contextual-ground-sections/sections.js
       - name: Reconstruct exact ensemble distribution
@@ -40,3 +40,5 @@ jobs:
           node experiments/contextual-ground-sections/verifier.js cgs-certificates.json
       - name: Reconstruct 1024-observer finite Ground without enumerating states
         run: node experiments/contextual-ground-sections/scale.js 1024
+      - name: Reconstruct exact uncertain-world counts, without enumerating completions
+        run: node experiments/contextual-ground-sections/demo_uncertain.js
