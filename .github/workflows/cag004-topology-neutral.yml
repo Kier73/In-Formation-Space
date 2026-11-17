@@ -10,6 +10,9 @@ on:
       - 'experiments/cross-ground-continuity/gci004/**'
       - 'experiments/cross-ground-continuity/gci005/**'
       - 'experiments/cross-ground-continuity/oe004/**'
+      - 'experiments/intention-without-identification/native_gci_lineage.py'
+      - 'experiments/intention-without-identification/test_native_gci_lineage.py'
+      - 'experiments/intention-without-identification/IWI-006.md'
       - '.github/workflows/cag004-topology-neutral.yml'
   push:
     branches: [main]
