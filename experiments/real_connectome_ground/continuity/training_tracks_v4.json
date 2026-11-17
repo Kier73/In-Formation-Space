@@ -1,0 +1,70 @@
+{
+  "schema": "ifs.rcg005.observer-fabric-mind-curriculum.v4",
+  "supersedes_interpretation": "RCG-002 v1 biological sensorimotor body framing is superseded; history and earlier evidence are retained unchanged",
+  "body": "Qualified E-CPU observer-hosts, authenticated communication paths, in-transit realization, verifiable authority and durable session lineage",
+  "mind": "Procedural synthetic neural/operator Grounds, verified representation changes, trained source-bound policies and task-relative computation navigation",
+  "connectome_role": "Version-pinned heterogeneous graph topology for explicitly synthetic computational models; no biological dynamics or artificial organism claim",
+  "current_evidence": {
+    "mathematical": "RCG-005 local generated sparse graph n=1024, depth=6, 7 latent outputs, exact vector annihilator, nonlinear observable, time 2^56+73",
+    "training": "RCG-003 synthetic path-cost regression only; RCG-005 nonlinear transformation parameters are generated, not learned",
+    "transport": "RCG-004 native authenticated transport remains gated by hosted E-CPU CI; RCG-005 reuses its protocol and has not locally verified a physical remote network",
+    "persistence": "RCG-002 Chronicle and E-CPU M1/M3 remain authorities; RCG-005 portable mathematical capsule has no independent trust domain"
+  },
+  "tracks": [
+    {
+      "id": "mind.learn-certified-nonlinear-charts",
+      "order": 1,
+      "question": "Can a learned compiler discover nontrivial invertible nonlinear encoders whose conjugated source operators still admit receiver-checkable compact vector certificates?",
+      "synthetic_training_data": "Generate disjoint families of sparse operators, invertible polynomial coupling descriptions and deliberately nonconjugate/corrupted counterexamples",
+      "objective": "Maximize held-out exact equivalence and usable nonlinear representation diversity per source byte and construction cost",
+      "baseline": ["RCG-005 hand-constructed triangular shears", "VGI polynomial-lift certificate", "direct finite-state iteration", "noninvertible guessed encoder"],
+      "promotion_gate": "Receiver checks exact E(D(x)) and D(E(x)) through a symbolic algebraic certificate or complete finite-domain proof, and full-vector q(M)e0=0; short sampled agreement is not enough",
+      "metrics": ["held-out accepted certificates", "false equivalent count (must be zero)", "unique observable function classes", "construction and independent verification ns", "stored certificate bytes"],
+      "status": "proposed"
+    },
+    {
+      "id": "body.train-on-actual-authorized-host-path-receipts",
+      "order": 2,
+      "question": "Can path selection adapt to changing real host latency and availability while preserving Ground and authority?",
+      "synthetic_training_data": "Known-bounded workloads with declared service queue perturbations; measurements are the actual E-CPU mTLS sender/receiver spans, not the injected delay label",
+      "objective": "Minimize verified complete intention latency and source/receipt transfer bytes; refuse unqualified routes",
+      "baseline": ["RCG-004 measured EWMA with exploration", "single authorized host", "fixed round-robin", "oracle best host post hoc"],
+      "promotion_gate": "Native E-CPU TLS peer identity, original source pin, full application receipt, transport and task correctness verified on withheld host states",
+      "metrics": ["p50/p95 end-to-end time", "regret to held-out best eligible route", "wrong-answer count", "refused intent count", "recoverability after process hard kill", "application and wire bytes"],
+      "status": "proposed"
+    },
+    {
+      "id": "mind.body-composed-dependent-latent-neural-operators",
+      "order": 3,
+      "question": "Can distinct observer-hosts realize different certified readouts of a shared neural Ground and compose an exact nonlinear result after a host is replaced?",
+      "synthetic_training_data": "RCG-005 source-anchored synthetic time navigation workloads varying operator dimension, requested latent count, nonlinear depth and log-time",
+      "objective": "Increase useful mathematically distinct demanded functions without repeating full-domain or full-history evaluation",
+      "baseline": ["RCG-004 per-target scalar recurrences", "RCG-005 shared vector certificate local", "direct source iteration on short horizons"],
+      "promotion_gate": "Every readout is returned by an authenticated receiver and independently verified; receipt set binds one model revision and logical coordinate; changed source, request or peer refuses",
+      "metrics": ["shared vs independent jump time", "number of latent coordinates", "verified long-horizon correctness", "host handoff completion", "recomputation count", "source and model bytes"],
+      "status": "local-mathematics-implemented-native-mtls-hosted-gate-pending"
+    },
+    {
+      "id": "body.m1-m3-source-pinned-neural-continuity",
+      "order": 4,
+      "question": "Can a verified source/model certificate and stateful receiver session migrate after a hard kill without duplicated semantic effects?",
+      "synthetic_training_data": "Original source pins, RCG-002 Chronicle high-water, E-CPU M1 object pages, M3 checkpoint lineage, independent process kill cuts and recovered requests",
+      "objective": "Preserve the same model, task coordinate and proof authority while hosts and implementation change",
+      "baseline": ["RCG-004 source-reconstructive replacement (not M3)", "E-CPU M3 native session checkpoint recovery", "RCG-002 local Chronicle independently pinned"],
+      "promotion_gate": "Two independently authenticated receiver lifetimes, quorum-current lineage and explicit no-replay effect evidence; do not substitute a hash for authority",
+      "metrics": ["recovered source/ground digest agreement", "duplicate committed effects", "recovery latency", "source pages transferred", "quorum freshness and refusal behavior"],
+      "status": "proposed"
+    },
+    {
+      "id": "mind.observer-relative-neural-equivalence-at-scale",
+      "order": 5,
+      "question": "Which nonlinear network descriptions are equivalent under an explicitly selected observation contract, and which require more evidence?",
+      "synthetic_training_data": "Families of different but observationally equivalent reversible charts, changed synthetic kernels and delayed counterexamples",
+      "objective": "Learn useful equivalence proposals and compressed capability atlas, with VGI proof/refusal as the authority",
+      "baseline": ["VGI sparse partial refinement", "VGI polynomial lift", "IFS response-equivalence", "RCG-005 whole-vector certificate"],
+      "promotion_gate": "Test adversarial changed Ground and hidden-mode counterexamples; any unproved equivalence stays unresolved",
+      "metrics": ["false certification count", "readout coverage", "source/orbit certificate bytes", "navigation cost", "held-out proof success"],
+      "status": "proposed"
+    }
+  ]
+}

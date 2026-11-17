@@ -1,0 +1,64 @@
+name: RCG-004 verified temporal Ground and E-CPU observer fabric
+
+on:
+  push:
+    paths:
+      - 'experiments/real_connectome_ground/**'
+      - '.github/workflows/rcg004.yml'
+  pull_request:
+    paths:
+      - 'experiments/real_connectome_ground/**'
+      - '.github/workflows/rcg004.yml'
+  workflow_dispatch:
+
+jobs:
+  sparse-temporal-math:
+    name: Prime-field proof / Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    env:
+      PYTHONPATH: experiments/real_connectome_ground
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Require original source-pinned OpenWorm data
+        run: |
+          python -c "from pathlib import Path; from connectome_ground import ConnectomeGround; p=Path('experiments/real_connectome_ground/data/herm_full_edgelist.csv'); g=ConnectomeGround.from_csv(p.read_bytes()); assert len(g.nodes)==448"
+      - name: Exact horizon 2**56+73 and 448-node independent reference
+        run: python -m unittest discover -s experiments/real_connectome_ground/continuity/temporal_fabric -p 'test_temporal_ground.py' -v
+
+  native-mtls-observers:
+    name: E-CPU native BM + authenticated receiver hard loss
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: experiments/real_connectome_ground
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install real E-CPU transport, law certifier, and TCR certificate dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install 'git+https://github.com/Kier73/E-CPU.git@6fd416facdb2aefd6fc7d66a06b014e3d31b5a52'
+      - name: Require original E-CPU native paths
+        run: |
+          python -c 'from mailcpu.law_certifier import berlekamp_massey; from mailcpu.mtls_transport import connect_mutual_tls,accept_mutual_tls; from mailcpu import ReliableChannel; print("existing E-CPU native paths imported")'
+      - name: Certify source Ground and actual separate-interpreter mTLS path
+        run: python -m unittest discover -s experiments/real_connectome_ground/continuity/temporal_fabric -p 'test_*.py' -v
+      - name: Run measured adaptive 3-host observer-path benchmark and retain receipts
+        run: |
+          python -m experiments.real_connectome_ground.continuity.temporal_fabric.run_temporal_fabric --requests 12 --workers 3 --out /tmp/rcg004-transit-results.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rcg004-actual-observer-telemetry
+          path: /tmp/rcg004-transit-results.json
+          if-no-files-found: warn

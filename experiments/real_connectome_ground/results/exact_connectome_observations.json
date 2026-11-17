@@ -1,0 +1,82 @@
+{
+  "schema": "ifs.real-connectome-ground.independent-full-graph-results.v1",
+  "upstream": {
+    "repo": "openworm/c302",
+    "commit": "d542a44bf2662f79e0ad23342a959a181a920877",
+    "path": "c302/data/herm_full_edgelist.csv",
+    "git_blob_sha1": "89ffc2a2d9e1934ddc462d51032acead5e4cfc91"
+  },
+  "model": "unsigned-outgoing-synapse-count-normalized-exact-horizon",
+  "method": "Independent V8 BigInt rational arithmetic across full original source and exact pruned causal cone; no Python/E-CPU native jobs executed as part of this measurement",
+  "values": [
+    {
+      "source": "ASHL",
+      "target": "AVAL",
+      "steps": 3,
+      "kind": "chemical",
+      "layer_nodes": [
+        1,
+        20,
+        49,
+        1
+      ],
+      "distinct_nodes": 58,
+      "selected_stage_edges": 245,
+      "whole_graph_edge_visits": 14043,
+      "exact_fraction": "5239506200558175646322148414923448348605780542037171993587/180736415729568146215238332456142391563020184922010692720000",
+      "whole_graph_equal": true
+    },
+    {
+      "source": "ASER",
+      "target": "AVBL",
+      "steps": 3,
+      "kind": "chemical",
+      "layer_nodes": [
+        1,
+        16,
+        27,
+        1
+      ],
+      "distinct_nodes": 42,
+      "selected_stage_edges": 110,
+      "whole_graph_edge_visits": 14043,
+      "exact_fraction": "607568371436319417200920423499070371089681430589339/30377037315016695776203092981251424713932204825862000",
+      "whole_graph_equal": true
+    },
+    {
+      "source": "AWCL",
+      "target": "AIYL",
+      "steps": 2,
+      "kind": "chemical",
+      "layer_nodes": [
+        1,
+        4,
+        1
+      ],
+      "distinct_nodes": 6,
+      "selected_stage_edges": 8,
+      "whole_graph_edge_visits": 9362,
+      "exact_fraction": "8978077/220655790",
+      "whole_graph_equal": true
+    },
+    {
+      "source": "ASHL",
+      "target": "AVAR",
+      "steps": 3,
+      "kind": "chemical",
+      "layer_nodes": [
+        1,
+        18,
+        44,
+        1
+      ],
+      "distinct_nodes": 55,
+      "selected_stage_edges": 215,
+      "whole_graph_edge_visits": 14043,
+      "exact_fraction": "3009582728198775308508682674019461004396181222077858267409/101129656438911031308875748354797246879113549216347054240000",
+      "whole_graph_equal": true
+    }
+  ],
+  "interpretation": "Mathematical structural transfer only, not neural firing, sign, or behavioral dynamics",
+  "verification_scope": "Source bytes and independent full-edge reference in GitHub tool runtime; native Python3.11/3.13 and E-CPU CI pending"
+}

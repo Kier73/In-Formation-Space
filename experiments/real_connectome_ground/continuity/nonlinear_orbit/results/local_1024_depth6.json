@@ -1,0 +1,28 @@
+{
+  "common_vector_annihilator_verified": true,
+  "depth": 6,
+  "dimension": 1024,
+  "edges": 8172,
+  "field": 1000000007,
+  "nonlinear_readout_algebraic_degree_upper_bound": 64,
+  "observed_tick": 72057594037928009,
+  "output_mod_p": 929745039,
+  "polynomial_multiplications": 60,
+  "python": "3.13.5",
+  "recurrence_degree": 1024,
+  "requested_readout_coordinates": [
+    "V0001",
+    "V0146",
+    "V0292",
+    "V0438",
+    "V0585",
+    "V0731",
+    "V0877"
+  ],
+  "schema": "ifs.rcg005.shared-vector-benchmark.v1",
+  "separate_scalar_comparison_included": false,
+  "shared_navigation_ns": 11486621496,
+  "shared_prepare_ns": 2950598567,
+  "shared_verify_ns": 1174157459,
+  "source": "deterministic-synthetic-graph-not-OpenWorm-biological-simulation"
+}

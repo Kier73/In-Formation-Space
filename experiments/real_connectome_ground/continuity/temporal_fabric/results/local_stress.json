@@ -1,0 +1,17 @@
+{
+  "schema": "ifs.rcg004.local-bounded-stress.v1",
+  "source_kind": "deterministic synthetic 448-vertex graph, NOT OpenWorm",
+  "nodes": 448,
+  "chemical_edges": 3559,
+  "recurrence_degree": 448,
+  "prepared_sequence_length": 896,
+  "field": 1000000007,
+  "far_logical_tick": 72057594037928020,
+  "far_value_mod_p": 665424168,
+  "polynomial_products": 60,
+  "prep_ns": 379592650,
+  "verification_ns": 346285674,
+  "navigation_ns": 2222866991,
+  "runtime": "local Python 3.13; no network, Hypervisor, native E-CPU, external source",
+  "interpretation": "exact GF(p) model only, not rational transfer nor biological dynamics"
+}

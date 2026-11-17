@@ -1,0 +1,47 @@
+name: RCG-001 real source-pinned connectome Ground
+
+on:
+  push:
+    paths:
+      - 'experiments/real_connectome_ground/**'
+      - '.github/workflows/rcg001.yml'
+  pull_request:
+    paths:
+      - 'experiments/real_connectome_ground/**'
+      - '.github/workflows/rcg001.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-source-and-cone:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Exact source identity and independent oracle
+        run: python -m unittest discover -s experiments/real_connectome_ground -p 'test_*.py' -v
+      - name: Run pinned real graph queries
+        run: python experiments/real_connectome_ground/connectome_ground.py
+      - name: Navigate a direct targeted biological-cone query
+        run: python experiments/real_connectome_ground/connectome_ground.py --from-node AWCL --to-node AIYL --steps 2 --top-n 4
+      - name: Measure separate Ground index, navigation, realization and full-oracle costs
+        run: python experiments/real_connectome_ground/benchmark.py --repeats 3
+
+  native-ecpu-dag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned existing E-CPU dependency DAG
+        run: python -m pip install 'git+https://github.com/Kier73/E-CPU.git@6fd416facdb2aefd6fc7d66a06b014e3d31b5a52'
+      - name: Require native import and execute recovery projection
+        run: |
+          python -c 'from mailcpu.computation_dag import ComputationNode, NavigableComputationDAG; print("native DAG available")'
+          python -m unittest discover -s experiments/real_connectome_ground -p 'test_*.py' -v
