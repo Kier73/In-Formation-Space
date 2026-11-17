@@ -1,0 +1,152 @@
+{
+  "crypto": "real Ed25519 signatures using cryptography installed in local interpreter",
+  "larger": {
+    "bundle_size_bytes": 11507128,
+    "recovery": {
+      "cognitive_memberships_reverified_against_signed_hosts": 4529,
+      "external_host_calls": 0,
+      "global_truth_established": false,
+      "learned_states": 25,
+      "native_ecpu_mtls_or_quorum": "not_claimed_in_local_demo",
+      "offline_signatures_reverified": 9193,
+      "phase": "fresh_process_recovered",
+      "predictive_answer": [
+        [
+          "noted"
+        ],
+        [
+          "minutes",
+          26
+        ]
+      ],
+      "private_keys_required": false,
+      "signed_dispute_resolved": true
+    },
+    "sample": {
+      "after_replacement_head": "e33b030b52085f672c7d8d4e18cc9ce7914887ee048832b1af777242ae9f04b5",
+      "before_replacement_head": "ea57cfff83cd3a0d237d958417404db2260787bdb7cdda2477d71347efbeda98",
+      "disputed_path": [
+        "noise",
+        "noise",
+        "mention:topic_0003",
+        "minutes"
+      ],
+      "distinct_durations": 8,
+      "epistemic_status": "provisional_finitely_challenged",
+      "independent_finite_conformance_edges": 3589,
+      "independent_finite_equivalent": true,
+      "learned_states": 25,
+      "membership_calls": 4529,
+      "original_reused_without_host_calls": true,
+      "replacement_boot_changed": true,
+      "resolved_response": [
+        [
+          "no-op"
+        ],
+        [
+          "no-op"
+        ],
+        [
+          "noted"
+        ],
+        [
+          "minutes",
+          26
+        ]
+      ],
+      "signed_host_exchanges": 9193,
+      "signed_receipts": 9193,
+      "source_subjects": 32,
+      "source_unknown_during_host_failure": true,
+      "target_path": [
+        "mention:topic_0003",
+        "minutes"
+      ],
+      "target_reply": [
+        [
+          "noted"
+        ],
+        [
+          "minutes",
+          26
+        ]
+      ]
+    }
+  },
+  "native_ecpu": "locally skipped because mailcpu not installed; hard-required in hosted CI",
+  "python": "3.13",
+  "schema": "COG009/direct-OS-process-signed-witness-audit/v1",
+  "security_scope": "one machine and trust-admin domain; source signatures do not establish truth; no actual mTLS/Hypervisor/quorum",
+  "small": {
+    "recovery": {
+      "cognitive_memberships_reverified_against_signed_hosts": 291,
+      "external_host_calls": 0,
+      "global_truth_established": false,
+      "learned_states": 7,
+      "native_ecpu_mtls_or_quorum": "not_claimed_in_local_demo",
+      "offline_signatures_reverified": 594,
+      "phase": "fresh_process_recovered",
+      "predictive_answer": [
+        [
+          "noted"
+        ],
+        [
+          "minutes",
+          24
+        ]
+      ],
+      "private_keys_required": false,
+      "signed_dispute_resolved": true
+    },
+    "sample": {
+      "after_replacement_head": "6349fe0687f72dfb026aebb1aa09fc9a6840327cc14c8cca4f2b89a3283ad723",
+      "before_replacement_head": "30afc85131d6f7120505082bd0ca2efdee75b1c55145c25a15424f42564455df",
+      "disputed_path": [
+        "noise",
+        "noise",
+        "mention:topic_0003",
+        "minutes"
+      ],
+      "distinct_durations": 2,
+      "epistemic_status": "provisional_finitely_challenged",
+      "independent_finite_conformance_edges": 117,
+      "independent_finite_equivalent": true,
+      "learned_states": 7,
+      "membership_calls": 291,
+      "original_reused_without_host_calls": true,
+      "replacement_boot_changed": true,
+      "resolved_response": [
+        [
+          "no-op"
+        ],
+        [
+          "no-op"
+        ],
+        [
+          "noted"
+        ],
+        [
+          "minutes",
+          24
+        ]
+      ],
+      "signed_host_exchanges": 594,
+      "signed_receipts": 594,
+      "source_subjects": 4,
+      "source_unknown_during_host_failure": true,
+      "target_path": [
+        "mention:topic_0003",
+        "minutes"
+      ],
+      "target_reply": [
+        [
+          "noted"
+        ],
+        [
+          "minutes",
+          24
+        ]
+      ]
+    }
+  }
+}

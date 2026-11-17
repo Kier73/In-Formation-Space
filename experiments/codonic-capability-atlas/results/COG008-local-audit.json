@@ -1,0 +1,179 @@
+{
+  "cases": [
+    {
+      "checkpoints": 814,
+      "counterexamples": [
+        [
+          "mention:topic_0000",
+          "minutes",
+          "repeat"
+        ]
+      ],
+      "distinct_durations": 3,
+      "evidence_head": "29bfd5fec0290dd53b7a00603be7b458419a75b8bf616d749856e8a77df1c536",
+      "final_candidate_states": 10,
+      "heldout_correct": 500,
+      "heldout_count": 500,
+      "identity_required": false,
+      "independent_complete_model_audit": true,
+      "independent_conformance_edges": 629,
+      "independently_minimal": true,
+      "initial_candidate_exact_conformance": false,
+      "initial_candidate_states": 4,
+      "membership_queries": 814,
+      "revision_count": 1,
+      "source_epoch": "6aa25aba7d4077179286d23d52b4ddf566b4fc97bea2cc58d2f60ca5d02cb2b5",
+      "source_free_replay_calls": 0,
+      "source_states": 37,
+      "subjects": 12
+    },
+    {
+      "checkpoints": 4529,
+      "counterexamples": [
+        [
+          "mention:topic_0000",
+          "minutes",
+          "repeat"
+        ]
+      ],
+      "distinct_durations": 8,
+      "evidence_head": "234a5e0472576aabc9ae307c5f61575223744984198a221b5081d26fdf49ec3d",
+      "final_candidate_states": 25,
+      "heldout_correct": 500,
+      "heldout_count": 500,
+      "identity_required": false,
+      "independent_complete_model_audit": true,
+      "independent_conformance_edges": 3589,
+      "independently_minimal": true,
+      "initial_candidate_exact_conformance": false,
+      "initial_candidate_states": 9,
+      "membership_queries": 4529,
+      "revision_count": 1,
+      "source_epoch": "cad7bb53d18b48e0139783decd9e34a1c8b95da534a4543d5fc99fccc500d2ed",
+      "source_free_replay_calls": 0,
+      "source_states": 97,
+      "subjects": 32
+    },
+    {
+      "checkpoints": 8529,
+      "counterexamples": [
+        [
+          "mention:topic_0000",
+          "minutes",
+          "repeat"
+        ]
+      ],
+      "distinct_durations": 8,
+      "evidence_head": "16fc1c60fc9622f8b8fc42689935c6352716f8998ca77feece0306d7944f879e",
+      "final_candidate_states": 25,
+      "heldout_correct": 500,
+      "heldout_count": 500,
+      "identity_required": false,
+      "independent_complete_model_audit": true,
+      "independent_conformance_edges": 13317,
+      "independently_minimal": true,
+      "initial_candidate_exact_conformance": false,
+      "initial_candidate_states": 9,
+      "membership_queries": 8529,
+      "revision_count": 1,
+      "source_epoch": "6af94c908693959410e5dea668405732426ff5d59141f0c1d585352cb6eef819",
+      "source_free_replay_calls": 0,
+      "source_states": 193,
+      "subjects": 64
+    },
+    {
+      "checkpoints": 16529,
+      "counterexamples": [
+        [
+          "mention:topic_0000",
+          "minutes",
+          "repeat"
+        ]
+      ],
+      "distinct_durations": 8,
+      "evidence_head": "7234e70b23f8f3311a157e902e3b7c1495b11144d3a4c3a8dac61a2a7d62f87e",
+      "final_candidate_states": 25,
+      "heldout_correct": 500,
+      "heldout_count": 500,
+      "identity_required": false,
+      "independent_complete_model_audit": true,
+      "independent_conformance_edges": 51205,
+      "independently_minimal": true,
+      "initial_candidate_exact_conformance": false,
+      "initial_candidate_states": 9,
+      "membership_queries": 16529,
+      "revision_count": 1,
+      "source_epoch": "980febfe5d3d4be98d763533f72974664799fc717bee684c9b2b42b26c1a5eab",
+      "source_free_replay_calls": 0,
+      "source_states": 385,
+      "subjects": 128
+    },
+    {
+      "checkpoints": 7258,
+      "counterexamples": [
+        [
+          "mention:topic_0004",
+          "who"
+        ],
+        [
+          "mention:topic_0000",
+          "minutes",
+          "repeat"
+        ]
+      ],
+      "distinct_durations": 4,
+      "evidence_head": "94a42a60aac35fa55f7f39ed147dde941fe984d88414087686227998c2fc4cb8",
+      "final_candidate_states": 49,
+      "heldout_correct": 500,
+      "heldout_count": 500,
+      "identity_required": true,
+      "independent_complete_model_audit": true,
+      "independent_conformance_edges": 1078,
+      "independently_minimal": true,
+      "initial_candidate_exact_conformance": false,
+      "initial_candidate_states": 5,
+      "membership_queries": 7258,
+      "revision_count": 2,
+      "source_epoch": "3f0eb086d1ef418fa716e8be16f7246803cd75fb8d6731b639016b891ab0ef83",
+      "source_free_replay_calls": 0,
+      "source_states": 49,
+      "subjects": 16
+    },
+    {
+      "checkpoints": 25226,
+      "counterexamples": [
+        [
+          "mention:topic_0008",
+          "who"
+        ],
+        [
+          "mention:topic_0000",
+          "minutes",
+          "repeat"
+        ]
+      ],
+      "distinct_durations": 8,
+      "evidence_head": "b0d30d94cceae810e87c4abdd55287e474ac46cc643a1262277afd57e301f95b",
+      "final_candidate_states": 97,
+      "heldout_correct": 500,
+      "heldout_count": 500,
+      "identity_required": true,
+      "independent_complete_model_audit": true,
+      "independent_conformance_edges": 3686,
+      "independently_minimal": true,
+      "initial_candidate_exact_conformance": false,
+      "initial_candidate_states": 9,
+      "membership_queries": 25226,
+      "revision_count": 2,
+      "source_epoch": "108cdf269b9cf64ca8ef402d2b3df4a730cc4f4dec891722e40d016048612949",
+      "source_free_replay_calls": 0,
+      "source_states": 97,
+      "subjects": 32
+    }
+  ],
+  "experiment": "unknown-preserving membership learning; complete model for audit only",
+  "native_ecpu_execution": "not performed",
+  "observation_authentication": "no; hash chain with externally provided pins only",
+  "schema": "COG008/partial-observer-synthetic-audit/1",
+  "source_pybot": "separate source-pinned hosted observation experiment"
+}

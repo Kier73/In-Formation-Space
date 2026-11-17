@@ -1,0 +1,191 @@
+{
+  "external_ECPU_patch": "393462c6e0dafba8e0ee22946ae44227c5c6e4e6",
+  "full_regression": {
+    "failed": 0,
+    "log": "COG010-local-regression.log",
+    "passed": 54,
+    "skipped": 5,
+    "tests": 59
+  },
+  "local_runtime": "Python 3.13 standard library + cryptography; no installed mailcpu",
+  "native_ECPU_IOS001": "not available locally; CI required",
+  "scenarios": [
+    {
+      "bundle_sha256": "8dc1928b70cd0c06ad2967c9f18ab49f4c5fdde4de34438cc1c7ed84537c0d55",
+      "dispute_signer_responses": 2,
+      "distinct_durations": 2,
+      "external_cog009_trust_roster": "19099356eec34954df3b05bf7ad88f81b3aec804033330eb17c29789c1e7c867",
+      "ground_fingerprint": "429963389f39cd52f2de0e826ff6eecdc03384a4912240eb791ca80a7d9b5e58",
+      "historical_signed_receipts": 594,
+      "historical_unique_cognitive_observations": 291,
+      "learned_states": 7,
+      "measure": {
+        "additional_host_exchanges": 1,
+        "finite_scope": true,
+        "intention": "seconds",
+        "machine_digest": "429963389f39cd52f2de0e826ff6eecdc03384a4912240eb791ca80a7d9b5e58",
+        "measurement_receipts": [
+          {
+            "additional_host_exchanges": 1,
+            "digest": "4ef85d2505ec6e8b7168d10aea5b04be34fb32ce34176d35856291cac921d373",
+            "fabric_head": "2b63091a4d8b8c93e12d3977210cf6a7332ffbfe9b20e666c90934e245f3e315",
+            "feature": "minutes",
+            "machine": "429963389f39cd52f2de0e826ff6eecdc03384a4912240eb791ca80a7d9b5e58",
+            "output": [
+              "minutes",
+              24
+            ],
+            "path_digest": "e33f152bda13805baad286a425b632860fa37d278e6ccc34d8adb9e944bfde7c",
+            "schema": "ifs.cog010.intention-transit.v1.signed-provisional",
+            "source_root": "19099356eec34954df3b05bf7ad88f81b3aec804033330eb17c29789c1e7c867"
+          }
+        ],
+        "plan_digest": "ef1365fdcad20e92329eb2187c0fe336784cb3f75e7c75d4677e381e3c9aae3d",
+        "resolution_digest": "3caa91ef59e4d74acef2eaca1577dc1c7b59b8adbc7204538bbbff65f86d2e38",
+        "result": [
+          "seconds",
+          1440
+        ],
+        "schema": "ifs.cog010.intention-transit.v1.result",
+        "selected": [
+          "minutes"
+        ],
+        "status": "RESOLVED_AFTER_MEASUREMENT"
+      },
+      "missing_quorum_status": "unknown",
+      "native_ECPU_mtls": "not part of local stdio witness path",
+      "new_signed_receipts": 9,
+      "orbit": {
+        "coordinate": "1000000000000000000000000000011",
+        "digest": "108499b64b4740e743fd8f6b52428d0b28534862106bb4a58f4310a741fc5010",
+        "materialized_states": 10,
+        "mu": 0,
+        "period": 10,
+        "program_length": 10,
+        "result": [
+          1,
+          1
+        ]
+      },
+      "provisional_trace_head": "2b63091a4d8b8c93e12d3977210cf6a7332ffbfe9b20e666c90934e245f3e315",
+      "ready": {
+        "additional_host_exchanges": 0,
+        "finite_scope": true,
+        "intention": "has_anchor",
+        "machine_digest": "429963389f39cd52f2de0e826ff6eecdc03384a4912240eb791ca80a7d9b5e58",
+        "measurement_receipts": [],
+        "plan_digest": "87dbffbc417a5698cfb2cdc3a4fa9eeb48d45cb5243459d8343ebf2878575cd2",
+        "resolution_digest": "05c939a76c631c021c328e916f70c96dd36ed08549f3580c0c51552aa767d1da",
+        "result": true,
+        "schema": "ifs.cog010.intention-transit.v1.result",
+        "selected": [],
+        "status": "RESOLVED_WITHOUT_MEASUREMENT"
+      },
+      "refuse": {
+        "additional_host_exchanges": 0,
+        "finite_scope": true,
+        "intention": "repeat",
+        "machine_digest": "429963389f39cd52f2de0e826ff6eecdc03384a4912240eb791ca80a7d9b5e58",
+        "measurement_receipts": [],
+        "plan_digest": "76910cf83cefe0ba811a6396084efd2000ecfc2a859fb24249a9bb7b92bc3184",
+        "result": null,
+        "schema": "ifs.cog010.intention-transit.v1.result",
+        "selected": [],
+        "status": "REFUSE"
+      },
+      "rehome_additional_signer_responses": 1,
+      "repeat_new_host_exchanges": 0,
+      "scenario": "4-subjects",
+      "subjects": 4
+    },
+    {
+      "bundle_sha256": "82f1066aa43c7e146826d755ada7d60ceb571b359bc70659a8fc64c609afea69",
+      "dispute_signer_responses": 2,
+      "distinct_durations": 8,
+      "external_cog009_trust_roster": "4add9c971909555b54b7acc2e7a0b07670f19312e91d34e58d670b97e272dfed",
+      "ground_fingerprint": "de190b58c4cd2d859174ac35368719532a6114366dd9df4e938cdfc6ddb22e63",
+      "historical_signed_receipts": 9193,
+      "historical_unique_cognitive_observations": 4529,
+      "learned_states": 25,
+      "measure": {
+        "additional_host_exchanges": 1,
+        "finite_scope": true,
+        "intention": "seconds",
+        "machine_digest": "de190b58c4cd2d859174ac35368719532a6114366dd9df4e938cdfc6ddb22e63",
+        "measurement_receipts": [
+          {
+            "additional_host_exchanges": 1,
+            "digest": "b6eb63375520b83f228b67eff32ed263619d2436779831aca7c854f5acc1a681",
+            "fabric_head": "c9ee75fa9886e663bb2926eb2eecb2fa182f4e70c91fc18fe1e8f12f88fc50f5",
+            "feature": "minutes",
+            "machine": "de190b58c4cd2d859174ac35368719532a6114366dd9df4e938cdfc6ddb22e63",
+            "output": [
+              "minutes",
+              26
+            ],
+            "path_digest": "e33f152bda13805baad286a425b632860fa37d278e6ccc34d8adb9e944bfde7c",
+            "schema": "ifs.cog010.intention-transit.v1.signed-provisional",
+            "source_root": "4add9c971909555b54b7acc2e7a0b07670f19312e91d34e58d670b97e272dfed"
+          }
+        ],
+        "plan_digest": "f71112013b78da6d759dbb2936cbe7b81ad0c11849b9755721a21fab7b486bfe",
+        "resolution_digest": "5fca23b20929cdbcb1eef7fbf7b41fd0f29082e51dded236d6a15ca5688052bd",
+        "result": [
+          "seconds",
+          1560
+        ],
+        "schema": "ifs.cog010.intention-transit.v1.result",
+        "selected": [
+          "minutes"
+        ],
+        "status": "RESOLVED_AFTER_MEASUREMENT"
+      },
+      "missing_quorum_status": "unknown",
+      "native_ECPU_mtls": "not part of local stdio witness path",
+      "new_signed_receipts": 9,
+      "orbit": {
+        "coordinate": "1000000000000000000000000000011",
+        "digest": "cd9a0dbf79d60f18551f867c09e6d09f1f6b650af69dd018f98ac19f44c47652",
+        "materialized_states": 10,
+        "mu": 0,
+        "period": 10,
+        "program_length": 10,
+        "result": [
+          1,
+          1
+        ]
+      },
+      "provisional_trace_head": "c9ee75fa9886e663bb2926eb2eecb2fa182f4e70c91fc18fe1e8f12f88fc50f5",
+      "ready": {
+        "additional_host_exchanges": 0,
+        "finite_scope": true,
+        "intention": "has_anchor",
+        "machine_digest": "de190b58c4cd2d859174ac35368719532a6114366dd9df4e938cdfc6ddb22e63",
+        "measurement_receipts": [],
+        "plan_digest": "ac41ceec1dfc585acbb851e941c6e06f6861a59429a3ba2d4dc29034be87b701",
+        "resolution_digest": "f2b9d29081538e603cc01408681dd0954752e99cfbbb3604a7cb9c4e0f15a4b0",
+        "result": true,
+        "schema": "ifs.cog010.intention-transit.v1.result",
+        "selected": [],
+        "status": "RESOLVED_WITHOUT_MEASUREMENT"
+      },
+      "refuse": {
+        "additional_host_exchanges": 0,
+        "finite_scope": true,
+        "intention": "repeat",
+        "machine_digest": "de190b58c4cd2d859174ac35368719532a6114366dd9df4e938cdfc6ddb22e63",
+        "measurement_receipts": [],
+        "plan_digest": "7db47d82831185a26f85c81a20f62f635eca3de5b15f7a99df888b3b5d54a937",
+        "result": null,
+        "schema": "ifs.cog010.intention-transit.v1.result",
+        "selected": [],
+        "status": "REFUSE"
+      },
+      "rehome_additional_signer_responses": 1,
+      "repeat_new_host_exchanges": 0,
+      "scenario": "32-subjects",
+      "subjects": 32
+    }
+  ],
+  "schema": "ifs.cog010.local-direct-audit.v1"
+}

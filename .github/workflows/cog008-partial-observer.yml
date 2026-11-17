@@ -1,0 +1,134 @@
+name: COG-008 Partial-observation cognitive Grounds
+on:
+  pull_request:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog008-partial-observer.yml'
+  push:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog008-partial-observer.yml'
+  workflow_dispatch:
+
+jobs:
+  synthetic-observer-learning:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Source-independent acquisition tests, refutations and replay
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_partial_observation.py' -v
+      - name: Check inherited exact predictive-ground behavior
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_predictive_state.py' -v
+      - name: Source-hidden partial acquisition; independent finite audit later
+        run: |
+          python experiments/codonic-capability-atlas/run_partial_observation.py audit > cog008-audit.json
+          python - <<'PY'
+          import json
+          report=json.load(open('cog008-audit.json'))
+          for c in report['cases']:
+              assert c['independent_complete_model_audit']
+              assert c['independently_minimal']
+              assert c['heldout_correct']==c['heldout_count']==500
+              assert c['source_free_replay_calls']==0
+          print('COG-008: independent finite fixture audit passed')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog008-synthetic-${{ matrix.python-version }}
+          path: cog008-audit.json
+          if-no-files-found: error
+
+  source-observer-prepares:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Acquire observable cognitive Ground and retain high-water
+        run: python experiments/codonic-capability-atlas/run_partial_observation.py prepare --path partial-ground.json | tee external-pins.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog008-provisional-ground
+          path: partial-ground.json
+          if-no-files-found: error
+      - name: Export pins from job result, not the saved Ground
+        id: proof
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          p=json.load(open('external-pins.json'))
+          print('checkpoint='+p['checkpoint_digest'])
+          print('head='+p['ledger_head'])
+          print('source='+p['source_root'])
+          PY
+    outputs:
+      checkpoint: ${{ steps.proof.outputs.checkpoint }}
+      head: ${{ steps.proof.outputs.head }}
+      source: ${{ steps.proof.outputs.source }}
+
+  fresh-observer-reconstructs:
+    needs: source-observer-prepares
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/download-artifact@v4
+        with: {name: cog008-provisional-ground}
+      - name: Recover from exact source-independent pins; never re-execute source
+        env:
+          CHECKPOINT: ${{ needs.source-observer-prepares.outputs.checkpoint }}
+          LEDGER_HEAD: ${{ needs.source-observer-prepares.outputs.head }}
+          SOURCE_ROOT: ${{ needs.source-observer-prepares.outputs.source }}
+        run: |
+          python - <<'PY'
+          import json,os,subprocess,sys
+          pins={'checkpoint_digest':os.environ['CHECKPOINT'],
+                'ledger_head':os.environ['LEDGER_HEAD'],
+                'source_root':os.environ['SOURCE_ROOT']}
+          subprocess.run([sys.executable,'experiments/codonic-capability-atlas/run_partial_observation.py',
+                          'resume','--path','partial-ground.json','--pins',json.dumps(pins)],check=True)
+          PY
+
+  real-pybot-membership:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: huggingface/pybot
+          ref: 7d63c7fbebb44c7e466e5c8b5c1f341ab767929e
+          path: external/pybot
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Query real pinned PyBot turn runtime and preserve original outputs
+        run: python experiments/codonic-capability-atlas/pybot_membership.py --pybot-root external/pybot --out pybot-membership.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cog008-real-pybot-membership
+          path: pybot-membership.json
+          if-no-files-found: error
+
+  independent-real-pybot-observer:
+    needs: real-pybot-membership
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: huggingface/pybot
+          ref: 7d63c7fbebb44c7e466e5c8b5c1f341ab767929e
+          path: external/pybot
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - uses: actions/download-artifact@v4
+        with: {name: cog008-real-pybot-membership}
+      - name: Independently reacquire and compare the exact source-ground observations
+        run: python experiments/codonic-capability-atlas/pybot_membership.py --pybot-root external/pybot --expected pybot-membership.json --out independently-replayed-pybot.json
