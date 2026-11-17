@@ -1,0 +1,46 @@
+name: COG-002 codonic adaptive capability atlas
+on:
+  push:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog002-capability-atlas.yml'
+  pull_request:
+    paths:
+      - 'experiments/codonic-capability-atlas/**'
+      - '.github/workflows/cog002-capability-atlas.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-reference:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Full exact mathematical source/persistence/test suite
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_*.py' -v
+      - name: Deterministic held-out acquisition ablation
+        run: python experiments/codonic-capability-atlas/run_experiment.py
+
+  native-vgi:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install exact pinned VGI implementation
+        run: python -m pip install 'git+https://github.com/Kier73/Virtual-Ground-Interpreter.git@e6e1900782aeede18a4de9046511bbba234dbc6e#subdirectory=virtual_ground_interpreter'
+      - name: Require native VGI imports
+        run: python -c 'from vgi.typed_operator_navigation import OperatorChain,homogeneous_affine_map,fulfill; from vgi.affine import ModularAffineMap; print("VGI available")'
+      - name: Reuse actual typed VGI operator navigation for the atlas
+        run: python -m unittest discover -s experiments/codonic-capability-atlas -p 'test_*.py' -v

@@ -1,0 +1,27 @@
+{
+  "schema": "COG004/reproducible-local-audit/1",
+  "hypothesis_families": [
+    "affine",
+    "quadratic-shear-before-affine"
+  ],
+  "observation_budget_per_family": 6,
+  "independent_source_trial_count": 100,
+  "active_two_family_identification_success": 100,
+  "random_two_family_identification_success": 19,
+  "heldout_source_checks": 10000,
+  "heldout_source_correct": 10000,
+  "mixed_family_contextual_acquisitions": 12,
+  "mixed_family_contextual_heldout": 500,
+  "mixed_family_contextual_correct": 500,
+  "selected_context_policy": {
+    "feature": "parity-sum",
+    "one": "learned_beta",
+    "zero": "learned_alpha"
+  },
+  "source_ground_root": "780fa9acf5ef95792a4eed4229a90738bee25b23ed2ed4d9cdee5a303c7a130a",
+  "source_ground_fingerprint": "42bb12ae1581e64b9e2087b26caae6d92309ef74712a869e7b0306107bf92c07",
+  "policy_evidence_root": "4874f6e96e1b3ea01849dec7209471161981b8b393f038f7ba178ddfbba902d8",
+  "policy_evidence_fingerprint": "00cf3daac92b71f8dfd3684803f3cb864a0fbbc2c13de63836c71cff80b837ee",
+  "claims": "candidate family identification only within declared model class; no remote source authentication",
+  "nonlinear_semantics": "explicit quadratic shear arithmetic separate from real VGI native affine subplan"
+}
