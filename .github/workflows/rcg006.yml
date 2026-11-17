@@ -1,0 +1,58 @@
+name: RCG-006 source-bound learned observer quotient
+
+on:
+  push:
+    paths:
+      - 'experiments/real_connectome_ground/continuity/observer_quotient/**'
+      - '.github/workflows/rcg006.yml'
+  pull_request:
+    paths:
+      - 'experiments/real_connectome_ground/continuity/observer_quotient/**'
+      - '.github/workflows/rcg006.yml'
+  workflow_dispatch:
+
+jobs:
+  independent-proof:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Source identity and source-independent proof tests
+        run: |
+          export PYTHONPATH="$PWD/experiments/real_connectome_ground:$PWD/experiments/real_connectome_ground/continuity/temporal_fabric:$PWD/experiments/real_connectome_ground/continuity/nonlinear_orbit:$PWD/experiments/real_connectome_ground/continuity/observer_quotient"
+          test -s experiments/real_connectome_ground/data/herm_full_edgelist.csv
+          test "$(git hash-object experiments/real_connectome_ground/data/herm_full_edgelist.csv)" = '89ffc2a2d9e1934ddc462d51032acead5e4cfc91'
+          python -m unittest discover -s experiments/real_connectome_ground/continuity/observer_quotient -p 'test_*.py' -v
+      - name: Recheck full original source derived 8K-state observer Ground
+        run: |
+          export PYTHONPATH="$PWD/experiments/real_connectome_ground:$PWD/experiments/real_connectome_ground/continuity/temporal_fabric:$PWD/experiments/real_connectome_ground/continuity/nonlinear_orbit:$PWD/experiments/real_connectome_ground/continuity/observer_quotient"
+          python experiments/real_connectome_ground/continuity/observer_quotient/benchmark.py --source experiments/real_connectome_ground/data/herm_full_edgelist.csv --groups 16 --copies 512 --query-count 5
+
+  scale-and-fresh-process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Compile, audit and navigate 131072 microstates without eager graph storage
+        run: |
+          export PYTHONPATH="$PWD/experiments/real_connectome_ground:$PWD/experiments/real_connectome_ground/continuity/temporal_fabric:$PWD/experiments/real_connectome_ground/continuity/nonlinear_orbit:$PWD/experiments/real_connectome_ground/continuity/observer_quotient"
+          python experiments/real_connectome_ground/continuity/observer_quotient/benchmark.py --source experiments/real_connectome_ground/data/herm_full_edgelist.csv --groups 16 --copies 8192 --query-count 8 --output /tmp/rcg006-scale.json
+          python -c 'import json; r=json.load(open("/tmp/rcg006-scale.json")); assert r["observed_classes"] == 16 and r["synthetic_directed_edge_records_defined"] == 1048576 and r["source_is_original_openworm_release"]'
+      - name: Receiver-owned separate process source pinned capsule roundtrip
+        run: |
+          export PYTHONPATH="$PWD/experiments/real_connectome_ground:$PWD/experiments/real_connectome_ground/continuity/temporal_fabric:$PWD/experiments/real_connectome_ground/continuity/nonlinear_orbit:$PWD/experiments/real_connectome_ground/continuity/observer_quotient"
+          SRC=experiments/real_connectome_ground/data/herm_full_edgelist.csv
+          PIN="$(sha256sum "$SRC" | cut -d' ' -f1)"
+          MOD=experiments/real_connectome_ground/continuity/observer_quotient/capsule.py
+          python "$MOD" train --source "$SRC" --expected-source-sha256 "$PIN" --groups 16 --copies 128 --out /tmp/rcg006-cert.json
+          python "$MOD" verify --source "$SRC" --expected-source-sha256 "$PIN" --certificate /tmp/rcg006-cert.json --out /tmp/rcg006-check.json
+          python "$MOD" query --source "$SRC" --expected-source-sha256 "$PIN" --certificate /tmp/rcg006-cert.json --micro-source 19 --tick 72057594037928009 --out /tmp/rcg006-observation.json
+          python "$MOD" replay --source "$SRC" --expected-source-sha256 "$PIN" --certificate /tmp/rcg006-cert.json --receipt /tmp/rcg006-observation.json --out /tmp/rcg006-verdict.json

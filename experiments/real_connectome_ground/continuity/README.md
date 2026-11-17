@@ -1,3 +1,5 @@
+> **2026-11-16 RCG-004 update:** Here, *body* means the E-CPU observer-host and communication-path computational fabric—not animal biology or sensorimotor behavior. The historical RCG-002 language below is retained as provenance; [RCG-003's correction](RCG-003-CORRECTION.md), [training tracks v3](training_tracks_v3.json), and the [certified temporal transit experiment](temporal_fabric/README.md) supersede it for current work. Original Chronicle entries remain unchanged.
+
 > **2026-11-16 semantic correction (RCG-003):** In the E-CPU objective, the **body is observer-hosts and computation-bearing communication paths**, not biological sensing, actuation or sensorimotor behavior. The **mind is procedural/synthetic computational Grounds and adaptive verified inference**. The OpenWorm connectome is a structural dataset for synthetic tasks, not a biological embodiment target. Read [RCG-003 correction](RCG-003-CORRECTION.md), [adaptive fabric](adaptive_fabric/README.md) and [training curriculum v2](training_tracks_v2.json). This v1 document remains for historical evidence, not a current development directive.
 
 # RCG-002 — Persistent connectome Ground and embodied virtual intelligence
@@ -80,3 +82,19 @@ A **training intention** is not a **trained model**. A fitted graph whose only l
 \`test_continuity.py\` covers reopening a store, independent whole-graph reconstruction, object tampering, missing objects, torn tails, concurrent writer refusal, stale trusted heads, source changes and source-inconsistent but freshly hashed observations. \`test_curriculum.py\` refuses false curriculum promotion. Full-original-source tests run in GitHub CI; local fixture tests alone are insufficient.
 
 A successful local test is not an E-CPU host-authenticated event or a peer-replicated recovery certificate. For cross-observer durable state use the actual existing E-CPU recovery services rather than interpreting this simple local Chronicle as a substitute.
+
+
+## RCG-005 — nonlinearly conjugated observer-host computation (2026-11-16)
+
+[RCG-005 nonlinear_orbit](nonlinear_orbit/README.md) extends the corrected **body = E-CPU observer-hosts/communication paths; mind = procedural synthetic neural Grounds** architecture. The real source-pinned connectome supplies a heterogeneous topology, not animal dynamics. An exact full-vector Krylov annihilator makes multiple nonlinear readouts share one distant-time polynomial navigation, and [training curriculum v4](training_tracks_v4.json) records measured-transport and evidence-gated development directions. The executable local Ground, independent receiver-checkable capsule, scaling experiments and a native E-CPU mTLS four-host hard-kill/rehome gate are in the new subfolder. It introduces **no** parallel transport, Hypervisor, quorum, scheduler or durable Chronicle; mTLS and full original-source hosted checks remain pending exact-head CI.
+
+
+## RCG-006: independently verified observer-relative quotient learning
+
+[Observer quotient implementation](observer_quotient/README.md) discovers computationally relevant equivalence classes from **synthetic temporal response observations**. A receiver checks the exact all-state intertwining relation `P M = Q P` across the entire source-derived generated sparse operator before admitting any quotient. A separate direct-original-source adapter does *not* promise a small quotient. The verified 131,072-state / 1,048,576-edge local synthetic stress generated a 16-state predictive Ground with explicitly charged discovery and proof cost; see [measured local report](observer_quotient/results/local_stress_131072.json). This builds on RCG-005's procedural nonlinear chart and RCG-004's finite-field semantics, rather than replacing E-CPU's Transit, Hypervisor or M1/M3.
+
+The **body** remains E-CPU observer-hosts and computation-bearing communication paths; no biological sensorimotor objective or native TLS execution is claimed by RCG-006. Its [training directions v5](training_tracks_v5.json) retain qualified host routing and recovery as next integration gates. Earlier versioned training records remain unchanged.
+
+## RCG-007 — Universal learned-observer capability atlas
+
+[RCG-007](observer_quotient/fabric_atlas/README.md) extends RCG-006's exact observer quotient to batches of arbitrary source-state mixtures and typed nonlinear readouts at distant logical times. A separately verified full-matrix annihilator allows one shared polynomial navigation across the batch. It also adds the native E-CPU M1 content-addressed object and mTLS/ReliableChannel receiver integration, with a hard-kill and externally pinned *local* M1 snapshot rehome test. This is not an M3 quorum guarantee; native integration is gated by workflow verification. The computational body remains qualified observer-host communication paths, not organism simulation.
