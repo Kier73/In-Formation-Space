@@ -106,3 +106,7 @@ an authenticated E-CPU observer, and its pins do not confer independent
 authority. Next: acquire language-to-intention structures from actual
 observations, compare to pinned PyBot behavior, and realize selected programs
 through E-CPU's existing Hypervisor/mTLS/M3 infrastructure.
+
+## COG-007 — predictive semantic memory from counterexamples
+
+[COG-007](COG-007.md) learns the coarsest **future-behavior-preserving** finite cognitive state from black-box COG-006 turn observations, with actively acquired distinguishing continuations, independent exhaustive finite conformance, an external-pin checked structural handoff, and source-pinned real PyBot observation probes in hosted CI. For 512 synthetic source subjects with eight task-distinct durations, 1,537 explicit source states reduce to **25** exact predictive states under the duration-answer contract; adding `who` restores subject identity distinctions. This is not natural-language/PyBot equivalence, global intelligence, or E-CPU host authentication. Reproduction: `python experiments/codonic-capability-atlas/run_predictive_state.py audit`; tests: `test_predictive_state.py`.
