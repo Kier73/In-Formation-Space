@@ -1,0 +1,34 @@
+{
+  "schema": "COG-003-exact-discovery-audit/1",
+  "trials": 100,
+  "contexts_per_trial": 2,
+  "observation_budget_per_context": 4,
+  "active_exact_reconstructions": 100,
+  "random_exact_reconstructions": 4,
+  "all_active_holdouts_correct": true,
+  "heldout_per_active_trial": 100,
+  "newly_discovered_affine_maps_per_trial": 2,
+  "second_stage_existing_COG002_policy": {
+    "feature": "parity-sum",
+    "one": "learned_right",
+    "zero": "learned_left"
+  },
+  "second_stage_training_observations": 12,
+  "second_stage_heldout_probes": 300,
+  "second_stage_correct": 300,
+  "evidence_case_zero": {
+    "atlas_head": "d4a1f4af661be86ea478b8574a867015a3b8cb73e0dc879c2c5d34cf742be6b5",
+    "seed": 0,
+    "selected_new_capabilities": [
+      {
+        "address": 105303091452800,
+        "context": "left"
+      },
+      {
+        "address": 279987297951514,
+        "context": "right"
+      }
+    ]
+  },
+  "qualification": "synthetic targets within admitted affine family; no global law proof, external source authentication, or new primitive invention"
+}
