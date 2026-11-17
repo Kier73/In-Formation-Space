@@ -1,0 +1,493 @@
+{
+  "experiment": "IWI-003",
+  "semantics": "static independent unknown transition/observation entries",
+  "results": {
+    "remembered": {
+      "model": {
+        "n": 7,
+        "start": [
+          1
+        ],
+        "goal": [
+          0
+        ],
+        "output": [
+          3,
+          0,
+          0,
+          0,
+          1,
+          2,
+          0
+        ],
+        "next": [
+          [
+            0,
+            [
+              2,
+              3
+            ],
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          [
+            0,
+            6,
+            4,
+            5,
+            6,
+            6,
+            6
+          ],
+          [
+            0,
+            6,
+            6,
+            6,
+            1,
+            1,
+            6
+          ],
+          [
+            0,
+            6,
+            0,
+            6,
+            6,
+            6,
+            6
+          ],
+          [
+            0,
+            6,
+            6,
+            0,
+            6,
+            6,
+            6
+          ]
+        ]
+      },
+      "report": {
+        "status": "certain-within-horizon",
+        "horizon": 5,
+        "minimumWorstCase": 5,
+        "plan": {
+          "action": 0,
+          "children": [
+            {
+              "output": 0,
+              "plan": {
+                "action": 1,
+                "children": [
+                  {
+                    "output": 1,
+                    "plan": {
+                      "action": 2,
+                      "children": [
+                        {
+                          "output": 0,
+                          "plan": {
+                            "action": 0,
+                            "children": [
+                              {
+                                "output": 0,
+                                "plan": {
+                                  "action": 3,
+                                  "children": [
+                                    {
+                                      "output": 3,
+                                      "plan": {
+                                        "stop": true
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "output": 2,
+                    "plan": {
+                      "action": 2,
+                      "children": [
+                        {
+                          "output": 0,
+                          "plan": {
+                            "action": 0,
+                            "children": [
+                              {
+                                "output": 0,
+                                "plan": {
+                                  "action": 4,
+                                  "children": [
+                                    {
+                                      "output": 3,
+                                      "plan": {
+                                        "stop": true
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "stats": {
+          "uniqueDepthBeliefs": 40,
+          "branchCalls": 120,
+          "generatedBeliefWorlds": 157,
+          "peakBeliefWorlds": 2
+        },
+        "initialPossibleStates": 1,
+        "possibleCompleteLaws": "2",
+        "unknownCells": 1,
+        "fullCompletionsEnumerated": 0
+      },
+      "verification": {
+        "verified": true,
+        "scope": "certain-within-horizon",
+        "independentBeliefDepthChecks": 116
+      },
+      "freshEffects": {
+        "rootRank": -1,
+        "winningBeliefCount": 5
+      }
+    },
+    "erased_diagnostic": {
+      "model": {
+        "n": 7,
+        "start": [
+          1
+        ],
+        "goal": [
+          0
+        ],
+        "output": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "next": [
+          [
+            0,
+            [
+              2,
+              3
+            ],
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          [
+            0,
+            6,
+            4,
+            5,
+            6,
+            6,
+            6
+          ],
+          [
+            0,
+            6,
+            6,
+            6,
+            1,
+            1,
+            6
+          ],
+          [
+            0,
+            6,
+            0,
+            6,
+            6,
+            6,
+            6
+          ],
+          [
+            0,
+            6,
+            6,
+            0,
+            6,
+            6,
+            6
+          ]
+        ]
+      },
+      "report": {
+        "status": "no-certain-policy-through-horizon",
+        "horizon": 5,
+        "minimumWorstCase": null,
+        "plan": null,
+        "stats": {
+          "uniqueDepthBeliefs": 35,
+          "branchCalls": 135,
+          "generatedBeliefWorlds": 200,
+          "peakBeliefWorlds": 2
+        },
+        "initialPossibleStates": 1,
+        "possibleCompleteLaws": "2",
+        "unknownCells": 1,
+        "fullCompletionsEnumerated": 0
+      },
+      "verification": {
+        "verified": true,
+        "scope": "no-certain-policy-through-horizon",
+        "independentBeliefDepthChecks": 301
+      },
+      "freshEffects": {
+        "rootRank": -1,
+        "winningBeliefCount": 5
+      }
+    },
+    "unvisited_24_unknown_cells": {
+      "model": {
+        "n": 26,
+        "start": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ],
+        "goal": [
+          0
+        ],
+        "output": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "next": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              6,
+              7
+            ],
+            [
+              7,
+              8
+            ],
+            [
+              8,
+              9
+            ],
+            [
+              9,
+              10
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11,
+              12
+            ],
+            [
+              12,
+              13
+            ],
+            [
+              13,
+              14
+            ],
+            [
+              14,
+              15
+            ],
+            [
+              15,
+              16
+            ],
+            [
+              16,
+              17
+            ],
+            [
+              17,
+              18
+            ],
+            [
+              18,
+              19
+            ],
+            [
+              19,
+              20
+            ],
+            [
+              20,
+              21
+            ],
+            [
+              21,
+              22
+            ],
+            [
+              22,
+              23
+            ],
+            [
+              23,
+              24
+            ],
+            [
+              24,
+              25
+            ],
+            25
+          ]
+        ]
+      },
+      "report": {
+        "status": "certain-within-horizon",
+        "horizon": 1,
+        "minimumWorstCase": 1,
+        "plan": {
+          "action": 0,
+          "children": [
+            {
+              "output": 0,
+              "plan": {
+                "stop": true
+              }
+            }
+          ]
+        },
+        "stats": {
+          "uniqueDepthBeliefs": 3,
+          "branchCalls": 1,
+          "generatedBeliefWorlds": 1,
+          "peakBeliefWorlds": 25
+        },
+        "initialPossibleStates": 25,
+        "possibleCompleteLaws": "16777216",
+        "unknownCells": 24,
+        "fullCompletionsEnumerated": 0
+      },
+      "verification": {
+        "verified": true,
+        "scope": "certain-within-horizon",
+        "independentBeliefDepthChecks": 0
+      },
+      "freshEffects": null
+    }
+  }
+}

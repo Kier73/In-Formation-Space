@@ -1,0 +1,1029 @@
+{
+  "experiment": "IWI-004",
+  "note": "offline perfect law-cell queries are hypothetical authorization-specific capabilities",
+  "cases": {
+    "needed": {
+      "report": {
+        "schema": "IWI-004/acquisition-v1",
+        "baseModel": {
+          "n": 7,
+          "start": [
+            1
+          ],
+          "goal": [
+            0
+          ],
+          "output": [
+            [
+              3
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ]
+          ],
+          "next": [
+            [
+              [
+                0
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ]
+          ],
+          "possibleLaws": "2",
+          "unknownCells": 1
+        },
+        "catalogue": [
+          {
+            "key": "t:0:1",
+            "cost": 2,
+            "scope": "offline-static-law-cell"
+          }
+        ],
+        "entitlement": "perfect offline nonintervening exact static-cell oracle (not sample observation)",
+        "executionHorizon": 3,
+        "maxQueries": 1,
+        "status": "REQUEST_LAW_EVIDENCE",
+        "tree": {
+          "kind": "query",
+          "key": "t:0:1",
+          "cost": 2,
+          "children": [
+            {
+              "value": 2,
+              "plan": {
+                "kind": "ready",
+                "actions": 2,
+                "policy": {
+                  "action": 0,
+                  "children": [
+                    {
+                      "output": 0,
+                      "plan": {
+                        "action": 3,
+                        "children": [
+                          {
+                            "output": 3,
+                            "plan": {
+                              "stop": true
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "value": 3,
+              "plan": {
+                "kind": "ready",
+                "actions": 2,
+                "policy": {
+                  "action": 0,
+                  "children": [
+                    {
+                      "output": 0,
+                      "plan": {
+                        "action": 4,
+                        "children": [
+                          {
+                            "output": 3,
+                            "plan": {
+                              "stop": true
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "minimumWorstEvidenceCost": 2,
+        "maximumQueries": 1,
+        "worstExecutionActions": 2,
+        "possibleCompleteLaws": "2",
+        "stats": {
+          "acquisitionStates": 3,
+          "executionChecks": 3
+        }
+      },
+      "verification": {
+        "verified": true,
+        "exactMinimumWorstCost": 2,
+        "independentQueryStates": 3,
+        "verifiedExecutionLeaves": 2
+      }
+    },
+    "prohibited": {
+      "report": {
+        "schema": "IWI-004/acquisition-v1",
+        "baseModel": {
+          "n": 7,
+          "start": [
+            1
+          ],
+          "goal": [
+            0
+          ],
+          "output": [
+            [
+              3
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ]
+          ],
+          "next": [
+            [
+              [
+                0
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ]
+          ],
+          "possibleLaws": "2",
+          "unknownCells": 1
+        },
+        "catalogue": [],
+        "entitlement": "perfect offline nonintervening exact static-cell oracle (not sample observation)",
+        "executionHorizon": 3,
+        "maxQueries": 1,
+        "status": "UNRESOLVED_WITHIN_DECLARED_BOUNDS",
+        "tree": null,
+        "minimumWorstEvidenceCost": null,
+        "maximumQueries": null,
+        "worstExecutionActions": null,
+        "possibleCompleteLaws": "2",
+        "stats": {
+          "acquisitionStates": 1,
+          "executionChecks": 1
+        }
+      },
+      "verification": {
+        "verified": true,
+        "exactMinimumWorstCost": null,
+        "independentQueryStates": 1,
+        "verifiedExecutionLeaves": 0
+      }
+    },
+    "already_observable": {
+      "report": {
+        "schema": "IWI-004/acquisition-v1",
+        "baseModel": {
+          "n": 7,
+          "start": [
+            1
+          ],
+          "goal": [
+            0
+          ],
+          "output": [
+            [
+              3
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              0
+            ]
+          ],
+          "next": [
+            [
+              [
+                0
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                0
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ],
+              [
+                6
+              ]
+            ]
+          ],
+          "possibleLaws": "2",
+          "unknownCells": 1
+        },
+        "catalogue": [
+          {
+            "key": "t:0:1",
+            "cost": 2,
+            "scope": "offline-static-law-cell"
+          }
+        ],
+        "entitlement": "perfect offline nonintervening exact static-cell oracle (not sample observation)",
+        "executionHorizon": 5,
+        "maxQueries": 1,
+        "status": "READY",
+        "tree": {
+          "kind": "ready",
+          "actions": 5,
+          "policy": {
+            "action": 0,
+            "children": [
+              {
+                "output": 0,
+                "plan": {
+                  "action": 1,
+                  "children": [
+                    {
+                      "output": 1,
+                      "plan": {
+                        "action": 2,
+                        "children": [
+                          {
+                            "output": 0,
+                            "plan": {
+                              "action": 0,
+                              "children": [
+                                {
+                                  "output": 0,
+                                  "plan": {
+                                    "action": 3,
+                                    "children": [
+                                      {
+                                        "output": 3,
+                                        "plan": {
+                                          "stop": true
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "output": 2,
+                      "plan": {
+                        "action": 2,
+                        "children": [
+                          {
+                            "output": 0,
+                            "plan": {
+                              "action": 0,
+                              "children": [
+                                {
+                                  "output": 0,
+                                  "plan": {
+                                    "action": 4,
+                                    "children": [
+                                      {
+                                        "output": 3,
+                                        "plan": {
+                                          "stop": true
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "minimumWorstEvidenceCost": 0,
+        "maximumQueries": 0,
+        "worstExecutionActions": 5,
+        "possibleCompleteLaws": "2",
+        "stats": {
+          "acquisitionStates": 1,
+          "executionChecks": 1
+        }
+      },
+      "verification": {
+        "verified": true,
+        "exactMinimumWorstCost": 0,
+        "independentQueryStates": 1,
+        "verifiedExecutionLeaves": 1
+      }
+    },
+    "irrelevant": {
+      "report": {
+        "schema": "IWI-004/acquisition-v1",
+        "baseModel": {
+          "n": 26,
+          "start": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25
+          ],
+          "goal": [
+            0
+          ],
+          "output": [
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ]
+          ],
+          "next": [
+            [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                0
+              ]
+            ],
+            [
+              [
+                0
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                4,
+                5
+              ],
+              [
+                5,
+                6
+              ],
+              [
+                6,
+                7
+              ],
+              [
+                7,
+                8
+              ],
+              [
+                8,
+                9
+              ],
+              [
+                9,
+                10
+              ],
+              [
+                10,
+                11
+              ],
+              [
+                11,
+                12
+              ],
+              [
+                12,
+                13
+              ],
+              [
+                13,
+                14
+              ],
+              [
+                14,
+                15
+              ],
+              [
+                15,
+                16
+              ],
+              [
+                16,
+                17
+              ],
+              [
+                17,
+                18
+              ],
+              [
+                18,
+                19
+              ],
+              [
+                19,
+                20
+              ],
+              [
+                20,
+                21
+              ],
+              [
+                21,
+                22
+              ],
+              [
+                22,
+                23
+              ],
+              [
+                23,
+                24
+              ],
+              [
+                24,
+                25
+              ],
+              [
+                25
+              ]
+            ]
+          ],
+          "possibleLaws": "16777216",
+          "unknownCells": 24
+        },
+        "catalogue": [
+          {
+            "key": "t:1:1",
+            "cost": 1,
+            "scope": "offline-static-law-cell"
+          }
+        ],
+        "entitlement": "perfect offline nonintervening exact static-cell oracle (not sample observation)",
+        "executionHorizon": 1,
+        "maxQueries": 1,
+        "status": "READY",
+        "tree": {
+          "kind": "ready",
+          "actions": 1,
+          "policy": {
+            "action": 0,
+            "children": [
+              {
+                "output": 0,
+                "plan": {
+                  "stop": true
+                }
+              }
+            ]
+          }
+        },
+        "minimumWorstEvidenceCost": 0,
+        "maximumQueries": 0,
+        "worstExecutionActions": 1,
+        "possibleCompleteLaws": "16777216",
+        "stats": {
+          "acquisitionStates": 1,
+          "executionChecks": 1
+        }
+      },
+      "verification": {
+        "verified": true,
+        "exactMinimumWorstCost": 0,
+        "independentQueryStates": 1,
+        "verifiedExecutionLeaves": 1
+      }
+    }
+  }
+}
