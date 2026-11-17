@@ -1,0 +1,50 @@
+name: RCG-007 native M1 capability atlas and authenticated observer rehome
+on:
+  push:
+    paths:
+      - 'experiments/real_connectome_ground/**'
+      - '.github/workflows/rcg007.yml'
+  pull_request:
+    paths:
+      - 'experiments/real_connectome_ground/**'
+      - '.github/workflows/rcg007.yml'
+  workflow_dispatch:
+
+jobs:
+  independent-source-mathematics:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Mathematical proof, adversarial controls and resource budgets
+        env:
+          PYTHONPATH: experiments/real_connectome_ground:experiments/real_connectome_ground/continuity/temporal_fabric:experiments/real_connectome_ground/continuity/nonlinear_orbit:experiments/real_connectome_ground/continuity/observer_quotient:experiments/real_connectome_ground/continuity/observer_quotient/fabric_atlas
+        run: python -m unittest discover -s experiments/real_connectome_ground/continuity/observer_quotient/fabric_atlas -p 'test_atlas.py' -v
+      - name: Full 131,072-state and 64-intention scale proof
+        env:
+          PYTHONPATH: experiments/real_connectome_ground:experiments/real_connectome_ground/continuity/temporal_fabric:experiments/real_connectome_ground/continuity/nonlinear_orbit:experiments/real_connectome_ground/continuity/observer_quotient:experiments/real_connectome_ground/continuity/observer_quotient/fabric_atlas
+        run: python experiments/real_connectome_ground/continuity/observer_quotient/fabric_atlas/benchmark.py --source experiments/real_connectome_ground/data/herm_full_edgelist.csv --groups 16 --copies 8192 --count 64 --output /tmp/rcg007-original-source-scale.json
+  native-m1-mtls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install native pinned E-CPU, no compatible stubs
+        run: python -m pip install 'git+https://github.com/Kier73/E-CPU.git@6fd416facdb2aefd6fc7d66a06b014e3d31b5a52'
+      - name: Assert native M1, TLS and recovery backing are importable
+        run: |
+          python -c 'from mailcpu.computational_objects import ComputationalObjectStore; from mailcpu.structural_memory_pages import StructuralMemoryPageBacking; from mailcpu.mtls_transport import connect_mutual_tls; print("native M1/mTLS available")'
+      - name: Require actual mTLS and source-bound M1 recovery gates
+        env:
+          PYTHONPATH: .:experiments/real_connectome_ground:experiments/real_connectome_ground/continuity/temporal_fabric:experiments/real_connectome_ground/continuity/nonlinear_orbit:experiments/real_connectome_ground/continuity/observer_quotient:experiments/real_connectome_ground/continuity/observer_quotient/fabric_atlas
+        run: |
+          python -m unittest discover -s experiments/real_connectome_ground/continuity/observer_quotient/fabric_atlas -p 'test_m1_bridge.py' -v
+          python -m unittest discover -s experiments/real_connectome_ground/continuity/observer_quotient/fabric_atlas -p 'test_native_handoff.py' -v

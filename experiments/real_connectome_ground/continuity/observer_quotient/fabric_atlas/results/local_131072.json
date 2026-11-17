@@ -1,0 +1,28 @@
+{
+  "atlas_certificate_bytes": 869,
+  "batch_query_ms_median": 6.611,
+  "batch_query_ms_samples": [
+    6.676,
+    7.265,
+    6.327,
+    6.523,
+    6.611
+  ],
+  "cold_source_index_ms": 0.345,
+  "generated_edges": 1048576,
+  "independent_proof_ms": 4864.411,
+  "intermediate_microstate_vectors": 0,
+  "learn_quotient_ms": 5044.599,
+  "logical_tick": 72057594037928009,
+  "microstates": 131072,
+  "observer_classes": 16,
+  "polynomial_products": 60,
+  "prepare_universal_annihilator_ms": 4876.758,
+  "query_count": 64,
+  "quotient_certificate_bytes": 3421,
+  "schema": "ifs.rcg007.benchmark.v1",
+  "scope": "synthetic finite-field work, not measured network or hardware-independent compute",
+  "source_evidence": "explicit-compact-fixture",
+  "source_sha256": "8715cc442b500c898ff33d50d68bb1a9762d7d842ff834345d62797a6199fc9e",
+  "values_digest": "bc3a61d1a296099b527a2e2c6e278a012d57ed6c77ed314315951c3ecce12806"
+}
