@@ -1,0 +1,62 @@
+{
+  "common_vector_annihilator_verified": true,
+  "depth": 3,
+  "dimension": 448,
+  "edges": 3559,
+  "field": 1000000007,
+  "independent_readout_agreement": true,
+  "independent_scalar_observers": [
+    {
+      "degree": 448,
+      "navigate_ns": 2149219992,
+      "prepare_ns": 356144411,
+      "target": "V0001",
+      "value_mod_p": 502776029,
+      "verify_ns": 313030232
+    },
+    {
+      "degree": 448,
+      "navigate_ns": 2175520503,
+      "prepare_ns": 347470813,
+      "target": "V0112",
+      "value_mod_p": 40779548,
+      "verify_ns": 308706072
+    },
+    {
+      "degree": 448,
+      "navigate_ns": 2167234426,
+      "prepare_ns": 346628557,
+      "target": "V0224",
+      "value_mod_p": 402412167,
+      "verify_ns": 303338579
+    },
+    {
+      "degree": 448,
+      "navigate_ns": 2108860759,
+      "prepare_ns": 338282430,
+      "target": "V0336",
+      "value_mod_p": 29327442,
+      "verify_ns": 336859798
+    }
+  ],
+  "measured_navigation_ratio_separate_over_shared": 4.022,
+  "nonlinear_readout_algebraic_degree_upper_bound": 8,
+  "observed_tick": 72057594037928009,
+  "output_mod_p": 997717564,
+  "polynomial_multiplications": 60,
+  "python": "3.13.5",
+  "recurrence_degree": 448,
+  "requested_readout_coordinates": [
+    "V0001",
+    "V0112",
+    "V0224",
+    "V0336"
+  ],
+  "schema": "ifs.rcg005.shared-vector-benchmark.v1",
+  "separate_scalar_comparison_included": true,
+  "shared_navigation_ns": 2138258663,
+  "shared_prepare_ns": 476100752,
+  "shared_verify_ns": 188040808,
+  "source": "deterministic-synthetic-graph-not-OpenWorm-biological-simulation",
+  "sum_independent_navigation_ns": 8600835680
+}

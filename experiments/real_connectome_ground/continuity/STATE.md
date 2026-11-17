@@ -49,3 +49,20 @@ A worthwhile alternative is **Body track 3**, actual calibrated physiology, but 
 On the 20-record source-derived compact fixture used by \`test_connectome_ground.py\`, Python 3.13 produced one source manifest and one AWCL → AIYL, two-transition query capsule. After a fresh Chronicle instance independently audited the Ground, the retained **two immutable objects + complete ledger** occupied **3,715 bytes**: 615 bytes for the two-record hash-linked lineage and 2,583 bytes for the query capsule (remainder source manifest). That one local audit took about **1.08 ms** in this environment.
 
 This is a **small-fixture measurement**, not the storage or latency of the complete connectome, external replication, trained weights, an E-CPU virtual machine, or HTTP/TLS observer-host transport. The complete upstream CSV remains separately versioned in RCG-001. Recording the counts and object digests allows the persistent representation to be measured again after source or code changes.
+
+
+## RCG-005 continuity checkpoint (2026-11-16)
+
+- New study: [nonlinear_orbit/README.md](nonlinear_orbit/README.md), stacked on RCG-004. A procedural triangular polynomial encoder E with exact inverse D realizes F=D M E on an admitted finite-field sparse Ground. A source-vector recurrence q(M)e_source=0, independently verified on **every** state coordinate, proves shared long-time navigation for requested latent observations; its candidate is selected from projected synthetic traces but admitted only after exact annihilator proof.
+- Local source-derived/synthetic tests: 12 passed, 2 skipped (full vendored source and native E-CPU are not installed in this local tool runtime). Reference dense powering and independent subprocess proof replay pass. Exact source SHA, model revision, and altered/rehashed receipts refuse.
+- Local 448-node, 3,559-edge synthetic: nonlinear depth six, seven latent readouts, t=2^56+73: 2.170 s one shared jump vs 15.547 s seven individual jumps; measures navigation only. 1024-node 8,172-edge depth six shared jump 11.487 s. No claim of learning biological dynamics or arbitrary neural time navigation.
+- [training_tracks_v4.json](training_tracks_v4.json) corrects the development roadmap toward authentic observer-host costs, learned qualified path choice, algebraically certified model construction and M1/M3 continuity; earlier track versions are retained historically.
+- E-CPU mTLS native hard-kill/rehome is an **unverified hosted CI gate**, not locally completed. Shared mathematical certificates and source-independent receiver validation do not constitute network authorization. Do not merge stacked PRs before parent/native checks are reviewed.
+
+
+## RCG-006 observation-relative Ground checkpoint (2026-11-16)
+
+- **Added** `continuity/observer_quotient/`: synthetic observational signature learner, complete source-column intertwining verifier, direct-source negative control, reversible procedural neural readout reuse, bounded portable process capsules, tests, and scale measurements.
+- **Verified locally** on a compact source-derived fixture: 131,072 generated addressed states, 1,048,576 directed procedural connections, 16 exact observer classes; 4.895s learning, 4.727s deep proof, ~27ms mean eight far-time observations; see `observer_quotient/results/local_stress_131072.json` for exact nanoseconds, source SHA and limitations.
+- **Not yet verified**: full original OpenWorm source CI, live authenticated E-CPU host execution of quotient demands, M1/M3 receiver-authoritative persistence, failures across independent host domains, or trained general-purpose intelligence.
+- **Next**: transport receiver-owned quotient/observation capsules through the existing E-CPU mTLS and Hypervisor, collect measured route cost and recovery evidence, then train qualified path placement without weakening Ground proof.
