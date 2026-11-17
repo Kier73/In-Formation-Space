@@ -1,0 +1,68 @@
+name: PGT-001 procedural Ground training and HTTP artifact paths
+on:
+  pull_request:
+    paths:
+      - 'experiments/procedural_ground_training/**'
+      - '.github/workflows/pgt001-procedural-training.yml'
+  push:
+    paths:
+      - 'experiments/procedural_ground_training/**'
+      - '.github/workflows/pgt001-procedural-training.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  model-train-and-local-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - run: python -m pip install 'numpy>=2.0,<3' 'torch>=2.5,<2.12'
+      - name: Actually optimize neural parameters against procedurally generated exact Grounds
+        working-directory: experiments/procedural_ground_training
+        run: python train_ground_model.py --train 10000 --valid 1500 --test 1500 --ood 900 --epochs 35 --batch 256 --output results
+      - name: Require source-holdout accuracy, refusals and real HTTP origin process failure tests
+        working-directory: experiments/procedural_ground_training
+        run: python -m unittest -v test_training.py
+      - name: Publish trained arrays, manifests and reports, without private credentials
+        uses: actions/upload-artifact@v4
+        with:
+          name: pgt001-model-output
+          path: experiments/procedural_ground_training/results/
+          if-no-files-found: error
+  native-ecpu-ios:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 6fd416facdb2aefd6fc7d66a06b014e3d31b5a52
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python -m pip install 'numpy>=1.24,<3'
+      - name: Compare 280 new Ground labels with exact native IOS-001 planner, not a copied verifier
+        env:
+          PYTHONPATH: '${{ github.workspace }}/external/E-CPU:${{ github.workspace }}/experiments/procedural_ground_training'
+        run: python -m unittest -v test_native_ios.py
+        working-directory: experiments/procedural_ground_training
+  independent-receiver:
+    needs: model-train-and-local-http
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - run: python -m pip install 'numpy>=2.0,<3' 'torch>=2.5,<2.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: pgt001-model-output
+          path: experiments/procedural_ground_training/results/
+      - name: Independently restore trained parameters and require byte-verified HTTP failover
+        working-directory: experiments/procedural_ground_training
+        run: python -m unittest -v test_training.py
