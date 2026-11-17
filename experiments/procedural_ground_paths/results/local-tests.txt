@@ -1,0 +1,15 @@
+test_exact_ground_planner_receives_only_restricted_observations (test_native_ecpu.NativeECPU.test_exact_ground_planner_receives_only_restricted_observations) ... skipped 'native E-CPU unavailable locally'
+test_http_and_stdio_paths_have_distinct_embeddings_under_same_intention (test_native_ecpu.NativeECPU.test_http_and_stdio_paths_have_distinct_embeddings_under_same_intention) ... skipped 'native E-CPU unavailable locally'
+test_advice_is_host_topology_relative_not_source_truth (test_path_navigation.LivePathTests.test_advice_is_host_topology_relative_not_source_truth) ... ok
+test_cheap_but_colluding_signatures_not_equal_to_truth (test_path_navigation.LivePathTests.test_cheap_but_colluding_signatures_not_equal_to_truth) ... ok
+test_cross_path_real_process_result_and_independent_offline_recovery (test_path_navigation.LivePathTests.test_cross_path_real_process_result_and_independent_offline_recovery) ... ok
+test_http_get_is_a_real_observer_not_static_weights (test_path_navigation.LivePathTests.test_http_get_is_a_real_observer_not_static_weights) ... ok
+test_path_receipts_refuse_even_after_resigning_outer_hash (test_path_navigation.LivePathTests.test_path_receipts_refuse_even_after_resigning_outer_hash) ... ok
+test_replay_nonce_and_key_substitution_rejected (test_path_navigation.LivePathTests.test_replay_nonce_and_key_substitution_rejected) ... ok
+test_source_salt_not_serialized_and_source_commitment_secret (test_path_navigation.LivePathTests.test_source_salt_not_serialized_and_source_commitment_secret) ... ok
+test_unknown_until_replacement_http_host_resolves_dissent (test_path_navigation.LivePathTests.test_unknown_until_replacement_http_host_resolves_dissent) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 10.737s
+
+OK (skipped=2)
