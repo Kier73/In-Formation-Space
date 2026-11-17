@@ -1,0 +1,141 @@
+name: PGT-005 learned observations through native E-CPU IOS-003 mTLS
+on:
+  pull_request:
+    paths:
+      - 'experiments/procedural_ground_transit/**'
+      - '.github/workflows/pgt005-native-transit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+
+env:
+  PYTHONPATH: 'external/ecpu:experiments/procedural_ground_transit:experiments/procedural_ground_paths:experiments/procedural_ground_navigation:experiments/procedural_ground_training:external/cog009/experiments/codonic-capability-atlas'
+  PGT005_REQUIRE_NATIVE: '1'
+
+jobs:
+  native-signed-transit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 393462c6e0dafba8e0ee22946ae44227c5c6e4e6
+          path: external/ecpu
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: b1aaebbee533c5296cc37c348f96d2f9b5b59456
+          path: external/cog009
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install numpy torch cryptography pytest
+      - name: Existing native E-CPU authority, receipt, intent and mTLS regression
+        run: |
+          python -m pytest -q \
+            external/ecpu/tests/test_intention_sufficiency.py \
+            external/ecpu/tests/test_intention_observer_bridge.py \
+            external/ecpu/tests/test_intention_measurement_fabric.py \
+            external/ecpu/tests/test_intent_embedding.py
+      - name: Require existing PGT-004 native HTTP/stdio structural embedding tests
+        run: python -m unittest discover -s experiments/procedural_ground_paths -p 'test_native_ecpu.py' -v
+      - name: Strict cross-process native IOS-003 + learned HTTP/stdio integration
+        run: python -m unittest discover -s experiments/procedural_ground_transit -p 'test_*.py' -v
+      - name: Existing live signed HTTP and stdio regression
+        run: python -m unittest discover -s experiments/procedural_ground_paths -p 'test_path_navigation.py' -v
+
+  producer:
+    needs: native-signed-transit
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    outputs:
+      high_water: ${{ steps.pin.outputs.high_water }}
+      source_root: ${{ steps.pin.outputs.source_root }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 393462c6e0dafba8e0ee22946ae44227c5c6e4e6
+          path: external/ecpu
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: b1aaebbee533c5296cc37c348f96d2f9b5b59456
+          path: external/cog009
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install numpy torch cryptography
+      - name: Execute real native provider/receiver over mTLS after HTTP/stdio quorum
+        run: python experiments/procedural_ground_transit/run_native_transit.py --root pgt005-handoff --source-index 12 --target 6
+      - id: pin
+        name: Carry source identity and immutable ledger head outside the untrusted artifact
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          p=json.loads(Path('pgt005-handoff/evidence/trust.json').read_bytes())
+          print('high_water='+p['head'])
+          print('source_root='+p['source_root'])
+          PY
+      - name: Publish ONLY signed public evidence, native receipts and metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: pgt005-signed-native-handoff
+          path: |
+            pgt005-handoff/evidence/bundle.json
+            pgt005-handoff/evidence/trust.json
+            pgt005-handoff/receiver-report.json
+            pgt005-handoff/provider-report.json
+            pgt005-handoff/audit.json
+          if-no-files-found: error
+
+  offline-receiver:
+    needs: producer
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 393462c6e0dafba8e0ee22946ae44227c5c6e4e6
+          path: external/ecpu
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: b1aaebbee533c5296cc37c348f96d2f9b5b59456
+          path: external/cog009
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install numpy torch cryptography
+      - uses: actions/download-artifact@v4
+        with:
+          name: pgt005-signed-native-handoff
+          path: pgt005-handoff
+      - name: Ensure no private keys or hidden source moved in the evidence capsule
+        shell: bash
+        run: |
+          test ! -e pgt005-handoff/private
+          test ! -e pgt005-handoff/tls
+          test ! -e pgt005-handoff/completion.sqlite
+          test ! -e pgt005-handoff/private.json
+      - name: Independently recheck every signed source witness and every E-CPU native receipt
+        env:
+          EXPECTED_HEAD: ${{ needs.producer.outputs.high_water }}
+          EXPECTED_ROOT: ${{ needs.producer.outputs.source_root }}
+        run: |
+          python experiments/procedural_ground_transit/run_native_transit.py \
+            --verify --root pgt005-handoff \
+            --expected-head "$EXPECTED_HEAD" --expected-root "$EXPECTED_ROOT"

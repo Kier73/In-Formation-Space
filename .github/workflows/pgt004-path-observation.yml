@@ -1,0 +1,144 @@
+name: PGT-004 active observations over HTTP and signed stdio
+on:
+  pull_request:
+    paths:
+      - 'experiments/procedural_ground_paths/**'
+      - '.github/workflows/pgt004-path-observation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-local-paths:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: b1aaebbee533c5296cc37c348f96d2f9b5b59456
+          path: external/cog009
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install numpy torch cryptography
+      - name: Run live HTTP + stdio signed observation tests
+        env:
+          PYTHONPATH: 'experiments/procedural_ground_paths:experiments/procedural_ground_navigation:experiments/procedural_ground_training:external/cog009/experiments/codonic-capability-atlas'
+        run: python -m unittest discover -s experiments/procedural_ground_paths -p 'test_path_navigation.py' -v
+      - name: Produce receiver-pinned multi-path evidence
+        env:
+          PYTHONPATH: 'experiments/procedural_ground_paths:experiments/procedural_ground_navigation:experiments/procedural_ground_training:external/cog009/experiments/codonic-capability-atlas'
+        run: python experiments/procedural_ground_paths/run_path_navigation.py --output pgt004-output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pgt004-evidence-${{ matrix.python }}
+          path: pgt004-output/
+          if-no-files-found: error
+  native-ecpu:
+    needs: live-local-paths
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: b1aaebbee533c5296cc37c348f96d2f9b5b59456
+          path: external/cog009
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 393462c6e0dafba8e0ee22946ae44227c5c6e4e6
+          path: external/ecpu
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install numpy torch cryptography pytest
+      - name: Strict existing native E-CPU sufficiency/embedding/mTLS gate
+        env:
+          PGT004_REQUIRE_NATIVE: '1'
+          PYTHONPATH: 'external/ecpu:experiments/procedural_ground_paths:experiments/procedural_ground_navigation:experiments/procedural_ground_training:external/cog009/experiments/codonic-capability-atlas'
+        run: |
+          python -m unittest discover -s experiments/procedural_ground_paths -p test_native_ecpu.py -v
+          python -m pytest external/ecpu/tests/test_intention_sufficiency.py external/ecpu/tests/test_intent_embedding.py external/ecpu/tests/test_intention_measurement_fabric.py -q
+  produce-observation-evidence:
+    runs-on: ubuntu-latest
+    outputs:
+      witness_head: ${{ steps.pin.outputs.witness_head }}
+      source_root: ${{ steps.pin.outputs.source_root }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: b1aaebbee533c5296cc37c348f96d2f9b5b59456
+          path: external/cog009
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install numpy torch cryptography
+      - name: Acquire live evidence from distinct observers
+        env:
+          PYTHONPATH: 'experiments/procedural_ground_paths:experiments/procedural_ground_navigation:experiments/procedural_ground_training:external/cog009/experiments/codonic-capability-atlas'
+        run: python experiments/procedural_ground_paths/run_path_navigation.py --output pgt004-handoff
+      - id: pin
+        name: Carry exact witness and source pins outside uploaded bundle
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          data=json.load(open('pgt004-handoff/trust.json'))
+          print('witness_head='+data['head'])
+          print('source_root='+data['source_root'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pgt004-witness-handoff
+          path: pgt004-handoff/
+          if-no-files-found: error
+  offline-receiver:
+    needs: produce-observation-evidence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: b1aaebbee533c5296cc37c348f96d2f9b5b59456
+          path: external/cog009
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install numpy cryptography torch
+      - uses: actions/download-artifact@v4
+        with:
+          name: pgt004-witness-handoff
+          path: pgt004-restore
+      - name: Check externally carried pins and revalidate signed bytes with zero observer access
+        env:
+          EXPECTED_HEAD: ${{ needs.produce-observation-evidence.outputs.witness_head }}
+          EXPECTED_ROOT: ${{ needs.produce-observation-evidence.outputs.source_root }}
+          PYTHONPATH: 'experiments/procedural_ground_paths:experiments/procedural_ground_navigation:experiments/procedural_ground_training:external/cog009/experiments/codonic-capability-atlas'
+        run: |
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          from path_navigator import recover_paths
+          root=Path('pgt004-restore')
+          trust=json.loads((root/'trust.json').read_bytes())
+          doc=json.loads((root/'bundle.json').read_bytes())
+          assert trust['head']==os.environ['EXPECTED_HEAD']
+          assert trust['source_root']==os.environ['EXPECTED_ROOT']
+          result=recover_paths(doc,trust)
+          assert result['process_source_calls']==0
+          assert result['http_reads']>0 and result['stdio_reads']>0
+          print('verified',result['signed_receipt_count'],'receipts in new job without private keys')
+          PY

@@ -1,0 +1,17 @@
+test_chain_tampering_stale_heads_and_key_change_refuse (test_navigation.PolicyTests.test_chain_tampering_stale_heads_and_key_change_refuse) ... ok
+test_costed_model_better_than_myopic_gain_on_fixed_holdout (test_navigation.PolicyTests.test_costed_model_better_than_myopic_gain_on_fixed_holdout) ... ok
+test_exact_signed_receipt_recovery_and_source_private (test_navigation.PolicyTests.test_exact_signed_receipt_recovery_and_source_private) ... ok
+test_exact_tree_never_costlier_than_direct_and_never_peeks_truth (test_navigation.PolicyTests.test_exact_tree_never_costlier_than_direct_and_never_peeks_truth) ... ok
+test_fresh_subprocess_receiver_uses_no_keys_or_worker_requests (test_navigation.PolicyTests.test_fresh_subprocess_receiver_uses_no_keys_or_worker_requests) ... ok
+test_http_artifact_checkpoint_failover (test_navigation.PolicyTests.test_http_artifact_checkpoint_failover) ... ok
+test_library_distinct_complete_and_finite (test_navigation.PolicyTests.test_library_distinct_complete_and_finite) ... ok
+test_out_of_family_fail_closed_no_inferred_answers_admitted (test_navigation.PolicyTests.test_out_of_family_fail_closed_no_inferred_answers_admitted) ... ok
+test_proposal_reproducible_and_never_observes_source (test_navigation.PolicyTests.test_proposal_reproducible_and_never_observes_source) ... ok
+test_student_checkpoint_real_tensors_and_independently_bound (test_navigation.PolicyTests.test_student_checkpoint_real_tensors_and_independently_bound) ... ok
+test_target_specific_terminal_differs_from_full_model_identity (test_navigation.PolicyTests.test_target_specific_terminal_differs_from_full_model_identity) ... ok
+test_two_signed_colluders_do_not_prove_the_observed_value_true (test_navigation.PolicyTests.test_two_signed_colluders_do_not_prove_the_observed_value_true) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 7.782s
+
+OK
