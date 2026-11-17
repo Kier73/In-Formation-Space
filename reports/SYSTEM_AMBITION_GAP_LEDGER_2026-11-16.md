@@ -4,6 +4,15 @@ Snapshot: 2026-11-16 America/Toronto (source collection crossed 2026-11-17 UTC).
 
 Purpose: turn stated restrictions, TODOs and capability gaps into build goals, and connect them to work already present. A current non-capability is a development target, not a verdict of impossibility. Evidence and authority contracts describe how a goal can be established; deleting them would not establish it.
 
+## Tensor integration and durable recovery — 2026-11-17, follow-up
+
+- **Merged tensor execution and verified-prefix recovery:** [E-CPU PR154](https://github.com/Kier73/E-CPU/pull/154), merge `5bfdd039dc0fc8bc870105ce4191cdfcb2565aef`. The reviewed branch head was unchanged before merging. This supersedes the earlier draft/unmerged status below.
+- **Merged atomic persistence adapter:** [E-CPU PR183](https://github.com/Kier73/E-CPU/pull/183), merge `50b618072941b8907280157e98c250892d4378fc`. `TensorCheckpointFile` connects the tensor coordinator to the existing HeadlessOS atomic checkpoint writer. It supplies bounded file loading/saving, integrity checks and detached evidence; mathematical verification still happens in the coordinator.
+- **Executed verification:** 51 tests passed on Windows/Python 3.14 across tensor paths, new tensor persistence, existing HeadlessOS checkpoints and non-network E-GPU cases. One socket-dependent E-GPU test was deselected because this environment prohibits sockets.
+- **Process recovery evidence:** a separate Python worker called `os._exit(23)` after persisting two chunks. A new host loaded those chunks and dispatched only the remaining operands, producing the expected product. Injected fsync and replacement failures retained the previous committed prefix and removed temporary files. Corruption and byte-budget violations refused.
+- All five published source/test/document/workflow files were fetched at the new head and compared with local text. Hosted checks were not required to finish before these merges, per the user's explicit instruction; a successful full repository suite is **not** asserted.
+- Remaining work: full-prefix copying/serialization is still potentially quadratic; the adapter is single-writer and does not supply multi-writer fencing. Shared writer file contents are fsynced before atomic replacement, but directory metadata is not fsynced, so universal power-loss durability is not established. Authenticated network recovery and receiver operation-identity integration remain goals; independent-process recovery is now tested.
+
 ## Integration progress — 2026-11-17
 
 This dated entry updates the original audit below without changing its historical source pins.
