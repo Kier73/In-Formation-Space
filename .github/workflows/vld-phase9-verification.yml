@@ -9,6 +9,8 @@ on:
       - "experiments/fluid-in-transit-computation/**"
       - "experiments/multi-model-virtual-layer-arbitration/**"
       - "experiments/pretrained-model-crash-continuity/**"
+      - "experiments/verified-realization-unstable-fabric/**"
+      - "experiments/cross-model-consensus-and-subagents/**"
       - ".github/workflows/vld-phase9-verification.yml"
   pull_request:
     paths:
@@ -17,6 +19,8 @@ on:
       - "experiments/fluid-in-transit-computation/**"
       - "experiments/multi-model-virtual-layer-arbitration/**"
       - "experiments/pretrained-model-crash-continuity/**"
+      - "experiments/verified-realization-unstable-fabric/**"
+      - "experiments/cross-model-consensus-and-subagents/**"
       - ".github/workflows/vld-phase9-verification.yml"
   workflow_dispatch:
 
@@ -48,12 +52,16 @@ jobs:
           python -m py_compile experiments/fluid-in-transit-computation/test_fluid_transit_study.py
           python -m py_compile experiments/multi-model-virtual-layer-arbitration/test_live_arbitration_evidence.py
           python -m py_compile experiments/pretrained-model-crash-continuity/test_pretrained_crash_continuity.py
+          python -m py_compile experiments/verified-realization-unstable-fabric/test_vru001_evidence.py
+          python -m py_compile experiments/cross-model-consensus-and-subagents/test_cmc001_evidence.py
           node --check bridges/vld-independent-verifier/vld_standalone_verifier.mjs
 
-      - name: Run VIV-001, RIV-AUDIT-001, FIT-001, MVA-001 and PMC-001 suites
+      - name: Run VIV-002, RIV-AUDIT-001, FIT-001, MVA-001, PMC-001, VRU-001 and CMC-001 suites
         run: |
           python -m unittest bridges/vld-independent-verifier/test_vld_independent_verifier.py -v
           python -m unittest experiments/recovery-identity-and-verifier-soundness/test_recovery_soundness.py -v
           python -m unittest experiments/fluid-in-transit-computation/test_fluid_transit_study.py -v
           python -m unittest experiments/multi-model-virtual-layer-arbitration/test_live_arbitration_evidence.py -v
           python -m unittest experiments/pretrained-model-crash-continuity/test_pretrained_crash_continuity.py -v
+          python -m unittest experiments/verified-realization-unstable-fabric/test_vru001_evidence.py -v
+          python -m unittest experiments/cross-model-consensus-and-subagents/test_cmc001_evidence.py -v
