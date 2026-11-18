@@ -1,0 +1,248 @@
+{
+  "cross_model_relational_consensus": {
+    "debiased_cross_statement_jl128": {
+      "exceeds_permutation_null": true,
+      "linear_cka": 0.938283,
+      "model_a": "Qwen3-JL128",
+      "model_b": "SmolLM-JL128",
+      "permutation_null_max": 0.776289,
+      "permutation_null_mean": 0.42604,
+      "relational_divergence": 0.351333,
+      "seq_len": 8
+    },
+    "debiased_cross_statement_matched": {
+      "exceeds_permutation_null": true,
+      "linear_cka": 0.936739,
+      "model_a": "Qwen3-0.6B-SetA",
+      "model_b": "SmolLM-135M-SetA",
+      "permutation_null_max": 0.78832,
+      "permutation_null_mean": 0.447587,
+      "relational_divergence": 0.355699,
+      "seq_len": 8
+    },
+    "debiased_cross_statement_unrelated_control": {
+      "exceeds_permutation_null": false,
+      "linear_cka": 0.700877,
+      "model_a": "Qwen3-0.6B-SetA",
+      "model_b": "SmolLM-135M-UnrelatedSetB",
+      "permutation_null_max": 0.822863,
+      "permutation_null_mean": 0.638129,
+      "relational_divergence": 0.773464,
+      "seq_len": 8
+    },
+    "method": "Boundary-anchored cumulative clause hidden states + double-centered Token-Gram CKA",
+    "qwen3_L28_vs_deepseek_r1_L2_matched": {
+      "exceeds_permutation_null": true,
+      "linear_cka": 0.911643,
+      "model_a": "Qwen3-0.6B(d=1024,L28)",
+      "model_b": "DeepSeek-R1-1.5B(d=1536,L2)",
+      "permutation_null_max": 0.805356,
+      "permutation_null_mean": 0.607235,
+      "relational_divergence": 0.420375,
+      "seq_len": 8
+    },
+    "qwen3_L28_vs_smollm2_L30_jl128_sketch": {
+      "exceeds_permutation_null": true,
+      "linear_cka": 0.902671,
+      "model_a": "Qwen3-JL128",
+      "model_b": "SmolLM2-JL128",
+      "permutation_null_max": 0.85176,
+      "permutation_null_mean": 0.427903,
+      "relational_divergence": 0.441202,
+      "seq_len": 8
+    },
+    "qwen3_L28_vs_smollm2_L30_matched": {
+      "exceeds_permutation_null": true,
+      "linear_cka": 0.922256,
+      "model_a": "Qwen3-0.6B(d=1024,L28)",
+      "model_b": "SmolLM2-135M(d=576,L30)",
+      "permutation_null_max": 0.818535,
+      "permutation_null_mean": 0.445566,
+      "relational_divergence": 0.394321,
+      "seq_len": 8
+    },
+    "qwen3_L28_vs_smollm2_L30_unrelated_control": {
+      "exceeds_permutation_null": true,
+      "linear_cka": 0.910565,
+      "model_a": "Qwen3-0.6B(d=1024,L28)",
+      "model_b": "SmolLM2-Unrelated(d=576,L30)",
+      "permutation_null_max": 0.835547,
+      "permutation_null_mean": 0.436521,
+      "relational_divergence": 0.422929,
+      "seq_len": 8
+    },
+    "rope_positional_confounding_finding": "Intra-sequence cumulative boundary CKA (0.922 matched vs 0.911 unrelated) was confounded by universal causal RoPE position drift u_pos(t); mean-pooled cross-statement Gram sketches eliminate shared position t, cleanly separating matched cross-model semantics (CKA=0.9367, exceeds_null=True) from unrelated controls (CKA=0.7009, exceeds_null=False)."
+  },
+  "experiment_id": "CMC-001",
+  "hosted_pretrained_models": {
+    "deepseek_r1_distill_1_5b": {
+      "elapsed_sec": 87.815,
+      "hidden_size": 1536,
+      "http_206_bytes": 187383525,
+      "repo": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+      "revision": "ad9f0ae0864d7fbcd1cd905e3c6c5b069cc8b562"
+    },
+    "qwen3_0_6b": {
+      "generated_note": {
+        "agent_id": "subagent.qwen3_0_6b",
+        "checkpoint_digest": "7557e2daef8e7e39981c10b865a78a3973c4619227120cb779c5d28ba55844a8",
+        "generated_token_ids": [
+          429,
+          279,
+          1849,
+          646,
+          387,
+          1483,
+          13444,
+          13,
+          1096,
+          374
+        ],
+        "model_fingerprint": "7746a452f7c719c6cbf7c510cae3ea46c1bb1e8e85c9730589a0b8d9da2a995f",
+        "text": "In Virtual Layer Dynamics, verifying mathematical laws before execution ensures that the system can be used effectively. This is"
+      },
+      "hidden_size": 1024,
+      "layers": 28,
+      "repo": "Qwen/Qwen3-0.6B",
+      "revision": "c1899de289a04d12100db370d81485cdf75e47ca"
+    },
+    "smollm2_135m_instruct_http206": {
+      "coalesced_spans": 5,
+      "generated_note": {
+        "agent_id": "subagent.smollm2_135m",
+        "checkpoint_digest": "ab2b71db15a9d20527f85ad2ba8985521dd04c0027c8e35cd5ae47957caa131b",
+        "generated_token_ids": [
+          338,
+          260,
+          7748,
+          314,
+          876,
+          29,
+          40201,
+          277,
+          284,
+          416
+        ],
+        "model_fingerprint": "4876a200e7f59ff7b1b8a2a5aaaa1f8e0a7433f3dff9730046c57abb9cc28f56",
+        "text": "In Virtual Layer Dynamics, verifying mathematical laws before execution ensures that the algorithm is well-behaved and can"
+      },
+      "hidden_size": 576,
+      "http_206_bytes": 269060560,
+      "http_206_requests": 8,
+      "layers": 30,
+      "prefetch_sec": 114.129,
+      "repo": "HuggingFaceTB/SmolLM2-135M-Instruct",
+      "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac"
+    }
+  },
+  "live_vld_upgrades_and_audits": {
+    "intention_compiler_1e12": {
+      "admitted_observation": [
+        190,
+        49
+      ],
+      "backends_verified": [
+        "direct_algebraic_navigation",
+        "fluid_in_transit_stream",
+        "hosted_continuous_execution"
+      ],
+      "pareto_selected": "cmc.orbit.1e12.direct_algebraic_navigation.closed_orbit_jump.1",
+      "upgrade_digest": "5450fa14a8609184b69b6411d6afaa226064aea6be57abd4b18ab3a1731c13a2"
+    },
+    "live_github_pack_v2_delta": {
+      "base_oid": "e8c8f626bb43271c9132a4ed1774bc03129289cf",
+      "byte_reduction_ratio": 0.04324,
+      "certificate_digest": "f85dee67d3ca181fcbf13c9366e3fade76a9057f012f9ee72518406a71625784",
+      "delta_objects": 22,
+      "delta_pack_bytes": 32532,
+      "full_closure_objects": 487,
+      "full_closure_pack_bytes": 752353,
+      "root_tree_oid": "916fe6bfec16f5e2f987ed0ab1b25723d0f0360b",
+      "target_oid": "dcbb5ec48f6513145ee041427f8c43d6140c1ba7"
+    },
+    "sheaf_1cocycle_localization": {
+      "conflicting_edge_ids": [
+        "drift.34",
+        "drift.45",
+        "drift.53"
+      ],
+      "holonomy_residual": "31",
+      "report_digest": "00d83642c45d6e72d60e27ac3dc3525925d60e11dc5c0a135bc3aa0a61afdba3"
+    }
+  },
+  "subagent_coevolution": {
+    "continuity_certificate_digest": "35f48e4419bf32c573bf1d2ed922b3e06fd6cc726e4a82fff5688d633d35fcfa",
+    "final_acceptance_rate": 1.0,
+    "initial_acceptance_rate": 1.0,
+    "post_directive_llm_logprobs": {
+      "qwen3": {
+        "00_decoy_3sample": -6.27148,
+        "01_compile_and_certify_orbit": -6.276692
+      },
+      "smollm2": {
+        "00_decoy_3sample": -5.823248,
+        "01_compile_and_certify_orbit": -4.30249
+      }
+    },
+    "pre_directive_llm_logprobs": {
+      "qwen3": {
+        "00_decoy_3sample": -5.959219,
+        "01_compile_and_certify_orbit": -6.255417
+      },
+      "smollm2": {
+        "00_decoy_3sample": -5.686631,
+        "01_compile_and_certify_orbit": -4.178509
+      }
+    },
+    "quorum_public_keys": {
+      "q0": "28cc856ea2dc2bce648ff0a8812751b037526065182cea8a9288b904240dd901",
+      "q1": "7634248fa5d2a99ab8d68d807050ca2024b2da2f9221aa01f4a7c352a2465291",
+      "q2": "6434b75463d134e58c9e5b7f9c6547f906f073cb0eca81ffe33033b298c8f597"
+    },
+    "round_outcomes": [
+      {
+        "action_kind": "compile_pareto_orbit",
+        "admitted": true,
+        "cross_model_cka": 0.233944,
+        "proposal_id": "01_compile_and_certify_orbit",
+        "round_index": 0,
+        "task_id": "cmc.task1.orbit_compiler"
+      },
+      {
+        "action_kind": "compile_pareto_orbit",
+        "admitted": true,
+        "cross_model_cka": 0.15471,
+        "proposal_id": "01_compile_and_certify_orbit",
+        "round_index": 1,
+        "task_id": "cmc.task1.orbit_compiler"
+      },
+      {
+        "action_kind": "qualify_github_smart_http_v2",
+        "admitted": true,
+        "cross_model_cka": 0.186369,
+        "proposal_id": "01_qualify_live_github_delta",
+        "round_index": 1,
+        "task_id": "cmc.task2.live_github_pack"
+      },
+      {
+        "action_kind": "solve_sheaf_1cocycle",
+        "admitted": true,
+        "cross_model_cka": 0.132584,
+        "proposal_id": "01_extract_minimal_1cocycle",
+        "round_index": 1,
+        "task_id": "cmc.task3.sheaf_holonomy"
+      }
+    ],
+    "standalone_ed25519_audit": {
+      "certificate_digest": "35f48e4419bf32c573bf1d2ed922b3e06fd6cc726e4a82fff5688d633d35fcfa",
+      "proposal_digest": "96e8b87453c58e0337c281f44e5c87c271a57b1bd70cfc838a57c46ad8216456",
+      "quorum_size": 2,
+      "signature_scheme": "ed25519-rfc8032",
+      "slot": 1,
+      "status": "VERIFIED",
+      "term": 1,
+      "votes_verified": 3
+    }
+  },
+  "total_elapsed_sec": 338.26
+}
