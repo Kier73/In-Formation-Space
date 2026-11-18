@@ -244,6 +244,158 @@ class TestVLDIndependentVerifier(unittest.TestCase):
         with self.assertRaises(VER.VerificationError):
             VER.verify_snc_1d_capsule(forged_cap)
 
+    def test_ed25519_public_key_quorum_cross_language_python_and_nodejs(self) -> None:
+        node_bin = shutil.which("node")
+        if node_bin is None:
+            self.skipTest("Node.js not available")
+
+        # Generate independent Ed25519 keypairs inside Node.js OpenSSL, sign a VLD receipt chain,
+        # and verify with ZERO private keys in BOTH Python pure-stdlib RFC 8032 AND Node.js!
+        gen_script = """
+        const crypto = require('node:crypto');
+        const out = {};
+        for (const m of ['q0', 'q1', 'q2']) {
+          const {publicKey, privateKey} = crypto.generateKeyPairSync('ed25519');
+          out[m] = {
+            pub32: publicKey.export({format: 'der', type: 'spki'}).subarray(-32).toString('hex'),
+            privDer: privateKey.export({format: 'der', type: 'pkcs8'}).toString('hex'),
+          };
+        }
+        console.log(JSON.stringify(out));
+        """
+        keys = json.loads(subprocess.check_output([node_bin, "-e", gen_script], text=True))
+        pub_map = {m: keys[m]["pub32"] for m in ("q0", "q1", "q2")}
+        pipeline_id = "viv002.ed25519.pipe"
+        initial_input = {"horizon": 1000000, "mode": "asymmetric"}
+        members = ["q0", "q1", "q2"]
+        mem_dg = VER.domain_digest(
+            "vld.quorum-membership.v1",
+            {
+                "lineage_id": "viv.ed.lin",
+                "member_ids": members,
+                "member_public_keys": pub_map,
+                "signature_scheme": "ed25519-rfc8032",
+            },
+        )
+        genesis_fp = VER.domain_digest("vld.pipeline-genesis.v1", {"input": initial_input, "pipeline_id": pipeline_id})
+        state_manifest = {
+            "chunks": [{"byte_length": 8, "index": 0, "page_digest": "1" * 64}],
+            "content_digest": "2" * 64,
+            "kind": "vld.m1-manifest.v1",
+            "manifest_digest": "3" * 64,
+            "media_type": "application/json",
+            "page_size": 4096,
+            "schema_version": 1,
+            "size_bytes": 8,
+        }
+        slot_dg = VER.domain_digest(
+            "vld.stage-slot.v1",
+            {"pipeline_id": pipeline_id, "stage_id": "s0", "stage_index": 0, "state_manifest_digest": state_manifest["manifest_digest"]},
+        )
+        prop_body = {
+            "lineage_id": "viv.ed.lin",
+            "membership_digest": mem_dg,
+            "operation_id": f"{pipeline_id}.s0",
+            "predecessor_manifest_digest": VER.GENESIS_DIGEST,
+            "proposer_id": "host.alpha",
+            "schema": "vld.quorum-proposal.v1",
+            "slot": 1,
+            "state_manifest_digest": slot_dg,
+            "term": 1,
+        }
+        prop_dg = VER.domain_digest("vld.quorum-proposal.v1", prop_body)
+
+        votes = []
+        for vid in ("q0", "q2"):
+            msg = VER.canonical_bytes(
+                {"domain": "vld.quorum-vote.v1", "lineage_id": "viv.ed.lin", "proposal_digest": prop_dg, "slot": 1, "term": 1, "voter_id": vid}
+            )
+            sign_js = (
+                "const crypto = require('node:crypto');"
+                f"const k = crypto.createPrivateKey({{key: Buffer.from('{keys[vid]['privDer']}', 'hex'), format: 'der', type: 'pkcs8'}});"
+                f"console.log(crypto.sign(null, Buffer.from('{msg.hex()}', 'hex'), k).toString('hex'));"
+            )
+            sig_hex = subprocess.check_output([node_bin, "-e", sign_js], text=True).strip()
+            votes.append(
+                {
+                    "lineage_id": "viv.ed.lin",
+                    "proposal_digest": prop_dg,
+                    "signature_ed25519": sig_hex,
+                    "signature_scheme": "ed25519-rfc8032",
+                    "slot": 1,
+                    "term": 1,
+                    "voter_id": vid,
+                }
+            )
+        votes.sort(key=lambda x: x["voter_id"])
+        cert_body = {
+            "membership": {
+                "lineage_id": "viv.ed.lin",
+                "member_ids": members,
+                "member_public_keys": pub_map,
+                "membership_digest": mem_dg,
+                "quorum_size": 2,
+                "signature_scheme": "ed25519-rfc8032",
+            },
+            "proposal": {**prop_body, "proposal_digest": prop_dg},
+            "schema": "vld.quorum-certificate.v1",
+            "votes": votes,
+        }
+        cert_dg = VER.domain_digest("vld.quorum-certificate.v1", cert_body)
+        rcpt_body = {
+            "clock_bridge_digest": None,
+            "host_id": "host.alpha",
+            "oracle_verdict": "PASS:s0|VERIFIED:ed25519_ok",
+            "pipeline_id": pipeline_id,
+            "prev_continuity_digest": VER.GENESIS_DIGEST,
+            "quorum_cert_digest": cert_dg,
+            "scheduler_id": "sched.0",
+            "schema": "vld.cross-ground-continuity-receipt.v1",
+            "source_ground_fingerprint": genesis_fp,
+            "source_representation": "in",
+            "stage_cost": {"bytes_moved": 32.0, "compute_ops": 4.0, "latency_ms": 0.2, "verification_ops": 2.0},
+            "stage_id": "s0",
+            "stage_index": 0,
+            "state_manifest": state_manifest,
+            "target_ground_fingerprint": "9" * 64,
+            "target_representation": "out",
+            "temporal": {"clock": {"host.alpha": 1}, "epoch": 1, "scheduler_id": "sched.0"},
+        }
+        cont_dg = VER.domain_digest("vld.cross-ground-continuity-receipt.v1", rcpt_body)
+        rcpt = {**rcpt_body, "continuity_digest": cont_dg, "quorum_certificate": {**cert_body, "certificate_digest": cert_dg}}
+
+        # Public bundle contains ZERO secrets!
+        pub_bundle = {
+            "initial_input": initial_input,
+            "pipeline_id": pipeline_id,
+            "quorum_member_ids": members,
+            "quorum_member_public_keys": pub_map,
+            "receipts": [rcpt],
+        }
+        py_ed = VER.verify_continuity_chain(
+            pub_bundle["receipts"],
+            pipeline_id=pipeline_id,
+            initial_input=initial_input,
+            quorum_member_ids=members,
+            quorum_member_public_keys=pub_map,
+        )
+        self.assertEqual(py_ed["status"], "VERIFIED")
+
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as tf:
+            json.dump(pub_bundle, tf)
+            p_path = tf.name
+        try:
+            node_ed = json.loads(
+                subprocess.check_output([node_bin, str(HERE / "vld_standalone_verifier.mjs"), p_path], text=True)
+            )
+            self.assertEqual(node_ed["status"], "VERIFIED_NODEJS")
+            self.assertEqual(node_ed["signature_scheme"], "ed25519-rfc8032")
+            self.assertEqual(node_ed["final_continuity_digest"], py_ed["final_continuity_digest"])
+        finally:
+            Path(p_path).unlink(missing_ok=True)
+
 
 if __name__ == "__main__":
     unittest.main()

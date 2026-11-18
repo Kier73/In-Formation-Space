@@ -1,10 +1,13 @@
-// Standalone Zero-Dependency Node.js Cross-Language Verifier for VLD Continuity Receipts (VIV-001).
+// Standalone Zero-Dependency Node.js Cross-Language Verifier for VLD Continuity Receipts (VIV-001 / VIV-002).
 // Uses ONLY Node.js built-in `node:crypto` and `node:fs` modules.
+// Supports BOTH legacy `hmac-sha256` AND asymmetric `ed25519-rfc8032` public-key quorums (zero private keys in bundle).
 
 import crypto from "node:crypto";
 import fs from "node:fs";
 
 const GENESIS_DIGEST = "0".repeat(64);
+const ED25519_SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
+const ED25519_L = (1n << 252n) + 27742317777372353535851937790883648493n;
 
 export function canonicalJson(val) {
   if (val === null || typeof val === "boolean") return JSON.stringify(val);
@@ -34,8 +37,6 @@ export function canonicalJson(val) {
   throw new Error("Unsupported value type");
 }
 
-// Python json.dumps formats float 1.0 as "1.0" whereas JS JSON.stringify(1.0) formats as "1".
-// For explicit float fields (`stage_cost`), preserve Python-compatible canonical float representation.
 function formatStageCostCanonical(sc) {
   const fmtFloat = (x) => {
     if (typeof x !== "number" || !Number.isFinite(x)) throw new Error("Non-finite cost");
@@ -68,6 +69,20 @@ export function domainDigest(domain, payload) {
   return domainDigestRaw(domain, canonicalJson(payload));
 }
 
+function verifyEd25519Hex(pubKeyHex, messageBuf, sigHex) {
+  if (!/^[0-9a-f]{64}$/.test(pubKeyHex) || !/^[0-9a-f]{128}$/.test(sigHex)) {
+    return false;
+  }
+  const sigBuf = Buffer.from(sigHex, "hex");
+  // Enforce strict RFC 8032 non-malleability S < L
+  const sLittle = Buffer.from(sigBuf.subarray(32, 64)).reverse();
+  const sVal = BigInt("0x" + sLittle.toString("hex"));
+  if (sVal >= ED25519_L) return false;
+  const spkiDer = Buffer.concat([ED25519_SPKI_PREFIX, Buffer.from(pubKeyHex, "hex")]);
+  const pubObj = crypto.createPublicKey({ key: spkiDer, format: "der", type: "spki" });
+  return crypto.verify(null, messageBuf, pubObj, sigBuf);
+}
+
 export function verifyContinuityChain(bundle) {
   const {
     pipeline_id,
@@ -76,6 +91,7 @@ export function verifyContinuityChain(bundle) {
     expected_stages = null,
     quorum_member_ids,
     quorum_member_secrets_utf8 = null,
+    quorum_member_public_keys = null,
     require_verified_tag = true,
   } = bundle;
 
@@ -100,6 +116,7 @@ export function verifyContinuityChain(bundle) {
   });
   let prevContDg = GENESIS_DIGEST;
   let prevSlotDg = GENESIS_DIGEST;
+  let verifiedScheme = "hmac-sha256";
 
   for (let idx = 0; idx < receipts.length; idx++) {
     const rcpt = receipts[idx];
@@ -131,13 +148,47 @@ export function verifyContinuityChain(bundle) {
 
     const qCert = rcpt.quorum_certificate;
     const prop = qCert.proposal;
-    const expMemDg = domainDigest("vld.quorum-membership.v1", {
-      lineage_id: String(prop.lineage_id),
-      member_ids: membersSorted,
-    });
-    if (prop.membership_digest !== expMemDg) throw new Error("membership_digest mismatch");
-
     const memDoc = qCert.membership ?? {};
+    const sigScheme = String(memDoc.signature_scheme ?? "hmac-sha256");
+    verifiedScheme = sigScheme;
+
+    let certPubKeys = null;
+    let expMemDg;
+    if (sigScheme === "ed25519-rfc8032") {
+      const rawPks = memDoc.member_public_keys;
+      if (!rawPks || typeof rawPks !== "object") {
+        throw new Error("Ed25519 certificate missing member_public_keys");
+      }
+      const pkKeysSorted = Object.keys(rawPks).sort();
+      if (pkKeysSorted.length !== membersSorted.length || pkKeysSorted.some((k, i) => k !== membersSorted[i])) {
+        throw new Error("member_public_keys keyset mismatch");
+      }
+      certPubKeys = {};
+      for (const k of membersSorted) {
+        certPubKeys[k] = String(rawPks[k]);
+        if (quorum_member_public_keys !== null && String(quorum_member_public_keys[k]) !== certPubKeys[k]) {
+          throw new Error(`Pinned Ed25519 public key mismatch for ${k}`);
+        }
+      }
+      expMemDg = domainDigest("vld.quorum-membership.v1", {
+        lineage_id: String(prop.lineage_id),
+        member_ids: membersSorted,
+        member_public_keys: certPubKeys,
+        signature_scheme: "ed25519-rfc8032",
+      });
+    } else if (sigScheme === "hmac-sha256") {
+      if (quorum_member_public_keys !== null) {
+        throw new Error("Expected ed25519-rfc8032 public-key quorum, got hmac-sha256");
+      }
+      expMemDg = domainDigest("vld.quorum-membership.v1", {
+        lineage_id: String(prop.lineage_id),
+        member_ids: membersSorted,
+      });
+    } else {
+      throw new Error(`Unsupported signature_scheme ${sigScheme}`);
+    }
+
+    if (prop.membership_digest !== expMemDg) throw new Error("membership_digest mismatch");
     if (
       !Array.isArray(memDoc.member_ids) ||
       memDoc.member_ids.length !== membersSorted.length ||
@@ -178,47 +229,72 @@ export function verifyContinuityChain(bundle) {
         throw new Error(`Stage ${idx} vote proposal/lineage/slot/term mismatch for ${voterId}`);
       }
       seen.add(voterId);
-      if (quorum_member_secrets_utf8 !== null) {
-        if (!Object.prototype.hasOwnProperty.call(quorum_member_secrets_utf8, voterId)) {
-          throw new Error(`Missing verification secret for voter ${voterId}`);
-        }
-        const voteMsg = canonicalJson({
-          domain: "vld.quorum-vote.v1",
-          lineage_id: propBody.lineage_id,
-          proposal_digest: propDg,
-          slot: propBody.slot,
-          term: propBody.term,
-          voter_id: voterId,
-        });
-        const expectedHex = crypto
-          .createHmac("sha256", Buffer.from(String(quorum_member_secrets_utf8[voterId]), "utf8"))
-          .update(Buffer.from(voteMsg, "utf8"))
-          .digest("hex");
-        const suppliedBuf = Buffer.from(String(v.signature_hmac ?? ""), "utf8");
-        const expectedBuf = Buffer.from(expectedHex, "utf8");
-        if (suppliedBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(suppliedBuf, expectedBuf)) {
-          throw new Error(`HMAC mismatch for ${voterId}`);
-        }
-      }
-      normalizedVotes.push({
+      const voteMsg = canonicalJson({
+        domain: "vld.quorum-vote.v1",
         lineage_id: propBody.lineage_id,
         proposal_digest: propDg,
-        signature_hmac: String(v.signature_hmac),
         slot: propBody.slot,
         term: propBody.term,
         voter_id: voterId,
       });
+
+      if (sigScheme === "ed25519-rfc8032") {
+        if (v.signature_scheme !== "ed25519-rfc8032" || Object.prototype.hasOwnProperty.call(v, "signature_hmac")) {
+          throw new Error(`Vote from ${voterId} lacks ed25519-rfc8032 scheme`);
+        }
+        const sigEd = String(v.signature_ed25519 ?? "");
+        if (!verifyEd25519Hex(certPubKeys[voterId], Buffer.from(voteMsg, "utf8"), sigEd)) {
+          throw new Error(`Ed25519 signature verification failed for ${voterId}`);
+        }
+        normalizedVotes.push({
+          lineage_id: propBody.lineage_id,
+          proposal_digest: propDg,
+          signature_ed25519: sigEd,
+          signature_scheme: "ed25519-rfc8032",
+          slot: propBody.slot,
+          term: propBody.term,
+          voter_id: voterId,
+        });
+      } else {
+        if (quorum_member_secrets_utf8 !== null) {
+          if (!Object.prototype.hasOwnProperty.call(quorum_member_secrets_utf8, voterId)) {
+            throw new Error(`Missing verification secret for voter ${voterId}`);
+          }
+          const expectedHex = crypto
+            .createHmac("sha256", Buffer.from(String(quorum_member_secrets_utf8[voterId]), "utf8"))
+            .update(Buffer.from(voteMsg, "utf8"))
+            .digest("hex");
+          const suppliedBuf = Buffer.from(String(v.signature_hmac ?? ""), "utf8");
+          const expectedBuf = Buffer.from(expectedHex, "utf8");
+          if (suppliedBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(suppliedBuf, expectedBuf)) {
+            throw new Error(`HMAC mismatch for ${voterId}`);
+          }
+        }
+        normalizedVotes.push({
+          lineage_id: propBody.lineage_id,
+          proposal_digest: propDg,
+          signature_hmac: String(v.signature_hmac),
+          slot: propBody.slot,
+          term: propBody.term,
+          voter_id: voterId,
+        });
+      }
     }
     if (2 * seen.size <= membersSorted.length) throw new Error("Quorum strict majority failed");
 
     normalizedVotes.sort((a, b) => (a.voter_id < b.voter_id ? -1 : a.voter_id > b.voter_id ? 1 : 0));
+    const memCanon = {
+      lineage_id: propBody.lineage_id,
+      member_ids: membersSorted,
+      membership_digest: expMemDg,
+      quorum_size: qMin,
+    };
+    if (sigScheme === "ed25519-rfc8032") {
+      memCanon.member_public_keys = certPubKeys;
+      memCanon.signature_scheme = "ed25519-rfc8032";
+    }
     const certBody = {
-      membership: {
-        lineage_id: propBody.lineage_id,
-        member_ids: membersSorted,
-        membership_digest: expMemDg,
-        quorum_size: qMin,
-      },
+      membership: memCanon,
       proposal: { ...propBody, proposal_digest: propDg },
       schema: "vld.quorum-certificate.v1",
       votes: normalizedVotes,
@@ -286,6 +362,7 @@ export function verifyContinuityChain(bundle) {
 
   return {
     final_continuity_digest: prevContDg,
+    signature_scheme: verifiedScheme,
     stages_verified: receipts.length,
     status: "VERIFIED_NODEJS",
   };
