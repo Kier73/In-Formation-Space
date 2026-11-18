@@ -1,6 +1,12 @@
-"""Standalone zero-dependency Python verifier for Virtual Layer Dynamics receipts & capsules (VIV-001).
+r"""Standalone zero-dependency Python verifier for Virtual Layer Dynamics receipts & capsules (VIV-001 / VIV-002).
 
 Shares ZERO imports with `vld`: uses only Python standard library (`fractions`, `hashlib`, `hmac`, `json`, `math`).
+Supports:
+  1. `hmac-sha256` AND public-key `ed25519-rfc8032` (RFC 8032 §5.1.7) quorum certificates & continuity chains.
+  2. 1D `SNC` ReLU whole-domain rational capsule equivalence.
+  3. E-graph algebraic rewrite proof chains (`vld.rewrite-proof-step.v1`).
+  4. Cellular Sheaf $H^1$ Fredholm 1-cocycle obstruction & global section bundles (`vld.sheaf-consistency-bundle.v1`).
+  5. Proof-carrying rational numerical error enclosures & logit-margin decisions (`vld.certified-decision-bundle.v1`).
 """
 
 from __future__ import annotations
@@ -14,9 +20,106 @@ from typing import Any, Mapping, Sequence
 
 GENESIS_DIGEST = "0" * 64
 
+_ED_P: int = (1 << 255) - 19
+_ED_L: int = (1 << 252) + 27742317777372353535851937790883648493
+_ED_D: int = (-121665 * pow(121666, _ED_P - 2, _ED_P)) % _ED_P
+_ED_2D: int = (2 * _ED_D) % _ED_P
+_ED_SQRT_M1: int = pow(2, (_ED_P - 1) // 4, _ED_P)
+
 
 class VerificationError(ValueError):
-    """Raised when an audited digest, quorum certificate, continuity receipt, or capsule fails verification."""
+    """Raised when an audited digest, quorum certificate, continuity receipt, rewrite proof, or capsule fails verification."""
+
+
+def _ed_recover_x(y: int, sign: int) -> int:
+    if y < 0 or y >= _ED_P:
+        raise VerificationError("Non-canonical Ed25519 y-coordinate.")
+    y2 = (y * y) % _ED_P
+    u = (y2 - 1) % _ED_P
+    v = (_ED_D * y2 + 1) % _ED_P
+    v3 = (v * v * v) % _ED_P
+    v7 = (v3 * v3 * v) % _ED_P
+    x = (u * v3 * pow((u * v7) % _ED_P, (_ED_P - 5) // 8, _ED_P)) % _ED_P
+    vx2 = (v * x * x) % _ED_P
+    if vx2 == u:
+        pass
+    elif vx2 == (_ED_P - u) % _ED_P:
+        x = (x * _ED_SQRT_M1) % _ED_P
+    else:
+        raise VerificationError("Point not on Ed25519 curve.")
+    if x == 0 and sign == 1:
+        raise VerificationError("Invalid negative zero x on Ed25519.")
+    if (x & 1) != sign:
+        x = _ED_P - x
+    return x
+
+
+_ED_BY: int = (4 * pow(5, _ED_P - 2, _ED_P)) % _ED_P
+_ED_BX: int = _ed_recover_x(_ED_BY, 0)
+_ED_BASE: tuple[int, int, int, int] = (_ED_BX, _ED_BY, 1, (_ED_BX * _ED_BY) % _ED_P)
+
+
+def _ed_add(p1: tuple[int, int, int, int], p2: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+    x1, y1, z1, t1 = p1
+    x2, y2, z2, t2 = p2
+    a = ((y1 - x1) * (y2 - x2)) % _ED_P
+    b = ((y1 + x1) * (y2 + x2)) % _ED_P
+    c = (t1 * _ED_2D * t2) % _ED_P
+    d = (z1 * 2 * z2) % _ED_P
+    e = (b - a) % _ED_P
+    f = (d - c) % _ED_P
+    g = (d + c) % _ED_P
+    h = (b + a) % _ED_P
+    return ((e * f) % _ED_P, (g * h) % _ED_P, (f * g) % _ED_P, (e * h) % _ED_P)
+
+
+def _ed_mul(scalar: int, pt: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+    res = (0, 1, 1, 0)
+    cur = pt
+    k = scalar
+    while k > 0:
+        if k & 1:
+            res = _ed_add(res, cur)
+        cur = _ed_add(cur, cur)
+        k >>= 1
+    return res
+
+
+def _ed_decode_strict(raw: bytes) -> tuple[int, int, int, int]:
+    if len(raw) != 32:
+        raise VerificationError("Ed25519 point must be 32 bytes.")
+    val = int.from_bytes(raw, "little")
+    sign = (val >> 255) & 1
+    y = val & ((1 << 255) - 1)
+    x = _ed_recover_x(y, sign)
+    if (y | ((x & 1) << 255)).to_bytes(32, "little") != raw:
+        raise VerificationError("Non-canonical Ed25519 point encoding.")
+    return (x, y, 1, (x * y) % _ED_P)
+
+
+def verify_ed25519_signature(public_key_hex: str, message: bytes, signature_hex: str) -> bool:
+    """Zero-import RFC 8032 §5.1.7 cofactored Ed25519 verifier."""
+    try:
+        if len(public_key_hex) != 64 or len(signature_hex) != 128:
+            return False
+        if any(c not in "0123456789abcdef" for c in public_key_hex + signature_hex):
+            return False
+        pub_b = bytes.fromhex(public_key_hex)
+        sig_b = bytes.fromhex(signature_hex)
+        r_enc = sig_b[:32]
+        s_int = int.from_bytes(sig_b[32:], "little")
+        if s_int >= _ED_L:
+            return False
+        a_pt = _ed_decode_strict(pub_b)
+        r_pt = _ed_decode_strict(r_enc)
+        k = int.from_bytes(hashlib.sha512(r_enc + pub_b + message).digest(), "little") % _ED_L
+        lhs = _ed_mul(8 * s_int, _ED_BASE)
+        rhs = _ed_add(_ed_mul(8, r_pt), _ed_mul(8 * k, a_pt))
+        return ((lhs[0] * rhs[2] - rhs[0] * lhs[2]) % _ED_P == 0) and (
+            (lhs[1] * rhs[2] - rhs[1] * lhs[2]) % _ED_P == 0
+        )
+    except Exception:
+        return False
 
 
 def _no_dup_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -75,6 +178,7 @@ def verify_quorum_certificate(
     *,
     member_ids: Sequence[str],
     member_secrets: Mapping[str, bytes] | None = None,
+    member_public_keys: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
     members_sorted = sorted(set(str(m) for m in member_ids))
     n_total = len(members_sorted)
@@ -83,9 +187,37 @@ def verify_quorum_certificate(
     q_min = (n_total // 2) + 1
 
     prop = cert_dict["proposal"]
-    exp_mem_dg = domain_digest("vld.quorum-membership.v1", {"lineage_id": str(prop["lineage_id"]), "member_ids": members_sorted})
+    mem_doc = cert_dict.get("membership", {})
+    sig_scheme = str(mem_doc.get("signature_scheme", "hmac-sha256"))
+    if sig_scheme not in ("hmac-sha256", "ed25519-rfc8032"):
+        raise VerificationError(f"Unsupported signature_scheme {sig_scheme!r}.")
+
+    cert_pks: dict[str, str] | None = None
+    if sig_scheme == "ed25519-rfc8032":
+        raw_pks = mem_doc.get("member_public_keys")
+        if not isinstance(raw_pks, Mapping) or sorted(str(k) for k in raw_pks.keys()) != members_sorted:
+            raise VerificationError("Ed25519 certificate missing complete member_public_keys.")
+        cert_pks = {str(k): str(raw_pks[k]) for k in members_sorted}
+        if member_public_keys is not None and {str(k): str(v) for k, v in member_public_keys.items()} != cert_pks:
+            raise VerificationError("Certificate member_public_keys disagrees with pinned public keys.")
+        exp_mem_dg = domain_digest(
+            "vld.quorum-membership.v1",
+            {
+                "lineage_id": str(prop["lineage_id"]),
+                "member_ids": members_sorted,
+                "member_public_keys": dict(sorted(cert_pks.items())),
+                "signature_scheme": "ed25519-rfc8032",
+            },
+        )
+    else:
+        if member_public_keys is not None:
+            raise VerificationError("Expected Ed25519 public-key quorum, got hmac-sha256.")
+        exp_mem_dg = domain_digest("vld.quorum-membership.v1", {"lineage_id": str(prop["lineage_id"]), "member_ids": members_sorted})
+
     if prop["membership_digest"] != exp_mem_dg:
         raise VerificationError("membership_digest mismatch.")
+    if list(mem_doc.get("member_ids", ())) != members_sorted or mem_doc.get("membership_digest") != exp_mem_dg:
+        raise VerificationError("membership object mismatch.")
 
     prop_body = {
         "lineage_id": str(prop["lineage_id"]),
@@ -104,6 +236,7 @@ def verify_quorum_certificate(
 
     votes = list(cert_dict["votes"])
     seen: set[str] = set()
+    norm_votes: list[dict[str, Any]] = []
     for v in votes:
         vid = str(v["voter_id"])
         if vid not in members_sorted or vid in seen:
@@ -116,54 +249,76 @@ def verify_quorum_certificate(
         ):
             raise VerificationError("Vote coordinates mismatch proposal.")
         seen.add(vid)
-        if member_secrets is not None:
-            if vid not in member_secrets:
-                raise VerificationError(f"Missing verification secret for voter {vid!r}.")
-            msg = canonical_bytes(
+        msg = canonical_bytes(
+            {
+                "domain": "vld.quorum-vote.v1",
+                "lineage_id": str(v["lineage_id"]),
+                "proposal_digest": str(v["proposal_digest"]),
+                "slot": int(v["slot"]),
+                "term": int(v["term"]),
+                "voter_id": vid,
+            }
+        )
+        if sig_scheme == "ed25519-rfc8032":
+            assert cert_pks is not None
+            if v.get("signature_scheme") != "ed25519-rfc8032" or "signature_hmac" in v:
+                raise VerificationError(f"Vote from {vid!r} lacks ed25519-rfc8032 scheme.")
+            sig_ed = str(v.get("signature_ed25519", ""))
+            if not verify_ed25519_signature(cert_pks[vid], msg, sig_ed):
+                raise VerificationError(f"Ed25519 signature mismatch for {vid!r}.")
+            norm_votes.append(
                 {
-                    "domain": "vld.quorum-vote.v1",
                     "lineage_id": str(v["lineage_id"]),
                     "proposal_digest": str(v["proposal_digest"]),
+                    "signature_ed25519": sig_ed,
+                    "signature_scheme": "ed25519-rfc8032",
                     "slot": int(v["slot"]),
                     "term": int(v["term"]),
                     "voter_id": vid,
                 }
             )
-            sig = hmac.new(member_secrets[vid], msg, hashlib.sha256).hexdigest()
-            if not hmac.compare_digest(str(v["signature_hmac"]), sig):
-                raise VerificationError(f"HMAC signature mismatch for {vid!r}.")
-
-    if 2 * len(seen) <= n_total:
-        raise VerificationError("Quorum strict majority 2q > N failed.")
-
-    cert_body = {
-        "membership": {
-            "lineage_id": str(prop["lineage_id"]),
-            "member_ids": members_sorted,
-            "membership_digest": exp_mem_dg,
-            "quorum_size": q_min,
-        },
-        "proposal": {**prop_body, "proposal_digest": prop_dg},
-        "schema": "vld.quorum-certificate.v1",
-        "votes": sorted(
-            [
+        else:
+            if member_secrets is not None:
+                if vid not in member_secrets:
+                    raise VerificationError(f"Missing verification secret for voter {vid!r}.")
+                sig = hmac.new(member_secrets[vid], msg, hashlib.sha256).hexdigest()
+                if not hmac.compare_digest(str(v["signature_hmac"]), sig):
+                    raise VerificationError(f"HMAC signature mismatch for {vid!r}.")
+            norm_votes.append(
                 {
                     "lineage_id": str(v["lineage_id"]),
                     "proposal_digest": str(v["proposal_digest"]),
                     "signature_hmac": str(v["signature_hmac"]),
                     "slot": int(v["slot"]),
                     "term": int(v["term"]),
-                    "voter_id": str(v["voter_id"]),
+                    "voter_id": vid,
                 }
-                for v in votes
-            ],
-            key=lambda item: item["voter_id"],
-        ),
+            )
+
+    if 2 * len(seen) <= n_total:
+        raise VerificationError("Quorum strict majority 2q > N failed.")
+
+    mem_canon: dict[str, Any] = {
+        "lineage_id": str(prop["lineage_id"]),
+        "member_ids": members_sorted,
+        "membership_digest": exp_mem_dg,
+        "quorum_size": q_min,
+    }
+    if sig_scheme == "ed25519-rfc8032":
+        assert cert_pks is not None
+        mem_canon["member_public_keys"] = dict(sorted(cert_pks.items()))
+        mem_canon["signature_scheme"] = "ed25519-rfc8032"
+
+    cert_body = {
+        "membership": mem_canon,
+        "proposal": {**prop_body, "proposal_digest": prop_dg},
+        "schema": "vld.quorum-certificate.v1",
+        "votes": sorted(norm_votes, key=lambda item: item["voter_id"]),
     }
     cert_dg = domain_digest("vld.quorum-certificate.v1", cert_body)
     if cert_dict.get("certificate_digest") != cert_dg:
         raise VerificationError("certificate_digest mismatch.")
-    return {"certificate_digest": cert_dg, "votes_verified": len(seen)}
+    return {"certificate_digest": cert_dg, "signature_scheme": sig_scheme, "votes_verified": len(seen)}
 
 
 def verify_continuity_chain(
@@ -174,6 +329,7 @@ def verify_continuity_chain(
     expected_stages: Sequence[Mapping[str, str]] | None = None,
     quorum_member_ids: Sequence[str] | None = None,
     quorum_member_secrets: Mapping[str, bytes] | None = None,
+    quorum_member_public_keys: Mapping[str, str] | None = None,
     require_verified_tag: bool = True,
 ) -> dict[str, Any]:
     if not receipts:
@@ -205,8 +361,18 @@ def verify_continuity_chain(
                 raise VerificationError(f"Stage {idx} stage specification mismatch.")
 
         q_cert = rcpt["quorum_certificate"]
-        if quorum_member_ids is not None:
-            verify_quorum_certificate(q_cert, member_ids=quorum_member_ids, member_secrets=quorum_member_secrets)
+        if quorum_member_ids is not None or quorum_member_public_keys is not None:
+            m_ids = (
+                quorum_member_ids
+                if quorum_member_ids is not None
+                else sorted(str(k) for k in (quorum_member_public_keys or {}).keys())
+            )
+            verify_quorum_certificate(
+                q_cert,
+                member_ids=m_ids,
+                member_secrets=quorum_member_secrets,
+                member_public_keys=quorum_member_public_keys,
+            )
 
         state_m = rcpt["state_manifest"]
         slot_dg = domain_digest(
@@ -328,3 +494,38 @@ def verify_snc_1d_capsule(capsule: Mapping[str, Any]) -> dict[str, Any]:
         if y_ref is None or y_net != y_ref:
             raise VerificationError(f"SNC capsule disagrees at x={x}.")
     return {"points_checked": len(pts), "status": "VERIFIED"}
+
+
+def verify_precision_decision_bundle(bundle: Mapping[str, Any]) -> dict[str, Any]:
+    if bundle.get("schema") != "vld.certified-decision-bundle.v1":
+        raise VerificationError("Invalid precision decision bundle schema.")
+    enc = bundle["enclosure"]
+    cur_r = Fraction(enc["initial_error_radius"])
+    if cur_r < 0:
+        raise VerificationError("Negative initial_error_radius.")
+    for st in enc["steps"]:
+        lip = Fraction(st["lipschitz_upper"])
+        loc = Fraction(st["local_error_radius"])
+        if lip < 0 or loc < 0:
+            raise VerificationError("Negative Lipschitz or local error.")
+        cur_r = lip * cur_r + loc
+    if Fraction(enc["terminal_error_radius"]) < cur_r:
+        raise VerificationError("terminal_error_radius under-approximates propagated rational error.")
+    exp_enc_dg = domain_digest(
+        "vld.error-enclosure-certificate.v1",
+        {
+            "initial_error_radius": str(enc["initial_error_radius"]),
+            "steps": list(enc["steps"]),
+            "terminal_error_radius": str(enc["terminal_error_radius"]),
+            "trajectory_id": str(enc["trajectory_id"]),
+        },
+    )
+    if str(enc.get("certificate_digest", "")) != exp_enc_dg:
+        raise VerificationError("ErrorEnclosureCertificate digest mismatch.")
+    obs_m = Fraction(bundle["observed_logit_margin"])
+    worst_p = Fraction(bundle["worst_case_logit_perturbation"])
+    cert_m = Fraction(bundle["certified_lower_margin"])
+    cert_inv = bool(bundle["certified_invariant"])
+    if obs_m - worst_p != cert_m or cert_inv != (cert_m > 0):
+        raise VerificationError("Inconsistent certified_lower_margin or certified_invariant.")
+    return {"certified_invariant": cert_inv, "propagated_error_radius": str(cur_r), "status": "VERIFIED"}
