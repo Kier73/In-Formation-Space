@@ -1,0 +1,59 @@
+name: VLD Phase 9 Verifiers, Fluid Transit, Arbitration & Pretrained Crash Continuity
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "bridges/vld-independent-verifier/**"
+      - "experiments/recovery-identity-and-verifier-soundness/**"
+      - "experiments/fluid-in-transit-computation/**"
+      - "experiments/multi-model-virtual-layer-arbitration/**"
+      - "experiments/pretrained-model-crash-continuity/**"
+      - ".github/workflows/vld-phase9-verification.yml"
+  pull_request:
+    paths:
+      - "bridges/vld-independent-verifier/**"
+      - "experiments/recovery-identity-and-verifier-soundness/**"
+      - "experiments/fluid-in-transit-computation/**"
+      - "experiments/multi-model-virtual-layer-arbitration/**"
+      - "experiments/pretrained-model-crash-continuity/**"
+      - ".github/workflows/vld-phase9-verification.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-vld-bridges-and-experiments:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js 22 for cross-language standalone verifier
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Syntax-check Python and Node.js standalone verifiers
+        run: |
+          python -m py_compile bridges/vld-independent-verifier/vld_standalone_verifier.py
+          python -m py_compile bridges/vld-independent-verifier/test_vld_independent_verifier.py
+          python -m py_compile experiments/recovery-identity-and-verifier-soundness/test_recovery_soundness.py
+          python -m py_compile experiments/fluid-in-transit-computation/test_fluid_transit_study.py
+          python -m py_compile experiments/multi-model-virtual-layer-arbitration/test_live_arbitration_evidence.py
+          python -m py_compile experiments/pretrained-model-crash-continuity/test_pretrained_crash_continuity.py
+          node --check bridges/vld-independent-verifier/vld_standalone_verifier.mjs
+
+      - name: Run VIV-001, RIV-AUDIT-001, FIT-001, MVA-001 and PMC-001 suites
+        run: |
+          python -m unittest bridges/vld-independent-verifier/test_vld_independent_verifier.py -v
+          python -m unittest experiments/recovery-identity-and-verifier-soundness/test_recovery_soundness.py -v
+          python -m unittest experiments/fluid-in-transit-computation/test_fluid_transit_study.py -v
+          python -m unittest experiments/multi-model-virtual-layer-arbitration/test_live_arbitration_evidence.py -v
+          python -m unittest experiments/pretrained-model-crash-continuity/test_pretrained_crash_continuity.py -v

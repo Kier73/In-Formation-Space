@@ -1,0 +1,885 @@
+{
+  "benchmark_id": "PMC-001",
+  "continuity_bundle": {
+    "initial_input": {
+      "token_ids": [
+        785,
+        6722,
+        315,
+        9625,
+        374
+      ]
+    },
+    "pipeline_id": "pmc001.qwen3_0_6b.pipe",
+    "quorum_member_ids": [
+      "q0",
+      "q1",
+      "q2"
+    ],
+    "quorum_member_secrets_utf8": {
+      "q0": "pmc001-sec-q0-0123456789abcdef",
+      "q1": "pmc001-sec-q1-0123456789abcdef",
+      "q2": "pmc001-sec-q2-0123456789abcdef"
+    },
+    "receipts": [
+      {
+        "clock_bridge_digest": null,
+        "continuity_digest": "c3934982ec9034ebf3b5990d0abce72e756c22f8689955e26fc6231199bfd068",
+        "host_id": "env.alpha.host",
+        "oracle_verdict": "PASS:qwen3_L0_6|VERIFIED:verified_hidden_L6_rms=0.6098",
+        "pipeline_id": "pmc001.qwen3_0_6b.pipe",
+        "prev_continuity_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "quorum_cert_digest": "75f5fb7c571aa922804f623e607088669d6cfca23a1fb4c620c330c6f152267e",
+        "quorum_certificate": {
+          "certificate_digest": "75f5fb7c571aa922804f623e607088669d6cfca23a1fb4c620c330c6f152267e",
+          "membership": {
+            "lineage_id": "pmc001.qwen3.lineage",
+            "member_ids": [
+              "q0",
+              "q1",
+              "q2"
+            ],
+            "membership_digest": "a1f87ab88552deca50a9989757db98addc15fe90248b3119e0d2e614295adba7",
+            "quorum_size": 2
+          },
+          "proposal": {
+            "lineage_id": "pmc001.qwen3.lineage",
+            "membership_digest": "a1f87ab88552deca50a9989757db98addc15fe90248b3119e0d2e614295adba7",
+            "operation_id": "pmc001.qwen3_0_6b.pipe.stage.0",
+            "predecessor_manifest_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+            "proposal_digest": "f71d90d043bcd890c15d248e56de0196c7d4187f7fa40a709fc06a8cbfa6c5c7",
+            "proposer_id": "env.alpha.host",
+            "schema": "vld.quorum-proposal.v1",
+            "slot": 1,
+            "state_manifest_digest": "3f688a0a003fa06e225c52d8547b92bbbfde3a66c39f818304172f2ab605f161",
+            "term": 1
+          },
+          "schema": "vld.quorum-certificate.v1",
+          "votes": [
+            {
+              "lineage_id": "pmc001.qwen3.lineage",
+              "proposal_digest": "f71d90d043bcd890c15d248e56de0196c7d4187f7fa40a709fc06a8cbfa6c5c7",
+              "signature_hmac": "673258e6a261e70310d0a97964ee13e58a4f243162dfbd9df554b4e12a68dd01",
+              "slot": 1,
+              "term": 1,
+              "voter_id": "q0"
+            },
+            {
+              "lineage_id": "pmc001.qwen3.lineage",
+              "proposal_digest": "f71d90d043bcd890c15d248e56de0196c7d4187f7fa40a709fc06a8cbfa6c5c7",
+              "signature_hmac": "a0c852cb8f889c62c91cc9550fda80349c7d9e2ff475e629391da56fa2508533",
+              "slot": 1,
+              "term": 1,
+              "voter_id": "q1"
+            }
+          ]
+        },
+        "scheduler_id": "sched.qwen3.env.alpha",
+        "schema": "vld.cross-ground-continuity-receipt.v1",
+        "source_ground_fingerprint": "ca2b5ac67707f187a433280d84206d62020388bf0082657699a5c2e54ba25184",
+        "source_representation": "prompt_token_ids",
+        "stage_cost": {
+          "bytes_moved": 157696.0,
+          "compute_ops": 35840.0,
+          "latency_ms": 14.0,
+          "verification_ops": 1024.0
+        },
+        "stage_id": "qwen3_stage_0",
+        "stage_index": 0,
+        "state_manifest": {
+          "chunks": [
+            {
+              "byte_length": 4096,
+              "index": 0,
+              "page_digest": "79bb697330b3872629fbb7db80de6ab2206db49177f4d88c4172b858e5e3dba6"
+            },
+            {
+              "byte_length": 4096,
+              "index": 1,
+              "page_digest": "bc1baaf1879187bdfa6104b22f2cb7061179534d220269ab95ca37f70a123e40"
+            },
+            {
+              "byte_length": 4096,
+              "index": 2,
+              "page_digest": "163c78e975d20d5bff1f0e0da231008ff045c812e59a295aa39568f233fd1c39"
+            },
+            {
+              "byte_length": 4096,
+              "index": 3,
+              "page_digest": "f35a3ca845f31b28c2274566da472bfa00677c3795817ef32e7e26fcbb6e80ae"
+            },
+            {
+              "byte_length": 4096,
+              "index": 4,
+              "page_digest": "fae8e1b1e67e591d247d9294a3c1695d6eb12d544507b0beddee545cd56d926c"
+            },
+            {
+              "byte_length": 4096,
+              "index": 5,
+              "page_digest": "a0372a11f1461d893c0368a734349e390eb02c891b8dff797721d198a402875b"
+            },
+            {
+              "byte_length": 4096,
+              "index": 6,
+              "page_digest": "5b23f5c61b67ba044381786176d64f1638e1c1d0212007406dbaab8add0aea42"
+            },
+            {
+              "byte_length": 4096,
+              "index": 7,
+              "page_digest": "0d98d473b11119a817cac390cbf5c3db68b439c5dfa4e1c4771bebf8e08cd952"
+            },
+            {
+              "byte_length": 4096,
+              "index": 8,
+              "page_digest": "0e53bf2ccb0ab3ca8c5c2e74212f0f649bec403a1974d7ced8844d0dda9ef5bd"
+            },
+            {
+              "byte_length": 4096,
+              "index": 9,
+              "page_digest": "fb529f240ae167266ceacbca4faac90783510d3a65f4d1a4367ef01319cd7956"
+            },
+            {
+              "byte_length": 4096,
+              "index": 10,
+              "page_digest": "0f3b0cce0117c44e4e039d89e9f0a58d47b5472b59f72a6d08d6dedcdc8a61b0"
+            },
+            {
+              "byte_length": 4096,
+              "index": 11,
+              "page_digest": "561eac656c403c52123481a810219cd9c95c49593ad9cbfbe499084109bc14a7"
+            },
+            {
+              "byte_length": 4096,
+              "index": 12,
+              "page_digest": "694e05af74d2cfdf1da1a36defa65c211df1d580ddc62d3af8cc9500027b94c2"
+            },
+            {
+              "byte_length": 4096,
+              "index": 13,
+              "page_digest": "3abd3a2aa41023a5394fde00ba59152634dfa4c90a27fc9df73e892278eb56e5"
+            },
+            {
+              "byte_length": 4096,
+              "index": 14,
+              "page_digest": "4efff25a8534d1de8b8eac9ba64670c64b7920e71290aca5de8d73cc6ed9e55e"
+            },
+            {
+              "byte_length": 4096,
+              "index": 15,
+              "page_digest": "a1db117085deb9a90667a9de19b6e7c991b70cb2fd871fb40e301a4e3dda25a7"
+            },
+            {
+              "byte_length": 4096,
+              "index": 16,
+              "page_digest": "9e22b4081bc64867b38495405b9aca8a7021f53ded8bffe0cf22b1a751b9c771"
+            },
+            {
+              "byte_length": 4096,
+              "index": 17,
+              "page_digest": "7ea6e0295df7b68e61499db3608a0a54c8c527fa4b7b9e471cb5c1b593bbc568"
+            },
+            {
+              "byte_length": 4096,
+              "index": 18,
+              "page_digest": "6873472bf6a80fd91d51db2fa271bd95b6f23953a6cc9abf05738065c71c5049"
+            },
+            {
+              "byte_length": 4096,
+              "index": 19,
+              "page_digest": "bea332a48c0c6ac2fa546a92e25e295f955d7653752aacd688a7b616d3266f7a"
+            },
+            {
+              "byte_length": 4096,
+              "index": 20,
+              "page_digest": "57c64ce53545609346275568d141ce6a1b7cd3d64ac6e1d52b718c94fa6a0f74"
+            },
+            {
+              "byte_length": 4096,
+              "index": 21,
+              "page_digest": "e09d6711aaacde53ae5b647c6c8c75488210a5d192f803beecc2ee6d4350e07c"
+            },
+            {
+              "byte_length": 4096,
+              "index": 22,
+              "page_digest": "9d97656b3581085a01d5cbb1a39d575dbd90144dccae8757ac07ea48f33ff538"
+            },
+            {
+              "byte_length": 4096,
+              "index": 23,
+              "page_digest": "801a0fec5cdb70311361cf607b49dc0d3dd562def843e4afb5f4761b6780041b"
+            },
+            {
+              "byte_length": 3049,
+              "index": 24,
+              "page_digest": "ee3d4dbd2ac52a16a00de85155fcaa8dce950b83064390d1f2b737b27d62d950"
+            }
+          ],
+          "content_digest": "7f379f37784a0a9242971cc6520ce6af210c3afabef986fda80f386335054033",
+          "kind": "vld.m1-manifest.v1",
+          "manifest_digest": "b4c1714ba4626266479917d88739e74bd1b462aeb1069ecf1004b50df5ec06ef",
+          "media_type": "application/json",
+          "page_size": 4096,
+          "schema_version": 1,
+          "size_bytes": 101353
+        },
+        "target_ground_fingerprint": "fdb535627cba58dce80f879e0931227488192f04ab4deee94e16dc5fc76b9b67",
+        "target_representation": "hidden_after_L6",
+        "temporal": {
+          "clock": {
+            "env.alpha.host": {
+              "encoding": "canonical-decimal-string",
+              "kind": "integer",
+              "schema": "vld.temporal-numeric.v2",
+              "value": "1"
+            }
+          },
+          "epoch": {
+            "encoding": "canonical-decimal-string",
+            "kind": "integer",
+            "schema": "vld.temporal-numeric.v2",
+            "value": "1"
+          },
+          "scheduler_id": "sched.qwen3.env.alpha",
+          "schema": "vld.temporal-coordinate.v2",
+          "wall_hint": null
+        }
+      },
+      {
+        "clock_bridge_digest": null,
+        "continuity_digest": "ae65f8a3778c73e5631c0c826344776c256d4e2990b4894a1c85082cbdd5d807",
+        "host_id": "env.alpha.host",
+        "oracle_verdict": "PASS:qwen3_L7_13|VERIFIED:verified_hidden_L13_rms=1.5641",
+        "pipeline_id": "pmc001.qwen3_0_6b.pipe",
+        "prev_continuity_digest": "c3934982ec9034ebf3b5990d0abce72e756c22f8689955e26fc6231199bfd068",
+        "quorum_cert_digest": "6a4f534ce6d7483d81a190db9c1b3fbb46fb4e56a237c18fb3e1c0d2df3393a4",
+        "quorum_certificate": {
+          "certificate_digest": "6a4f534ce6d7483d81a190db9c1b3fbb46fb4e56a237c18fb3e1c0d2df3393a4",
+          "membership": {
+            "lineage_id": "pmc001.qwen3.lineage",
+            "member_ids": [
+              "q0",
+              "q1",
+              "q2"
+            ],
+            "membership_digest": "a1f87ab88552deca50a9989757db98addc15fe90248b3119e0d2e614295adba7",
+            "quorum_size": 2
+          },
+          "proposal": {
+            "lineage_id": "pmc001.qwen3.lineage",
+            "membership_digest": "a1f87ab88552deca50a9989757db98addc15fe90248b3119e0d2e614295adba7",
+            "operation_id": "pmc001.qwen3_0_6b.pipe.stage.1",
+            "predecessor_manifest_digest": "3f688a0a003fa06e225c52d8547b92bbbfde3a66c39f818304172f2ab605f161",
+            "proposal_digest": "847b07e48970f26a45cdada8ab264fd491149cfbb199de5ec4b8a21acc6c7236",
+            "proposer_id": "env.alpha.host",
+            "schema": "vld.quorum-proposal.v1",
+            "slot": 2,
+            "state_manifest_digest": "97b2ee5d87f65084fe2a78a2a3fa99941fc58b56c8f0533945638204b7390500",
+            "term": 1
+          },
+          "schema": "vld.quorum-certificate.v1",
+          "votes": [
+            {
+              "lineage_id": "pmc001.qwen3.lineage",
+              "proposal_digest": "847b07e48970f26a45cdada8ab264fd491149cfbb199de5ec4b8a21acc6c7236",
+              "signature_hmac": "53e6216802040b3e2e2a748e9f2c6566191421d4b50176f08fd297f47a9bd2be",
+              "slot": 2,
+              "term": 1,
+              "voter_id": "q0"
+            },
+            {
+              "lineage_id": "pmc001.qwen3.lineage",
+              "proposal_digest": "847b07e48970f26a45cdada8ab264fd491149cfbb199de5ec4b8a21acc6c7236",
+              "signature_hmac": "e959d35b06378dc52816591c7cb7fd00fc0e8350cea8c346234e818daa896e81",
+              "slot": 2,
+              "term": 1,
+              "voter_id": "q1"
+            }
+          ]
+        },
+        "scheduler_id": "sched.qwen3.env.alpha",
+        "schema": "vld.cross-ground-continuity-receipt.v1",
+        "source_ground_fingerprint": "fdb535627cba58dce80f879e0931227488192f04ab4deee94e16dc5fc76b9b67",
+        "source_representation": "hidden_after_L6",
+        "stage_cost": {
+          "bytes_moved": 157696.0,
+          "compute_ops": 35840.0,
+          "latency_ms": 14.0,
+          "verification_ops": 1024.0
+        },
+        "stage_id": "qwen3_stage_1",
+        "stage_index": 1,
+        "state_manifest": {
+          "chunks": [
+            {
+              "byte_length": 4096,
+              "index": 0,
+              "page_digest": "0389f8cb546646432b227b5073fd3ad0eed0f2bef2f704cf98bf880366137471"
+            },
+            {
+              "byte_length": 4096,
+              "index": 1,
+              "page_digest": "bd211ebadf385105e4a51ad11f917206a8e8a4f4f81026e983a76f04096f697c"
+            },
+            {
+              "byte_length": 4096,
+              "index": 2,
+              "page_digest": "e5ba44a1504e55b3e28e696db703bbb5ad2c247659691cbad7dfa6caa3c8b275"
+            },
+            {
+              "byte_length": 4096,
+              "index": 3,
+              "page_digest": "a9eabeec21dd39482d226d5ef4d430c2182c837caea6bf8f64f791ca6b973778"
+            },
+            {
+              "byte_length": 4096,
+              "index": 4,
+              "page_digest": "8e07ea12743260c1e315946892578d3155f95eeb48bb114365a0b7632ec529f4"
+            },
+            {
+              "byte_length": 4096,
+              "index": 5,
+              "page_digest": "de28cc047b6ccf934ba9f5e7db5dfb7bc517cc8343e8735d6dad1864f41338b1"
+            },
+            {
+              "byte_length": 4096,
+              "index": 6,
+              "page_digest": "e8cc7a13cbeb08528be0fbb875a50c96db647e87f28ad2687cf3f8b7eef131fe"
+            },
+            {
+              "byte_length": 4096,
+              "index": 7,
+              "page_digest": "471abe65257af1c8655de169331cc860e3c36a7e1d71bf7b7dfc3738d6f1b7e2"
+            },
+            {
+              "byte_length": 4096,
+              "index": 8,
+              "page_digest": "f686318b1059505755a19254f89f41cb39786b61e24e17eb4809c38b5c9863b2"
+            },
+            {
+              "byte_length": 4096,
+              "index": 9,
+              "page_digest": "b80eb104c51e521a2cee66d4276e88596565945902ccf1236ba309ac17c78e80"
+            },
+            {
+              "byte_length": 4096,
+              "index": 10,
+              "page_digest": "2487ab0e266f7260dace64e1d1dd3cce3974dccb8e446b702f923087c4c63274"
+            },
+            {
+              "byte_length": 4096,
+              "index": 11,
+              "page_digest": "c13e69dd29f8ce0ba1a1cca4a780fcef23ca2eac7298a82388af1fb697fe2034"
+            },
+            {
+              "byte_length": 4096,
+              "index": 12,
+              "page_digest": "3e709fd7dc3386062a1888309d4342c70fdc9ac1f47f0f0174d05d1124480d29"
+            },
+            {
+              "byte_length": 4096,
+              "index": 13,
+              "page_digest": "ac4078fccfbcb21608444a42c3351ce2c0238bfd02429b1fd7f1738e5c7a8d10"
+            },
+            {
+              "byte_length": 4096,
+              "index": 14,
+              "page_digest": "6ddc4b9070745cf314eb31e344fe7a6b2941eee55247600330d0df7b66b174bf"
+            },
+            {
+              "byte_length": 4096,
+              "index": 15,
+              "page_digest": "aaa58a5a0855e2ef1a34f0326c09a189a036c8c4d979efd71daa406fb9c57a2c"
+            },
+            {
+              "byte_length": 4096,
+              "index": 16,
+              "page_digest": "fbc78fda0b7441c37c7f7c71d9773aefb54437caa605adc615d92db0df8eb371"
+            },
+            {
+              "byte_length": 4096,
+              "index": 17,
+              "page_digest": "0c251f8c68e2e0ebf81b37bb71cb966e0a703e3f14d8c766667d587033c24fc4"
+            },
+            {
+              "byte_length": 4096,
+              "index": 18,
+              "page_digest": "94cac4a820590f024655901a34d779440a56e974efeda3109bb3d4d83de47729"
+            },
+            {
+              "byte_length": 4096,
+              "index": 19,
+              "page_digest": "fc2adf74eb68727fbbc8185df78588929c79b4d3dfb241549e34dd8a31532464"
+            },
+            {
+              "byte_length": 4096,
+              "index": 20,
+              "page_digest": "5d83f90e318c7b81da2b57b1d8bd1198711348fee7d1bcc6e7c289504051ae4d"
+            },
+            {
+              "byte_length": 4096,
+              "index": 21,
+              "page_digest": "0c2276a031b50e1409b801825bc5716553133028ca9d3934e2e098f70efc9705"
+            },
+            {
+              "byte_length": 4096,
+              "index": 22,
+              "page_digest": "9a683c6097dcfdc4006c0fbcada74c537d22ae50e41d4f4f49e08d6f10f86d2a"
+            },
+            {
+              "byte_length": 4096,
+              "index": 23,
+              "page_digest": "42ff2bff761567c47aa072a086f002a20231ce60c87d4b0c3368e6d1ab5483a4"
+            },
+            {
+              "byte_length": 2064,
+              "index": 24,
+              "page_digest": "65c4852e7b0c3fcc39daa3ed764604bad1f3e63dd057f142c4db4e5c049d3ba3"
+            }
+          ],
+          "content_digest": "6298a2279af9eec6687162d3e5ac5907aee5c683a80d2581a13bdc179acb77e1",
+          "kind": "vld.m1-manifest.v1",
+          "manifest_digest": "a2efb846ca26c19d0324bb1f78ab131c9f1df81d75fdfbf181257f8522c6127e",
+          "media_type": "application/json",
+          "page_size": 4096,
+          "schema_version": 1,
+          "size_bytes": 100368
+        },
+        "target_ground_fingerprint": "8f234307c4002ce0e7708e706403ab4078903fb5723cd61c244ee157d7976866",
+        "target_representation": "hidden_after_L13",
+        "temporal": {
+          "clock": {
+            "env.alpha.host": {
+              "encoding": "canonical-decimal-string",
+              "kind": "integer",
+              "schema": "vld.temporal-numeric.v2",
+              "value": "2"
+            }
+          },
+          "epoch": {
+            "encoding": "canonical-decimal-string",
+            "kind": "integer",
+            "schema": "vld.temporal-numeric.v2",
+            "value": "1"
+          },
+          "scheduler_id": "sched.qwen3.env.alpha",
+          "schema": "vld.temporal-coordinate.v2",
+          "wall_hint": null
+        }
+      },
+      {
+        "clock_bridge_digest": "2c73dd0dee4af6abc07fd54975103bedb8a92b2ff54894375ca029f58b9c7220",
+        "continuity_digest": "4c0327f808a3956f006b0d8e594baff3412f9f17effbb7f0788b6a92816411d3",
+        "host_id": "env.beta.host",
+        "oracle_verdict": "PASS:qwen3_L14_20|VERIFIED:verified_hidden_L20_rms=5.3730",
+        "pipeline_id": "pmc001.qwen3_0_6b.pipe",
+        "prev_continuity_digest": "ae65f8a3778c73e5631c0c826344776c256d4e2990b4894a1c85082cbdd5d807",
+        "quorum_cert_digest": "cce411a30e81dc11a94822b9cc002e60b2330cde58c53c89a3f4ec5d8c961d5a",
+        "quorum_certificate": {
+          "certificate_digest": "cce411a30e81dc11a94822b9cc002e60b2330cde58c53c89a3f4ec5d8c961d5a",
+          "membership": {
+            "lineage_id": "pmc001.qwen3.lineage",
+            "member_ids": [
+              "q0",
+              "q1",
+              "q2"
+            ],
+            "membership_digest": "a1f87ab88552deca50a9989757db98addc15fe90248b3119e0d2e614295adba7",
+            "quorum_size": 2
+          },
+          "proposal": {
+            "lineage_id": "pmc001.qwen3.lineage",
+            "membership_digest": "a1f87ab88552deca50a9989757db98addc15fe90248b3119e0d2e614295adba7",
+            "operation_id": "pmc001.qwen3_0_6b.pipe.stage.2",
+            "predecessor_manifest_digest": "97b2ee5d87f65084fe2a78a2a3fa99941fc58b56c8f0533945638204b7390500",
+            "proposal_digest": "5d53c12f1c466590720cb37b476264060fd8507e6bf6165f05ff854388e4deca",
+            "proposer_id": "env.beta.host",
+            "schema": "vld.quorum-proposal.v1",
+            "slot": 3,
+            "state_manifest_digest": "01308f8f741c5ae427e00e156df88da674add3d8f1a2911a5e592dd55930f983",
+            "term": 2
+          },
+          "schema": "vld.quorum-certificate.v1",
+          "votes": [
+            {
+              "lineage_id": "pmc001.qwen3.lineage",
+              "proposal_digest": "5d53c12f1c466590720cb37b476264060fd8507e6bf6165f05ff854388e4deca",
+              "signature_hmac": "6d77147b76914a17f9ddc33d7d19477c97775c2ec2f278f26a24befc8801beb2",
+              "slot": 3,
+              "term": 2,
+              "voter_id": "q1"
+            },
+            {
+              "lineage_id": "pmc001.qwen3.lineage",
+              "proposal_digest": "5d53c12f1c466590720cb37b476264060fd8507e6bf6165f05ff854388e4deca",
+              "signature_hmac": "6024fcad7d5b5c88370e84607918cb964f5b41d68e43a9a4ecd23c60d5c7184f",
+              "slot": 3,
+              "term": 2,
+              "voter_id": "q2"
+            }
+          ]
+        },
+        "scheduler_id": "sched.qwen3.env.beta",
+        "schema": "vld.cross-ground-continuity-receipt.v1",
+        "source_ground_fingerprint": "8f234307c4002ce0e7708e706403ab4078903fb5723cd61c244ee157d7976866",
+        "source_representation": "hidden_after_L13",
+        "stage_cost": {
+          "bytes_moved": 157696.0,
+          "compute_ops": 35840.0,
+          "latency_ms": 14.0,
+          "verification_ops": 1024.0
+        },
+        "stage_id": "qwen3_stage_2",
+        "stage_index": 2,
+        "state_manifest": {
+          "chunks": [
+            {
+              "byte_length": 4096,
+              "index": 0,
+              "page_digest": "593eac10cd0f9f6886296ab17a68ecd0868ed4d33512c63d6842de76c53aa63d"
+            },
+            {
+              "byte_length": 4096,
+              "index": 1,
+              "page_digest": "392e6d6b763e564cdc79075f34d0482666f1780a95416531cf596a5d75ac71e0"
+            },
+            {
+              "byte_length": 4096,
+              "index": 2,
+              "page_digest": "6facea49dfdcf113f87c7bcbede90169f8b3e2e13555f5b4fc904ff323eaa3cb"
+            },
+            {
+              "byte_length": 4096,
+              "index": 3,
+              "page_digest": "79200e9c1644dd16e837f09fc7ff537e61b835114f7aa0ea1164d56a6ea5bbb3"
+            },
+            {
+              "byte_length": 4096,
+              "index": 4,
+              "page_digest": "c09c4d40e9332b84da0502749b9aa08aa0ff0eb85f1cad5b302a884622700592"
+            },
+            {
+              "byte_length": 4096,
+              "index": 5,
+              "page_digest": "ef4ee0194a0765c55b800d4c62fbb5b9ebd1f54a65806dd84d0f733230cee395"
+            },
+            {
+              "byte_length": 4096,
+              "index": 6,
+              "page_digest": "3a53bbe752c52bb4b5b94b5a16e8a8f6501a4f16f6c14e20870e6ecea30f2e56"
+            },
+            {
+              "byte_length": 4096,
+              "index": 7,
+              "page_digest": "47da628b8222d2ad4299ad0ec8676ec23b4c1f8f5e132aa67e5eb9b6a70d6945"
+            },
+            {
+              "byte_length": 4096,
+              "index": 8,
+              "page_digest": "da4d056cd23593ad990a7f1fe13429d43c4d44fc7917872d0cf97f60b1be09f0"
+            },
+            {
+              "byte_length": 4096,
+              "index": 9,
+              "page_digest": "30daac646c49fac0afa1cf34d0d10b7e8f3688c355fe1442f8c108259cee27ef"
+            },
+            {
+              "byte_length": 4096,
+              "index": 10,
+              "page_digest": "1e6b76dc365f575363d56487a14da38b17a8df31e14909cf6b840d54d0083da9"
+            },
+            {
+              "byte_length": 4096,
+              "index": 11,
+              "page_digest": "3fdfec74e5b87b6e403f92ce074eb966927a552ca7e03976e4c2bfd7769de10d"
+            },
+            {
+              "byte_length": 4096,
+              "index": 12,
+              "page_digest": "980f4878499bff418a483294e169e0a597740bada82a2051e689aa079523217d"
+            },
+            {
+              "byte_length": 4096,
+              "index": 13,
+              "page_digest": "320bb4aefb5930ba75ccfe737d0017cf2b8376742845280e3e611eab49774230"
+            },
+            {
+              "byte_length": 4096,
+              "index": 14,
+              "page_digest": "6c22b11fb4cb7900589829dbd554671b3d0c3590492863bc4b5a0deb9c5abf1a"
+            },
+            {
+              "byte_length": 4096,
+              "index": 15,
+              "page_digest": "891b130d899dabf416ca99bdf1275dfe1e30ff2d4e1ad1a7320ecc781d174669"
+            },
+            {
+              "byte_length": 4096,
+              "index": 16,
+              "page_digest": "709623516f3596f581d9f46c0a75420fe669205e6f4d511b15ac705a987e3534"
+            },
+            {
+              "byte_length": 4096,
+              "index": 17,
+              "page_digest": "4880e8beb035291401ef4e3cdd61f24b18215549bff9e9c7f7b24f4f6f8bb557"
+            },
+            {
+              "byte_length": 4096,
+              "index": 18,
+              "page_digest": "6c21fc58d35515bf84712b5b6e3385d5b9b0208853627dedc444c3fafd25a1a2"
+            },
+            {
+              "byte_length": 4096,
+              "index": 19,
+              "page_digest": "6f0d3b254248939bd77c2f56058cebc44362e9cf38fa776e3be4749b60c060a1"
+            },
+            {
+              "byte_length": 4096,
+              "index": 20,
+              "page_digest": "e6fdfe015c46c88540420b7feb9724dc864fd67bc924596c76b79ffaa31df638"
+            },
+            {
+              "byte_length": 4096,
+              "index": 21,
+              "page_digest": "1c5d136e9a5d70294b837820d4c906496aec08eff49203970bf3d105b97d930f"
+            },
+            {
+              "byte_length": 4096,
+              "index": 22,
+              "page_digest": "1cfe024e3a086bc9d8f699d66e1bf2e9df9201470ea69db711aed36fe4eefb56"
+            },
+            {
+              "byte_length": 3852,
+              "index": 23,
+              "page_digest": "58e02678fb4bff62bc4ece8f77d2d961d4c31e688c233b9f4d7738800acb5fd1"
+            }
+          ],
+          "content_digest": "84024a52c38bbf6b24f9877630ac36280d5b45ac57a69d37850eedf343e5509f",
+          "kind": "vld.m1-manifest.v1",
+          "manifest_digest": "12f2744ca29e01bad66dce7c630f8f1f317c9416c805cca08ab8be5c3e0ae66f",
+          "media_type": "application/json",
+          "page_size": 4096,
+          "schema_version": 1,
+          "size_bytes": 98060
+        },
+        "target_ground_fingerprint": "9dfffec02e105c343c863003c1538414c27eae06304106a3d581a85b4ecd9589",
+        "target_representation": "hidden_after_L20",
+        "temporal": {
+          "clock": {
+            "env.beta.host": {
+              "encoding": "canonical-decimal-string",
+              "kind": "integer",
+              "schema": "vld.temporal-numeric.v2",
+              "value": "3"
+            }
+          },
+          "epoch": {
+            "encoding": "canonical-decimal-string",
+            "kind": "integer",
+            "schema": "vld.temporal-numeric.v2",
+            "value": "2"
+          },
+          "scheduler_id": "sched.qwen3.env.beta",
+          "schema": "vld.temporal-coordinate.v2",
+          "wall_hint": null
+        }
+      },
+      {
+        "clock_bridge_digest": null,
+        "continuity_digest": "a582e695ef2b70a9d67783e449ce74440d8e6ff0f97147492504840ffdf03935",
+        "host_id": "env.beta.host",
+        "oracle_verdict": "PASS:qwen3_L21_27_logits|VERIFIED:verified_logits_top1=12095",
+        "pipeline_id": "pmc001.qwen3_0_6b.pipe",
+        "prev_continuity_digest": "4c0327f808a3956f006b0d8e594baff3412f9f17effbb7f0788b6a92816411d3",
+        "quorum_cert_digest": "a588e7e305eb6454380ecf3c0e5684b12a3c897380887f76301c199c441bc30a",
+        "quorum_certificate": {
+          "certificate_digest": "a588e7e305eb6454380ecf3c0e5684b12a3c897380887f76301c199c441bc30a",
+          "membership": {
+            "lineage_id": "pmc001.qwen3.lineage",
+            "member_ids": [
+              "q0",
+              "q1",
+              "q2"
+            ],
+            "membership_digest": "a1f87ab88552deca50a9989757db98addc15fe90248b3119e0d2e614295adba7",
+            "quorum_size": 2
+          },
+          "proposal": {
+            "lineage_id": "pmc001.qwen3.lineage",
+            "membership_digest": "a1f87ab88552deca50a9989757db98addc15fe90248b3119e0d2e614295adba7",
+            "operation_id": "pmc001.qwen3_0_6b.pipe.stage.3",
+            "predecessor_manifest_digest": "01308f8f741c5ae427e00e156df88da674add3d8f1a2911a5e592dd55930f983",
+            "proposal_digest": "2e75ba53e7ecc256a99095505993a1af82f5c96c401c700a868e52fc84c1a6df",
+            "proposer_id": "env.beta.host",
+            "schema": "vld.quorum-proposal.v1",
+            "slot": 4,
+            "state_manifest_digest": "aa4c12f7ca03c7df41dc5d7d0b9f1778eeaa646bcc26e3d4e6041c3ff7283edd",
+            "term": 2
+          },
+          "schema": "vld.quorum-certificate.v1",
+          "votes": [
+            {
+              "lineage_id": "pmc001.qwen3.lineage",
+              "proposal_digest": "2e75ba53e7ecc256a99095505993a1af82f5c96c401c700a868e52fc84c1a6df",
+              "signature_hmac": "d1bfec5854dcadddb4dc08d643d341e2b5ec78338055481676fb73bb33f90c32",
+              "slot": 4,
+              "term": 2,
+              "voter_id": "q1"
+            },
+            {
+              "lineage_id": "pmc001.qwen3.lineage",
+              "proposal_digest": "2e75ba53e7ecc256a99095505993a1af82f5c96c401c700a868e52fc84c1a6df",
+              "signature_hmac": "b0b35448e28b529c192ef08875dcdc944bf02d4a89f5269ff03a9ee56a5d0270",
+              "slot": 4,
+              "term": 2,
+              "voter_id": "q2"
+            }
+          ]
+        },
+        "scheduler_id": "sched.qwen3.env.beta",
+        "schema": "vld.cross-ground-continuity-receipt.v1",
+        "source_ground_fingerprint": "9dfffec02e105c343c863003c1538414c27eae06304106a3d581a85b4ecd9589",
+        "source_representation": "hidden_after_L20",
+        "stage_cost": {
+          "bytes_moved": 157696.0,
+          "compute_ops": 35840.0,
+          "latency_ms": 14.0,
+          "verification_ops": 1024.0
+        },
+        "stage_id": "qwen3_stage_3",
+        "stage_index": 3,
+        "state_manifest": {
+          "chunks": [
+            {
+              "byte_length": 595,
+              "index": 0,
+              "page_digest": "f2d12c0638735b129d3184b4730eab7e94253c666d874bc02fc145df69b0de55"
+            }
+          ],
+          "content_digest": "5f2fe883eb19a2be87f6db3d316a62585c6b17dbaf8413aa8c7345cbd8cecc14",
+          "kind": "vld.m1-manifest.v1",
+          "manifest_digest": "b6844a9c51fe22ded13b72abb263348ad199e8e81ceba061fcf3e8904ce910d7",
+          "media_type": "application/json",
+          "page_size": 4096,
+          "schema_version": 1,
+          "size_bytes": 595
+        },
+        "target_ground_fingerprint": "89eebf52645e10aa8d084a7f2032989e5c0c4d043beef85c72b95f4f60f9bcfa",
+        "target_representation": "vocab_logits_summary",
+        "temporal": {
+          "clock": {
+            "env.beta.host": {
+              "encoding": "canonical-decimal-string",
+              "kind": "integer",
+              "schema": "vld.temporal-numeric.v2",
+              "value": "4"
+            }
+          },
+          "epoch": {
+            "encoding": "canonical-decimal-string",
+            "kind": "integer",
+            "schema": "vld.temporal-numeric.v2",
+            "value": "2"
+          },
+          "scheduler_id": "sched.qwen3.env.beta",
+          "schema": "vld.temporal-coordinate.v2",
+          "wall_hint": null
+        }
+      }
+    ]
+  },
+  "environment_alpha": {
+    "active_quorum": [
+      "q0",
+      "q1"
+    ],
+    "exit_code": 73,
+    "host_id": "env.alpha.host",
+    "layers_committed_before_crash": [
+      0,
+      13
+    ],
+    "measured_m1_bytes_persisted": 201721,
+    "measured_pipeline_ms": 1123.915,
+    "process_wall_ms": 1655.763,
+    "safetensors_bytes_read": 440512232,
+    "safetensors_range_reads": 161,
+    "stages_executed": 2
+  },
+  "environment_beta": {
+    "active_quorum": [
+      "q1",
+      "q2"
+    ],
+    "fenced_offline_member": "q0",
+    "host_id": "env.beta.host",
+    "layers_resumed_and_completed": [
+      14,
+      27
+    ],
+    "measured_m1_bytes_persisted": 98655,
+    "measured_pipeline_ms": 2427.319,
+    "mtls_bulk_bytes_streamed": 221781,
+    "process_wall_ms": 4654.765,
+    "replayed_layers": 0,
+    "safetensors_bytes_read": 751668968,
+    "safetensors_range_reads": 158,
+    "stages_executed_this_invocation": 2,
+    "stages_recovered_from_quorum": 2
+  },
+  "independent_audits": {
+    "nodejs_standalone": {
+      "final_continuity_digest": "a582e695ef2b70a9d67783e449ce74440d8e6ff0f97147492504840ffdf03935",
+      "stages_verified": 4,
+      "status": "VERIFIED_NODEJS"
+    },
+    "python_zero_import": {
+      "final_continuity_digest": "a582e695ef2b70a9d67783e449ce74440d8e6ff0f97147492504840ffdf03935",
+      "genesis_fingerprint": "ca2b5ac67707f187a433280d84206d62020388bf0082657699a5c2e54ba25184",
+      "pipeline_id": "pmc001.qwen3_0_6b.pipe",
+      "stages_verified": 4,
+      "status": "VERIFIED"
+    }
+  },
+  "model": {
+    "hidden_size": 1024,
+    "num_hidden_layers": 28,
+    "prompt_text": "The capital of France is",
+    "prompt_token_ids": [
+      785,
+      6722,
+      315,
+      9625,
+      374
+    ],
+    "repo_id": "Qwen/Qwen3-0.6B",
+    "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "vocab_size": 151936
+  },
+  "model_cost_vector": {
+    "bytes_moved": 630784.0,
+    "compute_ops": 143360.0,
+    "latency_ms": 56.0,
+    "verification_ops": 4096.0
+  },
+  "reference_comparison_pytorch_fp32": {
+    "decoded_top1_token": " Paris",
+    "max_abs_logit_diff": 1.049041748046875e-05,
+    "pytorch_reference_wall_ms": 4961.968,
+    "pytorch_top5_tokens": [
+      12095,
+      7407,
+      279,
+      1112,
+      30743
+    ],
+    "top1_token_match": true,
+    "top5_tokens_match": true,
+    "vld_resumed_top5_tokens": [
+      12095,
+      7407,
+      279,
+      1112,
+      30743
+    ]
+  }
+}

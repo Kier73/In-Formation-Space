@@ -108,10 +108,17 @@ def verify_quorum_certificate(
         vid = str(v["voter_id"])
         if vid not in members_sorted or vid in seen:
             raise VerificationError(f"Invalid or duplicate voter {vid!r}.")
-        if v["proposal_digest"] != prop_dg or int(v["slot"]) != int(prop["slot"]) or int(v["term"]) != int(prop["term"]):
+        if (
+            v["proposal_digest"] != prop_dg
+            or str(v["lineage_id"]) != str(prop["lineage_id"])
+            or int(v["slot"]) != int(prop["slot"])
+            or int(v["term"]) != int(prop["term"])
+        ):
             raise VerificationError("Vote coordinates mismatch proposal.")
         seen.add(vid)
         if member_secrets is not None:
+            if vid not in member_secrets:
+                raise VerificationError(f"Missing verification secret for voter {vid!r}.")
             msg = canonical_bytes(
                 {
                     "domain": "vld.quorum-vote.v1",
@@ -251,20 +258,62 @@ def verify_snc_1d_capsule(capsule: Mapping[str, Any]) -> dict[str, Any]:
     if capsule.get("capsule_digest") != domain_digest("vld.snc-relu-capsule.v1", body):
         raise VerificationError("capsule_digest mismatch.")
     atlas = list(capsule["source_atlas"])
+    if not atlas or capsule.get("source_atlas_digest") != domain_digest("vld.semantic-atlas.v1", atlas):
+        raise VerificationError("source_atlas_digest mismatch or empty atlas.")
     net = capsule["network"]
-    w1 = [Fraction(row[0]) for row in net["hidden_weight"]]
-    b1 = [Fraction(v) for v in net["hidden_bias"]]
-    w2 = [[Fraction(v) for v in row] for row in net["output_weight"]]
-    b2 = [Fraction(v) for v in net["output_bias"]]
+    if not isinstance(net, Mapping) or net.get("hidden_activation") != "relu":
+        raise VerificationError("1D SNC capsule requires hidden_activation == 'relu'.")
+    raw_w1, raw_b1 = net.get("hidden_weight"), net.get("hidden_bias")
+    raw_w2, raw_b2 = net.get("output_weight"), net.get("output_bias")
+    if (
+        not isinstance(raw_w1, (list, tuple))
+        or not raw_w1
+        or any(not isinstance(r, (list, tuple)) or len(r) != 1 for r in raw_w1)
+        or not isinstance(raw_b1, (list, tuple))
+        or len(raw_b1) != len(raw_w1)
+        or not isinstance(raw_b2, (list, tuple))
+        or not raw_b2
+        or not isinstance(raw_w2, (list, tuple))
+        or len(raw_w2) != len(raw_b2)
+        or any(not isinstance(r, (list, tuple)) or len(r) != len(raw_w1) for r in raw_w2)
+    ):
+        raise VerificationError("Invalid 1D SNC layer geometry.")
+    w1 = [Fraction(row[0]) for row in raw_w1]
+    b1 = [Fraction(v) for v in raw_b1]
+    w2 = [[Fraction(v) for v in row] for row in raw_w2]
+    b2 = [Fraction(v) for v in raw_b2]
+
+    parsed_regions: list[tuple[Fraction | None, Fraction | None, list[tuple[Fraction, Fraction]]]] = []
+    for idx, reg in enumerate(atlas):
+        if not isinstance(reg, Mapping) or set(reg.keys()) != {"left", "right", "affines"}:
+            raise VerificationError("Invalid atlas region keys.")
+        l_v = None if reg["left"] == "-inf" else Fraction(reg["left"])
+        r_v = None if reg["right"] == "+inf" else Fraction(reg["right"])
+        if (l_v is None) != (idx == 0) or (r_v is None) != (idx == len(atlas) - 1):
+            raise VerificationError("Atlas must partition (-inf, +inf).")
+        if l_v is not None and r_v is not None and l_v >= r_v:
+            raise VerificationError("Inverted or empty atlas interval.")
+        affs = [(Fraction(a[0]), Fraction(a[1])) for a in reg["affines"]]
+        if len(affs) != len(b2):
+            raise VerificationError("Inconsistent output arity in atlas.")
+        if parsed_regions:
+            _, prev_r, prev_affs = parsed_regions[-1]
+            if prev_r != l_v:
+                raise VerificationError("Gap or overlap in 1D SNC source_atlas.")
+            assert l_v is not None
+            for (m1, c1), (m2, c2) in zip(prev_affs, affs):
+                if m1 * l_v + c1 != m2 * l_v + c2:
+                    raise VerificationError(f"Discontinuous 1D SNC atlas at {l_v}.")
+        parsed_regions.append((l_v, r_v, affs))
 
     kinks = sorted(
         {
-            *(Fraction(r["left"]) for r in atlas if r["left"] != "-inf"),
-            *(Fraction(r["right"]) for r in atlas if r["right"] != "+inf"),
+            *(l_v for l_v, _, _ in parsed_regions if l_v is not None),
+            *(r_v for _, r_v, _ in parsed_regions if r_v is not None),
             *(-b / w for w, b in zip(w1, b1) if w != 0),
         }
     )
-    pts = [Fraction(-1), Fraction(1)] if not kinks else [kinks[0] - 2, kinks[0] - 1, kinks[-1] + 1, kinks[-1] + 2]
+    pts = [Fraction(-1), Fraction(1)] if not kinks else [kinks[0] - 2, kinks[0] - 1, *kinks, kinks[-1] + 1, kinks[-1] + 2]
     for a, b in zip(kinks, kinks[1:]):
         pts.extend([a + (b - a) / 3, a + 2 * (b - a) / 3])
 
@@ -272,9 +321,9 @@ def verify_snc_1d_capsule(capsule: Mapping[str, Any]) -> dict[str, Any]:
         h = [max(Fraction(0), w * x + b) for w, b in zip(w1, b1)]
         y_net = [b2[o] + sum(w2[o][j] * h[j] for j in range(len(h))) for o in range(len(b2))]
         y_ref = None
-        for reg in atlas:
-            if (reg["left"] == "-inf" or x >= Fraction(reg["left"])) and (reg["right"] == "+inf" or x <= Fraction(reg["right"])):
-                y_ref = [Fraction(a[0]) * x + Fraction(a[1]) for a in reg["affines"]]
+        for l_v, r_v, affs in parsed_regions:
+            if (l_v is None or x >= l_v) and (r_v is None or x <= r_v):
+                y_ref = [m * x + c for m, c in affs]
                 break
         if y_ref is None or y_net != y_ref:
             raise VerificationError(f"SNC capsule disagrees at x={x}.")

@@ -177,6 +177,73 @@ class TestVLDIndependentVerifier(unittest.TestCase):
             finally:
                 Path(tmp_name).unlink(missing_ok=True)
 
+            # Negative controls on Node.js verifier: replayed votes from different proposal/slot, tampered certificate_digest & missing secret
+            replayed = copy.deepcopy(bundle)
+            fake_prop = "f" * 64
+            for v in replayed["receipts"][0]["quorum_certificate"]["votes"]:
+                v["proposal_digest"] = fake_prop
+                v["slot"] = 999
+                v["term"] = 999
+                msg = VER.canonical_bytes(
+                    {
+                        "domain": "vld.quorum-vote.v1",
+                        "lineage_id": v["lineage_id"],
+                        "proposal_digest": fake_prop,
+                        "slot": 999,
+                        "term": 999,
+                        "voter_id": v["voter_id"],
+                    }
+                )
+                v["signature_hmac"] = hmac.new(replayed["quorum_member_secrets_utf8"][v["voter_id"]].encode("utf-8"), msg, hashlib.sha256).hexdigest()
+
+            missing_sec = copy.deepcopy(bundle)
+            del missing_sec["quorum_member_secrets_utf8"]["q0"]
+
+            bad_stage_spec = copy.deepcopy(bundle)
+            bad_stage_spec["expected_stages"] = [
+                {
+                    "ground_fingerprint": "0" * 64,
+                    "input_representation": "init",
+                    "output_representation": "done",
+                    "stage_id": "stage.0",
+                }
+            ]
+
+            for bad_bundle in (replayed, missing_sec, bad_stage_spec):
+                with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as tf:
+                    json.dump(bad_bundle, tf)
+                    bad_path = tf.name
+                try:
+                    bad_proc = subprocess.run(
+                        [node_bin, str(HERE / "vld_standalone_verifier.mjs"), bad_path],
+                        capture_output=True,
+                        text=True,
+                    )
+                    self.assertNotEqual(bad_proc.returncode, 0)
+                finally:
+                    Path(bad_path).unlink(missing_ok=True)
+
+    def test_1d_snc_capsule_verifier_rejects_shadowed_and_non_relu_capsules(self) -> None:
+        shadow_atlas = [
+            {"left": "-inf", "right": "+inf", "affines": [["0", "0"]]},
+            {"left": "0", "right": "+inf", "affines": [["999", "999"]]},
+        ]
+        forged_body = {
+            "network": {
+                "hidden_activation": "tanh",
+                "hidden_bias": ["0"],
+                "hidden_weight": [["0", "9999"]],
+                "output_bias": ["0"],
+                "output_weight": [["0"]],
+            },
+            "schema": "vld.snc-relu-capsule.v1",
+            "source_atlas": shadow_atlas,
+            "source_atlas_digest": VER.domain_digest("vld.semantic-atlas.v1", shadow_atlas),
+        }
+        forged_cap = {**forged_body, "capsule_digest": VER.domain_digest("vld.snc-relu-capsule.v1", forged_body)}
+        with self.assertRaises(VER.VerificationError):
+            VER.verify_snc_1d_capsule(forged_cap)
+
 
 if __name__ == "__main__":
     unittest.main()
