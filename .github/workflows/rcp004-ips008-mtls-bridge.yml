@@ -1,0 +1,75 @@
+name: RCP-004 native IPS-008 mTLS semantic/resource handoff
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/resource-continuity-prefix/atomic_semantic_effect.py'
+      - 'experiments/resource-continuity-prefix/ips008_semantic_bridge.py'
+      - 'experiments/resource-continuity-prefix/ips008_semantic_service_worker.py'
+      - 'experiments/resource-continuity-prefix/test_ips008_semantic_bridge.py'
+      - 'experiments/resource-continuity-prefix/run_ips008_semantic_bridge.py'
+      - 'experiments/resource-continuity-prefix/RCP-004.md'
+      - '.github/workflows/rcp004-ips008-mtls-bridge.yml'
+  push:
+    branches:
+      - research/rcp004-mtls-semantic-receiver-bridge
+    paths:
+      - 'experiments/resource-continuity-prefix/atomic_semantic_effect.py'
+      - 'experiments/resource-continuity-prefix/ips008_semantic_bridge.py'
+      - 'experiments/resource-continuity-prefix/ips008_semantic_service_worker.py'
+      - 'experiments/resource-continuity-prefix/test_ips008_semantic_bridge.py'
+      - 'experiments/resource-continuity-prefix/run_ips008_semantic_bridge.py'
+      - '.github/workflows/rcp004-ips008-mtls-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-mtls-and-semantic-bridge:
+    name: Native IPS-008 real TLS and jointly gated VL-I effects
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin original E-CPU IPS-008, certificate and quorum code
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: e380070312b7553d8bd4860a460bb7b9dce7070a
+          path: external/E-CPU
+          persist-credentials: false
+      - name: Pin VL-I original source-derived temporal interpreter
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/VL-I
+          ref: b8ec6b5edae4845dcb9f3f94e9684da21fc41101
+          path: external/VL-I
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install independent original host implementations
+        run: |
+          python -m pip install -e ./external/E-CPU
+          python -m pip install -e ./external/VL-I
+          python -m pip install 'pytest>=8,<9' 'jsonschema>=4,<5'
+      - name: Run original IPS-008 and RCP-003 plus new native TLS integration
+        shell: bash
+        run: |
+          export PYTHONPATH="$PWD/experiments/duplicated-authority-domain:$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU:$PWD/external/E-CPU/tests:$PWD/external/VL-I/src"
+          python -m pytest -q external/E-CPU/tests/test_effect_receiver_service.py experiments/resource-continuity-prefix/test_atomic_semantic_effect.py experiments/resource-continuity-prefix/test_ips008_semantic_bridge.py
+      - name: Independently replay real mTLS resource recovery benchmark
+        shell: bash
+        run: |
+          export PYTHONPATH="$PWD/experiments/duplicated-authority-domain:$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU:$PWD/external/E-CPU/tests:$PWD/external/VL-I/src"
+          python experiments/resource-continuity-prefix/run_ips008_semantic_bridge.py --output rcp004-mtls-evidence.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rcp004-${{ matrix.os }}-${{ matrix.python-version }}
+          path: rcp004-mtls-evidence.json
+          if-no-files-found: error
