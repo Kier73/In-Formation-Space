@@ -27,3 +27,6 @@ jobs:
       - run: python experiments/theta_cayley_navigation/run_experiment.py
         env:
           OPENBLAS_NUM_THREADS: '1'
+      - run: python experiments/theta_cayley_navigation/robustness_sweep.py
+        env:
+          OPENBLAS_NUM_THREADS: '1'
