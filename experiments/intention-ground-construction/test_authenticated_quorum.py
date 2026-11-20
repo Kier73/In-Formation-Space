@@ -232,11 +232,17 @@ class AuthenticatedGroundTests(unittest.TestCase):
     def test_mtls_rejects_wrong_server_dns_even_with_valid_ca_cert(self):
         proc,cp,ready,report=self._start_compute("B",self.zero)
         altered=json.loads(ready.read_text(encoding="utf8"))
+        # Rebind the advertised *label* to C while the real TLS server is B.
+        # The client may construct a typed workload, but only the actual
+        # negotiated certificate may establish the peer identity.
+        altered["host_member"]="C"
+        altered["node_id"]="igc003-C"
         altered["peer_server_dns"]="member-c.mailcpu.test"
         ready.write_bytes(canonical(altered))
         failure=self._client("C",cp,self.zero,ready,"0",ok=False)
-        self.assertTrue("receiver endpoint" in failure.lower()
-                        or "certificate" in failure.lower())
+        self.assertTrue("certificate" in failure.lower()
+                        or "tls" in failure.lower()
+                        or "mutually authenticated" in failure.lower())
         # No forged request reaches receiver. Terminate blocked peer.
         self.fixture._stop(proc)
 
