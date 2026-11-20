@@ -1,0 +1,53 @@
+name: TCN-007 inverse intervention navigation
+on:
+  push:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/inverse_ground.py'
+      - 'experiments/quadratic_transfer_grounds/test_inverse_ground.py'
+      - 'experiments/quadratic_transfer_grounds/run_inverse_ground.py'
+      - 'experiments/quadratic_transfer_grounds/INVERSE_GROUND.md'
+      - 'experiments/quadratic_transfer_grounds/cocycle.py'
+      - 'experiments/quadratic_transfer_grounds/transfer.py'
+      - 'experiments/quadratic_transfer_grounds/moving_frame.py'
+      - '.github/workflows/tcn007-inverse-ground.yml'
+  pull_request:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/**'
+      - '.github/workflows/tcn007-inverse-ground.yml'
+  workflow_dispatch:
+
+jobs:
+  inverse-ground:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.12','3.13','3.14']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install NumPy
+        run: python -m pip install 'numpy>=1.26'
+      - name: Inverse Ground tests
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python -m unittest discover -s experiments/quadratic_transfer_grounds -p 'test_inverse_ground.py' -v
+      - name: Deterministic evidence and negative controls
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: |
+          python experiments/quadratic_transfer_grounds/run_inverse_ground.py > /tmp/tcn007-evidence.json
+          python - <<'PY'
+          import json
+          r = json.load(open('/tmp/tcn007-evidence.json', encoding='utf-8'))
+          assert r['echo_nontrivial_schedule']['plan']['status'] == 'found'
+          assert max(r['echo_nontrivial_schedule']['dense_short_amplitude_max_error_by_source'].values()) < 1e-10
+          assert r['restricted_residual_operation']['plan']['countergate_cubic'] == 12
+          assert r['high_coordinate']['reconstruction_verified']
+          assert r['negative_controls'] == {
+              'prohibited_control':'unreachable', 'premature_time':'outside_window',
+              'insufficient_memory_budget':'refused_budget', 'unreachable_axis':'unreachable'}
+          print('TCN-007 evidence checks accepted')
+          PY
