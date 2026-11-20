@@ -1,4 +1,4 @@
-"""RCP-003: measured real OS crash-recovery at every atomic handoff cut.
+"""RCP-003: measured real OS crash-recovery at seven atomic handoff cuts.
 
 This is a development benchmark, not a physical effect or liveness guarantee.
 Each scenario creates actual VL-I source observations and actual E-CPU quorum
