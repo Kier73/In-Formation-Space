@@ -157,7 +157,7 @@ def _paired_observations(source):
     return (pairs,skipped),"paired"
 
 
-def infer(report,stride=100):
+def infer(report,stride=32):
     """Replay bytes first, then learn without known conversion factor.
 
     Entire unselected timestamps remain held out. The number of timestamps
