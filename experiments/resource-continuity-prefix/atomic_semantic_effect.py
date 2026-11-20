@@ -210,14 +210,22 @@ class AtomicSemanticResourceReceiver:
         if native_guard is None:
             self.policy["ips008_native_guard"]=None
         elif (isinstance(native_guard,Mapping)
-              and set(native_guard)=={"resource","plan_digest"}
+              and set(native_guard)=={"resource","plan_digest","source_root","target_host","target_epoch"}
               and type(native_guard["resource"]) is str
               and native_guard["resource"].startswith("/")
               and len(native_guard["resource"])<=128
-              and _hex(native_guard["plan_digest"])):
+              and _hex(native_guard["plan_digest"])
+              and _hex(native_guard["source_root"])
+              and type(native_guard["target_host"]) is str
+              and 1<=len(native_guard["target_host"])<=128
+              and type(native_guard["target_epoch"]) is int
+              and native_guard["target_epoch"]>=2):
             self.policy["ips008_native_guard"]={
                 "resource":native_guard["resource"],
                 "plan_digest":native_guard["plan_digest"],
+                "source_root":native_guard["source_root"],
+                "target_host":native_guard["target_host"],
+                "target_epoch":native_guard["target_epoch"],
             }
         else:
             raise HandoffRefused("invalid independently provisioned IPS-008 native guard")
@@ -306,7 +314,7 @@ class AtomicSemanticResourceReceiver:
             raise HandoffRefused("exact current native IPS-008 root required")
         try:
             binding=db.execute(
-                "SELECT root,plan_digest,event FROM installed_authority WHERE resource=?",
+                "SELECT root,plan_digest,event,epoch,host FROM installed_authority WHERE resource=?",
                 (policy["resource"],),
             ).fetchone()
             pending=db.execute(
@@ -315,7 +323,9 @@ class AtomicSemanticResourceReceiver:
             ).fetchone()
         except sqlite3.OperationalError as exc:
             raise HandoffRefused("native IPS-008 receiver not provisioned") from exc
-        if binding!=(root,policy["plan_digest"],"publish") or pending is not None:
+        if (binding!=(root,policy["plan_digest"],"publish",
+                     policy["target_epoch"],policy["target_host"])
+                or root==policy["source_root"] or pending is not None):
             raise HandoffRefused("native receiver is stale, frozen or unpublished")
 
     def _qualified(self,p:PersistedTemporalFork)->dict[str,Any]:
