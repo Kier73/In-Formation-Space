@@ -15,7 +15,7 @@ import sys
 
 HERE=Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "tactile-perception-observations"))
-from independent_replay import verify as verify_noaa
+from independent_replay import replay_source
 from noaa_bridge import live as live_noaa
 
 SCHEMA="in-formation-space.tpp004.observer-relative-scale.v1"
@@ -162,14 +162,16 @@ def infer(report,stride=100):
     if type(stride) is not int or stride<2:
         raise ValueError("stride must be an integer >=2")
     try:
-        verified=verify_noaa(report)
+        documents=report["observations"]
+        if not isinstance(documents,list) or len(documents)!=2:
+            raise ValueError("two provider representations required")
+        independently_replayed=[replay_source(doc) for doc in documents]
     except (ValueError,TypeError,KeyError,ArithmeticError,OverflowError) as exc:
         return {"schema":SCHEMA,"status":"invalid-source-evidence",
                 "reason":type(exc).__name__}
-    if verified["status"]!="unit-expression-consistent":
+    if any(reading is None for reading in independently_replayed):
         return {"schema":SCHEMA,"status":"undetermined",
-                "reason":"source-replay-or-translation-not-consistent",
-                "replay_status":verified["status"]}
+                "reason":"source-unavailable-no-measurement"}
     result,reason=_paired_observations(report)
     if result is None:
         return {"schema":SCHEMA,"status":"undetermined","reason":reason}
