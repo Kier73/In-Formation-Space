@@ -1,0 +1,36 @@
+name: TCN-008 Intention-to-Ground Synthesis
+on:
+  push:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/intention_ground.py'
+      - 'experiments/quadratic_transfer_grounds/test_intention_ground.py'
+      - 'experiments/quadratic_transfer_grounds/run_intention_ground.py'
+      - '.github/workflows/tcn008.yml'
+  pull_request:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/intention_ground.py'
+      - 'experiments/quadratic_transfer_grounds/test_intention_ground.py'
+      - 'experiments/quadratic_transfer_grounds/run_intention_ground.py'
+      - '.github/workflows/tcn008.yml'
+  workflow_dispatch:
+jobs:
+  tested:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install numpy
+      - name: TCN-008 inverse synthesis and controls
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python -m unittest discover -s experiments/quadratic_transfer_grounds -p 'test_intention_ground.py' -v
+      - name: TCN-008 deterministic report
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python experiments/quadratic_transfer_grounds/run_intention_ground.py
