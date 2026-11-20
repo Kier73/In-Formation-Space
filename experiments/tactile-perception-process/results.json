@@ -1,0 +1,80 @@
+{
+  "continuation_probes": {
+    "electrical_vs_hydraulic_position": {
+      "max_depth": 3,
+      "status": "undetermined-within-supplied-horizon",
+      "tested": 14
+    },
+    "electrical_vs_inertial_energy": {
+      "left": [
+        "2/1"
+      ],
+      "right": [
+        "3/1"
+      ],
+      "sequence": [
+        "drive:1/2"
+      ],
+      "status": "distinguished",
+      "tested": 1
+    },
+    "electrical_vs_inertial_position": {
+      "left": [
+        "1/2",
+        "1/2"
+      ],
+      "right": [
+        "1/2",
+        "3/4"
+      ],
+      "sequence": [
+        "drive:1/2",
+        "idle:0/1"
+      ],
+      "status": "distinguished",
+      "tested": 4
+    },
+    "electrical_vs_resistive_energy": {
+      "left": [
+        "2/1"
+      ],
+      "right": [
+        "5/2"
+      ],
+      "sequence": [
+        "drive:1/2"
+      ],
+      "status": "distinguished",
+      "tested": 1
+    },
+    "electrical_vs_resistive_position": {
+      "max_depth": 3,
+      "status": "undetermined-within-supplied-horizon",
+      "tested": 14
+    }
+  },
+  "paired_observations": {
+    "electrical": [
+      "1/2",
+      "1/2",
+      "3/4"
+    ],
+    "hydraulic": [
+      "1/2",
+      "1/2",
+      "3/4"
+    ]
+  },
+  "raw_electrical": [
+    "13/2",
+    "13/2",
+    "33/4"
+  ],
+  "raw_hydraulic": [
+    "1/2",
+    "1/2",
+    "13/4"
+  ],
+  "schema": "in-formation-space.tactile-perception-process.tpp-001.v1",
+  "tested": "synthetic exact rational model only"
+}

@@ -1,0 +1,33 @@
+name: TPP-001 tactile perception process
+
+on:
+  push:
+    paths:
+      - "experiments/tactile-perception-process/**"
+      - ".github/workflows/tpp001-tactile-perception.yml"
+  pull_request:
+    paths:
+      - "experiments/tactile-perception-process/**"
+      - ".github/workflows/tpp001-tactile-perception.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cross-medium-expression:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Validate source syntax
+        run: python -m compileall -q experiments/tactile-perception-process
+      - name: Run exact physical-model and independent-replay tests
+        run: python -m unittest discover -s experiments/tactile-perception-process -p "test_*.py" -v
