@@ -1,0 +1,38 @@
+name: TPP-007 archived physical spectral qualification
+on:
+  push:
+    paths:
+      - 'experiments/tpp007-sgn001/**'
+      - '.github/workflows/tpp007-sgn001.yml'
+  pull_request:
+    paths:
+      - 'experiments/tpp007-sgn001/**'
+      - '.github/workflows/tpp007-sgn001.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  archived-spectral:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'numpy>=1.24'
+      - run: python -m unittest discover -s experiments/tpp007-sgn001 -p 'test_*.py' -v
+      - name: Retrieve frozen TPP-007 source evidence (not a new NOAA query)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 44685425942 -R Kier73/In-Formation-Space -n tpp007-seven-day-provider-evidence -D tpp-evidence
+      - name: Apply SGN-001 original code with frozen chronological splits
+        run: >-
+          python experiments/tpp007-sgn001/qualify_archived_tpp.py
+          --archive tpp-evidence/tpp007-live.json
+          --output tpp007-sgn001-result.json
+      - name: Upload complete qualified/refused evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: tpp007-sgn001-qualification
+          path: tpp007-sgn001-result.json
