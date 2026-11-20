@@ -114,6 +114,9 @@ def fetch_document(request_url, unit):
 def _check_english(doc):
     """Admit only raw-byte replayed, timestamped input expression."""
     if doc.get("status") != "observed":
+        if (doc.get("status") != "unavailable" or doc.get("observations") != []
+                or any(k in doc for k in ("raw_body_base64","raw_sha256","raw_bytes"))):
+            return None, "invalid-source-evidence"
         return None, "source-unavailable"
     if doc.get("units") != "ft" or doc.get("station") != STATION or doc.get("datum") != DATUM:
         return None, "incompatible-source-reference"
@@ -189,10 +192,13 @@ def policy(english):
 
 def _target(doc, timestamp, expected_url, english_quality):
     """Require a separately addressed byte-replayed response at exact time."""
-    if doc.get("status") != "observed":
-        return None, "unavailable"
     if doc.get("source") != expected_url:
         return None, "invalid-target-source-url"
+    if doc.get("status") != "observed":
+        if (doc.get("status") != "unavailable" or doc.get("observations") != []
+                or any(k in doc for k in ("raw_body_base64","raw_sha256","raw_bytes"))):
+            return None, "invalid-target-evidence"
+        return None, "unavailable"
     if doc.get("units") != "m" or doc.get("station") != STATION or doc.get("datum") != DATUM:
         return None, "incompatible-target-reference"
     try:
@@ -278,6 +284,22 @@ def replay(data):
         raise ValueError("wrong experiment schema")
     if data.get("encounter") not in ("live-read-only-noaa", "masked-retrospective-fixture"):
         raise ValueError("unrecognized source context")
+    if data["encounter"] == "live-read-only-noaa":
+        stamp=data.get("fixed_utc_day")
+        if not isinstance(stamp,str) or not re.fullmatch(r"\\d{8}",stamp):
+            raise ValueError("invalid declared source day")
+        try:
+            day=datetime.strptime(stamp,"%Y%m%d").date()
+        except ValueError as exc:
+            raise ValueError("invalid calendar day") from exc
+        if data["input_source"].get("source") != day_uri(day):
+            raise ValueError("source-day request contract differs")
+        if any(datetime.fromisoformat(r["timestamp_utc"]).date()!=day
+               for r in data["returns"]):
+            raise ValueError("target outside declared UTC day")
+        if (type(data.get("actual_http_request_attempts")) is not int
+                or data["actual_http_request_attempts"]!=1+len(data["returns"])):
+            raise ValueError("request attempt accounting mismatch")
     plan=policy(data["input_source"])
     if plan != data["plan"]:
         raise ValueError("tampered acquisition plan")
