@@ -1,0 +1,38 @@
+name: TCN-009 Constructive System Ground
+on:
+  push:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/system_ground.py'
+      - 'experiments/quadratic_transfer_grounds/test_system_ground.py'
+      - 'experiments/quadratic_transfer_grounds/run_system_ground.py'
+      - 'experiments/quadratic_transfer_grounds/intention_ground.py'
+      - '.github/workflows/tcn009-system-ground.yml'
+  pull_request:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/**'
+      - '.github/workflows/tcn009-system-ground.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Dependencies
+        run: python -m pip install numpy
+      - name: New synthesis regressions
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python -m unittest discover -s experiments/quadratic_transfer_grounds -p 'test_system_ground.py' -v
+      - name: Prior TCN-008 regressions
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python -m unittest discover -s experiments/quadratic_transfer_grounds -p 'test_intention_ground.py' -v
+      - name: Generate deterministic evidence report
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python experiments/quadratic_transfer_grounds/run_system_ground.py > tcn009.json
