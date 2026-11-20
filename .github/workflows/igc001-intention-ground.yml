@@ -1,0 +1,49 @@
+name: IGC-001 intention-ground constructive verification
+
+on:
+  push:
+    paths:
+      - 'experiments/intention-ground-construction/**'
+      - '.github/workflows/igc001-intention-ground.yml'
+  pull_request:
+    paths:
+      - 'experiments/intention-ground-construction/**'
+      - '.github/workflows/igc001-intention-ground.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  constructive-ground:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test finite derivative construction, NFA all-word equivalence, proof refusal
+        run: python -m unittest discover -s experiments/intention-ground-construction -p 'test_*.py' -v
+      - name: Construct three Ground/obstruction examples and 10^30 navigation
+        run: python experiments/intention-ground-construction/demo.py --output build/igc001
+      - name: Independently verify realized Ground
+        run: node experiments/intention-ground-construction/verify.mjs build/igc001/realized.intention.json build/igc001/realized.receipt.json
+      - name: Independently verify necessary-state capacity obstruction
+        run: node experiments/intention-ground-construction/verify.mjs build/igc001/capacity-obstruction.intention.json build/igc001/capacity-obstruction.receipt.json
+      - name: Independently verify contradictory intention witness
+        run: node experiments/intention-ground-construction/verify.mjs build/igc001/contradiction.intention.json build/igc001/contradiction.receipt.json
+      - name: Retain portable constructed Ground and proof evidence
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: igc001-intention-to-ground-witnesses
+          path: build/igc001/
+          if-no-files-found: error

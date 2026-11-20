@@ -1,0 +1,15 @@
+{
+  "schema": "ifs.igc001.trace-intention.v1",
+  "alphabet": ["0", "1"],
+  "language": {
+    "op": "concat",
+    "args": [
+      {"op":"star","arg":{"op":"alt","args":[{"op":"symbol","value":"0"},{"op":"symbol","value":"1"}]}},
+      {"op":"symbol","value":"0"},
+      {"op":"symbol","value":"1"}
+    ]
+  },
+  "required": [["0","1"],["1","0","1"]],
+  "forbidden": [[],["0"],["1"]],
+  "max_states": 3
+}
