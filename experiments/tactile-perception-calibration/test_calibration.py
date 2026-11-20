@@ -118,7 +118,7 @@ class CalibrationTests(unittest.TestCase):
 
     def test_malformed_evidence_and_unavailable_remain_nonobservations(self):
         report=synthetic_provider()
-        report["observations"][0]["status"]="unavailable"
+        report["observations"][0]={"status":"unavailable","observations":[]}
         self.assertEqual(infer(report,stride=5)["status"],"undetermined")
         report=synthetic_provider()
         report["observations"][1]["raw_sha256"]="0"*64
