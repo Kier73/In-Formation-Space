@@ -7,6 +7,7 @@ prove measurement accuracy, issue commands or claim independent calibration.
 from __future__ import annotations
 
 import argparse
+import base64
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from hashlib import sha256
@@ -92,6 +93,7 @@ def decode(raw, units, station, url, retrieved_at):
         "schema": SCHEMA, "scope": "provider-data-not-independent-physical-verification",
         "source": url, "retrieved_utc": retrieved_at,
         "raw_sha256": sha256(raw).hexdigest(), "raw_bytes": len(raw),
+        "raw_body_base64": base64.b64encode(raw).decode("ascii"),
         "station": station, "units": "m" if units == "metric" else "ft",
         "datum": DATUM, "time_zone": "UTC", "product": "water_level",
     }
