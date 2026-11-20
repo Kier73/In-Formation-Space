@@ -51,3 +51,13 @@ jobs:
         run: python -m unittest discover -s experiments/intention-ground-construction -p test_native_execution.py -v
       - name: Check IGC-002 documentation and pinned runtime
         run: python -c "from pathlib import Path; assert Path('experiments/intention-ground-construction/IGC-002.md').is_file(); print('IGC-002 contract found')"
+
+      - name: Build actual four-process native evidence bundle
+        run: python experiments/intention-ground-construction/run_native_demo.py --output build/igc002
+      - name: Retain source, proof, four native effects and reconstructed checkpoints
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: igc002-native-ground-process-reconstruction
+          path: build/igc002/
+          if-no-files-found: error
