@@ -1,0 +1,47 @@
+name: TCN-002 finite-field quadratic transfer conformance
+on:
+  push:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/**'
+      - 'experiments/theta_cayley_navigation/**'
+      - '.github/workflows/tcn002-quadratic-transfer.yml'
+  pull_request:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/**'
+      - 'experiments/theta_cayley_navigation/**'
+      - '.github/workflows/tcn002-quadratic-transfer.yml'
+jobs:
+  quadratic-transfer:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install minimal dependency
+        run: python -m pip install 'numpy>=1.26,<3'
+      - name: Independent direct-FFT / bridge tests
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python -m unittest discover -s experiments/quadratic_transfer_grounds -p 'test_*.py' -v
+      - name: Deterministic evidence runner
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python experiments/quadratic_transfer_grounds/run_experiment.py > /tmp/tcn002.json
+      - name: Explicit evidence contract
+        run: |
+          python - <<'PY'
+          import json
+          evidence=json.load(open('/tmp/tcn002.json'))
+          assert evidence['huge_operator']['recomputation_verified']
+          assert evidence['huge_operator']['earliest_equal_operator_step']==25
+          assert evidence['direct_fft_comparison']['fidelity_up_to_global_phase']>1-1e-9
+          assert evidence['quadratic_frame_audit']['quadratic']['modes_for_target']==1
+          assert evidence['quadratic_frame_audit']['cubic']['modes_for_target']>15
+          assert evidence['unobserved_schedule_change']['fidelity_to_wrong_declared_schedule'] < 0.1
+          print('TCN-002 evidence invariants checked')
+          PY
