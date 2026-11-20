@@ -132,7 +132,8 @@ class SelectiveAcquisitionTests(unittest.TestCase):
 
     def test_missing_requested_target_is_unknown_not_zero(self):
         report=fixture()
-        report["returns"][0]["source"]={"status":"unavailable","observations":[]}
+        report["returns"][0]["source"]={"status":"unavailable","observations":[],
+                                        "source":target_uri(report["returns"][0]["timestamp_utc"])}
         self.assertEqual(evaluate(report["input_source"],report["plan"],
                                   report["returns"])["status"],"undetermined")
 
