@@ -285,9 +285,17 @@ def request_once(intention_path,receipt_path,source_sha,checkpoint_path,
         payload["head"]=record["head"]
         updated={"payload":payload,"sha256":digest(payload)}
         verify_checkpoint(updated,ground,source_sha)
-        # Flush result ACK before closing the authenticated socket.
+        # Sending the result ACK is not sufficient: the receiver must
+        # consume it before either side closes TLS, or a truncated reliable
+        # frame can masquerade as successful delivery. Await receiver close,
+        # which happens only after its result-channel ACK is processed.
         request.channel.process_ack()
-        conn.service()
+        close_deadline=time.monotonic()+6
+        while not conn.closed and time.monotonic()<close_deadline:
+            conn.service()
+            if not conn.closed:
+                time.sleep(.005)
+        require(conn.closed,"peer did not complete native result ACK handshake")
         return {"schema":SCHEMA,"status":"native_mtls_hypervisor_executed",
                 "from_server_dns":ready["peer_server_dns"],
                 "server_host_pid":ready["host_pid"],
