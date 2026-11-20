@@ -69,6 +69,7 @@ def setup(root:Path):
     """Provision independent original semantic and native quorum histories."""
     root.mkdir(parents=True,exist_ok=True)
     source=create_workspace(root/"temporal")
+    (root/"native").mkdir(parents=True,exist_ok=True)
     native,first,envelope=_published_first(root/"native")
     with (root/"ips008-original-root.txt").open("wb") as file:
         file.write(first.manifest.digest.encode("ascii"))
