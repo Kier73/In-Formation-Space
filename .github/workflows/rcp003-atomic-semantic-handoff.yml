@@ -61,7 +61,7 @@ jobs:
         run: |
           export PYTHONPATH="$PWD/experiments/duplicated-authority-domain:$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU:$PWD/external/VL-I/src"
           python -m pytest -q external/VL-I/tests/test_temporal_intelligence.py experiments/resource-continuity-prefix/test_receiver.py experiments/resource-continuity-prefix/test_temporal_meet.py experiments/resource-continuity-prefix/test_atomic_semantic_effect.py
-      - name: Execute a fresh five-hard-crash native benchmark independently
+      - name: Execute a fresh seven-hard-crash native benchmark independently
         shell: bash
         run: |
           export PYTHONPATH="$PWD/experiments/duplicated-authority-domain:$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU:$PWD/external/VL-I/src"
