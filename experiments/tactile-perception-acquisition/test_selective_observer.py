@@ -8,6 +8,7 @@ from __future__ import annotations
 import base64
 from datetime import datetime, timezone, timedelta
 from fractions import Fraction as F
+from decimal import Decimal
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -43,7 +44,7 @@ def fixture(n=80, curved=False):
         for t in plan[purpose]:
             row=dict(lookup[t])
             if curved and purpose=="challenge" and t==plan["challenge"][0]:
-                row["v"]=str(F(row["v"])+F(1,5))
+                row["v"]=str(Decimal(row["v"])+Decimal("0.200"))
             payload=json.dumps({"metadata":source["metadata"],"data":[row]},
                                sort_keys=True,separators=(",",":")).encode()
             doc=decode(payload,"metric",STATION,target_uri(t),WHEN)
