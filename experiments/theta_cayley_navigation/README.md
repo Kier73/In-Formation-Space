@@ -60,3 +60,17 @@ OPENBLAS_NUM_THREADS=1 python experiments/theta_cayley_navigation/run_experiment
 ### Attribution and intellectual context
 
 Uses a new implementation from scratch of elementary Gauss-chirp matching, finite-field polynomial congruences, FFT, and Cayley parametrization. Adjacent repository work is [SGN-001](../spectral-ground-navigation/README.md), [Guarded Shortcut Trade-off](../guarded-shortcut-tradeoff/README.md), and [Logistic Map Coverage](../logistic-map-coverage/README.md). The resemblance to phase-separation/mixing optimization circuits (such as QAOA) is conceptual; we do not claim a quantum algorithm or quantum speedup. Source inspiration: user-shared exploratory notes dated 2026-11-20, not a reviewed research paper.
+
+## Additional gauge-uncertainty experiment (finite seeds)
+
+Run `OPENBLAS_NUM_THREADS=1 python experiments/theta_cayley_navigation/robustness_sweep.py` for 8 deterministic seeds at five additive complex noise levels. The recovered `(a,b)` pair and the rounded global offset `c` have different robustness. On the recorded local NumPy run:
+
+| Complex noise sigma | Qualified / 8 | (a,b) exact / 8 | c exact / 8 | Final test corroborated / 8 |
+| --- | ---: | ---: | ---: | ---: |
+| 0 | 8 | 8 | 8 | 8 |
+| 0.17 | 8 | 8 | 7 | 8 |
+| 0.45 | 8 | 8 | 3 | 8 |
+| 0.8 | 0 | 8 | 1 | 0 |
+| 1.5 | 0 | 8 | 2 | 0 |
+
+These are small, finite, in-family seeded synthetic trials, **not** statistical coverage guarantees. The meaningful finding: a phase coherence test and held-out RMSE can accept an approximate state model whose **absolute phase residue is wrong**. `goal_coordinates(h)` deliberately solves for *relative* phase h with respect to fitted c, so its roots depend only on `a,b`. An absolute-phase goal would require extra calibration/uncertainty accounting, and is not provided. The test suite explicitly rotates all observed phases by a common gauge angle and verifies that relative goal coordinates stay fixed while c shifts. At sigma 0.8 or higher, the regression policy refuses the model even when its inferred a,b happen to be correct, because quality is not witnessed strongly enough.
