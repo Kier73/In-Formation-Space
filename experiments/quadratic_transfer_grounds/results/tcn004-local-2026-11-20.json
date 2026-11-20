@@ -1,0 +1,176 @@
+{
+  "external_observation": false,
+  "large_field_procedural": {
+    "generated_taylor_modes": 25,
+    "ideal_l2_bound": 0.0008649434346975985,
+    "observed_l2_error": 0.0008649434315643691,
+    "p": 1009,
+    "retained_terms": 7,
+    "scope": "no curvature scan; full p-vector used for independent test only"
+  },
+  "models": {
+    "127": {
+      "direct_vs_phase_branch_l2": 4.817194054619891e-15,
+      "gate_cases": {
+        "cubic": {
+          "median_global_frame_search_ms": 7.125555,
+          "omitted_l2_at_8_terms": 0.8850509280151436,
+          "rank_required_for_10pct_l2": 108,
+          "status": "refused"
+        },
+        "harmonic_0.2": {
+          "accepted": true,
+          "actual_l2_error": 5.881958363397225e-06,
+          "full_search_candidate_frames": 127,
+          "full_search_omitted_l2": 5.881939644588252e-06,
+          "full_search_selected_rank": 7,
+          "ideal_l2_bound": 5.88195836338251e-06,
+          "median_full_scan_ms": 5.122777,
+          "median_procedural_ms": 0.056067,
+          "rank": 7,
+          "taylor_modes_constructed": 29
+        },
+        "harmonic_0.7": {
+          "accepted": true,
+          "actual_l2_error": 0.0008649434315644684,
+          "full_search_candidate_frames": 127,
+          "full_search_omitted_l2": 0.0008649434312360788,
+          "full_search_selected_rank": 7,
+          "ideal_l2_bound": 0.0008649434315716882,
+          "median_full_scan_ms": 5.184453,
+          "median_procedural_ms": 0.065147,
+          "rank": 7,
+          "taylor_modes_constructed": 29
+        },
+        "harmonic_1.2": {
+          "accepted": true,
+          "actual_l2_error": 0.007155867557052475,
+          "full_search_candidate_frames": 127,
+          "full_search_omitted_l2": 0.0071558675570277935,
+          "full_search_selected_rank": 7,
+          "ideal_l2_bound": 0.007155867596202463,
+          "median_full_scan_ms": 4.776542,
+          "median_procedural_ms": 0.052292,
+          "rank": 7,
+          "taylor_modes_constructed": 29
+        }
+      },
+      "long_equals_reduced_projective_vector_max_abs": 0.0,
+      "long_step_decimal_digits": 101,
+      "long_step_exact_schedule_products": 493,
+      "moderate_steps": 37,
+      "operator_products": 9,
+      "period": 384
+    },
+    "257": {
+      "direct_vs_phase_branch_l2": 5.193995204753964e-15,
+      "gate_cases": {
+        "cubic": {
+          "median_global_frame_search_ms": 20.524129,
+          "omitted_l2_at_8_terms": 0.9426831520571081,
+          "rank_required_for_10pct_l2": 200,
+          "status": "refused"
+        },
+        "harmonic_0.2": {
+          "accepted": true,
+          "actual_l2_error": 5.881958363312319e-06,
+          "full_search_candidate_frames": 257,
+          "full_search_omitted_l2": 5.88195851967556e-06,
+          "full_search_selected_rank": 7,
+          "ideal_l2_bound": 5.88195836338251e-06,
+          "median_full_scan_ms": 16.831967,
+          "median_procedural_ms": 0.054469,
+          "rank": 7,
+          "taylor_modes_constructed": 29
+        },
+        "harmonic_0.7": {
+          "accepted": true,
+          "actual_l2_error": 0.0008649434315643444,
+          "full_search_candidate_frames": 257,
+          "full_search_omitted_l2": 0.0008649434313644368,
+          "full_search_selected_rank": 7,
+          "ideal_l2_bound": 0.0008649434315716882,
+          "median_full_scan_ms": 16.91257,
+          "median_procedural_ms": 0.059142,
+          "rank": 7,
+          "taylor_modes_constructed": 29
+        },
+        "harmonic_1.2": {
+          "accepted": true,
+          "actual_l2_error": 0.007155867557052346,
+          "full_search_candidate_frames": 257,
+          "full_search_omitted_l2": 0.007155867557051066,
+          "full_search_selected_rank": 7,
+          "ideal_l2_bound": 0.007155867596202463,
+          "median_full_scan_ms": 15.983046,
+          "median_procedural_ms": 0.054466,
+          "rank": 7,
+          "taylor_modes_constructed": 29
+        }
+      },
+      "long_equals_reduced_projective_vector_max_abs": 0.0,
+      "long_step_decimal_digits": 101,
+      "long_step_exact_schedule_products": 493,
+      "moderate_steps": 37,
+      "operator_products": 9,
+      "period": 387
+    },
+    "31": {
+      "direct_vs_phase_branch_l2": 6.845258039067723e-15,
+      "gate_cases": {
+        "cubic": {
+          "median_global_frame_search_ms": 1.308064,
+          "omitted_l2_at_8_terms": 0.5935578392596519,
+          "rank_required_for_10pct_l2": 25,
+          "status": "refused"
+        },
+        "harmonic_0.2": {
+          "accepted": true,
+          "actual_l2_error": 5.881958363318519e-06,
+          "full_search_candidate_frames": 31,
+          "full_search_omitted_l2": 5.882005707128837e-06,
+          "full_search_selected_rank": 7,
+          "ideal_l2_bound": 5.881958363382509e-06,
+          "median_full_scan_ms": 0.838296,
+          "median_procedural_ms": 0.090383,
+          "rank": 7,
+          "taylor_modes_constructed": 29
+        },
+        "harmonic_0.7": {
+          "accepted": true,
+          "actual_l2_error": 0.0008649434315643017,
+          "full_search_candidate_frames": 31,
+          "full_search_omitted_l2": 0.0008649434316853314,
+          "full_search_selected_rank": 7,
+          "ideal_l2_bound": 0.0008649434315716882,
+          "median_full_scan_ms": 0.696414,
+          "median_procedural_ms": 0.056305,
+          "rank": 7,
+          "taylor_modes_constructed": 29
+        },
+        "harmonic_1.2": {
+          "accepted": true,
+          "actual_l2_error": 0.007155867557052193,
+          "full_search_candidate_frames": 31,
+          "full_search_omitted_l2": 0.007155867557074338,
+          "full_search_selected_rank": 7,
+          "ideal_l2_bound": 0.007155867596202463,
+          "median_full_scan_ms": 0.775006,
+          "median_procedural_ms": 0.058617,
+          "rank": 7,
+          "taylor_modes_constructed": 29
+        }
+      },
+      "long_equals_reduced_projective_vector_max_abs": 0.0,
+      "long_step_decimal_digits": 101,
+      "long_step_exact_schedule_products": 493,
+      "moderate_steps": 37,
+      "operator_products": 9,
+      "period": 96
+    }
+  },
+  "numpy_version": "2.3.5",
+  "premises": "declared finite-field quadratic schedules and synthetic diagonal gates",
+  "schema": "ifs.tcn004-experiment.v1",
+  "sha256": "19616a46fa7c3d5c10b0afaf5f28db8e740b4be3496b6857b2de4d9b73710139"
+}
