@@ -30,8 +30,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Test finite derivative construction, NFA all-word equivalence, proof refusal
-        run: python -m unittest discover -s experiments/intention-ground-construction -p 'test_*.py' -v
+      - name: Test IGC-001 finite derivative construction, NFA all-word equivalence, proof refusal
+        run: python -m unittest discover -s experiments/intention-ground-construction -p 'test_construct.py' -v
       - name: Construct three Ground/obstruction examples and 10^30 navigation
         run: python experiments/intention-ground-construction/demo.py --output build/igc001
       - name: Independently verify realized Ground

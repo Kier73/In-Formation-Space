@@ -1,0 +1,63 @@
+name: IGC-002 receiver-owned native Ground execution
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/intention-ground-construction/**'
+      - '.github/workflows/igc002-native-execution.yml'
+  push:
+    paths:
+      - 'experiments/intention-ground-construction/**'
+      - '.github/workflows/igc002-native-execution.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independently-reconstructed-native-hypervisor:
+    name: Native E-CPU separate processes (${{ matrix.os }}, ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.13']
+    steps:
+      - name: Check out IFS source and independent mathematical receiver
+        uses: actions/checkout@v4
+      - name: Pin the actual E-CPU implementation, not a stand-in
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 42aa58c289f62329deb14ced9b5d09f104b92837
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install actual receiver code and validate independent Node receiver
+        run: |
+          python -m pip install -e external/E-CPU
+          python -c "import mailcpu; print(mailcpu.__file__)"
+          node --check experiments/intention-ground-construction/verify.mjs
+          python -m py_compile experiments/intention-ground-construction/native_execution.py
+      - name: Reproduce IGC-001 mathematical source and adversarial checks
+        run: python -m unittest discover -s experiments/intention-ground-construction -p test_construct.py -v
+      - name: Run actual E-CPU Hypervisor across separately launched receiver processes
+        run: python -m unittest discover -s experiments/intention-ground-construction -p test_native_execution.py -v
+      - name: Check IGC-002 documentation and pinned runtime
+        run: python -c "from pathlib import Path; assert Path('experiments/intention-ground-construction/IGC-002.md').is_file(); print('IGC-002 contract found')"
+
+      - name: Build actual four-process native evidence bundle
+        run: python experiments/intention-ground-construction/run_native_demo.py --output build/igc002
+      - name: Retain source, proof, four native effects and reconstructed checkpoints
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: igc002-native-ground-process-reconstruction
+          path: build/igc002/
+          if-no-files-found: error
