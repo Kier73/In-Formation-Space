@@ -286,7 +286,7 @@ def replay(data):
         raise ValueError("unrecognized source context")
     if data["encounter"] == "live-read-only-noaa":
         stamp=data.get("fixed_utc_day")
-        if not isinstance(stamp,str) or not re.fullmatch(r"\\d{8}",stamp):
+        if not isinstance(stamp,str) or not re.fullmatch(r"\d{8}",stamp):
             raise ValueError("invalid declared source day")
         try:
             day=datetime.strptime(stamp,"%Y%m%d").date()
