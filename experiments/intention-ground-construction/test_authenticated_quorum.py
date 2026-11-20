@@ -97,6 +97,43 @@ class AuthenticatedGroundTests(unittest.TestCase):
         self.assertNotEqual(result.returncode,0,result.stdout)
         return result.stderr
 
+    def seal_and_hard_kill_owner(self,checkpoint):
+        """Keep an authenticated original owner alive after sealing, then kill it."""
+        self.seq+=1
+        input_path=self.base/("kill-owner-candidate-"+str(self.seq)+".json")
+        input_path.write_bytes(canonical(checkpoint))
+        ready=self.base/("owner-sealed-before-hard-kill.json")
+        args=[sys.executable,str(QUORUM),"seal",
+              "--intention",str(self.intention_path),
+              "--receipt",str(self.receipt_path),
+              "--expected-intention-sha256",self.source_sha,
+              "--archive",str(self.archive),
+              "--owner-journal",str(self.owner),
+              "--tls-dir",str(self.base),
+              "--endpoints",str(self.endpoints_file),
+              "--checkpoint",str(input_path),
+              "--ready-file",str(ready),"--hard-kill-ready"]
+        proc=subprocess.Popen(args,text=True,stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        self.addCleanup(self.fixture._stop,proc)
+        deadline=time.monotonic()+30
+        while time.monotonic()<deadline and not ready.exists():
+            if proc.poll() is not None:
+                out,err=proc.communicate(timeout=2)
+                self.fail("original owner failed before quorum seal: "+err+out)
+            time.sleep(.025)
+        self.assertTrue(ready.exists(),"original quorum owner did not publish readiness")
+        self.assertIsNone(proc.poll(),"original coordinator unexpectedly exited")
+        sealed=json.loads(ready.read_text(encoding="utf8"))
+        self.assertEqual(sealed["generation"],1)
+        self.assertEqual(sealed["decision_members"],["A","B","C"])
+        proc.kill()
+        proc.communicate(timeout=5)
+        self.assertNotEqual(proc.returncode,0)
+        ready.unlink()
+        self.assertFalse(ready.exists())
+        return sealed
+
     def _start_compute(self,member,checkpoint,*,grant=True):
         self.seq+=1
         cp_path=self.base/("network-previous-"+str(self.seq)+".json")
@@ -174,11 +211,10 @@ class AuthenticatedGroundTests(unittest.TestCase):
         self.start_authorities()
         stage1,host1=self.network_step("B",self.zero,"0")
         self.assertEqual(stage1["payload"]["state"],1)
-        sealed1=self._invoke_quorum("seal",checkpoint=stage1)
-        self.assertEqual(sealed1["generation"],1)
-        self.assertEqual(sealed1["decision_members"],["A","B","C"])
-        # All participants run independently; kill the coordinator process
-        # by using short-lived owner subprocess and reconstruct from quorum.
+        sealed1=self.seal_and_hard_kill_owner(stage1)
+        # The old owner's authenticated streams were severed by a hard OS
+        # kill; a fresh owner has no candidate checkpoint, only the
+        # protected authority journal, live peers and content archive.
         restored1=self.base/"recovered-state-1.json"
         recovered1=self._invoke_quorum("recover",output=restored1)
         self.assertEqual(recovered1["generation"],1)
