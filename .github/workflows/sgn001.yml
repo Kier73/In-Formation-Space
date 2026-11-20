@@ -1,0 +1,30 @@
+name: SGN-001 witnessed spectral navigation
+on:
+  push:
+    paths:
+      - 'experiments/spectral-ground-navigation/**'
+      - '.github/workflows/sgn001.yml'
+  pull_request:
+    paths:
+      - 'experiments/spectral-ground-navigation/**'
+      - '.github/workflows/sgn001.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install numpy
+      - working-directory: experiments/spectral-ground-navigation
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: |
+          python -m unittest -v test_navigator
+          python run_experiment.py > /tmp/sgn001.json
+          python -c 'import json; r=json.load(open("/tmp/sgn001.json")); assert r["curve"]["residue"] == 1187996290252243319; assert r["series"]["hidden_regime_change"]["untouched_test"]["status"] == "failed_out_of_sample"'
