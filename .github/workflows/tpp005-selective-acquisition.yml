@@ -1,0 +1,57 @@
+name: TPP-005 selective physical observation acquisition
+
+on:
+  push:
+    paths:
+      - "experiments/tactile-perception-acquisition/**"
+      - ".github/workflows/tpp005-selective-acquisition.yml"
+      - "experiments/tactile-perception-calibration/calibration.py"
+      - "experiments/tactile-perception-observations/**"
+  pull_request:
+    paths:
+      - "experiments/tactile-perception-acquisition/**"
+      - ".github/workflows/tpp005-selective-acquisition.yml"
+      - "experiments/tactile-perception-calibration/calibration.py"
+      - "experiments/tactile-perception-observations/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-evidence-and-selection:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile source
+        run: python -m compileall -q experiments/tactile-perception-acquisition
+      - name: Test bounded selection and adversarial evidence
+        run: python -m unittest discover -s experiments/tactile-perception-acquisition -p "test_*.py" -v
+
+  read-only-physical-observation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Acquire source and eight independently requested selected windows
+        run: python experiments/tactile-perception-acquisition/selective_observer.py --live > tpp005-live.json
+      - name: Independently replay archived bytes, planned requests, and model fit
+        run: python experiments/tactile-perception-acquisition/selective_observer.py --replay tpp005-live.json
+      - name: Summarize classification without upgrading missing observations
+        run: |
+          python -c "import json; r=json.load(open('tpp005-live.json')); p=r['plan']; z=r['result']; print('source:',r['input_source']['status']); print('plan:',p['status']); print('attempts:',r['actual_http_request_attempts']); print('result:',z['status']); print('training:',z.get('training_requests')); print('challenges:',z.get('challenge_requests')); print('violation count:',z.get('heldout',{}).get('violations')); print('original body bytes:',z.get('retained_original_response_bytes'))"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tpp005-selective-real-observation
+          path: tpp005-live.json
