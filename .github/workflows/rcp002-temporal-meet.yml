@@ -1,0 +1,71 @@
+name: RCP-002 nontrivial VL-I temporal causal meet across E-CPU quorums
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/resource-continuity-prefix/temporal_meet.py'
+      - 'experiments/resource-continuity-prefix/test_temporal_meet.py'
+      - 'experiments/resource-continuity-prefix/run_temporal_meet.py'
+      - 'experiments/resource-continuity-prefix/RCP-002.md'
+      - '.github/workflows/rcp002-temporal-meet.yml'
+  push:
+    branches:
+      - research/rcp002-nontrivial-temporal-causal-meet
+    paths:
+      - 'experiments/resource-continuity-prefix/temporal_meet.py'
+      - 'experiments/resource-continuity-prefix/test_temporal_meet.py'
+      - 'experiments/resource-continuity-prefix/run_temporal_meet.py'
+      - '.github/workflows/rcp002-temporal-meet.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  temporal-common-prefix:
+    name: Source-observed VL-I temporal fork and genuine E-CPU recovery quorum
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out pinned native E-CPU recovery quorum
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: e380070312b7553d8bd4860a460bb7b9dce7070a
+          path: external/E-CPU
+          persist-credentials: false
+      - name: Check out pinned VL-I original environmental interpreter
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/VL-I
+          ref: b8ec6b5edae4845dcb9f3f94e9684da21fc41101
+          path: external/VL-I
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install both actual original runtimes
+        run: |
+          python -m pip install -e ./external/E-CPU
+          python -m pip install -e ./external/VL-I
+          python -m pip install "pytest>=8,<9"
+      - name: Run genuine original VL-I temporal regression and new E-CPU fork/meet tests
+        shell: bash
+        run: |
+          export PYTHONPATH="$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU:$PWD/external/VL-I/src"
+          python -m pytest -q external/VL-I/tests/test_temporal_intelligence.py experiments/resource-continuity-prefix/test_temporal_meet.py
+      - name: Reproduce qualified interpreter continuity and collect measurement JSON
+        shell: bash
+        run: |
+          export PYTHONPATH="$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU:$PWD/external/VL-I/src"
+          python experiments/resource-continuity-prefix/run_temporal_meet.py --output rcp002-temporal-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rcp002-${{ matrix.os }}-${{ matrix.python-version }}
+          path: rcp002-temporal-report.json
+          if-no-files-found: error
