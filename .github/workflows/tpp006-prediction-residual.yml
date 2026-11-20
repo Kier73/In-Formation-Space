@@ -1,0 +1,55 @@
+name: TPP-006 prediction-observation residual test
+
+on:
+  push:
+    paths:
+      - "experiments/tactile-perception-prediction/**"
+      - ".github/workflows/tpp006-prediction-residual.yml"
+      - "experiments/tactile-perception-observations/independent_replay.py"
+  pull_request:
+    paths:
+      - "experiments/tactile-perception-prediction/**"
+      - ".github/workflows/tpp006-prediction-residual.yml"
+      - "experiments/tactile-perception-observations/independent_replay.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile Python observer
+        run: python -m compileall -q experiments/tactile-perception-prediction
+      - name: Run historical prediction and physical observation conformance tests
+        run: python -m unittest discover -s experiments/tactile-perception-prediction -p "test_*.py" -v
+
+  historical-public-encounter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Query two historical NOAA days for physical observations and model predictions
+        run: python experiments/tactile-perception-prediction/residual_observer.py --live > tpp006-live.json
+      - name: Replay complete archived response bytes and frozen correction
+        run: python experiments/tactile-perception-prediction/residual_observer.py --replay tpp006-live.json
+      - name: Print observation status, never fabricate successful correction
+        run: |
+          python -c "import json; r=json.load(open('tpp006-live.json')); x=r['assessment']; print('source states:',[d['status'] for d in r['documents']]); print('assessment:',x['status']); print('training rows:',x.get('training',{}).get('samples')); print('heldout rows:',x.get('heldout',{}).get('samples')); print('baseline heldout MAE:',x.get('heldout',{}).get('baseline_mae_m')); print('corrected heldout MAE:',x.get('heldout',{}).get('corrected_mae_m'))"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tpp006-historical-prediction-observation
+          path: tpp006-live.json
