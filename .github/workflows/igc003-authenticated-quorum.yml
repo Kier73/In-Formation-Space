@@ -1,0 +1,61 @@
+name: IGC-003 authenticated Ground over E-CPU native mTLS quorum
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/intention-ground-construction/**'
+      - '.github/workflows/igc003-authenticated-quorum.yml'
+  push:
+    paths:
+      - 'experiments/intention-ground-construction/**'
+      - '.github/workflows/igc003-authenticated-quorum.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authenticated-ground:
+    name: mTLS Hypervisor + quorum (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out exact existing E-CPU runtime with recovery lineage and native TLS
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 42aa58c289f62329deb14ced9b5d09f104b92837
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned E-CPU runtime and original test fixture imports
+        run: |
+          python -m pip install -e external/E-CPU
+          python -m pip install pytest
+          openssl version
+          python -c "import mailcpu; print(mailcpu.__file__)"
+      - name: Python syntax and independent mathematical source qualification
+        run: |
+          python -m py_compile experiments/intention-ground-construction/authenticated_ground.py experiments/intention-ground-construction/quorum_ground.py experiments/intention-ground-construction/test_authenticated_quorum.py
+          python -m unittest discover -s experiments/intention-ground-construction -p 'test_construct.py' -v
+      - name: Execute two mutually authenticated E-CPU Hypervisor receivers and mTLS authority quorum
+        env:
+          IGC003_EVIDENCE_DIR: evidence/igc003
+        run: python -m unittest discover -s experiments/intention-ground-construction -p 'test_authenticated_quorum.py' -v
+      - name: Retain complete public decision witness, without private keys
+        if: matrix.python == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: igc003-native-mtls-quorum-evidence
+          path: evidence/igc003/
+          if-no-files-found: error
