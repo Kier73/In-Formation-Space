@@ -24,7 +24,8 @@ from atomic_semantic_effect import (
     open_receiver,seal_successor,continue_after_restart,navigation_for,
 )
 
-CUTS=("after_fork","after_freeze","after_seal","after_activate","after_effect")
+CUTS=("after_fork","after_freeze","after_seal","after_activate","after_effect",
+      "before_activation_commit","before_effect_commit")
 
 
 def _prepared(root:Path):
@@ -68,15 +69,18 @@ def test_hard_crash_at_every_durable_cut_recovers_without_duplicate_effect(
         "after_fork":"unprepared","after_freeze":"frozen",
         "after_seal":"frozen","after_activate":"active",
         "after_effect":"active",
+        "before_activation_commit":"frozen",
+        "before_effect_commit":"active",
     }[cut]
     assert before["mode"]==expected_mode
     assert before["committed_effects"]==(1 if cut=="after_effect" else 0)
     assert before["old_fork_winner"] is None
     assert before["receiver_revision"]==(
         0 if cut=="after_fork" else
-        1 if cut in ("after_freeze","after_seal") else 2
+        1 if cut in ("after_freeze","after_seal","before_activation_commit") else 2
     )
-    if cut in ("after_seal","after_activate","after_effect"):
+    if cut in ("after_seal","after_activate","after_effect",
+               "before_activation_commit","before_effect_commit"):
         fresh=_quorum(tmp_path/"new-members",
                        successor_membership(p.evidence.shared_manifest.digest))
         assert fresh.high_water()[0]==1
