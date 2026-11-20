@@ -32,11 +32,25 @@ independently authenticates a physical instrument. The NOAA tidal predictions
 were fetched after the observed dates. This is a retrospective scientific
 comparison and **not** a measured prospective forecast.
 
-The local independent equation reproduction found that both residual and
-water-level fits qualified on model-selection validation but **failed** the
-out-of-sample SGN test. The executable CI driver is authoritative for its own
-output at the version recorded in a given run; floating-point/LAPACK selection
-at near-ties can vary across hosts.
+## Reproduced result using SGN-001's own implementation
+
+[The original-source qualification workflow](https://github.com/Kier73/In-Formation-Space/actions/runs/44804847674)
+completed successfully and archived a JSON report. The original SGN-001
+`navigator.py` agrees with an independently transcribed local numerical
+implementation to floating-point precision:
+
+| Lane | Validation RMSE | Independent final-test RMSE | Effective status |
+| --- | ---: | ---: | --- |
+| NOAA residual | 0.028019 m | 0.128685 m | refused |
+| Physical water level | 0.075609 m | 0.485131 m | refused |
+
+Both models were qualified by the *shorter validation* but **failed the
+independent final test**. The local frozen first-day correction and causal
+one-day-lag correction offered stronger comparators on the sampled test
+coordinates. Failure to predict the next physical interval does not prove
+that no compact law exists; it does disconfirm these fitted laws under the
+declared observation contract. Floating-point/LAPACK selection at near-ties
+can vary across hosts.
 
 A failed out-of-sample result is marked `refused_after_independent_test`
 even when the original SGN model's shorter validation status was `qualified`.
@@ -55,7 +69,7 @@ python experiments/tpp007-sgn001/qualify_archived_tpp.py \
 Download the exact archived JSON from the Actions artifact above. The
 companion workflow downloads that artifact, reruns the original SGN code and
 uploads the JSON result. GitHub Actions artifacts expire; the two source SHA-256
-identities above and TPP-007's retained design remain important when
+identities pinned in `qualify_archived_tpp.py` and TPP-007's retained design remain important when
 reacquiring observations, but revised provider bytes are **not** identical
 to the originally witnessed record.
 
