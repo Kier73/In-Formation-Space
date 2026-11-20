@@ -1,0 +1,446 @@
+{
+  "authority": "declared synthetic hosts, no live E-CPU/VGI execution or external observation",
+  "cost_context": "one local Python interpreter, end-to-end synthesis; not a universal speed benchmark",
+  "eight_bit_256_states": {
+    "affine_dimension": 8,
+    "family": "character",
+    "goal_readout": {
+      "0": 1,
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1
+    },
+    "latent_bits": 8,
+    "observed_classes": 256,
+    "plan": {
+      "actions": [
+        "flip_0",
+        "flip_1",
+        "flip_2",
+        "flip_3",
+        "flip_4",
+        "flip_5",
+        "flip_6",
+        "flip_7"
+      ],
+      "classes": [
+        0,
+        128,
+        192,
+        224,
+        240,
+        248,
+        252,
+        254,
+        255
+      ],
+      "cost": 8,
+      "hosts": [
+        "declared-tables",
+        "declared-tables",
+        "declared-tables",
+        "declared-tables",
+        "declared-tables",
+        "declared-tables",
+        "declared-tables",
+        "declared-tables"
+      ],
+      "states": [
+        "s00000000",
+        "s10000000",
+        "s11000000",
+        "s11100000",
+        "s11110000",
+        "s11111000",
+        "s11111100",
+        "s11111110",
+        "s11111111"
+      ]
+    },
+    "representation_cost": {
+      "stored_operator_entries": 64,
+      "stored_state_coordinates": 2048
+    },
+    "selection": {
+      "considered": [
+        {
+          "cost": 8,
+          "dimension": 8,
+          "family": "character",
+          "status": "realizable"
+        },
+        {
+          "cost": null,
+          "dimension": null,
+          "family": "onehot",
+          "status": "refused_representation_budget"
+        }
+      ],
+      "criterion": "declared execution cost, then dimension, then operator entries",
+      "global_optimality": false,
+      "scope": "only two declared candidate algebras and bounded construction"
+    },
+    "status": "realizable"
+  },
+  "experiment": "TCN-010",
+  "four_state": {
+    "affine_dimension": 2,
+    "family": "character",
+    "goal_readout": {
+      "0": 1,
+      "1": 1
+    },
+    "latent_bits": 2,
+    "observed_classes": 4,
+    "plan": {
+      "actions": [
+        "flip_both"
+      ],
+      "classes": [
+        0,
+        3
+      ],
+      "cost": 1,
+      "hosts": [
+        "declared-tables"
+      ],
+      "states": [
+        "s00",
+        "s11"
+      ]
+    },
+    "representation_cost": {
+      "stored_operator_entries": 6,
+      "stored_state_coordinates": 8
+    },
+    "selection": {
+      "considered": [
+        {
+          "cost": 1,
+          "dimension": 2,
+          "family": "character",
+          "status": "realizable"
+        },
+        {
+          "cost": 1,
+          "dimension": 4,
+          "family": "onehot",
+          "status": "realizable"
+        }
+      ],
+      "criterion": "declared execution cost, then dimension, then operator entries",
+      "global_optimality": false,
+      "scope": "only two declared candidate algebras and bounded construction"
+    },
+    "status": "realizable"
+  },
+  "four_state_trivial_scalar_capacity": true,
+  "guarded": {
+    "affine_dimension": 2,
+    "family": "character",
+    "goal_readout": {
+      "0": 1,
+      "1": 1
+    },
+    "latent_bits": 2,
+    "observed_classes": 4,
+    "plan": {
+      "actions": [
+        "flip_both"
+      ],
+      "classes": [
+        0,
+        3
+      ],
+      "cost": 1,
+      "hosts": [
+        "declared-tables"
+      ],
+      "states": [
+        "s00",
+        "s11"
+      ]
+    },
+    "representation_cost": {
+      "stored_operator_entries": 6,
+      "stored_state_coordinates": 8
+    },
+    "selection": {
+      "considered": [
+        {
+          "cost": 1,
+          "dimension": 2,
+          "family": "character",
+          "status": "realizable"
+        },
+        {
+          "cost": 1,
+          "dimension": 4,
+          "family": "onehot",
+          "status": "realizable"
+        }
+      ],
+      "criterion": "declared execution cost, then dimension, then operator entries",
+      "global_optimality": false,
+      "scope": "only two declared candidate algebras and bounded construction"
+    },
+    "status": "realizable"
+  },
+  "local_timing_ms": {
+    "256_state_synthesis": 274.7601,
+    "four_state_synthesis": 0.3965
+  },
+  "long_action_count": {
+    "goal_satisfied": true,
+    "modular_products": 4,
+    "observed_outputs": {
+      "0": 1,
+      "1": 1
+    },
+    "observer_state": "s11",
+    "scope": "conditional action-count quotient navigation only; no external execution",
+    "state_class": 3,
+    "state_vector": [
+      6,
+      6
+    ],
+    "total_logical_steps_decimal": "20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002"
+  },
+  "noncommuting_fallback": {
+    "affine_dimension": 3,
+    "family": "onehot",
+    "goal_readout": {
+      "0": 2
+    },
+    "latent_bits": null,
+    "observed_classes": 3,
+    "plan": {
+      "actions": [
+        "swap_ab",
+        "swap_bg"
+      ],
+      "classes": [
+        0,
+        1,
+        2
+      ],
+      "cost": 2,
+      "hosts": [
+        "general-matrix",
+        "general-matrix"
+      ],
+      "states": [
+        "alpha",
+        "beta",
+        "gamma"
+      ]
+    },
+    "representation_cost": {
+      "stored_operator_entries": 18,
+      "stored_state_coordinates": 9
+    },
+    "selection": {
+      "considered": [
+        {
+          "cost": null,
+          "dimension": null,
+          "family": "character",
+          "status": "unsupported_action_algebra"
+        },
+        {
+          "cost": 2,
+          "dimension": 3,
+          "family": "onehot",
+          "status": "realizable"
+        }
+      ],
+      "criterion": "declared execution cost, then dimension, then operator entries",
+      "global_optimality": false,
+      "scope": "only two declared candidate algebras and bounded construction"
+    },
+    "status": "realizable"
+  },
+  "noncommuting_without_fallback": {
+    "observed_classes": 3,
+    "plan": null,
+    "selection": null,
+    "status": "unsupported_action_algebra",
+    "witness": {
+      "actions": [
+        "swap_ab",
+        "swap_bg"
+      ],
+      "class": 0,
+      "first_then_second": 2,
+      "kind": "noncommuting",
+      "second_then_first": 1
+    }
+  },
+  "observer_full_three_bit": {
+    "affine_dimension": 3,
+    "family": "character",
+    "goal_readout": {
+      "0": 1,
+      "1": 1,
+      "2": 1
+    },
+    "latent_bits": 3,
+    "observed_classes": 8,
+    "plan": {
+      "actions": [
+        "flip_0",
+        "flip_1",
+        "flip_2"
+      ],
+      "classes": [
+        0,
+        4,
+        6,
+        7
+      ],
+      "cost": 3,
+      "hosts": [
+        "declared-tables",
+        "declared-tables",
+        "declared-tables"
+      ],
+      "states": [
+        "s000",
+        "s100",
+        "s110",
+        "s111"
+      ]
+    },
+    "representation_cost": {
+      "stored_operator_entries": 9,
+      "stored_state_coordinates": 24
+    },
+    "selection": {
+      "considered": [
+        {
+          "cost": 3,
+          "dimension": 3,
+          "family": "character",
+          "status": "realizable"
+        },
+        {
+          "cost": 3,
+          "dimension": 8,
+          "family": "onehot",
+          "status": "realizable"
+        }
+      ],
+      "criterion": "declared execution cost, then dimension, then operator entries",
+      "global_optimality": false,
+      "scope": "only two declared candidate algebras and bounded construction"
+    },
+    "status": "realizable"
+  },
+  "observer_one_bit": {
+    "affine_dimension": 1,
+    "family": "character",
+    "goal_readout": {
+      "0": 1
+    },
+    "latent_bits": 1,
+    "observed_classes": 2,
+    "plan": {
+      "actions": [
+        "flip_0"
+      ],
+      "classes": [
+        0,
+        1
+      ],
+      "cost": 1,
+      "hosts": [
+        "declared-tables"
+      ],
+      "states": [
+        "s000",
+        "s100"
+      ]
+    },
+    "representation_cost": {
+      "stored_operator_entries": 3,
+      "stored_state_coordinates": 2
+    },
+    "selection": {
+      "considered": [
+        {
+          "cost": 1,
+          "dimension": 1,
+          "family": "character",
+          "status": "realizable"
+        },
+        {
+          "cost": 1,
+          "dimension": 2,
+          "family": "onehot",
+          "status": "realizable"
+        }
+      ],
+      "criterion": "declared execution cost, then dimension, then operator entries",
+      "global_optimality": false,
+      "scope": "only two declared candidate algebras and bounded construction"
+    },
+    "status": "realizable"
+  },
+  "observer_parity": {
+    "affine_dimension": 1,
+    "family": "character",
+    "goal_readout": {
+      "3": 1
+    },
+    "latent_bits": 1,
+    "observed_classes": 2,
+    "plan": {
+      "actions": [
+        "flip_0"
+      ],
+      "classes": [
+        0,
+        1
+      ],
+      "cost": 1,
+      "hosts": [
+        "declared-tables"
+      ],
+      "states": [
+        "s000",
+        "s001"
+      ]
+    },
+    "representation_cost": {
+      "stored_operator_entries": 3,
+      "stored_state_coordinates": 2
+    },
+    "selection": {
+      "considered": [
+        {
+          "cost": 1,
+          "dimension": 1,
+          "family": "character",
+          "status": "realizable"
+        },
+        {
+          "cost": 1,
+          "dimension": 2,
+          "family": "onehot",
+          "status": "realizable"
+        }
+      ],
+      "criterion": "declared execution cost, then dimension, then operator entries",
+      "global_optimality": false,
+      "scope": "only two declared candidate algebras and bounded construction"
+    },
+    "status": "realizable"
+  },
+  "premise": "fully specified deterministic finite transition table; observer projection; odd-prime algebra",
+  "quadratic_character_lower_bound": 2,
+  "receipt_reconstructed": true
+}
