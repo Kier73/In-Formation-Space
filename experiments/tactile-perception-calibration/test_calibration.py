@@ -120,6 +120,10 @@ class CalibrationTests(unittest.TestCase):
         report=synthetic_provider()
         report["observations"][0]={"status":"unavailable","observations":[]}
         self.assertEqual(infer(report,stride=5)["status"],"undetermined")
+        contradictory=synthetic_provider()
+        contradictory["observations"][0]["status"]="unavailable"
+        # Retained observations cannot be re-labelled as non-observations.
+        self.assertEqual(infer(contradictory,stride=5)["status"],"invalid-source-evidence")
         report=synthetic_provider()
         report["observations"][1]["raw_sha256"]="0"*64
         self.assertEqual(infer(report,stride=5)["status"],"invalid-source-evidence")
