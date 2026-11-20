@@ -23,6 +23,16 @@ class PhaseTests(unittest.TestCase):
         cls.sample = fixture()
         cls.good = admit(P, *cls.sample[:4])
 
+    def test_global_phase_gauge_does_not_change_relative_goal_roots(self):
+        x,y,vx,vy,*_=self.sample
+        gauge=np.exp(0.71j)
+        shifted=admit(P,x,y*gauge,vx,vy*gauge)
+        self.assertEqual((shifted.a,shifted.b),(self.good.a,self.good.b))
+        self.assertEqual(shifted.goal_coordinates(19),self.good.goal_coordinates(19))
+        self.assertEqual(shifted.decision,'qualified')
+        # Absolute offset is not gauge-invariant, even for coherent dynamics.
+        self.assertNotEqual(shifted.c,self.good.c)
+
     def test_three_point_baseline_clean_vs_noisy(self):
         pristine=_phase(P,17,31,7,[0,1,2])
         self.assertEqual(three_point_quantized(P,pristine),(17,31,7))
