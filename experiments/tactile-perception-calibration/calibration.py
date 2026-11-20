@@ -7,6 +7,10 @@ Physical accuracy and independence of the original NOAA instruments remain unkno
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timedelta, timezone
+import re
+import urllib.parse
+import urllib.request
 from dataclasses import dataclass
 from fractions import Fraction as Q
 import json
@@ -16,7 +20,7 @@ import sys
 HERE=Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "tactile-perception-observations"))
 from independent_replay import replay_source
-from noaa_bridge import live as live_noaa
+from noaa_bridge import decode as decode_noaa, compare_expressions, HOST, PATH as NOAA_PATH, STATION, DATUM, MAX_RESPONSE_BYTES
 
 SCHEMA="in-formation-space.tpp004.observer-relative-scale.v1"
 EPS=Q(1,1000)
@@ -198,8 +202,60 @@ def infer(report,stride=100):
     }
 
 
+def bounded_day_observations(day=None):
+    """Read a full UTC calendar day, not an unstable moving 'recent' window.
+
+    A previous fully elapsed day is chosen before any measurement is read.
+    The two network requests use the same UTC day but are not atomic.
+    """
+    today=datetime.now(timezone.utc).date()
+    previous=today-timedelta(days=1)
+    if day is None:
+        day=previous.strftime("%Y%m%d")
+    if not isinstance(day,str) or not re.fullmatch(r"[0-9]{8}",day):
+        raise ValueError("date must be exactly YYYYMMDD")
+    try:
+        selected=datetime.strptime(day,"%Y%m%d").date()
+    except ValueError as exc:
+        raise ValueError("invalid UTC date") from exc
+    if selected>previous:
+        raise ValueError("only completed UTC days can be observed")
+    docs=[]
+    for unit in ("metric","english"):
+        params=urllib.parse.urlencode({
+            "application":"InFormationSpace_TPP004", "begin_date":day,
+            "end_date":day, "datum":DATUM, "format":"json",
+            "product":"water_level", "station":STATION,
+            "time_zone":"gmt", "units":unit,
+        })
+        url="https://"+HOST+NOAA_PATH+"?"+params
+        try:
+            request=urllib.request.Request(url,headers={
+                "Accept":"application/json",
+                "User-Agent":"InFormationSpace-TPP004/1.0",
+            })
+            with urllib.request.urlopen(request,timeout=15) as response:
+                final=urllib.parse.urlsplit(response.geturl())
+                if final.scheme!="https" or final.hostname!=HOST or final.path!=NOAA_PATH:
+                    raise ValueError("unapproved NOAA response redirect")
+                if response.status!=200:
+                    raise ValueError("unexpected HTTP status")
+                raw=response.read(MAX_RESPONSE_BYTES+1)
+                if len(raw)>MAX_RESPONSE_BYTES:
+                    raise ValueError("NOAA response exceeds declared size")
+            received=datetime.now(timezone.utc).isoformat()
+            docs.append(decode_noaa(raw,unit,STATION,url,received))
+        except (OSError,ValueError,TimeoutError) as exc:
+            docs.append({"status":"unavailable","scope":"public-read-failed",
+                         "source":url,"reason":type(exc).__name__,"observations":[]})
+    return {"experiment":"TPP-003","acquisition_window":{"utc_day":day,
+            "kind":"completed-fixed-calendar-day"},
+            "observations":docs,
+            "cross_unit_relation":compare_expressions(*docs)}
+
+
 def experiment():
-    source=live_noaa()
+    source=bounded_day_observations()
     return {"schema":SCHEMA,"read_only_source":source,"inference":infer(source)}
 
 
