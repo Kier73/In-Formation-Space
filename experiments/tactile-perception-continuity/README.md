@@ -28,6 +28,14 @@ are retained. The code verifies source endpoint, product, station,
 datum, units, date span, finite decimal values, duplicate timestamps,
 quality flags, and one-week bounds before computing any result.
 
+A second module, [independent_weekly_check.py](independent_weekly_check.py),
+does not import the primary seven-day producer. It independently parses the
+archived NOAA bytes and uses decimal arithmetic to reconstruct all seven days'
+quality counts, median corrections, daily and aggregate MAEs. The live CI
+workflow requires this second check as well as producer replay. This
+cross-check establishes internal mathematical and byte consistency, **not**
+an independently witnessed physical reading.
+
 This is historical retrospective evaluation: the NOAA predictions were
 retrieved *after* the observed days, not archived as originally issued
 before each day's measurement. Nothing here establishes prospective
