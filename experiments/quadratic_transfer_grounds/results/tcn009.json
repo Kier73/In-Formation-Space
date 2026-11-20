@@ -1,0 +1,122 @@
+{
+  "authenticated_hosts": false,
+  "composite_system": {
+    "architecture": [
+      {
+        "coefficients": [
+          0,
+          2
+        ],
+        "degree": 1,
+        "host": "scalar",
+        "name": "scale",
+        "per_step_cost": 1
+      },
+      {
+        "coefficients": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "degree": 3,
+        "host": "higher",
+        "name": "cube",
+        "per_step_cost": 1
+      }
+    ],
+    "hundred_digit_nonlinear_orbit": {
+      "period": 4,
+      "precomputation_transitions": 4,
+      "reduced_coordinate": 3,
+      "scope": "finite orbit of a declared synthesized operator, not an external observation",
+      "state": 7,
+      "transient": 0
+    },
+    "invariant_states_checked": 10,
+    "path": {
+      "execution_cost": 2,
+      "operation_path": [
+        "cube",
+        "cube"
+      ],
+      "state_path": [
+        2,
+        8,
+        6
+      ]
+    },
+    "status": "realizable"
+  },
+  "cost_accounting": "search counts full candidate polynomial programs; reachability enumerates finite safe states; long repeat precomputes finite orbit; full p-point phase output materializes p residues",
+  "experiment": "TCN-009",
+  "external_realization_witnessed": false,
+  "invariant_completion": {
+    "first_rejected_map": {
+      "input": 4,
+      "operation": "control",
+      "output": 3,
+      "polynomial": [
+        5,
+        3
+      ],
+      "reason": "invariant_violation"
+    },
+    "linear_only": "unreachable_declared_polynomial_family",
+    "mathematical_receipt_reconstructed": true,
+    "search_budget_guard": "refused_search_budget",
+    "selected_polynomial": [
+      2,
+      4,
+      2
+    ],
+    "state_path": [
+      4,
+      1
+    ],
+    "status": "realizable"
+  },
+  "scope": "bounded enumerated finite-field computational-system intentions",
+  "terminal_phase_adapter": {
+    "host_authenticated": false,
+    "phase_coefficients": [
+      0,
+      6,
+      0,
+      4
+    ],
+    "tcn008_mathematical_receipt_reconstructed": true,
+    "tcn008_status": "realizable"
+  },
+  "unreachable_degree_three_family": {
+    "candidates_examined": 0,
+    "scope": "only within the declared maximum degrees and invariant",
+    "status": "unreachable_declared_polynomial_family",
+    "witness": {
+      "examples": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          3
+        ]
+      ],
+      "max_degree": 3,
+      "reason": "interpolation_obstruction"
+    }
+  }
+}
