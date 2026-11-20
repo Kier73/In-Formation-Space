@@ -106,7 +106,11 @@ def provider_doc(doc,product,first,last):
     return values
 
 def mae(rows,offset):
-    return sum((abs(obs-model-offset) for obs,model,quality in rows),Decimal(0))/len(rows)
+    # Sum measurements independently in Decimal; divide only *after*
+    # lifting the exact finite-decimal total into a rational. Decimal
+    # division by e.g. 240 otherwise rounds the repeating quotient.
+    total=sum((abs(obs-model-offset) for obs,model,quality in rows),Decimal(0))
+    return Q(total)/len(rows)
 
 def med(values):
     xs=sorted(values)
@@ -155,7 +159,7 @@ def verify(report):
     frozen=med([o-p for o,p,_ in groups[dates[0]]])
     preceding=frozen
     items=[]
-    baseline_sum=frozen_sum=rolling_sum=Decimal(0)
+    baseline_sum=frozen_sum=rolling_sum=Q(0)
     total=0
     for d in dates[1:]:
         samples=groups[d]
