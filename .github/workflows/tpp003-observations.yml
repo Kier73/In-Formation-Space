@@ -42,6 +42,8 @@ jobs:
           python-version: "3.13"
       - name: Attempt two bounded public HTTPS observations
         run: python experiments/tactile-perception-observations/noaa_bridge.py --live --date recent > tpp003-live-report.json
+      - name: Independently reconstruct archived source bytes and unit comparison
+        run: python experiments/tactile-perception-observations/independent_replay.py tpp003-live-report.json
       - name: Print result classification, not ungrounded success
         run: |
           python -c "import json; r=json.load(open('tpp003-live-report.json')); print('observation statuses:', [x['status'] for x in r['observations']]); print('cross-unit classification:', r['cross_unit_relation']['status']); print('matched:', r['cross_unit_relation'].get('matched_timestamps', 0))"
