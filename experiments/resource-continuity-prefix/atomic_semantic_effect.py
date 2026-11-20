@@ -194,7 +194,8 @@ class AtomicSemanticResourceReceiver:
 
     def __init__(self, database:str|Path, *, resource:str,
                  source_identity:str, temporal_head:str, common_quorum_root:str,
-                 original_membership_digest:str, successor_membership_digest:str):
+                 original_membership_digest:str, successor_membership_digest:str,
+                 native_guard:Mapping[str,str]|None=None):
         if type(resource) is not str or resource!=RESOURCE:
             raise HandoffRefused("receiver resource is not independently provisioned")
         self.path=Path(database)
@@ -206,6 +207,20 @@ class AtomicSemanticResourceReceiver:
             "original_membership":original_membership_digest,
             "successor_membership":successor_membership_digest,
         }
+        if native_guard is None:
+            self.policy["ips008_native_guard"]=None
+        elif (isinstance(native_guard,Mapping)
+              and set(native_guard)=={"resource","plan_digest"}
+              and type(native_guard["resource"]) is str
+              and native_guard["resource"].startswith("/")
+              and len(native_guard["resource"])<=128
+              and _hex(native_guard["plan_digest"])):
+            self.policy["ips008_native_guard"]={
+                "resource":native_guard["resource"],
+                "plan_digest":native_guard["plan_digest"],
+            }
+        else:
+            raise HandoffRefused("invalid independently provisioned IPS-008 native guard")
         for key in ("source_identity","temporal_head","common_quorum_root",
                     "original_membership","successor_membership"):
             if not _hex(self.policy[key]):
@@ -228,7 +243,8 @@ class AtomicSemanticResourceReceiver:
                     checkpoint_sha256 TEXT,
                     processor_digest TEXT,
                     causal_head TEXT,
-                    checkpoint_json TEXT
+                    checkpoint_json TEXT,
+                    native_root TEXT
                 );
                 CREATE TABLE IF NOT EXISTS handoff_effects (
                     operation_id TEXT PRIMARY KEY,
@@ -247,7 +263,7 @@ class AtomicSemanticResourceReceiver:
                     db.execute("INSERT INTO handoff_policy VALUES (1,?)",(self.policy_json,))
                     db.execute(
                         "INSERT INTO handoff_state VALUES "
-                        "(1,0,'unprepared',NULL,NULL,NULL,NULL,NULL,NULL)"
+                        "(1,0,'unprepared',NULL,NULL,NULL,NULL,NULL,NULL,NULL)"
                     )
                 elif row[0]!=self.policy_json:
                     raise HandoffRefused("receiver trust bootstrap changed")
@@ -268,12 +284,39 @@ class AtomicSemanticResourceReceiver:
     def _state(db:sqlite3.Connection)->tuple:
         row=db.execute(
             "SELECT revision,mode,context_digest,successor_root,"
-            "checkpoint_sha256,processor_digest,causal_head,checkpoint_json "
+            "checkpoint_sha256,processor_digest,causal_head,checkpoint_json,native_root "
             "FROM handoff_state WHERE singleton=1"
         ).fetchone()
         if row is None:
             raise HandoffRefused("receiver high-water missing")
         return row
+
+    def _check_ips008_guard(self,db:sqlite3.Connection,root:str|None)->None:
+        """Validate IPS-008 installed *published* root under THIS same DB lock.
+
+        The original IPS-008 mTLS service owns the exact host/quorum barrier.
+        This adapter cannot install, unfreeze or invent that native authority.
+        """
+        policy=self.policy["ips008_native_guard"]
+        if policy is None:
+            if root is not None:
+                raise HandoffRefused("native IPS-008 root supplied to an unguarded receiver")
+            return
+        if not _hex(root):
+            raise HandoffRefused("exact current native IPS-008 root required")
+        try:
+            binding=db.execute(
+                "SELECT root,plan_digest,event FROM installed_authority WHERE resource=?",
+                (policy["resource"],),
+            ).fetchone()
+            pending=db.execute(
+                "SELECT 1 FROM effect_handoffs WHERE resource=?",
+                (policy["resource"],),
+            ).fetchone()
+        except sqlite3.OperationalError as exc:
+            raise HandoffRefused("native IPS-008 receiver not provisioned") from exc
+        if binding!=(root,policy["plan_digest"],"publish") or pending is not None:
+            raise HandoffRefused("native receiver is stale, frozen or unpublished")
 
     def _qualified(self,p:PersistedTemporalFork)->dict[str,Any]:
         return qualify_common_context(
@@ -291,7 +334,7 @@ class AtomicSemanticResourceReceiver:
         with closing(self._connect()) as db:
             db.execute("BEGIN IMMEDIATE")
             try:
-                rev,mode,context,root,sha,proc,head,bytes_=self._state(db)
+                rev,mode,context,root,sha,proc,head,bytes_,current_native_root=self._state(db)
                 if mode=="unprepared" and rev==0:
                     db.execute(
                         "UPDATE handoff_state SET revision=1,mode='frozen',"
@@ -319,7 +362,8 @@ class AtomicSemanticResourceReceiver:
 
     def activate(self,p:PersistedTemporalFork, *,
                  quorum:RecoveryLineageCoordinator,
-                 manifest:RecoveryStateManifest)->dict[str,Any]:
+                 manifest:RecoveryStateManifest,
+                 native_root:str|None=None)->dict[str,Any]:
         """Atomic *one-row* binding of semantic capsule and successor effect epoch.
 
         Verification happens outside the SQLite transaction, but any effect is
@@ -351,10 +395,12 @@ class AtomicSemanticResourceReceiver:
         with closing(self._connect()) as db:
             db.execute("BEGIN IMMEDIATE")
             try:
-                rev,mode,context,root,sha,proc,head,bytes_=self._state(db)
+                rev,mode,context,root,sha,proc,head,bytes_,current_native_root=self._state(db)
                 if context!=qualified["witness"]["digest"]:
                     raise HandoffRefused("receiver was not frozen for this exact common Ground")
-                if mode=="active" and rev==2 and root==manifest.digest:
+                self._check_ips008_guard(db,native_root)
+                if (mode=="active" and rev==2 and root==manifest.digest
+                        and current_native_root==native_root):
                     db.execute("COMMIT")
                 elif mode=="frozen" and rev==1 and root is None:
                     # Atomic release of resource authority is *this* row
@@ -363,10 +409,10 @@ class AtomicSemanticResourceReceiver:
                     db.execute(
                         "UPDATE handoff_state SET revision=2,mode='active',"
                         "successor_root=?,checkpoint_sha256=?,"
-                        "processor_digest=?,causal_head=? WHERE singleton=1",
+                        "processor_digest=?,causal_head=?,native_root=? WHERE singleton=1",
                         (manifest.digest,qualified["witness"]["checkpoint_sha256"],
                          qualified["witness"]["processor_digest"],
-                         qualified["witness"]["causal_head"]),
+                         qualified["witness"]["causal_head"],native_root),
                     )
                     db.execute("COMMIT")
                 else:
@@ -383,6 +429,7 @@ class AtomicSemanticResourceReceiver:
             "checkpoint_sha256":qualified["witness"]["checkpoint_sha256"],
             "processor_digest":qualified["witness"]["processor_digest"],
             "old_forks_effect_eligible":False,
+            "native_ips008_root":native_root,
             "effect_applied":False,
         }
 
@@ -403,11 +450,12 @@ class AtomicSemanticResourceReceiver:
         with closing(self._connect()) as db:
             db.execute("BEGIN IMMEDIATE")
             try:
-                rev,mode,context,active,checkpoint_sha,proc,head,raw=self._state(db)
+                rev,mode,context,active,checkpoint_sha,proc,head,raw,native_root=self._state(db)
                 if (rev!=epoch or mode!="active" or root!=active
                         or context_digest!=context or raw is None
                         or not _hex(checkpoint_sha) or not _hex(proc)):
                     raise HandoffRefused("semantic effect authority is frozen, stale or cloned")
+                self._check_ips008_guard(db,native_root)
                 snap=json.loads(raw)
                 if _sha(_bytes(snap))!=checkpoint_sha:
                     raise HandoffRefused("receiver's pinned common checkpoint bytes changed")
@@ -456,6 +504,7 @@ class AtomicSemanticResourceReceiver:
                     "value":value,"operation_id":operation_id,
                     "receiver_local_commit":True,
                     "source_observed_at_navigation":False,
+                    "native_ips008_root":native_root,
                     "old_fork_winner_elected":False,
                     "external_effect_attested":False,
                 }
@@ -477,7 +526,7 @@ class AtomicSemanticResourceReceiver:
         with closing(self._connect()) as db:
             db.execute("BEGIN")
             try:
-                rev,mode,context,root,sha,proc,head,raw=self._state(db)
+                rev,mode,context,root,sha,proc,head,raw,native_root=self._state(db)
                 effects=db.execute("SELECT operation_id,receipt_json "
                                    "FROM handoff_effects ORDER BY operation_id").fetchall()
                 db.execute("COMMIT")
@@ -490,6 +539,7 @@ class AtomicSemanticResourceReceiver:
             "context_digest":context,"active_root":root,
             "checkpoint_sha256":sha,"processor_digest":proc,
             "causal_head":head,"committed_effects":len(effects),
+            "native_ips008_root":native_root,
             "effect_history_digest":_digest([list(x) for x in effects]),
             "old_fork_winner":None,
         }
