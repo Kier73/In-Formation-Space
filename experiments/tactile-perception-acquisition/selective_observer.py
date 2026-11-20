@@ -242,7 +242,11 @@ def evaluate(input_doc, plan, returns):
         "training_requests":N_TRAIN,
         "challenge_requests":N_CHALLENGE,
         "source_day_requests":1,
-        "attempted_http_requests":1+len(returns),
+        "logical_requests":1+len(returns),
+        "retained_original_response_bytes":
+            input_doc["raw_bytes"] + sum(item["source"]["raw_bytes"] for item in returns),
+        "retained_target_response_bytes":
+            sum(item["source"]["raw_bytes"] for item in returns),
         "slope_min":rational(relation.lower),
         "slope_max":rational(relation.upper),
         "selected_slope":rational(relation.alpha),
@@ -263,6 +267,7 @@ def live(day=None):
                 returns.append({"timestamp_utc":t,"purpose":purpose,
                                 "source":fetch_document(target_uri(t),"metric")})
     return {"schema":SCHEMA,"encounter":"live-read-only-noaa",
+            "actual_http_request_attempts":1+len(returns),
             "fixed_utc_day":day.strftime("%Y%m%d"),"input_source":doc,
             "plan":plan,"returns":returns,
             "result":evaluate(doc,plan,returns) if plan["status"]=="planned"
