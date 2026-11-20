@@ -65,11 +65,12 @@ observation, rather than assuming why the remote service behaved differently.
 The next acquisition requests a fixed date to test whether that stabilizes
 the observation window.
 
-Training is selected by a predefined timestamp schedule: **every 100th
+Training is selected by a predefined timestamp schedule: **every 32nd
 matched sample**, with all other timestamps withheld. This selection uses
-no measured values. A 240-reading fixed day therefore supplies three
-training observations, which is deliberately **insufficient** under the
-four-reading minimum unless the sampling schedule is adjusted in advance.
+no measured values. A 240-reading fixed UTC day supplies eight training
+observations and 232 withheld predictions. If the provider returns too
+few observations or too little input variation, the answer remains
+undetermined rather than silently adjusting the sampling plan.
 
 The held-out predictions use only the inferred slope/intercept. The
 predictive score is the exact rational maximum absolute residual and
