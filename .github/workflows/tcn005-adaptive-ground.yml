@@ -1,0 +1,35 @@
+name: TCN-005 adaptive Ground switching
+on:
+  push:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/adaptive_ground.py'
+      - 'experiments/quadratic_transfer_grounds/test_adaptive_ground.py'
+      - 'experiments/quadratic_transfer_grounds/run_adaptive_ground.py'
+      - 'experiments/quadratic_transfer_grounds/ADAPTIVE_GROUND.md'
+      - '.github/workflows/tcn005-adaptive-ground.yml'
+  pull_request:
+    paths:
+      - 'experiments/quadratic_transfer_grounds/**'
+      - '.github/workflows/tcn005-adaptive-ground.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11','3.12','3.13']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install numpy
+      - name: Verify adaptive Ground selection and adversarial receipts
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python -m unittest discover -s experiments/quadratic_transfer_grounds -p 'test_adaptive_ground.py' -v
+      - name: Reconstruct deterministic adaptive-choice evidence
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python experiments/quadratic_transfer_grounds/run_adaptive_ground.py > /tmp/tcn005-result.json
