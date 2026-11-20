@@ -161,6 +161,33 @@ class SelectiveAcquisitionTests(unittest.TestCase):
         self.assertEqual(evaluate(report["input_source"],report["plan"],
                                   report["returns"])["status"],"invalid-plan")
 
+    def test_relabelled_unavailable_cannot_erase_observation_bytes(self):
+        report=fixture()
+        report["input_source"]["status"]="unavailable"
+        report["input_source"]["observations"]=[]
+        self.assertEqual(policy(report["input_source"])["reason"],
+                         "invalid-source-evidence")
+        report=fixture()
+        report["returns"][0]["source"]["status"]="unavailable"
+        report["returns"][0]["source"]["observations"]=[]
+        self.assertEqual(evaluate(report["input_source"],report["plan"],
+                                  report["returns"])["status"],"invalid-evidence")
+
+    def test_live_replay_binds_day_and_actual_request_count(self):
+        from datetime import date
+        report=fixture()
+        report["encounter"]="live-read-only-noaa"
+        report["input_source"]["source"]=day_uri(date(2026,11,17))
+        report["actual_http_request_attempts"]=9
+        self.assertEqual(replay(report)["status"],"heldout-consistent")
+        report["actual_http_request_attempts"]=8
+        with self.assertRaisesRegex(ValueError,"request attempt"):
+            replay(report)
+        report["actual_http_request_attempts"]=9
+        report["fixed_utc_day"]="20261118"
+        with self.assertRaisesRegex(ValueError,"source-day"):
+            replay(report)
+
     def test_source_only_outcome_must_not_ask_for_targets(self):
         with patch("selective_observer.fetch_document") as fetch:
             fetch.return_value={"status":"unavailable","observations":[]}
