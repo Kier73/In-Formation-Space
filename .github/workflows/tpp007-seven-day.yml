@@ -1,0 +1,57 @@
+name: TPP-007 seven-day residual continuity
+
+on:
+  push:
+    paths:
+      - "experiments/tactile-perception-continuity/**"
+      - ".github/workflows/tpp007-seven-day.yml"
+      - "experiments/tactile-perception-prediction/residual_observer.py"
+  pull_request:
+    paths:
+      - "experiments/tactile-perception-continuity/**"
+      - ".github/workflows/tpp007-seven-day.yml"
+      - "experiments/tactile-perception-prediction/residual_observer.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-conformance:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile seven-day observer
+        run: python -m compileall -q experiments/tactile-perception-continuity
+      - name: Test finite-ground evidence, temporal separation and counterexamples
+        run: python -m unittest discover -s experiments/tactile-perception-continuity -p "test_*.py" -v
+
+  live-provider-encounter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Retrieve NOAA water-level observations and model predictions for seven complete days
+        run: python experiments/tactile-perception-continuity/seven_day_residual.py --live > tpp007-live.json
+      - name: Replay exact original provider response bytes and observer policy
+        run: python experiments/tactile-perception-continuity/seven_day_residual.py --replay tpp007-live.json
+      - name: Independently reconstruct full-week results from provider bytes using Decimal
+        run: python experiments/tactile-perception-continuity/independent_weekly_check.py tpp007-live.json
+      - name: Print classification and all-day counts without promoting undetermined data
+        run: |
+          python -c "import json; x=json.load(open('tpp007-live.json'))['assessment']; print('status:',x['status']); print('trained day:',x.get('first_utc_day')); print('heldout days:',len(x.get('per_day',[]))); print('heldout matched:',x.get('evaluated_heldout_samples')); print('baseline MAE:',x.get('full_week_heldout_baseline_mae_m')); print('frozen MAE:',x.get('full_week_heldout_frozen_mae_m')); print('lag MAE:',x.get('one_day_lag_mae_m')); print('daily frozen outcomes:',[(d['day'],d.get('frozen_vs_baseline',d['status'])) for d in x.get('per_day',[])])"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tpp007-seven-day-provider-evidence
+          path: tpp007-live.json
