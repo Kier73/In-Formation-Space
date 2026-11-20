@@ -1,0 +1,41 @@
+name: TPP-002 blind transducer identification
+
+on:
+  push:
+    paths:
+      - "experiments/tactile-perception-discovery/**"
+      - "experiments/tactile-perception-process/tactile_process.py"
+      - ".github/workflows/tpp002-discovery.yml"
+  pull_request:
+    paths:
+      - "experiments/tactile-perception-discovery/**"
+      - "experiments/tactile-perception-process/tactile_process.py"
+      - ".github/workflows/tpp002-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  blind-identification-and-transfer:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile plant and learner
+        run: python -m compileall -q experiments/tactile-perception-discovery
+      - name: Test independent-process observations and counterexamples
+        run: python -m unittest discover -s experiments/tactile-perception-discovery -p "test_*.py" -v
+      - name: Retain observed synthetic process report
+        run: python experiments/tactile-perception-discovery/discovery.py > tpp002-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tpp002-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: tpp002-report.json
