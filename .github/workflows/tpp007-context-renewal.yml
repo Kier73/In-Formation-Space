@@ -1,0 +1,64 @@
+name: TPP-007 context renewal independent receiver
+on:
+  push:
+    paths:
+      - 'experiments/tpp007-sgn001/context_renewal.py'
+      - 'experiments/tpp007-sgn001/verify_renewal.mjs'
+      - 'experiments/tpp007-sgn001/test_context_renewal.py'
+      - 'experiments/tpp007-sgn001/CONTEXT-RENEWAL.md'
+      - '.github/workflows/tpp007-context-renewal.yml'
+  pull_request:
+    paths:
+      - 'experiments/tpp007-sgn001/context_renewal.py'
+      - 'experiments/tpp007-sgn001/verify_renewal.mjs'
+      - 'experiments/tpp007-sgn001/test_context_renewal.py'
+      - 'experiments/tpp007-sgn001/CONTEXT-RENEWAL.md'
+      - '.github/workflows/tpp007-context-renewal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  independent-renewal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exercise offline chronology/refusal tests
+        run: python -m unittest discover -s experiments/tpp007-sgn001 -p 'test_context_renewal.py' -v
+      - name: Fetch only original frozen source and original SGN CI artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 44685425942 -R Kier73/In-Formation-Space -n tpp007-seven-day-provider-evidence -D frozen-tpp
+          gh run download 44804847674 -R Kier73/In-Formation-Space -n tpp007-sgn001-qualification -D frozen-sgn
+      - name: Prepare source-replayable provisional and posttarget Ground receipt
+        run: >-
+          python experiments/tpp007-sgn001/context_renewal.py
+          --archive frozen-tpp/tpp007-live.json
+          --spectral-report frozen-sgn/tpp007-sgn001-result.json
+          --output contextual-ground-renewal.json
+      - name: Verify independently in Node.js
+        run: >-
+          node experiments/tpp007-sgn001/verify_renewal.mjs
+          frozen-tpp/tpp007-live.json
+          frozen-sgn/tpp007-sgn001-result.json
+          contextual-ground-renewal.json
+      - name: Rerun all 12 tests against exact original physical evidence
+        env:
+          TPP007_ARCHIVE: frozen-tpp/tpp007-live.json
+          TPP007_SGN_REPORT: frozen-sgn/tpp007-sgn001-result.json
+        run: python -m unittest discover -s experiments/tpp007-sgn001 -p 'test_context_renewal.py' -v
+      - name: Retain compact receipt; original provider bytes stay in original artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: contextual-ground-renewal-receipt
+          path: contextual-ground-renewal.json
+          if-no-files-found: error
