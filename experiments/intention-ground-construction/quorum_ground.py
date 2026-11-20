@@ -154,8 +154,9 @@ def load_latest(coordinator,membership,archive,ground,intention_sha,*,hint=None)
 
 
 def seal(intention_path,receipt_path,expected_intention_sha,checkpoint_path,
-         archive,owner_journal,tls_dir,endpoints):
-    """Commit a *preverified* next transition under native quorum monotonicity."""
+         archive,owner_journal,tls_dir,endpoints,*,ready_file=None,
+         hard_kill_ready=False):
+    """Commit a verified transition; optionally expose a real hard-kill seam."""
     _,_,ground=validate_source(intention_path,receipt_path,expected_intention_sha)
     candidate=json.loads(checkpoint_path.read_text(encoding="utf8"))
     count,state,_=verify_checkpoint(candidate,ground,expected_intention_sha)
@@ -190,12 +191,22 @@ def seal(intention_path,receipt_path,expected_intention_sha,checkpoint_path,
         verified=coordinator.verify_state(manifest)
         require(proof.proposal.digest==verified.proposal.digest,
                 "new Ground state was not independently quorum readable")
-        return {"schema":SCHEMA,"status":"quorum_sealed_igc_ground",
+        report={"schema":SCHEMA,"status":"quorum_sealed_igc_ground",
                 "generation":count,"state":state,"manifest_root":manifest.digest,
                 "state_digest":manifest.state_digest,
                 "checkpoint_sha256":candidate["sha256"],
                 "decision_members":sorted(d.member_id for d in proof.decisions),
                 "current_execution_authorized":False}
+        if ready_file is not None:
+            store(ready_file,canonical(report))
+        if hard_kill_ready:
+            require(ready_file is not None,
+                    "hard-kill experiment requires a durable readiness marker")
+            # The original owner is still holding its authenticated E-CPU
+            # authority streams. The parent harness sends a real OS SIGKILL.
+            while True:
+                time.sleep(.25)
+        return report
     finally:
         coordinator.close()
 
@@ -240,6 +251,8 @@ def main():
     parser.add_argument("--endpoints",type=Path,required=True)
     parser.add_argument("--candidate-hint")
     parser.add_argument("--output",type=Path)
+    parser.add_argument("--ready-file",type=Path)
+    parser.add_argument("--hard-kill-ready",action="store_true")
     args=parser.parse_args()
     if args.action=="seal":
         require(args.checkpoint is not None,"new seal requires a measured transition")
@@ -247,8 +260,11 @@ def main():
                 "seal cannot select a fabricated prior root")
         result=seal(args.intention,args.receipt,args.expected_intention_sha256,
                     args.checkpoint,args.archive,args.owner_journal,
-                    args.tls_dir,args.endpoints)
+                    args.tls_dir,args.endpoints,
+                    ready_file=args.ready_file,hard_kill_ready=args.hard_kill_ready)
     else:
+        require(not args.hard_kill_ready and args.ready_file is None,
+                "a recovery must not receive owner checkpoint readiness")
         require(args.checkpoint is None,"recovery cannot receive a candidate checkpoint")
         result=recover(args.intention,args.receipt,args.expected_intention_sha256,
                        args.archive,args.owner_journal,args.tls_dir,args.endpoints,
