@@ -2,7 +2,9 @@
 
 A parent creates the genuine late E-CPU quorum fork and provisions a separately
 protected receiver database. THIS child process performs staged handoff work,
-then exits with os._exit before it can send an effect acknowledgement. A new
+then exits with os._exit before it can send an effect acknowledgement.
+Two additional cuts kill the process within a public receiver SQL transaction,
+after changing rows but before the COMMIT instruction. A new
 Python interpreter/parent must reopen each original journal, recheck evidence
 and recover from persistent state alone.
 """
