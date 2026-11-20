@@ -1,0 +1,58 @@
+name: RCP-001 fork common-prefix effect continuity
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/resource-continuity-prefix/**'
+      - '.github/workflows/rcp001-fork-common-prefix.yml'
+  push:
+    branches:
+      - research/rcp001-fork-common-prefix-reconstitution
+    paths:
+      - 'experiments/resource-continuity-prefix/**'
+      - '.github/workflows/rcp001-fork-common-prefix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  common-prefix:
+    name: Real cloned quorum, receiver fork quarantine and fresh continuation
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11','3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use immutable independent E-CPU quorum implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: e380070312b7553d8bd4860a460bb7b9dce7070a
+          path: external/E-CPU
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install actual E-CPU and testing dependencies
+        run: |
+          python -m pip install -e ./external/E-CPU
+          python -m pip install "pytest>=8,<9" "jsonschema>=4,<5"
+      - name: Run real DAD-001 cloned-quorum test and RCP-001 receiver-continuation tests
+        shell: bash
+        run: |
+          export PYTHONPATH="$PWD/experiments/duplicated-authority-domain:$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU"
+          python -m pytest -q experiments/duplicated-authority-domain/test_fork_detection.py experiments/resource-continuity-prefix/test_receiver.py
+      - name: Emit independently checked durable common-prefix experiment result
+        shell: bash
+        run: |
+          export PYTHONPATH="$PWD/experiments/duplicated-authority-domain:$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU"
+          python experiments/resource-continuity-prefix/run_experiment.py --output rcp001-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rcp001-${{ matrix.os }}-${{ matrix.python-version }}
+          path: rcp001-report.json
+          if-no-files-found: error
