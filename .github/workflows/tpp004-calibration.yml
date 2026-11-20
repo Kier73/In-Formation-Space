@@ -1,0 +1,55 @@
+name: TPP-004 measured expression inference
+
+on:
+  push:
+    paths:
+      - "experiments/tactile-perception-calibration/**"
+      - "experiments/tactile-perception-observations/**"
+      - ".github/workflows/tpp004-calibration.yml"
+  pull_request:
+    paths:
+      - "experiments/tactile-perception-calibration/**"
+      - "experiments/tactile-perception-observations/**"
+      - ".github/workflows/tpp004-calibration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-identification-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify Python syntax
+        run: python -m compileall -q experiments/tactile-perception-calibration
+      - name: Test feasibility, counterexamples and blind replay
+        run: python -m unittest discover -s experiments/tactile-perception-calibration -p "test_*.py" -v
+
+  live-public-expression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Collect real read-only public observations and fit blind relation
+        run: python experiments/tactile-perception-calibration/calibration.py --live > tpp004-live-report.json
+      - name: Replay exact source bytes and independently rerun inference
+        run: python experiments/tactile-perception-calibration/calibration.py --replay tpp004-live-report.json
+      - name: Report inference status without treating absent readings as success
+        run: |
+          python -c "import json; r=json.load(open('tpp004-live-report.json')); x=r['inference']; print('fit status:',x['status']); print('training:',x.get('training_pairs')); print('withheld:',x.get('heldout_pairs')); print('violations:',x.get('heldout',{}).get('violations')); print('slope interval:',x.get('model',{}).get('alpha_min'),x.get('model',{}).get('alpha_max'))"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tpp004-observed-blind-calibration
+          path: tpp004-live-report.json
