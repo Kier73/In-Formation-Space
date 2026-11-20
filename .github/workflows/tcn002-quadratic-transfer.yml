@@ -32,6 +32,10 @@ jobs:
         env:
           OPENBLAS_NUM_THREADS: '1'
         run: python experiments/quadratic_transfer_grounds/run_experiment.py > /tmp/tcn002.json
+      - name: Exact Gauss phase evidence runner
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: python experiments/quadratic_transfer_grounds/run_cocycle.py > /tmp/tcn003.json
       - name: Explicit evidence contract
         run: |
           python - <<'PY'
@@ -44,4 +48,15 @@ jobs:
           assert evidence['quadratic_frame_audit']['cubic']['modes_for_target']>15
           assert evidence['unobserved_schedule_change']['fidelity_to_wrong_declared_schedule'] < 0.1
           print('TCN-002 evidence invariants checked')
+          phase=json.load(open('/tmp/tcn003.json'))
+          proof=phase['exact_long_jump']
+          assert proof['recomputation_verified']
+          assert proof['exact_operator']['global_quadrant_mod4']==2
+          assert proof['full_operator_period_bound']==306
+          assert proof['half_period_different_scalar']
+          case=phase['arbitrary_complex_input']
+          assert case['absolute_query_error'] < 1e-10
+          assert case['max_full_output_absolute_error'] < 1e-10
+          assert phase['nonquadratic_input']['full_output_max_absolute_error'] < 1e-10
+          print('TCN-003 exact Gauss cocycle evidence invariants checked')
           PY
