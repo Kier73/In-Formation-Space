@@ -56,9 +56,20 @@ labels and original source bytes are preserved by [TPP-003](../tactile-perceptio
 The fit replays and validates both original provider payloads with
 TPP-003's independent source-byte checker. Importantly, it does *not*
 consult TPP-003's precomputed cross-unit comparison, which uses the known
-conversion and would leak the intended answer. Training is selected by a
-predefined timestamp schedule: **every 100th matched sample**, with all
-other timestamps withheld. This selection uses no measured values.
+conversion and would leak the intended answer. Live acquisition requests
+a **fixed, fully elapsed UTC day** (`begin_date=end_date`, yesterday at
+execution time) for both unit expressions. During development, the moving
+`date=recent` query returned 720 observations on one run but only **one**
+on a later real GitHub runner. We preserve that insufficiency as an
+observation, rather than assuming why the remote service behaved differently.
+The next acquisition requests a fixed date to test whether that stabilizes
+the observation window.
+
+Training is selected by a predefined timestamp schedule: **every 100th
+matched sample**, with all other timestamps withheld. This selection uses
+no measured values. A 240-reading fixed day therefore supplies three
+training observations, which is deliberately **insufficient** under the
+four-reading minimum unless the sampling schedule is adjusted in advance.
 
 The held-out predictions use only the inferred slope/intercept. The
 predictive score is the exact rational maximum absolute residual and
