@@ -1,0 +1,210 @@
+{
+  "calibration": "no timed performance or performance advantage asserted; dense error is numerical rendering only",
+  "controls": {
+    "cost_budget_status": "refused_budget",
+    "cubic_without_cubic_host": "unreachable_with_declared_hosts",
+    "random_target_status": "unreachable_in_degree_5_family"
+  },
+  "experiment": "TCN-008",
+  "external_realization_witnessed": false,
+  "field": 127,
+  "scope": "exact declared finite-field phase intentions only; symbolic hosts are unauthenticated",
+  "trials": {
+    "cubic": {
+      "dense_max_absolute_error": 1.5587675346582232e-16,
+      "description_coefficients": 4,
+      "estimated_cost": 7,
+      "family": "cubic",
+      "full_target": true,
+      "huge_coordinate_digits": 101,
+      "huge_coordinate_exact_alias": true,
+      "minimality_witness": {
+        "excluded_degree_at_most": 2,
+        "first_mismatch": [
+          3,
+          36,
+          97
+        ],
+        "fixed_by": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            37
+          ],
+          [
+            2,
+            27
+          ]
+        ],
+        "scope": "exact under polynomial-degree family only"
+      },
+      "plan_reconstructed": true,
+      "selected_host": "cubic",
+      "status": "realizable",
+      "target_constraints": 127
+    },
+    "degree_six_negative": {
+      "estimated_cost": null,
+      "family": null,
+      "full_target": true,
+      "minimality_witness": {
+        "degree_cap": 5,
+        "first_mismatch": [
+          6,
+          91,
+          6
+        ],
+        "fixed_by": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            46
+          ],
+          [
+            2,
+            45
+          ],
+          [
+            3,
+            64
+          ],
+          [
+            4,
+            81
+          ],
+          [
+            5,
+            99
+          ]
+        ],
+        "kind": "degree_bound_witness"
+      },
+      "plan_reconstructed": true,
+      "selected_host": null,
+      "status": "unreachable_in_degree_5_family",
+      "target_constraints": 127
+    },
+    "quadratic": {
+      "dense_max_absolute_error": 1.3774403514400314e-16,
+      "description_coefficients": 3,
+      "estimated_cost": 2,
+      "family": "quadratic",
+      "full_target": true,
+      "huge_coordinate_digits": 101,
+      "huge_coordinate_exact_alias": true,
+      "minimality_witness": {
+        "excluded_degree_at_most": 1,
+        "first_mismatch": [
+          2,
+          66,
+          52
+        ],
+        "fixed_by": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            26
+          ]
+        ],
+        "scope": "exact under polynomial-degree family only"
+      },
+      "plan_reconstructed": true,
+      "selected_host": "quadratic",
+      "status": "realizable",
+      "target_constraints": 127
+    },
+    "quartic": {
+      "dense_max_absolute_error": 1.3092278833360675e-16,
+      "description_coefficients": 5,
+      "estimated_cost": 12,
+      "family": "higher_polynomial",
+      "full_target": true,
+      "huge_coordinate_digits": 101,
+      "huge_coordinate_exact_alias": true,
+      "minimality_witness": {
+        "excluded_degree_at_most": 3,
+        "first_mismatch": [
+          4,
+          9,
+          64
+        ],
+        "fixed_by": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            40
+          ],
+          [
+            2,
+            75
+          ],
+          [
+            3,
+            25
+          ]
+        ],
+        "scope": "exact under polynomial-degree family only"
+      },
+      "plan_reconstructed": true,
+      "selected_host": "analytic-degree-5",
+      "status": "realizable",
+      "target_constraints": 127
+    },
+    "quintic": {
+      "dense_max_absolute_error": 1.2509268882771003e-16,
+      "description_coefficients": 6,
+      "estimated_cost": 16,
+      "family": "higher_polynomial",
+      "full_target": true,
+      "huge_coordinate_digits": 101,
+      "huge_coordinate_exact_alias": true,
+      "minimality_witness": {
+        "excluded_degree_at_most": 4,
+        "first_mismatch": [
+          5,
+          95,
+          3
+        ],
+        "fixed_by": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            45
+          ],
+          [
+            2,
+            108
+          ],
+          [
+            3,
+            97
+          ],
+          [
+            4,
+            49
+          ]
+        ],
+        "scope": "exact under polynomial-degree family only"
+      },
+      "plan_reconstructed": true,
+      "selected_host": "analytic-degree-5",
+      "status": "realizable",
+      "target_constraints": 127
+    }
+  }
+}
