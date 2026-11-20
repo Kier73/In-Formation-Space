@@ -46,6 +46,8 @@ jobs:
         run: python experiments/tactile-perception-continuity/seven_day_residual.py --live > tpp007-live.json
       - name: Replay exact original provider response bytes and observer policy
         run: python experiments/tactile-perception-continuity/seven_day_residual.py --replay tpp007-live.json
+      - name: Independently reconstruct full-week results from provider bytes using Decimal
+        run: python experiments/tactile-perception-continuity/independent_weekly_check.py tpp007-live.json
       - name: Print classification and all-day counts without promoting undetermined data
         run: |
           python -c "import json; x=json.load(open('tpp007-live.json'))['assessment']; print('status:',x['status']); print('trained day:',x.get('first_utc_day')); print('heldout days:',len(x.get('per_day',[]))); print('heldout matched:',x.get('evaluated_heldout_samples')); print('baseline MAE:',x.get('full_week_heldout_baseline_mae_m')); print('frozen MAE:',x.get('full_week_heldout_frozen_mae_m')); print('lag MAE:',x.get('one_day_lag_mae_m')); print('daily frozen outcomes:',[(d['day'],d.get('frozen_vs_baseline',d['status'])) for d in x.get('per_day',[])])"
