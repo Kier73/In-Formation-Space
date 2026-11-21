@@ -1,0 +1,62 @@
+name: CGR-004 generalized NCR language through native E-CPU Hypervisor
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/resource-continuity-prefix/cgr004_finite_worker.py'
+      - 'experiments/resource-continuity-prefix/cgr004_language_hypervisor.py'
+      - 'experiments/resource-continuity-prefix/test_cgr004_language_hypervisor.py'
+      - 'experiments/resource-continuity-prefix/CGR-004.md'
+      - '.github/workflows/cgr004-general-ground-hypervisor.yml'
+  push:
+    branches:
+      - research/cgr004-general-ground-hypervisor
+    paths:
+      - 'experiments/resource-continuity-prefix/cgr004_finite_worker.py'
+      - 'experiments/resource-continuity-prefix/cgr004_language_hypervisor.py'
+      - 'experiments/resource-continuity-prefix/test_cgr004_language_hypervisor.py'
+      - '.github/workflows/cgr004-general-ground-hypervisor.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  general-ncr-operator:
+    name: General finite observer language under native E-CPU Hypervisor
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin original E-CPU Virtual Layer and Hypervisor
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: e380070312b7553d8bd4860a460bb7b9dce7070a
+          path: external/E-CPU
+          persist-credentials: false
+      - name: Pin native NCR-004 independent verifier
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: b9b2beeaed1393c6375337b055611d5ccf816f89
+          path: external/Navigable-Compute
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install native independent implementations
+        run: |
+          python -m pip install -e ./external/E-CPU
+          python -m pip install -e ./external/Navigable-Compute
+          python -m pip install 'pytest>=8,<9' 'jsonschema>=4,<5'
+      - name: Test actual Hypervisor operator and all source/admission regressions
+        shell: bash
+        run: |
+          export PYTHONPATH="$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU:$PWD/external/E-CPU/tests:$PWD/external/Navigable-Compute"
+          python -m pytest -q experiments/resource-continuity-prefix/test_cgr004_language_hypervisor.py
+          python -m pytest -q experiments/resource-continuity-prefix/test_cgr003_observed_ecpu.py
