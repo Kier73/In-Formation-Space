@@ -190,22 +190,33 @@ def test_wrong_host_policy_and_invalid_time_refused(tmp_path):
                 word=word,repetitions=repetitions)
 
 
-def test_rehashed_false_worker_result_cannot_pass_independent_ground(tmp_path):
+def test_rehashed_false_worker_result_cannot_pass_independent_ground(tmp_path,monkeypatch):
     epoch=non_affine_epoch();persist_epoch(tmp_path,epoch)
     qualified=host(tmp_path,"cgr004-host-a",epoch.source_head)
-    good=qualified.endpoint
+    original_exchange=SubprocessQualificationEndpoint.exchange
 
-    class RehashedFalseWorker:
-        def exchange(self,request,*,max_bytes):
-            response=good.exchange(request,max_bytes=max_bytes)
-            response["output"]="WRONG-RESULT"
-            response["receipt_digest"]=digest({
-                k:v for k,v in response.items() if k != "receipt_digest"})
-            return response
+    def lying_process_result(self,request,*,max_bytes):
+        response=original_exchange(self,request,max_bytes=max_bytes)
+        response["output"]="WRONG-RESULT"
+        response["receipt_digest"]=digest({
+            k:v for k,v in response.items() if k != "receipt_digest"})
+        return response
 
-    replaced=replace(qualified,endpoint=RehashedFalseWorker())
+    monkeypatch.setattr(SubprocessQualificationEndpoint,"exchange",lying_process_result)
     os,identity,envelope,ground,pid = _receiver()
     with pytest.raises(GroundLanguageRefused,match="native process differs"):
-        execute_qualified_language(tmp_path,replaced,expected_head=epoch.source_head,
+        execute_qualified_language(tmp_path,qualified,expected_head=epoch.source_head,
+            operating_system=os,pid=pid,system=identity,ground=ground,
+            initial=2,word=(0,),repetitions=1)
+
+
+def test_caller_cannot_change_qualified_subprocess_executable(tmp_path):
+    epoch=non_affine_epoch();persist_epoch(tmp_path,epoch)
+    qualified=host(tmp_path,"cgr004-host-a",epoch.source_head)
+    rogue=replace(qualified,endpoint=SubprocessQualificationEndpoint(
+        "cgr004-host-a",("untrusted-program",),timeout=10))
+    os,identity,envelope,ground,pid = _receiver()
+    with pytest.raises(GroundLanguageRefused,match="fixed trusted worker command"):
+        execute_qualified_language(tmp_path,rogue,expected_head=epoch.source_head,
             operating_system=os,pid=pid,system=identity,ground=ground,
             initial=2,word=(0,),repetitions=1)
