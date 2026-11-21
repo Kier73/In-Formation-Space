@@ -127,6 +127,35 @@ def test_rehashed_false_general_ground_checkpoint_is_rejected(tmp_path):
     assert lineage.restore_latest().manifest.digest==assigned.manifest.digest
 
 
+def test_rehashed_foreign_workload_cannot_become_a_native_stage(tmp_path):
+    # Rehash all newly forged layers: inner Hypervisor effect, typed stage
+    # receipt, actual original DAG commit, checkpoint and candidate wrapper.
+    # This must still refuse due to mismatch with the native workload contract.
+    from cgr005_general_quorum import _nodes,_receipt
+    lineage,head,os,envelope,pid=bootstrap(tmp_path)
+    host=selected_host(tmp_path,"cgr005-old-host")
+    assigned=lineage.assign(head,host)
+    candidate=lineage.compute(assigned,host,os,pid)
+    forged=deepcopy(candidate.next_checkpoint)
+    stage=forged["payload"]["stages"][0]
+    stage["hypervisor_effect"]["workload_digest"]="0"*64
+    record=stage["hypervisor_effect"]
+    stage["stage_receipt"]=_receipt(
+        0,2,3,stage["host"],lineage.source_head,
+        lineage.language_digest,record)
+    dag=_nodes(lineage.source_head,lineage.language_digest)
+    dag.commit("ips003.stage.000",{
+        "input":2,"value":3,
+        "stage_receipt_digest":stage["stage_receipt"]["receipt_digest"],
+        "hypervisor_effect_digest":canonical_value_digest(record),
+    })
+    forged["payload"]["dag_snapshot"]=dag.snapshot()
+    forged["digest"]=canonical_value_digest(forged["payload"])
+    with pytest.raises(GeneralGroundRefused,match="native Hypervisor effect"):
+        lineage.publish(assigned,replace(candidate,next_checkpoint=forged))
+    assert lineage.restore_latest().manifest.digest==assigned.manifest.digest
+
+
 def test_source_revision_and_stale_host_cannot_publish(tmp_path):
     lineage,head,os,envelope,pid=bootstrap(tmp_path)
     old=selected_host(tmp_path,"cgr005-old-host")
