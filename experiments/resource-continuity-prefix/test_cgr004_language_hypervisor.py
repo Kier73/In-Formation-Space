@@ -99,12 +99,29 @@ def test_original_hypervisor_denies_missing_compute_capability(tmp_path):
             operating_system=os,pid=denied,system=identity,ground=ground,
             initial=0,word=(1,),repetitions=1,
         )
+    # Native Hypervisor identities are (source, channel, sequence).
+    # Do NOT reuse the denied event's sequence for an independent request.
     valid = execute_qualified_language(
         tmp_path,worker,expected_head=epoch.source_head,
         operating_system=os,pid=pid,system=identity,ground=ground,
-        initial=0,word=(1,),repetitions=1,
+        initial=0,word=(1,),repetitions=1,request_sequence=2,
     )
     assert valid["value"] == "1"
+    assert valid["request_sequence"] == 2
+    second = execute_qualified_language(
+        tmp_path,worker,expected_head=epoch.source_head,
+        operating_system=os,pid=pid,system=identity,ground=ground,
+        initial=2,word=(0,),repetitions=1,request_sequence=3,
+    )
+    assert second["value"] == "3"
+    # The same sequence with a different request MUST refuse, not mutate a
+    # previously committed Hypervisor identity.
+    with pytest.raises(Exception,match="conflicting execution retransmission"):
+        execute_qualified_language(
+            tmp_path,worker,expected_head=epoch.source_head,
+            operating_system=os,pid=pid,system=identity,ground=ground,
+            initial=0,word=(1,),repetitions=3,request_sequence=2,
+        )
 
 
 def test_same_ground_executes_on_separately_selected_native_hosts(tmp_path):
