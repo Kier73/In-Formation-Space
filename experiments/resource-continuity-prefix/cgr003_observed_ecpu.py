@@ -109,6 +109,23 @@ def construct_native(epoch: ObservedEpoch, *, expected_head: str) -> NativeObser
     synthesis. The E-CPU primitive definition is derived from the observations
     and checks against all states; no caller supplies its coefficients.
     """
+    # Qualification order matters: an unsupported candidate may generate a
+    # huge source transformation monoid even when a 17-state affine check can
+    # refuse it cheaply. Preflight only COMPLETE directly witnessed tables;
+    # incomplete observations still reach NCR-004's explicit UNKNOWN refusal.
+    # This preflight is never accepted as the mathematical proof; every
+    # surviving candidate MUST still pass the native independent NCR checker.
+    if (isinstance(epoch, ObservedEpoch) and epoch.source_head == expected_head
+            and epoch.states == tuple(range(17)) and epoch.actions == ACTIONS):
+        witnessed = {(w.before, w.action): w.after for w in epoch.witnesses}
+        if len(witnessed) == 17 * len(ACTIONS):
+            for action in ACTIONS:
+                offset = witnessed[(0, action)]
+                multiplier = (witnessed[(1, action)] - offset) % 17
+                if any(witnessed[(state, action)] !=
+                       (multiplier * state + offset) % 17
+                       for state in range(17)):
+                    raise ObservedNativeRefused("witnessed law is not native finite affine")
     try:
         admission = admit_observed_epoch(epoch, expected_head=expected_head)
     except ValueError as exc:
