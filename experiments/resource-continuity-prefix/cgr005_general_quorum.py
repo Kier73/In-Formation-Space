@@ -26,7 +26,11 @@ from mailcpu.fenced_generated_ground import (
 from mailcpu.recovery_lineage import RecoveryLineageCoordinator, RecoveryLineageError
 from mailcpu.seed import SystemIdentity
 from mailcpu.semantic_translation import canonical_value_digest
-from mailcpu.virtual_layer import VirtualGroundRef
+from mailcpu.virtual_layer import (
+    VirtualGroundRef,VirtualLayerWorkload,VirtualOperatorRef,
+    VirtualBudget,OperatorSpec,
+)
+from mailcpu.runtime_qualification import digest as host_digest
 from cgr003_observed_ecpu import load_epoch
 from cgr004_language_hypervisor import (
     OPERATOR, GroundLanguageRefused, QualifiedFiniteHost,
@@ -189,11 +193,64 @@ class GeneralGroundLineage(FencedGroundLineage):
             value=int(wanted)
             effect=stage["hypervisor_effect"]
             result=effect.get("result")
+            # Reconstruct the actual original VirtualLayerWorkload and versioned
+            # pure OperatorSpec rather than trusting a stored runtime digest.
+            input_value={
+                "source_head":self.source_head,
+                "language_digest":self.language_digest,
+                "initial":current,"word":list(WORDS[index]),
+                "repetitions":"1","host":stage["host"],
+            }
+            sequence=index+1
+            workload=VirtualLayerWorkload(
+                "cgr004-"+host_digest({
+                    "input":input_value,"sequence":sequence})[:24],
+                system,ground,
+                {"goal":{"source_head":self.source_head,
+                         "language_digest":self.language_digest,
+                         "request_sequence":sequence}},
+                (VirtualOperatorRef(OPERATOR,1,"cpu"),),
+                input_value,VirtualBudget(1000000,32768,1000),
+                sequence,("cgr004-native",),1,
+            )
+            spec=OperatorSpec(
+                OPERATOR,1,"NCR-004 verified finite observer-word interpreter",
+                "object","object",("cpu",),
+                required_rights=frozenset({"compute"}),base_energy=1,
+                energy_per_byte=1,max_input_bytes=8192,max_output_bytes=8192,
+                deterministic=True,effect_mode="pure",
+            )
+            input_cost=len(json.dumps(input_value,sort_keys=True,
+                                       separators=(",",":"),ensure_ascii=False).encode("utf-8"))
+            estimated=spec.estimated_energy(input_cost)
+            expected_effect_fields={
+                "kind","schema_version","workload_id","workload_digest",
+                "operator_id","operator_version","operator_contract_digest",
+                "node_id","substrate","ground","logical_time",
+                "estimated_energy","estimated_virtual_ticks",
+                "input_digest","result_digest","result",
+            }
+            expected_result_fields={
+                "output","state","source_head","ncr_language_sha256",
+                "host","qualification_digest","native_receipt_digest",
+                "effect_authorized",
+            }
             if (not isinstance(result,dict) or
+                set(result)!=expected_result_fields or
+                set(effect)!=expected_effect_fields or
                 effect.get("kind")!="virtual_layer.operator_result" or
+                effect.get("schema_version")!=1 or
                 effect.get("operator_id")!=OPERATOR or
+                effect.get("operator_version")!=1 or
+                effect.get("operator_contract_digest")!=spec.digest or
                 effect.get("node_id")!="cgr004-native" or
-                effect.get("logical_time")!=index+1 or
+                effect.get("substrate")!="cpu" or
+                effect.get("logical_time")!=sequence or
+                effect.get("workload_id")!=workload.workload_id or
+                effect.get("workload_digest")!=workload.digest or
+                effect.get("estimated_energy")!=estimated or
+                effect.get("estimated_virtual_ticks")!=(estimated+63)//64 or
+                effect.get("input_digest")!=canonical_value_digest(input_value) or
                 effect.get("ground")!=ground.to_dict() or
                 effect.get("result_digest")!=canonical_value_digest(result) or
                 result.get("source_head")!=self.source_head or
@@ -205,7 +262,9 @@ class GeneralGroundLineage(FencedGroundLineage):
                 type(result.get("qualification_digest")) is not str or
                 type(result.get("native_receipt_digest")) is not str or
                 len(result["qualification_digest"])!=64 or
-                len(result["native_receipt_digest"])!=64):
+                len(result["native_receipt_digest"])!=64 or
+                any(c not in "0123456789abcdef"
+                    for c in result["qualification_digest"]+result["native_receipt_digest"])):
                 raise GeneralGroundRefused("saved native Hypervisor effect violates Ground proof")
             receipt=_receipt(index,current,value,stage["host"],
                              self.source_head,self.language_digest,effect)
