@@ -1,9 +1,11 @@
 # CKN-003 — Spectral navigation: what the critical line can and cannot carry
 
 - **Status:** Experiment, verified end-to-end in a single clean run (25 s). Theory sections are labelled Inference / Hypothesis.
-- **Lineage:** CKN-001/002 (causal kernels, residue/CRT navigation). The Riemann hypothesis was proven on 20 Nov 2026 (Alpöge, with Claude; Lean-formalized). Under it, Schoenfeld's bound |ψ(x) − x| ≤ √x·ln²x / 8π (x ≥ 73.2) is now unconditional.
+- **Lineage:** CKN-001/002 (causal kernels, residue/CRT navigation). On 20 Nov 2026 Levent Alpöge announced a claimed proof of the Riemann hypothesis developed with Claude, accompanied by Lean code. The present experiment does not establish or independently check that proof; its use of Schoenfeld's bound remains explicitly conditional on RH for this experiment.
 - **Scope:** one process, numpy and the standard library only, no external zero tables, no network.
-- **Reproduce:** `python run_ckn3.py` → `results_ckn3.json` and `zeta_zeros_t6000.npy`.
+- **Reproduce:** `python run_ckn3.py` → `results_ckn3.json` and `zeta_zeros_t6000.npy` in this directory. The binary array is shared with sibling CKN-003c (see [series index](../CKN-INDEX.md)).
+
+> **External theorem status, 21 Nov 2026:** Independent verification of the Alpöge/Claude announcement is being reported (see [MIT verification notes](https://math.mit.edu/~drew/grh/)), but the claimed proof and its wider mathematical acceptance are outside this experiment. A computed zero list, Gram-point checks, and 300 samples do not prove RH, zero completeness, or a general approximation error bound.
 
 ## 1. Question
 
@@ -68,7 +70,7 @@ Since zeros needed grow like T log T while the bitmap grows like T, the ratio gr
 
 ## 4. Aggregate question: ψ(x) for x ∈ [10⁶, 10⁷] (300 random points)
 
-The RH bound held at all 300 points. Its worst ratio was 0.071, so even with **zero** zeros the smooth generator x lands within 7% of the bound.
+The sampled values satisfied the numerical inequality corresponding to the **RH-conditional** Schoenfeld bound at all 300 points. Its worst ratio was 0.071, so even with **zero** zeros the smooth generator x lands within 7% of that conditional reference bound in the sampled range.
 
 | zeros K | rms error / √x | max error / RH bound | median bits beyond the RH bound |
 |---|---|---|---|
@@ -92,7 +94,7 @@ Hypothesis H-CKN-3: the same K terms keep an error of order 0.02√x at much lar
    |---|---|---|
    | clocks | integer periods λᵢ | frequencies γ (believed linearly independent) |
    | return | exact (lcm) | never exact, only near-returns |
-   | answer | exact, including proofs of "never" | approximate, with a **certified floor** set by RH |
+   | answer | exact, including proofs of "never" | approximate; compared against an **RH-conditional bound for ψ(x) − x**, not a certified truncation-error bound |
    | best for | coincidences, phases | sizes, densities, counts |
 
 2. **The ½ is a memory exponent.** RH puts every oscillator at amplitude x^½. The smooth generator x supplies the leading half of the bits of ψ(x) for free, and the remaining ~√x scale is what has to be stored or computed. Spectral terms cut it slowly (≈1 bit per decade of K), and only the sieve removes it entirely.
