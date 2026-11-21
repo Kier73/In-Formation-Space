@@ -1,0 +1,61 @@
+name: CGR-003 source-generated NCR Ground through E-CPU IPS-008
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/resource-continuity-prefix/cgr003_observed_ecpu.py'
+      - 'experiments/resource-continuity-prefix/cgr003_receiver_worker.py'
+      - 'experiments/resource-continuity-prefix/test_cgr003_observed_ecpu.py'
+      - 'experiments/resource-continuity-prefix/CGR-003.md'
+      - '.github/workflows/cgr003-observed-native-handoff.yml'
+  push:
+    branches:
+      - research/cgr003-observed-ground-native-ips008
+    paths:
+      - 'experiments/resource-continuity-prefix/cgr003_observed_ecpu.py'
+      - 'experiments/resource-continuity-prefix/cgr003_receiver_worker.py'
+      - 'experiments/resource-continuity-prefix/test_cgr003_observed_ecpu.py'
+      - '.github/workflows/cgr003-observed-native-handoff.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  observed-native-ips008:
+    name: Observed NCR-004 into real native E-CPU stage and mTLS recovery
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin original E-CPU native Hypervisor, quorum, resource service
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: e380070312b7553d8bd4860a460bb7b9dce7070a
+          path: external/E-CPU
+          persist-credentials: false
+      - name: Pin merged NCR-004 observed-source constructor and checker
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: b9b2beeaed1393c6375337b055611d5ccf816f89
+          path: external/Navigable-Compute
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned original hosts and verification packages
+        run: |
+          python -m pip install -e ./external/E-CPU
+          python -m pip install -e ./external/Navigable-Compute
+          python -m pip install 'pytest>=8,<9' 'jsonschema>=4,<5'
+      - name: Run original E-CPU mTLS tests and real CGR-003 integration
+        shell: bash
+        run: |
+          export PYTHONPATH="$PWD/experiments/resource-continuity-prefix:$PWD/external/E-CPU:$PWD/external/E-CPU/tests:$PWD/external/Navigable-Compute"
+          python -m pytest -q external/E-CPU/tests/test_effect_receiver_service.py experiments/resource-continuity-prefix/test_cgr003_observed_ecpu.py
