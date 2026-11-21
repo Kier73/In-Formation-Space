@@ -1,0 +1,206 @@
+{
+ "zeros": {
+  "count": 5598,
+  "t_max": 6000.0,
+  "seconds": 19.21606255000006,
+  "refined_brackets_with_sign_change": 5598,
+  "max_abs_error_vs_known": 3.275957283221942e-10,
+  "min_gap": 0.0432540598558262,
+  "gram_points": 5597,
+  "good_gram_points": 5190,
+  "good_gram_count_deviations": 0
+ },
+ "local": [
+  {
+   "K": 125,
+   "T": 279.2292509277449,
+   "weight": "cos2",
+   "perfect_up_to": 41,
+   "n0_over_T": 0.14683275431845577,
+   "prime_powers_resolved": 20,
+   "max_abs_err_below_n0": 0.5351683909576073
+  },
+  {
+   "K": 250,
+   "T": 472.7991746619088,
+   "weight": "cos2",
+   "perfect_up_to": 71,
+   "n0_over_T": 0.15016946687940175,
+   "prime_powers_resolved": 29,
+   "max_abs_err_below_n0": 0.6599253303172725
+  },
+  {
+   "K": 500,
+   "T": 812.7711083891095,
+   "weight": "cos2",
+   "perfect_up_to": 101,
+   "n0_over_T": 0.12426622816376838,
+   "prime_powers_resolved": 36,
+   "max_abs_err_below_n0": 0.3395531522116366
+  },
+  {
+   "K": 1000,
+   "T": 1420.4165263237521,
+   "weight": "cos2",
+   "perfect_up_to": 179,
+   "n0_over_T": 0.12601937296750443,
+   "prime_powers_resolved": 55,
+   "max_abs_err_below_n0": 0.40988151402034845
+  },
+  {
+   "K": 2000,
+   "T": 2516.5710491428867,
+   "weight": "cos2",
+   "perfect_up_to": 311,
+   "n0_over_T": 0.1235808542365306,
+   "prime_powers_resolved": 81,
+   "max_abs_err_below_n0": 0.4109833856445215
+  },
+  {
+   "K": 4000,
+   "T": 4507.745182883216,
+   "weight": "cos2",
+   "perfect_up_to": 569,
+   "n0_over_T": 0.12622718829817697,
+   "prime_powers_resolved": 125,
+   "max_abs_err_below_n0": 0.5054604009320061
+  },
+  {
+   "K": 5598,
+   "T": 6000.0,
+   "weight": "cos2",
+   "perfect_up_to": 807,
+   "n0_over_T": 0.1345,
+   "prime_powers_resolved": 162,
+   "max_abs_err_below_n0": 0.6694298421704481
+  }
+ ],
+ "local_taper_comparison_K2000": [
+  {
+   "K": 2000,
+   "T": 2516.5710491428867,
+   "weight": "sharp",
+   "perfect_up_to": 179,
+   "n0_over_T": 0.07112853025189382,
+   "prime_powers_resolved": 55,
+   "max_abs_err_below_n0": 0.3716969292314829
+  },
+  {
+   "K": 2000,
+   "T": 2516.5710491428867,
+   "weight": "fejer",
+   "perfect_up_to": 191,
+   "n0_over_T": 0.07589692334140626,
+   "prime_powers_resolved": 57,
+   "max_abs_err_below_n0": 0.4745280367518552
+  },
+  {
+   "K": 2000,
+   "T": 2516.5710491428867,
+   "weight": "cos2",
+   "perfect_up_to": 311,
+   "n0_over_T": 0.1235808542365306,
+   "prime_powers_resolved": 81,
+   "max_abs_err_below_n0": 0.4109833856445215
+  }
+ ],
+ "local_loglog_slope": 0.9565869677042992,
+ "precision_K2000": [
+  {
+   "eps": 0.1,
+   "perfect_up_to": 9
+  },
+  {
+   "eps": 0.03,
+   "perfect_up_to": 89
+  },
+  {
+   "eps": 0.01,
+   "perfect_up_to": 307
+  },
+  {
+   "eps": 0.003,
+   "perfect_up_to": 311
+  },
+  {
+   "eps": 0.001,
+   "perfect_up_to": 311
+  },
+  {
+   "eps": 0.0001,
+   "perfect_up_to": 311
+  },
+  {
+   "eps": 1e-06,
+   "perfect_up_to": 311
+  }
+ ],
+ "rh_bound_holds_all_300": true,
+ "aggregate": [
+  {
+   "K": 0,
+   "rms_err_over_sqrtx": 0.2049816979100493,
+   "max_err_over_RH_bound": 0.07082538728713118,
+   "median_bits_beyond_RH_bound": 5.995671744211425
+  },
+  {
+   "K": 10,
+   "rms_err_over_sqrtx": 0.13995884824160723,
+   "max_err_over_RH_bound": 0.05808019274057616,
+   "median_bits_beyond_RH_bound": 6.558852499518345
+  },
+  {
+   "K": 30,
+   "rms_err_over_sqrtx": 0.12189319123697777,
+   "max_err_over_RH_bound": 0.04371202362143317,
+   "median_bits_beyond_RH_bound": 6.584056342298995
+  },
+  {
+   "K": 100,
+   "rms_err_over_sqrtx": 0.08244714817227754,
+   "max_err_over_RH_bound": 0.028390118483082753,
+   "median_bits_beyond_RH_bound": 7.211026418683891
+  },
+  {
+   "K": 300,
+   "rms_err_over_sqrtx": 0.059432346183864206,
+   "max_err_over_RH_bound": 0.017823278793149294,
+   "median_bits_beyond_RH_bound": 7.835797915458517
+  },
+  {
+   "K": 1000,
+   "rms_err_over_sqrtx": 0.038579698851057886,
+   "max_err_over_RH_bound": 0.013074154504572505,
+   "median_bits_beyond_RH_bound": 8.360959159655295
+  },
+  {
+   "K": 3000,
+   "rms_err_over_sqrtx": 0.024551503449498017,
+   "max_err_over_RH_bound": 0.008019378962584891,
+   "median_bits_beyond_RH_bound": 9.065532843463245
+  },
+  {
+   "K": 5598,
+   "rms_err_over_sqrtx": 0.020428290073255497,
+   "max_err_over_RH_bound": 0.00783160429200797,
+   "median_bits_beyond_RH_bound": 9.33243230127251
+  }
+ ],
+ "aggregate_rms_vs_K_exponent": -0.3186195222689201,
+ "accounting_local": {
+  "primes_exactly_recovered_up_to": 807,
+  "zeros_used": 5598,
+  "zero_storage_bits": 37192,
+  "bitmap_bits": 807,
+  "odd_only_bitmap_bits": 403,
+  "ratio_zero_storage_to_bitmap": 46.087121375909426,
+  "note": "A sieve program of a few hundred bytes regenerates the same primes; zeros are not a compression of local prime data."
+ },
+ "accounting_aggregate": {
+  "x": 10000000.0,
+  "exact_sieve_element_ops": 10000000,
+  "spectral_terms": 5598,
+  "spectral_rms_error": 64.59992533409533,
+  "rh_bound_at_1e7": 32687.94343343418
+ }
+}
