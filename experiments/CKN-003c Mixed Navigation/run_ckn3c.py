@@ -7,14 +7,24 @@ Query: given n, return p_n exactly.  Correctness never depends on an estimate:
 An estimate only changes how many anchors / how many sieved numbers are needed. Answers are
 verified by known values (OEIS A006988), deterministic Miller-Rabin, and pi(p)=n (p prime and pi(p)=n => p = p_n).
 
-python run_ckn3c.py  (needs zeta_zeros_t6000.npy from run_ckn3.py)  -> results_ckn3c.json
+python run_ckn3c.py  (reads ../CKN-003 Spectral Navigation/zeta_zeros_t6000.npy)
+Override the input with CKN_ZEROS_PATH; writes results_ckn3c.json.
 """
 import json, math, os, time
 from math import isqrt
 import numpy as np
 
 HERE = globals().get("HERE_OVERRIDE") or os.path.dirname(os.path.abspath(__file__))
-gam = np.load(os.path.join(HERE, "zeta_zeros_t6000.npy"))
+# Resolve the uploaded CKN-003 artifact relative to the script, not HERE_OVERRIDE
+# (which controls the output location in staged runs).
+CKN3_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                      "..", "CKN-003 Spectral Navigation"))
+ZERO_PATH = os.environ.get("CKN_ZEROS_PATH") or os.path.join(CKN3_DIR, "zeta_zeros_t6000.npy")
+if not os.path.isfile(ZERO_PATH):
+    raise FileNotFoundError(f"CKN-003 zero table missing at {ZERO_PATH}; run CKN-003 or set CKN_ZEROS_PATH")
+gam = np.load(ZERO_PATH, allow_pickle=False)
+if gam.ndim != 1 or gam.size < 1 or not np.all(np.isfinite(gam)) or not np.all(np.diff(gam) > 0):
+    raise ValueError("CKN-003 zero table must be a one-dimensional, finite, strictly increasing array")
 R = {}
 
 # ------------------------------------------------------------------ exact tools
