@@ -142,7 +142,9 @@ def test_source_revision_and_stale_host_cannot_publish(tmp_path):
     accepted=restarted.compute(moved,replacement,successor_os,successor_pid)
     published=restarted.publish(moved,accepted)
     assert restarted._session(published.checkpoint).value==3
-    with pytest.raises(GeneralGroundRefused):
+    # The native majority high-water check rejects the stale assignment
+    # before the adapter's host-specific admission check is reached.
+    with pytest.raises((RecoveryLineageError,GeneralGroundRefused)):
         restarted.compute(moved,old,successor_os,successor_pid)
 
 
