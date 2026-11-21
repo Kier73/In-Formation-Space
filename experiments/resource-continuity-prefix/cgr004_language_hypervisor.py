@@ -169,6 +169,15 @@ def execute_qualified_language(root: Path, host: QualifiedFiniteHost, *,
         host.host_id not in host.policy_allowed_hosts or
         len(host.probes) != 3):
         raise GroundLanguageRefused("unqualified selected host or mathematical revision")
+    # A supplied host description must NOT be able to choose a different
+    # executable or Python source. Only the locally installed fixed worker
+    # and original E-CPU subprocess channel are admissible here.
+    expected_command = (sys.executable,str(WORKER),str(root.resolve()),host.host_id)
+    if (type(host.endpoint) is not SubprocessQualificationEndpoint or
+        host.endpoint.host_id != host.host_id or
+        host.endpoint.command != expected_command or
+        host.endpoint.timeout != 10.0):
+        raise GroundLanguageRefused("selected host changes fixed trusted worker command")
     if (type(initial) is not int or initial not in admission.source.initial or
         type(word) is not tuple or not 1 <= len(word) <= 256 or
         any(type(i) is not int or not 0 <= i < len(admission.source.generators)
