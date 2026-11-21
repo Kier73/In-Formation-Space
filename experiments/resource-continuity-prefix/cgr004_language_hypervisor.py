@@ -155,7 +155,7 @@ def execute_qualified_language(root: Path, host: QualifiedFiniteHost, *,
                                expected_head: str,
                                operating_system, pid: int, system, ground,
                                initial: int, word: tuple[int,...],
-                               repetitions: int) -> dict:
+                               repetitions: int, request_sequence: int = 1) -> dict:
     """Run a finite non-affine processor through the original E-CPU Hypervisor.
 
     A fixed trusted receiver handler is bound to the native declarative
@@ -174,7 +174,8 @@ def execute_qualified_language(root: Path, host: QualifiedFiniteHost, *,
         any(type(i) is not int or not 0 <= i < len(admission.source.generators)
             for i in word) or
         type(repetitions) is not int or not 0 <= repetitions or
-        repetitions.bit_length() > 4096):
+        repetitions.bit_length() > 4096 or
+        type(request_sequence) is not int or not 1 <= request_sequence <= 1000000):
         raise GroundLanguageRefused("invalid admitted mathematical request")
     expected = _independent_expected(admission,initial,word,repetitions)
     input_value = {
@@ -183,11 +184,12 @@ def execute_qualified_language(root: Path, host: QualifiedFiniteHost, *,
         "host":host.host_id,
     }
     workload = VirtualLayerWorkload(
-        "cgr004-"+digest(input_value)[:24],
+        "cgr004-"+digest({"input":input_value,"sequence":request_sequence})[:24],
         system,ground,{"goal":{"source_head":expected_head,
-                    "language_digest":admission.language.digest}},
+                    "language_digest":admission.language.digest,
+                    "request_sequence":request_sequence}},
         (VirtualOperatorRef(OPERATOR,1,"cpu"),),
-        input_value, VirtualBudget(1000000,32768,1000),1,
+        input_value, VirtualBudget(1000000,32768,1000),request_sequence,
         ("cgr004-native",),1,
     )
     spec = OperatorSpec(
@@ -229,7 +231,7 @@ def execute_qualified_language(root: Path, host: QualifiedFiniteHost, *,
         registry,"cgr004-native",frozenset({"cpu"}))
     outcome = runtime.execute_operator(
         operating_system,pid,"cgr004-observer",
-        "cgr004.execute",1,1,workload,OPERATOR,
+        "cgr004.execute",request_sequence,request_sequence,workload,OPERATOR,
     )
     if (not outcome.executed or outcome.action.value != "allow" or
         outcome.effect is None):
@@ -247,6 +249,7 @@ def execute_qualified_language(root: Path, host: QualifiedFiniteHost, *,
         "source_head":expected_head,
         "language_sha256":admission.language.digest,
         "host":host.host_id,
+        "request_sequence":request_sequence,
         "value":expected,
         "receiver_effect_digest":digest(effect),
         "hypervisor_effect":effect,
