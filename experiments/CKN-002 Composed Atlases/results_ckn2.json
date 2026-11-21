@@ -1,0 +1,389 @@
+{
+ "components": [
+  {
+   "seed": 1010,
+   "cycles": [
+    540,
+    158,
+    76,
+    26
+   ],
+   "max_tail": 2296,
+   "build_s": 0.189
+  },
+  {
+   "seed": 1015,
+   "cycles": [
+    2276,
+    601,
+    62,
+    51,
+    5,
+    5
+   ],
+   "max_tail": 5197,
+   "build_s": 0.233
+  },
+  {
+   "seed": 1016,
+   "cycles": [
+    773,
+    597,
+    28,
+    28,
+    14,
+    14,
+    14,
+    13,
+    10
+   ],
+   "max_tail": 586,
+   "build_s": 0.154
+  },
+  {
+   "seed": 1017,
+   "cycles": [
+    627,
+    463,
+    444,
+    99,
+    24
+   ],
+   "max_tail": 5958,
+   "build_s": 0.239
+  },
+  {
+   "seed": 1019,
+   "cycles": [
+    948,
+    107
+   ],
+   "max_tail": 1893,
+   "build_s": 0.183
+  },
+  {
+   "seed": 1021,
+   "cycles": [
+    339,
+    67,
+    27
+   ],
+   "max_tail": 3430,
+   "build_s": 0.216
+  },
+  {
+   "seed": 1025,
+   "cycles": [
+    384
+   ],
+   "max_tail": 455,
+   "build_s": 0.152
+  },
+  {
+   "seed": 1027,
+   "cycles": [
+    768,
+    384,
+    384,
+    6
+   ],
+   "max_tail": 54,
+   "build_s": 0.135
+  }
+ ],
+ "components_build_total_s": 7.746411609000006,
+ "product": {
+  "forward_check": {
+   "product_states": 300,
+   "horizons": [
+    "12345",
+    "1000000000000000000",
+    "618970019642690137449562119",
+    "1000000000000000000000000000003"
+   ],
+   "component_mismatches": 0
+  },
+  "forward_query_us": 5.183966666966929,
+  "joint_small_sieve_verified": {
+   "queries": 400,
+   "agree": 400,
+   "first_hits": 211,
+   "proved_never": 189,
+   "pre_periodic_answers": 12,
+   "skipped_bound_over_3e7": 230
+  },
+  "joint_full": {
+   "queries": 200,
+   "first_hits": 2,
+   "proved_never": 198,
+   "all_sound": true,
+   "brent_residue_crosscheck_agree": 200,
+   "log10_t_min": 11.428705681250202,
+   "log10_t_median": 11.839756359654409,
+   "log10_t_max": 12.250807038058616,
+   "max_residue_classes": 3420,
+   "query_ms_median": 6.947689499838816,
+   "query_ms_max": 13.412444000096002,
+   "never_reasons": [
+    "residue classes incompatible"
+   ],
+   "log10_hit_density_median": -15.576329591223054,
+   "log10_L_median": 10.708235773964631,
+   "examples": [
+    {
+     "t": null,
+     "L": "193055015388",
+     "peak": 54,
+     "regime": "never",
+     "reason": "residue classes incompatible when adding component 4",
+     "brent_agrees": true,
+     "sound": null
+    },
+    {
+     "t": null,
+     "L": "49699803444",
+     "peak": 1176,
+     "regime": "never",
+     "reason": "residue classes incompatible when adding component 4",
+     "brent_agrees": true,
+     "sound": null
+    },
+    {
+     "t": null,
+     "L": "1696441260",
+     "peak": 650,
+     "regime": "never",
+     "reason": "residue classes incompatible when adding component 4",
+     "brent_agrees": true,
+     "sound": null
+    },
+    {
+     "t": null,
+     "L": "55208984365440",
+     "peak": 192,
+     "regime": "never",
+     "reason": "residue classes incompatible when adding component 6",
+     "brent_agrees": true,
+     "sound": null
+    },
+    {
+     "t": null,
+     "L": "15427722612",
+     "peak": 104,
+     "regime": "never",
+     "reason": "residue classes incompatible when adding component 4",
+     "brent_agrees": true,
+     "sound": null
+    }
+   ]
+  },
+  "joint_realizable": {
+   "queries": 200,
+   "all_found": true,
+   "all_sound": true,
+   "all_le_Tstar": true,
+   "brent_crosscheck_agree": 200,
+   "first_occurrence_equals_Tstar": 7,
+   "log10_Tstar_median": 20.364068922436978,
+   "log10_first_median": 12.04633615809215,
+   "log10_first_max": 14.850183656585035,
+   "log10_L_median": 14.210178383721205,
+   "max_final_classes": 2500,
+   "query_ms_median": 7.282921500291195,
+   "query_ms_max": 11.690070999975433,
+   "examples": [
+    {
+     "Tstar": "1698855663443108928660963328",
+     "first": "2159451188608",
+     "L": "55208984365440"
+    },
+    {
+     "Tstar": "56341933152854824",
+     "first": "19434479288488",
+     "L": "698086935643008"
+    },
+    {
+     "Tstar": "214866909237863",
+     "first": "4061230139879",
+     "L": "55786644964992"
+    },
+    {
+     "Tstar": "656557665824750208",
+     "first": "31283253120",
+     "L": "1579213438080"
+    },
+    {
+     "Tstar": "61783029890080759881203187712",
+     "first": "3653518064512",
+     "L": "241619656026240"
+    },
+    {
+     "Tstar": "320093619609377721517342720",
+     "first": "47959469405440",
+     "L": "1292546974544640"
+    }
+   ]
+  },
+  "table_step_ns_per_component": 118.97061000126996,
+  "atlas_entries_used": 8388608,
+  "state_space_log2": 160
+ },
+ "cascade": {
+  "port_table_s": 2.4182273429996712,
+  "holonomy_build_s": 3.5384731959998135,
+  "sender": {
+   "seed": 1010,
+   "cycles": [
+    158,
+    540,
+    26,
+    76
+   ],
+   "max_tail": 2296
+  },
+  "receiver_seed": 5000,
+  "holonomies": [
+   {
+    "sender_cycle": 158,
+    "symbol_period": 158,
+    "image_size_after_one_period": 131072,
+    "receiver_holonomy_cycles": 20,
+    "holonomy_longest_cycle": 57107,
+    "holonomy_max_tail": 1,
+    "joint_eventual_period_max": 9022906
+   },
+   {
+    "sender_cycle": 540,
+    "symbol_period": 540,
+    "image_size_after_one_period": 131072,
+    "receiver_holonomy_cycles": 30,
+    "holonomy_longest_cycle": 47435,
+    "holonomy_max_tail": 1,
+    "joint_eventual_period_max": 25614900
+   },
+   {
+    "sender_cycle": 26,
+    "symbol_period": 13,
+    "image_size_after_one_period": 131072,
+    "receiver_holonomy_cycles": 28,
+    "holonomy_longest_cycle": 31482,
+    "holonomy_max_tail": 1,
+    "joint_eventual_period_max": 818532
+   },
+   {
+    "sender_cycle": 76,
+    "symbol_period": 76,
+    "image_size_after_one_period": 131072,
+    "receiver_holonomy_cycles": 22,
+    "holonomy_longest_cycle": 37850,
+    "holonomy_max_tail": 1,
+    "joint_eventual_period_max": 2876600
+   }
+  ],
+  "V1_bruteforce": {
+   "starts": 4096,
+   "steps": 120000,
+   "checked_queries": 3500,
+   "mismatches": 0,
+   "seconds": 12.797289169000123
+  },
+  "V2_full_layer_all_2^20_receiver_states_per_sender_cycle": {
+   "1000000000000000000": true,
+   "2305843009213693951": true
+  },
+  "V3_semigroup_mismatches": 0,
+  "query_ms_t1e18": 0.46283803999995143,
+  "joint_step_ns": 487.5184699994861,
+  "iterate_1e18_years": 15448.528088304754,
+  "flat_atlas_bytes_needed": 21990232555520,
+  "holonomy_bytes_used": 188743680,
+  "entrained_contrast_seed_5001": {
+   "image_size_after_one_period": 61440,
+   "holonomy_cycles": 61440,
+   "longest_cycle": 1,
+   "max_tail": 1
+  },
+  "holonomy_structure": {
+   "5000": [
+    {
+     "sender_cycle": 158,
+     "image": 131072,
+     "bits_erased_once": 3.0,
+     "bijective_on_image": true,
+     "idempotent": false
+    },
+    {
+     "sender_cycle": 540,
+     "image": 131072,
+     "bits_erased_once": 3.0,
+     "bijective_on_image": true,
+     "idempotent": false
+    },
+    {
+     "sender_cycle": 26,
+     "image": 131072,
+     "bits_erased_once": 3.0,
+     "bijective_on_image": true,
+     "idempotent": false
+    },
+    {
+     "sender_cycle": 76,
+     "image": 131072,
+     "bits_erased_once": 3.0,
+     "bijective_on_image": true,
+     "idempotent": false
+    }
+   ],
+   "5001": [
+    {
+     "sender_cycle": 158,
+     "image": 61440,
+     "bits_erased_once": 4.093,
+     "bijective_on_image": true,
+     "idempotent": true
+    },
+    {
+     "sender_cycle": 540,
+     "image": 61440,
+     "bits_erased_once": 4.093,
+     "bijective_on_image": true,
+     "idempotent": true
+    },
+    {
+     "sender_cycle": 26,
+     "image": 61978,
+     "bits_erased_once": 4.081,
+     "bijective_on_image": false,
+     "idempotent": false
+    },
+    {
+     "sender_cycle": 76,
+     "image": 61441,
+     "bits_erased_once": 4.093,
+     "bijective_on_image": false,
+     "idempotent": false
+    }
+   ]
+  }
+ },
+ "admission": {
+  "budget_element_steps": 20000000000.0,
+  "case_receiver_reads_one_sender": {
+   "period": 540,
+   "cost": 566231040,
+   "admitted": true
+  },
+  "case_receiver_reads_xor_of_three_senders": {
+   "state_period_bound": 237511980,
+   "cost_bound": 249049361940480,
+   "admitted": false,
+   "note": "the XOR stream's minimal period divides this lcm; it is not computed, so admission is refused, not guessed"
+  },
+  "case_flat_joint_atlas_2pow40": {
+   "cost": 1099511627776,
+   "memory_bytes": 21990232555520,
+   "admitted": false
+  }
+ },
+ "provenance": "Numbers were produced by executing this script's sections in order inside one interpreter (Section 2 was run twice; the second run is recorded). holonomy_structure was computed by the same code in a separate call. The final script adds memory reductions (memoryview lookups, array-backed Brent sequences, driver atlas reuse); those edits were smoke-tested against the oracles on one component (0 mismatches) but the final file has NOT yet been run end-to-end. Run `python run_ckn2.py` once (about 1-2 min, ~0.5 GB RAM) before labelling these results Verified."
+}
