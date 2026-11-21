@@ -103,6 +103,29 @@ def test_witnessed_native_plan_is_not_hardcoded():
     assert qualified.plan.authoritative is False
 
 
+def test_reobserved_different_affine_law_generates_a_new_native_processor():
+    # Entire new source law, not a parameter hardcoded into lowering code.
+    old = observed_epoch()
+    changed = []
+    for event in old.witnesses:
+        if event.action == "second":
+            after = (event.after + 1) % 17
+            changed.append(replace(event, after=after, after_output=str(after)))
+        else:
+            changed.append(event)
+    new = replace(old, context="reobserved-affine-epoch-v2",
+                  witnesses=tuple(changed))
+    first = construct_native(old, expected_head=old.source_head)
+    second = construct_native(new, expected_head=new.source_head)
+    assert new.source_head != old.source_head
+    assert second.intention.relation.ground_digest == new.source_head
+    assert second.primitives[1].offset == 6
+    assert second.intention.output_at_zero == 5
+    assert second.intention.output_at_one == 12
+    assert second.plan.primitive_names == ("first", "second")
+    assert second.plan.digest != first.plan.digest
+
+
 def test_non_affine_source_and_partial_source_refuse_native_lowering():
     epoch = observed_epoch()
     changed = list(epoch.witnesses)
