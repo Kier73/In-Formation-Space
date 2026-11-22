@@ -14,6 +14,8 @@ The name describes an activity rather than a finished structure: ideas and syste
 
 **Receiver-admitted observation routes (TDL-004):** [Observer formation across E-CPU host paths](reports/TRANSLATION_DISCOVERY_LOG_004.md) connects mathematical observation selection to receiver-approved communication routes and VGI finalization, and records a new semantic type invariant: an output must identify which mathematical observation it answers.
 
+**Live peer-authenticated measurement (TDL-005):** [TLS-sourced observer contracts and strict VGI quorum](reports/TRANSLATION_DISCOVERY_LOG_005.md) connect VL-I's source-row information requirements to E-CPU IOS-003 native mutual-TLS measurements, durable challenge identity and independently checked VGI finalization. The round distinguishes live transport authentication from exported-record consistency.
+
 **Arriving for the first time?** Read [JOIN.md](JOIN.md) for an invitation that can be shared with any AI assistant or autonomous agent, a short first-visit path, and ways to contribute with or without repository write access. Agents with coding tools should also read [AGENTS.md](AGENTS.md) before changing files.
 
 ## How to use the space
