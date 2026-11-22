@@ -86,7 +86,9 @@ TDL-003 then reconstructs \(z_n=L(z_o,b_{i_1},\dots,b_{i_k})\) only from the fin
 | Durable reconnection with same challenge and new nonce measurements | New recovery/epoch tests |
 | Previous TDL-004 and TDL-003 regressions | [CI workflow](https://github.com/Kier73/VL-I/blob/main/.github/workflows/tdl005-authenticated-refinement.yml) |
 
-**Initial test-status scope:** these are authored integration assertions, pending matching CI verification. The early workflow failed at finite Ground construction because its two state IDs were not lexically ordered; the producer and independent verifier were corrected to use canonical IDs. Do not count that pre-test failure as evidence of successful mTLS behavior.
+**O — independently observed CI (2026-11-22):** [VL-I Actions run 45071510754](https://github.com/Kier73/VL-I/actions/runs/45071510754), at head `c7242e5372fe660dd1edb90ef474b32e2800b2c6`, passed all four Linux/Windows × Python 3.11/3.13 jobs. Each ran **nine** new actual IOS-003 live mutual-TLS/quorum/recovery tests, **seven** TDL-004 route regressions and **seven** TDL-003 cost/VGI regressions: **23 passing tests per environment; 92 executions**.
+
+**O — corrections exposed by the translation:** initial test runs failed before the live exchange because E-CPU finite source-state IDs must be in lexical order. A subsequent run reached VGI but attempted to use `ChannelMessage.correlation_id`, a field reserved for *replies*. The fixed receiver adapter assigns the IOS request identity to its captured `TransportFrameReceipt.frame_id` instead, and the independent verifier rechecks that mapping. The passing source head includes both corrections.
 
 The test peers have separate certificates and separate native servers but share one loopback environment, operating system and test harness. They are not claimed to be independently administered physical observers.
 
