@@ -1,0 +1,26 @@
+name: SPN-002 spectral-phase navigation
+
+on:
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/spectral_phase_navigation/**'
+      - '.github/workflows/spn-spectral-phase-navigation.yml'
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/spectral_phase_navigation/**'
+      - '.github/workflows/spn-spectral-phase-navigation.yml'
+
+jobs:
+  exact-proof-receipts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test exact Walsh restrictions and independently checked receipts
+        working-directory: experiments/pnp-ground-navigation/spectral_phase_navigation
+        run: |
+          python walsh_phase_navigation_probe.py
+          python -m unittest -v test_spectral_receipts.py
+          python campaign.py
