@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install pinned real CaDiCaL CDCL baseline
-        run: python -m pip install --only-binary=:all: python-sat==1.9.dev13
+        run: "python -m pip install --only-binary=:all: python-sat==1.9.dev13"
       - name: Existing SFI source Ground regression suite
         working-directory: experiments/pnp-ground-navigation
         run: python -m unittest -v test_algebraic_ground.py test_derived_ground.py test_frontier_ground.py test_morphic_sat.py test_recursive_sat_compiler.py test_self_forming_sat.py test_self_selecting_sat.py
