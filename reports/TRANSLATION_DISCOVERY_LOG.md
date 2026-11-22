@@ -70,6 +70,29 @@ Proof sketch: the joint map \(x\mapsto(B_ox,B_nx)\) has rank \(r_o+d\); restrict
 
 For \(d=0\), the current `mathematically-derived-quotient-map` is sufficient. For \(d>0\), the current `declared-source-anchor-required` branch supplies more information than this lower bound generally requires.
 
+**O — independent finite sanity check (this round):** enumerated all 961 pairs of nonzero one-row old/new observer matrices on \(\mathbb F_2^5\) and all 32 source states per pair (**30,752 source assignments**). Every old-coordinate fiber contained exactly \(2^d\) new-coordinate values; zero counterexamples. This checks the stated conditional-rank property on a small domain, separately from the repository's test suites.
+
+A self-contained Python reproduction for that one-row finite check:
+
+```python
+def projection(row, x):
+    return (row & x).bit_count() & 1
+
+cases = 0
+for old_row in range(1, 32):
+    for new_row in range(1, 32):
+        fibers = {}
+        for x in range(32):
+            old_z = projection(old_row, x)
+            new_z = projection(new_row, x)
+            fibers.setdefault(old_z, set()).add(new_z)
+        # One-row nonzero matrices: joint rank increase is 0 iff identical.
+        d = 0 if old_row == new_row else 1
+        assert all(len(values) == 1 << d for values in fibers.values())
+        cases += 1
+assert cases == 961
+```
+
 **H:** Add a *minimal refinement witness* to PFI-001: exact complement-row basis, \(d\) observed bits, old coordinate and source/epoch digest. Reconstruct \(z_n\) by a matrix over \(\mathbb F_2\). Verify with an independent full-anchor oracle and adversarial tampering. Acceptance includes \(d=0\), rank-increasing cases, changed-law rejection, and multiple consistent source states giving identical reconstructed \(z_n\).
 
 ### B2. General finite source: conditional class information
