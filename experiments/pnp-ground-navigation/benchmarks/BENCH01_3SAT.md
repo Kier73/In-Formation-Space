@@ -138,3 +138,19 @@ Provide the uncompressed `.cnf`, `.cnf.gz` or `.cnf.xz` files yourself for exter
 For actual 2026 competition benchmarks, how often is the cost of a problem-derived processor paid back before a good DPLL/CDCL solver finds a certificate? Benchmark the exact same source against (1) native SFI alone, (2) native SFI→SPN proof fallback, and (3) a pinned external CDCL baseline with independently checked SAT models and DRAT/LRAT proofs, reporting PAR-2 and proof bytes. Then test amortization when the same family is changed by constraints and SFI-004 can reuse a source-qualified construction.
 
 Move to **challenge 02/20 (#SAT)** only after closing this 3-SAT implementation and its recorded verification checkpoint. #SAT will require exact counting, so 3-CNF auxiliary-variable satisfiability reductions are **not** sufficient for count preservation without additional proof obligations.
+
+## 9. Recorded proof-carrying integration outcome (same challenge)
+
+**CI source:** [BENCH-01 cross-platform run 45056995233](https://github.com/Kier73/In-Formation-Space/actions/runs/45056995233), commit `9c9ecc91e875c9a626011ba87478aa454ed19bf4`. All four jobs passed (Linux/Windows, Python 3.11/3.13); **21 tests passed per job without skips**. PNG-002 and PNG-003 predecessor workflows also passed. The post-PR implementation sends each native SPN proof back to the parent process, which invokes its original-source verifier before publishing a decision. This is still same-runner process isolation, **not** an authenticated E-CPU network receipt.
+
+The seeded baseline **SFI alone** stayed at 6 SAT, 5 UNSAT, 6 UNKNOWN (17 source-bound cases). A separate opt-in **SFI→SPN-008** experiment checked three of the six previously UNKNOWN cases. These numbers are from the Linux Python 3.13 job log, single uncalibrated run; `wall_ms` includes process startup, native SFI construction, fallback, and parent source-proof verification.
+
+| Previously unresolved 3-SAT instance | Native fallback result | Proof type | DPLL nodes | Wall-clock |
+| --- | --- | --- | ---: | ---: |
+| 5 pigeons into 4 holes, 3-CNF transformed (25 vars) | **UNSAT** | Complete source-replayed split/conflict tree | 61 | 229.14 ms |
+| Planted random 24-variable 3-CNF | **SAT** | Source-replayed witness | 7 | 133.35 ms |
+| Planted random 60-variable 3-CNF | **SAT** | Source-replayed witness | 20 | 272.38 ms |
+
+**Scope of claim:** These three cases are independently admitted **only after switching from SFI's structurally formed interpreter to the separate SPN-008 proof-carrying DPLL path**. The other three baseline UNKNOWN instances were not part of this three-case fallback experiment and must not be relabeled solved without evidence. A native-SFI UNSAT without a bounded parent exhaustive oracle or replayable proof is explicitly downgraded to UNKNOWN. No production-CDCL performance comparison or official 2026 SAT Competition instance was run; external DIMACS support is ready, not an external benchmark result.
+
+**Next falsifiable extension:** run a pinned external 2026 SAT benchmark corpus under uniform source, proof, resource and wall-clock contracts; compare native SFI alone, verified SFI→SPN, and a production CDCL solver with independently checked SAT models and certified UNSAT traces. Then measure whether SFI-004 structural memory amortizes compilation across related clauses. This remains challenge 01's research frontier, rather than claimed closure of arbitrary 3-SAT.
