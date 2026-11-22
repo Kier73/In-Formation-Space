@@ -220,3 +220,23 @@ integer counts without using an existence-only witness as counting evidence.
 Run `python language_choice_cli.py examples/three_var_sat.cnf --goal count`
 for an end-to-end executable demonstration. This is an algorithm portfolio
 experiment, not a P versus NP resolution.
+
+## 10. SPN-010 — Use the existing system to improve its own construction
+
+[SPN-010 research note](SPN-010_SELF_USE_GROUND_COMPILATION.md) puts the
+existing proof-carrying SPN-008 and SPN-009 solvers **inside their own
+improvement cycle**: source-bound paired experiments -> a small meta-SAT
+policy-selection problem -> verifier-checked candidates -> a validation gate
+-> a frozen final evaluation. Its independently checked outcome includes a
+**negative control**: a learned structural policy was *rejected* because it
+increased work without increasing decisions. The system does not equate a
+verified answer with an optimization success.
+
+The profiler also identified duplicated source-XOR recognition and wasted
+spectral conversion calls inside earlier code. The existing SPN-008/009
+implementations now avoid those operations while retaining the independent
+source-proof verifier; the [overhead probe](self_use_overhead.py) and
+[new tests](test_self_use_cycle.py) preserve that regression evidence.
+Run `python self_use_campaign.py` and `python self_use_overhead.py` to
+reconstruct the evidence. **No universal solver, proof of P=NP or
+self-modifying authority is claimed.**
