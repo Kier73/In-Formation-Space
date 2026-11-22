@@ -386,3 +386,21 @@ def cycle_xor(n=19,*,unsat=False):
         rows+=xor_three(*variables,rhs=(i*7+3)%2)
     if unsat:rows+=xor_three(1,2,3,rhs=0) if (3%2) else xor_three(1,2,3,rhs=1)
     return rows
+
+
+def hub_not_all_equal(blocks=12):
+    """Connected strictly 3-CNF, nonlinear exact #SAT with rank-two factors.
+
+    Each block (hub,a,b) excludes 000 and 111, leaving three possibilities
+    for (a,b) after hub is fixed. The two source clauses per block have only
+    nonconstant pair-parity Fourier supports; these GF(2) rank-two subspaces
+    are independent even though all block clauses share the hub variable.
+    Exact count: 2 * 3**blocks, not a power of two and hence not affine.
+    """
+    if type(blocks) is not int or not 1<=blocks<=63:
+        raise ValueError('bounded non-affine block count required')
+    clauses=[]
+    for k in range(blocks):
+        a,b=2*k+2,2*k+3
+        clauses.extend(((1,a,b),(-1,-a,-b)))
+    return clauses,2*blocks+1
