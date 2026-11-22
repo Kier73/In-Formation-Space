@@ -167,6 +167,32 @@ class TestRefusals(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'independent exhaustive'):
                 b.run_case(self.example)
 
+    def test_false_large_native_unsat_downgraded_without_parent_proof(self):
+        large={'id':'large-guard','n':17,'clauses':[[1,2,3]]}
+        forged=subprocess.CompletedProcess(args=[],returncode=0,
+            stdout=json.dumps({'status':'UNSAT','selected':'local-Boolean-functions',
+                'checked':131072,'witness':None}),stderr='')
+        with patch.object(b.subprocess,'run',return_value=forged):
+            ans=b.run_case(large)
+            self.assertEqual(ans['status'],'UNKNOWN')
+            self.assertIn('without-parent-checkable',ans['reason'])
+
+    def test_worker_spn_proof_claim_requires_original_certificate(self):
+        forged=subprocess.CompletedProcess(args=[],returncode=0,
+            stdout=json.dumps({'status':'UNSAT','selected':'spn-008-source-verified',
+                'spn_original_proof_verified':True,'witness':None}),stderr='')
+        with patch.object(b.subprocess,'run',return_value=forged):
+            with self.assertRaisesRegex(ValueError,'falsely claimed'):
+                b.run_case(self.example)
+
+    def test_forged_empty_clause_label_requires_real_source_clause(self):
+        forged=subprocess.CompletedProcess(args=[],returncode=0,
+            stdout=json.dumps({'status':'UNSAT','selected':'source-empty-clause',
+                'witness':None}),stderr='')
+        with patch.object(b.subprocess,'run',return_value=forged):
+            with self.assertRaisesRegex(ValueError,'not present'):
+                b.run_case(self.example)
+
     def test_timeout_produces_unknown(self):
         with patch.object(b.subprocess,'run',side_effect=subprocess.TimeoutExpired('worker',0.01)):
             ans=b.run_case(self.example,timeout=0.01)
