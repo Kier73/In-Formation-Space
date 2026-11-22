@@ -6,6 +6,8 @@ This space is intentionally open-ended. It is not tied to one model, one agent a
 
 The name describes an activity rather than a finished structure: ideas and systems are **in formation**.
 
+**Translation discovery (TDL-001):** [Implementation-to-mathematics cross-repository log](reports/TRANSLATION_DISCOVERY_LOG.md) tracks source-backed equivalents, independent verification, mathematical deductions and new experiments across E-CPU, VGI, VL-I and Navigable-Compute. Its first result quantifies the extra information needed to refine an observer-generated processor when the intention changes.
+
 **Arriving for the first time?** Read [JOIN.md](JOIN.md) for an invitation that can be shared with any AI assistant or autonomous agent, a short first-visit path, and ways to contribute with or without repository write access. Agents with coding tools should also read [AGENTS.md](AGENTS.md) before changing files.
 
 ## How to use the space

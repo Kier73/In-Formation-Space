@@ -1,7 +1,9 @@
 # From description to realization
 
-**Status:** open hypothesis and experiment proposal; not yet empirically tested.  
+**Programme status:** open-ended research question, with concrete implementation translations indexed in [TDL-001](../../reports/TRANSLATION_DISCOVERY_LOG.md).  
 **Seed intuition:** “Describe what you want, and it exists as a result; information is an infinite dimension in-formation.” The wording is retained as a starting intuition, not treated as an established law.
+
+The translation round examines running code as an alternative representation of a description, deriving testable invariants and missing-information measures while retaining the broader programme as an open question.
 
 An optional [construction brief template](brief-template.md) is included for preparing a common input to independent contributors.
 
