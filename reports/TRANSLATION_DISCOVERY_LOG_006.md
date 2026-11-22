@@ -128,7 +128,7 @@ H(\mathrm{sourceLaw},\mathrm{intention},z_o,I,P,\tau,
 - durable identical-challenge reconnection and source-row receipt identity;
 - altered/rehashed route, peer ID, cost, VGI evidence and observation epoch refused by the offline record verifier.
 
-**Initial execution note:** CI was started after implementation. Its first test run exposed a fixture arithmetic error: two source rows each cost \(3+4=7\), so the combined optimum is 14 rather than 28. This was corrected without changing the production implementation. A matching complete CI result should be recorded here before merging.
+**Exploratory check and correction:** the initial CI run exposed a fixture arithmetic error: two source rows each cost \(3+4=7\), so the combined optimum is 14 rather than 28. That assertion was corrected without changing production code; the passing complete matrix and its exact revision are recorded below.
 
 [Dedicated test workflow](https://github.com/Kier73/VL-I/blob/main/.github/workflows/tdl006-routed-authenticated.yml): Linux/Windows × Python 3.11/3.13, exercising the new tests plus IOS-003 live TLS and prior TDL-004 route regressions.
 
