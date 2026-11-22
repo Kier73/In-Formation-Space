@@ -1,0 +1,61 @@
+name: BENCH-01E external 3-SAT and pinned CaDiCaL baseline
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/benchmarks/**'
+      - '.github/workflows/bench01-external-cdcl.yml'
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/benchmarks/**'
+      - '.github/workflows/bench01-external-cdcl.yml'
+  workflow_dispatch:
+jobs:
+  production-cdcl-comparison:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned production CDCL baseline
+        run: python -m pip install --only-binary=:all: python-sat==1.9.dev13
+      - name: Test external source provenance and evidence controls
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python -m unittest -v test_bench01_external.py test_bench01_3sat.py
+      - name: Fetch immutable independent external 3-SAT inputs
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python bench01_external.py fetch .external-bench01 --limit 4
+      - name: Run SFI, SFI-to-SPN and production CaDiCaL on identical sources
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python bench01_external.py compare .external-bench01 --limit 4 --timeout 6 --spn-nodes 8192 --output BENCH01-external-ci-results.json
+      - name: Reject hidden failures and print exact per-engine costs
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          d=json.loads(Path('BENCH01-external-ci-results.json').read_text())
+          assert len(d['results'])==4, d
+          for r in d['results']:
+              assert all(r[k]['status' if k!='cdcl' else 'accepted']!='ERROR'
+                         for k in ('sfi','sfi_spn','cdcl')), r
+              c=r['cdcl']
+              assert c['package']=='1.9.dev13', c
+              if c['claim']=='SAT':
+                  assert c['accepted']=='SAT' and c['reason']=='original-source-witness', c
+              if c['claim']=='UNSAT':
+                  assert c['accepted'] in ('UNSAT','UNVERIFIED_UNSAT'), c
+              print(r['id'],r['qualified_decisions'],
+                    *(str(round(r[k]['wall_ms'],2))+'ms' for k in ('sfi','sfi_spn','cdcl')))
+          print('Summary:', d['summary'])
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bench01e-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: experiments/pnp-ground-navigation/benchmarks/BENCH01-external-ci-results.json
+          if-no-files-found: ignore
