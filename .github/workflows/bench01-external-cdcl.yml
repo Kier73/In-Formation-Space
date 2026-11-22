@@ -29,10 +29,10 @@ jobs:
         run: python -m unittest -v test_bench01_external.py test_bench01_3sat.py
       - name: Fetch immutable independent external 3-SAT inputs
         working-directory: experiments/pnp-ground-navigation/benchmarks
-        run: python bench01_external.py fetch .external-bench01 --limit 4
+        run: python bench01_external.py fetch .external-bench01 --limit 6
       - name: Run SFI, SFI-to-SPN and production CaDiCaL on identical sources
         working-directory: experiments/pnp-ground-navigation/benchmarks
-        run: python bench01_external.py compare .external-bench01 --limit 4 --timeout 6 --spn-nodes 8192 --output BENCH01-external-ci-results.json
+        run: python bench01_external.py compare .external-bench01 --limit 6 --timeout 6 --spn-nodes 8192 --output BENCH01-external-ci-results.json
       - name: Reject hidden failures and print exact per-engine costs
         working-directory: experiments/pnp-ground-navigation/benchmarks
         shell: python
@@ -40,7 +40,7 @@ jobs:
           import json
           from pathlib import Path
           d=json.loads(Path('BENCH01-external-ci-results.json').read_text())
-          assert len(d['results'])==4, d
+          assert len(d['results'])==6, d
           for r in d['results']:
               assert all(r[k]['status' if k!='cdcl' else 'accepted']!='ERROR'
                          for k in ('sfi','sfi_spn','cdcl')), r
