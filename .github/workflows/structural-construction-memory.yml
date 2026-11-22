@@ -1,0 +1,35 @@
+name: SFI-004 verified interpreter-construction memory
+on:
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/construction_memory.py'
+      - 'experiments/pnp-ground-navigation/test_construction_memory.py'
+      - 'experiments/pnp-ground-navigation/run_construction_memory.py'
+      - 'experiments/pnp-ground-navigation/SFI-004.md'
+      - '.github/workflows/structural-construction-memory.yml'
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/construction_memory.py'
+      - 'experiments/pnp-ground-navigation/test_construction_memory.py'
+      - 'experiments/pnp-ground-navigation/run_construction_memory.py'
+      - 'experiments/pnp-ground-navigation/SFI-004.md'
+      - '.github/workflows/structural-construction-memory.yml'
+jobs:
+  qualified-memory:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Structural memory + predecessor SAT regressions
+        working-directory: experiments/pnp-ground-navigation
+        run: python -m unittest -v test_construction_memory.py test_recursive_sat_compiler.py test_self_selecting_sat.py test_morphic_sat.py test_self_forming_sat.py test_derived_ground.py test_algebraic_ground.py test_frontier_ground.py
+      - name: Repeat independently qualified construction-memory campaign
+        working-directory: experiments/pnp-ground-navigation
+        run: python run_construction_memory.py
