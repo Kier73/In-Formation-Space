@@ -17,13 +17,26 @@ from self_forming_sat import form,verify_program,execute_partition,aggregate
 
 
 def choose(clauses,n,*,intention='#SAT',maximum_coordinates=65536,
-           maximum_free=16,partition_size=1024,resolution_attempts=5000):
+           maximum_free=16,partition_size=1024,resolution_attempts=5000,
+           self_refine=False):
     if intention not in ('SAT','#SAT') or type(maximum_free) is not int or \
        not 0<=maximum_free<=20 or type(maximum_coordinates) is not int or \
        not 0<=maximum_coordinates<=1<<20:
         raise ValueError('invalid observer intention or finite budgets')
+    if type(self_refine) is not bool:
+        raise ValueError('self-refinement must be an explicit Boolean option')
     start=perf_counter()
-    gate,gate_ledger=compile_ground(clauses,n)
+    improvement=None
+    if self_refine:
+        from recursive_sat_compiler import refine, audit_refinement
+        gate,improvement=refine(clauses,n)
+        audit_refinement(clauses,n,gate,improvement)
+        gate_ledger={**improvement['baseline_ledger'],
+                     'recursive_refinement_receipt':improvement['digest'],
+                     'recursive_refinement_ms':improvement['elapsed_ms'],
+                     'recursive_meta_attempts':len(improvement['meta_attempts'])}
+    else:
+        gate,gate_ledger=compile_ground(clauses,n)
     gate_audit=verify(gate,max_free=maximum_free)
     gate_space=1 << len(gate['registers'])
     gate_feasible=(len(gate['registers'])<=maximum_free and
@@ -46,7 +59,7 @@ def choose(clauses,n,*,intention='#SAT',maximum_coordinates=65536,
     if gate_feasible:competitors.append((gate_space,1,'local-Boolean-functions'))
     if affine_feasible:competitors.append((affine_space,0,'affine-proof-ground'))
     selected=min(competitors)[2] if competitors else 'undetermined'
-    return {'selected':selected,'machine_ground_digest':gate['digest'],
+    result={'selected':selected,'machine_ground_digest':gate['digest'],
             'affine_program_digest':affine['digest'],
             'constructive_candidates':{
                 'local-Boolean-functions':{'status':'admitted' if gate_feasible else 'budget-refusal',
@@ -64,6 +77,14 @@ def choose(clauses,n,*,intention='#SAT',maximum_coordinates=65536,
             'construction_and_selection_ms':round((perf_counter()-start)*1000,3),
             'source_variables':n,'intention':intention,
             '_local_ground':gate,'_affine_program':affine,'_affine_receipt':affine_receipt}
+    if self_refine:
+        result['self_refinement']={
+            'receipt_digest':improvement['digest'],
+            'outcome':improvement['outcome'],
+            'baseline_registers':improvement['baseline_registers'],
+            'refined_registers':improvement['refined_registers'],
+            'independently_audited':True}
+    return result
 
 
 def realize(plan,*,maximum_coordinates=65536,partition_size=1024):
@@ -136,7 +157,8 @@ def _decompose(clauses,n):
 
 
 def choose_composite(clauses,n,*,intention='#SAT',maximum_coordinates=65536,
-                     maximum_free=16,partition_size=1024,resolution_attempts=5000):
+                     maximum_free=16,partition_size=1024,resolution_attempts=5000,
+                     self_refine=False):
     """Form a composite interpreter of independently selectable sub-machines.
 
     Standard CNF component factoring, not a new worst-case SAT method. Exact
@@ -152,7 +174,8 @@ def choose_composite(clauses,n,*,intention='#SAT',maximum_coordinates=65536,
         p=choose(component['local_clauses'],len(component['source_variables']),
                  intention=intention,maximum_coordinates=maximum_coordinates,
                  maximum_free=maximum_free,partition_size=partition_size,
-                 resolution_attempts=resolution_attempts)
+                 resolution_attempts=resolution_attempts,
+                 self_refine=self_refine)
         r=realize(p,maximum_coordinates=maximum_coordinates,
                   partition_size=partition_size)
         plans.append({'source_variables':component['source_variables'],

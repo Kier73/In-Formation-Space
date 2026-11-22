@@ -1,0 +1,134 @@
+{
+  "environment": "CPU Python standard library; localhost; no distributed execution",
+  "runs": [
+    {
+      "baseline": {
+        "exact_coordinates_evaluated": 32,
+        "execution_median_ms": 0.143,
+        "execution_samples_ms": [
+          0.143,
+          0.132,
+          0.153
+        ],
+        "name": "baseline",
+        "registers": 5,
+        "source_solutions": 5
+      },
+      "baseline_compile_ms": 1.27,
+      "bounded_optimum_audited": true,
+      "candidate_gate_pool": 4,
+      "case": "satisfiable-overlap-6",
+      "exact_source_count_checked_bruteforce": 5,
+      "exact_source_semantics_verified": true,
+      "extra_compile_ms": 2.876,
+      "measured_break_even_query_uses": 62.522,
+      "measured_query_time_saved_ms": 0.046,
+      "meta_sat_attempts": [
+        {
+          "coordinates_checked": 1,
+          "meta_ground_digest": "839bdadd292f7cad644dd9441b70740814f3458d1ae435b65a05ab120481eaba",
+          "outcome": "UNSAT",
+          "threshold": 4
+        },
+        {
+          "coordinates_checked": 2,
+          "meta_ground_digest": "b95b9ecd6a9340ff5b3eb319fb40cc4609185a715ccf161d21adece52916309f",
+          "outcome": "UNSAT",
+          "threshold": 3
+        },
+        {
+          "coordinates_checked": 3,
+          "meta_ground_digest": "cccbf6f24cabefce40aa75cd348ed5e400b22a9650db5b6cd055c8922c732b53",
+          "outcome": "SAT",
+          "threshold": 2
+        }
+      ],
+      "no_p_np_claim": true,
+      "original_variables": 6,
+      "refinement_compile_ms": 4.146,
+      "report_digest": "78c49dd1007d8c1936035284686992f276a57abe40c242437974962dc83f1e8b",
+      "self_refined": {
+        "exact_coordinates_evaluated": 16,
+        "execution_median_ms": 0.097,
+        "execution_samples_ms": [
+          0.102,
+          0.097,
+          0.094
+        ],
+        "name": "self-refined",
+        "registers": 4,
+        "source_solutions": 5
+      },
+      "source_clauses": 20
+    },
+    {
+      "baseline": {
+        "exact_coordinates_evaluated": 65536,
+        "execution_median_ms": 286.722,
+        "execution_samples_ms": [
+          283.648,
+          286.722,
+          288.851
+        ],
+        "name": "baseline",
+        "registers": 16,
+        "source_solutions": 10240
+      },
+      "baseline_compile_ms": 1.15,
+      "bounded_optimum_audited": true,
+      "candidate_gate_pool": 4,
+      "case": "satisfiable-overlap-with-11-free-bits",
+      "exact_source_count_checked_bruteforce": null,
+      "exact_source_semantics_verified": true,
+      "extra_compile_ms": 2.707,
+      "measured_break_even_query_uses": 0.027,
+      "measured_query_time_saved_ms": 100.32,
+      "meta_sat_attempts": [
+        {
+          "coordinates_checked": 1,
+          "meta_ground_digest": "839bdadd292f7cad644dd9441b70740814f3458d1ae435b65a05ab120481eaba",
+          "outcome": "UNSAT",
+          "threshold": 4
+        },
+        {
+          "coordinates_checked": 2,
+          "meta_ground_digest": "b95b9ecd6a9340ff5b3eb319fb40cc4609185a715ccf161d21adece52916309f",
+          "outcome": "UNSAT",
+          "threshold": 3
+        },
+        {
+          "coordinates_checked": 3,
+          "meta_ground_digest": "cccbf6f24cabefce40aa75cd348ed5e400b22a9650db5b6cd055c8922c732b53",
+          "outcome": "SAT",
+          "threshold": 2
+        }
+      ],
+      "no_p_np_claim": true,
+      "original_variables": 17,
+      "refinement_compile_ms": 3.857,
+      "report_digest": "602e1adfce7b2d6ed6472bf042c6c3f971a3cc7887df2d0dcb6ee71333fa78f1",
+      "self_refined": {
+        "exact_coordinates_evaluated": 32768,
+        "execution_median_ms": 186.402,
+        "execution_samples_ms": [
+          186.402,
+          194.176,
+          183.23
+        ],
+        "name": "self-refined",
+        "registers": 15,
+        "source_solutions": 10240
+      },
+      "source_clauses": 20
+    },
+    {
+      "candidate_pool_size": 16,
+      "case": "large-candidate-budget-refusal",
+      "original_variables": 20,
+      "reason": "candidate selection exceeds bounded meta-interpreter register budget",
+      "retained_verified_baseline": true
+    }
+  ],
+  "schema": "sfi.recursive-meta-sat-benchmark.v1",
+  "scope": "single-host measured performance, no global optimality claim"
+}
