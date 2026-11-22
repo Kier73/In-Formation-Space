@@ -162,7 +162,41 @@ R_2(E_2(T_2(D),x,w)).
 
 **H:** Implement a finite exact cross-language checker (source table, affine basis, ANF feature law) with an explicit common-domain adapter; assert the commuting relation using independently written evaluators and preserve counterexamples as regression fixtures. The bridge must not conflate local mathematical equality with receiver authority, source admission, or remote physical execution.
 
-## TDL-001/F — Current editorial changes
+## TDL-001/F — Information gain can be known before an observation
+
+**I:** [VLD TRACE-002 `ActiveTraceInquiry.next_probe`](https://github.com/Kier73/Virtual-Layer-Dynamics/blob/main/src/vld/inquiry/trace_inquiry.py) uses rank gain over known prime-field recurrence regressors to choose the next query before observing its scalar result. The [independent auditor](https://github.com/Kier73/Virtual-Layer-Dynamics/blob/main/src/vld/independent_trace_inquiry_audit.py) checks each selected query and the retained digest-linked transcript. [Tests](https://github.com/Kier73/Virtual-Layer-Dynamics/blob/main/tests/test_trace_inquiry.py) cover two jointly identifying observers that are individually rank-deficient, stale selections, budget limits and forged query decisions.
+
+For candidate observation regressor \(r_{c,t}\) and existing equations \(R\),
+
+\[
+\Delta_{c,t}=\operatorname{rank}(R\cup\{r_{c,t}\})
+-\operatorname{rank}(R).
+\tag{TDL-F1}
+\]
+
+This gain uses only observed predecessor values. The actual response \(y_c(t)\) determines consistency and coefficients, while held-out data determines empirical support.
+
+**M:** The *choice of which unknown to resolve* and the *answer to that unknown* can be separated mathematically. Rank selection is an active-attention operation on representation structure, without pretending that missing data has a known value.
+
+**H:** Connect VGI's `unknown`/ `ambiguous` state-action evidence to VLD-like query planners: choose a source-bound observation predicted to split possible Ground laws, then use the actual evidence to update the admitted law, and only then compile an E-CPU intention-relative processor. Acceptance: higher rank/partition discrimination from combined observers, independent transcript audit, preserved unknown status until finalization, and no false external-authority promotion.
+
+## TDL-001/G — A stable dispatch graph can carry changing numerical weights
+
+**I:** [E-CPU-Virtual-Processor `route_experts`](https://github.com/Kier73/E-CPU-Virtual-Processor/blob/main/vp/moe.py) consumes 128 finite externally supplied router logits, computes stable reference softmax, selects eight experts with deterministic index tie-breaking, then normalizes selected weights. [`compile_layer_frontier`](https://github.com/Kier73/E-CPU-Virtual-Processor/blob/main/vp/moe.py) builds 25 typed dependencies and binds the exact route receipt. [Tests](https://github.com/Kier73/E-CPU-Virtual-Processor/blob/main/tests/test_moe.py) cover top-k selection, ties, tampering, route verification and the typed E-CPU DAG.
+
+Let \(m=\ell_{(k)}-\ell_{(k+1)}>0\) be the exact real-arithmetic separation between selected/unselected score groups. If \(|\Delta_i|\le\epsilon\) for every score, then
+
+\[
+2\epsilon<m\quad\Longrightarrow\quad
+\operatorname{TopK}_k(\ell+\Delta)=\operatorname{TopK}_k(\ell).
+\tag{TDL-G1}
+\]
+
+**M:** This is a sufficient *structural route-membership* invariant. It says nothing about exact float64 softmax weights, tensor values, or admitted neural execution. An unchanged selected-expert set may preserve operator/dependency **shape** while each receipt and weighted-sum result still needs its own numerical check.
+
+**H:** Build a source-bound `RouteMembershipStabilityCertificate` with a lower bound on the top-k gap, an input perturbation contract and a checker that rejects threshold crossings. Compare reused task-graph construction against full per-request rebuilding while maintaining independently verified per-token weights. Test ties, float rounding, changed model Ground, and adversarial logits. Separate structural reuse from memoizing numerical expert outputs.
+
+## TDL-001/H — Current editorial changes
 
 | Repository | Applied edit | Outcome |
 |---|---|---|
@@ -170,6 +204,8 @@ R_2(E_2(T_2(D),x,w)).
 | [Virtual-Ground-Interpreter](https://github.com/Kier73/Virtual-Ground-Interpreter) | [Evidence and reconstruction](https://github.com/Kier73/Virtual-Ground-Interpreter/blob/main/virtual_ground_interpreter/docs/EVIDENCE_AND_RECONSTRUCTION.md) | Quorum equation, finalization semantics, code path, reconstruction contract |
 | [VL-I](https://github.com/Kier73/VL-I) | [PFI-001](https://github.com/Kier73/VL-I/blob/main/docs/PROBLEM_FORMED_INTERPRETER_PFI001.md) | Affine observation quotient, gate semantics, exact succession criterion, source API |
 | [Navigable-Compute](https://github.com/Kier73/Navigable-Compute) | [NCR-007](https://github.com/Kier73/Navigable-Compute/blob/main/docs/NCR-007.md) | ANF feature closure, actual callable API, image-versus-rank distinction |
+| [Virtual-Layer-Dynamics](https://github.com/Kier73/Virtual-Layer-Dynamics) | [TRACE-002](https://github.com/Kier73/Virtual-Layer-Dynamics/blob/main/docs/TRACE_002_ACTIVE_OBSERVER_INQUIRY.md) | Exact rank-gain query choice, source API and independent transcript audit |
+| [E-CPU-Virtual-Processor](https://github.com/Kier73/E-CPU-Virtual-Processor) | [VP-002](https://github.com/Kier73/E-CPU-Virtual-Processor/blob/main/docs/VP-002.md) | Exact sparse-router formula, source API and structural-margin research question |
 
 Links to mainline documents become current after their respective documentation PRs merge. The code and test references were inspected at their current default branch during this round.
 
@@ -178,6 +214,7 @@ Links to mainline documents become current after their respective documentation 
 1. **TDL-B1:** Compute minimal affine refinement witnesses from PFI-001's existing `certify_succession` source/quotient types. Compare with full-source-anchor oracle and exact rank calculation.
 2. **TDL-E1:** Build a shared small finite source whose three independent representations can be enumerated; verify observation commutativity and record witness digest.
 3. **TDL-C1:** Make VGI evidence-revision lineage explicit, then test whether its admitted source law can drive the cross-representation compiler without erasing three-valued observation status.
-4. **TDL-D1 / A2:** Profile semantic-isomorphism checking and nonlinear feature-image minimization separately; measure when smaller encoding improves actual execution rather than only the abstract state count.
+4. **TDL-F1 / G1:** Prototype rank-aware evidence acquisition and separately certified sparse expert-membership stability; preserve exact source and output receipts.
+5. **TDL-D1 / A2:** Profile semantic-isomorphism checking and nonlinear feature-image minimization separately; measure when smaller encoding improves actual execution rather than only the abstract state count.
 
 Every later entry should record **source commit**, **formal contract**, **translation algorithm**, **actual verification**, **counterexample**, **new construction**, and **status**. Append results; do not silently revise a previously observed experiment to match a newer implementation.
