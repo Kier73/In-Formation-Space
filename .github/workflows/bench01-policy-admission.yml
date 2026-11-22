@@ -1,0 +1,39 @@
+name: BENCH-01F self-use SAT interpreter policy and held-out admission
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/benchmarks/**'
+      - '.github/workflows/bench01-policy-admission.yml'
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/benchmarks/**'
+      - '.github/workflows/bench01-policy-admission.yml'
+  workflow_dispatch:
+jobs:
+  adaptive-policy:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install fixed production CDCL baseline
+        run: python -m pip install --only-binary=:all: python-sat==1.9.dev13
+      - name: Native SAT, source-proof and meta-policy adversarial regressions
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python -m unittest -v test_bench01_policy.py test_bench01_3sat.py test_bench01_external.py
+      - name: Execute pinned 12-source policy training, admission and untouched final
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python run_bench01_policy.py "$RUNNER_TEMP/bench01f-corpus" --timeout 12 --spn-nodes 8192 --output "$RUNNER_TEMP/BENCH01F-results.json"
+        shell: bash
+      - name: Upload original evidence with complete source proofs
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench01f-${{ runner.os }}-py${{ matrix.python-version }}
+          path: ${{ runner.temp }}/BENCH01F-results.json
+          if-no-files-found: error
