@@ -1,0 +1,42 @@
+name: BENCH-01H native algebraic-coordinate 3-SAT versus variable separator and CDCL
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/benchmarks/**'
+      - '.github/workflows/bench01-algebraic-coordinate.yml'
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/benchmarks/**'
+      - '.github/workflows/bench01-algebraic-coordinate.yml'
+  workflow_dispatch:
+
+jobs:
+  algebraic-coordinates:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned real CaDiCaL CDCL baseline
+        run: python -m pip install --only-binary=:all: python-sat==1.9.dev13
+      - name: Existing SFI source Ground regression suite
+        working-directory: experiments/pnp-ground-navigation
+        run: python -m unittest -v test_algebraic_ground.py test_derived_ground.py test_frontier_ground.py test_morphic_sat.py test_recursive_sat_compiler.py test_self_forming_sat.py test_self_selecting_sat.py
+      - name: Source independent Fourier and adversarial checks
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python -m unittest -v test_bench01_algebraic.py test_bench01_separator.py
+      - name: Compare native SPN-007 decomposition, variable cutsets, SPN-008 and CaDiCaL
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python run_bench01_algebraic.py --external --cdcl --spn --require-native --timeout 12
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bench01h-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: experiments/pnp-ground-navigation/benchmarks/BENCH01H-results.json
+          if-no-files-found: ignore
