@@ -1,4 +1,6 @@
 # Translation Discovery Log — TDL-003
+
+**Continuation:** [TDL-004 — Intention-formed observer hosts and typed communication routes](TRANSLATION_DISCOVERY_LOG_004.md) integrates the existing SAB-001 host/path admission and reports a semantic output-type identity requirement exposed by its first execution tests.
 ## From minimal information to affordable, admitted observations
 
 **Round:** 2026-11-22. [TDL-001](TRANSLATION_DISCOVERY_LOG.md) · [TDL-002](TRANSLATION_DISCOVERY_LOG_002.md) · [VL-I TDL-003 technical contract](https://github.com/Kier73/VL-I/blob/main/docs/COST_AWARE_REFINEMENT_TDL003.md)
