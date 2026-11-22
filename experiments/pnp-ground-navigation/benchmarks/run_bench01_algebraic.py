@@ -70,9 +70,15 @@ def one(item,*,cdcl=False,spn=False,require_native=False,coordinate_rank=6,coord
     if cdcl:
         from bench01_external import run_cdcl
         d=run_cdcl(n,src,timeout=seconds)
-        if d['accepted']=='UNVERIFIED_UNSAT' and check['status']=='UNSAT':
-            d['accepted']='UNSAT'
-            d['reason']='independent-source-Fourier-coordinate-refutation'
+        if d['accepted']=='UNVERIFIED_UNSAT':
+            if check['status']=='UNSAT':
+                d['accepted']='UNSAT'
+                d['reason']='independent-source-Fourier-coordinate-refutation'
+            elif spn and sp['status']=='UNSAT':
+                # SPN-008's proof has crossed the worker boundary and was
+                # independently replayed against the original CNF by run_case.
+                d['accepted']='UNSAT'
+                d['reason']='independent-original-source-SPN008-refutation'
         if d['accepted'] in ('SAT','UNSAT') and check['status'] in ('SAT','UNSAT') and d['accepted']!=check['status']:
             raise AssertionError('source-qualified CDCL contradicts algebraic certificate')
         record['cdcl_cadical195']={k:d.get(k) for k in ('claim','accepted','reason','wall_ms','engine_ms')}
