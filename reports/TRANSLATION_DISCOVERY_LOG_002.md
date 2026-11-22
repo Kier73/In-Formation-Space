@@ -33,6 +33,8 @@ z_n=L\begin{bmatrix}z_o\\Cx\end{bmatrix}. \tag{TDL2-A2}
 
 **Subtlety revealed by translation:** the old state and the \(d\) supplemental bits determine the *new mathematical coordinate*, but do not by themselves attest which physical source state supplied those bits. Algebraic reconstruction and observation authority remain separate obligations.
 
+**O — repository verification (matching code PR):** [VL-I Actions run 45067753045](https://github.com/Kier73/VL-I/actions/runs/45067753045) passed all four Linux/Windows × Python 3.11/3.13 jobs for source head `4f5e7b5f88b425a6d5fda9eccb61d6af79b4bfd0`. Each job ran 7 new minimal-refinement tests, 1 independent E-CPU/NCR commutation test, and 16 existing PFI-001 regression tests, all passing. The corresponding source changes were [merged as VL-I PR #63](https://github.com/Kier73/VL-I/pull/63).
+
 ## TDL-002/B — Correspondence is an independently checkable commutative diagram
 
 **I — implemented cross-representation test:** [`tests/test_translation_commutation.py`](https://github.com/Kier73/VL-I/blob/main/tests/test_translation_commutation.py) converts a declared 5-bit binary-affine source into a total 32-state `FiniteObserverLaw` for E-CPU. It independently forms:
@@ -109,4 +111,4 @@ The central round result is a **constructive translation of a mathematical infor
 3. **Nonlinear conditional image:** compute exact conditional class counts for selected NCR-007 families and compare them with linear feature rank; use a counterexample that forces additional bits.
 4. **Memory and resource accounting:** measure receipt bytes, old/full-anchor bytes, execution cost and reconstruction time rather than presuming that fewer observation bits imply a faster complete migration.
 
-**Scope of this log:** source inspection and new repository code/tests are explicit. Only the standalone randomized algebra check is an observed execution result at the time of initial authorship; CI status should be appended separately after a matching workflow run.
+**Scope of this log:** the randomized algebra check and the linked four-job CI matrix are observed executions. The source-admission and physical-observer authority questions remain separately identified next constructions.
