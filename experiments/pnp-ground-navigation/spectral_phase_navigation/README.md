@@ -4,10 +4,6 @@
 
 Companion to [PNG-001](../README.md), which implements an exact #SAT frontier/factor-elimination Ground. Here we study a *different representation*: signed Walsh characters of a fixed-width clause-violation energy. We ask whether exact transformations of that description can yield a witness or a separately checkable proof of exclusion, while explicitly charging for construction, branching and verification.
 
-**SPN-003 continuation:** [Frustrated Walsh cycles and independently checked UNSAT certificates](SPN-003_PHASE_CYCLE_CERTIFICATES.md) strengthens the triangle-inequality bound by retaining phase-compatible triples. Its [exact implementation](phase_cycle_bounds.py), [tests](test_phase_cycle_bounds.py), [campaign](phase_cycle_campaign.py), and [results](phase_cycle_results.json) are maintained beside SPN-001/002. The claim is a sound finite certificate scheme, not a polynomial-time SAT solver.
-
-**SPN-004 continuation:** [Rank-bounded parity Grounds and exact realization](SPN-004_RANK_GROUNDS.md) generalizes phase cycles to low-rank blocks of interacting Fourier terms. [Implementation](rank_block_bounds.py), [tamper and exhaustive tests](test_rank_block_bounds.py), [matching campaign](rank_block_campaign.py), and [measured results](rank_block_results.json) accompany the proof. The theorem is fixed-parameter in known Fourier rank; it does not establish an unrestricted polynomial-time SAT solver.
-
 **No general polynomial-time SAT algorithm, P-vs-NP claim, or quantum speedup is established.** Conditional expectation and exhaustive proof branching are classical techniques; the experiment makes their evidence and costs explicit in the spectral/observer-ground framing.
 
 ## 1. Exact description and phase
@@ -149,3 +145,25 @@ python -m unittest -v test_spectral_receipts.py test_phase_cycle_bounds.py test_
 python nonlocal_rank_campaign.py
 python parity_obstruction_campaign.py
 ```
+
+
+## 7. SPN-007 — Goal-aware compilation and source-checked direct-sum Grounds
+
+[SPN-007 research and proofs](SPN-007_ADAPTIVE_DIRECT_SUM_GROUNDS.md) add an exact
+Fourier direct-sum decomposition based on independently verified GF(2) rank
+additivity. Each low-rank Ground is minimized separately; lifting reconstructs
+one global witness. The result certifies **exact minimum energy and ground-state
+multiplicity**, not merely SAT/UNSAT. A connected source constraint graph need
+not imply a connected Fourier parity space.
+
+The [adaptive compiler](adaptive_ground_compiler.py) chooses between a SAT
+witness, compatible-sign exact Ground, bounded direct-sum exact Ground, and the
+prior proof-search engines. Its [JSON checker](verify_adaptive_json.py) verifies
+receipts in a separate process, still sharing the existing Python trust base.
+The [campaign](adaptive_ground_campaign.py) and [results](adaptive_ground_results.json)
+retain the important **negative control**: on matched dense random 3-SAT, the
+new compiler's extra discovery and checking costs outweighed reduced proof
+search. The [tests](test_direct_sum_grounds.py) and
+[adaptive tests](test_adaptive_ground_compiler.py) plus
+[transport tests](test_adaptive_transport.py) expand the full suite to 59.
+No general SAT complexity improvement is claimed.
