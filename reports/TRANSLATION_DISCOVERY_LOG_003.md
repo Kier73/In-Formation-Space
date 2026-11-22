@@ -82,7 +82,11 @@ The emitted receipt retains VGI policy and ledger digests and per-observation ev
 | Regression | TDL-002 minimum bit witnesses and E-CPU/NCR finite quotient equivalence | Existing [TDL-002 tests](https://github.com/Kier73/VL-I/blob/main/tests/test_minimal_refinement.py) |
 | Matrix | Linux + Windows, Python 3.11 and 3.13, pinned VGI/E-CPU/NCR | [TDL-003 CI](https://github.com/Kier73/VL-I/blob/main/.github/workflows/tdl003-cost-aware-refinement.yml) |
 
-At authorship these are source/test contracts; append exact workflow outcome after successful execution. Do not promote an authored assertion to a measured test result without checking its run.
+The source/test contracts above are now supported by the exact four-job verified CI run recorded below; physical sensor authentication and actual host route cost remain separate future evidence obligations.
+
+**O — verified code execution (2026-11-22):** [VL-I Actions run 45069128848](https://github.com/Kier73/VL-I/actions/runs/45069128848) passed its complete Linux/Windows × Python 3.11/3.13 matrix on source head `0dbe698130bec8cffd0b853e97add8c76d2677e3`. Each job passed **7** new TDL-003 cost/VGI-evidence tests, **7** TDL-002 minimal-refinement regressions and **1** E-CPU/NCR cross-representation test: **15 passing test cases per environment**. The reviewed implementation was [merged as VL-I PR #64](https://github.com/Kier73/VL-I/pull/64).
+
+**O — build-system discovery:** the first Windows CI checkout failed before tests because VGI's deeply nested historical research archive exceeded the runner's Windows path length. Restricting GitHub's sparse checkout to `virtual_ground_interpreter/` allowed the exact active VGI dependency to be installed and the full four-job matrix to pass. This illustrates that a repository's **historical representation layout** can affect the cost of composing computational systems even when the runtime implementation is correct.
 
 ## TDL-003/E — New opportunities revealed during translation
 
