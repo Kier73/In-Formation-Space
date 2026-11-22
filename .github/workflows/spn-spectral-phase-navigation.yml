@@ -1,4 +1,4 @@
-name: SPN-001/009 spectral-phase and direct SAT navigation
+name: SPN-001/010 spectral-phase self-use navigation
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
         working-directory: experiments/pnp-ground-navigation/spectral_phase_navigation
         run: |
           python walsh_phase_navigation_probe.py
-          python -m unittest -v test_spectral_receipts.py test_phase_cycle_bounds.py test_rank_block_bounds.py test_nonlocal_rank_grounds.py test_parity_obstruction_grounds.py test_direct_sum_grounds.py test_adaptive_ground_compiler.py test_adaptive_transport.py test_direct_sat_compiler.py test_direct_sat_cli.py test_language_choice_sat.py test_language_choice_cli.py
+          python -m unittest -v test_spectral_receipts.py test_phase_cycle_bounds.py test_rank_block_bounds.py test_nonlocal_rank_grounds.py test_parity_obstruction_grounds.py test_direct_sum_grounds.py test_adaptive_ground_compiler.py test_adaptive_transport.py test_direct_sat_compiler.py test_direct_sat_cli.py test_language_choice_sat.py test_language_choice_cli.py test_self_use_cycle.py
           python campaign.py
           python phase_cycle_campaign.py
           python rank_block_campaign.py
@@ -31,4 +31,6 @@ jobs:
           python adaptive_ground_campaign.py
           python direct_sat_campaign.py
           python language_choice_campaign.py
+          python self_use_campaign.py
+          python self_use_overhead.py
           python direct_sat_cli.py examples/xor_cycle_unsat.cnf --node-budget 128

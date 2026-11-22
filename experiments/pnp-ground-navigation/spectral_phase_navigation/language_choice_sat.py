@@ -319,20 +319,21 @@ def compile_language(clauses,n,*,goal="decision",node_budget=512,
              peak_occurrences=peak,total_clauses=len(clauses))
         if highly_concentrated:
             t=perf_counter()
-            candidate=produce_direct_sat(clauses,n,node_budget=min(16,node_budget))
+            candidate=produce_direct_sat(clauses,n,node_budget=min(16,node_budget),
+                                         skip_complete_xor=True)
             mark("bounded_direct_pilot",t,candidate["result"],
                  node_budget=min(16,node_budget))
             if candidate["result"] in ("SAT","UNSAT"):
                 proof={"kind":"direct_decision","receipt":candidate}
                 language="source_dpll_pilot"
 
-    # A paid spectral preflight is eligible for bounded input sizes only.
-    if proof is None:
-        qualifies=(spectral_form(clauses,n) is not None and
-            len(clauses)<=2500 and (goal=="count" or n>=20))
-        if qualifies:
-            t=perf_counter()
-            converted=spectral_form(clauses,n)
+    # A source-only guard must run BEFORE constructing an expensive encoding.
+    # Prior implementation computed spectral_form once even on small decision
+    # problems where no spectral method could be selected, then AGAIN on
+    # eligible sources. This reuses the source transform exactly once.
+    if proof is None and len(clauses)<=2500 and (goal=="count" or n>=20):
+        t=perf_counter();converted=spectral_form(clauses,n)
+        if converted is not None:
             coeff=spectral_coefficients(converted)
             groups,_=fundamental_components(s for s,a in coeff.items() if s and a)
             ranks=[gf2_rank(g) for g in groups]
@@ -380,7 +381,8 @@ def compile_language(clauses,n,*,goal="decision",node_budget=512,
             mark("frontier_producer",t,"exact",projected_entries=ledger["projected_entries"])
 
     if proof is None and goal=="decision":
-        t=perf_counter();nested=produce_direct_sat(clauses,n,node_budget=node_budget)
+        t=perf_counter();nested=produce_direct_sat(clauses,n,node_budget=node_budget,
+                                 skip_complete_xor=True)
         proof={"kind":"direct_decision","receipt":nested}
         language="source_dpll"
         mark("direct_sat",t,nested["result"],

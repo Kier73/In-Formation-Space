@@ -1,0 +1,12 @@
+{
+  "schema": "SPN-010-redundancy-probe-v1",
+  "cases": 60,
+  "previous_total_ms": 89.1662,
+  "updated_total_ms": 70.8678,
+  "previous_parity_scans": 120,
+  "updated_parity_scans": 60,
+  "previous_spectral_conversions": 60,
+  "updated_spectral_conversions": 0,
+  "all_verdicts_source_checked": true,
+  "note": "pre-fix behavior reconstructed via injected redundant passes, not a standalone historical checkout; measured times are observational"
+}

@@ -348,19 +348,28 @@ def verify_direct_sat(clauses,n,receipt):
     return result
 
 
-def produce_direct_sat(clauses,n,node_budget=1024,spectral_budget=0):
+def produce_direct_sat(clauses,n,node_budget=1024,spectral_budget=0,*,skip_complete_xor=False):
     """Goal-specific compiler: complete XOR -> DPLL -> optional SPN fallback.
 
     ``spectral_budget=0`` disables the optionally expensive spectral fallback.
+    ``skip_complete_xor`` is an expert-only producer optimization for callers
+    that have *already checked and excluded* complete source XOR encodings.
+    A wrong caller choice may lose an efficient method but cannot create a
+    verified false answer: the verifier rechecks all submitted proof content.
     Ledger is measured, but never used as a proof of correctness.
     """
     validate_cnf(clauses,n)
     if type(spectral_budget) is not int or spectral_budget<0:
         raise ValueError('invalid spectral budget')
+    if type(skip_complete_xor) is not bool:
+        raise ValueError('skip_complete_xor must be bool')
     started=perf_counter()
     attempts=[]
-    t=perf_counter();equations=parity_blocks(clauses,n)
-    attempts.append({'method':'complete_xor_recognition','status':'recognized' if equations is not None else 'refused',
+    t=perf_counter()
+    equations=None if skip_complete_xor else parity_blocks(clauses,n)
+    attempts.append({'method':'complete_xor_recognition',
+                     'status':'skipped_prechecked' if skip_complete_xor else
+                              ('recognized' if equations is not None else 'refused'),
                      'elapsed_ms':round((perf_counter()-t)*1000,3)})
     if equations is not None:
         t=perf_counter();proof,rank=gaussian_ground(equations,n)
