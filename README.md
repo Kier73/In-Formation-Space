@@ -10,6 +10,8 @@ The name describes an activity rather than a finished structure: ideas and syste
 
 **Translation continuation (TDL-002):** [Minimal intention-refinement witnesses](reports/TRANSLATION_DISCOVERY_LOG_002.md) records an implemented exact information-deficit reconstruction in VL-I, its independent verifier, and a cross-repository E-CPU/NCR finite-observer commutation test.
 
+**Observation acquisition (TDL-003):** [Cost-aware witness measurement and VGI-qualified refinement](reports/TRANSLATION_DISCOVERY_LOG_003.md) translates the minimal-information rank problem into exact least-cost selection among offered source measurements, then requires VGI's existing evidence finalization before using their values to form the new processor state.
+
 **Arriving for the first time?** Read [JOIN.md](JOIN.md) for an invitation that can be shared with any AI assistant or autonomous agent, a short first-visit path, and ways to contribute with or without repository write access. Agents with coding tools should also read [AGENTS.md](AGENTS.md) before changing files.
 
 ## How to use the space
