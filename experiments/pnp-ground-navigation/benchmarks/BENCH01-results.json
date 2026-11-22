@@ -1,0 +1,573 @@
+{
+  "configuration": {
+    "composite": false,
+    "exhaustive_ref_vars": 15,
+    "max_coordinates": 65536,
+    "max_free": 16,
+    "max_source_clauses": 400,
+    "max_source_vars": 64,
+    "self_refine": false,
+    "spn_fallback": false,
+    "spn_nodes": 8192,
+    "timeout_seconds": 6.0
+  },
+  "elapsed_ms": 12512.50236,
+  "results": [
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 4,
+          "registers": 2,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 4,
+          "registers": 2,
+          "status": "admitted"
+        }
+      },
+      "checked": 1,
+      "construction_ms": 0.92674,
+      "execution_ms": 0.20014,
+      "expected_fixture_status": "SAT",
+      "id": "unit-sat",
+      "origin": "bounded-unit",
+      "reason": "",
+      "reference_models": 3,
+      "reference_ms": 0.01296,
+      "reference_status": "SAT",
+      "selected": "affine-proof-ground",
+      "source_clauses": 3,
+      "source_ground_verified": true,
+      "source_sha256": "17b2e4c316de8ff5c8cf82d47d2d43bb44a57bc1fc0af1f8a8cd2f1e37d48f19",
+      "source_variables": 4,
+      "status": "SAT",
+      "verification": "source-witness+exhaustive-reference",
+      "wall_ms": 644.50549,
+      "witness": "1"
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 8,
+          "registers": 3,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 8,
+          "registers": 3,
+          "status": "admitted"
+        }
+      },
+      "checked": 8,
+      "construction_ms": 0.58666,
+      "execution_ms": 0.16163,
+      "expected_fixture_status": "UNSAT",
+      "id": "unit-unsat",
+      "origin": "unit-contradiction",
+      "reason": "",
+      "reference_models": 0,
+      "reference_ms": 0.0091,
+      "reference_status": "UNSAT",
+      "selected": "affine-proof-ground",
+      "source_clauses": 2,
+      "source_ground_verified": true,
+      "source_sha256": "e6fbc11ff0de14f06010f6c828ae1279600a82ae1227b027e9d034cff5a2b522",
+      "source_variables": 3,
+      "status": "UNSAT",
+      "verification": "native-proof-replay+exhaustive-reference",
+      "wall_ms": 660.59519,
+      "witness": null
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 0,
+          "registers": null,
+          "status": "refutation"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 8,
+          "registers": 3,
+          "status": "admitted"
+        }
+      },
+      "checked": 0,
+      "construction_ms": 3.81993,
+      "execution_ms": 0.8698,
+      "expected_fixture_status": "UNSAT",
+      "id": "php-3-into-2",
+      "origin": "pigeonhole",
+      "reason": "",
+      "reference_models": 0,
+      "reference_ms": 0.07361,
+      "reference_status": "UNSAT",
+      "selected": "affine-proof-ground",
+      "source_clauses": 12,
+      "source_ground_verified": true,
+      "source_sha256": "2164399b32f423212a7fe248661e3b4edcc1a6046062b995a43151f1c8c99c38",
+      "source_variables": 6,
+      "status": "UNSAT",
+      "verification": "native-proof-replay+exhaustive-reference",
+      "wall_ms": 602.21105,
+      "witness": null
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 4096,
+          "registers": 12,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 256,
+          "registers": 8,
+          "status": "admitted"
+        }
+      },
+      "checked": 256,
+      "construction_ms": 31.40938,
+      "execution_ms": 2.62396,
+      "expected_fixture_status": "UNSAT",
+      "id": "php-4-into-3",
+      "origin": "pigeonhole",
+      "reason": "",
+      "reference_models": 0,
+      "reference_ms": 7.24251,
+      "reference_status": "UNSAT",
+      "selected": "local-Boolean-functions",
+      "source_clauses": 34,
+      "source_ground_verified": true,
+      "source_sha256": "02ee5c396b4bc3971d067ea0cd7fe6754739fba7bc67229be3d6f132c630d6a3",
+      "source_variables": 12,
+      "status": "UNSAT",
+      "verification": "native-proof-replay+exhaustive-reference",
+      "wall_ms": 664.04827,
+      "witness": null
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": null,
+          "registers": 25,
+          "status": "budget-refusal"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 33554432,
+          "registers": 25,
+          "status": "budget-refusal"
+        }
+      },
+      "checked": 0,
+      "construction_ms": 96.30436,
+      "execution_ms": 0.00238,
+      "expected_fixture_status": "UNSAT",
+      "id": "php-5-into-4",
+      "origin": "pigeonhole-3cnf-chain",
+      "reason": "No proved feasible candidate under budget",
+      "reference_models": null,
+      "reference_ms": 0.00134,
+      "reference_status": "NOT_RUN",
+      "selected": "undetermined",
+      "source_clauses": 80,
+      "source_ground_verified": true,
+      "source_sha256": "ed464f8c30a5012ee0c8e1d7bdb7166109ef2057ea80d207d6377727bfcfa38b",
+      "source_variables": 25,
+      "status": "UNKNOWN",
+      "verification": "no-decision-claim",
+      "wall_ms": 815.10884,
+      "witness": null
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 512,
+          "registers": 9,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 64,
+          "registers": 6,
+          "status": "admitted"
+        }
+      },
+      "checked": 7,
+      "construction_ms": 8.79062,
+      "execution_ms": 0.40625,
+      "expected_fixture_status": "SAT",
+      "id": "clique-3-3color",
+      "origin": "graph-coloring",
+      "reason": "",
+      "reference_models": 6,
+      "reference_ms": 0.69596,
+      "reference_status": "SAT",
+      "selected": "local-Boolean-functions",
+      "source_clauses": 21,
+      "source_ground_verified": true,
+      "source_sha256": "257f865aa286697a8641918ebc70a3a4e8a46d20c6a3b4fc51ad85582432208f",
+      "source_variables": 9,
+      "status": "SAT",
+      "verification": "source-witness+exhaustive-reference",
+      "wall_ms": 649.95645,
+      "witness": "266"
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 4096,
+          "registers": 12,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 256,
+          "registers": 8,
+          "status": "admitted"
+        }
+      },
+      "checked": 256,
+      "construction_ms": 34.05902,
+      "execution_ms": 2.55971,
+      "expected_fixture_status": "UNSAT",
+      "id": "clique-4-3color",
+      "origin": "graph-coloring",
+      "reason": "",
+      "reference_models": 0,
+      "reference_ms": 5.53188,
+      "reference_status": "UNSAT",
+      "selected": "local-Boolean-functions",
+      "source_clauses": 34,
+      "source_ground_verified": true,
+      "source_sha256": "ed3557c31eee4836770b3aee34d0281e3e378c4116eaa8e283461ac8c8495b46",
+      "source_variables": 12,
+      "status": "UNSAT",
+      "verification": "native-proof-replay+exhaustive-reference",
+      "wall_ms": 707.62576,
+      "witness": null
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 4096,
+          "registers": 12,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 4096,
+          "registers": 12,
+          "status": "admitted"
+        }
+      },
+      "checked": 2418,
+      "construction_ms": 34.58919,
+      "execution_ms": 25.13353,
+      "expected_fixture_status": "SAT",
+      "id": "planted-3sat-12",
+      "origin": "planted-random-3cnf",
+      "reason": "",
+      "reference_models": 17,
+      "reference_ms": 10.93502,
+      "reference_status": "SAT",
+      "selected": "affine-proof-ground",
+      "source_clauses": 50,
+      "source_ground_verified": true,
+      "source_sha256": "d3c5daa210fd4ae16ba817d5f5b5c4bee991639a57c3533fb063ffaea5f5ae5a",
+      "source_variables": 12,
+      "status": "SAT",
+      "verification": "source-witness+exhaustive-reference",
+      "wall_ms": 685.86665,
+      "witness": "68"
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 65536,
+          "registers": 16,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 65536,
+          "registers": 16,
+          "status": "admitted"
+        }
+      },
+      "checked": 64101,
+      "construction_ms": 518.03774,
+      "execution_ms": 656.03333,
+      "expected_fixture_status": "SAT",
+      "id": "planted-3sat-16",
+      "origin": "planted-random-3cnf",
+      "reason": "",
+      "reference_models": null,
+      "reference_ms": 0.00107,
+      "reference_status": "NOT_RUN",
+      "selected": "affine-proof-ground",
+      "source_clauses": 68,
+      "source_ground_verified": true,
+      "source_sha256": "3f5f0e771048579cdc10a76b75b39a875c69687d7b2b12e13c94d519925a67c4",
+      "source_variables": 16,
+      "status": "SAT",
+      "verification": "source-witness",
+      "wall_ms": 1832.12161,
+      "witness": "42960"
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": null,
+          "registers": 24,
+          "status": "budget-refusal"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 16777216,
+          "registers": 24,
+          "status": "budget-refusal"
+        }
+      },
+      "checked": 0,
+      "construction_ms": 29.29768,
+      "execution_ms": 0.00229,
+      "expected_fixture_status": "SAT",
+      "id": "planted-3sat-24",
+      "origin": "planted-random-3cnf",
+      "reason": "No proved feasible candidate under budget",
+      "reference_models": null,
+      "reference_ms": 0.00126,
+      "reference_status": "NOT_RUN",
+      "selected": "undetermined",
+      "source_clauses": 102,
+      "source_ground_verified": true,
+      "source_sha256": "5f54600e877720c883c9ae1c86261ce362942e717707ad971e54aeceda8a09ff",
+      "source_variables": 24,
+      "status": "UNKNOWN",
+      "verification": "no-decision-claim",
+      "wall_ms": 683.67578,
+      "witness": null
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": null,
+          "registers": 32,
+          "status": "budget-refusal"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 4294967296,
+          "registers": 32,
+          "status": "budget-refusal"
+        }
+      },
+      "checked": 0,
+      "construction_ms": 42.63172,
+      "execution_ms": 0.00259,
+      "expected_fixture_status": "SAT",
+      "id": "planted-3sat-32",
+      "origin": "planted-random-near-threshold",
+      "reason": "No proved feasible candidate under budget",
+      "reference_models": null,
+      "reference_ms": 0.00148,
+      "reference_status": "NOT_RUN",
+      "selected": "undetermined",
+      "source_clauses": 136,
+      "source_ground_verified": true,
+      "source_sha256": "719d837f4154035107862568e03cef7844296efd9bd50b684839e9568f094ae7",
+      "source_variables": 32,
+      "status": "UNKNOWN",
+      "verification": "no-decision-claim",
+      "wall_ms": 726.88199,
+      "witness": null
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": null,
+          "registers": 60,
+          "status": "budget-refusal"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 1152921504606846976,
+          "registers": 60,
+          "status": "budget-refusal"
+        }
+      },
+      "checked": 0,
+      "construction_ms": 118.60538,
+      "execution_ms": 0.00247,
+      "expected_fixture_status": "SAT",
+      "id": "planted-3sat-60",
+      "origin": "planted-random-near-threshold",
+      "reason": "No proved feasible candidate under budget",
+      "reference_models": null,
+      "reference_ms": 0.00102,
+      "reference_status": "NOT_RUN",
+      "selected": "undetermined",
+      "source_clauses": 255,
+      "source_ground_verified": true,
+      "source_sha256": "de107e4e23b24e7ef623dc988fdb80ad8cbac2c6d2220608af012ea39e20b85b",
+      "source_variables": 60,
+      "status": "UNKNOWN",
+      "verification": "no-decision-claim",
+      "wall_ms": 789.8941,
+      "witness": null
+    },
+    {
+      "checked": 0,
+      "construction_ms": 0,
+      "execution_ms": 0,
+      "expected_fixture_status": "SAT",
+      "id": "planted-3sat-80",
+      "origin": "planted-random-near-threshold",
+      "reason": "native-input-admission-budget",
+      "reference_models": null,
+      "reference_ms": 0.00098,
+      "reference_status": "NOT_RUN",
+      "selected": "none",
+      "source_clauses": 340,
+      "source_sha256": "100380ba041de68233786e4eda89a0ab5d0dd92819502c3b7168a36f04a516d5",
+      "source_variables": 80,
+      "status": "UNKNOWN",
+      "verification": "no-decision-claim",
+      "wall_ms": 0.00143
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 8,
+          "registers": 3,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 8,
+          "registers": 3,
+          "status": "admitted"
+        }
+      },
+      "checked": 8,
+      "construction_ms": 0.98994,
+      "execution_ms": 0.30246,
+      "expected_fixture_status": "UNSAT",
+      "id": "parity3-conflict",
+      "origin": "xor-contradiction",
+      "reason": "",
+      "reference_models": 0,
+      "reference_ms": 0.01481,
+      "reference_status": "UNSAT",
+      "selected": "affine-proof-ground",
+      "source_clauses": 8,
+      "source_ground_verified": true,
+      "source_sha256": "10dc5f24d7003a3cef3273a595b30ff4fa015e41482422f6bb686094ac221f84",
+      "source_variables": 3,
+      "status": "UNSAT",
+      "verification": "native-proof-replay+exhaustive-reference",
+      "wall_ms": 646.58152,
+      "witness": null
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 64,
+          "registers": 6,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 64,
+          "registers": 6,
+          "status": "admitted"
+        }
+      },
+      "checked": 1,
+      "construction_ms": 2.91796,
+      "execution_ms": 0.74305,
+      "expected_fixture_status": "SAT",
+      "id": "parity3-independent",
+      "origin": "xor-independent",
+      "reason": "",
+      "reference_models": 64,
+      "reference_ms": 0.87605,
+      "reference_status": "SAT",
+      "selected": "affine-proof-ground",
+      "source_clauses": 12,
+      "source_ground_verified": true,
+      "source_sha256": "5e65592f4067bba6dea8de8e2579ade3e00647ff818b83252debd4eb95fd9bb1",
+      "source_variables": 9,
+      "status": "SAT",
+      "verification": "source-witness+exhaustive-reference",
+      "wall_ms": 703.19254,
+      "witness": "8"
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": 65536,
+          "registers": 16,
+          "status": "constructed-search"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 2048,
+          "registers": 11,
+          "status": "admitted"
+        }
+      },
+      "checked": 110,
+      "construction_ms": 345.05903,
+      "execution_ms": 2.10817,
+      "expected_fixture_status": "SAT",
+      "id": "circuit-8-3cnf",
+      "origin": "nonaffine-tseitin",
+      "reason": "",
+      "reference_models": null,
+      "reference_ms": 0.00171,
+      "reference_status": "NOT_RUN",
+      "selected": "local-Boolean-functions",
+      "source_clauses": 33,
+      "source_ground_verified": true,
+      "source_sha256": "d5ccdcb68278090920d62292fe3d0ae0c5d0af5a5dee8472ea261ba6649fb285",
+      "source_variables": 17,
+      "status": "SAT",
+      "verification": "source-witness",
+      "wall_ms": 998.49555,
+      "witness": "8173"
+    },
+    {
+      "candidate_architectures": {
+        "affine-proof-ground": {
+          "coordinate_count": null,
+          "registers": 33,
+          "status": "budget-refusal"
+        },
+        "local-Boolean-functions": {
+          "coordinate_count": 8388608,
+          "registers": 23,
+          "status": "budget-refusal"
+        }
+      },
+      "checked": 0,
+      "construction_ms": 22.92561,
+      "execution_ms": 0.00212,
+      "expected_fixture_status": "SAT",
+      "id": "circuit-16-3cnf",
+      "origin": "nonaffine-tseitin",
+      "reason": "No proved feasible candidate under budget",
+      "reference_models": null,
+      "reference_ms": 0.00126,
+      "reference_status": "NOT_RUN",
+      "selected": "undetermined",
+      "source_clauses": 75,
+      "source_ground_verified": true,
+      "source_sha256": "51b0a350cda35a36f23b4f4a4ae5593446a1cd59a2be16c61324095908104fd4",
+      "source_variables": 35,
+      "status": "UNKNOWN",
+      "verification": "no-decision-claim",
+      "wall_ms": 673.11944,
+      "witness": null
+    }
+  ],
+  "schema": "ifs.bench01.3sat.v1",
+  "suite": "seeded-3sat-challenge-01",
+  "summary": {
+    "ERROR": 0,
+    "SAT": 6,
+    "UNKNOWN": 6,
+    "UNSAT": 5
+  },
+  "test_time_kind": "wall-clock single run; subprocess timeout; not a calibrated speedup"
+}

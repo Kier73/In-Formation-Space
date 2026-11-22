@@ -1,0 +1,57 @@
+name: BENCH-01 direct 3-SAT qualified benchmark
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/benchmarks/**'
+      - '.github/workflows/bench01-direct-3sat.yml'
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/benchmarks/**'
+      - '.github/workflows/bench01-direct-3sat.yml'
+jobs:
+  direct-3sat:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Adversarial DIMACS, proof, source-projection and native SAT regressions
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python -m unittest -v test_bench01_3sat.py
+      - name: Run the reproducible SFI-only campaign
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python bench01_3sat.py suite --timeout 12 --output BENCH01-ci-results.json
+      - name: Try the existing SPN-008 proof-carrying fallback on harder cases
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python bench01_3sat.py suite --timeout 16 --spn-fallback --spn-nodes 8192 --id planted-3sat-24 --id php-5-into-4 --id planted-3sat-60 --output BENCH01-spn-ci-results.json
+      - name: Assert proof-qualified fallback decisions and report cost ledger
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        shell: python
+        run: |
+          import json
+          a=json.load(open('BENCH01-ci-results.json', encoding='utf8'))
+          b=json.load(open('BENCH01-spn-ci-results.json', encoding='utf8'))
+          assert a['summary']['ERROR']==0, a['summary']
+          assert b['summary']['ERROR']==0, b['summary']
+          by={x['id']:x for x in b['results']}
+          assert by['planted-3sat-24']['status']=='SAT',by
+          assert by['php-5-into-4']['status']=='UNSAT',by
+          assert by['planted-3sat-24']['spn_original_proof_verified']
+          assert by['php-5-into-4']['spn_original_proof_verified']
+          print('SFI:',a['summary'],'SPN comparison:',b['summary'])
+          for row in b['results']:
+              print(row['id'],row['status'],row['selected'],row.get('spn_nodes'),row.get('spn_proof_kind'),row['wall_ms'])
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bench01-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: |
+            experiments/pnp-ground-navigation/benchmarks/BENCH01-ci-results.json
+            experiments/pnp-ground-navigation/benchmarks/BENCH01-spn-ci-results.json
+          if-no-files-found: ignore
