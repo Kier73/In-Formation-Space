@@ -72,3 +72,30 @@ python bench01_external.py compare .external-bench01 --limit 6 --timeout 12 --sp
 ```
 
 Results are JSON with per-source Git blob and byte SHA, every engine's source-accepted verdict, wall-clock and worker timing, native proof kind and refusal reason, and the official-2026-manifest provenance marker. No unaudited `UNSAT` is allowed to masquerade as an independently proven mathematical result. The pre-existing BENCH-01 Markdown log remains the record of the original seeded campaign, and this file is the log for **this external/CDCL extension of Challenge 01**.
+
+
+## CI measurement checkpoint: externally sourced CNF execution
+
+**Verified 22 November 2026.** [GitHub Actions run 45058493009](https://github.com/Kier73/In-Formation-Space/actions/runs/45058493009), head commit `90ad345479add77afe4eb682f924929abaffcc14`. All four jobs passed on Ubuntu/Windows with Python 3.11/3.13, including 34 local-source and predecessor tests per job, exact pinned-CNF retrieval, genuine compiled `python-sat==1.9.dev13` CaDiCaL execution, and parent source-evidence checks. The Actions artifacts contain full per-instance JSON receipts; the log below records a small reproducible measurement digest.
+
+| Independent 3-CNF source | SHA-256 of downloaded bytes | SFI alone | SFI→SPN proof | CaDiCaL + independent confirmation | SPN DPLL nodes / proof |
+|---|---|---|---|---|---|
+| `sat50-a` | `b63c897e8cc7974dbb67a20834cc0554ea72ea027eb073902cd5113cb4abcd97` | UNKNOWN | SAT | SAT | 136 / original-source witness |
+| `unsat50-a` | `6c98cbb0cdd56e04f16c412a4c44eb83783bb1cbfc8d2568abd535817ab6a3e9` | UNKNOWN | UNSAT | UNSAT | 175 / complete conflict split tree |
+| `sat50-b` | `fff791a73b43c0e43397855888a4d03205094f300087e11c85f2d4a4f42e5f60` | UNKNOWN | SAT | SAT | 73 / original-source witness |
+| `unsat50-b` | `f01198d4275679505f86bbc310db9d678dbec950e76b622548e9db069c562619` | UNKNOWN | UNSAT | UNSAT | 75 / complete conflict split tree |
+
+Median **end-to-end per-method wall time** per CI platform, milliseconds, from four independent formula cases. These are not repeats of a fixed formula or calibrated hardware comparisons; they include Python startup and source-proof checks where applicable:
+
+| Runner | SFI-only (4 UNKNOWN) | SFI→SPN (4 qualified) | CaDiCaL (4 qualified after SPN corroboration) |
+|---|---:|---:|---:|
+| Ubuntu / Python 3.11 | 174.91 | 221.69 | 81.94 |
+| Ubuntu / Python 3.13 | 189.35 | 222.52 | 86.28 |
+| Windows / Python 3.11 | 257.27 | 319.27 | 141.10 |
+| Windows / Python 3.13 | 248.44 | 298.86 | 142.46 |
+
+**Adverse result and interpretation.** The current non-affine/affine generated interpreter does not find a qualified complete coordinate representation for these near-phase-transition formulas under its declared budgets. The native DPLL engine *does* produce complete source-replayable evidence in relatively few nodes, and production CDCL is faster on every one of these four cases on each runner. The performance of our *fallback* is not a source of competitive advantage here. The useful engineering outcome is evidence-preserving algorithm selection: the host interpreter must refuse and yield to an effective solver instead of inferring UNSAT from a failed structural construction. A next self-use step should measure which readily observed source features predict this outcome and whether skipping expensive construction pays for itself.
+
+**Verification scope.** GitHub CI reports four qualified results in each of four platform jobs, but there are only **four distinct external source formulas**. Their SAT answers have independently re-evaluated witnesses. Their UNSAT answers are source-admitted by SPN-008 complete DPLL conflict proofs and only *then* used as corroboration for the matching CaDiCaL claims. No independent DRAT/LRAT proof was emitted by CaDiCaL in this run, and no official SAT Competition 2026 Main Track instance was executed. Production CDCL's own claim is recorded separately from the proof evidence used to accept it.
+
+**Implementation repair during CI.** The first GitHub Actions push revealed a YAML parsing failure in an unquoted pip install command containing a colon. The workflow was fixed before tests ran, and the subsequent four-job matrix passed. This was an orchestration defect, not a solver or SAT proof failure.
