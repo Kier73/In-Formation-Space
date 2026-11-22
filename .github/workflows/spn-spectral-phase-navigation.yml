@@ -1,4 +1,4 @@
-name: SPN-001/004 spectral-phase navigation
+name: SPN-001/006 spectral-phase navigation
 
 on:
   push:
@@ -18,11 +18,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Test exact Walsh restrictions and independently checked receipts
+      - name: Test Fourier restrictions and independently checked receipts
         working-directory: experiments/pnp-ground-navigation/spectral_phase_navigation
         run: |
           python walsh_phase_navigation_probe.py
-          python -m unittest -v test_spectral_receipts.py test_phase_cycle_bounds.py test_rank_block_bounds.py
+          python -m unittest -v test_spectral_receipts.py test_phase_cycle_bounds.py test_rank_block_bounds.py test_nonlocal_rank_grounds.py test_parity_obstruction_grounds.py
           python campaign.py
           python phase_cycle_campaign.py
           python rank_block_campaign.py
+          python nonlocal_rank_campaign.py
+          python parity_obstruction_campaign.py
