@@ -1,0 +1,161 @@
+{
+  "seed": 73176,
+  "budget": 256,
+  "random_3sat": [
+    {
+      "n": 8,
+      "m": 34,
+      "samples": 30,
+      "sat": 24,
+      "unsat": 6,
+      "unknown": 0,
+      "legacy_nodes": 205,
+      "cycle_nodes": 105,
+      "cycle_nodes_less": 7,
+      "cycle_nodes_equal": 23,
+      "cycle_nodes_more": 0,
+      "improved_unsat": 6,
+      "cycle_positive_leaves": 40,
+      "root_phase_correction_positive": 30
+    },
+    {
+      "n": 10,
+      "m": 43,
+      "samples": 30,
+      "sat": 23,
+      "unsat": 7,
+      "unknown": 0,
+      "legacy_nodes": 430,
+      "cycle_nodes": 206,
+      "cycle_nodes_less": 9,
+      "cycle_nodes_equal": 21,
+      "cycle_nodes_more": 0,
+      "improved_unsat": 7,
+      "cycle_positive_leaves": 90,
+      "root_phase_correction_positive": 30
+    },
+    {
+      "n": 12,
+      "m": 51,
+      "samples": 30,
+      "sat": 22,
+      "unsat": 8,
+      "unknown": 0,
+      "legacy_nodes": 915,
+      "cycle_nodes": 441,
+      "cycle_nodes_less": 10,
+      "cycle_nodes_equal": 20,
+      "cycle_nodes_more": 0,
+      "improved_unsat": 8,
+      "cycle_positive_leaves": 206,
+      "root_phase_correction_positive": 30
+    }
+  ],
+  "disjoint_frustrated_blocks": [
+    {
+      "blocks": 1,
+      "n": 3,
+      "clauses": 16,
+      "legacy_result": "UNSAT",
+      "legacy_nodes": 3,
+      "phase_result": "UNSAT",
+      "phase_nodes": 1,
+      "phase_bound": [
+        1,
+        1
+      ],
+      "triangles": 1,
+      "receipt_bytes": 279
+    },
+    {
+      "blocks": 2,
+      "n": 6,
+      "clauses": 32,
+      "legacy_result": "UNSAT",
+      "legacy_nodes": 9,
+      "phase_result": "UNSAT",
+      "phase_nodes": 1,
+      "phase_bound": [
+        2,
+        1
+      ],
+      "triangles": 2,
+      "receipt_bytes": 289
+    },
+    {
+      "blocks": 4,
+      "n": 12,
+      "clauses": 64,
+      "legacy_result": "UNSAT",
+      "legacy_nodes": 21,
+      "phase_result": "UNSAT",
+      "phase_nodes": 1,
+      "phase_bound": [
+        4,
+        1
+      ],
+      "triangles": 4,
+      "receipt_bytes": 318
+    },
+    {
+      "blocks": 8,
+      "n": 24,
+      "clauses": 128,
+      "legacy_result": "UNSAT",
+      "legacy_nodes": 105,
+      "phase_result": "UNSAT",
+      "phase_nodes": 1,
+      "phase_bound": [
+        8,
+        1
+      ],
+      "triangles": 8,
+      "receipt_bytes": 405
+    },
+    {
+      "blocks": 12,
+      "n": 36,
+      "clauses": 192,
+      "legacy_result": "UNKNOWN",
+      "legacy_nodes": 261,
+      "phase_result": "UNSAT",
+      "phase_nodes": 1,
+      "phase_bound": [
+        12,
+        1
+      ],
+      "triangles": 12,
+      "receipt_bytes": 539
+    },
+    {
+      "blocks": 16,
+      "n": 48,
+      "clauses": 256,
+      "legacy_result": "UNKNOWN",
+      "legacy_nodes": 263,
+      "phase_result": "UNSAT",
+      "phase_nodes": 1,
+      "phase_bound": [
+        16,
+        1
+      ],
+      "triangles": 16,
+      "receipt_bytes": 715
+    },
+    {
+      "blocks": 32,
+      "n": 96,
+      "clauses": 512,
+      "legacy_result": "UNKNOWN",
+      "legacy_nodes": 269,
+      "phase_result": "UNSAT",
+      "phase_nodes": 1,
+      "phase_bound": [
+        32,
+        1
+      ],
+      "triangles": 32,
+      "receipt_bytes": 1849
+    }
+  ]
+}
