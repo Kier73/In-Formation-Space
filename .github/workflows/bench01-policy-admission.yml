@@ -1,13 +1,5 @@
 name: BENCH-01F self-use SAT interpreter policy and held-out admission
 on:
-  pull_request:
-    paths:
-      - 'experiments/pnp-ground-navigation/benchmarks/**'
-      - '.github/workflows/bench01-policy-admission.yml'
-  push:
-    paths:
-      - 'experiments/pnp-ground-navigation/benchmarks/**'
-      - '.github/workflows/bench01-policy-admission.yml'
   workflow_dispatch:
 jobs:
   adaptive-policy:
