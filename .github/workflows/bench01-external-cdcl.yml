@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install pinned production CDCL baseline
-        run: python -m pip install --only-binary=:all: python-sat==1.9.dev13
+        run: "python -m pip install --only-binary=:all: python-sat==1.9.dev13"
       - name: Test external source provenance and evidence controls
         working-directory: experiments/pnp-ground-navigation/benchmarks
         run: python -m unittest -v test_bench01_external.py test_bench01_3sat.py
