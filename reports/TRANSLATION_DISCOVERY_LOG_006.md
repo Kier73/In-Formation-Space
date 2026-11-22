@@ -132,6 +132,10 @@ H(\mathrm{sourceLaw},\mathrm{intention},z_o,I,P,\tau,
 
 [Dedicated test workflow](https://github.com/Kier73/VL-I/blob/main/.github/workflows/tdl006-routed-authenticated.yml): Linux/Windows × Python 3.11/3.13, exercising the new tests plus IOS-003 live TLS and prior TDL-004 route regressions.
 
+**O — matching CI execution (2026-11-22):** [VL-I Actions run 45072964545](https://github.com/Kier73/VL-I/actions/runs/45072964545) passed the full four-job Linux/Windows × Python 3.11/3.13 matrix at implementation head `aa1bb321cb9245034ad03cf05c85d908c59a9c98`. In every environment, **10 new TDL-006 route/TLS binding tests**, **9 TDL-005 live TLS/quorum regression tests**, and **7 TDL-004 receiver-owned route regressions** completed successfully: **26 tests per environment; 104 observed test executions**. The first exploratory run's only failure was an incorrectly doubled expected combined route cost (28 rather than the actual 14), corrected in the final tested revision without changing production logic.
+
+**O — exact scope:** the experiment exercises real E-CPU native SAB-001 path planning and bound dispatch handlers/carriers, native IOS-003 CA-verified TLS sockets, existing VGI strict source quorum and the exact VL-I mathematical decoder. The test peers run as separate certificate identities in a single local test environment; exported record verification is not historical TLS authentication and the locally bound SAB channels are not a claimed physical IP route.
+
 ## TDL-006/F — Next research frontiers
 
 1. **Actual wire path correspondence:** instrument the live IOS-003 peer/channel with source-observed network metadata and compare it against a typed SAB route, distinguishing an authorization graph from a physical byte path.
