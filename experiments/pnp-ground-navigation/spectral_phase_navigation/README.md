@@ -167,3 +167,29 @@ search. The [tests](test_direct_sum_grounds.py) and
 [adaptive tests](test_adaptive_ground_compiler.py) plus
 [transport tests](test_adaptive_transport.py) expand the full suite to 59.
 No general SAT complexity improvement is claimed.
+
+
+## 8. SPN-008 — Direct SAT and proof-admitted language selection
+
+[SPN-008 research note](SPN-008_DIRECT_SAT_AND_PNP.md) makes the question
+**direct SAT**: given ordinary width-3 DIMACS CNF, can the observer return a
+source-certified witness or source-certified refutation? A small DPLL engine
+returns checked two-branch contradiction trees, a complete XOR parser
+recognizes tractable parity languages by truth-table equivalence, and an
+optional SPN-007 fallback can be invoked when the direct search budget fails.
+Source checks recompute XOR truth tables separately from the producer parser;
+`UNKNOWN` is preserved whenever search or compilation refuses.
+
+Use [direct_sat_cli.py](direct_sat_cli.py),
+[implementation](direct_sat_compiler.py),
+[direct tests](test_direct_sat_compiler.py),
+[CLI/transport tests](test_direct_sat_cli.py),
+[matched campaign](direct_sat_campaign.py), and
+[near-density bounded campaign](direct_sat_hardness.py).
+The [matched results](direct_sat_results.json) compare the **same 121** source
+instances against PNG-001's factor elimination, SPN-007, and exhaustive
+references. The [bounded stress results](direct_sat_hardness_results.json)
+cover increasing-size random 3-SAT with explicit unproved cases.
+The benchmark outcome on dense random SAT continues to favor direct clauses
+in this small local implementation; discovering a complex Ground is not free.
+**Nothing here proves a uniform polynomial-time algorithm for arbitrary SAT.**

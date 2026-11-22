@@ -1,0 +1,316 @@
+{
+  "experiment": "SPN-008 increasing-n near-density 4.26 bounded tests",
+  "note": "source-bound decisions only; UNKNOWN explicitly preserved; not a worst-case or threshold proof",
+  "results": [
+    {
+      "n": 16,
+      "m": 68,
+      "samples": 12,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 7,
+        "UNSAT": 5,
+        "UNKNOWN": 0
+      },
+      "dpll_2048": {
+        "SAT": 7,
+        "UNSAT": 5,
+        "UNKNOWN": 0
+      },
+      "total_ms_256": 16.931,
+      "total_ms_2048": 17.167,
+      "nodes_256": 145,
+      "nodes_2048": 145,
+      "spectral_128": {
+        "SAT": 3,
+        "UNSAT": 0,
+        "UNKNOWN": 1
+      },
+      "spectral_evaluated": 4,
+      "spectral_total_ms": 421.671,
+      "recovered_from_256_unknown_by_2048": 0,
+      "source_hashes": [
+        "a9bf4c58c5c09c7ccbab7b85c7bd85812520c15b27d6b73b251f6959b45e97e5"
+      ]
+    },
+    {
+      "n": 20,
+      "m": 85,
+      "samples": 12,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 9,
+        "UNSAT": 3,
+        "UNKNOWN": 0
+      },
+      "dpll_2048": {
+        "SAT": 9,
+        "UNSAT": 3,
+        "UNKNOWN": 0
+      },
+      "total_ms_256": 25.525,
+      "total_ms_2048": 29.632,
+      "nodes_256": 172,
+      "nodes_2048": 172,
+      "spectral_128": {
+        "SAT": 4,
+        "UNSAT": 0,
+        "UNKNOWN": 0
+      },
+      "spectral_evaluated": 4,
+      "spectral_total_ms": 205.636,
+      "recovered_from_256_unknown_by_2048": 0,
+      "source_hashes": [
+        "ad055fb8d78af404f31dcbe9ad99dc5f6e85d51c94a3db07705173cf1f61fd97"
+      ]
+    },
+    {
+      "n": 24,
+      "m": 102,
+      "samples": 12,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 7,
+        "UNSAT": 5,
+        "UNKNOWN": 0
+      },
+      "dpll_2048": {
+        "SAT": 7,
+        "UNSAT": 5,
+        "UNKNOWN": 0
+      },
+      "total_ms_256": 33.92,
+      "total_ms_2048": 34.352,
+      "nodes_256": 218,
+      "nodes_2048": 218,
+      "spectral_128": {
+        "SAT": 2,
+        "UNSAT": 0,
+        "UNKNOWN": 2
+      },
+      "spectral_evaluated": 4,
+      "spectral_total_ms": 1228.763,
+      "recovered_from_256_unknown_by_2048": 0,
+      "source_hashes": [
+        "9c0ab56e50a7962e5ba5fe2abf19174d29b399efbe52c16a60162fab83a41881"
+      ]
+    },
+    {
+      "n": 28,
+      "m": 119,
+      "samples": 12,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 8,
+        "UNSAT": 4,
+        "UNKNOWN": 0
+      },
+      "dpll_2048": {
+        "SAT": 8,
+        "UNSAT": 4,
+        "UNKNOWN": 0
+      },
+      "total_ms_256": 50.913,
+      "total_ms_2048": 50.706,
+      "nodes_256": 297,
+      "nodes_2048": 297,
+      "spectral_128": {
+        "SAT": 0,
+        "UNSAT": 0,
+        "UNKNOWN": 0
+      },
+      "spectral_evaluated": 0,
+      "spectral_total_ms": 0.0,
+      "recovered_from_256_unknown_by_2048": 0,
+      "source_hashes": [
+        "75d0ed0eff213065e83ecfe211f554de3a71898119e6031bb0574f54b9b4b624"
+      ]
+    },
+    {
+      "n": 36,
+      "m": 153,
+      "samples": 12,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 9,
+        "UNSAT": 3,
+        "UNKNOWN": 0
+      },
+      "dpll_2048": {
+        "SAT": 9,
+        "UNSAT": 3,
+        "UNKNOWN": 0
+      },
+      "total_ms_256": 81.976,
+      "total_ms_2048": 81.009,
+      "nodes_256": 355,
+      "nodes_2048": 355,
+      "spectral_128": {
+        "SAT": 0,
+        "UNSAT": 0,
+        "UNKNOWN": 0
+      },
+      "spectral_evaluated": 0,
+      "spectral_total_ms": 0.0,
+      "recovered_from_256_unknown_by_2048": 0,
+      "source_hashes": [
+        "026bbd45742922fa721575bbd9d83a1a03d2710a9c93a1eb739c9c78cf9ba174"
+      ]
+    },
+    {
+      "n": 48,
+      "m": 204,
+      "samples": 12,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 8,
+        "UNSAT": 4,
+        "UNKNOWN": 0
+      },
+      "dpll_2048": {
+        "SAT": 8,
+        "UNSAT": 4,
+        "UNKNOWN": 0
+      },
+      "total_ms_256": 241.43,
+      "total_ms_2048": 240.104,
+      "nodes_256": 702,
+      "nodes_2048": 702,
+      "spectral_128": {
+        "SAT": 0,
+        "UNSAT": 0,
+        "UNKNOWN": 0
+      },
+      "spectral_evaluated": 0,
+      "spectral_total_ms": 0.0,
+      "recovered_from_256_unknown_by_2048": 0,
+      "source_hashes": [
+        "9634c06bd11ff6341e0edc6e5a29d34f3ff4cfbe536934942f4d9103ab1bc090"
+      ]
+    },
+    {
+      "n": 64,
+      "m": 273,
+      "samples": 8,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 3,
+        "UNSAT": 2,
+        "UNKNOWN": 3
+      },
+      "dpll_2048": {
+        "SAT": 4,
+        "UNSAT": 4,
+        "UNKNOWN": 0
+      },
+      "total_ms_256": 520.855,
+      "total_ms_2048": 727.48,
+      "nodes_256": 1555,
+      "nodes_2048": 1682,
+      "spectral_128": {
+        "SAT": 0,
+        "UNSAT": 0,
+        "UNKNOWN": 0
+      },
+      "spectral_evaluated": 0,
+      "spectral_total_ms": 0.0,
+      "recovered_from_256_unknown_by_2048": 3,
+      "source_hashes": [
+        "64cee16ec95215e801efc8303a3562e2eef1758cda6d98ee7c3d67bb1a4a43cb"
+      ]
+    },
+    {
+      "n": 80,
+      "m": 341,
+      "samples": 8,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 2,
+        "UNSAT": 0,
+        "UNKNOWN": 6
+      },
+      "dpll_2048": {
+        "SAT": 6,
+        "UNSAT": 2,
+        "UNKNOWN": 0
+      },
+      "total_ms_256": 631.832,
+      "total_ms_2048": 1971.343,
+      "nodes_256": 1726,
+      "nodes_2048": 3637,
+      "spectral_128": {
+        "SAT": 0,
+        "UNSAT": 0,
+        "UNKNOWN": 0
+      },
+      "spectral_evaluated": 0,
+      "spectral_total_ms": 0.0,
+      "recovered_from_256_unknown_by_2048": 6,
+      "source_hashes": [
+        "ea9afee0833f3211f73c1a1ecf458d64db21fcc0fb75e34c85da07226c54569d"
+      ]
+    },
+    {
+      "n": 96,
+      "m": 409,
+      "samples": 8,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 1,
+        "UNSAT": 0,
+        "UNKNOWN": 7
+      },
+      "dpll_2048": {
+        "SAT": 4,
+        "UNSAT": 3,
+        "UNKNOWN": 1
+      },
+      "total_ms_256": 883.839,
+      "total_ms_2048": 5803.618,
+      "nodes_256": 1820,
+      "nodes_2048": 8146,
+      "spectral_128": {
+        "SAT": 0,
+        "UNSAT": 0,
+        "UNKNOWN": 0
+      },
+      "spectral_evaluated": 0,
+      "spectral_total_ms": 0.0,
+      "recovered_from_256_unknown_by_2048": 6,
+      "source_hashes": [
+        "8511030e0d98d1130fcb4677b5a2479f804162cdbb445e8197e229438daeea91"
+      ]
+    },
+    {
+      "n": 120,
+      "m": 511,
+      "samples": 4,
+      "seed": 80488,
+      "dpll_256": {
+        "SAT": 0,
+        "UNSAT": 0,
+        "UNKNOWN": 4
+      },
+      "dpll_2048": {
+        "SAT": 1,
+        "UNSAT": 0,
+        "UNKNOWN": 3
+      },
+      "total_ms_256": 575.204,
+      "total_ms_2048": 3880.872,
+      "nodes_256": 1024,
+      "nodes_2048": 7155,
+      "spectral_128": {
+        "SAT": 0,
+        "UNSAT": 0,
+        "UNKNOWN": 0
+      },
+      "spectral_evaluated": 0,
+      "spectral_total_ms": 0.0,
+      "recovered_from_256_unknown_by_2048": 1,
+      "source_hashes": [
+        "1c7ca2d6ecb99c9243b55814109e179f7c165a567fb5bb12ad6ac384cdded854"
+      ]
+    }
+  ]
+}
