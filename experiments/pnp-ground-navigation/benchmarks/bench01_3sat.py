@@ -316,6 +316,7 @@ def _spn_worker(payload, *, previous=None):
             "spn_proof_bytes":len(canonical(receipt)),
             "construction_ms":round(elapsed,5),"execution_ms":0,
             "witness":witness,"spn_original_proof_verified":True,
+            "spn_receipt":receipt,
             "prior_machine":None if previous is None else previous.get("selected"),
             "prior_construction_ms":0 if previous is None else previous.get("construction_ms",0)}
 
@@ -434,6 +435,29 @@ def run_case(item, *, timeout=8.0, max_coords=65536, max_free=16,
     status=result["status"]
     if status not in ("SAT","UNSAT","UNKNOWN","ERROR"):
         raise ValueError("worker returned unsupported status")
+    # A worker is an execution locus, not a publication authority.
+    # Independently replay the source-bound SPN proof in the parent process.
+    spn_receipt=result.pop("spn_receipt",None)
+    if spn_receipt is not None:
+        spn_path=SOURCE_DIR/"spectral_phase_navigation"
+        if str(spn_path) not in sys.path:sys.path.insert(0,str(spn_path))
+        from direct_sat_compiler import verify_direct_sat
+        if not isinstance(spn_receipt,dict) or verify_direct_sat(clauses,n,spn_receipt)!=status:
+            raise ValueError("worker SPN result lacks a matching, source-replayed certificate")
+        result["spn_original_proof_verified"]=True
+        result["parent_spn_proof_replayed"]=True
+    elif result.get("spn_original_proof_verified"):
+        raise ValueError("worker falsely claimed a source-checked SPN certificate")
+    if result.get("selected")=="source-empty-clause" and (status!="UNSAT" or [] not in clauses):
+        raise ValueError("source-empty-clause refutation is not present in original CNF")
+    # Larger native SFI UNSAT claims remain UNKNOWN until a complete proof
+    # crosses the boundary or a bounded exhaustive parent reference exists.
+    if (status=="UNSAT" and reference["status"]=="NOT_RUN" and
+            not result.get("parent_spn_proof_replayed") and
+            result.get("selected")!="source-empty-clause"):
+        result={**result,"status":"UNKNOWN","witness":None,
+                "reason":"native-UNSAT-without-parent-checkable-certificate"}
+        status="UNKNOWN"
     witness=result.get("witness")
     if status=="SAT":
         if witness is None or not isinstance(witness,str) or not witness.isdecimal():
