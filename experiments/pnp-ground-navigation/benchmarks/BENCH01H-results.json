@@ -1,0 +1,146 @@
+{
+  "record_count": 5,
+  "records": [
+    {
+      "algebraic": {
+        "build_ms": 1.7391,
+        "components": 19,
+        "coordinates_checked": 38,
+        "model_count": 1,
+        "native_spn007_used": false,
+        "rank": 19,
+        "status": "SAT",
+        "total_ms": 5.2484,
+        "verification_ms": 3.5093
+      },
+      "id": "xor-cycle-19-sat",
+      "source": {
+        "clauses": 76,
+        "fixture_expected": "SAT",
+        "n": 19,
+        "origin": "source-generated-strict-3xor",
+        "source_sha256": "0b3a1a13bc92e506e568bebe5d3a069a9e2e6c1b6fb7d8b141bbcb783e554975"
+      },
+      "variable_separator": {
+        "count": null,
+        "separator": [],
+        "status": "UNKNOWN",
+        "total_ms": 4.1463
+      }
+    },
+    {
+      "algebraic": {
+        "build_ms": 2.0605,
+        "components": 31,
+        "coordinates_checked": 62,
+        "model_count": 1,
+        "native_spn007_used": false,
+        "rank": 31,
+        "status": "SAT",
+        "total_ms": 8.2094,
+        "verification_ms": 6.1488
+      },
+      "id": "xor-cycle-31-sat",
+      "source": {
+        "clauses": 124,
+        "fixture_expected": "SAT",
+        "n": 31,
+        "origin": "source-generated-strict-3xor",
+        "source_sha256": "ab8db474528c0a052f08bba26436d1e096d98b48699580a617490561f99df97b"
+      },
+      "variable_separator": {
+        "count": null,
+        "separator": [],
+        "status": "UNKNOWN",
+        "total_ms": 8.724
+      }
+    },
+    {
+      "algebraic": {
+        "build_ms": 5.3464,
+        "components": 80,
+        "coordinates_checked": 160,
+        "model_count": 1,
+        "native_spn007_used": false,
+        "rank": 80,
+        "status": "SAT",
+        "total_ms": 20.6744,
+        "verification_ms": 15.3279
+      },
+      "id": "xor-cycle-80-sat",
+      "source": {
+        "clauses": 320,
+        "fixture_expected": "SAT",
+        "n": 80,
+        "origin": "source-generated-strict-3xor",
+        "source_sha256": "7c9e984a294ea97dabf027ee2f4f671b4340d180c2e0478dd268e88e30600eae"
+      },
+      "variable_separator": {
+        "count": null,
+        "separator": [],
+        "status": "UNKNOWN",
+        "total_ms": 50.0096
+      }
+    },
+    {
+      "algebraic": {
+        "build_ms": 2.0546,
+        "components": 30,
+        "coordinates_checked": 60,
+        "model_count": 0,
+        "native_spn007_used": false,
+        "rank": 30,
+        "status": "UNSAT",
+        "total_ms": 8.0076,
+        "verification_ms": 5.953
+      },
+      "id": "xor-cycle-31-unsat",
+      "source": {
+        "clauses": 128,
+        "fixture_expected": "UNSAT",
+        "n": 31,
+        "origin": "source-generated-conflicting-3xor",
+        "source_sha256": "fe68e79e1424d71748e508bcb7b0b4588c46d8b786d4a1fa2544c77dcaec7485"
+      },
+      "variable_separator": {
+        "count": null,
+        "separator": [],
+        "status": "UNKNOWN",
+        "total_ms": 11.1195
+      }
+    },
+    {
+      "algebraic": {
+        "build_ms": 1.3826,
+        "components": 1,
+        "coordinates_checked": 0,
+        "model_count": null,
+        "native_spn007_used": false,
+        "rank": 16,
+        "status": "UNKNOWN",
+        "total_ms": 4.151,
+        "verification_ms": 2.7684
+      },
+      "id": "unstructured-16",
+      "source": {
+        "clauses": 52,
+        "fixture_expected": null,
+        "n": 16,
+        "origin": "seeded-unstructured-3cnf",
+        "source_sha256": "534ea3b99d55e9292271d8d4c428e0576f58d8ed4846211ba9351ee71817a99d"
+      },
+      "variable_separator": {
+        "count": null,
+        "separator": [],
+        "status": "UNKNOWN",
+        "total_ms": 2.5174
+      }
+    }
+  ],
+  "schema": "ifs.bench01h.coordinate-representation-comparison.v1",
+  "scope": "finite strict 3-CNF only; independent exact source verification; no P-vs-NP claim",
+  "source_pins": {
+    "cross_repos": "SPN-007, SFI-002, BENCH-01G, BENCH-01E",
+    "repository": "Kier73/In-Formation-Space"
+  }
+}
