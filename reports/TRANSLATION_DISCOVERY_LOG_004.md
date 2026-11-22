@@ -70,6 +70,12 @@ The current VGI adapter is **one receiver-owned policy source**, and the test ca
 
 **H:** integrate E-CPU's mutual-TLS cross-process transit with exactly scoped observer operations and source-signed/mTLS-bound VGI evidence. Measure path negotiation, packet bytes and execution wall time separately, and verify safety when the host dies after producing a bit but before its evidence is finalized.
 
+### Cross-repository discovery: mTLS observation transport already exists
+
+**I:** [E-CPU IOS-003](https://github.com/Kier73/E-CPU/blob/main/mailcpu/intention_measurement_fabric.py) exposes `MeasurementPeerClient.connect_mutual_tls` and `MeasurementPeerServer.accept_mutual_tls`, checks authenticated peer DNS SANs and `CERT_REQUIRED`, requires preinstalled `HostedMeasurement` observer contracts, rechecks receiver-local authority at request time, and writes completed read-only measurements into a durable ledger before channel acknowledgement. These are executable primitives for the next stage, rather than novel transport mechanisms to build from scratch.
+
+**M:** a mathematical observer offer can remain independent of a chosen network address, while a live authenticated measurement receipt can establish a source-relative trust claim for one execution. Binding their identities is an explicit **translation obligation**: offer row/epoch ↔ observer contract ↔ TLS peer identity ↔ VGI admitted source. This is stronger than merely preserving hashes across the existing receiver-local adapter.
+
 ## TDL-004/D — Verification inventory
 
 | Test / code | Property |
@@ -86,7 +92,7 @@ At this entry's initial authorship, the above are code/test contracts. Append ex
 ## TDL-004/E — Research continuations
 
 1. **Semantic type identity by law:** compile the required projection digest and source revision into the operation's type identity. Use an independent type verifier that checks the source-law interpretation without trusting a caller-assigned offer label.
-2. **Authenticated receiver-independent observers:** map selected computation requests onto E-CPU mTLS peer identities, enforce local Hypervisor and receiver permission, then attribute VGI evidence to independently authenticated observer sources rather than a shared local adapter.
+2. **Authenticated receiver-independent observers:** reuse E-CPU's already implemented [IOS-003 mTLS measurement service](https://github.com/Kier73/E-CPU/blob/main/mailcpu/intention_measurement_fabric.py), especially `MeasurementPeerClient.resolve`, `MeasurementPeerServer`, `HostedMeasurement` and the durable `MeasurementReceiptLedger`. Its CA-verified peer DNS/SAN and native `ObserverReceipt` checks can supply a live authenticated origin for each typed source-row measurement. Adapt those receipts into VGI source membership and E-CPU SAB output kinds without inventing new transport, voting or signature authority. The present implementation still uses one receiver-local VGI adapter; this authenticated adapter remains a testable next construction.
 3. **Quorum-aware cost:** each selected source row may require two or more independently verified observer sources. Joint optimization of rows, hosts, paths, source quorum and retry risk is a new mathematical decision problem.
 4. **Measurement instead of estimate:** use actual transport/carrier instrumentation to measure latency distributions, bytes on wire and energy, and test whether minimizing estimated quanta predicts end-to-end utility.
 5. **Crash-recoverable acquisition:** store unfinished observation task/lease/epoch receipts so host rehome can continue without prematurely finalizing unknown evidence. Combine E-CPU durable DAG epoch fencing with VGI immutable finalizations.
