@@ -113,13 +113,13 @@ def observed(item, *, timeout=9.0, nodes=8192, max_source_vars=80):
     """Obtain both source-checked backend outcomes from real BENCH-01 workers."""
     check_cnf(item["n"], item["clauses"])
     base = {"timeout": timeout, "spn_nodes": nodes,
-            "max_source_vars": max_source_vars, "max_source_clauses": 400,
+            "max_source_clauses": 400,
             "max_spn_vars": 1024, "max_spn_clauses": 5000,
             "export_spn_proof": True}
     # Native direct SPN path, intentionally refusing costly SFI admission.
     direct = run_case(item, spn_fallback=True, max_source_vars=0, **base)
     # Problem-formed interpreter, followed by SPN only after an UNKNOWN result.
-    formed = run_case(item, spn_fallback=True, **base)
+    formed = run_case(item, spn_fallback=True, max_source_vars=max_source_vars, **base)
     def capsule(r):
         if r["status"] == "ERROR":
             raise RuntimeError("native worker failed: " + str(r.get("reason", "")))
