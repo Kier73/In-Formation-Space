@@ -1,5 +1,7 @@
 # Translation Discovery Log — TDL-001
 
+**Continuation:** [TDL-002 — Minimal observer information and representation commutation](TRANSLATION_DISCOVERY_LOG_002.md) translates the first round's conditional-rank discovery into source code, a separate independent verifier, and cross-repository equivalent-observer tests.
+
 **Round:** 2026-11-22 · **Method:** implementation → mathematical relation → algorithm → independent evidence → new construction.
 
 This is a living **technical research log** of discoveries that arise when working implementations are rewritten in other exact languages. The purpose is to expose properties that are hard to notice in implementation prose, without conflating existing code, mathematical deduction and proposed functionality.
