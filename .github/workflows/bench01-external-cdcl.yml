@@ -1,4 +1,4 @@
-name: BENCH-01E external 3-SAT and pinned CaDiCaL baseline
+name: BENCH-01E/F external CDCL and self-use policy benchmark
 on:
   pull_request:
     paths:
@@ -53,6 +53,18 @@ jobs:
               print(r['id'],r['qualified_decisions'],
                     *(str(round(r[k]['wall_ms'],2))+'ms' for k in ('sfi','sfi_spn','cdcl')))
           print('Summary:', d['summary'])
+      - name: Test BENCH-01F source-only self-use policy and forged evidence controls
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python -m unittest -v test_bench01_policy.py
+      - name: Evaluate BENCH-01F on twelve pinned external sources with disjoint cohorts
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python run_bench01_policy.py .external-bench01f --timeout 12 --spn-nodes 8192 --output BENCH01F-results.json
+      - name: Upload BENCH-01F original receipts and admission measurements
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench01f-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: experiments/pnp-ground-navigation/benchmarks/BENCH01F-results.json
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
