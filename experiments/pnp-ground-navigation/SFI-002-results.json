@@ -1,0 +1,135 @@
+{
+  "cases": [
+    {
+      "affine_registers": 51,
+      "case": "nonaffine-64",
+      "construction_and_selection_ms": 71.271,
+      "coordinates_checked": 256,
+      "count": 168,
+      "execution_and_verification_ms": 40.234,
+      "nonaffine_instructions": 56,
+      "nonaffine_registers": 8,
+      "nonaffine_scanned_literals": 50476,
+      "nonaffine_support_attempts": 1152,
+      "selected": "local-Boolean-functions",
+      "source_clauses": 213,
+      "source_variables": 64,
+      "status": "SAT"
+    },
+    {
+      "affine_registers": 108,
+      "case": "nonaffine-128",
+      "construction_and_selection_ms": 315.369,
+      "coordinates_checked": 256,
+      "count": 184,
+      "execution_and_verification_ms": 124.902,
+      "nonaffine_instructions": 120,
+      "nonaffine_registers": 8,
+      "nonaffine_scanned_literals": 108460,
+      "nonaffine_support_attempts": 2735,
+      "selected": "local-Boolean-functions",
+      "source_clauses": 445,
+      "source_variables": 128,
+      "status": "SAT"
+    },
+    {
+      "affine_registers": null,
+      "case": "parity-global-unsat-60",
+      "construction_and_selection_ms": 21.084,
+      "coordinates_checked": 0,
+      "count": 0,
+      "execution_and_verification_ms": 8.217,
+      "nonaffine_instructions": 37,
+      "nonaffine_registers": 23,
+      "nonaffine_scanned_literals": 11520,
+      "nonaffine_support_attempts": 120,
+      "selected": "affine-proof-ground",
+      "source_clauses": 160,
+      "source_variables": 60,
+      "status": "UNSAT"
+    },
+    {
+      "case": "heterogeneous-disjoint-104",
+      "component_count": 2,
+      "component_counts": [
+        168,
+        16
+      ],
+      "component_registers": [
+        8,
+        4
+      ],
+      "construction_and_selection_ms": 124.274,
+      "count": 2688,
+      "selected": [
+        "local-Boolean-functions",
+        "affine-proof-ground"
+      ],
+      "source_clauses": 501,
+      "source_variables": 104,
+      "status": "SAT"
+    },
+    {
+      "case": "heterogeneous-bridged-104",
+      "component_count": 1,
+      "component_counts": [
+        null
+      ],
+      "component_registers": [
+        null
+      ],
+      "construction_and_selection_ms": 176.456,
+      "count": null,
+      "selected": [
+        "undetermined"
+      ],
+      "source_clauses": 502,
+      "source_variables": 104,
+      "status": "UNKNOWN"
+    },
+    {
+      "affine_registers": 16,
+      "case": "general-random-16",
+      "construction_and_selection_ms": 460.804,
+      "coordinates_checked": 65536,
+      "count": 28,
+      "execution_and_verification_ms": 651.541,
+      "nonaffine_instructions": 0,
+      "nonaffine_registers": 16,
+      "nonaffine_scanned_literals": 7410,
+      "nonaffine_support_attempts": 603,
+      "selected": "affine-proof-ground",
+      "source_clauses": 64,
+      "source_variables": 16,
+      "status": "SAT"
+    },
+    {
+      "affine_registers": 35,
+      "case": "general-random-35",
+      "construction_and_selection_ms": 41.76,
+      "coordinates_checked": 0,
+      "count": null,
+      "execution_and_verification_ms": null,
+      "nonaffine_instructions": 0,
+      "nonaffine_registers": 35,
+      "nonaffine_scanned_literals": 10476,
+      "nonaffine_support_attempts": 930,
+      "selected": "undetermined",
+      "source_clauses": 140,
+      "source_variables": 35,
+      "status": "UNKNOWN"
+    }
+  ],
+  "environment": {
+    "python": "3.13.5",
+    "substrate": "single-host ordinary CPU, standard Python"
+  },
+  "limits": {
+    "local_function_support_variables": 4,
+    "maximum_free_bits": 16,
+    "maximum_search_coordinates": 65536,
+    "per_component_execution": true,
+    "physical_remote_execution_proven": false
+  },
+  "schema": "sfi-002.problem-selected-heterogeneous-sat.v1"
+}
