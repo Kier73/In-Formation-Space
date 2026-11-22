@@ -392,7 +392,8 @@ def run_case(item, *, timeout=8.0, max_coords=65536, max_free=16,
              partition_size=1024, max_source_vars=64,
              max_source_clauses=400, self_refine=False, composite=False,
              exhaustive_n=15, resolution_attempts=500, spn_fallback=False,
-             spn_nodes=8192, max_spn_vars=1024, max_spn_clauses=5000):
+             spn_nodes=8192, max_spn_vars=1024, max_spn_clauses=5000,
+             export_spn_proof=False):
     n,clauses=item["n"],item["clauses"]
     check_cnf(n,clauses)
     known_witness=item.get("known_witness")
@@ -446,6 +447,8 @@ def run_case(item, *, timeout=8.0, max_coords=65536, max_free=16,
             raise ValueError("worker SPN result lacks a matching, source-replayed certificate")
         result["spn_original_proof_verified"]=True
         result["parent_spn_proof_replayed"]=True
+        if export_spn_proof:
+            result["spn_receipt"] = spn_receipt  # portable source-replay evidence
     elif result.get("spn_original_proof_verified"):
         raise ValueError("worker falsely claimed a source-checked SPN certificate")
     if result.get("selected")=="source-empty-clause" and (status!="UNSAT" or [] not in clauses):
