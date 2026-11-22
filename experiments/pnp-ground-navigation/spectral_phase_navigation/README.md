@@ -4,6 +4,10 @@
 
 Companion to [PNG-001](../README.md), which implements an exact #SAT frontier/factor-elimination Ground. Here we study a *different representation*: signed Walsh characters of a fixed-width clause-violation energy. We ask whether exact transformations of that description can yield a witness or a separately checkable proof of exclusion, while explicitly charging for construction, branching and verification.
 
+**SPN-003 continuation:** [Frustrated Walsh cycles and independently checked UNSAT certificates](SPN-003_PHASE_CYCLE_CERTIFICATES.md) strengthens the triangle-inequality bound by retaining phase-compatible triples. Its [exact implementation](phase_cycle_bounds.py), [tests](test_phase_cycle_bounds.py), [campaign](phase_cycle_campaign.py), and [results](phase_cycle_results.json) are maintained beside SPN-001/002. The claim is a sound finite certificate scheme, not a polynomial-time SAT solver.
+
+**SPN-004 continuation:** [Rank-bounded parity Grounds and exact realization](SPN-004_RANK_GROUNDS.md) generalizes phase cycles to low-rank blocks of interacting Fourier terms. [Implementation](rank_block_bounds.py), [tamper and exhaustive tests](test_rank_block_bounds.py), [matching campaign](rank_block_campaign.py), and [measured results](rank_block_results.json) accompany the proof. The theorem is fixed-parameter in known Fourier rank; it does not establish an unrestricted polynomial-time SAT solver.
+
 **No general polynomial-time SAT algorithm, P-vs-NP claim, or quantum speedup is established.** Conditional expectation and exhaustive proof branching are classical techniques; the experiment makes their evidence and costs explicit in the spectral/observer-ground framing.
 
 ## 1. Exact description and phase
