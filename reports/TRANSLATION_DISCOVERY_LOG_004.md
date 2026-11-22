@@ -1,4 +1,6 @@
 # Translation Discovery Log — TDL-004
+
+**Continuation:** [TDL-005 — Live authenticated measurements and observation attempts](TRANSLATION_DISCOVERY_LOG_005.md) composes E-CPU's native IOS-003 dual-peer TLS measurements with strict VGI source quorum, preserving a distinct observation-challenge epoch and avoiding false claims of offline source attestation.
 ## Intention becomes a typed observer operation and an admitted communication route
 
 **Round:** 2026-11-22. [TDL-001](TRANSLATION_DISCOVERY_LOG.md) · [TDL-002](TRANSLATION_DISCOVERY_LOG_002.md) · [TDL-003](TRANSLATION_DISCOVERY_LOG_003.md) · [VL-I implementation](https://github.com/Kier73/VL-I/blob/main/docs/FABRIC_REFINEMENT_TDL004.md)
