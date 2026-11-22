@@ -1,0 +1,165 @@
+{
+  "seed": 73176,
+  "node_budget_random": 256,
+  "random_3sat": [
+    {
+      "n": 8,
+      "m": 34,
+      "samples": 30,
+      "sat": 24,
+      "unsat": 6,
+      "local_nodes": 99,
+      "pair_scan_nodes": 93,
+      "gaussian_nodes": 97,
+      "gaussian_better_than_local": 1,
+      "gaussian_worse_than_local": 0,
+      "producer_local_ms": 107.474,
+      "producer_pair_scan_ms": 424.907,
+      "producer_gaussian_ms": 78.361,
+      "gaussian_row_reductions": 2693,
+      "gaussian_circuit_leaves": 1,
+      "gaussian_receipt_bytes": 14379
+    },
+    {
+      "n": 10,
+      "m": 43,
+      "samples": 30,
+      "sat": 23,
+      "unsat": 7,
+      "local_nodes": 194,
+      "pair_scan_nodes": 170,
+      "gaussian_nodes": 188,
+      "gaussian_better_than_local": 3,
+      "gaussian_worse_than_local": 0,
+      "producer_local_ms": 252.945,
+      "producer_pair_scan_ms": 1200.929,
+      "producer_gaussian_ms": 224.688,
+      "gaussian_row_reductions": 8556,
+      "gaussian_circuit_leaves": 3,
+      "gaussian_receipt_bytes": 21289
+    },
+    {
+      "n": 12,
+      "m": 51,
+      "samples": 30,
+      "sat": 22,
+      "unsat": 8,
+      "local_nodes": 391,
+      "pair_scan_nodes": 313,
+      "gaussian_nodes": 363,
+      "gaussian_better_than_local": 6,
+      "gaussian_worse_than_local": 0,
+      "producer_local_ms": 560.099,
+      "producer_pair_scan_ms": 2642.162,
+      "producer_gaussian_ms": 519.864,
+      "gaussian_row_reductions": 22955,
+      "gaussian_circuit_leaves": 12,
+      "gaussian_receipt_bytes": 36635
+    }
+  ],
+  "strided_parity_cycles": [
+    {
+      "blocks": 1,
+      "n": 5,
+      "clauses": 16,
+      "unsat_circuit_count": 1,
+      "unsat_nodes": 1,
+      "unsat_bound": [
+        1,
+        1
+      ],
+      "unsat_producer_ms": 0.52,
+      "unsat_receipt_bytes": 364,
+      "sat_fourier_rank": 3,
+      "sat_exact_ground": 0,
+      "sat_ground_reconstruction_ms": 0.072,
+      "gaussian_row_reductions": 3
+    },
+    {
+      "blocks": 2,
+      "n": 10,
+      "clauses": 32,
+      "unsat_circuit_count": 2,
+      "unsat_nodes": 1,
+      "unsat_bound": [
+        2,
+        1
+      ],
+      "unsat_producer_ms": 0.984,
+      "unsat_receipt_bytes": 382,
+      "sat_fourier_rank": 6,
+      "sat_exact_ground": 0,
+      "sat_ground_reconstruction_ms": 0.119,
+      "gaussian_row_reductions": 6
+    },
+    {
+      "blocks": 4,
+      "n": 20,
+      "clauses": 64,
+      "unsat_circuit_count": 4,
+      "unsat_nodes": 1,
+      "unsat_bound": [
+        4,
+        1
+      ],
+      "unsat_producer_ms": 1.981,
+      "unsat_receipt_bytes": 438,
+      "sat_fourier_rank": 12,
+      "sat_exact_ground": 0,
+      "sat_ground_reconstruction_ms": 0.249,
+      "gaussian_row_reductions": 12
+    },
+    {
+      "blocks": 8,
+      "n": 40,
+      "clauses": 128,
+      "unsat_circuit_count": 8,
+      "unsat_nodes": 1,
+      "unsat_bound": [
+        8,
+        1
+      ],
+      "unsat_producer_ms": 4.36,
+      "unsat_receipt_bytes": 628,
+      "sat_fourier_rank": 24,
+      "sat_exact_ground": 0,
+      "sat_ground_reconstruction_ms": 0.511,
+      "gaussian_row_reductions": 24
+    },
+    {
+      "blocks": 16,
+      "n": 80,
+      "clauses": 256,
+      "unsat_circuit_count": 16,
+      "unsat_nodes": 1,
+      "unsat_bound": [
+        16,
+        1
+      ],
+      "unsat_producer_ms": 10.165,
+      "unsat_receipt_bytes": 1322,
+      "sat_fourier_rank": 48,
+      "sat_exact_ground": 0,
+      "sat_ground_reconstruction_ms": 1.072,
+      "gaussian_row_reductions": 48
+    },
+    {
+      "blocks": 24,
+      "n": 120,
+      "clauses": 384,
+      "unsat_circuit_count": 24,
+      "unsat_nodes": 1,
+      "unsat_bound": [
+        24,
+        1
+      ],
+      "unsat_producer_ms": 17.45,
+      "unsat_receipt_bytes": 2439,
+      "sat_fourier_rank": 72,
+      "sat_exact_ground": 0,
+      "sat_ground_reconstruction_ms": 1.633,
+      "gaussian_row_reductions": 72
+    }
+  ],
+  "timing_note": "One local Python run; each producer internally checks its own receipt; times are not calibrated or cross-host comparisons."
+}

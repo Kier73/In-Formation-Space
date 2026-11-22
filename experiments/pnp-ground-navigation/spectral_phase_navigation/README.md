@@ -4,10 +4,6 @@
 
 Companion to [PNG-001](../README.md), which implements an exact #SAT frontier/factor-elimination Ground. Here we study a *different representation*: signed Walsh characters of a fixed-width clause-violation energy. We ask whether exact transformations of that description can yield a witness or a separately checkable proof of exclusion, while explicitly charging for construction, branching and verification.
 
-**SPN-003 continuation:** [Frustrated Walsh cycles and independently checked UNSAT certificates](SPN-003_PHASE_CYCLE_CERTIFICATES.md) strengthens the triangle-inequality bound by retaining phase-compatible triples. Its [exact implementation](phase_cycle_bounds.py), [tests](test_phase_cycle_bounds.py), [campaign](phase_cycle_campaign.py), and [results](phase_cycle_results.json) are maintained beside SPN-001/002. The claim is a sound finite certificate scheme, not a polynomial-time SAT solver.
-
-**SPN-004 continuation:** [Rank-bounded parity Grounds and exact realization](SPN-004_RANK_GROUNDS.md) generalizes phase cycles to low-rank blocks of interacting Fourier terms. [Implementation](rank_block_bounds.py), [tamper and exhaustive tests](test_rank_block_bounds.py), [matching campaign](rank_block_campaign.py), and [measured results](rank_block_results.json) accompany the proof. The theorem is fixed-parameter in known Fourier rank; it does not establish an unrestricted polynomial-time SAT solver.
-
 **No general polynomial-time SAT algorithm, P-vs-NP claim, or quantum speedup is established.** Conditional expectation and exhaustive proof branching are classical techniques; the experiment makes their evidence and costs explicit in the spectral/observer-ground framing.
 
 ## 1. Exact description and phase
@@ -125,3 +121,27 @@ This work answers only a first finite step of the question:
 ### Spectral and adiabatic interpretation
 
 The companion conversation also studied \(H(s)=(1-s)H_B+sH_P\). For a degenerate final ground set of size `d>1`, the quantity \(\lambda_d-\lambda_0\) is not automatically the spectral gap controlling a unique-state adiabatic theorem; determining `d` can itself require counting. Nothing in this experiment uses a physical quantum Hamiltonian or infers a quantum acceleration from the positivity of a chosen indexed spectral separation.
+
+
+## 6. Continued spectral-phase research (SPN-003 through SPN-006)
+
+The initial SPN-001/002 source-derived Fourier engine has four additional,
+standalone reproducible research stages:
+
+- [SPN-003: three-term frustrated-phase certificates](SPN-003_PHASE_CYCLE_CERTIFICATES.md) — XOR triangle inequalities and source-recomputed receipt checks.
+- [SPN-004: rank-bounded parity Grounds](SPN-004_RANK_GROUNDS.md) — exact `2^r` local minimization, term-disjoint decomposition, and witness lifting.
+- [SPN-005: nonlocal rank-three discovery](SPN-005_NONLOCAL_RANK_GROUNDS.md) — exact four-term dependencies crossing source-clause scopes, with pair-scan budgets and explicit discovery costs.
+- [SPN-006: Gaussian parity obstructions and realizable Grounds](SPN-006_PARITY_OBSTRUCTION_GROUNDS.md) — reconstruct exact minimizers when all signed term preferences agree; otherwise extract contradictory parity circuits and source-check their lower bounds.
+
+All stages use pure standard-library Python, preserve `UNKNOWN` when a bounded
+search cannot establish a claim, and count proof search separately from
+coordinate discovery and checking. The parity constraints exploit a special
+algebraic structure: **none of these experiments settles general P versus NP**.
+
+Run the current regression suite from this directory:
+
+```sh
+python -m unittest -v test_spectral_receipts.py test_phase_cycle_bounds.py test_rank_block_bounds.py test_nonlocal_rank_grounds.py test_parity_obstruction_grounds.py
+python nonlocal_rank_campaign.py
+python parity_obstruction_campaign.py
+```

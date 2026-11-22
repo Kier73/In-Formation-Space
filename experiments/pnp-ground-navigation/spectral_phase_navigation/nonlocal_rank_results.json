@@ -1,0 +1,178 @@
+{
+  "seed": 73176,
+  "random_budget": 256,
+  "structured_budget": 64,
+  "random_3sat": [
+    {
+      "n": 8,
+      "m": 34,
+      "samples": 30,
+      "sat": 24,
+      "unsat": 6,
+      "rank4_nodes": 99,
+      "rank5_nodes": 93,
+      "rank5_better": 2,
+      "rank5_worse": 0,
+      "producer_rank4_ms": 108.803,
+      "producer_rank5_ms": 439.284,
+      "discovery_pairs": 19146,
+      "discovery_minima": 14209,
+      "discovery_parity_states": 113672,
+      "producer_truncated_nodes": 9,
+      "rank5_receipt_bytes": 18742
+    },
+    {
+      "n": 10,
+      "m": 43,
+      "samples": 30,
+      "sat": 23,
+      "unsat": 7,
+      "rank4_nodes": 194,
+      "rank5_nodes": 170,
+      "rank5_better": 7,
+      "rank5_worse": 0,
+      "producer_rank4_ms": 259.031,
+      "producer_rank5_ms": 1251.21,
+      "discovery_pairs": 61653,
+      "discovery_minima": 38890,
+      "discovery_parity_states": 311120,
+      "producer_truncated_nodes": 24,
+      "rank5_receipt_bytes": 24857
+    },
+    {
+      "n": 12,
+      "m": 51,
+      "samples": 30,
+      "sat": 22,
+      "unsat": 8,
+      "rank4_nodes": 391,
+      "rank5_nodes": 313,
+      "rank5_better": 9,
+      "rank5_worse": 0,
+      "producer_rank4_ms": 568.171,
+      "producer_rank5_ms": 2731.262,
+      "discovery_pairs": 161592,
+      "discovery_minima": 79840,
+      "discovery_parity_states": 638720,
+      "producer_truncated_nodes": 53,
+      "rank5_receipt_bytes": 38239
+    }
+  ],
+  "strided_frustrated_parity_cycles": [
+    {
+      "blocks": 1,
+      "n": 5,
+      "m": 16,
+      "local_status": "UNSAT",
+      "local_nodes": 7,
+      "nonlocal_status": "UNSAT",
+      "nonlocal_nodes": 1,
+      "nonlocal_bound": [
+        1,
+        1
+      ],
+      "nonlocal_proof_blocks": 1,
+      "discovery_pairs": 6,
+      "discovery_parity_states": 8,
+      "local_ms": 1.06,
+      "nonlocal_ms": 0.648,
+      "nonlocal_receipt_bytes": 507
+    },
+    {
+      "blocks": 2,
+      "n": 10,
+      "m": 32,
+      "local_status": "UNSAT",
+      "local_nodes": 15,
+      "nonlocal_status": "UNSAT",
+      "nonlocal_nodes": 1,
+      "nonlocal_bound": [
+        2,
+        1
+      ],
+      "nonlocal_proof_blocks": 2,
+      "discovery_pairs": 28,
+      "discovery_parity_states": 16,
+      "local_ms": 4.507,
+      "nonlocal_ms": 1.234,
+      "nonlocal_receipt_bytes": 527
+    },
+    {
+      "blocks": 4,
+      "n": 20,
+      "m": 64,
+      "local_status": "UNSAT",
+      "local_nodes": 63,
+      "nonlocal_status": "UNSAT",
+      "nonlocal_nodes": 1,
+      "nonlocal_bound": [
+        4,
+        1
+      ],
+      "nonlocal_proof_blocks": 4,
+      "discovery_pairs": 120,
+      "discovery_parity_states": 32,
+      "local_ms": 33.839,
+      "nonlocal_ms": 7.079,
+      "nonlocal_receipt_bytes": 583
+    },
+    {
+      "blocks": 8,
+      "n": 40,
+      "m": 128,
+      "local_status": "UNKNOWN",
+      "local_nodes": 69,
+      "nonlocal_status": "UNSAT",
+      "nonlocal_nodes": 1,
+      "nonlocal_bound": [
+        8,
+        1
+      ],
+      "nonlocal_proof_blocks": 8,
+      "discovery_pairs": 496,
+      "discovery_parity_states": 64,
+      "local_ms": 107.111,
+      "nonlocal_ms": 5.816,
+      "nonlocal_receipt_bytes": 773
+    },
+    {
+      "blocks": 16,
+      "n": 80,
+      "m": 256,
+      "local_status": "UNKNOWN",
+      "local_nodes": 79,
+      "nonlocal_status": "UNSAT",
+      "nonlocal_nodes": 1,
+      "nonlocal_bound": [
+        16,
+        1
+      ],
+      "nonlocal_proof_blocks": 16,
+      "discovery_pairs": 2016,
+      "discovery_parity_states": 128,
+      "local_ms": 282.966,
+      "nonlocal_ms": 18.269,
+      "nonlocal_receipt_bytes": 1470
+    },
+    {
+      "blocks": 24,
+      "n": 120,
+      "m": 384,
+      "local_status": "UNKNOWN",
+      "local_nodes": 87,
+      "nonlocal_status": "UNSAT",
+      "nonlocal_nodes": 1,
+      "nonlocal_bound": [
+        24,
+        1
+      ],
+      "nonlocal_proof_blocks": 24,
+      "discovery_pairs": 4560,
+      "discovery_parity_states": 192,
+      "local_ms": 553.001,
+      "nonlocal_ms": 39.05,
+      "nonlocal_receipt_bytes": 2587
+    }
+  ],
+  "measurement_note": "One local Python run; times are illustrative, not stable cross-hardware benchmarks."
+}
