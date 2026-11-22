@@ -99,3 +99,28 @@ Median **end-to-end per-method wall time** per CI platform, milliseconds, from f
 **Verification scope.** GitHub CI reports four qualified results in each of four platform jobs, but there are only **four distinct external source formulas**. Their SAT answers have independently re-evaluated witnesses. Their UNSAT answers are source-admitted by SPN-008 complete DPLL conflict proofs and only *then* used as corroboration for the matching CaDiCaL claims. No independent DRAT/LRAT proof was emitted by CaDiCaL in this run, and no official SAT Competition 2026 Main Track instance was executed. Production CDCL's own claim is recorded separately from the proof evidence used to accept it.
 
 **Implementation repair during CI.** The first GitHub Actions push revealed a YAML parsing failure in an unquoted pip install command containing a colon. The workflow was fixed before tests ran, and the subsequent four-job matrix passed. This was an orchestration defect, not a solver or SAT proof failure.
+
+
+## Extended independent cohort — 75-variable phase-transition cases
+
+**Verified CI run [45058730719](https://github.com/Kier73/In-Formation-Space/actions/runs/45058730719), 22 November 2026.** The original four fixed 50-variable sources were supplemented by two exact-Git-blob-pinned 75-variable, 325-clause formulas. Each of the four Linux/Windows/Python jobs admitted all six unchanged source SHA-256 identities, ran the compiled CaDiCaL baseline and the native SFI and SFI→SPN paths, and passed source-evidence checks. The actual six-formula per-run JSON is retained in the four Actions artifacts; this log records the observations, not a replacement for the raw evidence.
+
+| Added source | Raw SHA-256 (pinned source) | SFI-only | SFI→SPN qualified | CDCL qualified by SPN corroboration | SPN proof / nodes |
+|---|---|---|---|---|---|
+| `sat75-a` | `f88b2c86584d60b6bb03609da700addb141540dd091bd72c9476bfc0f21502dc` | UNKNOWN | SAT | SAT | original-source witness / 30 |
+| `unsat75-a` | `895875836423eabccaf249396713174f2f8f0a0b2866b6ab09dfabc28acbd452` | UNKNOWN | UNSAT | UNSAT | complete conflict split tree / 297 |
+
+All four platforms agreed on the same **six distinct formulas**: **SFI-only 0 SAT, 0 UNSAT, 6 UNKNOWN; SFI→SPN 3 SAT + 3 UNSAT; CaDiCaL 3 SAT + 3 UNSAT after independent source qualification**. The publisher labels were never used as proof, and the CDCL UNSAT statuses were accepted only after checking native SPN evidence.
+
+Six-case median **per-method end-to-end wall time in milliseconds** (each formula used once per platform; time includes Python startup and source checking):
+
+| Platform | SFI-only (UNKNOWN) | SFI→SPN | CaDiCaL |
+|---|---:|---:|---:|
+| Ubuntu / Python 3.11 | 197.40 | 306.49 | 83.48 |
+| Ubuntu / Python 3.13 | 232.71 | 329.45 | 97.69 |
+| Windows / Python 3.11 | 222.17 | 325.55 | 126.95 |
+| Windows / Python 3.13 | 199.29 | 263.68 | 116.71 |
+
+For the added `unsat75-a` case specifically, Linux/Python 3.11 source-admitted SPN proof publication required **816.08 ms** end-to-end while the separately run CaDiCaL baseline required **84.01 ms**; the other platforms showed the same ordering, with different timings. This cost gap should motivate adaptive interpreter **construction policy**, not a claim of new SAT asymptotics. The complete SPN refutation is the independent evidence supporting the answer and is more demanding than CaDiCaL's unchecked raw UNSAT claim; comparison therefore includes different verification burdens. Production CaDiCaL itself still lacks an integrated independent DRAT/LRAT proof checker in this benchmark.
+
+**Development action:** treat failed whole-problem compression as an observation for the existing SFI-003/SPN-010 meta-SAT policy machinery. Test a source-only, pre-execution selector on genuinely held-out random, parity and structured-circuit CNFs; charge its training and classification, refuse policies that lower proof coverage or fail a predeclared cost hurdle, and preserve old working policies as recoverable structural memory. No such new policy is claimed here. Official SAT Competition **2026** Main Track instances likewise remain a next experimental tier, not part of this measurement.
