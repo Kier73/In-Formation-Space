@@ -2,7 +2,7 @@
 import copy
 import random
 import unittest
-from bench01_algebraic import (build, verify, cycle_xor, xor_three, _digest,
+from bench01_algebraic import (build, verify, cycle_xor, hub_not_all_equal, xor_three, _digest,
                                _canonical_source, _coefficients, _source_independent_coefficients)
 from bench01_separator import run as variable_run, select_separator
 
@@ -24,6 +24,17 @@ class ExactCoordinateTests(unittest.TestCase):
                 self.assertEqual(len(p['components']),n)
                 self.assertEqual(verify(clauses,n,p)['count'],1)
                 self.assertEqual(variable_run(clauses,n)['status'],'UNKNOWN')
+
+    def test_nonaffine_not_all_equal_exact_model_count(self):
+        for blocks in (1,3,7,12,20):
+            with self.subTest(blocks=blocks):
+                clauses,n=hub_not_all_equal(blocks)
+                p=build(clauses,n,max_rank=4,max_cells=4096)
+                self.assertEqual((p['status'],p['count']),('SAT',2*3**blocks))
+                self.assertEqual(p['global_rank'],2*blocks)
+                self.assertEqual([len(g['basis']) for g in p['components']],[2]*blocks)
+                self.assertEqual(verify(clauses,n,p)['count'],2*3**blocks)
+                if n<=15:self.assertEqual(len(_truth(n,clauses)),2*3**blocks)
 
     def test_connected_unsat_in_exact_coordinates(self):
         for n in (5,7,19,31,80):
