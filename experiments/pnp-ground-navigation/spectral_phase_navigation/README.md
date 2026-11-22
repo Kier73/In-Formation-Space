@@ -193,3 +193,30 @@ cover increasing-size random 3-SAT with explicit unproved cases.
 The benchmark outcome on dense random SAT continues to favor direct clauses
 in this small local implementation; discovering a complex Ground is not free.
 **Nothing here proves a uniform polynomial-time algorithm for arbitrary SAT.**
+
+
+## 9. SPN-009 — Choosing the language for direct SAT and exact #SAT
+
+[SPN-009 research note](SPN-009_PROBLEM_FORMED_LANGUAGE_SELECTION.md)
+introduces a source-bound goal-sensitive compiler over SPN-008 direct CNF,
+SPN-007 signed Fourier direct sums, PNG-001 exact factor frontiers, and an
+optional proof-carrying SFI-001 formed interpreter. Declared intentions are
+`decision` (SAT/UNSAT/UNKNOWN) and `count` (exact #SAT/UNKNOWN), not silently
+interchangeable. The compiler pays for source XOR recognition, bounded direct
+pilots, Fourier rank discovery, factor-cell estimation, interpreter creation,
+proof generation and source verification. It refuses to treat budget misses as
+refutations.
+
+The [implementation](language_choice_sat.py), [portable DIMACS CLI](language_choice_cli.py),
+[tests](test_language_choice_sat.py), [CLI tests](test_language_choice_cli.py),
+[campaign](language_choice_campaign.py) and [measured summary](language_choice_summary.json)
+are reproducible in the existing Python environment. The new test stages pass
+locally; the SFI-001 path requires the sibling files present in the full GitHub
+checkout. The empirical **negative control** is retained: on ordinary SAT
+decision the added selection costs generally exceed fixed DPLL's wall time.
+On exact counting, finite algebraic or factor Grounds can produce source-checked
+integer counts without using an existence-only witness as counting evidence.
+
+Run `python language_choice_cli.py examples/three_var_sat.cnf --goal count`
+for an end-to-end executable demonstration. This is an algorithm portfolio
+experiment, not a P versus NP resolution.
