@@ -1,0 +1,10 @@
+c SPN-008 direct SAT example: all_eight_unsat.cnf
+p cnf 3 8
+-1 -2 -3 0
+1 -2 -3 0
+-1 2 -3 0
+1 2 -3 0
+-1 -2 3 0
+1 -2 3 0
+-1 2 3 0
+1 2 3 0
