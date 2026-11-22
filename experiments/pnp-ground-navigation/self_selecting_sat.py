@@ -151,7 +151,7 @@ def _decompose(clauses,n):
                            'original_clauses':assignments[root]})
     # Reassemble the original CNF and variable universe explicitly.
     reconstructed=[tuple(c) for item in components for c in item['original_clauses']]
-    if set(reconstructed)!=set(source) or sum((x['source_variables'] for x in components),[])!=list(range(1,n+1)):
+    if set(reconstructed)!=set(source) or sorted(v for item in components for v in item['source_variables'])!=list(range(1,n+1)):
         raise ValueError('decomposition proof cannot reconstruct source')
     return components
 

@@ -1,0 +1,52 @@
+{
+  "note": "local single-run timings include source-verified rerun; not CDCL ranking",
+  "records": [
+    {
+      "baseline": {
+        "count": 16,
+        "elapsed_ms": 3.301,
+        "status": "SAT"
+      },
+      "branch_components": [
+        2,
+        2
+      ],
+      "clauses": 8,
+      "construction_execution_ms": 4.547,
+      "id": "interleaved",
+      "original_variables": 7,
+      "separator": [
+        7
+      ],
+      "source_sha256": "9ddcc1ab857cde93241e50f9b7ad9295e7558ad6c7c483528f09b1e352e03730",
+      "total_ms": 9.262,
+      "verification_replay_ms": 4.715,
+      "verified_count": 16,
+      "verified_status": "SAT"
+    },
+    {
+      "baseline": {
+        "count": null,
+        "elapsed_ms": 34.433,
+        "status": "UNKNOWN"
+      },
+      "branch_components": [
+        2,
+        2
+      ],
+      "clauses": 185,
+      "construction_execution_ms": 611.298,
+      "id": "connected-structured",
+      "original_variables": 63,
+      "separator": [
+        31
+      ],
+      "source_sha256": "fd527a9b12c864806ffde4e77486390ba35a83164a5f4ccb5d2bf387af6fc1a8",
+      "total_ms": 1287.635,
+      "verification_replay_ms": 676.337,
+      "verified_count": 196608,
+      "verified_status": "SAT"
+    }
+  ],
+  "schema": "ifs.bench01.separator-campaign.v1"
+}

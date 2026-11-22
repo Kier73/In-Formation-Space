@@ -1,0 +1,47 @@
+name: BENCH-01G source-qualified separator Grounds
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/self_selecting_sat.py'
+      - 'experiments/pnp-ground-navigation/test_self_selecting_sat.py'
+      - 'experiments/pnp-ground-navigation/benchmarks/bench01_separator.py'
+      - 'experiments/pnp-ground-navigation/benchmarks/test_bench01_separator.py'
+      - 'experiments/pnp-ground-navigation/benchmarks/run_bench01_separator.py'
+      - 'experiments/pnp-ground-navigation/benchmarks/BENCH01_STRUCTURAL_AUDIT.md'
+      - '.github/workflows/bench01-separator-grounds.yml'
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/self_selecting_sat.py'
+      - 'experiments/pnp-ground-navigation/test_self_selecting_sat.py'
+      - 'experiments/pnp-ground-navigation/benchmarks/bench01_separator.py'
+      - 'experiments/pnp-ground-navigation/benchmarks/test_bench01_separator.py'
+      - 'experiments/pnp-ground-navigation/benchmarks/run_bench01_separator.py'
+      - 'experiments/pnp-ground-navigation/benchmarks/BENCH01_STRUCTURAL_AUDIT.md'
+      - '.github/workflows/bench01-separator-grounds.yml'
+  workflow_dispatch:
+jobs:
+  source-separator:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify old and newly constructed SAT Grounds with adversarial tests
+        working-directory: experiments/pnp-ground-navigation
+        run: python -m unittest -v test_self_selecting_sat.py test_morphic_sat.py test_recursive_sat_compiler.py test_self_forming_sat.py test_derived_ground.py test_algebraic_ground.py
+      - name: Verify separator source replay, counting and tamper refusals
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python -m unittest -v test_bench01_separator.py
+      - name: Execute source-qualified separator benchmark
+        working-directory: experiments/pnp-ground-navigation/benchmarks
+        run: python run_bench01_separator.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bench01-separator-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: experiments/pnp-ground-navigation/benchmarks/BENCH01-structural-results.json

@@ -50,6 +50,21 @@ class MetaInterpreterTests(unittest.TestCase):
         self.assertEqual(plan['status'],'UNKNOWN')
         self.assertIsNone(plan['count'])
 
+    def test_interleaved_independent_components_survive_variable_permutation(self):
+        # Previously _decompose mistook variable ordering for component identity.
+        cases = [
+            (4, [(1, 3), (-1, 3), (2, 4), (-2, 4)]),
+            (6, [(1, 4, 6), (2, 3, 5)]),
+            (7, [(1, 4), (2, 5), (3, 6), (7,)]),
+        ]
+        from self_selecting_sat import _decompose
+        for n, clauses in cases:
+            parts = _decompose(clauses, n)
+            self.assertIsNotNone(parts)
+            self.assertEqual(sorted(v for part in parts for v in part['source_variables']), list(range(1,n+1)))
+            result = choose_composite(clauses, n, maximum_coordinates=1024)
+            self.assertEqual(result['count'], brute_count(clauses, n))
+
     def test_small_disjoint_mixed_sat_vs_full_reference(self):
         # Four-variable connected nonlinear function and independent XOR
         # relation; count is multiplicative only under disjoint support.
