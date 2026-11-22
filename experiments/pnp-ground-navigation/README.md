@@ -94,3 +94,7 @@ P versus NP is a uniform **worst-case** question. Success on 96 variables, large
 ## Companion: SPN-001/002 spectral phase navigation
 
 [SPN-001/002](spectral_phase_navigation/README.md) studies exact signed Walsh transforms of width-three clause-violation energies as an alternative observer interface. It demonstrates a SAT/UNSAT pair with identical Fourier magnitudes, phase-preserving conditioning, and separately checked SAT-witness/UNSAT-lower-bound proof receipts with explicit UNKNOWN when the proof budget is exhausted. The construction is complementary to this factor-frontier #SAT implementation; neither claims general polynomial-time SAT.
+
+## PNG-003 — proof-carrying nonlocal algebraic Grounds
+
+[PNG-003](PNG-003.md) extends direct XOR recognition to exact consensus simplification and bounded resolution-derived parity, with replayable proof DAGs and independent source equivalence/count checks. Its guarded and implication-chain fixtures demonstrate hidden affine structure while retaining measured proof-construction costs and explicit undetermined outcomes.

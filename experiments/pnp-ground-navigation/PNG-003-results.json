@@ -1,0 +1,400 @@
+{
+  "research_id": "PNG-003",
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "mode": "single-process CPU, Python standard library, deterministic synthetic fixtures"
+  },
+  "measurement": "single local run; construction and verifier times separate; generation excluded",
+  "cases": [
+    {
+      "name": "two-guards-dense-98",
+      "n": 98,
+      "original_clauses": 2816,
+      "direct_png002_equations": 0,
+      "status": "sat",
+      "count": 1024,
+      "method": "affine-rank",
+      "rank": 88,
+      "free_dimension": 10,
+      "ordinary_min_fill_estimate": {
+        "width": 39,
+        "projected_entries": 1457676755011,
+        "initial_entries": 180224
+      },
+      "construction": {
+        "source_clauses": 2816,
+        "terminal_clauses": 704,
+        "base_equations": 88,
+        "learned_equations": 0,
+        "candidate_equations": 0,
+        "rank_checks": 0,
+        "proof_steps": 0,
+        "contraction": {
+          "rounds": 3,
+          "contractions": 2112,
+          "cutoff": false
+        },
+        "resolution": {
+          "attempts": 0,
+          "new_clauses": 0,
+          "cutoff": false,
+          "width": 2
+        },
+        "elapsed_ms": 110.509
+      },
+      "independent_verification": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": false,
+        "enumerated_coordinates": 1024,
+        "independent_rank": 88,
+        "source_digest": "0048e8fc7aab82a1b44c5a3686819f9ce98a8434553aa7e9ea76515159a83a56",
+        "ground_digest": "cde4de4a34337a6751cad37470b54ca09a80fb34ee0c6717eaa56e4813cf0e31",
+        "source_rewrite_verified": true,
+        "resolution_verified": true,
+        "exact_source_equivalence_verified": true,
+        "contractions_checked": 2112,
+        "resolution_steps_checked": 0,
+        "independent_original_source_digest": "a61b17a1be207f76b30ca64f2a76980da9575167799d3d8b4de3b01a6a5e9b41"
+      },
+      "independent_verification_ms": 310.725,
+      "source_sha256": "a61b17a1be207f76b30ca64f2a76980da9575167799d3d8b4de3b01a6a5e9b41",
+      "ground_sha256": "cde4de4a34337a6751cad37470b54ca09a80fb34ee0c6717eaa56e4813cf0e31"
+    },
+    {
+      "name": "two-guards-mixed-98",
+      "n": 98,
+      "original_clauses": 2828,
+      "direct_png002_equations": 0,
+      "status": "sat",
+      "count": 704,
+      "method": "affine-reduced-search",
+      "rank": 88,
+      "free_dimension": 10,
+      "ordinary_min_fill_estimate": {
+        "width": 41,
+        "projected_entries": 4711974284067,
+        "initial_entries": 180608
+      },
+      "construction": {
+        "source_clauses": 2828,
+        "terminal_clauses": 707,
+        "base_equations": 88,
+        "learned_equations": 0,
+        "candidate_equations": 0,
+        "rank_checks": 0,
+        "proof_steps": 0,
+        "contraction": {
+          "rounds": 3,
+          "contractions": 2121,
+          "cutoff": false
+        },
+        "resolution": {
+          "attempts": 0,
+          "new_clauses": 0,
+          "cutoff": false,
+          "width": 2
+        },
+        "elapsed_ms": 106.409
+      },
+      "independent_verification": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": false,
+        "enumerated_coordinates": 1024,
+        "independent_rank": 88,
+        "source_digest": "3909a539628f4de2be00600471a61c87da634ddb2dfb861905d68446ae759988",
+        "ground_digest": "5c130d80026b6c6dd88fec1dfed1e810ab2d0ff0c30c9b7996b7af00cb488238",
+        "source_rewrite_verified": true,
+        "resolution_verified": true,
+        "exact_source_equivalence_verified": true,
+        "contractions_checked": 2121,
+        "resolution_steps_checked": 0,
+        "independent_original_source_digest": "c74fc68d069361eabf35deb0edb1a785e1009d89f87d8fbc84d72bf6dd860621"
+      },
+      "independent_verification_ms": 247.526,
+      "source_sha256": "c74fc68d069361eabf35deb0edb1a785e1009d89f87d8fbc84d72bf6dd860621",
+      "ground_sha256": "5c130d80026b6c6dd88fec1dfed1e810ab2d0ff0c30c9b7996b7af00cb488238"
+    },
+    {
+      "name": "guarded-tseitin-121",
+      "n": 121,
+      "original_clauses": 640,
+      "direct_png002_equations": 0,
+      "status": "unsat",
+      "count": 0,
+      "method": "gf2-refutation",
+      "rank": 79,
+      "free_dimension": 42,
+      "ordinary_min_fill_estimate": {
+        "width": 22,
+        "projected_entries": 12783743,
+        "initial_entries": 10240
+      },
+      "construction": {
+        "source_clauses": 640,
+        "terminal_clauses": 320,
+        "base_equations": 80,
+        "learned_equations": 0,
+        "candidate_equations": 0,
+        "rank_checks": 0,
+        "proof_steps": 0,
+        "contraction": {
+          "rounds": 2,
+          "contractions": 320,
+          "cutoff": false
+        },
+        "resolution": {
+          "attempts": 0,
+          "new_clauses": 0,
+          "cutoff": false,
+          "width": 2
+        },
+        "elapsed_ms": 18.388
+      },
+      "independent_verification": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": true,
+        "independent_rank": 79,
+        "source_digest": "792fcf1512c508c7be49c7f6f4c96940f509740bc29d8a013b8d02684dac1d27",
+        "ground_digest": "fff8b9c30ad4d6ccae0bf749e5a4b22a08ec23d37dba841a4e8ea77ef024aad5",
+        "source_rewrite_verified": true,
+        "resolution_verified": true,
+        "exact_source_equivalence_verified": true,
+        "contractions_checked": 320,
+        "resolution_steps_checked": 0,
+        "independent_original_source_digest": "ed2a2dd7329d3c27466201c326c1f4fdc1d5c44cbc0f6d9da8397d935b93db51"
+      },
+      "independent_verification_ms": 12.853,
+      "source_sha256": "ed2a2dd7329d3c27466201c326c1f4fdc1d5c44cbc0f6d9da8397d935b93db51",
+      "ground_sha256": "fff8b9c30ad4d6ccae0bf749e5a4b22a08ec23d37dba841a4e8ea77ef024aad5"
+    },
+    {
+      "name": "non-twin-implication-23",
+      "n": 23,
+      "original_clauses": 33,
+      "direct_png002_equations": 0,
+      "status": "sat",
+      "count": 2,
+      "method": "affine-reduced-search",
+      "rank": 22,
+      "free_dimension": 1,
+      "ordinary_min_fill_estimate": {
+        "width": 2,
+        "projected_entries": 67,
+        "initial_entries": 132
+      },
+      "construction": {
+        "source_clauses": 33,
+        "terminal_clauses": 33,
+        "base_equations": 0,
+        "learned_equations": 22,
+        "candidate_equations": 253,
+        "rank_checks": 253,
+        "proof_steps": 67,
+        "contraction": {
+          "rounds": 1,
+          "contractions": 0,
+          "cutoff": false
+        },
+        "resolution": {
+          "attempts": 19754,
+          "new_clauses": 473,
+          "cutoff": false,
+          "width": 2
+        },
+        "elapsed_ms": 56.593
+      },
+      "independent_verification": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": false,
+        "enumerated_coordinates": 2,
+        "independent_rank": 22,
+        "source_digest": "47e6f5c179c0536beff5d0503bd72b97b21c4c7f9fadbab4efd0d47249e60e3c",
+        "ground_digest": "24799e3fcd7ade0156586452d51da5fd14a504e31983c255bed9b992158e3a38",
+        "source_rewrite_verified": true,
+        "resolution_verified": true,
+        "exact_source_equivalence_verified": true,
+        "contractions_checked": 0,
+        "resolution_steps_checked": 67,
+        "independent_original_source_digest": "9585c4dc21f7b234b2be73301e5544393e925318c462efd8c5e19a84ad1c3f15"
+      },
+      "independent_verification_ms": 1.671,
+      "source_sha256": "9585c4dc21f7b234b2be73301e5544393e925318c462efd8c5e19a84ad1c3f15",
+      "ground_sha256": "24799e3fcd7ade0156586452d51da5fd14a504e31983c255bed9b992158e3a38"
+    },
+    {
+      "name": "nonlocal-unsat-9",
+      "n": 9,
+      "original_clauses": 14,
+      "direct_png002_equations": 2,
+      "status": "unsat",
+      "count": 0,
+      "method": "gf2-refutation",
+      "rank": 2,
+      "free_dimension": 7,
+      "ordinary_min_fill_estimate": {
+        "width": 2,
+        "projected_entries": 25,
+        "initial_entries": 52
+      },
+      "construction": {
+        "source_clauses": 14,
+        "terminal_clauses": 14,
+        "base_equations": 2,
+        "learned_equations": 1,
+        "candidate_equations": 52,
+        "rank_checks": 1,
+        "proof_steps": 8,
+        "contraction": {
+          "rounds": 1,
+          "contractions": 0,
+          "cutoff": false
+        },
+        "resolution": {
+          "attempts": 1321,
+          "new_clauses": 77,
+          "cutoff": false,
+          "width": 2
+        },
+        "elapsed_ms": 3.1
+      },
+      "independent_verification": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": true,
+        "independent_rank": 2,
+        "source_digest": "0ca774e28c1ca762641ab32622d506922b2052024873f166d6eee7878cff3464",
+        "ground_digest": "efa05bd19ec6f05044f360e377364715cbf2ee6b20b107e688150a69581b2e7e",
+        "source_rewrite_verified": true,
+        "resolution_verified": true,
+        "exact_source_equivalence_verified": true,
+        "contractions_checked": 0,
+        "resolution_steps_checked": 8,
+        "independent_original_source_digest": "99362ba70f3f10731173594319f313b1d054580c04d5be3d25e72c45c070d4e9"
+      },
+      "independent_verification_ms": 0.352,
+      "source_sha256": "99362ba70f3f10731173594319f313b1d054580c04d5be3d25e72c45c070d4e9",
+      "ground_sha256": "efa05bd19ec6f05044f360e377364715cbf2ee6b20b107e688150a69581b2e7e"
+    },
+    {
+      "name": "incomplete-guard-5",
+      "n": 5,
+      "original_clauses": 15,
+      "direct_png002_equations": 0,
+      "status": "sat",
+      "count": 17,
+      "method": "affine-reduced-search",
+      "rank": 0,
+      "free_dimension": 5,
+      "ordinary_min_fill_estimate": {
+        "width": 4,
+        "projected_entries": 31,
+        "initial_entries": 480
+      },
+      "construction": {
+        "source_clauses": 15,
+        "terminal_clauses": 8,
+        "base_equations": 0,
+        "learned_equations": 0,
+        "candidate_equations": 0,
+        "rank_checks": 0,
+        "proof_steps": 0,
+        "contraction": {
+          "rounds": 2,
+          "contractions": 7,
+          "cutoff": false
+        },
+        "resolution": {
+          "attempts": 0,
+          "new_clauses": 0,
+          "cutoff": false,
+          "width": 2
+        },
+        "elapsed_ms": 0.67
+      },
+      "independent_verification": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": false,
+        "enumerated_coordinates": 32,
+        "independent_rank": 0,
+        "source_digest": "b29ea7354165ead72d50fa1519ad07bca6818d5bf22a2ca8e34c57ba21273ca8",
+        "ground_digest": "30ff1ef28c53b489ab4c5f6818775197244ea7f500f28014211c48ad85dfb8cb",
+        "source_rewrite_verified": true,
+        "resolution_verified": true,
+        "exact_source_equivalence_verified": true,
+        "contractions_checked": 7,
+        "resolution_steps_checked": 0,
+        "independent_original_source_digest": "c417d467d104e9b9f7090d513d1134cd5794c7947007d403d55c92a2a3477672"
+      },
+      "independent_verification_ms": 0.444,
+      "source_sha256": "c417d467d104e9b9f7090d513d1134cd5794c7947007d403d55c92a2a3477672",
+      "ground_sha256": "30ff1ef28c53b489ab4c5f6818775197244ea7f500f28014211c48ad85dfb8cb"
+    },
+    {
+      "name": "random-35-budget-refusal",
+      "n": 35,
+      "original_clauses": 140,
+      "direct_png002_equations": 0,
+      "status": "undetermined",
+      "count": null,
+      "method": "budget-refusal",
+      "rank": 0,
+      "free_dimension": 35,
+      "ordinary_min_fill_estimate": {
+        "width": 24,
+        "projected_entries": 54968319,
+        "initial_entries": 1120
+      },
+      "construction": {
+        "source_clauses": 140,
+        "terminal_clauses": 140,
+        "base_equations": 0,
+        "learned_equations": 0,
+        "candidate_equations": 0,
+        "rank_checks": 0,
+        "proof_steps": 0,
+        "contraction": {
+          "rounds": 1,
+          "contractions": 0,
+          "cutoff": false
+        },
+        "resolution": {
+          "attempts": 0,
+          "new_clauses": 0,
+          "cutoff": false,
+          "width": 2
+        },
+        "elapsed_ms": 11.525
+      },
+      "independent_verification": {
+        "compilation_verified": true,
+        "count_verified": false,
+        "decision_verified": false,
+        "reason": "budgeted-undetermined",
+        "independent_rank": 0,
+        "source_digest": "94cfd587def3fbcac393d6a2bae6806fa794c76ae578a438d7130073ec1457f3",
+        "ground_digest": "00319ec0e31cbb2d4474df95ea9f5d7990c767ee3775d82c58c6628312b5548d",
+        "source_rewrite_verified": true,
+        "resolution_verified": true,
+        "exact_source_equivalence_verified": true,
+        "contractions_checked": 0,
+        "resolution_steps_checked": 0,
+        "independent_original_source_digest": "94cfd587def3fbcac393d6a2bae6806fa794c76ae578a438d7130073ec1457f3"
+      },
+      "independent_verification_ms": 3.137,
+      "source_sha256": "94cfd587def3fbcac393d6a2bae6806fa794c76ae578a438d7130073ec1457f3",
+      "ground_sha256": "00319ec0e31cbb2d4474df95ea9f5d7990c767ee3775d82c58c6628312b5548d"
+    }
+  ]
+}
