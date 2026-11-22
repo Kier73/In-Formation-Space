@@ -1,5 +1,7 @@
 # Translation Discovery Log — TDL-005
 
+**Continuation:** [TDL-006 — Exact route endpoint and live authenticated peer identity](TRANSLATION_DISCOVERY_LOG_006.md) adds quorum-qualified cost planning across the receiver-admitted E-CPU SAB route catalogue and native IOS-003 peer TLS connections, keeping physical network-route evidence separate.
+
 ## Live authenticated observer evidence and the identity of a measurement attempt
 
 **Round:** 2026-11-22. [TDL-001](TRANSLATION_DISCOVERY_LOG.md) · [TDL-002](TRANSLATION_DISCOVERY_LOG_002.md) · [TDL-003](TRANSLATION_DISCOVERY_LOG_003.md) · [TDL-004](TRANSLATION_DISCOVERY_LOG_004.md) · [VL-I TDL-005 implementation contract](https://github.com/Kier73/VL-I/blob/main/docs/AUTHENTICATED_REFINEMENT_TDL005.md).
