@@ -1,17 +1,75 @@
 {
-  "record_count": 5,
+  "record_count": 7,
   "records": [
     {
       "algebraic": {
-        "build_ms": 1.7391,
+        "build_ms": 0.694,
+        "components": 7,
+        "coordinates_checked": 28,
+        "model_count": 4374,
+        "native_spn007_used": false,
+        "rank": 14,
+        "status": "SAT",
+        "total_ms": 1.5537,
+        "verification_ms": 0.8596
+      },
+      "id": "nonaffine-NAE-7",
+      "source": {
+        "clauses": 14,
+        "fixture_expected": "SAT",
+        "n": 15,
+        "origin": "source-generated-nonlinear-3CNF",
+        "source_sha256": "4ae058da475804ba3b632bccc061a0c8968426a8fa0e98d112c42a3ac8387a37"
+      },
+      "variable_separator": {
+        "count": 4374,
+        "separator": [
+          1
+        ],
+        "status": "SAT",
+        "total_ms": 16.7677
+      }
+    },
+    {
+      "algebraic": {
+        "build_ms": 1.0252,
+        "components": 12,
+        "coordinates_checked": 48,
+        "model_count": 1062882,
+        "native_spn007_used": false,
+        "rank": 24,
+        "status": "SAT",
+        "total_ms": 2.4232,
+        "verification_ms": 1.398
+      },
+      "id": "nonaffine-NAE-12",
+      "source": {
+        "clauses": 24,
+        "fixture_expected": "SAT",
+        "n": 25,
+        "origin": "source-generated-nonlinear-3CNF",
+        "source_sha256": "1f66b9e46da18cc01f96f2176e17ca8591c78be3a69f6b93485ee39e7966946a"
+      },
+      "variable_separator": {
+        "count": 1062882,
+        "separator": [
+          1
+        ],
+        "status": "SAT",
+        "total_ms": 25.9043
+      }
+    },
+    {
+      "algebraic": {
+        "build_ms": 1.5519,
         "components": 19,
         "coordinates_checked": 38,
         "model_count": 1,
         "native_spn007_used": false,
         "rank": 19,
         "status": "SAT",
-        "total_ms": 5.2484,
-        "verification_ms": 3.5093
+        "total_ms": 4.983,
+        "verification_ms": 3.4311
       },
       "id": "xor-cycle-19-sat",
       "source": {
@@ -25,20 +83,20 @@
         "count": null,
         "separator": [],
         "status": "UNKNOWN",
-        "total_ms": 4.1463
+        "total_ms": 4.3064
       }
     },
     {
       "algebraic": {
-        "build_ms": 2.0605,
+        "build_ms": 2.2694,
         "components": 31,
         "coordinates_checked": 62,
         "model_count": 1,
         "native_spn007_used": false,
         "rank": 31,
         "status": "SAT",
-        "total_ms": 8.2094,
-        "verification_ms": 6.1488
+        "total_ms": 8.3416,
+        "verification_ms": 6.0722
       },
       "id": "xor-cycle-31-sat",
       "source": {
@@ -52,20 +110,20 @@
         "count": null,
         "separator": [],
         "status": "UNKNOWN",
-        "total_ms": 8.724
+        "total_ms": 9.5654
       }
     },
     {
       "algebraic": {
-        "build_ms": 5.3464,
+        "build_ms": 5.5132,
         "components": 80,
         "coordinates_checked": 160,
         "model_count": 1,
         "native_spn007_used": false,
         "rank": 80,
         "status": "SAT",
-        "total_ms": 20.6744,
-        "verification_ms": 15.3279
+        "total_ms": 20.8473,
+        "verification_ms": 15.3341
       },
       "id": "xor-cycle-80-sat",
       "source": {
@@ -79,20 +137,20 @@
         "count": null,
         "separator": [],
         "status": "UNKNOWN",
-        "total_ms": 50.0096
+        "total_ms": 51.8716
       }
     },
     {
       "algebraic": {
-        "build_ms": 2.0546,
+        "build_ms": 2.258,
         "components": 30,
         "coordinates_checked": 60,
         "model_count": 0,
         "native_spn007_used": false,
         "rank": 30,
         "status": "UNSAT",
-        "total_ms": 8.0076,
-        "verification_ms": 5.953
+        "total_ms": 8.2442,
+        "verification_ms": 5.9862
       },
       "id": "xor-cycle-31-unsat",
       "source": {
@@ -106,20 +164,20 @@
         "count": null,
         "separator": [],
         "status": "UNKNOWN",
-        "total_ms": 11.1195
+        "total_ms": 9.777
       }
     },
     {
       "algebraic": {
-        "build_ms": 1.3826,
+        "build_ms": 1.1314,
         "components": 1,
         "coordinates_checked": 0,
         "model_count": null,
         "native_spn007_used": false,
         "rank": 16,
         "status": "UNKNOWN",
-        "total_ms": 4.151,
-        "verification_ms": 2.7684
+        "total_ms": 3.9272,
+        "verification_ms": 2.7958
       },
       "id": "unstructured-16",
       "source": {
@@ -133,7 +191,7 @@
         "count": null,
         "separator": [],
         "status": "UNKNOWN",
-        "total_ms": 2.5174
+        "total_ms": 2.7638
       }
     }
   ],
