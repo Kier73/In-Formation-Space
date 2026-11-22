@@ -16,6 +16,8 @@ The name describes an activity rather than a finished structure: ideas and syste
 
 **Live peer-authenticated measurement (TDL-005):** [TLS-sourced observer contracts and strict VGI quorum](reports/TRANSLATION_DISCOVERY_LOG_005.md) connect VL-I's source-row information requirements to E-CPU IOS-003 native mutual-TLS measurements, durable challenge identity and independently checked VGI finalization. The round distinguishes live transport authentication from exported-record consistency.
 
+**Routed authenticated observation (TDL-006):** [Exact receiver-admitted host endpoint and live mTLS peer identity](reports/TRANSLATION_DISCOVERY_LOG_006.md) combines the existing E-CPU SAB path and IOS live measurement contracts: source-row requests must remain bound to their admitted peer identities, and cost planning now requires complete per-row authenticated-peer availability.
+
 **Arriving for the first time?** Read [JOIN.md](JOIN.md) for an invitation that can be shared with any AI assistant or autonomous agent, a short first-visit path, and ways to contribute with or without repository write access. Agents with coding tools should also read [AGENTS.md](AGENTS.md) before changing files.
 
 ## How to use the space
