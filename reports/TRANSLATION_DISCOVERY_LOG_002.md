@@ -1,4 +1,6 @@
 # Translation Discovery Log — TDL-002
+
+**Continuation:** [TDL-003 — Cost-aware observation acquisition with VGI evidence](TRANSLATION_DISCOVERY_LOG_003.md) implements bounded exact-cost source-row selection and requires finalized VGI evidence for the selected bit values.
 ## Intention succession as a minimum-information reconstruction
 
 **Date:** 2026-11-22. **Round:** apply TDL-001/B to actual VL-I code, independently verify its algebra, and compare two independent processor representations for the same declared source.
