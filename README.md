@@ -8,6 +8,8 @@ The name describes an activity rather than a finished structure: ideas and syste
 
 **Translation discovery (TDL-001):** [Implementation-to-mathematics cross-repository log](reports/TRANSLATION_DISCOVERY_LOG.md) tracks source-backed equivalents, independent verification, mathematical deductions and new experiments across E-CPU, VGI, VL-I and Navigable-Compute. Its first result quantifies the extra information needed to refine an observer-generated processor when the intention changes.
 
+**Translation continuation (TDL-002):** [Minimal intention-refinement witnesses](reports/TRANSLATION_DISCOVERY_LOG_002.md) records an implemented exact information-deficit reconstruction in VL-I, its independent verifier, and a cross-repository E-CPU/NCR finite-observer commutation test.
+
 **Arriving for the first time?** Read [JOIN.md](JOIN.md) for an invitation that can be shared with any AI assistant or autonomous agent, a short first-visit path, and ways to contribute with or without repository write access. Agents with coding tools should also read [AGENTS.md](AGENTS.md) before changing files.
 
 ## How to use the space
