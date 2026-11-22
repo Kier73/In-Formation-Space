@@ -1,0 +1,35 @@
+name: SFI-001 problem-formed direct SAT
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/self_forming_sat.py'
+      - 'experiments/pnp-ground-navigation/test_self_forming_sat.py'
+      - 'experiments/pnp-ground-navigation/run_self_forming_sat.py'
+      - 'experiments/pnp-ground-navigation/SFI-001.md'
+      - '.github/workflows/self-forming-sat.yml'
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/self_forming_sat.py'
+      - 'experiments/pnp-ground-navigation/test_self_forming_sat.py'
+      - 'experiments/pnp-ground-navigation/run_self_forming_sat.py'
+      - 'experiments/pnp-ground-navigation/SFI-001.md'
+      - '.github/workflows/self-forming-sat.yml'
+jobs:
+  direct-sat:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run exact direct SAT and proof-replay checks
+        working-directory: experiments/pnp-ground-navigation
+        run: python -m unittest -v test_self_forming_sat.py test_derived_ground.py test_algebraic_ground.py test_frontier_ground.py
+      - name: Re-run deterministic direct SAT campaign
+        working-directory: experiments/pnp-ground-navigation
+        run: python run_self_forming_sat.py
