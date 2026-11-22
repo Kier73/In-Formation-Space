@@ -1,0 +1,31 @@
+name: PNG-002 exact algebraic ground
+
+on:
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/**'
+      - '.github/workflows/png002-ground.yml'
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/**'
+      - '.github/workflows/png002-ground.yml'
+
+jobs:
+  exact-ground:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Regression and adversarial tests
+        working-directory: experiments/pnp-ground-navigation
+        run: python -m unittest -v test_frontier_ground.py test_algebraic_ground.py
+      - name: End-to-end independently checked campaign
+        working-directory: experiments/pnp-ground-navigation
+        run: python run_png002.py

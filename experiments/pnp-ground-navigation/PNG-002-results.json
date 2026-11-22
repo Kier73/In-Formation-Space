@@ -1,0 +1,452 @@
+{
+  "research_id": "PNG-002",
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "description": "single-process standard-library synthetic tests"
+  },
+  "cases": [
+    {
+      "case": "dense-96-pure-parity",
+      "n": 96,
+      "clauses": 704,
+      "status": "sat",
+      "method": "affine-rank",
+      "solutions": 256,
+      "independent_verification_ms": 72.628,
+      "independent_verifier": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": false,
+        "enumerated_coordinates": 256,
+        "independent_rank": 88,
+        "source_digest": "e568bc4ef2ad5899c98f128c41f88fb0723d0f38f2e626ae652c8f67ef35a98c",
+        "ground_digest": "a35e4abcb2e10eab3d70c6d567bb0f2a42ccd1a904584dd73d47a6febe6a5b9a"
+      },
+      "ground_cost": {
+        "source_clauses": 704,
+        "canonical_clauses": 704,
+        "lifted_clauses": 704,
+        "recovered_equations": 88,
+        "residual_clauses": 0,
+        "rank": 88,
+        "free_dimension": 8,
+        "gf2_row_xors": 1945,
+        "gf2_row_probes_upper_bound": 4102,
+        "compilation_equivalence_verified": true,
+        "original_model_count_preserved": true,
+        "elapsed_ms": 9.819
+      },
+      "original_cnf_baseline": {
+        "min_fill_estimate": {
+          "width": 37,
+          "projected_entries": 364419188755,
+          "initial_entries": 11264
+        },
+        "execution": "not_run"
+      }
+    },
+    {
+      "case": "dense-96-mixed-parity-cnf",
+      "n": 96,
+      "clauses": 707,
+      "status": "sat",
+      "method": "affine-reduced-search",
+      "solutions": 176,
+      "independent_verification_ms": 53.379,
+      "independent_verifier": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": false,
+        "enumerated_coordinates": 256,
+        "independent_rank": 88,
+        "source_digest": "ce5a1e7f94a2d2fd8cbe15de288688a657b37c09237919477b8e667984bc33d2",
+        "ground_digest": "f6e73711d4e377a526aa54a8bacfc1135b899147744787e0a16c9188235ea0b0"
+      },
+      "ground_cost": {
+        "source_clauses": 707,
+        "canonical_clauses": 707,
+        "lifted_clauses": 704,
+        "recovered_equations": 88,
+        "residual_clauses": 3,
+        "rank": 88,
+        "free_dimension": 8,
+        "gf2_row_xors": 1945,
+        "gf2_row_probes_upper_bound": 4102,
+        "compilation_equivalence_verified": true,
+        "original_model_count_preserved": true,
+        "residual_search": {
+          "visited_nodes": 11,
+          "literal_evaluations": 85,
+          "pruned_false_nodes": 3,
+          "satisfied_suffix_nodes": 3,
+          "free_variable_order": [
+            4,
+            6,
+            8,
+            7,
+            1,
+            2,
+            3,
+            5
+          ],
+          "node_budget": 1000000
+        },
+        "elapsed_ms": 53.285
+      },
+      "original_cnf_baseline": {
+        "min_fill_estimate": {
+          "width": 39,
+          "projected_entries": 1177993571019,
+          "initial_entries": 11288
+        },
+        "execution": "not_run"
+      }
+    },
+    {
+      "case": "tseitin-120-global-unsat",
+      "n": 120,
+      "clauses": 320,
+      "status": "unsat",
+      "method": "gf2-refutation",
+      "solutions": 0,
+      "independent_verification_ms": 3.408,
+      "independent_verifier": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": true,
+        "independent_rank": 79,
+        "source_digest": "bafa5c1c4f7931a812a79d09002a217cc0b4543efe9c02f2fb55e0da77a711c5",
+        "ground_digest": "2ec26175c9777decf060de8557024aeeaa0f92fc476360c2e2afe041e4137ecb"
+      },
+      "ground_cost": {
+        "source_clauses": 320,
+        "canonical_clauses": 320,
+        "lifted_clauses": 320,
+        "recovered_equations": 80,
+        "residual_clauses": 0,
+        "rank": 79,
+        "free_dimension": 41,
+        "gf2_row_xors": 346,
+        "gf2_row_probes_upper_bound": 3474,
+        "compilation_equivalence_verified": true,
+        "original_model_count_preserved": true,
+        "elapsed_ms": 3.827
+      },
+      "original_cnf_baseline": {
+        "min_fill_estimate": {
+          "width": 21,
+          "projected_entries": 6391871,
+          "initial_entries": 2560
+        },
+        "execution": "not_run"
+      }
+    },
+    {
+      "case": "chain-96-structured",
+      "n": 96,
+      "clauses": 191,
+      "status": "sat",
+      "method": "affine-rank",
+      "solutions": 1,
+      "independent_verification_ms": 1.621,
+      "independent_verifier": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": false,
+        "enumerated_coordinates": 1,
+        "independent_rank": 96,
+        "source_digest": "128b19b9a61293f15e14809728f1cfd031a05189717b3ec822593823a944a04c",
+        "ground_digest": "437de5090c33f554fd6ab3454dbd2868e3bdc463fa81ccb6d5ea049a04597c37"
+      },
+      "ground_cost": {
+        "source_clauses": 191,
+        "canonical_clauses": 191,
+        "lifted_clauses": 191,
+        "recovered_equations": 96,
+        "residual_clauses": 0,
+        "rank": 96,
+        "free_dimension": 0,
+        "gf2_row_xors": 95,
+        "gf2_row_probes_upper_bound": 4656,
+        "compilation_equivalence_verified": true,
+        "original_model_count_preserved": true,
+        "elapsed_ms": 2.574
+      },
+      "original_cnf_baseline": {
+        "min_fill_estimate": {
+          "width": 1,
+          "projected_entries": 191,
+          "initial_entries": 762
+        },
+        "execution": "completed",
+        "count": 1,
+        "factor_lookups": 855,
+        "elapsed_ms": 1.402
+      }
+    },
+    {
+      "case": "incomplete-parity-8",
+      "n": 8,
+      "clauses": 7,
+      "status": "sat",
+      "method": "affine-reduced-search",
+      "solutions": 144,
+      "independent_verification_ms": 0.72,
+      "independent_verifier": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": false,
+        "enumerated_coordinates": 256,
+        "independent_rank": 0,
+        "source_digest": "2c998c9ba19737734880962451b4542d416be2fa73cbc0d92bf77146a8014b26",
+        "ground_digest": "4b59ecfcadf9cc1431ae1752e5f76e877fe5f6cac5f3382b8b543375d1019a91"
+      },
+      "ground_cost": {
+        "source_clauses": 7,
+        "canonical_clauses": 7,
+        "lifted_clauses": 0,
+        "recovered_equations": 0,
+        "residual_clauses": 7,
+        "rank": 0,
+        "free_dimension": 8,
+        "gf2_row_xors": 0,
+        "gf2_row_probes_upper_bound": 0,
+        "compilation_equivalence_verified": true,
+        "original_model_count_preserved": true,
+        "residual_search": {
+          "visited_nodes": 29,
+          "literal_evaluations": 379,
+          "pruned_false_nodes": 7,
+          "satisfied_suffix_nodes": 8,
+          "free_variable_order": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "node_budget": 1000000
+        },
+        "elapsed_ms": 0.198
+      },
+      "original_cnf_baseline": {
+        "min_fill_estimate": {
+          "width": 3,
+          "projected_entries": 19,
+          "initial_entries": 112
+        },
+        "execution": "completed",
+        "count": 144,
+        "factor_lookups": 105,
+        "elapsed_ms": 0.104
+      }
+    },
+    {
+      "case": "ordinary-random-16",
+      "n": 16,
+      "clauses": 64,
+      "status": "sat",
+      "method": "affine-reduced-search",
+      "solutions": 28,
+      "independent_verification_ms": 262.76,
+      "independent_verifier": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": true,
+        "refutation_verified": false,
+        "enumerated_coordinates": 65536,
+        "independent_rank": 0,
+        "source_digest": "3e6bb72f54ea00ae1f8b5d3311064c4de650f767fe38d3eb178c8f4ec6c1b104",
+        "ground_digest": "a5dd4102d1aff8f35084fb6ce6abb5799f00089263571b9a5d4dfb2b85d343e4"
+      },
+      "ground_cost": {
+        "source_clauses": 64,
+        "canonical_clauses": 63,
+        "lifted_clauses": 0,
+        "recovered_equations": 0,
+        "residual_clauses": 63,
+        "rank": 0,
+        "free_dimension": 16,
+        "gf2_row_xors": 0,
+        "gf2_row_probes_upper_bound": 0,
+        "compilation_equivalence_verified": true,
+        "original_model_count_preserved": true,
+        "residual_search": {
+          "visited_nodes": 821,
+          "literal_evaluations": 70791,
+          "pruned_false_nodes": 383,
+          "satisfied_suffix_nodes": 28,
+          "free_variable_order": [
+            3,
+            4,
+            13,
+            1,
+            14,
+            16,
+            2,
+            6,
+            11,
+            12,
+            7,
+            9,
+            5,
+            8,
+            10,
+            15
+          ],
+          "node_budget": 1000000
+        },
+        "elapsed_ms": 10.578
+      },
+      "original_cnf_baseline": {
+        "min_fill_estimate": {
+          "width": 11,
+          "projected_entries": 7679,
+          "initial_entries": 512
+        },
+        "execution": "completed",
+        "count": 28,
+        "factor_lookups": 80738,
+        "elapsed_ms": 52.169
+      }
+    },
+    {
+      "case": "narrow-fallback-25",
+      "n": 25,
+      "clauses": 23,
+      "status": "sat",
+      "method": "ordinary-frontier",
+      "solutions": 16898609,
+      "independent_verification_ms": 0.202,
+      "independent_verifier": {
+        "compilation_verified": true,
+        "decision_verified": true,
+        "count_verified": false,
+        "reason": "free-coordinate verification-budget",
+        "independent_rank": 0,
+        "source_digest": "252eaf0b2a4ad2267de6b58cd35a002ab6d22bfc5a1a29df10b7a10e82b2897d",
+        "ground_digest": "aeb2caa013de6a238f92088e646aa212a8eace11c9f337df39ad9fecbc5a6899"
+      },
+      "ground_cost": {
+        "source_clauses": 23,
+        "canonical_clauses": 23,
+        "lifted_clauses": 0,
+        "recovered_equations": 0,
+        "residual_clauses": 23,
+        "rank": 0,
+        "free_dimension": 25,
+        "gf2_row_xors": 0,
+        "gf2_row_probes_upper_bound": 0,
+        "compilation_equivalence_verified": true,
+        "original_model_count_preserved": true,
+        "ordinary_frontier_estimate": {
+          "width": 2,
+          "projected_entries": 95,
+          "initial_entries": 184
+        },
+        "ordinary_frontier_execution": {
+          "n": 25,
+          "clauses": 23,
+          "max_scope": 2,
+          "factor_lookups": 344,
+          "projected_entries": 95,
+          "initial_table_entries": 184,
+          "elimination_order": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            1,
+            24,
+            25
+          ],
+          "elapsed_ms": 0.32
+        },
+        "elapsed_ms": 1.387
+      },
+      "original_cnf_baseline": {
+        "min_fill_estimate": {
+          "width": 2,
+          "projected_entries": 95,
+          "initial_entries": 184
+        },
+        "execution": "completed",
+        "count": 16898609,
+        "factor_lookups": 344,
+        "elapsed_ms": 0.291
+      }
+    },
+    {
+      "case": "random-35-budget-refusal",
+      "n": 35,
+      "clauses": 140,
+      "status": "undetermined",
+      "method": "budget-refusal",
+      "solutions": null,
+      "independent_verification_ms": 1.164,
+      "independent_verifier": {
+        "compilation_verified": true,
+        "count_verified": false,
+        "decision_verified": false,
+        "reason": "budgeted-undetermined",
+        "independent_rank": 0,
+        "source_digest": "94cfd587def3fbcac393d6a2bae6806fa794c76ae578a438d7130073ec1457f3",
+        "ground_digest": "00319ec0e31cbb2d4474df95ea9f5d7990c767ee3775d82c58c6628312b5548d"
+      },
+      "ground_cost": {
+        "source_clauses": 140,
+        "canonical_clauses": 140,
+        "lifted_clauses": 0,
+        "recovered_equations": 0,
+        "residual_clauses": 140,
+        "rank": 0,
+        "free_dimension": 35,
+        "gf2_row_xors": 0,
+        "gf2_row_probes_upper_bound": 0,
+        "compilation_equivalence_verified": true,
+        "original_model_count_preserved": true,
+        "ordinary_frontier_estimate": {
+          "width": 24,
+          "projected_entries": 54968319,
+          "initial_entries": 1120
+        },
+        "elapsed_ms": 7.79
+      },
+      "original_cnf_baseline": {
+        "min_fill_estimate": {
+          "width": 24,
+          "projected_entries": 54968319,
+          "initial_entries": 1120
+        },
+        "execution": "not_run"
+      }
+    }
+  ]
+}
