@@ -64,11 +64,12 @@ The next host integration should dispatch one independent parity-component task 
 
 ## Experiment families, hypotheses, and controlled negative results
 
-1. **Cyclic triple XOR:** `n` overlapping triple equations `x_i XOR x_(i+1) XOR x_(i+2) = b_i`, encoded with **four genuine three-literal clauses per equation**. For `3 ∤ n`, the cyclic triple-parity observation vectors are independent. All original variables are connected, and no single source variable disconnects the hypergraph. Expected: no BENCH-01G variable-cut admission, but native SPN-007 factorizes parity supports into many rank-one groups. Source-verified exact #SAT for the specified family is one.
-2. **Contradictory triple XOR:** add the opposite parity requirement on one source scope. Expected: source-verified UNSAT when constant energy cannot fall to zero. This is not an assertion that all individual Fourier-component energies are positive.
-3. **General strict 3-CNF:** a fixed seeded 16-variable formula with mixed clauses. Expected: a large irreducible support span and an honest rank-budget `UNKNOWN`. Native SPN-008 and CDCL may still solve it directly.
-4. **Third-party random 3-SAT:** two instances from BENCH-01E's exact Git-SHA1-pinned 50-variable corpus, retrieved only by its existing source-verifying downloader. The algebraic system is expected to refuse without a small decomposition. Published labels never serve as proofs.
-5. **96 seeded small formulas:** original truth-table exhaustive counting of all assignments, adversarial false minima/multiplicities/witnesses, rehashed modified supports, insufficient search budgets and invalid source clauses.
+1. **Non-affine not-all-equal constraints:** Each block uses two genuine 3-literal clauses `(hub∨a∨b) ∧ (¬hub∨¬a∨¬b)` to exclude the all-equal states, leaving **three** possible `(a,b)` assignments for a fixed hub. The Fourier expansion of these two clauses has three even-parity masks with a **rank-two** subspace; independent blocks share the original hub variable yet have linearly independent support spans. The entire source has `n=2k+1` variables, `2k` clauses, and exactly `2 × 3^k` models. This is **not** an affine solution set (its model count is not a power of two). BENCH-01G's variable-cut path can also prove it, but requires conditioning the hub and reconstructing many separate interpreters; compare complete #SAT costs, not just yes/no SAT.
+2. **Cyclic triple XOR:** `n` overlapping triple equations `x_i XOR x_(i+1) XOR x_(i+2) = b_i`, encoded with **four genuine three-literal clauses per equation**. For `3 ∤ n`, the cyclic triple-parity observation vectors are independent. All original variables are connected, and no single source variable disconnects the hypergraph. Expected: no BENCH-01G variable-cut admission, but native SPN-007 factorizes parity supports into many rank-one groups. Source-verified exact #SAT for the specified family is one.
+3. **Contradictory triple XOR:** add the opposite parity requirement on one source scope. Expected: source-verified UNSAT when constant energy cannot fall to zero. This is not an assertion that all individual Fourier-component energies are positive.
+4. **General strict 3-CNF:** a fixed seeded 16-variable formula with mixed clauses. Expected: a large irreducible support span and an honest rank-budget `UNKNOWN`. Native SPN-008 and CDCL may still solve it directly.
+5. **Third-party random 3-SAT:** two instances from BENCH-01E's exact Git-SHA1-pinned 50-variable corpus, retrieved only by its existing source-verifying downloader. The algebraic system is expected to refuse without a small decomposition. Published labels never serve as proofs.
+6. **96 seeded small formulas:** original truth-table exhaustive counting of all assignments, adversarial false minima/multiplicities/witnesses, rehashed modified supports, insufficient search budgets and invalid source clauses.
 
 All measured times distinguish original construction, independent verification, variable-cut construction/replay, native SPN-008 result with parent proof replay, and CDCL engine time vs subprocess wall time. The CDCL solver has a different proof burden; its bare UNSAT exit is *not* labeled independently proven. **One-run timings are not a complexity theorem or a general solver ranking**.
 
@@ -87,15 +88,19 @@ The workflow `.github/workflows/bench01-algebraic-coordinate.yml` installs `pyth
 
 ## Local checkpoint — isolated CPython 3.13.5
 
-The finite benchmark and its independent checks were executed on a local isolated CPython 3.13.5 host **before publication**: **102 tests passed** (74 existing algebraic/non-affine/recursive/affine regression tests and 28 separator/new coordinate tests). The native SPN-007 files were absent in this isolated working directory, so the standalone fallback produced the coordinate partition; the full-repository CI **must** exercise `fundamental_components` and `linear_coordinates` directly before native reuse is claimed. All times below are one-run CPU wall times, include independent source checks for the algebraic path, and are not statistical benchmarks.
+The finite benchmark and its independent checks were executed on a local isolated CPython 3.13.5 host **before publication**: **103 tests passed** (74 existing algebraic/non-affine/recursive/affine regression tests and 29 separator/new coordinate tests). The native SPN-007 files were absent in this isolated working directory, so the standalone fallback produced the coordinate partition; the full-repository CI **must** exercise `fundamental_components` and `linear_coordinates` directly before native reuse is claimed. All times below are one-run CPU wall times, include independent source checks for the algebraic path, and are not statistical benchmarks.
 
 | Original-source 3-CNF | Variables / clauses | Algebraic status / exact #SAT | Algebraic full build + verifier | Variable separator |
 | --- | ---: | --- | ---: | --- |
+| Non-affine NAE-3 blocks | 15 / 14 | SAT / **4,374** | 1.55 ms | SAT, 4,374 models (16.77 ms) |
+| Non-affine NAE-3 blocks | 25 / 24 | SAT / **1,062,882** | 2.42 ms | SAT, 1,062,882 models (25.90 ms) |
 | Cyclic XOR SAT | 19 / 76 | SAT / **1** | 5.25 ms | UNKNOWN (4.15 ms) |
 | Cyclic XOR SAT | 31 / 124 | SAT / **1** | 8.21 ms | UNKNOWN (8.72 ms) |
 | Cyclic XOR SAT | 80 / 320 | SAT / **1** | 20.67 ms | UNKNOWN (50.01 ms) |
 | Cyclic XOR contradiction | 31 / 128 | UNSAT / **0** | 8.01 ms | UNKNOWN (11.12 ms) |
 | Unstructured strict 3-CNF | 16 / 52 | **UNKNOWN** | 4.15 ms | UNKNOWN (2.52 ms) |
+
+The 25-variable NAE case is the crucial **non-affine** check: twelve independent rank-two components each have **three minimizers**, and the one-dimensional unused source-fibre contributes the factor two, giving exactly `2 × 3^12 = 1,062,882` models, without source-state enumeration. The cost comparison here is against the independently replayed BENCH-01G **#SAT** method, not CaDiCaL decision SAT, which has a different task.
 
 The 80-variable SAT case uses exactly 80 independent rank-one Fourier components with 160 total local coordinate evaluations; its source has `2^80` assignments, but the source proof does **not** enumerate them. This is not a lower bound on another solver's time, and it is not an efficiency guarantee on arbitrary SAT formulas.
 
