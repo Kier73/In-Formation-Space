@@ -1,4 +1,4 @@
-name: SPN-002 spectral-phase navigation
+name: SPN-001/003 spectral-phase navigation
 
 on:
   push:
@@ -22,5 +22,6 @@ jobs:
         working-directory: experiments/pnp-ground-navigation/spectral_phase_navigation
         run: |
           python walsh_phase_navigation_probe.py
-          python -m unittest -v test_spectral_receipts.py
+          python -m unittest -v test_spectral_receipts.py test_phase_cycle_bounds.py
           python campaign.py
+          python phase_cycle_campaign.py
