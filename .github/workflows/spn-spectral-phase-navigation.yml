@@ -33,4 +33,6 @@ jobs:
           python language_choice_campaign.py
           python self_use_campaign.py
           python self_use_overhead.py
+          python -m unittest -v test_ground_revision_continuity.py
+          python ground_revision_campaign.py
           python direct_sat_cli.py examples/xor_cycle_unsat.cnf --node-budget 128

@@ -240,3 +240,19 @@ source-proof verifier; the [overhead probe](self_use_overhead.py) and
 Run `python self_use_campaign.py` and `python self_use_overhead.py` to
 reconstruct the evidence. **No universal solver, proof of P=NP or
 self-modifying authority is claimed.**
+
+
+## 11. GRC-001 — Reuse a verified Ground across source revisions (experimental)
+
+[GRC-001](GRC-001_SOURCE_REFINEMENT_CONTINUITY.md) cross-checks
+SFI-003 self-revision, VL-I PFI-004 SAT execution, E-CPU IPS-003–006
+generated-Ground recovery and VGI evidence admission **before** proposing a
+new integration. Its source-bound theorem supports CNF *strengthening*: an
+old UNSAT proof remains valid, a SAT witness needs source rechecking, and
+an old exact count may be adjusted by independently verified lost-model
+counts or preserved by a checked entailment. Unavailable proof budgets yield
+UNKNOWN. It does not transfer E-CPU authority, and delta counting is often
+slower than fresh counting. See
+`ground_revision_continuity.py`, `test_ground_revision_continuity.py`,
+`verify_ground_revision_json.py`, `ground_revision_campaign.py` and
+`ground_revision_results.json`.
