@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from time import perf_counter_ns
 
-from bench01_algebraic import build, verify, cycle_xor
+from bench01_algebraic import build, verify, cycle_xor, hub_not_all_equal
 from bench01_separator import run as separator_run, verify_receipt as separator_verify
 
 
@@ -21,7 +21,11 @@ def fixtures():
     for _ in range(52):
         v=r.sample(range(1,17),3)
         generic.append([x*r.choice((-1,1)) for x in v])
+    nonaffine_small,n_small=hub_not_all_equal(7)
+    nonaffine_large,n_large=hub_not_all_equal(12)
     return [
+      _case('nonaffine-NAE-7',n_small,nonaffine_small,'source-generated-nonlinear-3CNF','SAT'),
+      _case('nonaffine-NAE-12',n_large,nonaffine_large,'source-generated-nonlinear-3CNF','SAT'),
       _case('xor-cycle-19-sat',19,cycle_xor(19),'source-generated-strict-3xor','SAT'),
       _case('xor-cycle-31-sat',31,cycle_xor(31),'source-generated-strict-3xor','SAT'),
       _case('xor-cycle-80-sat',80,cycle_xor(80),'source-generated-strict-3xor','SAT'),
