@@ -82,6 +82,23 @@ class SourceAndFeatureTests(unittest.TestCase):
         f=deepcopy(x);f['source_sha256']='0'*64
         with self.assertRaises(ValueError):_validate_observation(f)
 
+    def test_worker_calls_respect_distinct_admission_budgets(self):
+        from unittest.mock import patch
+        from bench01_policy import observed
+        entry={"id":"budget-shape","n":3,"clauses":[[1],[-2,3]]}
+        def mock_runner(item, **kwargs):
+            self.assertTrue(kwargs["spn_fallback"])
+            self.assertTrue(kwargs["export_spn_proof"])
+            self.assertIn(kwargs["max_source_vars"],(0,80))
+            return {"status":"SAT","witness":"5","wall_ms":1.0,
+                    "verification":"source-witness"}
+        with patch("bench01_policy.run_case",side_effect=mock_runner) as worker:
+            r=observed(entry)
+        self.assertEqual(worker.call_count,2)
+        self.assertEqual(worker.call_args_list[0].kwargs["max_source_vars"],0)
+        self.assertEqual(worker.call_args_list[1].kwargs["max_source_vars"],80)
+        self.assertEqual(r["direct"]["status"],"SAT")
+
     def test_forged_unsat_refused_even_with_source_checked_flag(self):
         x=small('x',1)
         x['formed']={'status':'UNSAT','wall_ms':1.,'witness':None,'proof':None,'source_checked':True}
