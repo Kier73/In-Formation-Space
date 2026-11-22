@@ -47,7 +47,7 @@ Represent every CNF clause as a factor f_i: {0,1}^{S_i} -> {0,1}. Their product 
 
     g(y) = sum_{b in {0,1}} product_{f in bucket(v)} f(y, v=b)
 
-All other factors are retained. After eliminating every variable, the remaining scalar is the **exact integer number of satisfying assignments**. A witness is reconstructed by reversing the elimination history, choosing a value for each eliminated variable consistent with positive bucket products. The recovered assignment is checked directly against the original CNF.
+All other factors are retained. After eliminating every variable, the remaining scalar is the **exact integer number of satisfying assignments** (#SAT, a harder counting task in the standard worst-case complexity sense). A witness is reconstructed by reversing the elimination history, choosing a value for each eliminated variable consistent with positive bucket products. The recovered assignment is checked directly against the original CNF.
 
 Each eliminated variable exposes a compact *frontier ground*: a factor on the variables shared with the remainder of the problem. An exact relation is retained, not merely a Boolean saying "some local solution exists". The code chooses a deterministic min-fill order in the primal graph. It does not claim optimal treewidth and is not an original SAT algorithm.
 
@@ -69,7 +69,7 @@ For elimination order pi, let w be the maximum number of surviving variables in 
 
 **Negative control: local consistency is not global consistency.** The four clauses (x OR y), (x OR NOT y), (NOT x OR y), (NOT x OR NOT y) are *individually satisfiable* yet jointly UNSAT. An observer that remembers only a one-bit local satisfiable status for each clause destroys the necessary correlation and can report a false possibility. Exact interfaces preserve the joint relation; their width is the cost.
 
-**Verification scope:** 8 unit tests passed locally; random small instances compared against exhaustive references, and all five campaign cases of n <= 16 were exhaustively checked. For n=96, validation is through exact elimination and direct witness inspection for SAT; the contradictory UNSAT run has not been separately enumerated and should be regarded as verified under the implemented recurrence plus unit-level cross-checks. No independent proof checker or external physical-host execution is claimed.
+**Verification scope:** 8 unit tests passed locally; random small instances compared against exhaustive references, and all three campaign cases with n <= 16 were exhaustively checked. For n=96, validation is through exact elimination and direct witness inspection for SAT; the contradictory UNSAT run has not been separately enumerated and should be regarded as verified under the implemented recurrence plus unit-level cross-checks. No independent proof checker or external physical-host execution is claimed.
 
 ## 6. A possible research frontier: discover the *least sufficient interface*, not just the shortest path
 
