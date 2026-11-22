@@ -87,7 +87,9 @@ The current VGI adapter is **one receiver-owned policy source**, and the test ca
 | `fabric_refinement_verify.py` | Recomputes all available declared offers, independent SAB route and VGI ledger/coordinate verification |
 | [Dedicated CI](https://github.com/Kier73/VL-I/blob/main/.github/workflows/tdl004-fabric-refinement.yml) | Linux/Windows Python 3.11, 3.13, plus TDL-003 and TDL-002 regressions |
 
-At this entry's initial authorship, the above are code/test contracts. Append exact job conclusions and source commit after CI confirmation. Track unsuccessful runs and concrete corrections rather than relabeling them as successful observations.
+The new and regression contracts are backed by the exact verified CI run recorded below. The failed exploratory run and its type-contract diagnosis remain separately documented rather than being counted as successful execution.
+
+**O — verified integration (2026-11-22):** [VL-I Actions run 45070098905](https://github.com/Kier73/VL-I/actions/runs/45070098905) passed all four Linux/Windows × Python 3.11/3.13 jobs at source head `c03f7487899bb5fc7ccd927bdb6c0ed3fa997e7d`. Each ran 7 new TDL-004 path+VGI tests, 7 TDL-003 cost/evidence regressions, and 7 TDL-002 refinement regressions, all successful (**21 tests/job; 84 total test executions**). Earlier tests exposed a real typed-routing mismatch: generic result types let an unrelated cheapest handler satisfy the route shape; the final correction adds observation-specific output kinds and independent catalogue/route checks. The source revision above includes this correction. The dedicated source PR is [VL-I #65](https://github.com/Kier73/VL-I/pull/65).
 
 ## TDL-004/E — Research continuations
 
