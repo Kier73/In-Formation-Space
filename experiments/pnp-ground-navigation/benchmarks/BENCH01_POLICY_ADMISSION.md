@@ -103,8 +103,8 @@ These are independently authored threshold-random 3-SAT formulas, **not** offici
 | Source evidence | Extended BENCH-01 `run_case` with optional `export_spn_proof=False` default. When enabled, an already parent-replayed native proof can be retained and independently replayed when training from a serialized observation. |
 | Reproduction harness | Created `run_bench01_policy.py` with 12 exact Git blob pins, explicit training/validation/final cohorts, optional pinned CaDiCaL final comparator and output JSON. |
 | Adversarial regression | Checks false models, changed source SHA, forged UNSAT despite `source_checked=True`, changed meta proof, changed rule list, source leakage, UNKNOWN preservation, invalid external file bytes, Tseitin truth-table equivalence, policy acceptance and policy rejection. |
-| Local bounded tests | `python -m unittest -q test_bench01_policy.py` — **14 tests passed**. Combined with predecessor BENCH-01/01E tests: **48 tests passed, 1 optional SPN integration skipped** in isolated local sources. |
-| External CI performance | **Not yet established at the initial research checkpoint.** The GitHub Actions workflow executes the real pinned corpus and source-verifier on Linux/Windows, Python 3.11/3.13. Record its actual run and outcomes below, after it finishes. |
+| Local bounded tests | `python -m unittest -q test_bench01_policy.py` — **15 tests passed**. Combined with predecessor BENCH-01/01E tests: **49 tests passed, 1 optional SPN integration skipped** in isolated local sources. |
+| External CI performance | **Executed and qualified.** Four successful PR CI jobs, Linux/Windows × Python 3.11/3.13, completed the actual SPN meta-SAT proof path and twelve pinned external source observations each. Evidence and figures are below. |
 
 ### Failure found and corrected during implementation
 
@@ -139,3 +139,26 @@ The first invocation requires the existing IFS parent source modules. The second
 5. After qualification, expose policy-selected work to VL-I PFI-005/E-CPU under existing authority and recovery semantics, rather than importing local benchmark artifacts as publication rights.
 
 **Scientific conclusion to date:** We have built a proof-qualified mechanism for SAT to construct an execution policy for its own interpreter, with explicit admission/rejection and full acquisition cost. General speed advantage, competitiveness and transfer to new SAT families remain empirical questions.
+
+## 9. Executed external campaign — source-checked negative result
+
+**GitHub CI:** [BENCH-01E/F run 45060293327](https://github.com/Kier73/In-Formation-Space/actions/runs/45060293327), four passing jobs (Ubuntu and Windows × Python 3.11, 3.13). Full original-source proof objects, source digests, selected policies and individual execution costs are in the job-specific artifacts `bench01f-ubuntu-latest-py3.11`, `bench01f-ubuntu-latest-py3.13`, `bench01f-windows-latest-py3.11`, `bench01f-windows-latest-py3.13`. **No solver label was admitted from the publisher's directory name.**
+
+| CI job | Paired source observation + policy training | Direct SPN: 4 validation formulas | Frozen policy: 4 validation formulas | Direct SPN: 4 untouched final formulas | Frozen policy: 4 untouched final formulas | Candidate policy |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Ubuntu, Python 3.11 | 3,126.49 ms | 831.62 ms | 833.22 ms | 1,336.49 ms | 1,338.08 ms | Empty / rejected |
+| Ubuntu, Python 3.13 | 2,835 ms (rounded) | 744 ms (rounded) | 746 ms (rounded) | 1,137 ms (rounded) | 1,138 ms (rounded) | Empty / rejected |
+| Windows, Python 3.11 | 3,295 ms (rounded) | 933 ms (rounded) | 934 ms (rounded) | 1,409 ms (rounded) | 1,411 ms (rounded) | Empty / rejected |
+| Windows, Python 3.13 | 1,988 ms (rounded) | 568.03 ms | 569.01 ms | 811.48 ms | 812.45 ms | Empty / rejected |
+
+Each platform independently reproduced the same exact twelve source identities, **four source-verified SAT or UNSAT results in validation, four in final**, zero admitted coverage losses, and matching final CaDiCaL decisions. A CaDiCaL UNSAT status was accepted as corroborated only where the native SPN-008 proof independently refuted the same CNF. That is **not** a separately checked LRAT/DRAT certificate emitted by CaDiCaL.
+
+**What actually happened:** The native policy synthesizer found no source-only feature rule that justified paying for SFI construction on the four training sources. It emitted the empty rule set; validation rejected any claimed gain and froze direct SPN. This is a successful **refusal and cost-accounting benchmark**, not evidence that adaptive selection beats a strong direct solver on these instances. The policy wrapper itself adds a small feature/digest scan overhead even with an empty rule set. This measured overhead is a candidate for a later verified implementation improvement, not a speedup claimed here.
+
+### CI-driven correction of the implementation itself
+
+The first BENCH-01F PR workflow run failed during the external campaign because `observed()` accidentally passed `max_source_vars` twice when composing the direct-SPN call. The original local unit tests had not exercised that argument combination. We fixed the call, added `test_worker_calls_respect_distinct_admission_budgets`, reran the **49-test** local regression suite, and verified all four real CI jobs. This test now asserts the direct path uses `max_source_vars=0`, the SFI-first path uses its declared source budget, and both request the already-parent-replayed portable proof.
+
+### Interpretation and next implementation target
+
+The result rejects a tempting but unmeasured assumption: a self-formed interpreter should not be preferred merely because it can be constructed. The cost of selecting, forming, proving and later executing it must be strictly better *for the requested family*. This cohort's 50/75-variable near-threshold random 3-CNF contains little local algebraic structure that SFI's bounded compiler can exploit; SPN solves it directly. A useful next trial must include **independently sourced structured and unstructured families** under preregistered source-only descriptors, then check if one frozen policy handles both. No claims about official SAT Competition 2026 entries, production CDCL proof certificates, or P=NP follow from this finite campaign.
