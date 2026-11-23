@@ -42,7 +42,10 @@ from vld.compiler import (
 )
 
 HERE = Path(__file__).resolve().parent
-FIXTURES = frozenset(("funnel", "branch", "erased"))
+FIXTURES = frozenset((
+    "funnel", "branch", "erased", "safe_diagnosis", "silent_conflict",
+    "single_alpha", "silent_common_funnel",
+))
 SCHEMA = "ifs.observation-sufficient-computation.v1"
 
 
