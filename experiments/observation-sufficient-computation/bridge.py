@@ -417,6 +417,9 @@ def demonstrate() -> dict[str, Any]:
     a = source_fixture("funnel")
     b = source_fixture("branch")
     c = source_fixture("erased")
+    safe = source_fixture("safe_diagnosis")
+    silent = source_fixture("silent_conflict")
+    common = source_fixture("silent_common_funnel")
     return {
         "funnel": run_intention(a, expected_source_digest=a["source_digest"],
                                  original_state=2),
@@ -424,6 +427,15 @@ def demonstrate() -> dict[str, Any]:
                                  original_state=2, failover_after=1),
         "erased": run_intention(c, expected_source_digest=c["source_digest"],
                                  original_state=2),
+        "multi_law_safe_diagnosis": run_intention(
+            safe, expected_source_digest=safe["source_digest"],
+            original_state=4, failover_after=1),
+        "multi_law_silent_conflict": run_intention(
+            silent, expected_source_digest=silent["source_digest"],
+            original_state=1),
+        "multi_law_common_funnel": run_intention(
+            common, expected_source_digest=common["source_digest"],
+            original_state=3),
     }
 
 
