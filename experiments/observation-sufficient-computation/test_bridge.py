@@ -141,7 +141,7 @@ class ObservationSufficientComputationTests(unittest.TestCase):
         _, law, _, _ = _verified_models(model)
         machine = form_observer_machine(law, ("visible", "goal"))
         inventory, policy, carriers = _host_inventory(machine.operation, alpha_available=True)
-        revoked = BootstrapPolicy(frozenset(), policy.permitted_channels,
+        revoked = BootstrapPolicy(frozenset(), policy.allowed_channels,
                                   "receiver-execution-revoked")
         with self.assertRaises(BootstrapRefused):
             realize_formed_intention(
