@@ -133,11 +133,11 @@ python run_frontier_observation_planner.py
 
 The rank can grow exponentially while a selected SAT witness or #SAT result has a short, independently source-checkable structural Ground. The complete relation's exponential rank remains valid; a symbolic rank certificate does not materialize or factorize the relation tensor. The experiment admits only equality pairs proven directly from the original source clauses and refuses modified sources.
 
-Run from \`experiments/pnp-ground-navigation/cut_intention/\`:
+Run from `experiments/pnp-ground-navigation/cut_intention/`:
 
-\`\`\`bash
+```bash
 python -m unittest discover -s . -p 'test_*.py' -v
 python run_cut_intention.py > CIG-001-results.reproduced.json
-\`\`\`
+```
 
 The study connects [PNG-001](frontier_ground.py) exact frontiers, [SFI-002](self_selecting_sat.py) source-qualified language formation and [OFG-003](observer_fibers/OFG-003.md) intention-specific observers, with next experiments targeting cross-component source coupling and nonlinear rank certificates.
