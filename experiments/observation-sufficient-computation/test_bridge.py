@@ -71,6 +71,18 @@ class ObservationSufficientComputationTests(unittest.TestCase):
         self.assertEqual(report["steps"][0]["execution"]["vld_alternative"],
                          "fluid_in_transit_stream")
 
+    def test_blind_policy_public_transcript_does_not_reveal_initial_source_state(self):
+        packet = self.models["funnel"]
+        receipts = [run_intention(
+            packet, expected_source_digest=packet["source_digest"],
+            original_state=s,
+        ) for s in range(3)]
+        # Every receiver started in a DIFFERENT state, but the observer-facing
+        # transcript is byte-for-byte equal after the common convergent action.
+        self.assertEqual(receipts[0], receipts[1])
+        self.assertEqual(receipts[1], receipts[2])
+        self.assertNotIn("task", json.dumps(receipts[0]))
+
     def test_conditional_observations_change_action_and_survive_host_loss(self):
         source = self.models["branch"]
         traces = [run_intention(source, expected_source_digest=source["source_digest"],

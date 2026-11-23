@@ -67,7 +67,7 @@ jobs:
           python -m pip install -e external/E-CPU
           python -m pip install -e external/VLD
       - name: Run actual IWI proof and native cross-repo execution
-        run: python -m unittest discover -s experiments/observation-sufficient-computation -p "test_bridge.py" -v
+        run: python -m unittest discover -s experiments/observation-sufficient-computation -p "test_*.py" -v
       - name: Reproduce original IWI unconditional and contingent policies
         run: node experiments/observation-sufficient-computation/iwi_source.js branch
       - name: Reproduce end-to-end intention/observation/realization receipts
