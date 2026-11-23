@@ -1,0 +1,72 @@
+name: OFC-001 observation-sufficient computation across five original systems
+
+on:
+  push:
+    paths:
+      - "experiments/observation-sufficient-computation/**"
+      - ".github/workflows/ofc001-observation-sufficient.yml"
+  pull_request:
+    paths:
+      - "experiments/observation-sufficient-computation/**"
+      - ".github/workflows/ofc001-observation-sufficient.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-native-five-repository-composition:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, python: "3.11"}
+          - {os: ubuntu-latest, python: "3.13"}
+          - {os: windows-latest, python: "3.11"}
+          - {os: windows-latest, python: "3.13"}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin original VGI
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Ground-Interpreter
+          ref: ae3f949b7d0b2aaa42236bc7cc37e9857384b174
+          path: external/VGI
+      - name: Pin original NCR-004/NCR-005
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: 66e216e53ab606547ba4a5316ed44044e327b67b
+          path: external/Navigable-Compute
+      - name: Pin E-CPU INTENT-001/SAB-001
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: d329b8ca6d1f9c94f77e7823a3352cbe66b34707
+          path: external/E-CPU
+      - name: Pin VLD original intention realization compiler
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Virtual-Layer-Dynamics
+          ref: afe54804bc15ea14b1c51766757edef3aac96817
+          path: external/VLD
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install original packages, no model weights or invented operators
+        run: |
+          python -m pip install -e external/VGI/virtual_ground_interpreter
+          python -m pip install -e external/Navigable-Compute
+          python -m pip install -e external/E-CPU
+          python -m pip install -e external/VLD
+      - name: Run actual IWI proof and native cross-repo execution
+        run: python -m unittest discover -s experiments/observation-sufficient-computation -p "test_bridge.py" -v
+      - name: Reproduce original IWI unconditional and contingent policies
+        run: node experiments/observation-sufficient-computation/iwi_source.js branch
+      - name: Reproduce end-to-end intention/observation/realization receipts
+        run: python experiments/observation-sufficient-computation/bridge.py
