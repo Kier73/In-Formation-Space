@@ -1,0 +1,394 @@
+{
+  "schema": "ifs.cig003.nonlinear-observer-benchmark.v1",
+  "python": "3.13.5",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "samples_each": 9,
+  "wall_times": "single-process local, not network or sensor latency",
+  "measured_source_only_no_real_sensors": true,
+  "rows": [
+    {
+      "groups": 2,
+      "source_original_variables": 132,
+      "source_original_clauses": 139,
+      "source_active_labels": 6,
+      "source_active_truth_table_size": "64",
+      "bounded_local_states_per_count": 64,
+      "local_component_widths": [
+        6
+      ],
+      "nonlinear_source_proved_gates": 2,
+      "source_model_count": "8070450532247928832",
+      "cut_rank": "51539607552",
+      "native_output_declared_cost": 2,
+      "derived_anf_declared_cost": 0,
+      "observer_candidates": [
+        2,
+        3
+      ],
+      "observer_selected": {
+        "observe_indices": [
+          2,
+          3
+        ],
+        "methods": {
+          "2": "derived-anf",
+          "3": "derived-anf"
+        },
+        "outcome_ranks": [
+          "0",
+          "17179869184",
+          "17179869184",
+          "17179869184"
+        ],
+        "worst_rank": "17179869184",
+        "worst_rank_bits": 34,
+        "measurement_cost": 0,
+        "total_declared_cost": 34
+      },
+      "median_compile_ms": 1.9263,
+      "median_independent_verify_ms": 1.6025,
+      "all_runs_receiver_replayed": true
+    },
+    {
+      "groups": 2,
+      "source_original_variables": 132,
+      "source_original_clauses": 139,
+      "source_active_labels": 6,
+      "source_active_truth_table_size": "64",
+      "bounded_local_states_per_count": 64,
+      "local_component_widths": [
+        6
+      ],
+      "nonlinear_source_proved_gates": 2,
+      "source_model_count": "8070450532247928832",
+      "cut_rank": "51539607552",
+      "native_output_declared_cost": 0,
+      "derived_anf_declared_cost": 2,
+      "observer_candidates": [
+        2,
+        3
+      ],
+      "observer_selected": {
+        "observe_indices": [
+          2,
+          3
+        ],
+        "methods": {
+          "2": "native-output",
+          "3": "native-output"
+        },
+        "outcome_ranks": [
+          "0",
+          "17179869184",
+          "17179869184",
+          "17179869184"
+        ],
+        "worst_rank": "17179869184",
+        "worst_rank_bits": 34,
+        "measurement_cost": 0,
+        "total_declared_cost": 34
+      },
+      "median_compile_ms": 1.6484,
+      "median_independent_verify_ms": 1.5477,
+      "all_runs_receiver_replayed": true
+    },
+    {
+      "groups": 2,
+      "source_original_variables": 132,
+      "source_original_clauses": 139,
+      "source_active_labels": 6,
+      "source_active_truth_table_size": "64",
+      "bounded_local_states_per_count": 64,
+      "local_component_widths": [
+        6
+      ],
+      "nonlinear_source_proved_gates": 2,
+      "source_model_count": "8070450532247928832",
+      "cut_rank": "51539607552",
+      "native_output_declared_cost": 4,
+      "derived_anf_declared_cost": 3,
+      "observer_candidates": [
+        2,
+        3
+      ],
+      "observer_selected": {
+        "observe_indices": [],
+        "methods": {},
+        "outcome_ranks": [
+          "51539607552"
+        ],
+        "worst_rank": "51539607552",
+        "worst_rank_bits": 36,
+        "measurement_cost": 0,
+        "total_declared_cost": 36
+      },
+      "median_compile_ms": 1.6616,
+      "median_independent_verify_ms": 1.5104,
+      "all_runs_receiver_replayed": true
+    },
+    {
+      "groups": 4,
+      "source_original_variables": 132,
+      "source_original_clauses": 145,
+      "source_active_labels": 12,
+      "source_active_truth_table_size": "4096",
+      "bounded_local_states_per_count": 80,
+      "local_component_widths": [
+        6,
+        3,
+        3
+      ],
+      "nonlinear_source_proved_gates": 4,
+      "source_model_count": "2017612633061982208",
+      "cut_rank": "51539607552",
+      "native_output_declared_cost": 2,
+      "derived_anf_declared_cost": 0,
+      "observer_candidates": [
+        4,
+        6
+      ],
+      "observer_selected": {
+        "observe_indices": [
+          4,
+          6
+        ],
+        "methods": {
+          "4": "derived-anf",
+          "6": "derived-anf"
+        },
+        "outcome_ranks": [
+          "0",
+          "17179869184",
+          "17179869184",
+          "17179869184"
+        ],
+        "worst_rank": "17179869184",
+        "worst_rank_bits": 34,
+        "measurement_cost": 0,
+        "total_declared_cost": 34
+      },
+      "median_compile_ms": 2.0991,
+      "median_independent_verify_ms": 2.1072,
+      "all_runs_receiver_replayed": true
+    },
+    {
+      "groups": 4,
+      "source_original_variables": 132,
+      "source_original_clauses": 145,
+      "source_active_labels": 12,
+      "source_active_truth_table_size": "4096",
+      "bounded_local_states_per_count": 80,
+      "local_component_widths": [
+        6,
+        3,
+        3
+      ],
+      "nonlinear_source_proved_gates": 4,
+      "source_model_count": "2017612633061982208",
+      "cut_rank": "51539607552",
+      "native_output_declared_cost": 0,
+      "derived_anf_declared_cost": 2,
+      "observer_candidates": [
+        4,
+        6
+      ],
+      "observer_selected": {
+        "observe_indices": [
+          4,
+          6
+        ],
+        "methods": {
+          "4": "native-output",
+          "6": "native-output"
+        },
+        "outcome_ranks": [
+          "0",
+          "17179869184",
+          "17179869184",
+          "17179869184"
+        ],
+        "worst_rank": "17179869184",
+        "worst_rank_bits": 34,
+        "measurement_cost": 0,
+        "total_declared_cost": 34
+      },
+      "median_compile_ms": 2.2816,
+      "median_independent_verify_ms": 2.0288,
+      "all_runs_receiver_replayed": true
+    },
+    {
+      "groups": 4,
+      "source_original_variables": 132,
+      "source_original_clauses": 145,
+      "source_active_labels": 12,
+      "source_active_truth_table_size": "4096",
+      "bounded_local_states_per_count": 80,
+      "local_component_widths": [
+        6,
+        3,
+        3
+      ],
+      "nonlinear_source_proved_gates": 4,
+      "source_model_count": "2017612633061982208",
+      "cut_rank": "51539607552",
+      "native_output_declared_cost": 4,
+      "derived_anf_declared_cost": 3,
+      "observer_candidates": [
+        4,
+        6
+      ],
+      "observer_selected": {
+        "observe_indices": [],
+        "methods": {},
+        "outcome_ranks": [
+          "51539607552"
+        ],
+        "worst_rank": "51539607552",
+        "worst_rank_bits": 36,
+        "measurement_cost": 0,
+        "total_declared_cost": 36
+      },
+      "median_compile_ms": 2.0405,
+      "median_independent_verify_ms": 1.935,
+      "all_runs_receiver_replayed": true
+    },
+    {
+      "groups": 8,
+      "source_original_variables": 132,
+      "source_original_clauses": 157,
+      "source_active_labels": 24,
+      "source_active_truth_table_size": "16777216",
+      "bounded_local_states_per_count": 112,
+      "local_component_widths": [
+        6,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "nonlinear_source_proved_gates": 8,
+      "source_model_count": "126100789566373888",
+      "cut_rank": "51539607552",
+      "native_output_declared_cost": 2,
+      "derived_anf_declared_cost": 0,
+      "observer_candidates": [
+        5,
+        9
+      ],
+      "observer_selected": {
+        "observe_indices": [
+          5,
+          9
+        ],
+        "methods": {
+          "5": "derived-anf",
+          "9": "derived-anf"
+        },
+        "outcome_ranks": [
+          "0",
+          "17179869184",
+          "17179869184",
+          "17179869184"
+        ],
+        "worst_rank": "17179869184",
+        "worst_rank_bits": 34,
+        "measurement_cost": 0,
+        "total_declared_cost": 34
+      },
+      "median_compile_ms": 3.0531,
+      "median_independent_verify_ms": 3.0101,
+      "all_runs_receiver_replayed": true
+    },
+    {
+      "groups": 8,
+      "source_original_variables": 132,
+      "source_original_clauses": 157,
+      "source_active_labels": 24,
+      "source_active_truth_table_size": "16777216",
+      "bounded_local_states_per_count": 112,
+      "local_component_widths": [
+        6,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "nonlinear_source_proved_gates": 8,
+      "source_model_count": "126100789566373888",
+      "cut_rank": "51539607552",
+      "native_output_declared_cost": 0,
+      "derived_anf_declared_cost": 2,
+      "observer_candidates": [
+        5,
+        9
+      ],
+      "observer_selected": {
+        "observe_indices": [
+          5,
+          9
+        ],
+        "methods": {
+          "5": "native-output",
+          "9": "native-output"
+        },
+        "outcome_ranks": [
+          "0",
+          "17179869184",
+          "17179869184",
+          "17179869184"
+        ],
+        "worst_rank": "17179869184",
+        "worst_rank_bits": 34,
+        "measurement_cost": 0,
+        "total_declared_cost": 34
+      },
+      "median_compile_ms": 3.1866,
+      "median_independent_verify_ms": 3.1287,
+      "all_runs_receiver_replayed": true
+    },
+    {
+      "groups": 8,
+      "source_original_variables": 132,
+      "source_original_clauses": 157,
+      "source_active_labels": 24,
+      "source_active_truth_table_size": "16777216",
+      "bounded_local_states_per_count": 112,
+      "local_component_widths": [
+        6,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "nonlinear_source_proved_gates": 8,
+      "source_model_count": "126100789566373888",
+      "cut_rank": "51539607552",
+      "native_output_declared_cost": 4,
+      "derived_anf_declared_cost": 3,
+      "observer_candidates": [
+        5,
+        9
+      ],
+      "observer_selected": {
+        "observe_indices": [],
+        "methods": {},
+        "outcome_ranks": [
+          "51539607552"
+        ],
+        "worst_rank": "51539607552",
+        "worst_rank_bits": 36,
+        "measurement_cost": 0,
+        "total_declared_cost": 36
+      },
+      "median_compile_ms": 3.0385,
+      "median_independent_verify_ms": 3.0258,
+      "all_runs_receiver_replayed": true
+    }
+  ]
+}
