@@ -317,13 +317,14 @@ class HiddenSourceHost:
             "action": action, "visible": obs["visible"],
             "path": [s.locus for s in formed.plan.steps],
             "machine": formed.machine.fingerprint,
-            "task": formed.task.fingerprint,
             "source": self._law.fingerprint,
             "vld_alternative": vld_backend,
         }
         self.observed.append(step)
-        # Do not return the hidden state or the goal channel to the controller.
-        return {"visible": obs["visible"], "execution": step}
+        # Only the visible observation reaches the active controller.
+        # Native execution evidence stays on the receiver until the policy
+        # has already completed, avoiding source-dependent receipt side channels.
+        return {"visible": obs["visible"]}
 
     def audit_goal(self) -> bool:
         """Receiver-held final state is compared with the declared goal only at audit."""
@@ -389,11 +390,14 @@ def run_intention(
             "belief_before": belief, "action": action,
             "observed_visible": outcome["visible"],
             "belief_after": group,
-            "execution": outcome["execution"],
         })
         belief = group
     if not host.audit_goal():
         raise ConstructionRefused("receiver-held hidden state failed objective")
+    # Publish only model/processor-wide evidence after policy termination,
+    # not hidden input coordinates or per-input task fingerprints.
+    for row, evidence in zip(steps, host.observed, strict=True):
+        row["execution"] = evidence
     result = {
         "schema": SCHEMA, "status": "GOAL_REALIZED_WITHOUT_INITIAL_IDENTIFICATION",
         "source": expected_source_digest,
