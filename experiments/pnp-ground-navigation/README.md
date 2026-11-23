@@ -141,3 +141,13 @@ python run_cut_intention.py > CIG-001-results.reproduced.json
 ```
 
 The study connects [PNG-001](frontier_ground.py) exact frontiers, [SFI-002](self_selecting_sat.py) source-qualified language formation and [OFG-003](observer_fibers/OFG-003.md) intention-specific observers, with next experiments targeting cross-component source coupling and nonlinear rank certificates.
+
+## CIG-002 — One clause, three observer-cut ranks
+
+[CIG-002](cut_intention/CIG-002.md) continues CIG-001 using the **same original endpoint-equality CNF language plus a single extra source clause**, rather than trusting an external latent-bit annotation. The compiler reconstructs a bounded residual CNF from source-proved equality pairs and an independent verifier recomputes SAT, #SAT and the exact GF(2) node-cut matrix rank. For the same cut and model count, one added clause can **decrease, preserve, or increase** the rank of the full source relation.
+
+For the 24-node, two-bit-per-edge family with 288 crossing label bits, all three two-label OR constraints have exactly \(3\cdot 2^{550}\) source models. Depending on whether the constrained bits are crossing/crossing, left/crossing, or left/right, their ranks are \(3\cdot2^{286}\), \(2^{288}\), or \(2^{289}\). The last case is particularly useful: **a constraint removes assignments while doubling the full matrix's rank**, demonstrating that solution cardinality is not a substitute for a specified observer representation cost.
+
+The admitted active constraint vocabulary is deliberately finite (at most 14 active label bits). The 9 new test groups include randomized original-CNF exhaustive oracles, literal full-matrix rank checks, forged receipts, and contradictions. [Executable coupled compiler](cut_intention/coupled_ground.py), [independent verifier](cut_intention/verify_coupled_ground.py), [ledger](cut_intention/CIG-002-results.json). The existing PNG-001 frontier solver is invoked on the source-derived residual as a separately billed counting comparator in repository CI; no simulation or P-versus-NP worst-case claim is made.
+
+
