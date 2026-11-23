@@ -34,6 +34,8 @@ jobs:
           repository: Kier73/Virtual-Ground-Interpreter
           ref: ae3f949b7d0b2aaa42236bc7cc37e9857384b174
           path: external/VGI
+          sparse-checkout: virtual_ground_interpreter
+          sparse-checkout-cone-mode: true
       - name: Pin original NCR-004/NCR-005
         uses: actions/checkout@v4
         with:
