@@ -1,4 +1,4 @@
-name: OFG-001/002 observer-fiber navigation
+name: OFG-001/002/003 observer-fiber navigation
 on:
   pull_request:
     paths:
@@ -22,9 +22,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Independently verify both observer-fiber constructions
+      - name: Independently verify all observer-fiber constructions
         working-directory: experiments/pnp-ground-navigation/observer_fibers
         run: python -m unittest discover -p 'test_*.py' -v
       - name: Reproduce separator-conditioned source and witness cost ledger
         working-directory: experiments/pnp-ground-navigation/observer_fibers
         run: python run_separator_fiber_ground.py
+      - name: Reproduce frontier-derived observation acquisition policies
+        working-directory: experiments/pnp-ground-navigation/observer_fibers
+        run: python run_frontier_observation_planner.py
