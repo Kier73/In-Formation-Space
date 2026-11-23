@@ -77,6 +77,10 @@ class MultiLawNativeRealization(unittest.TestCase):
             self.assertEqual(report["final_belief_count"], 2)
             self.assertEqual(report["final_belief_mask"], 0b0101)
             self.assertEqual([s["action"] for s in report["steps"]], [0])
+        # The observer cannot infer the original law from the public result;
+        # no per-hidden-input task commitment is disclosed.
+        self.assertEqual(reports[0], reports[1])
+        self.assertNotIn('"task"', json.dumps(reports[0]))
         self.assertEqual(reports[0]["ecpu_machine"], reports[1]["ecpu_machine"])
         self.assertEqual(reports[0]["steps"][0]["observed_visible"],
                          reports[1]["steps"][0]["observed_visible"])
