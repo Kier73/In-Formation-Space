@@ -1,0 +1,256 @@
+{
+  "schema": "ifs.ofg.frontier-observation-benchmark.v3",
+  "python": "3.13.5",
+  "host": "Linux",
+  "pricing": "declared nonphysical integer units per bounded symbolic intersection probe",
+  "notes": "Single local run, simulated observation values from supplied source witness. Cold compilation includes search, verified Ground, and policy selection; times not complexity bounds.",
+  "rows": [
+    {
+      "case": "one-hub-8-free",
+      "n": 9,
+      "separator": [
+        1
+      ],
+      "bags": 8,
+      "candidate_count": 6,
+      "local_source_evaluations": 32,
+      "source_models": "256",
+      "observed_variables": [
+        1
+      ],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 256,
+      "costed_total_declared": 342,
+      "additional_bits_worst": 7,
+      "cold_compile_with_independent_verification_ms": 0.6998,
+      "independent_plan_reverification_ms": 0.4534,
+      "encode_median_ms": 0.0683,
+      "decode_median_ms": 0.0737,
+      "certificate_bytes": 2655
+    },
+    {
+      "case": "one-hub-8-expensive",
+      "n": 9,
+      "separator": [
+        1
+      ],
+      "bags": 8,
+      "candidate_count": 6,
+      "local_source_evaluations": 32,
+      "source_models": "256",
+      "observed_variables": [],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 808,
+      "costed_total_declared": 894,
+      "additional_bits_worst": 8,
+      "cold_compile_with_independent_verification_ms": 0.4703,
+      "independent_plan_reverification_ms": 0.4469,
+      "encode_median_ms": 0.0641,
+      "decode_median_ms": 0.108,
+      "certificate_bytes": 2666
+    },
+    {
+      "case": "one-hub-32-free",
+      "n": 33,
+      "separator": [
+        1
+      ],
+      "bags": 32,
+      "candidate_count": 6,
+      "local_source_evaluations": 128,
+      "source_models": "4294967296",
+      "observed_variables": [
+        1
+      ],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 4096,
+      "costed_total_declared": 4374,
+      "additional_bits_worst": 31,
+      "cold_compile_with_independent_verification_ms": 1.7244,
+      "independent_plan_reverification_ms": 1.6325,
+      "encode_median_ms": 0.1856,
+      "decode_median_ms": 0.3674,
+      "certificate_bytes": 6289
+    },
+    {
+      "case": "one-hub-32-expensive",
+      "n": 33,
+      "separator": [
+        1
+      ],
+      "bags": 32,
+      "candidate_count": 6,
+      "local_source_evaluations": 128,
+      "source_models": "4294967296",
+      "observed_variables": [],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 12448,
+      "costed_total_declared": 12726,
+      "additional_bits_worst": 32,
+      "cold_compile_with_independent_verification_ms": 1.57,
+      "independent_plan_reverification_ms": 1.3414,
+      "encode_median_ms": 0.2367,
+      "decode_median_ms": 0.7795,
+      "certificate_bytes": 6294
+    },
+    {
+      "case": "one-hub-128-free",
+      "n": 129,
+      "separator": [
+        1
+      ],
+      "bags": 128,
+      "candidate_count": 6,
+      "local_source_evaluations": 512,
+      "source_models": "340282366920938463463374607431768211456",
+      "observed_variables": [
+        1
+      ],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 65536,
+      "costed_total_declared": 66582,
+      "additional_bits_worst": 127,
+      "cold_compile_with_independent_verification_ms": 8.8348,
+      "independent_plan_reverification_ms": 7.2475,
+      "encode_median_ms": 0.6693,
+      "decode_median_ms": 3.0996,
+      "certificate_bytes": 20832
+    },
+    {
+      "case": "one-hub-128-expensive",
+      "n": 129,
+      "separator": [
+        1
+      ],
+      "bags": 128,
+      "candidate_count": 6,
+      "local_source_evaluations": 512,
+      "source_models": "340282366920938463463374607431768211456",
+      "observed_variables": [],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 197248,
+      "costed_total_declared": 198294,
+      "additional_bits_worst": 128,
+      "cold_compile_with_independent_verification_ms": 8.261,
+      "independent_plan_reverification_ms": 7.3961,
+      "encode_median_ms": 0.8312,
+      "decode_median_ms": 9.9823,
+      "certificate_bytes": 20807
+    },
+    {
+      "case": "one-hub-256-free",
+      "n": 257,
+      "separator": [
+        1
+      ],
+      "bags": 256,
+      "candidate_count": 6,
+      "local_source_evaluations": 1024,
+      "source_models": "115792089237316195423570985008687907853269984665640564039457584007913129639936",
+      "observed_variables": [
+        1
+      ],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 262144,
+      "costed_total_declared": 264214,
+      "additional_bits_worst": 255,
+      "cold_compile_with_independent_verification_ms": 71.3515,
+      "independent_plan_reverification_ms": 22.7771,
+      "encode_median_ms": 1.2967,
+      "decode_median_ms": 10.8764,
+      "certificate_bytes": 40382
+    },
+    {
+      "case": "one-hub-256-expensive",
+      "n": 257,
+      "separator": [
+        1
+      ],
+      "bags": 256,
+      "candidate_count": 6,
+      "local_source_evaluations": 1024,
+      "source_models": "115792089237316195423570985008687907853269984665640564039457584007913129639936",
+      "observed_variables": [],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 787712,
+      "costed_total_declared": 789782,
+      "additional_bits_worst": 256,
+      "cold_compile_with_independent_verification_ms": 23.5538,
+      "independent_plan_reverification_ms": 21.918,
+      "encode_median_ms": 1.6211,
+      "decode_median_ms": 38.4875,
+      "certificate_bytes": 40316
+    },
+    {
+      "case": "two-hub-free",
+      "n": 26,
+      "separator": [
+        1,
+        2
+      ],
+      "bags": 24,
+      "candidate_count": 351,
+      "local_source_evaluations": 192,
+      "source_models": "16777218",
+      "observed_variables": [
+        1,
+        2
+      ],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 2352,
+      "costed_total_declared": 3855,
+      "additional_bits_worst": 24,
+      "cold_compile_with_independent_verification_ms": 6.0227,
+      "independent_plan_reverification_ms": 5.6552,
+      "encode_median_ms": 0.3116,
+      "decode_median_ms": 0.4315,
+      "certificate_bytes": 7684
+    },
+    {
+      "case": "two-hub-mixed",
+      "n": 26,
+      "separator": [
+        1,
+        2
+      ],
+      "bags": 24,
+      "candidate_count": 351,
+      "local_source_evaluations": 192,
+      "source_models": "16777218",
+      "observed_variables": [
+        2
+      ],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 7032,
+      "costed_total_declared": 8535,
+      "additional_bits_worst": 24,
+      "cold_compile_with_independent_verification_ms": 6.0669,
+      "independent_plan_reverification_ms": 5.5892,
+      "encode_median_ms": 0.4826,
+      "decode_median_ms": 0.8093,
+      "certificate_bytes": 7708
+    },
+    {
+      "case": "two-hub-expensive",
+      "n": 26,
+      "separator": [
+        1,
+        2
+      ],
+      "bags": 24,
+      "candidate_count": 351,
+      "local_source_evaluations": 192,
+      "source_models": "16777218",
+      "observed_variables": [],
+      "observation_cost_declared": 0,
+      "costed_navigation_probe_upper": 16368,
+      "costed_total_declared": 17871,
+      "additional_bits_worst": 24,
+      "cold_compile_with_independent_verification_ms": 6.2085,
+      "independent_plan_reverification_ms": 5.57,
+      "encode_median_ms": 0.554,
+      "decode_median_ms": 0.914,
+      "certificate_bytes": 7722
+    }
+  ]
+}

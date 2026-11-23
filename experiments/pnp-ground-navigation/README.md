@@ -110,3 +110,13 @@ Run from `experiments/pnp-ground-navigation/observer_fibers`:
 python -m unittest discover -p 'test_*.py' -v
 python run_separator_fiber_ground.py
 ```
+
+## OFG-003 — frontier-derived, cost-aware observer navigation
+
+[OFG-003](observer_fibers/OFG-003.md) reuses PNG-001's actual `min_fill_order` to discover bounded separators from the original CNF, checks the resulting bag factorization, constructs independently verified OFG-002 local observer fibers, and optimizes which offered separator bits to observe under declared costs **before** knowing the measurement values. The intended output projection is invariant under separator selection. Its source-bound certificate supports partial-separator conditioning, exact union cardinalities, witness rank/unrank, cost-ledger replay and fresh-process verification. [Executable source](observer_fibers/frontier_observation_planner.py), [23-test combined regression suite](observer_fibers/test_frontier_observation_planner.py), and [measured ledger](observer_fibers/OFG-003-results.json). The planner uses a conservative structural-work price, not an inferred physical observation cost; arbitrary sources exceeding the decomposition budget are refused.
+
+```sh
+cd experiments/pnp-ground-navigation/observer_fibers
+python -m unittest discover -p 'test_*.py' -v
+python run_frontier_observation_planner.py
+```
