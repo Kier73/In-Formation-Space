@@ -120,3 +120,24 @@ cd experiments/pnp-ground-navigation/observer_fibers
 python -m unittest discover -p 'test_*.py' -v
 python run_frontier_observation_planner.py
 ```
+
+
+## CIG-001 — Intention-equivalent cut Grounds: one CNF, three exact observations
+
+[CIG-001](cut_intention/CIG-001.md) constructs source-bound SAT, exact #SAT, and coefficient-tensor cut-rank Grounds from **one original equality-CNF source**, with a separately implemented original-clause verifier, exact GF(2) small-matrix oracle, adversarial mutation tests, and measured construction/replay costs. For node cut S of a complete k-node graph with ℓ independent edge bits, its exact identities are:
+
+\[
+\log_2 \operatorname{rank} M_S=\ell |S|(k-|S|)=2\ell\|v_S\|_1,\qquad
+\#\operatorname{SAT}(F)=2^{\ell \binom{k}{2}}.
+\]
+
+The rank can grow exponentially while a selected SAT witness or #SAT result has a short, independently source-checkable structural Ground. The complete relation's exponential rank remains valid; a symbolic rank certificate does not materialize or factorize the relation tensor. The experiment admits only equality pairs proven directly from the original source clauses and refuses modified sources.
+
+Run from `experiments/pnp-ground-navigation/cut_intention/`:
+
+```bash
+python -m unittest discover -s . -p 'test_*.py' -v
+python run_cut_intention.py > CIG-001-results.reproduced.json
+```
+
+The study connects [PNG-001](frontier_ground.py) exact frontiers, [SFI-002](self_selecting_sat.py) source-qualified language formation and [OFG-003](observer_fibers/OFG-003.md) intention-specific observers, with next experiments targeting cross-component source coupling and nonlinear rank certificates.

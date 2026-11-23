@@ -1,0 +1,262 @@
+{
+  "schema": "ifs.cut-intention-campaign.v1",
+  "environment": {
+    "python": "3.13.5",
+    "implementation": "CPython",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41"
+  },
+  "ledger": "11 local trials per Ground; each charges fresh source compilation and separate original-CNF verification; no shared cache or external host",
+  "matrix_note": "Matrix entries are described by log2 size, never materialized except independent tiny-oracle cases.",
+  "cases": [
+    {
+      "k": 3,
+      "label_bits": 1,
+      "source_variables": 6,
+      "source_clauses": 6,
+      "cut": [
+        0
+      ],
+      "cut_edges": 2,
+      "min_balanced_hub_four_norm_sq": 2,
+      "grounds": {
+        "SAT": {
+          "certificate_bytes": 328,
+          "construct_ms_median": 0.0302,
+          "verify_ms_median": 0.0273,
+          "joint_ms_median": 0.0565,
+          "verified": true,
+          "trials": 11,
+          "status": "SAT"
+        },
+        "#SAT": {
+          "certificate_bytes": 337,
+          "construct_ms_median": 0.0247,
+          "verify_ms_median": 0.0208,
+          "joint_ms_median": 0.0452,
+          "verified": true,
+          "trials": 11,
+          "model_count_log2": 3
+        },
+        "CUT_RANK": {
+          "certificate_bytes": 508,
+          "construct_ms_median": 0.0331,
+          "verify_ms_median": 0.0282,
+          "joint_ms_median": 0.0663,
+          "verified": true,
+          "trials": 11,
+          "rank_log2": 2,
+          "row_bits": 2,
+          "col_bits": 4,
+          "full_matrix_entries_log2": 6,
+          "hub_norm_sq_numerator": 4
+        }
+      },
+      "tiny_exhaustive_oracles": {
+        "bruteforce_count_ms_median": 0.0939,
+        "explicit_matrix_rank_ms_median": 0.1113
+      }
+    },
+    {
+      "k": 4,
+      "label_bits": 1,
+      "source_variables": 12,
+      "source_clauses": 12,
+      "cut": [
+        0,
+        1
+      ],
+      "cut_edges": 4,
+      "min_balanced_hub_four_norm_sq": 6,
+      "grounds": {
+        "SAT": {
+          "certificate_bytes": 361,
+          "construct_ms_median": 0.0402,
+          "verify_ms_median": 0.0345,
+          "joint_ms_median": 0.0754,
+          "verified": true,
+          "trials": 11,
+          "status": "SAT"
+        },
+        "#SAT": {
+          "certificate_bytes": 359,
+          "construct_ms_median": 0.0345,
+          "verify_ms_median": 0.0288,
+          "joint_ms_median": 0.0647,
+          "verified": true,
+          "trials": 11,
+          "model_count_log2": 6
+        },
+        "CUT_RANK": {
+          "certificate_bytes": 535,
+          "construct_ms_median": 0.0416,
+          "verify_ms_median": 0.036,
+          "joint_ms_median": 0.0765,
+          "verified": true,
+          "trials": 11,
+          "rank_log2": 4,
+          "row_bits": 6,
+          "col_bits": 6,
+          "full_matrix_entries_log2": 12,
+          "hub_norm_sq_numerator": 8
+        }
+      },
+      "tiny_exhaustive_oracles": {
+        "bruteforce_count_ms_median": 7.9644,
+        "explicit_matrix_rank_ms_median": 9.2336
+      }
+    },
+    {
+      "k": 6,
+      "label_bits": 1,
+      "source_variables": 30,
+      "source_clauses": 30,
+      "cut": [
+        0,
+        1,
+        2
+      ],
+      "cut_edges": 9,
+      "min_balanced_hub_four_norm_sq": 14,
+      "grounds": {
+        "SAT": {
+          "certificate_bytes": 469,
+          "construct_ms_median": 0.0817,
+          "verify_ms_median": 0.0677,
+          "joint_ms_median": 0.1576,
+          "verified": true,
+          "trials": 11,
+          "status": "SAT"
+        },
+        "#SAT": {
+          "certificate_bytes": 435,
+          "construct_ms_median": 0.0711,
+          "verify_ms_median": 0.0616,
+          "joint_ms_median": 0.1339,
+          "verified": true,
+          "trials": 11,
+          "model_count_log2": 15
+        },
+        "CUT_RANK": {
+          "certificate_bytes": 617,
+          "construct_ms_median": 0.0816,
+          "verify_ms_median": 0.0717,
+          "joint_ms_median": 0.1586,
+          "verified": true,
+          "trials": 11,
+          "rank_log2": 9,
+          "row_bits": 15,
+          "col_bits": 15,
+          "full_matrix_entries_log2": 30,
+          "hub_norm_sq_numerator": 27
+        }
+      },
+      "tiny_exhaustive_oracles": null
+    },
+    {
+      "k": 12,
+      "label_bits": 1,
+      "source_variables": 132,
+      "source_clauses": 132,
+      "cut": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "cut_edges": 36,
+      "min_balanced_hub_four_norm_sq": 108,
+      "grounds": {
+        "SAT": {
+          "certificate_bytes": 1115,
+          "construct_ms_median": 0.3025,
+          "verify_ms_median": 0.2627,
+          "joint_ms_median": 0.5693,
+          "verified": true,
+          "trials": 11,
+          "status": "SAT"
+        },
+        "#SAT": {
+          "certificate_bytes": 892,
+          "construct_ms_median": 0.2552,
+          "verify_ms_median": 0.2289,
+          "joint_ms_median": 0.4852,
+          "verified": true,
+          "trials": 11,
+          "model_count_log2": 66
+        },
+        "CUT_RANK": {
+          "certificate_bytes": 1090,
+          "construct_ms_median": 0.2686,
+          "verify_ms_median": 0.2308,
+          "joint_ms_median": 0.5105,
+          "verified": true,
+          "trials": 11,
+          "rank_log2": 36,
+          "row_bits": 66,
+          "col_bits": 66,
+          "full_matrix_entries_log2": 132,
+          "hub_norm_sq_numerator": 216
+        }
+      },
+      "tiny_exhaustive_oracles": null
+    },
+    {
+      "k": 24,
+      "label_bits": 2,
+      "source_variables": 1104,
+      "source_clauses": 1104,
+      "cut": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "cut_edges": 144,
+      "min_balanced_hub_four_norm_sq": 856,
+      "grounds": {
+        "SAT": {
+          "certificate_bytes": 8024,
+          "construct_ms_median": 2.3336,
+          "verify_ms_median": 2.2053,
+          "joint_ms_median": 4.6725,
+          "verified": true,
+          "trials": 11,
+          "status": "SAT"
+        },
+        "#SAT": {
+          "certificate_bytes": 6005,
+          "construct_ms_median": 2.0171,
+          "verify_ms_median": 1.8867,
+          "joint_ms_median": 3.9544,
+          "verified": true,
+          "trials": 11,
+          "model_count_log2": 552
+        },
+        "CUT_RANK": {
+          "certificate_bytes": 6188,
+          "construct_ms_median": 2.065,
+          "verify_ms_median": 1.9395,
+          "joint_ms_median": 4.0677,
+          "verified": true,
+          "trials": 11,
+          "rank_log2": 288,
+          "row_bits": 552,
+          "col_bits": 552,
+          "full_matrix_entries_log2": 1104,
+          "hub_norm_sq_numerator": 1728
+        }
+      },
+      "tiny_exhaustive_oracles": null
+    }
+  ]
+}
