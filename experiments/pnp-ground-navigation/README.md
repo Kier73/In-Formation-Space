@@ -98,3 +98,15 @@ P versus NP is a uniform **worst-case** question. Success on 96 variables, large
 ## PNG-003 — proof-carrying nonlocal algebraic Grounds
 
 [PNG-003](PNG-003.md) extends direct XOR recognition to exact consensus simplification and bounded resolution-derived parity, with replayable proof DAGs and independent source equivalence/count checks. Its guarded and implication-chain fixtures demonstrate hidden affine structure while retaining measured proof-construction costs and explicit undetermined outcomes.
+
+
+## OFG-001/002 — observer-fiber Grounds and shared-separator navigation
+
+The [observer-fiber experiments](observer_fibers/OFG-001.md) construct exact nonlinear observer-relative information certificates over independent SAT factors. [OFG-002](observer_fibers/OFG-002.md) extends this to private CNF bags connected by a verified small separator. When the separator is hidden, it counts overlapping output rectangles by exact inclusion–exclusion and navigates the resulting union by symbolic rank/unrank without enumerating the global assignment product. The implementation includes [source](observer_fibers/separator_fiber_ground.py), [exhaustive/adversarial tests](observer_fibers/test_separator_fiber_ground.py), and a [cost ledger](observer_fibers/OFG-002-results.json). It measures information bits, construction work, evidence checking and realization separately; it does not assert general polynomial SAT.
+
+Run from `experiments/pnp-ground-navigation/observer_fibers`:
+
+```sh
+python -m unittest discover -p 'test_*.py' -v
+python run_separator_fiber_ground.py
+```
