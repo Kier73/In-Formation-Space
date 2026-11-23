@@ -8,6 +8,7 @@ No network, no hidden result cache, no asserted universal complexity advantage.
 from __future__ import annotations
 
 import json
+import os
 import platform
 import sys
 from pathlib import Path
@@ -24,6 +25,8 @@ try:
     from frontier_ground import solve as png_solve,verify_assignment as png_verify
 except ImportError:
     png_solve=None
+if os.environ.get('CIG002_REQUIRE_PNG')=='1' and png_solve is None:
+    raise RuntimeError('native PNG-001 solver is required by repository CI')
 
 
 def _case(k,ell,kind,repetitions=9):
