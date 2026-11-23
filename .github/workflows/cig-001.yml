@@ -1,4 +1,4 @@
-name: CIG-001 intention-equivalent cut Grounds
+name: CIG-001/002 intention-equivalent cut Grounds
 
 on:
   pull_request:
@@ -31,3 +31,9 @@ jobs:
       - name: Reproduce matched symbolic Ground ledger
         working-directory: experiments/pnp-ground-navigation/cut_intention
         run: python run_cut_intention.py
+
+      - name: Reproduce coupled-source Ground ledger and run actual PNG-001 control
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        env:
+          CIG002_REQUIRE_PNG: '1'
+        run: python run_coupled_ground.py
