@@ -1,0 +1,244 @@
+{
+  "schema": "ifs.cig006.blind-random3sat-holdout.v1",
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41"
+  },
+  "source_only_selection": true,
+  "dpll_budget": {
+    "nodes": 1200,
+    "seconds": 1.5
+  },
+  "milp_limit_seconds": 2.5,
+  "cases": [
+    {
+      "size": 50,
+      "seed": 201,
+      "clauses": 213,
+      "source_digest": "27af4ad1bffca2be38ed16593fde53351e059ddfb2aebf525322e44ce54818ce",
+      "source_formed_status": "UNSAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 13.932,
+      "verify_ms": 7.592,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNSAT_CLAIM_NO_PROOF",
+        "wall_ms": 205.726,
+        "status_code": 2,
+        "model_source_checked": false
+      }
+    },
+    {
+      "size": 50,
+      "seed": 202,
+      "clauses": 213,
+      "source_digest": "d6466a684b19baceb1ce383bcd8ead5c1bfcb208c7f9cecc3044bfa65c6b4b61",
+      "source_formed_status": "SAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 8.106,
+      "verify_ms": 2.62,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 41.934,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "size": 50,
+      "seed": 203,
+      "clauses": 213,
+      "source_digest": "b110d04e1e39281de323340073b88a987c72e68553262c756b9d0b4462b9144e",
+      "source_formed_status": "SAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 5.803,
+      "verify_ms": 1.164,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 33.844,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "size": 50,
+      "seed": 204,
+      "clauses": 213,
+      "source_digest": "630450d7b362c0eef9b398138c7cea811f988539d09d7bd0b8fcb15575ea1194",
+      "source_formed_status": "SAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 8.34,
+      "verify_ms": 1.196,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 93.827,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "size": 75,
+      "seed": 201,
+      "clauses": 320,
+      "source_digest": "3f8908c44dfa65169cefa464eab30ddf2a4a4074374c7cd10df58b666904580c",
+      "source_formed_status": "SAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 21.297,
+      "verify_ms": 1.925,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 49.248,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "size": 75,
+      "seed": 202,
+      "clauses": 320,
+      "source_digest": "a72437a4342a2cd971c76b4e59d7376cf07ffa8bde560fe91e04f1979ef9a377",
+      "source_formed_status": "SAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 31.662,
+      "verify_ms": 1.777,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 378.337,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "size": 75,
+      "seed": 203,
+      "clauses": 320,
+      "source_digest": "916079771054624c57e3b3b729359901ab2fc3a2c3d38cf2de109cc4887bf4f3",
+      "source_formed_status": "UNSAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 58.572,
+      "verify_ms": 31.705,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNSAT_CLAIM_NO_PROOF",
+        "wall_ms": 529.982,
+        "status_code": 2,
+        "model_source_checked": false
+      }
+    },
+    {
+      "size": 75,
+      "seed": 204,
+      "clauses": 320,
+      "source_digest": "c7f83497d92197afdbfe6113cccd8464a68a89cb94e6dc9a3dd98a1db7e5d4cc",
+      "source_formed_status": "UNSAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 81.196,
+      "verify_ms": 44.226,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNSAT_CLAIM_NO_PROOF",
+        "wall_ms": 518.074,
+        "status_code": 2,
+        "model_source_checked": false
+      }
+    },
+    {
+      "size": 100,
+      "seed": 201,
+      "clauses": 426,
+      "source_digest": "d6d6434fb35b9d86db32ce8f1e9dd17e91d4ce06f8988e3ca8a0c075b8337ba1",
+      "source_formed_status": "SAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 183.194,
+      "verify_ms": 2.666,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 366.577,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "size": 100,
+      "seed": 202,
+      "clauses": 426,
+      "source_digest": "cfc6fe700386e2427c534063a5cf385e83ba2cabdf3b91440e147a3ca1bf87d1",
+      "source_formed_status": "SAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 387.282,
+      "verify_ms": 2.473,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 947.18,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "size": 100,
+      "seed": 203,
+      "clauses": 426,
+      "source_digest": "23e2b2e6750c184249c560131ee27d4d984705cd9d7cda47fa3345de3c8494ae",
+      "source_formed_status": "SAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 290.193,
+      "verify_ms": 2.712,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 935.66,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "size": 100,
+      "seed": 204,
+      "clauses": 426,
+      "source_digest": "e923b12e00d68f87a13aad026942b2cdb3716c38a11615f8d8285b1c953f24a3",
+      "source_formed_status": "SAT",
+      "source_formed_family": "bounded-source-DPLL",
+      "verified": true,
+      "construct_ms": 331.678,
+      "verify_ms": 2.363,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 827.517,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    }
+  ],
+  "scope": "deterministic held-out random 3-CNF near 4.26 ratio; HiGHS infeasibility has no independently checked proof"
+}

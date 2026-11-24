@@ -1,0 +1,196 @@
+{
+  "schema": "ifs.cig006.source-language-campaign.v1",
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41"
+  },
+  "source_endpoint_variables": 90,
+  "source_original_clauses": 106,
+  "cases": [
+    {
+      "time": "0",
+      "consensus": "CONSENSUS_IN_DISCOVERED_CLASS",
+      "total_source_orientations": 9,
+      "source_valid_processors": 4,
+      "chosen_orientation": [
+        3,
+        2,
+        5,
+        6
+      ],
+      "feature_dimensions": [
+        10,
+        8,
+        9,
+        9
+      ],
+      "intention_nonlinear_code_bits": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "future_image_sizes": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "counterexample": null,
+      "full_production_ms": 1.3641,
+      "independent_verification_ms": 3.3279,
+      "source_fixedpoint_models": 8,
+      "original_source_model_count": "2199023255552",
+      "total_producer_feature_pullbacks": 36,
+      "total_matrix_products": 0
+    },
+    {
+      "time": "1",
+      "consensus": "INTERPRETATION_AMBIGUOUS",
+      "total_source_orientations": 9,
+      "source_valid_processors": 4,
+      "chosen_orientation": [
+        3,
+        2,
+        5,
+        6
+      ],
+      "feature_dimensions": [
+        10,
+        8,
+        9,
+        9
+      ],
+      "intention_nonlinear_code_bits": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "future_image_sizes": [
+        8,
+        6,
+        8,
+        6
+      ],
+      "counterexample": {
+        "initial": 4,
+        "first": [
+          0,
+          1,
+          0
+        ],
+        "second": [
+          1,
+          0,
+          0
+        ]
+      },
+      "full_production_ms": 1.3475,
+      "independent_verification_ms": 3.4391,
+      "source_fixedpoint_models": 8,
+      "original_source_model_count": "2199023255552",
+      "total_producer_feature_pullbacks": 36,
+      "total_matrix_products": 4
+    },
+    {
+      "time": "3",
+      "consensus": "INTERPRETATION_AMBIGUOUS",
+      "total_source_orientations": 9,
+      "source_valid_processors": 4,
+      "chosen_orientation": [
+        3,
+        2,
+        5,
+        6
+      ],
+      "feature_dimensions": [
+        10,
+        8,
+        9,
+        9
+      ],
+      "intention_nonlinear_code_bits": [
+        3,
+        2,
+        3,
+        2
+      ],
+      "future_image_sizes": [
+        8,
+        4,
+        8,
+        4
+      ],
+      "counterexample": {
+        "initial": 3,
+        "first": [
+          0,
+          1,
+          0
+        ],
+        "second": [
+          1,
+          0,
+          0
+        ]
+      },
+      "full_production_ms": 1.7136,
+      "independent_verification_ms": 3.7345,
+      "source_fixedpoint_models": 8,
+      "original_source_model_count": "2199023255552",
+      "total_producer_feature_pullbacks": 36,
+      "total_matrix_products": 12
+    },
+    {
+      "time": "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000173",
+      "consensus": "INTERPRETATION_AMBIGUOUS",
+      "total_source_orientations": 9,
+      "source_valid_processors": 4,
+      "chosen_orientation": [
+        3,
+        2,
+        5,
+        6
+      ],
+      "feature_dimensions": [
+        10,
+        8,
+        9,
+        9
+      ],
+      "intention_nonlinear_code_bits": [
+        3,
+        2,
+        3,
+        2
+      ],
+      "future_image_sizes": [
+        8,
+        4,
+        8,
+        4
+      ],
+      "counterexample": {
+        "initial": 3,
+        "first": [
+          0,
+          0,
+          1
+        ],
+        "second": [
+          1,
+          0,
+          0
+        ]
+      },
+      "full_production_ms": 3.915,
+      "independent_verification_ms": 11.1009,
+      "source_fixedpoint_models": 8,
+      "original_source_model_count": "2199023255552",
+      "total_producer_feature_pullbacks": 36,
+      "total_matrix_products": 1768
+    }
+  ],
+  "scope": "finite complete orientation class, mathematical outcomes; no live host"
+}

@@ -1,0 +1,59 @@
+{
+  "schema": "ifs.cig006.large-budget-controls.v1",
+  "environment": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "limits": {
+    "dpll_nodes": 1200,
+    "dpll_seconds": 1.5,
+    "milp_seconds": 2.5
+  },
+  "cases": [
+    {
+      "size": 200,
+      "clauses": 852,
+      "decision": "UNKNOWN",
+      "construction_ms": 1206.626,
+      "independent_verification_ms": 4.606,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNKNOWN",
+        "wall_ms": 2507.588,
+        "status_code": 1,
+        "model_source_checked": false
+      },
+      "source_digest": "b95ceae74e3301cfa29f8646bbaf93f902c436abc00808a1facd5986d0eb5d90"
+    },
+    {
+      "size": 300,
+      "clauses": 1278,
+      "decision": "UNKNOWN",
+      "construction_ms": 1506.689,
+      "independent_verification_ms": 7.041,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNKNOWN",
+        "wall_ms": 2504.19,
+        "status_code": 1,
+        "model_source_checked": false
+      },
+      "source_digest": "3fdf824ea64ef4cd7b816ffa9bd5ed557705c46f9fcf77f10c9e245e34cf6bbb"
+    },
+    {
+      "size": 500,
+      "clauses": 2130,
+      "decision": "UNKNOWN",
+      "construction_ms": 1512.859,
+      "independent_verification_ms": 13.187,
+      "independent_milp": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNKNOWN",
+        "wall_ms": 2503.834,
+        "status_code": 1,
+        "model_source_checked": false
+      },
+      "source_digest": "c0fbbb2fea424bc03d566be35a567c98c07bf1e2fe92b45948ed977c40e8bcd6"
+    }
+  ]
+}
