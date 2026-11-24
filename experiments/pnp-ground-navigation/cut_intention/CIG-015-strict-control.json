@@ -1,0 +1,176 @@
+[
+  {
+    "n": 289,
+    "regions": 32,
+    "clauses": 192,
+    "rounds": 2,
+    "extending": {
+      "preparation_ms": 75.318742,
+      "query_ms": 465.836012,
+      "total_ms": 541.154754,
+      "metrics": {
+        "language_hits": 512,
+        "query_bins": 11772,
+        "join": 496,
+        "producer_cells": 3360,
+        "new_full_checks": 496,
+        "equivalence_attempts": 128,
+        "implication_edge_visits": 2048,
+        "symbolic_bins": 1090,
+        "equivalence_extensions": 64,
+        "split_fibers": 654,
+        "extensions": 128,
+        "symbolic_extensions": 64,
+        "extension_check_states": 65536,
+        "extension_check_bins": 1090,
+        "semantic_states": 65536,
+        "refinements": 64
+      },
+      "runs": [
+        {
+          "ms": 356.462249,
+          "metrics": {
+            "language_hits": 256,
+            "query_bins": 4796,
+            "join": 248,
+            "producer_cells": 1680,
+            "new_full_checks": 248,
+            "equivalence_attempts": 128,
+            "implication_edge_visits": 2048,
+            "symbolic_bins": 1090,
+            "equivalence_extensions": 64,
+            "split_fibers": 654,
+            "extensions": 128,
+            "symbolic_extensions": 64,
+            "extension_check_states": 65536,
+            "extension_check_bins": 1090,
+            "semantic_states": 65536,
+            "refinements": 64
+          }
+        },
+        {
+          "ms": 109.373763,
+          "metrics": {
+            "language_hits": 256,
+            "query_bins": 6976,
+            "join": 248,
+            "producer_cells": 1680,
+            "new_full_checks": 248
+          }
+        }
+      ],
+      "archive_bytes": 19040,
+      "bins": 872,
+      "seed": {
+        "seed_states": 32768,
+        "predicate_evaluations": 6144,
+        "source_models": 6144,
+        "seed_check_states": 32768
+      }
+    },
+    "static": {
+      "preparation_ms": 76.048025,
+      "query_ms": 1133.321829,
+      "total_ms": 1209.369854,
+      "metrics": {
+        "predicate_reuse": 64,
+        "predicate_bins": 436,
+        "predicate_check_bins": 436,
+        "novel_clause_covers": 0,
+        "join": 496,
+        "producer_cells": 462112,
+        "new_full_checks": 944,
+        "boolean": 448
+      },
+      "runs": [
+        {
+          "ms": 577.051173,
+          "metrics": {
+            "predicate_reuse": 32,
+            "predicate_bins": 218,
+            "predicate_check_bins": 218,
+            "novel_clause_covers": 0,
+            "join": 248,
+            "producer_cells": 231056,
+            "new_full_checks": 472,
+            "boolean": 224
+          }
+        },
+        {
+          "ms": 556.270656,
+          "metrics": {
+            "predicate_reuse": 32,
+            "predicate_bins": 218,
+            "predicate_check_bins": 218,
+            "novel_clause_covers": 0,
+            "join": 248,
+            "producer_cells": 231056,
+            "new_full_checks": 472,
+            "boolean": 224
+          }
+        }
+      ],
+      "archive_bytes": 12296,
+      "bins": 218,
+      "seed": {
+        "seed_states": 32768,
+        "predicate_evaluations": 6144,
+        "source_models": 6144,
+        "seed_checks": 32,
+        "bins": 218,
+        "coordinate_cells": 248
+      }
+    },
+    "cold": {
+      "preparation_ms": 0.00028,
+      "query_ms": 1209.231374,
+      "total_ms": 1209.231654,
+      "metrics": {
+        "boolean": 512,
+        "producer_cells": 527648,
+        "new_full_checks": 1008,
+        "join": 496
+      },
+      "runs": [
+        {
+          "ms": 605.840169,
+          "metrics": {
+            "boolean": 256,
+            "producer_cells": 263824,
+            "new_full_checks": 504,
+            "join": 248
+          }
+        },
+        {
+          "ms": 603.391205,
+          "metrics": {
+            "boolean": 256,
+            "producer_cells": 263824,
+            "new_full_checks": 504,
+            "join": 248
+          }
+        }
+      ]
+    },
+    "count_digits": [
+      56,
+      56,
+      55,
+      61,
+      55,
+      63,
+      50,
+      1
+    ],
+    "count_sha256": [
+      "5bf9d2bf4387588eb301598d8a281652a25e620f774029bddb08c36469a6d333",
+      "5bf9d2bf4387588eb301598d8a281652a25e620f774029bddb08c36469a6d333",
+      "69175391477c2e33603a09f58d8d117a969adfa7fd06d65fff7beaaa0fea8fb7",
+      "ac5733c39dd975b41ebff356348816fa8db163d75b12be11d963eb96a00bf117",
+      "69175391477c2e33603a09f58d8d117a969adfa7fd06d65fff7beaaa0fea8fb7",
+      "37bb1a721e1123e4cd69ca6e60b6827bbf7b222ff3ac0494ac813619afbcf063",
+      "53e48463b777b9fdbc3402a7a173b98e6f0c391fc2a652326065aa82f5252992",
+      "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    ]
+  }
+]
