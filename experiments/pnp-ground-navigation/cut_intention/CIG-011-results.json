@@ -1,0 +1,1853 @@
+{
+  "cycles": [
+    {
+      "n": 64,
+      "clauses": 144,
+      "count": "2207",
+      "selection_ms": 24.970487,
+      "selected": "walk-balanced",
+      "leaf_budget": 3,
+      "score": {
+        "name": "walk-balanced",
+        "status": "ADMITTED",
+        "cells": 436,
+        "width": 3,
+        "depth": 5,
+        "nodes": 63,
+        "plan": "bce75ededd75c8576d07e9d2d7058d41ba994492cbbb36706ac70630113c7ffc",
+        "objective": 436,
+        "formation_ns": 1890183
+      },
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 415275,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 343286,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "ADMITTED",
+          "cells": 18596,
+          "width": 11,
+          "depth": 16,
+          "nodes": 119,
+          "split_attempts": 2336,
+          "levels": 2,
+          "estimated_cells": 18596,
+          "plan": "ba3ce38bf75e1f06c46ea7c2014644cd9d9ea527373da33dcf3e7b8974779644",
+          "objective": 18596,
+          "formation_ns": 4133177,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 174283,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 1616912,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 436,
+          "width": 3,
+          "depth": 5,
+          "nodes": 63,
+          "plan": "bce75ededd75c8576d07e9d2d7058d41ba994492cbbb36706ac70630113c7ffc",
+          "objective": 436,
+          "formation_ns": 1890183,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 436,
+          "width": 3,
+          "depth": 5,
+          "nodes": 63,
+          "split_attempts": 1361,
+          "levels": 2,
+          "estimated_cells": 436,
+          "plan": "bce75ededd75c8576d07e9d2d7058d41ba994492cbbb36706ac70630113c7ffc",
+          "objective": 436,
+          "formation_ns": 2898510,
+          "leaf_budget": 3
+        },
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 419821,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "ADMITTED",
+          "cells": 19472,
+          "width": 12,
+          "depth": 4,
+          "nodes": 29,
+          "plan": "4af3482d44f06557268b33521a715c887a187a88294e81d5c2229ca4f59dde7a",
+          "objective": 19472,
+          "formation_ns": 1318453,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "ADMITTED",
+          "cells": 5512,
+          "width": 8,
+          "depth": 9,
+          "nodes": 29,
+          "split_attempts": 560,
+          "levels": 1,
+          "estimated_cells": 5512,
+          "plan": "e7b9a7940a67b9e1899434d56f3de62f8310ef3f2f2950249720c70adc3d3e17",
+          "objective": 5512,
+          "formation_ns": 2122733,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 76905,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "ADMITTED",
+          "cells": 4720,
+          "width": 10,
+          "depth": 10,
+          "nodes": 25,
+          "split_attempts": 241,
+          "levels": 1,
+          "estimated_cells": 4720,
+          "plan": "827802d2491e50a70b14288ec350bd0308ea1b9e71f6ba692bd968ca6043d899",
+          "objective": 4720,
+          "formation_ns": 1895001,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 2136,
+          "width": 8,
+          "depth": 4,
+          "nodes": 21,
+          "plan": "9dd96f68248a4b6004d6f51b6c4be8e56a2a8e17e6984ed32d33d0d38710dbbe",
+          "objective": 2136,
+          "formation_ns": 1220486,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 2068,
+          "width": 8,
+          "depth": 4,
+          "nodes": 21,
+          "split_attempts": 220,
+          "levels": 1,
+          "estimated_cells": 2068,
+          "plan": "b15381e02236bc9d85e4f6e16ca0c65ed7344020c79441f4233a5010daa41c58",
+          "objective": 2068,
+          "formation_ns": 1980048,
+          "leaf_budget": 8
+        }
+      ],
+      "realize_ms": 6.804835,
+      "metrics": {
+        "affine": 16,
+        "producer_cells": 436,
+        "new_full_checks": 63,
+        "boolean": 16,
+        "join": 31
+      },
+      "alternate": {
+        "method": "walk",
+        "score": {
+          "cells": 2136,
+          "width": 8,
+          "depth": 4,
+          "nodes": 21
+        },
+        "transition_ms": 7.239799,
+        "transition": {
+          "boolean": 11,
+          "producer_cells": 2136,
+          "new_full_checks": 21,
+          "join": 10
+        },
+        "cold_ms": 7.356555,
+        "cold": {
+          "boolean": 11,
+          "producer_cells": 2136,
+          "new_full_checks": 21,
+          "join": 10
+        },
+        "wide_to_selected_ms": 6.994791,
+        "wide_to_selected": {
+          "affine": 16,
+          "producer_cells": 436,
+          "new_full_checks": 63,
+          "boolean": 16,
+          "join": 31
+        }
+      }
+    },
+    {
+      "n": 256,
+      "clauses": 576,
+      "count": "23725150497407",
+      "selection_ms": 145.467945,
+      "selected": "walk-balanced",
+      "leaf_budget": 3,
+      "score": {
+        "name": "walk-balanced",
+        "status": "ADMITTED",
+        "cells": 1780,
+        "width": 3,
+        "depth": 7,
+        "nodes": 255,
+        "plan": "7ee0d2688d6442e5779bb9f048cd791ba12c759d46d8f1d13500c1b471ad0ff0",
+        "objective": 1780,
+        "formation_ns": 67141406
+      },
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 1586156,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 488115,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "ADMITTED",
+          "cells": 61346,
+          "width": 11,
+          "depth": 22,
+          "nodes": 479,
+          "split_attempts": 10760,
+          "levels": 2,
+          "estimated_cells": 61346,
+          "plan": "8fbdbcd44ea61680e317ca6bd2d77cf1fba30d0565736dca07d92be7e9270abd",
+          "objective": 61346,
+          "formation_ns": 16986479,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 400072,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 5565010,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 1780,
+          "width": 3,
+          "depth": 7,
+          "nodes": 255,
+          "plan": "7ee0d2688d6442e5779bb9f048cd791ba12c759d46d8f1d13500c1b471ad0ff0",
+          "objective": 1780,
+          "formation_ns": 67141406,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 1780,
+          "width": 3,
+          "depth": 7,
+          "nodes": 255,
+          "split_attempts": 5524,
+          "levels": 2,
+          "estimated_cells": 1780,
+          "plan": "7ee0d2688d6442e5779bb9f048cd791ba12c759d46d8f1d13500c1b471ad0ff0",
+          "objective": 1780,
+          "formation_ns": 11823192,
+          "leaf_budget": 3
+        },
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 1489451,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 130637,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "ADMITTED",
+          "cells": 55336,
+          "width": 11,
+          "depth": 17,
+          "nodes": 127,
+          "split_attempts": 2730,
+          "levels": 2,
+          "estimated_cells": 55336,
+          "plan": "7674938713698d7451a37a4eb731f6f0e05566a120688d6968452c76cd2eb9c8",
+          "objective": 55336,
+          "formation_ns": 9609433,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 260231,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 2336274,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 9016,
+          "width": 8,
+          "depth": 6,
+          "nodes": 85,
+          "plan": "1a736802eb3cd0d0e85875dfd71ee9e74594fdd72aa5d8b85258c9b9228dd103",
+          "objective": 9016,
+          "formation_ns": 4528691,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 8596,
+          "width": 8,
+          "depth": 6,
+          "nodes": 85,
+          "split_attempts": 1584,
+          "levels": 2,
+          "estimated_cells": 8596,
+          "plan": "428fcebf2143353225d0ca84b91d87989000dd947fc24728d535500313e55c99",
+          "objective": 8596,
+          "formation_ns": 7301703,
+          "leaf_budget": 8
+        }
+      ],
+      "realize_ms": 27.419071,
+      "metrics": {
+        "affine": 64,
+        "producer_cells": 1780,
+        "new_full_checks": 255,
+        "boolean": 64,
+        "join": 127
+      },
+      "alternate": {
+        "method": "walk",
+        "score": {
+          "cells": 9016,
+          "width": 8,
+          "depth": 6,
+          "nodes": 85
+        },
+        "transition_ms": 32.872573,
+        "transition": {
+          "boolean": 43,
+          "producer_cells": 9016,
+          "new_full_checks": 85,
+          "join": 42
+        },
+        "cold_ms": 29.296615,
+        "cold": {
+          "boolean": 43,
+          "producer_cells": 9016,
+          "new_full_checks": 85,
+          "join": 42
+        },
+        "wide_to_selected_ms": 27.41861,
+        "wide_to_selected": {
+          "affine": 64,
+          "producer_cells": 1780,
+          "new_full_checks": 255,
+          "boolean": 64,
+          "join": 127
+        }
+      }
+    },
+    {
+      "n": 1024,
+      "clauses": 2304,
+      "count": "316837008400094222150776738483768236006420971486980607",
+      "selection_ms": 346.720874,
+      "selected": "walk-balanced",
+      "leaf_budget": 3,
+      "score": {
+        "name": "walk-balanced",
+        "status": "ADMITTED",
+        "cells": 7156,
+        "width": 3,
+        "depth": 9,
+        "nodes": 1023,
+        "plan": "e085fde5d67c8dbd8ec1dd5f85c9241b0f79639d85037b6f767ae9bd6783b9be",
+        "objective": 7156,
+        "formation_ns": 25472043
+      },
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 8605023,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 1089539,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 34487041,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 846063,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 9555954,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 7156,
+          "width": 3,
+          "depth": 9,
+          "nodes": 1023,
+          "plan": "e085fde5d67c8dbd8ec1dd5f85c9241b0f79639d85037b6f767ae9bd6783b9be",
+          "objective": 7156,
+          "formation_ns": 25472043,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 7156,
+          "width": 3,
+          "depth": 9,
+          "nodes": 1023,
+          "split_attempts": 23121,
+          "levels": 3,
+          "estimated_cells": 7156,
+          "plan": "e085fde5d67c8dbd8ec1dd5f85c9241b0f79639d85037b6f767ae9bd6783b9be",
+          "objective": 7156,
+          "formation_ns": 45386595,
+          "leaf_budget": 3
+        },
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 6833909,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "ADMITTED",
+          "cells": 539792,
+          "width": 12,
+          "depth": 8,
+          "nodes": 509,
+          "plan": "28af8214649449959416d2cb7eda2551058387f4401dcfe0631e25f32f120b7c",
+          "objective": 539792,
+          "formation_ns": 25870721,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "ADMITTED",
+          "cells": 349576,
+          "width": 12,
+          "depth": 26,
+          "nodes": 509,
+          "split_attempts": 11440,
+          "levels": 2,
+          "estimated_cells": 349576,
+          "plan": "d48961c22721aec0bc7e24f6f52ad9939214459ccd88a90e7adba426e12e1850",
+          "objective": 349576,
+          "formation_ns": 48158204,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 334613,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 7677538,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 36632,
+          "width": 8,
+          "depth": 8,
+          "nodes": 341,
+          "plan": "540029483aea5f4ce1bad47ecda4989f29cd5f83469981a9deeb72d52417ab18",
+          "objective": 36632,
+          "formation_ns": 21709482,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 34708,
+          "width": 8,
+          "depth": 8,
+          "nodes": 341,
+          "split_attempts": 7240,
+          "levels": 2,
+          "estimated_cells": 34708,
+          "plan": "88f8be68bdc31d85a9170cbbc70a61937fd541ef9890afb43d3022854622e1db",
+          "objective": 34708,
+          "formation_ns": 32355875,
+          "leaf_budget": 8
+        }
+      ],
+      "realize_ms": 109.237181,
+      "metrics": {
+        "affine": 256,
+        "producer_cells": 7156,
+        "new_full_checks": 1023,
+        "boolean": 256,
+        "join": 511
+      },
+      "alternate": {
+        "method": "walk",
+        "score": {
+          "cells": 36632,
+          "width": 8,
+          "depth": 8,
+          "nodes": 341
+        },
+        "transition_ms": 128.728457,
+        "transition": {
+          "boolean": 171,
+          "producer_cells": 36632,
+          "new_full_checks": 341,
+          "join": 170
+        },
+        "cold_ms": 129.325806,
+        "cold": {
+          "boolean": 171,
+          "producer_cells": 36632,
+          "new_full_checks": 341,
+          "join": 170
+        },
+        "wide_to_selected_ms": 113.189395,
+        "wide_to_selected": {
+          "affine": 256,
+          "producer_cells": 7156,
+          "new_full_checks": 1023,
+          "boolean": 256,
+          "join": 511
+        }
+      }
+    },
+    {
+      "n": 2048,
+      "clauses": 4608,
+      "count": "100385689891921376688754239992826256704879627683181901515099398613465618884806971304035121947368905594088447",
+      "selection_ms": 684.391076,
+      "selected": "walk-balanced",
+      "leaf_budget": 3,
+      "score": {
+        "name": "walk-balanced",
+        "status": "ADMITTED",
+        "cells": 14324,
+        "width": 3,
+        "depth": 10,
+        "nodes": 2047,
+        "plan": "eea9e4e011de1bdfd2d3082e159c9674412b94970e84327d92ea8106858d2e7e",
+        "objective": 14324,
+        "formation_ns": 53825828
+      },
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 16259235,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 1719877,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 76817779,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 1626096,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 32680013,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 14324,
+          "width": 3,
+          "depth": 10,
+          "nodes": 2047,
+          "plan": "eea9e4e011de1bdfd2d3082e159c9674412b94970e84327d92ea8106858d2e7e",
+          "objective": 14324,
+          "formation_ns": 53825828,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 14324,
+          "width": 3,
+          "depth": 10,
+          "nodes": 2047,
+          "split_attempts": 46250,
+          "levels": 3,
+          "estimated_cells": 14324,
+          "plan": "eea9e4e011de1bdfd2d3082e159c9674412b94970e84327d92ea8106858d2e7e",
+          "objective": 14324,
+          "formation_ns": 99249099,
+          "leaf_budget": 3
+        },
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 16971176,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 883639,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 29364457,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 527613,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 14484336,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 73712,
+          "width": 8,
+          "depth": 9,
+          "nodes": 683,
+          "plan": "8a8d4a2b4d43f5b56c7cc8b70299d5fe1bb00e401dce5b2990237f7cee91ad8c",
+          "objective": 73712,
+          "formation_ns": 45585935,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 69636,
+          "width": 8,
+          "depth": 9,
+          "nodes": 683,
+          "split_attempts": 15031,
+          "levels": 3,
+          "estimated_cells": 69636,
+          "plan": "911dd0a2b55eee171128402156d59832f68924c5742b9e2c783230c43d819a9e",
+          "objective": 69636,
+          "formation_ns": 73930867,
+          "leaf_budget": 8
+        }
+      ],
+      "realize_ms": 259.006094,
+      "metrics": {
+        "affine": 512,
+        "producer_cells": 14324,
+        "new_full_checks": 2047,
+        "boolean": 512,
+        "join": 1023
+      },
+      "alternate": {
+        "method": "walk",
+        "score": {
+          "cells": 73712,
+          "width": 8,
+          "depth": 9,
+          "nodes": 683
+        },
+        "transition_ms": 263.860081,
+        "transition": {
+          "boolean": 342,
+          "producer_cells": 73712,
+          "new_full_checks": 683,
+          "join": 341
+        },
+        "cold_ms": 257.517707,
+        "cold": {
+          "boolean": 342,
+          "producer_cells": 73712,
+          "new_full_checks": 683,
+          "join": 341
+        },
+        "wide_to_selected_ms": 234.292794,
+        "wide_to_selected": {
+          "affine": 512,
+          "producer_cells": 14324,
+          "new_full_checks": 2047,
+          "boolean": 512,
+          "join": 1023
+        }
+      }
+    },
+    {
+      "n": 4096,
+      "clauses": 9216,
+      "count": "10077286735077005660982008061065073068074475300466012444629388487574769652115651763500026128367679301744790365920278775601766000217455997930809875108639504578766853603625505162682177708433023235042368022152858871807",
+      "selection_ms": 1693.582101,
+      "selected": "walk-balanced",
+      "leaf_budget": 3,
+      "score": {
+        "name": "walk-balanced",
+        "status": "ADMITTED",
+        "cells": 28660,
+        "width": 3,
+        "depth": 11,
+        "nodes": 4095,
+        "plan": "0004d20b24214c5e3f154c4d9e9dc21bf8778203619de82846fef437a86fc87b",
+        "objective": 28660,
+        "formation_ns": 107309356
+      },
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 28498151,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 3267974,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 187501196,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 2791057,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 38271547,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 28660,
+          "width": 3,
+          "depth": 11,
+          "nodes": 4095,
+          "plan": "0004d20b24214c5e3f154c4d9e9dc21bf8778203619de82846fef437a86fc87b",
+          "objective": 28660,
+          "formation_ns": 107309356,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 28660,
+          "width": 3,
+          "depth": 11,
+          "nodes": 4095,
+          "split_attempts": 92564,
+          "levels": 3,
+          "estimated_cells": 28660,
+          "plan": "0004d20b24214c5e3f154c4d9e9dc21bf8778203619de82846fef437a86fc87b",
+          "objective": 28660,
+          "formation_ns": 277240702,
+          "leaf_budget": 3
+        },
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 27826792,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "ADMITTED",
+          "cells": 2131536,
+          "width": 12,
+          "depth": 10,
+          "nodes": 2045,
+          "plan": "9a63b46b248b17e53d93e56c00e13d275d6298715ad094195901b62c8dd8ec65",
+          "objective": 2131536,
+          "formation_ns": 99851963,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "ADMITTED",
+          "cells": 1390728,
+          "width": 12,
+          "depth": 32,
+          "nodes": 2045,
+          "split_attempts": 46130,
+          "levels": 3,
+          "estimated_cells": 1390728,
+          "plan": "2f14cb27231fc3d20eee9f3598dca007259a5a8dc2d77153e93db580d64abbaf",
+          "objective": 1390728,
+          "formation_ns": 185484003,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 942878,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 33870409,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 147192,
+          "width": 8,
+          "depth": 10,
+          "nodes": 1365,
+          "plan": "1da5e1fc1fe2df8cab03ec308550f78ec8e3fab06237239e57b90236fbb5a2a0",
+          "objective": 147192,
+          "formation_ns": 99334363,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 139156,
+          "width": 8,
+          "depth": 10,
+          "nodes": 1365,
+          "split_attempts": 30364,
+          "levels": 3,
+          "estimated_cells": 139156,
+          "plan": "a0cb0317578fc27ea8dbd3652fda5c190c4bdd986f6512d52fb4cced252af488",
+          "objective": 139156,
+          "formation_ns": 228868377,
+          "leaf_budget": 8
+        }
+      ],
+      "realize_ms": 506.181548,
+      "metrics": {
+        "affine": 1024,
+        "producer_cells": 28660,
+        "new_full_checks": 4095,
+        "boolean": 1024,
+        "join": 2047
+      },
+      "alternate": {
+        "method": "walk",
+        "score": {
+          "cells": 147192,
+          "width": 8,
+          "depth": 10,
+          "nodes": 1365
+        },
+        "transition_ms": 593.676731,
+        "transition": {
+          "boolean": 683,
+          "producer_cells": 147192,
+          "new_full_checks": 1365,
+          "join": 682
+        },
+        "cold_ms": 703.091813,
+        "cold": {
+          "boolean": 683,
+          "producer_cells": 147192,
+          "new_full_checks": 1365,
+          "join": 682
+        },
+        "wide_to_selected_ms": 505.056367,
+        "wide_to_selected": {
+          "affine": 1024,
+          "producer_cells": 28660,
+          "new_full_checks": 4095,
+          "boolean": 1024,
+          "join": 2047
+        }
+      }
+    },
+    {
+      "n": 8192,
+      "clauses": 18432,
+      "count": "101551707940958976476873723686691537560124936216049957128359991876726343954548826671188589246207404049249584475544225686479598181242824239865026718975582831790339042655215629893459077413144429144815676624628680986839974189561981371422914234508007983748918604313893297542075331365600286467195288043916251150089236097377941252734677327147814393642121714369673795261602383375518218563568418129690432349780011400594146198108859445247",
+      "selection_ms": 3169.449703,
+      "selected": "walk-balanced",
+      "leaf_budget": 3,
+      "score": {
+        "name": "walk-balanced",
+        "status": "ADMITTED",
+        "cells": 57332,
+        "width": 3,
+        "depth": 12,
+        "nodes": 8191,
+        "plan": "129346ff5036a374194f42b004ddb20441a2ddc16a2ad45009e73167da758a9c",
+        "objective": 57332,
+        "formation_ns": 223114866
+      },
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 64343570,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 6812184,
+          "leaf_budget": 3
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 484694305,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 5665209,
+          "leaf_budget": 3
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 88012950,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 57332,
+          "width": 3,
+          "depth": 12,
+          "nodes": 8191,
+          "plan": "129346ff5036a374194f42b004ddb20441a2ddc16a2ad45009e73167da758a9c",
+          "objective": 57332,
+          "formation_ns": 223114866,
+          "leaf_budget": 3
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 57332,
+          "width": 3,
+          "depth": 12,
+          "nodes": 8191,
+          "split_attempts": 185640,
+          "levels": 3,
+          "estimated_cells": 57332,
+          "plan": "129346ff5036a374194f42b004ddb20441a2ddc16a2ad45009e73167da758a9c",
+          "objective": 57332,
+          "formation_ns": 564016362,
+          "leaf_budget": 3
+        },
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 77082946,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 3004879,
+          "leaf_budget": 8
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 137639462,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 1811043,
+          "leaf_budget": 8
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 59801566,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-balanced",
+          "status": "ADMITTED",
+          "cells": 294896,
+          "width": 8,
+          "depth": 11,
+          "nodes": 2731,
+          "plan": "0ff9026dfe3a5e225681aab675c0a0712bcea99ebb2c5fa958e3f98a0918d40e",
+          "objective": 294896,
+          "formation_ns": 188238571,
+          "leaf_budget": 8
+        },
+        {
+          "name": "walk-optimized",
+          "status": "ADMITTED",
+          "cells": 278532,
+          "width": 8,
+          "depth": 11,
+          "nodes": 2731,
+          "split_attempts": 61305,
+          "levels": 3,
+          "estimated_cells": 278532,
+          "plan": "ece327b3a18e90dba6cd18a809f0accb754addb26fd9e0cc7827100ebfe7a892",
+          "objective": 278532,
+          "formation_ns": 385368492,
+          "leaf_budget": 8
+        }
+      ],
+      "realize_ms": 1230.595026,
+      "metrics": {
+        "affine": 2048,
+        "producer_cells": 57332,
+        "new_full_checks": 8191,
+        "boolean": 2048,
+        "join": 4095
+      },
+      "alternate": {
+        "method": "walk",
+        "score": {
+          "cells": 294896,
+          "width": 8,
+          "depth": 11,
+          "nodes": 2731
+        },
+        "transition_ms": 1198.721578,
+        "transition": {
+          "boolean": 1366,
+          "producer_cells": 294896,
+          "new_full_checks": 2731,
+          "join": 1365
+        },
+        "cold_ms": 1329.601396,
+        "cold": {
+          "boolean": 1366,
+          "producer_cells": 294896,
+          "new_full_checks": 2731,
+          "join": 1365
+        },
+        "wide_to_selected_ms": 1482.907742,
+        "wide_to_selected": {
+          "affine": 2048,
+          "producer_cells": 57332,
+          "new_full_checks": 8191,
+          "boolean": 2048,
+          "join": 4095
+        }
+      }
+    }
+  ],
+  "revisions": [
+    {
+      "i": 0,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 46.390939,
+      "cold_ms": 116.631467,
+      "metrics": {
+        "proof_reuse": 1013,
+        "boolean": 1,
+        "producer_cells": 76,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 1,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 42.391787,
+      "cold_ms": 121.113858,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 2,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 44.940018,
+      "cold_ms": 113.851047,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 3,
+      "count": "0",
+      "warm_ms": 35.741428,
+      "cold_ms": 104.083181,
+      "metrics": {
+        "proof_reuse": 1013,
+        "boolean": 1,
+        "producer_cells": 76,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 4,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 46.405181,
+      "cold_ms": 109.72878,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 5,
+      "count": "87571595343018854458033386304178158174356588264390370",
+      "warm_ms": 44.376111,
+      "cold_ms": 109.091581,
+      "metrics": {
+        "proof_reuse": 1013,
+        "boolean": 1,
+        "producer_cells": 76,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 6,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 43.414063,
+      "cold_ms": 112.002408,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 7,
+      "count": "0",
+      "warm_ms": 34.659847,
+      "cold_ms": 108.048343,
+      "metrics": {
+        "proof_reuse": 1013,
+        "boolean": 1,
+        "producer_cells": 72,
+        "new_full_checks": 9,
+        "join": 8,
+        "semantic_join_reuse": 1
+      }
+    },
+    {
+      "i": 8,
+      "count": "87571595343018854458033386304178158174356588264390370",
+      "warm_ms": 42.919501,
+      "cold_ms": 113.93937,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 9,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 44.451583,
+      "cold_ms": 109.346464,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 10,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 51.066734,
+      "cold_ms": 116.543425,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 11,
+      "count": "0",
+      "warm_ms": 40.933704,
+      "cold_ms": 123.99607,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 52,
+        "new_full_checks": 7,
+        "join": 6,
+        "semantic_join_reuse": 3
+      }
+    },
+    {
+      "i": 12,
+      "count": "87571595343018854458033386304178158174356588264390370",
+      "warm_ms": 44.320136,
+      "cold_ms": 112.182538,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 13,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 43.987356,
+      "cold_ms": 120.464431,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 14,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 48.356064,
+      "cold_ms": 119.185908,
+      "metrics": {
+        "proof_reuse": 1013,
+        "boolean": 1,
+        "producer_cells": 76,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 15,
+      "count": "0",
+      "warm_ms": 37.392921,
+      "cold_ms": 107.864116,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 44,
+        "new_full_checks": 6,
+        "join": 5,
+        "semantic_join_reuse": 4
+      }
+    },
+    {
+      "i": 16,
+      "count": "87571595343018854458033386304178158174356588264390370",
+      "warm_ms": 126.307375,
+      "cold_ms": 128.44572,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 72,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 17,
+      "count": "87571595343018854458033386304178158174356588264390370",
+      "warm_ms": 43.293141,
+      "cold_ms": 115.178432,
+      "metrics": {
+        "proof_reuse": 1013,
+        "boolean": 1,
+        "producer_cells": 76,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 18,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 44.390322,
+      "cold_ms": 113.675503,
+      "metrics": {
+        "proof_reuse": 1013,
+        "boolean": 1,
+        "producer_cells": 72,
+        "new_full_checks": 9,
+        "join": 8,
+        "semantic_join_reuse": 1
+      }
+    },
+    {
+      "i": 19,
+      "count": "0",
+      "warm_ms": 35.432944,
+      "cold_ms": 110.049151,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 60,
+        "new_full_checks": 8,
+        "join": 7,
+        "semantic_join_reuse": 2
+      }
+    },
+    {
+      "i": 20,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 46.020192,
+      "cold_ms": 112.767678,
+      "metrics": {
+        "proof_reuse": 1013,
+        "boolean": 1,
+        "producer_cells": 76,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 21,
+      "count": "229265413057075367692743352179590077832064383222590237",
+      "warm_ms": 50.7546,
+      "cold_ms": 125.714439,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 68,
+        "new_full_checks": 9,
+        "join": 8,
+        "semantic_join_reuse": 1
+      }
+    },
+    {
+      "i": 22,
+      "count": "87571595343018854458033386304178158174356588264390370",
+      "warm_ms": 55.555158,
+      "cold_ms": 123.047799,
+      "metrics": {
+        "proof_reuse": 1013,
+        "boolean": 1,
+        "producer_cells": 76,
+        "new_full_checks": 10,
+        "join": 9
+      }
+    },
+    {
+      "i": 23,
+      "count": "0",
+      "warm_ms": 37.629116,
+      "cold_ms": 112.120337,
+      "metrics": {
+        "proof_reuse": 1013,
+        "affine": 1,
+        "producer_cells": 68,
+        "new_full_checks": 9,
+        "join": 8,
+        "semantic_join_reuse": 1
+      }
+    }
+  ],
+  "controls": [
+    {
+      "n": 50,
+      "status": "UNKNOWN",
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 847745
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 96435
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 1476610
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 72700
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 1459875
+        },
+        {
+          "name": "walk-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 83406
+        },
+        {
+          "name": "walk-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 1361257
+        }
+      ],
+      "selection_ms": 9.092561
+    },
+    {
+      "n": 100,
+      "status": "UNKNOWN",
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 1878895
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 163876
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 2866720
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 135423
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 2710125
+        },
+        {
+          "name": "walk-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 222575
+        },
+        {
+          "name": "walk-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 2865058
+        }
+      ],
+      "selection_ms": 18.343881
+    },
+    {
+      "n": 200,
+      "status": "UNKNOWN",
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 4065753
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 397268
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 5523756
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 325870
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 5878118
+        },
+        {
+          "name": "walk-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 264617
+        },
+        {
+          "name": "walk-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 6070167
+        }
+      ],
+      "selection_ms": 41.163862
+    },
+    {
+      "n": 500,
+      "status": "UNKNOWN",
+      "candidates": [
+        {
+          "name": "cig010",
+          "status": "REFUSED",
+          "reason": "biconnected region exceeds leaf budget",
+          "formation_ns": 11231908
+        },
+        {
+          "name": "bfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 750819
+        },
+        {
+          "name": "bfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 15262968
+        },
+        {
+          "name": "dfs-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 709867
+        },
+        {
+          "name": "dfs-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 14244387
+        },
+        {
+          "name": "walk-balanced",
+          "status": "REFUSED",
+          "reason": "interface width budget",
+          "formation_ns": 1052362
+        },
+        {
+          "name": "walk-optimized",
+          "status": "REFUSED",
+          "reason": "no qualified ordered contraction in window",
+          "formation_ns": 17487564
+        }
+      ],
+      "selection_ms": 109.30864
+    }
+  ],
+  "reassociation": [
+    {
+      "n": 1024,
+      "old": {
+        "cells": 36632,
+        "width": 8,
+        "depth": 8,
+        "nodes": 341
+      },
+      "new": {
+        "cells": 34708,
+        "width": 8,
+        "depth": 8,
+        "nodes": 341
+      },
+      "dp": {
+        "split_attempts": 7240,
+        "levels": 2,
+        "estimated_cells": 34708
+      },
+      "old_ms": 195.749668,
+      "warm_ms": 38.510602,
+      "cold_ms": 132.729334,
+      "restore_ms": 29.283809,
+      "warm": {
+        "proof_reuse": 203,
+        "join": 138,
+        "producer_cells": 1524,
+        "new_full_checks": 138
+      },
+      "fresh": {
+        "boolean": 171,
+        "producer_cells": 34708,
+        "new_full_checks": 341,
+        "join": 170
+      },
+      "restore": {
+        "proof_reuse": 341
+      }
+    },
+    {
+      "n": 4096,
+      "old": {
+        "cells": 147192,
+        "width": 8,
+        "depth": 10,
+        "nodes": 1365
+      },
+      "new": {
+        "cells": 139156,
+        "width": 8,
+        "depth": 10,
+        "nodes": 1365
+      },
+      "dp": {
+        "split_attempts": 30364,
+        "levels": 3,
+        "estimated_cells": 139156
+      },
+      "old_ms": 628.700056,
+      "warm_ms": 188.204123,
+      "cold_ms": 528.163846,
+      "restore_ms": 227.448678,
+      "warm": {
+        "proof_reuse": 811,
+        "join": 554,
+        "producer_cells": 6132,
+        "new_full_checks": 554
+      },
+      "fresh": {
+        "boolean": 683,
+        "producer_cells": 139156,
+        "new_full_checks": 1365,
+        "join": 682
+      },
+      "restore": {
+        "proof_reuse": 1365
+      }
+    },
+    {
+      "n": 8192,
+      "old": {
+        "cells": 294896,
+        "width": 8,
+        "depth": 11,
+        "nodes": 2731
+      },
+      "new": {
+        "cells": 278532,
+        "width": 8,
+        "depth": 11,
+        "nodes": 2731
+      },
+      "dp": {
+        "split_attempts": 61305,
+        "levels": 3,
+        "estimated_cells": 278532
+      },
+      "old_ms": 1153.747767,
+      "warm_ms": 544.752987,
+      "cold_ms": 1160.127812,
+      "restore_ms": 393.567916,
+      "warm": {
+        "proof_reuse": 1622,
+        "join": 1109,
+        "producer_cells": 12284,
+        "new_full_checks": 1109
+      },
+      "fresh": {
+        "boolean": 1366,
+        "producer_cells": 278532,
+        "new_full_checks": 2731,
+        "join": 1365
+      },
+      "restore": {
+        "proof_reuse": 2731
+      }
+    }
+  ],
+  "pricing": {
+    "weight": 64,
+    "selected": "walk-optimized",
+    "leaf_budget": 8,
+    "score": {
+      "name": "walk-optimized",
+      "status": "ADMITTED",
+      "cells": 278532,
+      "width": 8,
+      "depth": 11,
+      "nodes": 2731,
+      "split_attempts": 61305,
+      "levels": 3,
+      "estimated_cells": 278532,
+      "plan": "ece327b3a18e90dba6cd18a809f0accb754addb26fd9e0cc7827100ebfe7a892",
+      "objective": 453316,
+      "formation_ns": 385587003
+    },
+    "metrics": {
+      "boolean": 1366,
+      "producer_cells": 278532,
+      "new_full_checks": 2731,
+      "join": 1365
+    },
+    "selection_ms": 3170.17946,
+    "frontier": [
+      [
+        57332,
+        8191
+      ],
+      [
+        278532,
+        2731
+      ]
+    ]
+  }
+}
