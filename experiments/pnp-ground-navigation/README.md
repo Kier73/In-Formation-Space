@@ -211,3 +211,18 @@ cd experiments/pnp-ground-navigation/cut_intention
 python -m unittest discover -s . -p 'test_*.py' -v
 python run_anticipatory_memory.py --sizes 32 256 1024 --output CIG-013-results.reproduced.json
 ```
+
+
+## CIG-014–017 — Self-extending sufficient observation languages
+
+| Iteration | Source-verified mathematical operation |
+|---|---|
+| [CIG-014](cut_intention/CIG-014.md) | Nonlinear predicate fibers, exact signed-union translations and sufficient anticipatory interfaces |
+| [CIG-015](cut_intention/CIG-015.md) | Source-implication decoders, counterexample-guided fiber extension and exact multiplicity conservation |
+| [CIG-016](cut_intention/CIG-016.md) | One-sided proof-directed refinement; preserve partial split evidence and recover complementary counts by conservation |
+| [CIG-017](cut_intention/CIG-017.md) | Global paired-source sufficiency, source-proved affine and nonlinear circuit decoders, independent receiver admission |
+
+CIG-017 reuses the CIG-014 union translator, CIG-008 parity extraction and paired-source count checker, and CIG-016 receiver. Its two symbolic routes construct and independently check decoders on 8,192-variable sources with 1,024 observed bits, without enumerating observation codes. The general paired-source route distinguishes sufficiency, insufficiency witnesses and unknown results; executable decoder formation is separately budgeted. On an already admitted 16-fiber cyclic source at 1,024 variables, one global proof replaces 16 local contradiction checks. See the [implementation](cut_intention/global_sufficiency.py), [independent verifier](cut_intention/verify_global_sufficiency.py) and [measured ledger](cut_intention/CIG-017-results.json). **258 local regression tests passed**; remote CI is reported separately.
+
+Next: proof-interpolant decoder synthesis over the shared observation language, with independently checked source implications and explicit compilation costs.
+

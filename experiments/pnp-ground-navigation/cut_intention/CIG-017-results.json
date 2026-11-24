@@ -1,0 +1,363 @@
+{
+  "symbolic": [
+    {
+      "kind": "affine",
+      "n": 128,
+      "clauses": 448,
+      "q": 16,
+      "route": "affine",
+      "compile_ms": 3.231922,
+      "verify_ms": 1.629031,
+      "oracle24_ms": 4.373288,
+      "receipt_bytes": 3131,
+      "proof_equations": 112,
+      "gates": 0,
+      "row_xors": 128,
+      "decoder_terms": 30
+    },
+    {
+      "kind": "affine",
+      "n": 512,
+      "clauses": 1792,
+      "q": 64,
+      "route": "affine",
+      "compile_ms": 13.372604,
+      "verify_ms": 6.283131,
+      "oracle24_ms": 19.303084,
+      "receipt_bytes": 13657,
+      "proof_equations": 448,
+      "gates": 0,
+      "row_xors": 465,
+      "decoder_terms": 174
+    },
+    {
+      "kind": "affine",
+      "n": 2048,
+      "clauses": 7168,
+      "q": 256,
+      "route": "affine",
+      "compile_ms": 49.399045,
+      "verify_ms": 29.055624,
+      "oracle24_ms": 88.604896,
+      "receipt_bytes": 61205,
+      "proof_equations": 1792,
+      "gates": 0,
+      "row_xors": 1812,
+      "decoder_terms": 750
+    },
+    {
+      "kind": "affine",
+      "n": 8192,
+      "clauses": 28672,
+      "q": 1024,
+      "route": "affine",
+      "compile_ms": 302.017454,
+      "verify_ms": 169.195679,
+      "oracle24_ms": 539.781601,
+      "receipt_bytes": 264070,
+      "proof_equations": 7168,
+      "gates": 0,
+      "row_xors": 7191,
+      "decoder_terms": 3054
+    },
+    {
+      "kind": "mixed",
+      "n": 128,
+      "clauses": 410,
+      "q": 16,
+      "route": "circuit",
+      "compile_ms": 13.571444,
+      "verify_ms": 4.555822,
+      "oracle24_ms": 6.403341,
+      "receipt_bytes": 12123,
+      "proof_equations": 0,
+      "gates": 112,
+      "row_xors": null,
+      "decoder_terms": 0
+    },
+    {
+      "kind": "mixed",
+      "n": 512,
+      "clauses": 1642,
+      "q": 64,
+      "route": "circuit",
+      "compile_ms": 78.633528,
+      "verify_ms": 9.727372,
+      "oracle24_ms": 21.913391,
+      "receipt_bytes": 51800,
+      "proof_equations": 0,
+      "gates": 448,
+      "row_xors": null,
+      "decoder_terms": 0
+    },
+    {
+      "kind": "mixed",
+      "n": 2048,
+      "clauses": 6570,
+      "q": 256,
+      "route": "circuit",
+      "compile_ms": 137.745853,
+      "verify_ms": 43.240089,
+      "oracle24_ms": 102.919579,
+      "receipt_bytes": 222264,
+      "proof_equations": 0,
+      "gates": 1792,
+      "row_xors": null,
+      "decoder_terms": 0
+    },
+    {
+      "kind": "mixed",
+      "n": 8192,
+      "clauses": 26282,
+      "q": 1024,
+      "route": "circuit",
+      "compile_ms": 767.885215,
+      "verify_ms": 186.66208,
+      "oracle24_ms": 663.168355,
+      "receipt_bytes": 928329,
+      "proof_equations": 0,
+      "gates": 7168,
+      "row_xors": null,
+      "decoder_terms": 0
+    }
+  ],
+  "receiver": [
+    {
+      "n": 64,
+      "source_clauses": 144,
+      "fibers": 16,
+      "seed_ms": 211.599702,
+      "control_seed_ms": 115.198515,
+      "global_extension_ms": 1.841229,
+      "per_fiber_extension_ms": 31.08002,
+      "global_work": {
+        "global_compile_ns": 728806,
+        "global_verify_ns": 1105963,
+        "global_attempts": 1,
+        "global_extensions": 1
+      },
+      "per_fiber_work": {
+        "verify_ns": 11506700,
+        "verified_proofs": 16,
+        "decision_attempts": 16,
+        "decision_ns": 903526,
+        "dpll_nodes": 16,
+        "dpll_literal_checks": 3970,
+        "refinement_check_ns": 8182448,
+        "extension_attempts": 1,
+        "DECODE": 16
+      },
+      "route": "affine"
+    },
+    {
+      "n": 256,
+      "source_clauses": 576,
+      "fibers": 16,
+      "seed_ms": 641.687725,
+      "control_seed_ms": 643.797744,
+      "global_extension_ms": 6.594489,
+      "per_fiber_extension_ms": 77.356021,
+      "global_work": {
+        "global_compile_ns": 2745901,
+        "global_verify_ns": 3841358,
+        "global_attempts": 1,
+        "global_extensions": 1
+      },
+      "per_fiber_work": {
+        "verify_ns": 30308582,
+        "verified_proofs": 16,
+        "decision_attempts": 16,
+        "decision_ns": 1909543,
+        "dpll_nodes": 16,
+        "dpll_literal_checks": 17268,
+        "refinement_check_ns": 15995051,
+        "extension_attempts": 1,
+        "DECODE": 16
+      },
+      "route": "affine"
+    },
+    {
+      "n": 512,
+      "source_clauses": 1152,
+      "fibers": 16,
+      "seed_ms": 1931.635586,
+      "control_seed_ms": 1968.187529,
+      "global_extension_ms": 14.143297,
+      "per_fiber_extension_ms": 158.540232,
+      "global_work": {
+        "global_compile_ns": 5875990,
+        "global_verify_ns": 8259475,
+        "global_attempts": 1,
+        "global_extensions": 1
+      },
+      "per_fiber_work": {
+        "verify_ns": 62945782,
+        "verified_proofs": 16,
+        "decision_attempts": 16,
+        "decision_ns": 3787187,
+        "dpll_nodes": 16,
+        "dpll_literal_checks": 32740,
+        "refinement_check_ns": 32876868,
+        "extension_attempts": 1,
+        "DECODE": 16
+      },
+      "route": "affine"
+    },
+    {
+      "n": 1024,
+      "source_clauses": 2304,
+      "fibers": 16,
+      "seed_ms": 6446.836811,
+      "control_seed_ms": 6554.920778,
+      "global_extension_ms": 28.646923,
+      "per_fiber_extension_ms": 329.977562,
+      "global_work": {
+        "global_compile_ns": 12038429,
+        "global_verify_ns": 16600822,
+        "global_attempts": 1,
+        "global_extensions": 1
+      },
+      "per_fiber_work": {
+        "verify_ns": 133817568,
+        "verified_proofs": 16,
+        "decision_attempts": 16,
+        "decision_ns": 6138864,
+        "dpll_nodes": 16,
+        "dpll_literal_checks": 53884,
+        "refinement_check_ns": 70194603,
+        "extension_attempts": 1,
+        "DECODE": 16
+      },
+      "route": "affine"
+    }
+  ],
+  "paired": [
+    {
+      "n": 32,
+      "case": "nonlinear-union",
+      "status": "SUFFICIENT",
+      "compile_ms": 10.413804,
+      "verify_ms": 11.426167,
+      "decoder": false,
+      "paired_cells": 4014,
+      "paired_projection_visits": 712
+    },
+    {
+      "n": 128,
+      "case": "nonlinear-union",
+      "status": "SUFFICIENT",
+      "compile_ms": 70.814313,
+      "verify_ms": 18.869312,
+      "decoder": false,
+      "paired_cells": 6222,
+      "paired_projection_visits": 10528
+    },
+    {
+      "n": 256,
+      "case": "nonlinear-union",
+      "status": "SUFFICIENT",
+      "compile_ms": 82.87175,
+      "verify_ms": 41.627783,
+      "decoder": false,
+      "paired_cells": 9166,
+      "paired_projection_visits": 41536
+    },
+    {
+      "n": 512,
+      "case": "nonlinear-union",
+      "status": "SUFFICIENT",
+      "compile_ms": 288.329494,
+      "verify_ms": 112.165962,
+      "decoder": false,
+      "paired_cells": 15054,
+      "paired_projection_visits": 164992
+    },
+    {
+      "n": 64,
+      "case": "source-dependent-alias-union",
+      "status": "SUFFICIENT",
+      "compile_ms": 43.431156,
+      "verify_ms": 40.057793,
+      "decoder": true,
+      "decoder_obligations": 8,
+      "paired_cells": 8910,
+      "paired_projection_visits": 2704
+    },
+    {
+      "n": 256,
+      "case": "source-dependent-alias-union",
+      "status": "SUFFICIENT",
+      "compile_ms": 87.110415,
+      "verify_ms": 49.381646,
+      "decoder": false,
+      "decoder_obligations": 0,
+      "paired_cells": 13326,
+      "paired_projection_visits": 41536
+    },
+    {
+      "n": 512,
+      "case": "source-dependent-alias-union",
+      "status": "SUFFICIENT",
+      "compile_ms": 290.67915,
+      "verify_ms": 115.899838,
+      "decoder": false,
+      "decoder_obligations": 0,
+      "paired_cells": 19214,
+      "paired_projection_visits": 164992
+    },
+    {
+      "n": 4,
+      "case": "decoder-ANF",
+      "status": "SUFFICIENT",
+      "compile_ms": 1.834169,
+      "verify_ms": 1.84803,
+      "anf": [
+        1,
+        2,
+        3
+      ],
+      "decoder_obligations": 4
+    },
+    {
+      "n": 4,
+      "case": "counterexample",
+      "status": "INSUFFICIENT",
+      "witness": [
+        "5",
+        "6"
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "n": 50,
+      "status": "UNKNOWN",
+      "route": "paired",
+      "compile_ms": 10.427034
+    },
+    {
+      "n": 100,
+      "status": "UNKNOWN",
+      "route": "paired",
+      "compile_ms": 23.718528
+    },
+    {
+      "n": 200,
+      "status": "UNKNOWN",
+      "route": "paired",
+      "compile_ms": 41.559695
+    },
+    {
+      "n": 500,
+      "status": "UNKNOWN",
+      "route": "paired",
+      "compile_ms": 124.237791
+    }
+  ],
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "local_regression": {
+    "tests": 258,
+    "passed": 258
+  },
+  "timing_scope": "Symbolic and receiver timings measured before addition of the CIG-014 union fast path; those workloads use the same affine/circuit routes in the final implementation. Paired campaigns use final implementation. Independent oracle times separate; receiver seed times separate."
+}
