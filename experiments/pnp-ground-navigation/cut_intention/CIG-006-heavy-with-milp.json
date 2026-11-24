@@ -1,0 +1,248 @@
+{
+  "schema": "ifs.cig006.heavy-problem-campaign.v1",
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41"
+  },
+  "budgets": {
+    "direct_and_fallback_dpll_nodes": 1200,
+    "direct_and_fallback_dpll_wall_seconds": 1.5,
+    "milp_seconds_per_case": 3.0
+  },
+  "cases": [
+    {
+      "case": "xor192_sat",
+      "variables": 192,
+      "clauses": 760,
+      "source_digest": "678808dc9df742163008eb2d3d6287ebd23bbe37595ceb82f9c6fe7e2b4095a6",
+      "intention": "#SAT",
+      "chosen_family": "exact-source-XOR-GF2",
+      "status": "SAT",
+      "count": "4",
+      "source_proof_verified": true,
+      "construction_ms": 5.636,
+      "independent_verification_ms": 4.814,
+      "independent_direct_DPLL_control": null,
+      "external_milp_control": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 86.716,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "case": "xor192_unsat",
+      "variables": 192,
+      "clauses": 766,
+      "source_digest": "fb1a8a80bef1379416515cf77b09693de17481805c24ab52a2b5ba71cc9c72af",
+      "intention": "SAT",
+      "chosen_family": "exact-source-XOR-GF2",
+      "status": "UNSAT",
+      "count": null,
+      "source_proof_verified": true,
+      "construction_ms": 4.693,
+      "independent_verification_ms": 3.631,
+      "independent_direct_DPLL_control": {
+        "status": "UNSAT",
+        "nodes": 3,
+        "literal_checks": 4617,
+        "wall_ms": 1.105
+      },
+      "external_milp_control": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNSAT_CLAIM_NO_PROOF",
+        "wall_ms": 3.159,
+        "status_code": 2,
+        "model_source_checked": false
+      }
+    },
+    {
+      "case": "nonlinear80_count",
+      "variables": 240,
+      "clauses": 320,
+      "source_digest": "a7014c6e5fde36ea1ca7f32b1b4da798ad9bd30a6e937bd5d1fa82f5df803e2b",
+      "intention": "#SAT",
+      "chosen_family": "source-connected-components",
+      "status": "SAT",
+      "count": "1461501637330902918203684832716283019655932542976",
+      "source_proof_verified": true,
+      "construction_ms": 5.458,
+      "independent_verification_ms": 3.571,
+      "independent_direct_DPLL_control": null,
+      "external_milp_control": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 4.675,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "case": "pigeonhole8_7",
+      "variables": 56,
+      "clauses": 204,
+      "source_digest": "f1eb6403e297fb6c5e9a997b4153065dcee5b2bd76aad45e03d0c4afd9c8fd9e",
+      "intention": "SAT",
+      "chosen_family": "bounded-source-DPLL",
+      "status": "UNKNOWN",
+      "count": null,
+      "source_proof_verified": true,
+      "construction_ms": 122.066,
+      "independent_verification_ms": 0.817,
+      "independent_direct_DPLL_control": {
+        "status": "UNKNOWN",
+        "nodes": 1201,
+        "literal_checks": 927914,
+        "wall_ms": 119.069
+      },
+      "external_milp_control": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNSAT_CLAIM_NO_PROOF",
+        "wall_ms": 15.281,
+        "status_code": 2,
+        "model_source_checked": false
+      }
+    },
+    {
+      "case": "odd_wheel_32",
+      "variables": 96,
+      "clauses": 314,
+      "source_digest": "759349ba04186e22d1b8e2a61704cb059ed0c24d0574114c2fee3724618c0cea",
+      "intention": "SAT",
+      "chosen_family": "bounded-source-DPLL",
+      "status": "UNSAT",
+      "count": null,
+      "source_proof_verified": true,
+      "construction_ms": 7.937,
+      "independent_verification_ms": 6.086,
+      "independent_direct_DPLL_control": {
+        "status": "UNSAT",
+        "nodes": 11,
+        "literal_checks": 68992,
+        "wall_ms": 6.96
+      },
+      "external_milp_control": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNSAT_CLAIM_NO_PROOF",
+        "wall_ms": 208.902,
+        "status_code": 2,
+        "model_source_checked": false
+      }
+    },
+    {
+      "case": "independent_K4_40",
+      "variables": 480,
+      "clauses": 1360,
+      "source_digest": "65e50da19f891f2aa585e50cfae613278d9852ee33834060415fa684dfbcffc8",
+      "intention": "SAT",
+      "chosen_family": "source-connected-components",
+      "status": "UNSAT",
+      "count": null,
+      "source_proof_verified": true,
+      "construction_ms": 19.429,
+      "independent_verification_ms": 12.849,
+      "independent_direct_DPLL_control": {
+        "status": "UNKNOWN",
+        "nodes": 1201,
+        "literal_checks": 4946754,
+        "wall_ms": 975.75
+      },
+      "external_milp_control": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNSAT_CLAIM_NO_PROOF",
+        "wall_ms": 18.46,
+        "status_code": 2,
+        "model_source_checked": false
+      }
+    },
+    {
+      "case": "random3sat_50",
+      "variables": 50,
+      "clauses": 213,
+      "source_digest": "c637150db21f0c76af138b563d16f53b55b454615f821daa45d4b399b5771dd9",
+      "intention": "SAT",
+      "chosen_family": "bounded-source-DPLL",
+      "status": "UNSAT",
+      "count": null,
+      "source_proof_verified": true,
+      "construction_ms": 20.554,
+      "independent_verification_ms": 10.214,
+      "independent_direct_DPLL_control": {
+        "status": "UNSAT",
+        "nodes": 87,
+        "literal_checks": 136383,
+        "wall_ms": 17.258
+      },
+      "external_milp_control": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "UNSAT_CLAIM_NO_PROOF",
+        "wall_ms": 287.224,
+        "status_code": 2,
+        "model_source_checked": false
+      }
+    },
+    {
+      "case": "random3sat_75",
+      "variables": 75,
+      "clauses": 320,
+      "source_digest": "d5647a813ca1ef1d9c5b1617dca20ad04af03551fae408e0aaabebf1e6d1009c",
+      "intention": "SAT",
+      "chosen_family": "bounded-source-DPLL",
+      "status": "SAT",
+      "count": null,
+      "source_proof_verified": true,
+      "construction_ms": 31.263,
+      "independent_verification_ms": 1.77,
+      "independent_direct_DPLL_control": {
+        "status": "SAT",
+        "nodes": 91,
+        "literal_checks": 224157,
+        "wall_ms": 29.052
+      },
+      "external_milp_control": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 220.453,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    },
+    {
+      "case": "random3sat_100",
+      "variables": 100,
+      "clauses": 426,
+      "source_digest": "a973b049c86113b88f284959c29ed839b6778bbad1de4d578caaa841231de0d0",
+      "intention": "SAT",
+      "chosen_family": "bounded-source-DPLL",
+      "status": "SAT",
+      "count": null,
+      "source_proof_verified": true,
+      "construction_ms": 29.994,
+      "independent_verification_ms": 2.252,
+      "independent_direct_DPLL_control": {
+        "status": "SAT",
+        "nodes": 59,
+        "literal_checks": 217521,
+        "wall_ms": 27.808
+      },
+      "external_milp_control": {
+        "backend": "SciPy HiGHS MILP, not CDCL",
+        "scipy": "1.17.0",
+        "status": "SAT",
+        "wall_ms": 346.275,
+        "status_code": 0,
+        "model_source_checked": true
+      }
+    }
+  ],
+  "interpretation": "SAT source-ground accuracy and construction/verification cost; UNKNOWN is not UNSAT; no universal polynomial time claim"
+}
