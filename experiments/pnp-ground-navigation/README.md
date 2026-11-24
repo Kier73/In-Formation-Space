@@ -229,3 +229,23 @@ Next: proof-interpolant decoder synthesis over the shared observation language, 
 ## CIG-018 — Proof-derived executable interpolants
 
 [CIG-018](cut_intention/CIG-018.md) constructs shared-observation Boolean circuits directly from independently checked resolution refutations. Exact two-copy source obligations distinguish sufficiency from concrete counterexamples. On shuffled mixed and parity chains with 4,095 original variables and 1,024 nonlinear observation predicates, scope-aware resolution constructs and verifies executable interpolants in approximately half a second locally, without observation-code enumeration. Pair-count-only elimination exhausts its budget on the larger parity controls. The [compiler](cut_intention/interpolant_ground.py), [independent checker](cut_intention/verify_interpolant_ground.py), [benchmark](cut_intention/run_interpolant_ground.py) and [ledger](cut_intention/CIG-018-results.json) retain full proof and cost evidence. **275 local regression tests passed**; remote CI is separate. Next: incremental shared proof DAGs and multi-output interpolant reuse.
+
+
+## CIG-019–020 — Shared proof architecture and adaptive verified execution
+
+| Iteration | Mathematical capability |
+|---|---|
+| [CIG-019](cut_intention/CIG-019.md) | Target-independent colored resolution prefix; independently checked target suffixes; shared multi-output interpolant DAG |
+| [CIG-020](cut_intention/CIG-020.md) | Receiver-owned incremental circuit state; complete dirty-frontier verification; atomic event admission; adaptive full/delta realization |
+
+Eight adjacent intentions on the 4,095-variable mixed CNF require 48,694 candidate resolution pairs instead of 390,271 independent pairs. The shared circuit uses 4,130 gates rather than 35,924. Across 256 random single-coordinate observation changes, the incremental interpreter checks 1,631 gates per side instead of 1,057,280 each in full evaluation. Broad changes and long parity propagation favor full evaluation; the adaptive policy measures abandoned delta work. See the source contracts and measured tables in the two research documents, the [shared compiler](cut_intention/shared_proof.py), [proof checker](cut_intention/verify_shared_proof.py), [event interpreter](cut_intention/incremental_decoder.py), [event receiver](cut_intention/verify_incremental_decoder.py), and reproducible runners. **297 local tests passed**; remote CI remains separate. No source reachability or physical observation authority is implied by a supplied input vector.
+
+Reproduce from the CIG directory:
+
+```sh
+python -m unittest discover -s . -p 'test_*.py' -q
+python run_shared_proof.py
+python run_adaptive_decoder.py
+```
+
+Next: source-qualified temporal jumps for the proof-derived circuit, costed propagation prediction, and existing E-CPU authority/host realization for retained gate state.
