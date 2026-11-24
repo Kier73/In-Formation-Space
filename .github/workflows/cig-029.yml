@@ -1,0 +1,199 @@
+name: CIG-029 GitHub-native continuous processor
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/github_continuation.py'
+      - 'experiments/pnp-ground-navigation/cut_intention/test_github_continuation.py'
+      - '.github/workflows/cig-029.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/github_continuation.py'
+      - 'experiments/pnp-ground-navigation/cut_intention/test_github_continuation.py'
+      - '.github/workflows/cig-029.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      sha256: ${{ steps.realize.outputs.sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: df75e8dee43c48c93bdca73637dada95c7d53f81
+          path: external-ecpu
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: c249a482a0a09e24b3a2af5b39d43a45856e2bc6
+          path: external-ncr
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install pinned native implementations
+        run: python -m pip install --disable-pip-version-check --no-deps ./external-ecpu ./external-ncr
+      - name: Native bootstrap and tamper controls
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        run: python -m unittest test_github_continuation -v
+      - name: Bootstrap or recover the processor and publish admitted coordinate
+        id: realize
+        shell: bash
+        run: |
+          set -euo pipefail
+          python experiments/pnp-ground-navigation/cut_intention/github_continuation.py seed --output evidence/chain.json
+      - name: Transfer exact checkpoint and proof history to the next runner
+        uses: actions/upload-artifact@v4
+        with:
+          name: cig029-seed
+          path: evidence/chain.json
+          if-no-files-found: error
+          retention-days: 30
+  contract:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    needs: seed
+    outputs:
+      sha256: ${{ steps.realize.outputs.sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: df75e8dee43c48c93bdca73637dada95c7d53f81
+          path: external-ecpu
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: c249a482a0a09e24b3a2af5b39d43a45856e2bc6
+          path: external-ncr
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install pinned native implementations
+        run: python -m pip install --disable-pip-version-check --no-deps ./external-ecpu ./external-ncr
+      - name: Receive prior runner artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cig029-seed
+          path: received
+      - name: Bootstrap or recover the processor and publish admitted coordinate
+        id: realize
+        shell: bash
+        env:
+          EXPECTED: ${{ needs.seed.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          python experiments/pnp-ground-navigation/cut_intention/github_continuation.py contract --input received/chain.json --expected "$EXPECTED" --output evidence/chain.json
+      - name: Transfer exact checkpoint and proof history to the next runner
+        uses: actions/upload-artifact@v4
+        with:
+          name: cig029-contract
+          path: evidence/chain.json
+          if-no-files-found: error
+          retention-days: 30
+  resume:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: contract
+    outputs:
+      sha256: ${{ steps.realize.outputs.sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: df75e8dee43c48c93bdca73637dada95c7d53f81
+          path: external-ecpu
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: c249a482a0a09e24b3a2af5b39d43a45856e2bc6
+          path: external-ncr
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install pinned native implementations
+        run: python -m pip install --disable-pip-version-check --no-deps ./external-ecpu ./external-ncr
+      - name: Receive prior runner artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cig029-contract
+          path: received
+      - name: Bootstrap or recover the processor and publish admitted coordinate
+        id: realize
+        shell: bash
+        env:
+          EXPECTED: ${{ needs.contract.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          python experiments/pnp-ground-navigation/cut_intention/github_continuation.py resume --input received/chain.json --expected "$EXPECTED" --output evidence/chain.json
+      - name: Transfer exact checkpoint and proof history to the next runner
+        uses: actions/upload-artifact@v4
+        with:
+          name: cig029-resume
+          path: evidence/chain.json
+          if-no-files-found: error
+          retention-days: 30
+  audit:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    needs: resume
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: df75e8dee43c48c93bdca73637dada95c7d53f81
+          path: external-ecpu
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: c249a482a0a09e24b3a2af5b39d43a45856e2bc6
+          path: external-ncr
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install pinned native implementations
+        run: python -m pip install --disable-pip-version-check --no-deps ./external-ecpu ./external-ncr
+      - name: Receive prior runner artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cig029-resume
+          path: received
+      - name: Independently reconstruct all three runner publications
+        env:
+          EXPECTED: ${{ needs.resume.outputs.sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python experiments/pnp-ground-navigation/cut_intention/github_continuation.py audit --input received/chain.json --expected "$EXPECTED" > audit.json
+          cat audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cig029-audit
+          path: audit.json
+          if-no-files-found: error
+          retention-days: 30
