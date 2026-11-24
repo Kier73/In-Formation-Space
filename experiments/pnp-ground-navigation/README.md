@@ -249,3 +249,8 @@ python run_adaptive_decoder.py
 ```
 
 Next: source-qualified temporal jumps for the proof-derived circuit, costed propagation prediction, and existing E-CPU authority/host realization for retained gate state.
+
+
+## CIG-021 — Source-qualified temporal and inverse-time navigation
+
+[CIG-021](cut_intention/CIG-021.md) composes the CIG-019 proof-derived decoder with a separately qualified nonlinear block-transport transition, and independently verifies its lifted finite functional graph. The largest source has 4,091 variables, 1,023 observed bits and 2,728 lifted vertices. Exact jumps to 10^1000+173 are checked by a separate binary-composition oracle. A reusable constructive section proves every observation code has a valid source realization. Inverse-time navigation joins local periodic constraints by CRT, finding the earliest full observation target in a system with exact period 614,889,782,588,491,410. **324 local tests pass** (27 new). Full preparation and receiver costs are documented; the explicit law is not inferred from static source constraints. Reproduce with [forward campaign](cut_intention/run_temporal_ground.py) and [inverse campaign](cut_intention/run_inverse_time.py); remote CI remains separate.
