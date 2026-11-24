@@ -84,7 +84,9 @@ class ImageTests(unittest.TestCase):
             self.skipTest('native NCR codec checkout not requested')
         from navigable_compute.realized_image import Factor,ImageCertificate
         from navigable_compute.realized_image import pack as ncr_pack,unpack as ncr_unpack
-        nav,r=qualified();p=Processor(nav,r.initial)
+        from ncr_image_codec import NCRCodec
+        nav,r=qualified();p=Processor(nav,r.initial,codec=NCRCodec())
+        admission=Admission(r,p.proof)
         for t in (0,1,7,10**1000+173):
             alph=p.alphabets(t)
             # Adapter is only a radix layout; CIG height proof, not NCR ANF
@@ -96,6 +98,11 @@ class ImageTests(unittest.TestCase):
             self.assertEqual(ncr_pack(layout,code),rank)
             self.assertEqual(ncr_unpack(layout,rank),code)
             self.assertEqual(layout.bits,capacity(alph)[1])
+            if t:
+                receipt=p.move(t)
+                self.assertTrue(admission.accept(t,receipt))
+                p.commit(receipt)
+                self.assertEqual(p.rank,rank)
 
 
 if __name__=='__main__':
