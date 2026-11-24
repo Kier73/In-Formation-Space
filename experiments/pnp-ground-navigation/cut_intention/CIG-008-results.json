@@ -1,0 +1,190 @@
+{
+  "connected": [
+    {
+      "stages": 8,
+      "n": 57,
+      "clauses": 128,
+      "contradiction": false,
+      "count": "10",
+      "status": "SAT",
+      "affine_equations": 40,
+      "interface": 25,
+      "private_pivots": 32,
+      "free_hidden": 0,
+      "projected": 8,
+      "factor_cells": 462,
+      "peak_scope": 4,
+      "projection_row_visits": 784,
+      "certificate_bytes": 2362,
+      "construction_ms": 1.971,
+      "verification_ms": 1.638,
+      "direct_dpll": {
+        "status": "SAT",
+        "nodes": 37,
+        "literal_checks": 47885,
+        "wall_ms": 5.731,
+        "count": "10"
+      }
+    },
+    {
+      "stages": 32,
+      "n": 225,
+      "clauses": 512,
+      "contradiction": false,
+      "count": "34",
+      "status": "SAT",
+      "affine_equations": 160,
+      "interface": 97,
+      "private_pivots": 128,
+      "free_hidden": 0,
+      "projected": 32,
+      "factor_cells": 1858,
+      "peak_scope": 4,
+      "projection_row_visits": 12352,
+      "certificate_bytes": 19294,
+      "construction_ms": 9.891,
+      "verification_ms": 7.92,
+      "direct_dpll": {
+        "status": "SAT",
+        "nodes": 693,
+        "literal_checks": 2938048,
+        "wall_ms": 343.694,
+        "count": "34"
+      }
+    },
+    {
+      "stages": 128,
+      "n": 897,
+      "clauses": 2048,
+      "contradiction": false,
+      "count": "130",
+      "status": "SAT",
+      "affine_equations": 640,
+      "interface": 385,
+      "private_pivots": 512,
+      "free_hidden": 0,
+      "projected": 128,
+      "factor_cells": 7574,
+      "peak_scope": 4,
+      "projection_row_visits": 196864,
+      "certificate_bytes": 252829,
+      "construction_ms": 148.004,
+      "verification_ms": 61.367,
+      "direct_dpll": {
+        "status": "UNKNOWN",
+        "nodes": 218,
+        "literal_checks": 15611343,
+        "wall_ms": 1629.714
+      }
+    },
+    {
+      "stages": 256,
+      "n": 1793,
+      "clauses": 4096,
+      "contradiction": false,
+      "count": "258",
+      "status": "SAT",
+      "affine_equations": 1280,
+      "interface": 769,
+      "private_pivots": 1024,
+      "free_hidden": 0,
+      "projected": 256,
+      "factor_cells": 15170,
+      "peak_scope": 4,
+      "projection_row_visits": 786944,
+      "certificate_bytes": 982403,
+      "construction_ms": 416.107,
+      "verification_ms": 209.579,
+      "direct_dpll": {
+        "status": "UNKNOWN",
+        "nodes": 183,
+        "literal_checks": 14958473,
+        "wall_ms": 1662.789
+      }
+    },
+    {
+      "stages": 256,
+      "n": 1793,
+      "clauses": 4098,
+      "contradiction": true,
+      "count": "0",
+      "status": "UNSAT",
+      "affine_equations": 1282,
+      "interface": 769,
+      "private_pivots": 1024,
+      "free_hidden": 0,
+      "projected": 258,
+      "factor_cells": 15174,
+      "peak_scope": 4,
+      "projection_row_visits": 788992,
+      "certificate_bytes": 982740,
+      "construction_ms": 417.991,
+      "verification_ms": 203.715,
+      "direct_dpll": {
+        "status": "UNSAT",
+        "nodes": 1,
+        "literal_checks": 7474201,
+        "wall_ms": 713.564,
+        "count": "0"
+      }
+    }
+  ],
+  "hall_decision": [
+    {
+      "n": 58,
+      "clauses": 208,
+      "pigeons": 8,
+      "holes": 7,
+      "status": "UNSAT",
+      "route": "Hall-subsource",
+      "construction_ms": 2.024,
+      "verification_ms": 0.379,
+      "certificate_bytes": 460
+    },
+    {
+      "n": 994,
+      "clauses": 15412,
+      "pigeons": 32,
+      "holes": 31,
+      "status": "UNSAT",
+      "route": "Hall-subsource",
+      "construction_ms": 135.967,
+      "verification_ms": 13.754,
+      "certificate_bytes": 7960
+    },
+    {
+      "n": 18,
+      "clauses": 32,
+      "pigeons": 4,
+      "holes": 4,
+      "status": "SAT",
+      "route": "Hall-affine-extension",
+      "construction_ms": 0.485,
+      "verification_ms": 0.076,
+      "certificate_bytes": 66
+    }
+  ],
+  "random_controls": [
+    {
+      "n": 50,
+      "clauses": 213,
+      "status": "UNKNOWN",
+      "ms": 3.587,
+      "reason": "bounded factor budget"
+    },
+    {
+      "n": 75,
+      "clauses": 320,
+      "status": "UNKNOWN",
+      "ms": 11.391,
+      "reason": "bounded factor budget"
+    },
+    {
+      "n": 100,
+      "clauses": 426,
+      "status": "UNKNOWN",
+      "ms": 20.063,
+      "reason": "bounded factor budget"
+    }
+  ]
+}
