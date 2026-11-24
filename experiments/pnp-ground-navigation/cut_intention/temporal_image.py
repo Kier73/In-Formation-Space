@@ -67,10 +67,10 @@ def unpack(alphabets,w,rank):
 
 class Processor:
     """Local producer; admission and migrations checked by a separate receiver."""
-    def __init__(self,nav,initial):
+    def __init__(self,nav,initial,*,codec=None):
         contract_code(initial,nav.k)
         self.nav=nav
-        self.initial=initial
+        self.codec=codec
         self.h=tuple(heights(nav))
         self.proof=dict(schema='ifs.cig025.image.v1',key=nav.key,
                         heights=list(self.h))
@@ -86,10 +86,12 @@ class Processor:
         contract_time(t)
         if t<=self.time:
             raise ValueError('migration must advance time')
-        old=unpack(self.alphabets(self.time),self.nav.w,self.rank)
+        decode=unpack if self.codec is None else self.codec.unpack
+        encode=pack if self.codec is None else self.codec.pack
+        old=decode(self.alphabets(self.time),self.nav.w,self.rank)
         new=self.nav.jump(old,t-self.time)
         alph=self.alphabets(t)
-        rank=pack(alph,self.nav.w,new)
+        rank=encode(alph,self.nav.w,new)
         count,bits=capacity(alph)
         return dict(schema='ifs.cig025.move.v1',key=self.key,
                     previous_time=str(self.time),previous_rank=str(self.rank),
