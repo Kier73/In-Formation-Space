@@ -1,0 +1,353 @@
+{
+  "training": {
+    "episodes": 36,
+    "skills": 25,
+    "ms": 25.338547000661492,
+    "sequential_work": 63120,
+    "bytes": 2971
+  },
+  "heldout": [
+    {
+      "regime": "matched",
+      "policy": "primitive",
+      "queries": 60,
+      "found": 60,
+      "unknown": 0,
+      "attempts": 9860,
+      "work": 1444779,
+      "ms": 285.25545500032604
+    },
+    {
+      "regime": "matched",
+      "policy": "learned",
+      "queries": 60,
+      "found": 60,
+      "unknown": 0,
+      "attempts": 140,
+      "work": 24441,
+      "ms": 5.4376050010323524
+    },
+    {
+      "regime": "matched",
+      "policy": "hybrid",
+      "queries": 60,
+      "found": 60,
+      "unknown": 0,
+      "attempts": 440,
+      "work": 29671,
+      "ms": 7.022097999230027
+    },
+    {
+      "regime": "known_trace_fusion",
+      "queries": 60,
+      "sequential_work": 105200,
+      "fused_work": 22360
+    },
+    {
+      "regime": "primitive",
+      "policy": "primitive",
+      "queries": 30,
+      "found": 30,
+      "unknown": 0,
+      "attempts": 30,
+      "work": 5340,
+      "ms": 1.8627400007098913
+    },
+    {
+      "regime": "primitive",
+      "policy": "learned",
+      "queries": 30,
+      "found": 30,
+      "unknown": 0,
+      "attempts": 780,
+      "work": 10524,
+      "ms": 3.426502000540495
+    },
+    {
+      "regime": "primitive",
+      "policy": "hybrid",
+      "queries": 30,
+      "found": 30,
+      "unknown": 0,
+      "attempts": 30,
+      "work": 5340,
+      "ms": 1.8582539986819029
+    },
+    {
+      "regime": "novel",
+      "policy": "primitive",
+      "queries": 30,
+      "found": 30,
+      "unknown": 0,
+      "attempts": 5130,
+      "work": 999380,
+      "ms": 170.32154400087893
+    },
+    {
+      "regime": "novel",
+      "policy": "learned",
+      "queries": 30,
+      "found": 30,
+      "unknown": 0,
+      "attempts": 5160,
+      "work": 1004708,
+      "ms": 160.49814499914646
+    },
+    {
+      "regime": "novel",
+      "policy": "hybrid",
+      "queries": 30,
+      "found": 30,
+      "unknown": 0,
+      "attempts": 5160,
+      "work": 1004708,
+      "ms": 169.0623320005834
+    },
+    {
+      "regime": "unreachable",
+      "policy": "primitive",
+      "queries": 15,
+      "found": 0,
+      "unknown": 15,
+      "attempts": 6630,
+      "work": 887164,
+      "ms": 217.94387399964035
+    },
+    {
+      "regime": "unreachable",
+      "policy": "learned",
+      "queries": 15,
+      "found": 0,
+      "unknown": 15,
+      "attempts": 6630,
+      "work": 887164,
+      "ms": 220.17152299918234
+    },
+    {
+      "regime": "unreachable",
+      "policy": "hybrid",
+      "queries": 15,
+      "found": 0,
+      "unknown": 15,
+      "attempts": 6630,
+      "work": 887164,
+      "ms": 226.94530700147152
+    }
+  ],
+  "source": [
+    {
+      "bits": 60,
+      "period": "210",
+      "form": [
+        2,
+        9,
+        0
+      ],
+      "source_ms": 97.94645000062883,
+      "discovery": [
+        {
+          "policy": "primitive",
+          "form": [
+            2,
+            8,
+            0
+          ],
+          "attempts": 44,
+          "work": 1531,
+          "ms": 0.4361760001629591
+        },
+        {
+          "policy": "learned",
+          "form": [
+            2,
+            9,
+            0
+          ],
+          "attempts": 19,
+          "work": 350,
+          "ms": 0.09075699932873249
+        }
+      ],
+      "sequential_work": 253,
+      "ordinals": 8,
+      "selection_work": 1120,
+      "realization_and_terminal_ms": 3.3395010009407997,
+      "independent_residue_count": 1,
+      "compact_period": "105",
+      "wide_compile_work": 39,
+      "compact_compile_work": 38,
+      "wide_selection_work": 160,
+      "compact_selection_work": 140
+    },
+    {
+      "bits": 174,
+      "period": "510510",
+      "form": [
+        2,
+        9,
+        0
+      ],
+      "source_ms": 113.61081199906766,
+      "discovery": [
+        {
+          "policy": "primitive",
+          "form": [
+            2,
+            8,
+            0
+          ],
+          "attempts": 44,
+          "work": 4479,
+          "ms": 0.9621869996190071
+        },
+        {
+          "policy": "learned",
+          "form": [
+            2,
+            9,
+            0
+          ],
+          "attempts": 19,
+          "work": 614,
+          "ms": 0.13421200029551983
+        }
+      ],
+      "sequential_work": 825,
+      "ordinals": 8,
+      "selection_work": 9216,
+      "realization_and_terminal_ms": 5.886919999495149,
+      "independent_residue_count": 1,
+      "compact_period": "255255",
+      "wide_compile_work": 127,
+      "compact_compile_work": 126,
+      "wide_selection_work": 1216,
+      "compact_selection_work": 1152
+    },
+    {
+      "bits": 384,
+      "period": "446185740",
+      "form": [
+        2,
+        9,
+        0
+      ],
+      "source_ms": 254.74428199976683,
+      "discovery": [
+        {
+          "policy": "primitive",
+          "form": [
+            2,
+            9,
+            0
+          ],
+          "attempts": 72,
+          "work": 11361,
+          "ms": 3.3676229994744062
+        },
+        {
+          "policy": "learned",
+          "form": [
+            2,
+            9,
+            0
+          ],
+          "attempts": 19,
+          "work": 616,
+          "ms": 0.13346000015735626
+        }
+      ],
+      "sequential_work": 1416,
+      "ordinals": 8,
+      "selection_work": 24864,
+      "realization_and_terminal_ms": 12.03579599969089,
+      "independent_residue_count": 1,
+      "compact_period": "223092870",
+      "wide_compile_work": 217,
+      "compact_compile_work": 215,
+      "wide_selection_work": 6380,
+      "compact_selection_work": 3108
+    },
+    {
+      "bits": 1023,
+      "period": "614889782588491410",
+      "form": [
+        2,
+        9,
+        0
+      ],
+      "source_ms": 729.2637300007045,
+      "discovery": [
+        {
+          "policy": "primitive",
+          "form": [
+            2,
+            8,
+            0
+          ],
+          "attempts": 44,
+          "work": 23105,
+          "ms": 3.649907998740673
+        },
+        {
+          "policy": "learned",
+          "form": [
+            2,
+            9,
+            0
+          ],
+          "attempts": 19,
+          "work": 2282,
+          "ms": 0.3774480000138283
+        }
+      ],
+      "sequential_work": 4439,
+      "ordinals": 8,
+      "selection_work": 158688,
+      "realization_and_terminal_ms": 30.695280000567436,
+      "independent_residue_count": 1,
+      "compact_period": "307444891294245705",
+      "wide_compile_work": 683,
+      "compact_compile_work": 682,
+      "wide_selection_work": 20178,
+      "compact_selection_work": 19836
+    }
+  ],
+  "composition": {
+    "form": [
+      54,
+      42,
+      0
+    ],
+    "rows": [
+      {
+        "policy": "primitive",
+        "queries": 12,
+        "found": 0,
+        "attempts": 5304,
+        "work": 1299346,
+        "ms": 258.8789889998734
+      },
+      {
+        "policy": "retained",
+        "queries": 12,
+        "found": 0,
+        "attempts": 5304,
+        "work": 1299346,
+        "ms": 264.45433100126684
+      },
+      {
+        "policy": "composed",
+        "queries": 12,
+        "found": 12,
+        "attempts": 384,
+        "work": 38387,
+        "ms": 5.925029000267386
+      }
+    ],
+    "retained_after_usage": {
+      "attempts": 1,
+      "work": 172
+    },
+    "skills": 35
+  }
+}
