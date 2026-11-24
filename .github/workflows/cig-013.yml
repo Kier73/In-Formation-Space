@@ -1,0 +1,33 @@
+name: CIG-013 anticipatory regional memory
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/*anticipatory_memory.py'
+      - 'experiments/pnp-ground-navigation/cut_intention/CIG-013*'
+      - '.github/workflows/cig-013.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/*anticipatory_memory.py'
+      - 'experiments/pnp-ground-navigation/cut_intention/CIG-013*'
+      - '.github/workflows/cig-013.yml'
+  workflow_dispatch:
+jobs:
+  source-revision-campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Independent restriction and retention tests
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        run: python -m unittest test_anticipatory_memory -v
+      - name: Reproduce connected-source campaign
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        run: python run_anticipatory_memory.py --sizes 32 256 1024 --output CIG-013-results.reproduced.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cig013-reproduced-ledger
+          path: experiments/pnp-ground-navigation/cut_intention/CIG-013-results.reproduced.json
