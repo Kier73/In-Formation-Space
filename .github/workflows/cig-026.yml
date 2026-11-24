@@ -1,4 +1,4 @@
-name: CIG-026 temporal image and native NCR codec
+name: CIG-026/027 temporal capacity and native NCR codec
 on:
   pull_request:
     paths:
@@ -33,9 +33,14 @@ jobs:
         env:
           CIG026_NATIVE_NCR: '1'
           PYTHONPATH: ${{ github.workspace }}/ncr-native
-        run: python -m unittest test_temporal_image -v
+        run: python -m unittest test_temporal_image test_capacity_time -v
       - name: Native-scale campaign
         working-directory: experiments/pnp-ground-navigation/cut_intention
         env:
           PYTHONPATH: ${{ github.workspace }}/ncr-native
         run: python run_temporal_image.py --native-ncr --sizes 24 96 1023
+      - name: Continuing capacity-constrained processes
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        env:
+          PYTHONPATH: ${{ github.workspace }}/ncr-native
+        run: python run_capacity_time.py --native-ncr --sizes 24 96 1023
