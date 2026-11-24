@@ -1,0 +1,44 @@
+name: CIG-005 shared nonlinear observer languages
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/**'
+      - '.github/workflows/cig-005.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/**'
+      - '.github/workflows/cig-005.yml'
+  workflow_dispatch:
+
+jobs:
+  source-and-native-cross-repo:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned NCR-007 for real source Boolean polynomial pullbacks
+        uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: 66e216e53ab606547ba4a5316ed44044e327b67b
+          path: navigable-compute-reference
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Entire original-CNF cut-intention regression (CIG-001 through 005)
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        run: python -m unittest discover -s . -p 'test_*.py' -v
+      - name: Native CIG-004 PNG-001 SFI-002 OFG-003 NCR-007 integration
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        env:
+          PYTHONPATH: ${{ github.workspace }}/navigable-compute-reference
+        run: python run_cross_repo_joint.py
+      - name: Reproduce shared nonlinear observer construction ledger
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        run: python run_joint_intention.py
