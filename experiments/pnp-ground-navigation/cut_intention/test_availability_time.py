@@ -41,6 +41,17 @@ def worker(path,digest):
     print(json.dumps(dict(key=proc.key,time=str(proc.time),rank=str(proc.rank),
                           host=rec.host,receipt=r,move=move)))
 
+def seed_worker(path):
+    proc,_,nav,rec=setup()
+    r=nav.query(0,1);m=proc.move(2)
+    assert rec.accept_move(0,1,1,r,m)
+    proc.commit(m)
+    digest=save(rec,path)
+    print(json.dumps(dict(digest=digest,key=proc.key,time=str(proc.time),
+                          rank=str(proc.rank))),flush=True)
+    # Parent kills this process after the checkpoint is flushed.
+    sys.stdin.read(1)
+
 
 class AvailabilityTests(unittest.TestCase):
     def test_continuity_and_ordinal(self):
@@ -115,6 +126,53 @@ class AvailabilityTests(unittest.TestCase):
             self.assertEqual(result['time'],'12')
             self.assertTrue(rec.accept_move(0,11,1,result['receipt'],result['move']))
 
+    def test_future_schedule_revision(self):
+        proc,_,nav,rec=setup()
+        r=nav.query(0,1);m=proc.move(2)
+        self.assertTrue(rec.accept_move(0,1,1,r,m));proc.commit(m)
+        old=nav.query(0,3)
+        self.assertEqual(old['time'],'10')
+        revised=((0,1,'host-A',6),(1,3,'host-A',5),
+                 (16,19,'host-D',4),(20,None,'host-C',4))
+        # The authority for these offered windows is caller-local.
+        nav.revise(revised,3,0);rec.revise(revised,3,0)
+        self.assertEqual(rec.revision,1)
+        self.assertFalse(rec.verify(0,3,1,old))
+        with self.assertRaises(ValueError):rec.revise(WINDOWS,3,0)
+        with self.assertRaises(ValueError):rec.revise(WINDOWS,2,1)
+        with self.assertRaises(ValueError):rec.revise(((0,None,'bad',6),),3,1)
+        self.assertEqual(rec.capacity.image.time,2)
+        r=nav.query(0,3);self.assertEqual(r['time'],'16')
+        self.assertEqual(r['host'],'host-D')
+        m=proc.move(16)
+        self.assertTrue(rec.accept_move(0,3,1,r,m));proc.commit(m)
+        self.assertEqual(rec.snapshot()['state']['revision'],1)
+
+    def test_hard_process_kill_and_rehome(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path=Path(temp)/'checkpoint.json'
+            child=subprocess.Popen([sys.executable,__file__,'seed',str(path)],
+                                   stdin=subprocess.PIPE,stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,text=True)
+            try:
+                checkpoint=json.loads(child.stdout.readline())
+                self.assertEqual(checkpoint['time'],'2')
+                self.assertIsNone(child.poll())
+            finally:
+                child.kill();child.communicate(timeout=30)
+            self.assertIsNotNone(child.returncode)
+            result=json.loads(subprocess.check_output(
+                [sys.executable,__file__,'worker',str(path),checkpoint['digest']],
+                text=True,timeout=60))
+            self.assertEqual(result['key'],checkpoint['key'])
+            self.assertEqual(result['time'],'10')
+            self.assertEqual(result['host'],'host-B')
+            old,_,_,admitted=setup()
+            recovered=recover(admitted,old.nav,7,path,checkpoint['digest'])
+            self.assertEqual(str(recovered.rank),checkpoint['rank'])
+            self.assertTrue(admitted.accept_move(0,3,1,result['receipt'],result['move']))
+            self.assertEqual(str(admitted.capacity.image.rank),result['rank'])
+
     def test_random_explicit_chronology(self):
         rng=random.Random(28028)
         for _ in range(40):
@@ -154,4 +212,5 @@ class AvailabilityTests(unittest.TestCase):
 
 if __name__=='__main__':
     if len(sys.argv)>1 and sys.argv[1]=='worker':worker(sys.argv[2],sys.argv[3])
+    elif len(sys.argv)>1 and sys.argv[1]=='seed':seed_worker(sys.argv[2])
     else:unittest.main()
