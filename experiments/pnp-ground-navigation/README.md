@@ -226,3 +226,6 @@ CIG-017 reuses the CIG-014 union translator, CIG-008 parity extraction and paire
 
 Next: proof-interpolant decoder synthesis over the shared observation language, with independently checked source implications and explicit compilation costs.
 
+## CIG-018 — Proof-derived executable interpolants
+
+[CIG-018](cut_intention/CIG-018.md) constructs shared-observation Boolean circuits directly from independently checked resolution refutations. Exact two-copy source obligations distinguish sufficiency from concrete counterexamples. On shuffled mixed and parity chains with 4,095 original variables and 1,024 nonlinear observation predicates, scope-aware resolution constructs and verifies executable interpolants in approximately half a second locally, without observation-code enumeration. Pair-count-only elimination exhausts its budget on the larger parity controls. The [compiler](cut_intention/interpolant_ground.py), [independent checker](cut_intention/verify_interpolant_ground.py), [benchmark](cut_intention/run_interpolant_ground.py) and [ledger](cut_intention/CIG-018-results.json) retain full proof and cost evidence. **275 local regression tests passed**; remote CI is separate. Next: incremental shared proof DAGs and multi-output interpolant reuse.
