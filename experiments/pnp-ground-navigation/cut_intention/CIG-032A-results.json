@@ -1,0 +1,1169 @@
+[
+  {
+    "label": "shift",
+    "target": 2,
+    "period": "210",
+    "count": "105",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 74,
+      "rows": 0,
+      "attempts": 1,
+      "relation": {
+        "kind": "shift",
+        "base": 0,
+        "target": 2,
+        "delta": 1
+      }
+    },
+    "discovery_ms": 0.09918899973854423,
+    "manifest_bytes": 497,
+    "manifest_ms": 0.28830299992114305,
+    "cold_setup_ms": 0.13166800001636147,
+    "cold_query_ms": 0.5914890002459288,
+    "cold_terms": 7,
+    "cold_bytes": 106,
+    "found": 16,
+    "exact_phases": 18,
+    "phase_queries": 18,
+    "max_width": 0,
+    "relation": {
+      "kind": "shift",
+      "base": 0,
+      "target": 2,
+      "delta": 1
+    },
+    "admit_ms": 0.09241900034248829,
+    "residual_ms": 0.034052000381052494,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 1.808968999888748,
+    "steps": 30,
+    "relation_bytes": 46,
+    "retained_target_bytes": 298,
+    "bits": 60,
+    "n": 193,
+    "source_ms": 156.5323210004717,
+    "acquire": {
+      "ms": 0.6195620005019009,
+      "terms": 8,
+      "proof_bytes": 115
+    }
+  },
+  {
+    "label": "xor",
+    "target": 3,
+    "period": "210",
+    "count": "105",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 364,
+      "rows": 3,
+      "attempts": 0,
+      "relation": {
+        "kind": "residual",
+        "base": 0,
+        "target": 3,
+        "flip": false,
+        "disagreement": "2"
+      }
+    },
+    "discovery_ms": 0.49057700019329786,
+    "manifest_bytes": 507,
+    "manifest_ms": 1.131972000002861,
+    "cold_setup_ms": 0.5417450005188584,
+    "cold_query_ms": 0.6781889996491373,
+    "cold_terms": 11,
+    "cold_bytes": 151,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "residual",
+      "link": {
+        "base": 0,
+        "target": 3,
+        "flip": false,
+        "view": 0,
+        "opposite": 4,
+        "nt": 5,
+        "plus": 6,
+        "minus": 7
+      },
+      "disagreement": "2"
+    },
+    "admit_ms": 0.40285499999299645,
+    "residual_ms": 0.6730319992639124,
+    "residual_terms": 3,
+    "residual_bytes": 117,
+    "transfer_ms": 1.8575619999319315,
+    "steps": 31,
+    "relation_bytes": 128,
+    "retained_target_bytes": 288,
+    "bits": 60,
+    "n": 193,
+    "source_ms": 156.5323210004717,
+    "acquire": {
+      "ms": 0.6195620005019009,
+      "terms": 8,
+      "proof_bytes": 115
+    }
+  },
+  {
+    "label": "not_xor",
+    "target": 8,
+    "period": "210",
+    "count": "105",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 247,
+      "rows": 2,
+      "attempts": 0,
+      "relation": {
+        "kind": "span",
+        "target": 8,
+        "den": 1,
+        "constant": 1,
+        "terms": [
+          [
+            3,
+            -1
+          ]
+        ]
+      }
+    },
+    "discovery_ms": 0.16244400013238192,
+    "manifest_bytes": 697,
+    "manifest_ms": 0.3605520003475249,
+    "cold_setup_ms": 0.20971500035375357,
+    "cold_query_ms": 0.5493560000322759,
+    "cold_terms": 10,
+    "cold_bytes": 143,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "span",
+      "target": 8,
+      "den": 1,
+      "constant": 1,
+      "terms": [
+        [
+          3,
+          -1
+        ]
+      ]
+    },
+    "admit_ms": 0.06430699955672026,
+    "residual_ms": 0.0003909999504685402,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 1.6004660003818572,
+    "steps": 30,
+    "relation_bytes": 64,
+    "retained_target_bytes": 288,
+    "bits": 60,
+    "n": 193,
+    "source_ms": 156.5323210004717,
+    "acquire": {
+      "ms": 0.6195620005019009,
+      "terms": 8,
+      "proof_bytes": 115
+    }
+  },
+  {
+    "bits": 60,
+    "label": "forced_budget",
+    "discovery": {
+      "status": "UNKNOWN",
+      "work": 1,
+      "rows": 0,
+      "attempts": 0,
+      "relation": null
+    }
+  },
+  {
+    "label": "majority",
+    "target": 4,
+    "period": "210",
+    "count": "57",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 955,
+      "rows": 5,
+      "attempts": 0,
+      "relation": {
+        "kind": "span",
+        "target": 4,
+        "den": 2,
+        "constant": 0,
+        "terms": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            -1
+          ]
+        ]
+      }
+    },
+    "discovery_ms": 0.6086650001816452,
+    "manifest_bytes": 1533,
+    "manifest_ms": 0.4164959997870028,
+    "cold_setup_ms": 0.1673009996302426,
+    "cold_query_ms": 0.5709379999898374,
+    "cold_terms": 8,
+    "cold_bytes": 116,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "span",
+      "target": 4,
+      "den": 2,
+      "constant": 0,
+      "terms": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          -1
+        ]
+      ]
+    },
+    "admit_ms": 0.13222899986431003,
+    "residual_ms": 0.0005600000731647015,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 3.0978359999135137,
+    "steps": 53,
+    "relation_bytes": 82,
+    "retained_target_bytes": 284,
+    "bits": 60,
+    "n": 195,
+    "source_ms": 63.34183699963614,
+    "acquire": {
+      "ms": 1.6466549998149276,
+      "terms": 16,
+      "proof_bytes": 304
+    },
+    "source_outputs": true,
+    "direct_source_control": null
+  },
+  {
+    "bits": 60,
+    "label": "insufficient_seed",
+    "discovery": {
+      "status": "UNKNOWN",
+      "work": 119,
+      "rows": 2,
+      "attempts": 0,
+      "relation": null
+    }
+  },
+  {
+    "label": "shift",
+    "target": 2,
+    "period": "510510",
+    "count": "255255",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 258,
+      "rows": 0,
+      "attempts": 1,
+      "relation": {
+        "kind": "shift",
+        "base": 0,
+        "target": 2,
+        "delta": 1
+      }
+    },
+    "discovery_ms": 0.2300559999421239,
+    "manifest_bytes": 625,
+    "manifest_ms": 0.9531629998236895,
+    "cold_setup_ms": 0.9070629999041557,
+    "cold_query_ms": 2.8296739999204874,
+    "cold_terms": 127,
+    "cold_bytes": 1706,
+    "found": 16,
+    "exact_phases": 18,
+    "phase_queries": 18,
+    "max_width": 0,
+    "relation": {
+      "kind": "shift",
+      "base": 0,
+      "target": 2,
+      "delta": 1
+    },
+    "admit_ms": 0.5339230000972748,
+    "residual_ms": 0.04361600009724498,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 2.468741999939084,
+    "steps": 75,
+    "relation_bytes": 46,
+    "retained_target_bytes": 533,
+    "bits": 174,
+    "n": 541,
+    "source_ms": 199.4016279997304,
+    "acquire": {
+      "ms": 2.215830999892205,
+      "terms": 128,
+      "proof_bytes": 1709
+    }
+  },
+  {
+    "label": "xor",
+    "target": 3,
+    "period": "510510",
+    "count": "255255",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 950,
+      "rows": 3,
+      "attempts": 0,
+      "relation": {
+        "kind": "residual",
+        "base": 0,
+        "target": 3,
+        "flip": false,
+        "disagreement": "2"
+      }
+    },
+    "discovery_ms": 0.5386289996095002,
+    "manifest_bytes": 635,
+    "manifest_ms": 1.0316800000146031,
+    "cold_setup_ms": 1.4737550001591444,
+    "cold_query_ms": 3.649265000130981,
+    "cold_terms": 161,
+    "cold_bytes": 2177,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "residual",
+      "link": {
+        "base": 0,
+        "target": 3,
+        "flip": false,
+        "view": 0,
+        "opposite": 4,
+        "nt": 5,
+        "plus": 6,
+        "minus": 7
+      },
+      "disagreement": "2"
+    },
+    "admit_ms": 1.6777219995856285,
+    "residual_ms": 2.4452160000801086,
+    "residual_terms": 3,
+    "residual_bytes": 136,
+    "transfer_ms": 2.4746909998357296,
+    "steps": 75,
+    "relation_bytes": 128,
+    "retained_target_bytes": 517,
+    "bits": 174,
+    "n": 541,
+    "source_ms": 199.4016279997304,
+    "acquire": {
+      "ms": 2.215830999892205,
+      "terms": 128,
+      "proof_bytes": 1709
+    }
+  },
+  {
+    "label": "not_xor",
+    "target": 8,
+    "period": "510510",
+    "count": "255255",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 564,
+      "rows": 2,
+      "attempts": 0,
+      "relation": {
+        "kind": "span",
+        "target": 8,
+        "den": 1,
+        "constant": 1,
+        "terms": [
+          [
+            3,
+            -1
+          ]
+        ]
+      }
+    },
+    "discovery_ms": 0.3864710000343621,
+    "manifest_bytes": 936,
+    "manifest_ms": 1.2366089997813106,
+    "cold_setup_ms": 2.456042000092566,
+    "cold_query_ms": 3.7566070002503693,
+    "cold_terms": 160,
+    "cold_bytes": 2169,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "span",
+      "target": 8,
+      "den": 1,
+      "constant": 1,
+      "terms": [
+        [
+          3,
+          -1
+        ]
+      ]
+    },
+    "admit_ms": 0.17908900044858456,
+    "residual_ms": 0.000509999692440033,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 3.3383479998447,
+    "steps": 17,
+    "relation_bytes": 64,
+    "retained_target_bytes": 517,
+    "bits": 174,
+    "n": 541,
+    "source_ms": 199.4016279997304,
+    "acquire": {
+      "ms": 2.215830999892205,
+      "terms": 128,
+      "proof_bytes": 1709
+    }
+  },
+  {
+    "bits": 174,
+    "label": "forced_budget",
+    "discovery": {
+      "status": "UNKNOWN",
+      "work": 1,
+      "rows": 0,
+      "attempts": 0,
+      "relation": null
+    }
+  },
+  {
+    "label": "majority",
+    "target": 4,
+    "period": "510510",
+    "count": "156604",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 3533,
+      "rows": 5,
+      "attempts": 0,
+      "relation": {
+        "kind": "span",
+        "target": 4,
+        "den": 2,
+        "constant": 0,
+        "terms": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            -1
+          ]
+        ]
+      }
+    },
+    "discovery_ms": 1.20637399982661,
+    "manifest_bytes": 2012,
+    "manifest_ms": 2.032846000045538,
+    "cold_setup_ms": 1.625013000331819,
+    "cold_query_ms": 2.7710569999180734,
+    "cold_terms": 120,
+    "cold_bytes": 1611,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "span",
+      "target": 4,
+      "den": 2,
+      "constant": 0,
+      "terms": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          -1
+        ]
+      ]
+    },
+    "admit_ms": 0.414361999835819,
+    "residual_ms": 0.0006810002960264683,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 3.5919500002637506,
+    "steps": 19,
+    "relation_bytes": 82,
+    "retained_target_bytes": 507,
+    "bits": 174,
+    "n": 545,
+    "source_ms": 246.25497199967504,
+    "acquire": {
+      "ms": 11.264605000149459,
+      "terms": 142,
+      "proof_bytes": 1966
+    },
+    "source_outputs": true,
+    "direct_source_control": null
+  },
+  {
+    "bits": 174,
+    "label": "insufficient_seed",
+    "discovery": {
+      "status": "UNKNOWN",
+      "work": 962,
+      "rows": 3,
+      "attempts": 0,
+      "relation": null
+    }
+  },
+  {
+    "label": "shift",
+    "target": 2,
+    "period": "446185740",
+    "count": "224683305",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 463,
+      "rows": 0,
+      "attempts": 1,
+      "relation": {
+        "kind": "shift",
+        "base": 0,
+        "target": 2,
+        "delta": 1
+      }
+    },
+    "discovery_ms": 0.33788800006732345,
+    "manifest_bytes": 732,
+    "manifest_ms": 1.5465650004334748,
+    "cold_setup_ms": 4.6205860003829,
+    "cold_query_ms": 20.058896000031382,
+    "cold_terms": 767,
+    "cold_bytes": 12632,
+    "found": 16,
+    "exact_phases": 18,
+    "phase_queries": 18,
+    "max_width": 0,
+    "relation": {
+      "kind": "shift",
+      "base": 0,
+      "target": 2,
+      "delta": 1
+    },
+    "admit_ms": 0.8001329996623099,
+    "residual_ms": 0.03812800021842122,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 3.3302070000208914,
+    "steps": 17,
+    "relation_bytes": 46,
+    "retained_target_bytes": 735,
+    "bits": 384,
+    "n": 1180,
+    "source_ms": 262.4129349994473,
+    "acquire": {
+      "ms": 9.419271999504417,
+      "terms": 767,
+      "proof_bytes": 12632
+    }
+  },
+  {
+    "label": "xor",
+    "target": 3,
+    "period": "446185740",
+    "count": "224683307",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 1459,
+      "rows": 3,
+      "attempts": 0,
+      "relation": {
+        "kind": "residual",
+        "base": 0,
+        "target": 3,
+        "flip": false,
+        "disagreement": "2"
+      }
+    },
+    "discovery_ms": 0.7595420004799962,
+    "manifest_bytes": 742,
+    "manifest_ms": 1.62931999983266,
+    "cold_setup_ms": 8.790956999640912,
+    "cold_query_ms": 68.36575199989602,
+    "cold_terms": 1669,
+    "cold_bytes": 28130,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "residual",
+      "link": {
+        "base": 0,
+        "target": 3,
+        "flip": false,
+        "view": 0,
+        "opposite": 4,
+        "nt": 5,
+        "plus": 6,
+        "minus": 7
+      },
+      "disagreement": "2"
+    },
+    "admit_ms": 3.836587999947369,
+    "residual_ms": 4.398473000153899,
+    "residual_terms": 2,
+    "residual_bytes": 131,
+    "transfer_ms": 3.1081930003128946,
+    "steps": 17,
+    "relation_bytes": 128,
+    "retained_target_bytes": 713,
+    "bits": 384,
+    "n": 1180,
+    "source_ms": 262.4129349994473,
+    "acquire": {
+      "ms": 9.419271999504417,
+      "terms": 767,
+      "proof_bytes": 12632
+    }
+  },
+  {
+    "label": "not_xor",
+    "target": 8,
+    "period": "446185740",
+    "count": "221502433",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 824,
+      "rows": 2,
+      "attempts": 0,
+      "relation": {
+        "kind": "span",
+        "target": 8,
+        "den": 1,
+        "constant": 1,
+        "terms": [
+          [
+            3,
+            -1
+          ]
+        ]
+      }
+    },
+    "discovery_ms": 0.5482349996455014,
+    "manifest_bytes": 1138,
+    "manifest_ms": 1.9143280000425875,
+    "cold_setup_ms": 9.622847000136971,
+    "cold_query_ms": 47.38472899980843,
+    "cold_terms": 1668,
+    "cold_bytes": 28120,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "span",
+      "target": 8,
+      "den": 1,
+      "constant": 1,
+      "terms": [
+        [
+          3,
+          -1
+        ]
+      ]
+    },
+    "admit_ms": 0.26292600063607097,
+    "residual_ms": 0.0008310000412166119,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 3.495415000244975,
+    "steps": 73,
+    "relation_bytes": 64,
+    "retained_target_bytes": 713,
+    "bits": 384,
+    "n": 1180,
+    "source_ms": 262.4129349994473,
+    "acquire": {
+      "ms": 9.419271999504417,
+      "terms": 767,
+      "proof_bytes": 12632
+    }
+  },
+  {
+    "bits": 384,
+    "label": "forced_budget",
+    "discovery": {
+      "status": "UNKNOWN",
+      "work": 1,
+      "rows": 0,
+      "attempts": 0,
+      "relation": null
+    }
+  },
+  {
+    "label": "majority",
+    "target": 4,
+    "period": "446185740",
+    "count": "148678620",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 5675,
+      "rows": 5,
+      "attempts": 0,
+      "relation": {
+        "kind": "span",
+        "target": 4,
+        "den": 2,
+        "constant": 0,
+        "terms": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            -1
+          ]
+        ]
+      }
+    },
+    "discovery_ms": 1.7324250005185604,
+    "manifest_bytes": 2422,
+    "manifest_ms": 3.0783570003695786,
+    "cold_setup_ms": 6.904579999856651,
+    "cold_query_ms": 18.829990000464022,
+    "cold_terms": 738,
+    "cold_bytes": 12116,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "span",
+      "target": 4,
+      "den": 2,
+      "constant": 0,
+      "terms": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          -1
+        ]
+      ]
+    },
+    "admit_ms": 0.7565379999577999,
+    "residual_ms": 0.0003809994086623192,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 4.8715739995241165,
+    "steps": 59,
+    "relation_bytes": 82,
+    "retained_target_bytes": 703,
+    "bits": 384,
+    "n": 1187,
+    "source_ms": 768.4276529997587,
+    "acquire": {
+      "ms": 22.958095000125468,
+      "terms": 796,
+      "proof_bytes": 13064
+    },
+    "source_outputs": true,
+    "direct_source_control": null
+  },
+  {
+    "bits": 384,
+    "label": "insufficient_seed",
+    "discovery": {
+      "status": "UNKNOWN",
+      "work": 1634,
+      "rows": 3,
+      "attempts": 0,
+      "relation": null
+    }
+  },
+  {
+    "label": "shift",
+    "target": 2,
+    "period": "614889782588491410",
+    "count": "307444891294245705",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 1300,
+      "rows": 0,
+      "attempts": 1,
+      "relation": {
+        "kind": "shift",
+        "base": 0,
+        "target": 2,
+        "delta": 1
+      }
+    },
+    "discovery_ms": 0.8000929998233914,
+    "manifest_bytes": 1060,
+    "manifest_ms": 8.326917999889702,
+    "cold_setup_ms": 131.27310999995098,
+    "cold_query_ms": 980.822598000057,
+    "cold_terms": 16383,
+    "cold_bytes": 410806,
+    "found": 16,
+    "exact_phases": 18,
+    "phase_queries": 18,
+    "max_width": 0,
+    "relation": {
+      "kind": "shift",
+      "base": 0,
+      "target": 2,
+      "delta": 1
+    },
+    "admit_ms": 6.269847000017762,
+    "residual_ms": 0.06939399940893054,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 11.805579999927431,
+    "steps": 73,
+    "relation_bytes": 46,
+    "retained_target_bytes": 1353,
+    "bits": 1023,
+    "n": 3115,
+    "source_ms": 1046.9603829998523,
+    "acquire": {
+      "ms": 340.50992899993435,
+      "terms": 16384,
+      "proof_bytes": 410729
+    }
+  },
+  {
+    "label": "xor",
+    "target": 3,
+    "period": "614889782588491410",
+    "count": "307444891294245707",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 4573,
+      "rows": 3,
+      "attempts": 0,
+      "relation": {
+        "kind": "residual",
+        "base": 0,
+        "target": 3,
+        "flip": false,
+        "disagreement": "2"
+      }
+    },
+    "discovery_ms": 1.800337000284344,
+    "manifest_bytes": 1070,
+    "manifest_ms": 9.049956999719143,
+    "cold_setup_ms": 203.71581500023603,
+    "cold_query_ms": 1159.4340400001965,
+    "cold_terms": 20483,
+    "cold_bytes": 519329,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "residual",
+      "link": {
+        "base": 0,
+        "target": 3,
+        "flip": false,
+        "view": 0,
+        "opposite": 4,
+        "nt": 5,
+        "plus": 6,
+        "minus": 7
+      },
+      "disagreement": "2"
+    },
+    "admit_ms": 16.6683020000346,
+    "residual_ms": 26.148606000002474,
+    "residual_terms": 3,
+    "residual_bytes": 211,
+    "transfer_ms": 11.233018999919295,
+    "steps": 73,
+    "relation_bytes": 128,
+    "retained_target_bytes": 1313,
+    "bits": 1023,
+    "n": 3115,
+    "source_ms": 1046.9603829998523,
+    "acquire": {
+      "ms": 340.50992899993435,
+      "terms": 16384,
+      "proof_bytes": 410729
+    }
+  },
+  {
+    "label": "not_xor",
+    "target": 8,
+    "period": "614889782588491410",
+    "count": "307444891294245703",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 2538,
+      "rows": 2,
+      "attempts": 0,
+      "relation": {
+        "kind": "span",
+        "target": 8,
+        "den": 1,
+        "constant": 1,
+        "terms": [
+          [
+            3,
+            -1
+          ]
+        ]
+      }
+    },
+    "discovery_ms": 1.22217799955979,
+    "manifest_bytes": 1757,
+    "manifest_ms": 9.450018999632448,
+    "cold_setup_ms": 255.05320500023663,
+    "cold_query_ms": 1307.3642199994065,
+    "cold_terms": 20482,
+    "cold_bytes": 519321,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "span",
+      "target": 8,
+      "den": 1,
+      "constant": 1,
+      "terms": [
+        [
+          3,
+          -1
+        ]
+      ]
+    },
+    "admit_ms": 0.7633879999630153,
+    "residual_ms": 0.0008109998889267445,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 12.415008000098169,
+    "steps": 17,
+    "relation_bytes": 64,
+    "retained_target_bytes": 1313,
+    "bits": 1023,
+    "n": 3115,
+    "source_ms": 1046.9603829998523,
+    "acquire": {
+      "ms": 340.50992899993435,
+      "terms": 16384,
+      "proof_bytes": 410729
+    }
+  },
+  {
+    "bits": 1023,
+    "label": "forced_budget",
+    "discovery": {
+      "status": "UNKNOWN",
+      "work": 1,
+      "rows": 0,
+      "attempts": 0,
+      "relation": null
+    }
+  },
+  {
+    "label": "majority",
+    "target": 9,
+    "period": "614889782588491410",
+    "count": "183328305040425930",
+    "queries": 16,
+    "discovery": {
+      "status": "FOUND",
+      "work": 18711,
+      "rows": 5,
+      "attempts": 0,
+      "relation": {
+        "kind": "span",
+        "target": 9,
+        "den": 2,
+        "constant": 0,
+        "terms": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            4,
+            -1
+          ]
+        ]
+      }
+    },
+    "discovery_ms": 4.446756000164896,
+    "manifest_bytes": 3679,
+    "manifest_ms": 3.529225999955088,
+    "cold_setup_ms": 196.20329899992794,
+    "cold_query_ms": 908.6147549995221,
+    "cold_terms": 16398,
+    "cold_bytes": 405652,
+    "found": 16,
+    "exact_phases": 16,
+    "phase_queries": 16,
+    "max_width": 0,
+    "relation": {
+      "kind": "span",
+      "target": 9,
+      "den": 2,
+      "constant": 0,
+      "terms": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          4,
+          -1
+        ]
+      ]
+    },
+    "admit_ms": 2.1554899998009205,
+    "residual_ms": 0.0006109997630119324,
+    "residual_terms": 0,
+    "residual_bytes": 0,
+    "transfer_ms": 6.009655000176281,
+    "steps": 18,
+    "relation_bytes": 82,
+    "retained_target_bytes": 1305,
+    "bits": 1023,
+    "n": 3082,
+    "source_ms": 1213.3187850001268,
+    "acquire": {
+      "ms": 227.70337000023574,
+      "terms": 16510,
+      "proof_bytes": 412568
+    },
+    "source_outputs": false,
+    "direct_source_control": {
+      "n": 3128,
+      "status": "COMPLETE",
+      "goals": [
+        "SUFFICIENT",
+        "SUFFICIENT",
+        "SUFFICIENT",
+        "SUFFICIENT",
+        "UNKNOWN"
+      ],
+      "ms": 681.1799340001307
+    }
+  },
+  {
+    "bits": 1023,
+    "label": "insufficient_seed",
+    "discovery": {
+      "status": "UNKNOWN",
+      "work": 4633,
+      "rows": 2,
+      "attempts": 0,
+      "relation": null
+    }
+  }
+]
