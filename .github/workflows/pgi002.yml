@@ -1,0 +1,34 @@
+name: PGI-002 induced skill vocabulary
+on:
+  pull_request:
+    paths:
+      - 'experiments/ground-intelligence/**'
+      - 'experiments/pnp-ground-navigation/cut_intention/**'
+      - '.github/workflows/pgi002.yml'
+  push:
+    paths:
+      - 'experiments/ground-intelligence/**'
+      - 'experiments/pnp-ground-navigation/cut_intention/**'
+      - '.github/workflows/pgi002.yml'
+permissions:
+  contents: read
+jobs:
+  skills:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.14']
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONPATH: ${{ github.workspace }}/experiments/pnp-ground-navigation/cut_intention
+    defaults:
+      run:
+        working-directory: experiments/ground-intelligence
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest test_skill_language test_ground_intelligence test_ground_network test_seed_network -v
+      - run: python run_skill_language.py --sizes 60 174 --output CI-PGI-002-results.json
