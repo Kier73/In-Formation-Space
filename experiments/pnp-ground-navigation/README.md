@@ -260,3 +260,15 @@ Next: source-qualified temporal jumps for the proof-derived circuit, costed prop
 
 [CIG-022](cut_intention/CIG-022.md) computes the earliest time satisfying specified outputs of the actual CIG-019 proof-derived decoder under CIG-021's independently admitted transport and universal source section. It decomposes mandatory signed gate requirements into temporal factors on their spatial-cycle supports, groups identical supports, and composes residue sets by generalized CRT. On a 3,110-variable shuffled CNF with 1,023 observations, the exact global period is 614,889,782,588,491,410; eight coupled output factors admit 128 time classes. From 10^1000+173 the earliest offset is 5,418,922,329,477,735. Grouping reduces candidate CRT pairs from 80,574 to 270, with identical results. A wide parity control honestly returns UNKNOWN. **333 local regression tests passed**, including 300 randomized inverse-output queries checked exhaustively in both factor modes. See the [compiler](cut_intention/output_time.py), [independent verifier](cut_intention/verify_output_time.py), [runner](cut_intention/run_output_time.py) and [ledger](cut_intention/CIG-022-results.json). Full preparation and verification costs are recorded; remote CI remains separate. Next: proof-directed disjunctive temporal factorization to avoid joint-period expansion for wide output cones.
 
+
+## CIG-023–025 — Temporal alternatives, algebra and chronological selection
+
+| Iteration | Source-qualified mathematical capability |
+|---|---|
+| [CIG-023](cut_intention/CIG-023.md) | Disjunctive temporal proof navigation; certified interval exclusion and earliest-time alternative coverage |
+| [CIG-024](cut_intention/CIG-024.md) | Shared reduced CRT decision diagrams; Boolean set operations, forward time shifts, exact period cardinality and bounded interval counts |
+| [CIG-025](cut_intention/CIG-025.md) | Signed congruence translation; exact chronological rank, interval counts and ordinal selection; integer discrepancy-directed search |
+
+CIG-025 directly translates the admitted CIG-024 diagram on the 3,118-variable source with 1,023 observed bits and common period 614,889,782,588,491,410. Broad parity uses 16,384 signed terms and resolves the earlier partial-period UNKNOWN control. Its one-based ordinal 10^900+173 is realized at 2*10^900+28217; adjacent ranks are independently checked against the admitted diagram translation and a separate marker-level inclusion-exclusion oracle. Discrepancy bounds reduce selection probes from 59 to 23. Irregular phase sets can expand, and budget exhaustion remains unresolved. See [compiler](cut_intention/temporal_rank.py), [independent checker](cut_intention/verify_temporal_rank.py), [runner](cut_intention/run_temporal_rank.py), and [ledger](cut_intention/CIG-025-results.json). **358 local tests passed**; remote CI separate.
+
+Next: hybrid rank representations, adaptive partial-rank evidence, and cost-aware chronological architecture selection.
