@@ -1,0 +1,45 @@
+name: CIG-028 availability-conditioned continuity
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/availability_time.py'
+      - 'experiments/pnp-ground-navigation/cut_intention/verify_availability_time.py'
+      - 'experiments/pnp-ground-navigation/cut_intention/continuation_checkpoint.py'
+      - 'experiments/pnp-ground-navigation/cut_intention/test_availability_time.py'
+      - 'experiments/pnp-ground-navigation/cut_intention/run_availability_time.py'
+      - '.github/workflows/cig-028.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/**'
+      - '.github/workflows/cig-028.yml'
+  workflow_dispatch:
+jobs:
+  continuity:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: c249a482a0a09e24b3a2af5b39d43a45856e2bc6
+          path: ncr-native
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Native schedule and process-loss tests
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        env:
+          PYTHONPATH: ${{ github.workspace }}/ncr-native
+          CIG026_NATIVE_NCR: '1'
+        run: python -m unittest test_temporal_image test_capacity_time test_availability_time -v
+      - name: Native continuing-process campaign
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        env:
+          PYTHONPATH: ${{ github.workspace }}/ncr-native
+        run: python run_availability_time.py --native-ncr --sizes 24 96 1023
