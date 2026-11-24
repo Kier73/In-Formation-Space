@@ -1,0 +1,87 @@
+{
+  "schema": "ifs.cig005.joint-observer-campaign.v1",
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41"
+  },
+  "repetitions_per_case": 5,
+  "original_endpoint_variables": 90,
+  "original_source_clauses": 106,
+  "logical_time_decimal": "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000173",
+  "cases": [
+    {
+      "case": "default",
+      "producer_median_ms": 1.9206,
+      "receiver_median_ms": 19.8737,
+      "chosen_measurements": [
+        "j",
+        "y_xor_j"
+      ],
+      "declared_price": 3,
+      "whole_future_shared_features": 9,
+      "separate_feature_dimensions": [
+        4,
+        3,
+        4
+      ],
+      "eventual_linear_dimension": 3,
+      "eventual_nonlinear_quotient_bits": 2,
+      "eventual_quotient_states": 4,
+      "support_states_evaluated_for_quotient": 8,
+      "policy_state_evaluations": 220,
+      "symbolic_matrix_products": 442,
+      "source_witness_validated": true,
+      "original_sat_count": "2199023255552"
+    },
+    {
+      "case": "raw-observation-free",
+      "producer_median_ms": 1.9454,
+      "receiver_median_ms": 19.2975,
+      "chosen_measurements": [
+        "y",
+        "j"
+      ],
+      "declared_price": 0,
+      "whole_future_shared_features": 9,
+      "separate_feature_dimensions": [
+        4,
+        3,
+        4
+      ],
+      "eventual_linear_dimension": 3,
+      "eventual_nonlinear_quotient_bits": 2,
+      "eventual_quotient_states": 4,
+      "support_states_evaluated_for_quotient": 8,
+      "policy_state_evaluations": 220,
+      "symbolic_matrix_products": 442,
+      "source_witness_validated": true,
+      "original_sat_count": "2199023255552"
+    },
+    {
+      "case": "derived-observation-unavailable",
+      "producer_median_ms": 2.0692,
+      "receiver_median_ms": 19.9707,
+      "chosen_measurements": [
+        "y",
+        "j"
+      ],
+      "declared_price": 5,
+      "whole_future_shared_features": 9,
+      "separate_feature_dimensions": [
+        4,
+        3,
+        4
+      ],
+      "eventual_linear_dimension": 3,
+      "eventual_nonlinear_quotient_bits": 2,
+      "eventual_quotient_states": 4,
+      "support_states_evaluated_for_quotient": 8,
+      "policy_state_evaluations": 220,
+      "symbolic_matrix_products": 442,
+      "source_witness_validated": true,
+      "original_sat_count": "2199023255552"
+    }
+  ],
+  "evidence_scope": "local Python timing; symbolic finite source; no physical observer acquisition",
+  "budget_status": "bounded feature closure and at most 8 local support states per decoder check"
+}
