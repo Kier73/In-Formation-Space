@@ -159,5 +159,4 @@ class SkillIntelligence:
         self.agent.observe(z,memory=True)
         result=select(z,ordinal,max_work=max_work)
         if result['status']!='FOUND' or not verify_selection(z,ordinal,result['time'],max_work=max_work):return None
-        return {'schema':'pgi.skill-expression.v1','source':source,'skill':skill_key,'target':z.key,
-                'ordinal':str(ordinal),'time':str(result['time'])},dict(compile_work=work,qualification_work=checked,selection_work=result['work'])
+        return {'schema':'pgi.skill-expression.v1','source':source,'skill':skill_key,'target':z.key,'ordinal':str(ordinal),'time':str(result['time'])},dict(compile_work=work,qualification_work=checked,selection_work=result['work'])
