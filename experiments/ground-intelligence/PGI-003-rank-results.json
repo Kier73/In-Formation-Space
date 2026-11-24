@@ -1,0 +1,294 @@
+[
+  {
+    "bits": 60,
+    "period": "210",
+    "source_ms": 51.562834000214934,
+    "seed_ms": 0.25820899941027164,
+    "seed_bytes": 206,
+    "rows": [
+      {
+        "kind": "unit_discovered",
+        "form": [
+          "103",
+          "38",
+          "0"
+        ],
+        "used": [
+          "1",
+          "138",
+          "0"
+        ],
+        "discovery_ms": 0.13661600090563297,
+        "discovery": {
+          "work": 367,
+          "attempts": 1,
+          "methods": [
+            "cofactor"
+          ]
+        },
+        "target_period": "210",
+        "seed_terms": 8,
+        "derived_terms": 8,
+        "fresh_terms": 8,
+        "transfer_ms": 0.07783699966967106,
+        "fresh_ms": 0.08092099986970425,
+        "transfer_work": 16,
+        "relation_work": 66,
+        "fresh_work": 151,
+        "recipe_bytes": 211,
+        "fresh_bytes": 207,
+        "ordinals": 8,
+        "selection_ms": 0.29533400014042854,
+        "oracle_and_terminal_ms": 0.881725000217557
+      },
+      {
+        "kind": "nonunit_supplied",
+        "form": [
+          "206",
+          "38",
+          "1"
+        ],
+        "used": [
+          "206",
+          "38",
+          "1"
+        ],
+        "discovery_ms": null,
+        "discovery": null,
+        "target_period": "105",
+        "seed_terms": 8,
+        "derived_terms": 3,
+        "fresh_terms": 3,
+        "transfer_ms": 0.059028999879956245,
+        "fresh_ms": 0.0532200001180172,
+        "transfer_work": 16,
+        "relation_work": 54,
+        "fresh_work": 91,
+        "recipe_bytes": 212,
+        "fresh_bytes": 159,
+        "ordinals": 8,
+        "selection_ms": 0.27378199994564056,
+        "oracle_and_terminal_ms": 0.8130620010197163
+      }
+    ]
+  },
+  {
+    "bits": 174,
+    "period": "510510",
+    "source_ms": 178.93967199884355,
+    "seed_ms": 0.6068320013582706,
+    "seed_bytes": 1799,
+    "rows": [
+      {
+        "kind": "unit_discovered",
+        "form": [
+          "433519",
+          "288276",
+          "0"
+        ],
+        "used": [
+          "1",
+          "121410",
+          "0"
+        ],
+        "discovery_ms": 0.44226500019431114,
+        "discovery": {
+          "work": 1725,
+          "attempts": 1,
+          "methods": [
+            "cofactor"
+          ]
+        },
+        "target_period": "510510",
+        "seed_terms": 128,
+        "derived_terms": 128,
+        "fresh_terms": 128,
+        "transfer_ms": 0.41200999915599823,
+        "fresh_ms": 0.5985300000756979,
+        "transfer_work": 256,
+        "relation_work": 258,
+        "fresh_work": 1559,
+        "recipe_bytes": 214,
+        "fresh_bytes": 1804,
+        "ordinals": 8,
+        "selection_ms": 1.8349380008876324,
+        "oracle_and_terminal_ms": 4.017759999260306
+      },
+      {
+        "kind": "nonunit_supplied",
+        "form": [
+          "867038",
+          "288276",
+          "1"
+        ],
+        "used": [
+          "867038",
+          "288276",
+          "1"
+        ],
+        "discovery_ms": null,
+        "discovery": null,
+        "target_period": "255255",
+        "seed_terms": 128,
+        "derived_terms": 63,
+        "fresh_terms": 63,
+        "transfer_ms": 0.42672199942171574,
+        "fresh_ms": 0.3531609997153282,
+        "transfer_work": 256,
+        "relation_work": 250,
+        "fresh_work": 967,
+        "recipe_bytes": 219,
+        "fresh_bytes": 926,
+        "ordinals": 8,
+        "selection_ms": 0.7915399987250566,
+        "oracle_and_terminal_ms": 4.35555600002408
+      }
+    ]
+  },
+  {
+    "bits": 384,
+    "period": "446185740",
+    "source_ms": 264.39337600022554,
+    "seed_ms": 3.6620950009673834,
+    "seed_bytes": 12722,
+    "rows": [
+      {
+        "kind": "unit_discovered",
+        "form": [
+          "410241361",
+          "11800845",
+          "0"
+        ],
+        "used": [
+          "1",
+          "252271365",
+          "0"
+        ],
+        "discovery_ms": 0.7007129993289709,
+        "discovery": {
+          "work": 3507,
+          "attempts": 1,
+          "methods": [
+            "cofactor"
+          ]
+        },
+        "target_period": "446185740",
+        "seed_terms": 767,
+        "derived_terms": 767,
+        "fresh_terms": 767,
+        "transfer_ms": 2.0874370001256466,
+        "fresh_ms": 3.5708769988268614,
+        "transfer_work": 1534,
+        "relation_work": 470,
+        "fresh_work": 6923,
+        "recipe_bytes": 217,
+        "fresh_bytes": 12754,
+        "ordinals": 8,
+        "selection_ms": 9.372098000720143,
+        "oracle_and_terminal_ms": 14.061165001243353
+      },
+      {
+        "kind": "nonunit_supplied",
+        "form": [
+          "820482722",
+          "11800845",
+          "1"
+        ],
+        "used": [
+          "820482722",
+          "11800845",
+          "1"
+        ],
+        "discovery_ms": null,
+        "discovery": null,
+        "target_period": "223092870",
+        "seed_terms": 767,
+        "derived_terms": 768,
+        "fresh_terms": 383,
+        "transfer_ms": 3.0493429992347956,
+        "fresh_ms": 1.9876479990780354,
+        "transfer_work": 1534,
+        "relation_work": 462,
+        "fresh_work": 5111,
+        "recipe_bytes": 224,
+        "fresh_bytes": 6292,
+        "ordinals": 8,
+        "selection_ms": 8.976622000336647,
+        "oracle_and_terminal_ms": 13.663086999207735
+      }
+    ]
+  },
+  {
+    "bits": 1023,
+    "period": "614889782588491410",
+    "source_ms": 679.3319610003382,
+    "seed_ms": 155.990297999233,
+    "seed_bytes": 410818,
+    "rows": [
+      {
+        "kind": "unit_discovered",
+        "form": [
+          "288919639222966373",
+          "222342933454548835",
+          "0"
+        ],
+        "used": [
+          "1",
+          "580467691554773672",
+          "1"
+        ],
+        "discovery_ms": 4.09931099973619,
+        "discovery": {
+          "work": 18097,
+          "attempts": 1,
+          "methods": [
+            "cofactor"
+          ]
+        },
+        "target_period": "614889782588491410",
+        "seed_terms": 16384,
+        "derived_terms": 16383,
+        "fresh_terms": 16383,
+        "transfer_ms": 72.81178200058639,
+        "fresh_ms": 129.85797800123692,
+        "transfer_work": 32768,
+        "relation_work": 1314,
+        "fresh_work": 149875,
+        "recipe_bytes": 226,
+        "fresh_bytes": 411036,
+        "ordinals": 8,
+        "selection_ms": 484.52404199913144,
+        "oracle_and_terminal_ms": 333.5904159992933
+      },
+      {
+        "kind": "nonunit_supplied",
+        "form": [
+          "577839278445932746",
+          "222342933454548835",
+          "1"
+        ],
+        "used": [
+          "577839278445932746",
+          "222342933454548835",
+          "1"
+        ],
+        "discovery_ms": null,
+        "discovery": null,
+        "target_period": "307444891294245705",
+        "seed_terms": 16384,
+        "derived_terms": 8192,
+        "fresh_terms": 8192,
+        "transfer_ms": 85.68002399988472,
+        "fresh_ms": 46.48651299998164,
+        "transfer_work": 32768,
+        "relation_work": 1306,
+        "fresh_work": 76135,
+        "recipe_bytes": 243,
+        "fresh_bytes": 201810,
+        "ordinals": 8,
+        "selection_ms": 206.5448700003326,
+        "oracle_and_terminal_ms": 221.58458099886775
+      }
+    ]
+  }
+]
