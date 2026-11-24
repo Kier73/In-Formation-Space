@@ -28,7 +28,9 @@ def _schedule(windows,k):
 
 class AvailabilityAdmission:
     """Local receiver-owned schedule; no claim of external host authorization."""
-    def __init__(self,capacity,windows):
+    def __init__(self,capacity,windows,*,revision=0):
+        if type(revision) is not int or not 0<=revision<1<<63:raise ValueError('revision')
+        self.revision=revision
         self.capacity=capacity
         self.windows=windows
         self.schedule=_schedule(windows,capacity.image.receiver.k)
@@ -46,13 +48,32 @@ class AvailabilityAdmission:
             for B in tuple(pending):
                 if bits<=B:self.thresholds[B]=t;pending.remove(B)
 
+    def revise(self,windows,effective,expected_revision):
+        """Independently admit a future-only schedule revision; preserve cursor."""
+        if (not _time(effective) or effective<=self.capacity.image.time
+            or type(expected_revision) is not int or expected_revision!=self.revision):
+            raise ValueError('stale or retroactive schedule')
+        candidate=AvailabilityAdmission(self.capacity,windows,revision=self.revision+1)
+        # Partition structure itself is frozen on the historical prefix.
+        def past(rows):
+            result=[]
+            for start,stop,host,bits in rows:
+                if start>=effective:break
+                result.append((start,effective if stop is None or stop>effective else stop,host,bits))
+            return result
+        if past(self.windows)!=past(candidate.windows):raise ValueError('changed historical windows')
+        self.windows=candidate.windows
+        self.schedule=candidate.schedule
+        self.thresholds=candidate.thresholds
+        self.revision=candidate.revision
+
     def verify(self,i,start,ordinal,r):
         try:
             if (not _time(start) or type(ordinal) is not int or ordinal<1 or ordinal.bit_length()>4096
                 or type(i) is not int or i not in self.capacity.ranks):return False
-            if set(r)!={'schema','key','schedule','root','start','ordinal','status','time','window','host','evidence'}:return False
+            if set(r)!={'schema','key','schedule','revision','root','start','ordinal','status','time','window','host','evidence'}:return False
             if (r['schema']!='ifs.cig028.availability.v1' or r['key']!=self.capacity.image.key
-                or r['schedule']!=self.schedule or type(r['root']) is not int or r['root']!=i
+                or r['schedule']!=self.schedule or type(r['revision']) is not int or r['revision']!=self.revision or type(r['root']) is not int or r['root']!=i
                 or r['start']!=str(start) or r['ordinal']!=str(ordinal)
                 or r['status'] not in ('FOUND','UNREACHABLE')):return False
             rank=self.capacity.ranks[i];remaining=ordinal
@@ -85,7 +106,7 @@ class AvailabilityAdmission:
         image=self.capacity.image
         if self.host is None:raise ValueError('no accepted hosted coordinate')
         state=dict(schema='ifs.cig028.checkpoint.v1',key=image.key,
-                   schedule=self.schedule,time=str(image.time),rank=str(image.rank),host=self.host)
+                   schedule=self.schedule,revision=self.revision,time=str(image.time),rank=str(image.rank),host=self.host)
         return dict(state=state,sha256=_hash(state))
 
     def restore(self,packet,expected_digest):
@@ -100,9 +121,9 @@ class AvailabilityAdmission:
             if (set(packet)!={'state','sha256'} or packet['sha256']!=expected_digest
                 or packet['sha256']!=_hash(packet['state'])):return False
             s=packet['state']
-            if (set(s)!={'schema','key','schedule','time','rank','host'}
+            if (set(s)!={'schema','key','schedule','revision','time','rank','host'}
                 or s['schema']!='ifs.cig028.checkpoint.v1' or s['key']!=image.key
-                or s['schedule']!=self.schedule):return False
+                or s['schedule']!=self.schedule or type(s['revision']) is not int or s['revision']!=self.revision):return False
             t=_decimal(s['time'],4096);r=_decimal(s['rank'],image.receiver.k)
             if t<=0:return False
             code,bits=image._decode(t,r)

@@ -27,11 +27,26 @@ def schedule_key(windows,k):
 
 class AvailabilityNavigator:
     """Use existing capacity thresholds and prepared CIG-025 rank language."""
-    def __init__(self,planner,windows):
+    def __init__(self,planner,windows,*,revision=0):
+        if type(revision) is not int or not 0<=revision<1<<63:raise ValueError('revision')
+        self.revision=revision
         self.planner=planner
         self.windows=windows
         self.schedule=schedule_key(windows,planner.processor.nav.k)
         self.thresholds={B:threshold(planner.processor,B) for B in {r[3] for r in windows}}
+
+    def revise(self,windows,effective,expected_revision):
+        """Replace future offers without changing the computational identity."""
+        contract_time(effective)
+        if type(expected_revision) is not int or expected_revision!=self.revision or effective<=self.planner.processor.time:
+            raise ValueError('stale or retroactive schedule')
+        candidate=AvailabilityNavigator(self.planner,windows,revision=self.revision+1)
+        def prefix(rows):
+            return tuple((a,min(b,effective) if b is not None else effective,h,B)
+                         for a,b,h,B in rows if a<effective)
+        if prefix(self.windows)!=prefix(windows):raise ValueError('changed historical windows')
+        self.windows,self.schedule,self.thresholds,self.revision=(
+            candidate.windows,candidate.schedule,candidate.thresholds,candidate.revision)
 
     def query(self,i,start,ordinal=1):
         contract_time(start)
@@ -41,7 +56,7 @@ class AvailabilityNavigator:
             raise ValueError('unprepared rank')
         rank=self.planner.ranks[i]
         r=dict(schema='ifs.cig028.availability.v1',key=self.planner.processor.key,
-               schedule=self.schedule,root=i,start=str(start),ordinal=str(ordinal),
+               schedule=self.schedule,revision=self.revision,root=i,start=str(start),ordinal=str(ordinal),
                status='UNREACHABLE',time=None,window=None,host=None,evidence=None)
         left=ordinal
         for j,(lo,hi,host,B) in enumerate(self.windows):
