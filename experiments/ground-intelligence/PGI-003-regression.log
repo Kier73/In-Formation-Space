@@ -1,0 +1,42 @@
+test_budgets_and_untrained (test_family_language.FamilyTests.test_budgets_and_untrained) ... ok
+test_constant_and_callable_family (test_family_language.FamilyTests.test_constant_and_callable_family) ... ok
+test_coupled_and_unrelated_same_basis (test_family_language.FamilyTests.test_coupled_and_unrelated_same_basis) ... ok
+test_dense_unknown_parameters (test_family_language.FamilyTests.test_dense_unknown_parameters) ... ok
+test_partitions_exact (test_family_language.FamilyTests.test_partitions_exact) ... ok
+test_prefix_lifts (test_family_language.FamilyTests.test_prefix_lifts) ... ok
+test_restore_and_forgery (test_family_language.FamilyTests.test_restore_and_forgery) ... ok
+test_sparse_extraction_complement (test_family_language.FamilyTests.test_sparse_extraction_complement) ... ok
+test_sparse_full_period_and_contraction (test_family_language.FamilyTests.test_sparse_full_period_and_contraction) ... ok
+test_empty_and_full (test_family_rank.RankFamilyTests.test_empty_and_full) ... ok
+test_forgery_refusal (test_family_rank.RankFamilyTests.test_forgery_refusal) ... ok
+test_random_transport_and_ordinals (test_family_rank.RankFamilyTests.test_random_transport_and_ordinals) ... ok
+test_composition_and_expression (test_skill_language.SkillTests.test_composition_and_expression) ... ok
+test_cross_basis_and_prefix (test_skill_language.SkillTests.test_cross_basis_and_prefix) ... ok
+test_forgery_and_restore (test_skill_language.SkillTests.test_forgery_and_restore) ... ok
+test_goal_only (test_skill_language.SkillTests.test_goal_only) ... ok
+test_huge_and_rank (test_skill_language.SkillTests.test_huge_and_rank) ... ok
+test_random_exact (test_skill_language.SkillTests.test_random_exact) ... ok
+test_wrong_skill_and_boolean (test_skill_language.SkillTests.test_wrong_skill_and_boolean) ... ok
+test_acquisition_is_independently_qualified (test_ground_intelligence.IntelligenceTests.test_acquisition_is_independently_qualified) ... ok
+test_checkpoint_replays_proofs (test_ground_intelligence.IntelligenceTests.test_checkpoint_replays_proofs) ... ok
+test_cycles_and_reduction (test_ground_intelligence.IntelligenceTests.test_cycles_and_reduction) ... ok
+test_negative_cycle (test_ground_intelligence.IntelligenceTests.test_negative_cycle) ... ok
+test_policy_training_and_generalization (test_ground_intelligence.IntelligenceTests.test_policy_training_and_generalization) ... ok
+test_random_reduction (test_ground_intelligence.IntelligenceTests.test_random_reduction) ... ok
+test_typed_expression (test_ground_intelligence.IntelligenceTests.test_typed_expression) ... ok
+test_wrong_hint_and_budget (test_ground_intelligence.IntelligenceTests.test_wrong_hint_and_budget) ... ok
+test_bounded_cost_optimality_and_cycles (test_ground_network.GroundNetworkTests.test_bounded_cost_optimality_and_cycles) ... ok
+test_costed_paths_and_scope (test_ground_network.GroundNetworkTests.test_costed_paths_and_scope) ... ok
+test_large_sparse_crt (test_ground_network.GroundNetworkTests.test_large_sparse_crt) ... ok
+test_random_compatible_suffix_and_composition (test_ground_network.GroundNetworkTests.test_random_compatible_suffix_and_composition) ... ok
+test_random_rank_and_edge_oracle (test_ground_network.GroundNetworkTests.test_random_rank_and_edge_oracle) ... ok
+test_reverse_time_suffix_and_finite_events (test_ground_network.GroundNetworkTests.test_reverse_time_suffix_and_finite_events) ... ok
+test_schema_and_budget (test_ground_network.GroundNetworkTests.test_schema_and_budget) ... ok
+test_route_and_composite (test_seed_network.SeedNetworkTests.test_route_and_composite) ... ok
+test_seed_binding_and_restore (test_seed_network.SeedNetworkTests.test_seed_binding_and_restore) ... ok
+test_unreachable_through_suffix (test_seed_network.SeedNetworkTests.test_unreachable_through_suffix) ... ok
+
+----------------------------------------------------------------------
+Ran 37 tests in 1.650s
+
+OK
