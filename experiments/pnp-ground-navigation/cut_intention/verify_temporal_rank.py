@@ -5,37 +5,55 @@ from collections import Counter
 from math import prod
 from verify_temporal_algebra import Admission
 
+def checked_expansion(a,i,max_work=4_000_000):
+    """Reconstruct a signed proof from receiver-owned source mathematics.
+    Used both to audit incoming proofs and to realize compact seed recipes.
+    """
+    if type(a) is not Admission or type(max_work) is not int or max_work<1:raise ValueError('admission')
+    if type(i) is not int or not 0<=i<len(a.roots):raise ValueError('root')
+    v=a.roots[i];d=a.d
+    live={v};todo=[v]
+    while todo:
+        z=todo.pop()
+        if z>=2:
+            for u in d.nodes[z-2][1]:
+                if u not in live:live.add(u);todo.append(u)
+    tab={0:Counter(),1:Counter({(0,1):1})};work=0
+    for z in sorted(live-{0,1}):
+        j,kids=d.nodes[z-2];b=d.base[j];freq=Counter(kids);default=max(dict.fromkeys(kids),key=freq.get)
+        old=tab[default];out=old.copy();work+=len(old)+len(kids)
+        for digit,u in enumerate(kids):
+            if u==default:continue
+            new=tab[u];work+=len(new)+len(old)
+            if work>max_work:raise ValueError('work')
+            # Independently distribute positive and negative terms, using
+            # the symmetric CRT formula rather than producer difference join.
+            for source,sign in ((new,1),(old,-1)):
+                for (r,m),c in source.items():
+                    x=(digit+b*((r-digit)*pow(b,-1,m)%m))%(b*m) if m>1 else digit
+                    out[x,b*m]+=sign*c
+        if work>max_work:raise ValueError('work')
+        tab[z]=Counter({key:c for key,c in out.items() if c})
+    expected=[[r,m,c] for (r,m),c in sorted(tab[v].items())]
+    return expected,work
+
 class CheckedRank:
     def __init__(self,a,packet,max_work=4_000_000):
         if type(a) is not Admission or type(max_work) is not int or max_work<1:raise ValueError('admission')
         if type(packet) is not dict or set(packet)!={'index','root','terms','work'}:raise ValueError('packet')
-        i=packet['index'];v=packet['root'];d=a.d
+        i=packet['index'];v=packet['root']
         if type(i) is not int or not 0<=i<len(a.roots) or type(v) is not int or v!=a.roots[i]:raise ValueError('root')
-        live={v};todo=[v]
-        while todo:
-            z=todo.pop()
-            if z>=2:
-                for u in d.nodes[z-2][1]:
-                    if u not in live:live.add(u);todo.append(u)
-        tab={0:Counter(),1:Counter({(0,1):1})};work=0
-        for z in sorted(live-{0,1}):
-            j,kids=d.nodes[z-2];b=d.base[j];freq=Counter(kids);default=max(dict.fromkeys(kids),key=freq.get)
-            old=tab[default];out=old.copy();work+=len(old)+len(kids)
-            for digit,u in enumerate(kids):
-                if u==default:continue
-                new=tab[u];work+=len(new)+len(old)
-                if work>max_work:raise ValueError('work')
-                # Independently distribute positive and negative terms, using
-                # the symmetric CRT formula rather than producer difference join.
-                for source,sign in ((new,1),(old,-1)):
-                    for (r,m),c in source.items():
-                        x=(digit+b*((r-digit)*pow(b,-1,m)%m))%(b*m) if m>1 else digit
-                        out[x,b*m]+=sign*c
-            if work>max_work:raise ValueError('work')
-            tab[z]=Counter({key:c for key,c in out.items() if c})
-        expected=[[r,m,c] for (r,m),c in sorted(tab[v].items())]
+        expected,work=checked_expansion(a,i,max_work)
         terms=packet['terms']
         if type(terms) is not list or any(type(row) is not list or len(row)!=3 or any(type(x) is not int for x in row) for row in terms) or terms!=expected or type(packet['work']) is not int or packet['work']!=work:raise ValueError('expansion')
+        self._install(a,i,expected)
+    @classmethod
+    def from_ground(cls,a,i,max_work=4_000_000):
+        """Independent local reconstruction, without a producer's proof packet."""
+        terms,work=checked_expansion(a,i,max_work)
+        result=cls.__new__(cls);result._install(a,i,terms);return result
+    def _install(self,a,i,expected):
+        d=a.d;v=a.roots[i]
         self.terms=tuple(map(tuple,expected));self.D=a.D;self.prefix=a.prefix[i];self.before=self.prefix.bit_count();self.P=prod(d.base);self.total=a.count(i);self.d=d;self.root=v
         if sum(c*(self.P//m) for r,m,c in self.terms)!=self.total:raise ValueError('count')
     def rank(self,t):
