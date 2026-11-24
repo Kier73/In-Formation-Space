@@ -116,8 +116,8 @@ class Ground:
         return old
 
 
-def bootstrap(ground,stage,proc,producer,admission,observed):
-    """Execute one locally authorized CIG migration through actual E-CPU SAB."""
+def binding_plan(ground,stage,proc,producer,admission,observed):
+    """Construct the receiver-owned local capability and exact task."""
     root,start,ordinal=ground.request(stage)
     request=dict(root=root,start=str(start),ordinal=str(ordinal),
                  prior_time=str(proc.time),prior_rank=str(proc.rank),
@@ -140,7 +140,7 @@ def bootstrap(ground,stage,proc,producer,admission,observed):
                                  digest(observed),(offer,))
     # Fingerprint the installed local binding, not an untrusted advertisement.
     binding=RealizerBinding(host,'cig-migrate',handler,
-                            raw_digest(Path(__file__).read_bytes()),oracle)
+                            raw_digest(Path(__file__).read_text(encoding='utf-8').encode('utf-8')),oracle)
     inventory=SubstrateObservation((resource,),())
     policy=BootstrapPolicy(frozenset({(host,'cig-migrate')}),frozenset(),'cig029-job')
     task=BootstrapTask('cig029-migration',proc.key,host,'intention',host,
@@ -152,6 +152,13 @@ def bootstrap(ground,stage,proc,producer,admission,observed):
         AdaptiveBootstrap(inventory,policy,(),()).plan(task,coordinate=stage)
     except BootstrapRefused:pass
     else:raise AssertionError('unbound advertised operation admitted')
+    return runtime,task,plan
+
+
+def bootstrap(ground,stage,proc,producer,admission,observed):
+    """Execute one locally authorized CIG migration through actual E-CPU SAB."""
+    root,start,ordinal=ground.request(stage)
+    runtime,task,plan=binding_plan(ground,stage,proc,producer,admission,observed)
     report=runtime.execute(task,plan,coordinate=stage)
     assert verify_bootstrap_report(report,task,plan)
     assert report['receiver_oracle_checked_steps']==1
@@ -174,6 +181,8 @@ def replay(ground,records):
             or report['output_digest']!=digest(report['output'])
             or report['report_digest']!=digest({k:v for k,v in report.items() if k!='report_digest'})):
             raise ValueError('SAB report identity')
+        _,task,plan=binding_plan(ground,stage,proc,producer,admission,record['provenance'])
+        if not verify_bootstrap_report(report,task,plan):raise ValueError('SAB route replay')
         r,m=report['output']['query'],report['output']['move']
         if r['host']!=HOSTS[stage] or not admission.accept_move(root,start,ordinal,r,m):
             raise ValueError('independent migration replay')
