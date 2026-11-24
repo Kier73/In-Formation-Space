@@ -1,0 +1,3107 @@
+{
+  "training": {
+    "episodes": 12,
+    "families": [
+      "sparse",
+      "cofactor"
+    ],
+    "bytes": 3213,
+    "ms": 4.332397999241948
+  },
+  "old_training": {
+    "episodes": 36,
+    "skills": 25,
+    "ms": 25.45371000096202,
+    "sequential_work": 63120,
+    "bytes": 2971
+  },
+  "heldout": [
+    {
+      "kind": "sparse_unit",
+      "base": [
+        29,
+        31,
+        37
+      ],
+      "period": "33263",
+      "queries": 24,
+      "family_found": 24,
+      "old_found": 0,
+      "family_ms": 1.6954789962619543,
+      "old_ms": 458.25776200369,
+      "family_work": 12552,
+      "old_work": 2098316,
+      "family_attempts": 24,
+      "old_attempts": 12288,
+      "hybrid_found": 24,
+      "hybrid_ms": 5.254435997456312,
+      "hybrid_work": 33380,
+      "hybrid_attempts": 144,
+      "rows": [
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.36183400079607964,
+          "hybrid_work": 1807,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.09232900105416775,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 22.134324999526143,
+          "old_attempts": 512,
+          "old_work": 102650,
+          "form": [
+            "19550",
+            "2388",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.14071100018918514,
+          "hybrid_work": 964,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06828200072050095,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 15.71544000133872,
+          "old_attempts": 512,
+          "old_work": 72168,
+          "form": [
+            "25424",
+            "11782",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.2582680005580187,
+          "hybrid_work": 1807,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06584899872541428,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 21.076344998553395,
+          "old_attempts": 512,
+          "old_work": 102616,
+          "form": [
+            "33085",
+            "748",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.14113199897110462,
+          "hybrid_work": 964,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.0683130007237196,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 15.853237999603152,
+          "old_attempts": 512,
+          "old_work": 72040,
+          "form": [
+            "184",
+            "5206",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.255214000120759,
+          "hybrid_work": 1839,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06842299923300743,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 21.158757999539375,
+          "old_attempts": 512,
+          "old_work": 102808,
+          "form": [
+            "11512",
+            "6861",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.32562899962067604,
+          "hybrid_work": 1060,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.0672410000115633,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 15.450353000313044,
+          "old_attempts": 512,
+          "old_work": 72258,
+          "form": [
+            "8664",
+            "25568",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.30839299969375134,
+          "hybrid_work": 1807,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.09607500024139881,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 20.84864200092852,
+          "old_attempts": 512,
+          "old_work": 102616,
+          "form": [
+            "20094",
+            "1291",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.20175400003790855,
+          "hybrid_work": 964,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.07022599875926971,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 18.463688999414444,
+          "old_attempts": 512,
+          "old_work": 71522,
+          "form": [
+            "14747",
+            "1285",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.24613000079989433,
+          "hybrid_work": 1807,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.0682120006531477,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 22.94462100043893,
+          "old_attempts": 512,
+          "old_work": 103160,
+          "form": [
+            "11742",
+            "1547",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.1370259989053011,
+          "hybrid_work": 964,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.07040599919855595,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 15.776251001283526,
+          "old_attempts": 512,
+          "old_work": 71952,
+          "form": [
+            "22585",
+            "825",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.23275000043213367,
+          "hybrid_work": 1743,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06817200034856796,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 18.88254800066352,
+          "old_attempts": 512,
+          "old_work": 103474,
+          "form": [
+            "27300",
+            "15391",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.16312499903142452,
+          "hybrid_work": 964,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.07132799923419952,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 17.45916000008583,
+          "old_attempts": 512,
+          "old_work": 72392,
+          "form": [
+            "32212",
+            "25753",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.2417830005288124,
+          "hybrid_work": 1807,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06773200072348118,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 18.70740499906242,
+          "old_attempts": 512,
+          "old_work": 102642,
+          "form": [
+            "23047",
+            "22336",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.14827200025320053,
+          "hybrid_work": 1028,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.0691940002143383,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.965131999924779,
+          "old_attempts": 512,
+          "old_work": 72118,
+          "form": [
+            "24288",
+            "30534",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.2329699993133545,
+          "hybrid_work": 1775,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.07008499838411808,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 19.161769000813365,
+          "old_attempts": 512,
+          "old_work": 102528,
+          "form": [
+            "6553",
+            "5148",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.1353329997509718,
+          "hybrid_work": 964,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06744099967181683,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.690248999744654,
+          "old_attempts": 512,
+          "old_work": 71184,
+          "form": [
+            "11641",
+            "25752",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.2444080002605915,
+          "hybrid_work": 1711,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06316499970853329,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 23.49334600009024,
+          "old_attempts": 512,
+          "old_work": 102648,
+          "form": [
+            "32655",
+            "20969",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.14106199890375137,
+          "hybrid_work": 964,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06965499930083752,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 17.189915999770164,
+          "old_attempts": 512,
+          "old_work": 71836,
+          "form": [
+            "10947",
+            "4139",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.2745020017027855,
+          "hybrid_work": 1807,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06737099960446358,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 23.315347999334335,
+          "old_attempts": 512,
+          "old_work": 102636,
+          "form": [
+            "13805",
+            "29028",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.18524800054728985,
+          "hybrid_work": 932,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06912299990653992,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 15.512004999443889,
+          "old_attempts": 512,
+          "old_work": 71560,
+          "form": [
+            "33238",
+            "28319",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.2626350000500679,
+          "hybrid_work": 1807,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06727200001478195,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 20.656423000618815,
+          "old_attempts": 512,
+          "old_work": 103320,
+          "form": [
+            "28172",
+            "21045",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.14204399846494198,
+          "hybrid_work": 996,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.07068599946796894,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 15.303411001339555,
+          "old_attempts": 512,
+          "old_work": 71848,
+          "form": [
+            "13778",
+            "30974",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.31003599986433983,
+          "hybrid_work": 1775,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.07008500024676323,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 30.666664000600576,
+          "old_attempts": 512,
+          "old_work": 102360,
+          "form": [
+            "5145",
+            "14884",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.16417699865996838,
+          "hybrid_work": 1124,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06881400011479855,
+          "family_work": 523,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 18.83272400125861,
+          "old_attempts": 512,
+          "old_work": 73980,
+          "form": [
+            "24006",
+            "24685",
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "sparse_contracted",
+      "base": [
+        29,
+        31,
+        37
+      ],
+      "period": "33263",
+      "queries": 24,
+      "family_found": 24,
+      "old_found": 0,
+      "family_ms": 0.948445001617074,
+      "old_ms": 338.89983599446714,
+      "family_work": 5441,
+      "old_work": 1391984,
+      "family_attempts": 24,
+      "old_attempts": 12288,
+      "hybrid_found": 24,
+      "hybrid_ms": 3.0983889997005463,
+      "hybrid_work": 19199,
+      "hybrid_attempts": 144,
+      "rows": [
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.13744699954986572,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.03752700053155422,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 13.427673999220133,
+          "old_attempts": 512,
+          "old_work": 60248,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.08870300091803074,
+          "hybrid_work": 510,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.03248799964785576,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 11.812235999852419,
+          "old_attempts": 512,
+          "old_work": 44616,
+          "form": [
+            "29",
+            "0",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.15531300008296967,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.03335000015795231,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.935598999261856,
+          "old_attempts": 512,
+          "old_work": 60312,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.1667299997061491,
+          "hybrid_work": 1105,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.05399100109934807,
+          "family_work": 350,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 20.83741599880159,
+          "old_attempts": 512,
+          "old_work": 88024,
+          "form": [
+            "29",
+            "28257",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.1449280008673668,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.033069999888539314,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 13.964069999754429,
+          "old_attempts": 512,
+          "old_work": 60504,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.18313500098884106,
+          "hybrid_work": 510,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.08631900139153004,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 13.105970000848174,
+          "old_attempts": 512,
+          "old_work": 44744,
+          "form": [
+            "29",
+            "0",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.1806320007890463,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.034592000767588615,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.989821000024676,
+          "old_attempts": 512,
+          "old_work": 60504,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.0911870002746582,
+          "hybrid_work": 510,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.03353999927639961,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 16.706558998674154,
+          "old_attempts": 512,
+          "old_work": 45000,
+          "form": [
+            "29",
+            "0",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.14016100019216537,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.06573900021612644,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.405473001301289,
+          "old_attempts": 512,
+          "old_work": 60248,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.12037099897861481,
+          "hybrid_work": 510,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.03800700046122074,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 12.795863999053836,
+          "old_attempts": 512,
+          "old_work": 44552,
+          "form": [
+            "29",
+            "0",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.14230400137603283,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.033069999888539314,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.006183000281453,
+          "old_attempts": 512,
+          "old_work": 60408,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.15404199995100498,
+          "hybrid_work": 1105,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.04818299971520901,
+          "family_work": 350,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 17.64485900104046,
+          "old_attempts": 512,
+          "old_work": 88024,
+          "form": [
+            "29",
+            "2960",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.147792000323534,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.03312999941408634,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.271710999310017,
+          "old_attempts": 512,
+          "old_work": 59960,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.08619000017642975,
+          "hybrid_work": 608,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.03316999971866608,
+          "family_work": 211,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 11.673998000100255,
+          "old_attempts": 512,
+          "old_work": 45576,
+          "form": [
+            "29",
+            "2",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.13838799856603146,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.07460200041532516,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 13.973443999886513,
+          "old_attempts": 512,
+          "old_work": 60408,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.14489799924194813,
+          "hybrid_work": 1105,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.04678099974989891,
+          "family_work": 350,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 16.72241299971938,
+          "old_attempts": 512,
+          "old_work": 88024,
+          "form": [
+            "29",
+            "1906",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.15246899984776974,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.029443999752402306,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 13.867264000698924,
+          "old_attempts": 512,
+          "old_work": 60408,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.07696600072085857,
+          "hybrid_work": 510,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.029114000499248505,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 11.628289999440312,
+          "old_attempts": 512,
+          "old_work": 44616,
+          "form": [
+            "29",
+            "0",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.13933899998664856,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.028452999889850616,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.059191999956965,
+          "old_attempts": 512,
+          "old_work": 60504,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.07765700109302998,
+          "hybrid_work": 510,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.028903000056743622,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 11.92883199825883,
+          "old_attempts": 512,
+          "old_work": 45096,
+          "form": [
+            "29",
+            "0",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.13494299910962582,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.029854999855160713,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.206803999841213,
+          "old_attempts": 512,
+          "old_work": 60248,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.07423199899494648,
+          "hybrid_work": 510,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.02821199968457222,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 11.636141000315547,
+          "old_attempts": 512,
+          "old_work": 44968,
+          "form": [
+            "29",
+            "0",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.14123299904167652,
+          "hybrid_work": 933,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.027650998905301094,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 14.398080999031663,
+          "old_attempts": 512,
+          "old_work": 60248,
+          "form": [
+            "29",
+            "0",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.0793289989233017,
+          "hybrid_work": 510,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.029254000633955002,
+          "family_work": 209,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 11.901941999793053,
+          "old_attempts": 512,
+          "old_work": 44744,
+          "form": [
+            "29",
+            "0",
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "dense_unit",
+      "base": [
+        29,
+        31,
+        37
+      ],
+      "period": "33263",
+      "queries": 24,
+      "family_found": 24,
+      "old_found": 0,
+      "family_ms": 28.661798998713493,
+      "old_ms": 632.9899589959532,
+      "family_work": 133569,
+      "old_work": 3825904,
+      "family_attempts": 24,
+      "old_attempts": 12288,
+      "hybrid_found": 24,
+      "hybrid_ms": 34.16180499829352,
+      "hybrid_work": 170986,
+      "hybrid_attempts": 144,
+      "rows": [
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.5185320004820824,
+          "hybrid_work": 7485,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.4193929992616177,
+          "family_work": 5924,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.64233599975705,
+          "old_attempts": 512,
+          "old_work": 159404,
+          "form": [
+            "2521",
+            "12412",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.3808150012046099,
+          "hybrid_work": 6652,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.1164769995957613,
+          "family_work": 5089,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.289206000044942,
+          "old_attempts": 512,
+          "old_work": 159532,
+          "form": [
+            "29181",
+            "24568",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.3761679995805025,
+          "hybrid_work": 6772,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.131759999319911,
+          "family_work": 5206,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.938931999728084,
+          "old_attempts": 512,
+          "old_work": 159625,
+          "form": [
+            "7120",
+            "25253",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.440114000812173,
+          "hybrid_work": 7172,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.236617999151349,
+          "family_work": 5610,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 34.77320200018585,
+          "old_attempts": 512,
+          "old_work": 159571,
+          "form": [
+            "18988",
+            "32718",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.4550360012799501,
+          "hybrid_work": 6942,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.208746001124382,
+          "family_work": 5379,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.18801200017333,
+          "old_attempts": 512,
+          "old_work": 159526,
+          "form": [
+            "17224",
+            "13379",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.4287659991532564,
+          "hybrid_work": 6958,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.1420560013502836,
+          "family_work": 5394,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.650596998631954,
+          "old_attempts": 512,
+          "old_work": 159602,
+          "form": [
+            "24728",
+            "17561",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.478821998462081,
+          "hybrid_work": 7170,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.1748549994081259,
+          "family_work": 5606,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.489113999530673,
+          "old_attempts": 512,
+          "old_work": 159617,
+          "form": [
+            "24786",
+            "30472",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.330918999388814,
+          "hybrid_work": 6805,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.1200819984078407,
+          "family_work": 5339,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.458148000761867,
+          "old_attempts": 512,
+          "old_work": 156487,
+          "form": [
+            "9194",
+            "12475",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.4849509987980127,
+          "hybrid_work": 7446,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.2150950003415346,
+          "family_work": 5881,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.0127809997648,
+          "old_attempts": 512,
+          "old_work": 159542,
+          "form": [
+            "26652",
+            "4861",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.4208349995315075,
+          "hybrid_work": 7092,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.1844389997422695,
+          "family_work": 5529,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.711559001356363,
+          "old_attempts": 512,
+          "old_work": 159366,
+          "form": [
+            "32110",
+            "1846",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.5242099985480309,
+          "hybrid_work": 7463,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.2488059997558594,
+          "family_work": 5900,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.97504400089383,
+          "old_attempts": 512,
+          "old_work": 159543,
+          "form": [
+            "1789",
+            "9688",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.3823769986629486,
+          "hybrid_work": 7289,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.218079999089241,
+          "family_work": 5726,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.96391800045967,
+          "old_attempts": 512,
+          "old_work": 159630,
+          "form": [
+            "20410",
+            "3317",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.45932300016284,
+          "hybrid_work": 7497,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.261795999482274,
+          "family_work": 5936,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.875473998486996,
+          "old_attempts": 512,
+          "old_work": 159611,
+          "form": [
+            "20789",
+            "29458",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.391881000250578,
+          "hybrid_work": 7130,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.1639990005642176,
+          "family_work": 5568,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.764948999509215,
+          "old_attempts": 512,
+          "old_work": 159623,
+          "form": [
+            "12340",
+            "20586",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.347113998606801,
+          "hybrid_work": 6964,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.1032880004495382,
+          "family_work": 5403,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.489657999947667,
+          "old_attempts": 512,
+          "old_work": 159627,
+          "form": [
+            "30027",
+            "22034",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.3738240003585815,
+          "hybrid_work": 6480,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.0158160012215376,
+          "family_work": 4919,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.506069999188185,
+          "old_attempts": 512,
+          "old_work": 159430,
+          "form": [
+            "18514",
+            "11290",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.4924219995737076,
+          "hybrid_work": 7384,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.2180000003427267,
+          "family_work": 5822,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.75390199944377,
+          "old_attempts": 512,
+          "old_work": 159513,
+          "form": [
+            "9513",
+            "23140",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.4518810007721186,
+          "hybrid_work": 7322,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.3580710012465715,
+          "family_work": 5757,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.07247099839151,
+          "old_attempts": 512,
+          "old_work": 159570,
+          "form": [
+            "7112",
+            "26994",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.5022270008921623,
+          "hybrid_work": 7353,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.2128020003437996,
+          "family_work": 5788,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 25.992329999804497,
+          "old_attempts": 512,
+          "old_work": 159560,
+          "form": [
+            "14462",
+            "18919",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.2912900000810623,
+          "hybrid_work": 6782,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.0675239991396666,
+          "family_work": 5219,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.104348000138998,
+          "old_attempts": 512,
+          "old_work": 159571,
+          "form": [
+            "22183",
+            "8374",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.432641999796033,
+          "hybrid_work": 7553,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.3937229998409748,
+          "family_work": 5988,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.061164001002908,
+          "old_attempts": 512,
+          "old_work": 159507,
+          "form": [
+            "29496",
+            "9410",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.3336840011179447,
+          "hybrid_work": 6884,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.1339229997247458,
+          "family_work": 5321,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.333872999995947,
+          "old_attempts": 512,
+          "old_work": 159457,
+          "form": [
+            "28763",
+            "18363",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.3388110008090734,
+          "hybrid_work": 6874,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.0934330001473427,
+          "family_work": 5312,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.03792900033295,
+          "old_attempts": 512,
+          "old_work": 159523,
+          "form": [
+            "21276",
+            "20807",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.525160999968648,
+          "hybrid_work": 7517,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 1.2230169996619225,
+          "family_work": 5953,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 26.904941998422146,
+          "old_attempts": 512,
+          "old_work": 159467,
+          "form": [
+            "9138",
+            "28777",
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "primitive",
+      "base": [
+        29,
+        31,
+        37
+      ],
+      "period": "33263",
+      "queries": 12,
+      "family_found": 12,
+      "old_found": 12,
+      "family_ms": 13.689776005223393,
+      "old_ms": 0.4163710009306669,
+      "family_work": 65820,
+      "old_work": 2064,
+      "family_attempts": 12,
+      "old_attempts": 12,
+      "hybrid_found": 12,
+      "hybrid_ms": 0.35388999804854393,
+      "hybrid_work": 2076,
+      "hybrid_attempts": 12,
+      "rows": [
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.030875999480485916,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.1626660004258156,
+          "family_work": 5511,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.039139000698924065,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.030115000903606415,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.3020759988576174,
+          "family_work": 5627,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.03720500133931637,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.029194001108407974,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.2355659995228052,
+          "family_work": 6024,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.03453199937939644,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.029072999954223633,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.2112290002405643,
+          "family_work": 5966,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.03232800029218197,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.028963999822735786,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.2051699999719858,
+          "family_work": 5707,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.03284899890422821,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.028873000293970108,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.0876839999109507,
+          "family_work": 5376,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.03214799985289574,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.028942998498678207,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.0818750001490116,
+          "family_work": 5309,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.047711001709103584,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.028974000364542007,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.0830880012363195,
+          "family_work": 5309,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.03226800076663494,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.028542999178171158,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.1394920013844967,
+          "family_work": 5491,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.032297998666763306,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.030385999009013176,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.0427670013159513,
+          "family_work": 5142,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.03215799853205681,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.030264999717473984,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.0541540011763573,
+          "family_work": 5058,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.03202800080180168,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.029683999717235565,
+          "hybrid_work": 173,
+          "hybrid_attempts": 1,
+          "family_found": true,
+          "family_ms": 1.084009001031518,
+          "family_work": 5300,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": true,
+          "old_ms": 0.031706999987363815,
+          "old_attempts": 1,
+          "old_work": 172,
+          "form": [
+            "1",
+            "1",
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unrelated",
+      "base": [
+        29,
+        31,
+        37
+      ],
+      "period": "33263",
+      "queries": 12,
+      "family_found": 0,
+      "old_found": 0,
+      "family_ms": 0.08150299824774265,
+      "old_ms": 359.0587160028517,
+      "family_work": 0,
+      "old_work": 2184204,
+      "family_attempts": 0,
+      "old_attempts": 6144,
+      "hybrid_found": 0,
+      "hybrid_ms": 2.8450319971889257,
+      "hybrid_work": 21392,
+      "hybrid_attempts": 60,
+      "rows": [
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.23641499876976013,
+          "hybrid_work": 1781,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.0036350004374980927,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 30.950641000643373,
+          "old_attempts": 512,
+          "old_work": 182008,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.24843299947679043,
+          "hybrid_work": 1784,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.0038559995591640472,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 29.716197000816464,
+          "old_attempts": 512,
+          "old_work": 182011,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.2450679987668991,
+          "hybrid_work": 1783,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.00320499949157238,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 29.421174000948668,
+          "old_attempts": 512,
+          "old_work": 182026,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.23290899954736233,
+          "hybrid_work": 1784,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.0030949991196393967,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 30.061326000839472,
+          "old_attempts": 512,
+          "old_work": 182011,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.2314079999923706,
+          "hybrid_work": 1783,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.0034549999982118607,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 29.680554000660777,
+          "old_attempts": 512,
+          "old_work": 182022,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.243155000731349,
+          "hybrid_work": 1781,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.003235001116991043,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 30.835188001394272,
+          "old_attempts": 512,
+          "old_work": 182013,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.23063700087368488,
+          "hybrid_work": 1782,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.0037050005048513412,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 29.942115999758244,
+          "old_attempts": 512,
+          "old_work": 182017,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.23174799978733063,
+          "hybrid_work": 1783,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.0035350006073713303,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 29.800362998619676,
+          "old_attempts": 512,
+          "old_work": 182021,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.2311669997870922,
+          "hybrid_work": 1784,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.04416699893772602,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 29.347874000668526,
+          "old_attempts": 512,
+          "old_work": 182040,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.2552129998803139,
+          "hybrid_work": 1782,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.0035350006073713303,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 30.051950998604298,
+          "old_attempts": 512,
+          "old_work": 182029,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.23207799904048443,
+          "hybrid_work": 1783,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.0029249992221593857,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 29.898271000012755,
+          "old_attempts": 512,
+          "old_work": 182000,
+          "form": null
+        },
+        {
+          "hybrid_found": false,
+          "hybrid_ms": 0.22680100053548813,
+          "hybrid_work": 1782,
+          "hybrid_attempts": 5,
+          "family_found": false,
+          "family_ms": 0.0031549986451864243,
+          "family_work": 0,
+          "family_attempts": 0,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 29.3530609998852,
+          "old_attempts": 512,
+          "old_work": 182006,
+          "form": null
+        }
+      ]
+    },
+    {
+      "kind": "sparse_unit",
+      "base": [
+        3,
+        5,
+        7,
+        11,
+        13,
+        17,
+        19,
+        23,
+        29,
+        31,
+        37,
+        41,
+        43,
+        47,
+        53
+      ],
+      "period": "16294579238595022365",
+      "queries": 12,
+      "family_found": 12,
+      "old_found": 0,
+      "family_ms": 3.5882019996643066,
+      "old_ms": 631.1030990015715,
+      "family_work": 28380,
+      "old_work": 3689050,
+      "family_attempts": 12,
+      "old_attempts": 6144,
+      "hybrid_found": 12,
+      "hybrid_ms": 10.089598000049591,
+      "hybrid_work": 72692,
+      "hybrid_attempts": 72,
+      "rows": [
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.066992999985814,
+          "hybrid_work": 7861,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.2715179994702339,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 59.72349100001156,
+          "old_attempts": 512,
+          "old_work": 361714,
+          "form": [
+            "5495393822076715364",
+            "6240956316340825777",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.5575680006295443,
+          "hybrid_work": 4004,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.43852899968624115,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 42.337369998916984,
+          "old_attempts": 512,
+          "old_work": 238990,
+          "form": [
+            "15801404483233355461",
+            "10958598177856150205",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.1340040005743504,
+          "hybrid_work": 8227,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.32558000087738037,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 61.911089001223445,
+          "old_attempts": 512,
+          "old_work": 377406,
+          "form": [
+            "12187246084194742663",
+            "3920262554492592673",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.5388700012117624,
+          "hybrid_work": 3990,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.2703260015696287,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 41.58323699980974,
+          "old_attempts": 512,
+          "old_work": 233078,
+          "form": [
+            "9295139253598622399",
+            "9495030810488580970",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.1103280000388622,
+          "hybrid_work": 7853,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.2631649989634752,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 61.19477200135589,
+          "old_attempts": 512,
+          "old_work": 361270,
+          "form": [
+            "2390770569434483723",
+            "14677938557101311482",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.5392899997532368,
+          "hybrid_work": 4004,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.2821139991283417,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 43.485603999346495,
+          "old_attempts": 512,
+          "old_work": 246874,
+          "form": [
+            "2028625029242464418",
+            "9261047302199858737",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.1788309998810291,
+          "hybrid_work": 8243,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.28406599909067154,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 61.99461300112307,
+          "old_attempts": 512,
+          "old_work": 375914,
+          "form": [
+            "7989055246455095068",
+            "1644179769646257788",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.5404019989073277,
+          "hybrid_work": 3998,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.2870220001786947,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 42.426924999803305,
+          "old_attempts": 512,
+          "old_work": 239430,
+          "form": [
+            "6356378395980726814",
+            "14106744258381663685",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.1421759985387325,
+          "hybrid_work": 8225,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.28040199913084507,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 63.23533700034022,
+          "old_attempts": 512,
+          "old_work": 379274,
+          "form": [
+            "2845489769483910656",
+            "1555921940054913060",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.5628849994391203,
+          "hybrid_work": 4048,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.34812300093472004,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 44.18383399955928,
+          "old_attempts": 512,
+          "old_work": 249172,
+          "form": [
+            "11766502311489583663",
+            "8501719799171981754",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 1.1709090005606413,
+          "hybrid_work": 8237,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.26805200055241585,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 64.90035900101066,
+          "old_attempts": 512,
+          "old_work": 378070,
+          "form": [
+            "13895151500616584698",
+            "1524926196911638868",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 0.54734200052917,
+          "hybrid_work": 4002,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 0.26930500008165836,
+          "family_work": 2365,
+          "family_attempts": 1,
+          "family_methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 44.12646799907088,
+          "old_attempts": 512,
+          "old_work": 247858,
+          "form": [
+            "8771453699420406893",
+            "13872224595209981877",
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "dense_unit",
+      "base": [
+        3,
+        5,
+        7,
+        11,
+        13,
+        17,
+        19,
+        23,
+        29,
+        31,
+        37,
+        41,
+        43,
+        47,
+        53
+      ],
+      "period": "16294579238595022365",
+      "queries": 12,
+      "family_found": 12,
+      "old_found": 0,
+      "family_ms": 59.59003099426627,
+      "old_ms": 1499.3155740033835,
+      "family_work": 284848,
+      "old_work": 9465785,
+      "family_attempts": 12,
+      "old_attempts": 6144,
+      "hybrid_found": 12,
+      "hybrid_ms": 73.2175210006535,
+      "hybrid_work": 377443,
+      "hybrid_attempts": 72,
+      "rows": [
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 5.774575000628829,
+          "hybrid_work": 30850,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 4.884237999096513,
+          "family_work": 23060,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 124.93477800115943,
+          "old_attempts": 512,
+          "old_work": 795841,
+          "form": [
+            "412397667540548566",
+            "3378114248466559853",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 6.4336660001426935,
+          "hybrid_work": 30585,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 4.924047999083996,
+          "family_work": 22960,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 124.6334259994328,
+          "old_attempts": 512,
+          "old_work": 781672,
+          "form": [
+            "9964793856899163661",
+            "8653247146859497560",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 5.957952000200748,
+          "hybrid_work": 30943,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 4.948245000094175,
+          "family_work": 23285,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 125.14042600058019,
+          "old_attempts": 512,
+          "old_work": 781627,
+          "form": [
+            "4428209524989919936",
+            "8290319499804757900",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 6.55536799877882,
+          "hybrid_work": 32870,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 5.132821999490261,
+          "family_work": 25168,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 125.86464500054717,
+          "old_attempts": 512,
+          "old_work": 788171,
+          "form": [
+            "4835965700691004951",
+            "15459147100526632695",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 6.202769000083208,
+          "hybrid_work": 32169,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 5.0406129993498325,
+          "family_work": 24379,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 126.39330999925733,
+          "old_attempts": 512,
+          "old_work": 795934,
+          "form": [
+            "14469819838962860716",
+            "2526818156942636497",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 5.803148999810219,
+          "hybrid_work": 30133,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 4.926551999524236,
+          "family_work": 22477,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 126.42493599839509,
+          "old_attempts": 512,
+          "old_work": 781615,
+          "form": [
+            "7342046893638743161",
+            "11641916393059222970",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 5.915958000347018,
+          "hybrid_work": 31386,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 4.987523000687361,
+          "family_work": 23709,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 121.22614600136876,
+          "old_attempts": 512,
+          "old_work": 785286,
+          "form": [
+            "12127404731027310376",
+            "15068179993011733974",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 6.145943999290466,
+          "hybrid_work": 31571,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 4.826901998370886,
+          "family_work": 23784,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 127.26166400127113,
+          "old_attempts": 512,
+          "old_work": 796018,
+          "form": [
+            "2417983550131099996",
+            "10699004125743596381",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 5.983279000967741,
+          "hybrid_work": 32163,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 5.064358999952674,
+          "family_work": 24464,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 122.05464999936521,
+          "old_attempts": 512,
+          "old_work": 788243,
+          "form": [
+            "13579989632652053857",
+            "13410462983058200427",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 5.93716000020504,
+          "hybrid_work": 31128,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 4.746762000024319,
+          "family_work": 23336,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 125.40890100039542,
+          "old_attempts": 512,
+          "old_work": 795972,
+          "form": [
+            "10227715840946604577",
+            "1190613638066576374",
+            1
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 6.173154000192881,
+          "hybrid_work": 31206,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 4.8379889987409115,
+          "family_work": 23419,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 125.00726700015366,
+          "old_attempts": 512,
+          "old_work": 795873,
+          "form": [
+            "4609911583563139171",
+            "6539318796324306111",
+            0
+          ]
+        },
+        {
+          "hybrid_found": true,
+          "hybrid_ms": 6.334547000005841,
+          "hybrid_work": 32439,
+          "hybrid_attempts": 6,
+          "family_found": true,
+          "family_ms": 5.269977999851108,
+          "family_work": 24807,
+          "family_attempts": 1,
+          "family_methods": [
+            "cofactor"
+          ],
+          "old_found": false,
+          "old_ms": 124.96542500145733,
+          "old_attempts": 512,
+          "old_work": 779533,
+          "form": [
+            "13172132289978476116",
+            "2190775675468569084",
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "actual": [
+    {
+      "bits": 60,
+      "period": "210",
+      "source_ms": 93.03514999896288,
+      "results": [
+        {
+          "kind": "unit",
+          "target_period": "210",
+          "actual_form": [
+            "191",
+            "130",
+            0
+          ],
+          "discovered": [
+            "191",
+            "130",
+            0
+          ],
+          "family_ms": 0.0802099984139204,
+          "work": 130,
+          "attempts": 1,
+          "methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 9.809297999367118,
+          "old": {
+            "attempts": 512,
+            "work": 19702
+          },
+          "ordinals": 8,
+          "instantiation": {
+            "compile_work": 39,
+            "qualification_work": 41
+          },
+          "realization_and_terminal_ms": 2.2842119988054037
+        },
+        {
+          "kind": "contracted",
+          "target_period": "105",
+          "actual_form": [
+            "382",
+            "130",
+            0
+          ],
+          "discovered": [
+            "2",
+            "80",
+            0
+          ],
+          "family_ms": 0.03667500056326389,
+          "work": 88,
+          "attempts": 1,
+          "methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 8.859401000663638,
+          "old": {
+            "attempts": 512,
+            "work": 13858
+          },
+          "ordinals": 8,
+          "instantiation": {
+            "compile_work": 38,
+            "qualification_work": 23
+          },
+          "realization_and_terminal_ms": 1.7551269996911287
+        }
+      ]
+    },
+    {
+      "bits": 174,
+      "period": "510510",
+      "source_ms": 109.36661799997091,
+      "results": [
+        {
+          "kind": "unit",
+          "target_period": "510510",
+          "actual_form": [
+            "148363",
+            "378529",
+            0
+          ],
+          "discovered": [
+            "148363",
+            "378529",
+            0
+          ],
+          "family_ms": 0.09026500023901463,
+          "work": 394,
+          "attempts": 1,
+          "methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 17.14889500103891,
+          "old": {
+            "attempts": 512,
+            "work": 58028
+          },
+          "ordinals": 8,
+          "instantiation": {
+            "compile_work": 127,
+            "qualification_work": 129
+          },
+          "realization_and_terminal_ms": 6.522209998220205
+        },
+        {
+          "kind": "contracted",
+          "target_period": "255255",
+          "actual_form": [
+            "296726",
+            "378529",
+            0
+          ],
+          "discovered": [
+            "2",
+            "247098",
+            0
+          ],
+          "family_ms": 0.0575959999114275,
+          "work": 264,
+          "attempts": 1,
+          "methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 12.679169999435544,
+          "old": {
+            "attempts": 512,
+            "work": 38882
+          },
+          "ordinals": 8,
+          "instantiation": {
+            "compile_work": 126,
+            "qualification_work": 67
+          },
+          "realization_and_terminal_ms": 4.483986999839544
+        }
+      ]
+    },
+    {
+      "bits": 384,
+      "period": "446185740",
+      "source_ms": 252.06978200003505,
+      "results": [
+        {
+          "kind": "unit",
+          "target_period": "446185740",
+          "actual_form": [
+            "308577601",
+            "198957677",
+            0
+          ],
+          "discovered": [
+            "137608139",
+            "405086090",
+            0
+          ],
+          "family_ms": 0.1238659992814064,
+          "work": 664,
+          "attempts": 1,
+          "methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 20.872700000181794,
+          "old": {
+            "attempts": 512,
+            "work": 87728
+          },
+          "ordinals": 8,
+          "instantiation": {
+            "compile_work": 217,
+            "qualification_work": 219
+          },
+          "realization_and_terminal_ms": 10.916660999879241
+        },
+        {
+          "kind": "contracted",
+          "target_period": "223092870",
+          "actual_form": [
+            "617155202",
+            "198957677",
+            0
+          ],
+          "discovered": [
+            "2",
+            "364371317",
+            0
+          ],
+          "family_ms": 0.07541299983859062,
+          "work": 447,
+          "attempts": 1,
+          "methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 16.118055999279022,
+          "old": {
+            "attempts": 512,
+            "work": 55164
+          },
+          "ordinals": 8,
+          "instantiation": {
+            "compile_work": 215,
+            "qualification_work": 113
+          },
+          "realization_and_terminal_ms": 8.429704999551177
+        }
+      ]
+    },
+    {
+      "bits": 1023,
+      "period": "614889782588491410",
+      "source_ms": 719.3980120010674,
+      "results": [
+        {
+          "kind": "unit",
+          "target_period": "614889782588491410",
+          "actual_form": [
+            "487303613828826313",
+            "536789510947516866",
+            0
+          ],
+          "discovered": [
+            "487303613828826313",
+            "536789510947516866",
+            0
+          ],
+          "family_ms": 0.27795800007879734,
+          "work": 2062,
+          "attempts": 1,
+          "methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 52.077363001182675,
+          "old": {
+            "attempts": 512,
+            "work": 293982
+          },
+          "ordinals": 8,
+          "instantiation": {
+            "compile_work": 683,
+            "qualification_work": 685
+          },
+          "realization_and_terminal_ms": 38.75147200003266
+        },
+        {
+          "kind": "contracted",
+          "target_period": "307444891294245705",
+          "actual_form": [
+            "974607227657652626",
+            "536789510947516866",
+            0
+          ],
+          "discovered": [
+            "2",
+            "219818470222737894",
+            0
+          ],
+          "family_ms": 0.1717579998075962,
+          "work": 1376,
+          "attempts": 1,
+          "methods": [
+            "sparse"
+          ],
+          "old_found": false,
+          "old_ms": 35.63825500011444,
+          "old": {
+            "attempts": 512,
+            "work": 188010
+          },
+          "ordinals": 8,
+          "instantiation": {
+            "compile_work": 682,
+            "qualification_work": 345
+          },
+          "realization_and_terminal_ms": 27.318014001473784
+        }
+      ]
+    }
+  ],
+  "ambiguous": {
+    "period": "16294579238595022365",
+    "nodes": 30,
+    "work": 20123,
+    "attempts": 1,
+    "ms": 4.4652890004217625,
+    "form": [
+      "1",
+      "3853583658822635747",
+      "1"
+    ],
+    "actual": [
+      "2151912510308904608",
+      "7001809708520175019",
+      "1"
+    ]
+  }
+}
