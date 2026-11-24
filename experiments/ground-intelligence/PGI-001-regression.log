@@ -1,0 +1,23 @@
+test_acquisition_is_independently_qualified (test_ground_intelligence.IntelligenceTests.test_acquisition_is_independently_qualified) ... ok
+test_checkpoint_replays_proofs (test_ground_intelligence.IntelligenceTests.test_checkpoint_replays_proofs) ... ok
+test_cycles_and_reduction (test_ground_intelligence.IntelligenceTests.test_cycles_and_reduction) ... ok
+test_negative_cycle (test_ground_intelligence.IntelligenceTests.test_negative_cycle) ... ok
+test_policy_training_and_generalization (test_ground_intelligence.IntelligenceTests.test_policy_training_and_generalization) ... ok
+test_random_reduction (test_ground_intelligence.IntelligenceTests.test_random_reduction) ... ok
+test_typed_expression (test_ground_intelligence.IntelligenceTests.test_typed_expression) ... ok
+test_wrong_hint_and_budget (test_ground_intelligence.IntelligenceTests.test_wrong_hint_and_budget) ... ok
+test_bounded_cost_optimality_and_cycles (test_ground_network.GroundNetworkTests.test_bounded_cost_optimality_and_cycles) ... ok
+test_costed_paths_and_scope (test_ground_network.GroundNetworkTests.test_costed_paths_and_scope) ... ok
+test_large_sparse_crt (test_ground_network.GroundNetworkTests.test_large_sparse_crt) ... ok
+test_random_compatible_suffix_and_composition (test_ground_network.GroundNetworkTests.test_random_compatible_suffix_and_composition) ... ok
+test_random_rank_and_edge_oracle (test_ground_network.GroundNetworkTests.test_random_rank_and_edge_oracle) ... ok
+test_reverse_time_suffix_and_finite_events (test_ground_network.GroundNetworkTests.test_reverse_time_suffix_and_finite_events) ... ok
+test_schema_and_budget (test_ground_network.GroundNetworkTests.test_schema_and_budget) ... ok
+test_route_and_composite (test_seed_network.SeedNetworkTests.test_route_and_composite) ... ok
+test_seed_binding_and_restore (test_seed_network.SeedNetworkTests.test_seed_binding_and_restore) ... ok
+test_unreachable_through_suffix (test_seed_network.SeedNetworkTests.test_unreachable_through_suffix) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.639s
+
+OK
