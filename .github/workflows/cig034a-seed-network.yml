@@ -1,0 +1,30 @@
+name: CIG-034A cross-Ground Seed network
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/**'
+      - '.github/workflows/cig034a-seed-network.yml'
+  push:
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/**'
+      - '.github/workflows/cig034a-seed-network.yml'
+permissions:
+  contents: read
+jobs:
+  network:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.14']
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest test_ground_network test_seed_network -v
+      - run: python run_seed_network.py --sizes 60 174 --output CI-CIG-034A-results.json
