@@ -1,0 +1,41 @@
+name: CIG-026 temporal image and native NCR codec
+on:
+  pull_request:
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/**'
+      - '.github/workflows/cig-026.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/pnp-ground-navigation/cut_intention/**'
+      - '.github/workflows/cig-026.yml'
+  workflow_dispatch:
+jobs:
+  native-image:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.11', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/Navigable-Compute
+          ref: c249a482a0a09e24b3a2af5b39d43a45856e2bc6
+          path: ncr-native
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Native image and migration tests
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        env:
+          CIG026_NATIVE_NCR: '1'
+          PYTHONPATH: ${{ github.workspace }}/ncr-native
+        run: python -m unittest test_temporal_image -v
+      - name: Native-scale campaign
+        working-directory: experiments/pnp-ground-navigation/cut_intention
+        env:
+          PYTHONPATH: ${{ github.workspace }}/ncr-native
+        run: python run_temporal_image.py --native-ncr --sizes 24 96 1023
