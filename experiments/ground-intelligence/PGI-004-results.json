@@ -1,0 +1,274 @@
+{
+  "synthetic": [
+    {
+      "kind": "coupled",
+      "period": "1155",
+      "count": 60,
+      "found": 60,
+      "affine_found": 0,
+      "work": 640169,
+      "branches": 241,
+      "backtracks": 1,
+      "ms": 76.82386199571192,
+      "affine_ms": 716.992649000138,
+      "affine_work": 5066594
+    },
+    {
+      "kind": "large_parity",
+      "period": "16294579238595022365",
+      "count": 24,
+      "found": 24,
+      "affine_found": 0,
+      "work": 136972,
+      "branches": 360,
+      "backtracks": 0,
+      "ms": 29.54318900220096,
+      "affine_ms": 16.70304000377655,
+      "affine_work": 133480
+    },
+    {
+      "kind": "many_to_one",
+      "period": "105",
+      "count": 40,
+      "found": 40,
+      "bijective_found": 0,
+      "work": 1449745,
+      "branches": 8232,
+      "backtracks": 8112,
+      "ms": 228.51716299168766
+    }
+  ],
+  "actual": [
+    {
+      "bits": 60,
+      "period": "210",
+      "radices": [
+        2,
+        3,
+        5,
+        7
+      ],
+      "source_nodes": 9,
+      "target_nodes": 9,
+      "nonaffine_prime": 7,
+      "source_ms": 43.398230999708176,
+      "discovery_ms": 0.14054100029170513,
+      "discovery": {
+        "work": 523,
+        "branches": 4,
+        "backtracks": 0,
+        "status": "FOUND"
+      },
+      "old_found": false,
+      "old_ms": 0.2217629998922348,
+      "old": {
+        "work": 847,
+        "attempts": 4,
+        "methods": [
+          "sparse",
+          "cofactor"
+        ]
+      },
+      "skill_bytes": 43,
+      "activation": {
+        "compile_work": 53,
+        "verification_work": 72
+      },
+      "ordinal_checks": 8,
+      "selection_ms": 0.7849399987608194,
+      "selection_work": 3648,
+      "terminal_ms": 0.38222499936819077,
+      "collapse": {
+        "discovery_ms": 0.1452489998191595,
+        "discovery": {
+          "work": 578,
+          "branches": 5,
+          "backtracks": 1,
+          "status": "FOUND"
+        },
+        "ordinal_checks": 8,
+        "selection_work": 3712,
+        "realization_and_terminal_ms": 1.1037600003182888,
+        "events": 4
+      }
+    },
+    {
+      "bits": 174,
+      "period": "510510",
+      "radices": [
+        2,
+        3,
+        5,
+        7,
+        11,
+        13,
+        17
+      ],
+      "source_nodes": 18,
+      "target_nodes": 18,
+      "nonaffine_prime": 7,
+      "source_ms": 109.36827900074422,
+      "discovery_ms": 0.31292100064456463,
+      "discovery": {
+        "work": 1609,
+        "branches": 7,
+        "backtracks": 0,
+        "status": "FOUND"
+      },
+      "old_found": false,
+      "old_ms": 0.45560500025749207,
+      "old": {
+        "work": 2637,
+        "attempts": 4,
+        "methods": [
+          "sparse",
+          "cofactor"
+        ]
+      },
+      "skill_bytes": 142,
+      "activation": {
+        "compile_work": 185,
+        "verification_work": 245
+      },
+      "ordinal_checks": 8,
+      "selection_ms": 3.1356440000236034,
+      "selection_work": 28728,
+      "terminal_ms": 1.0642799995839596,
+      "collapse": {
+        "discovery_ms": 0.3116880003362894,
+        "discovery": {
+          "work": 1467,
+          "branches": 7,
+          "backtracks": 0,
+          "status": "FOUND"
+        },
+        "ordinal_checks": 8,
+        "selection_work": 34632,
+        "realization_and_terminal_ms": 4.7018290013074875,
+        "events": 4
+      }
+    },
+    {
+      "bits": 384,
+      "period": "446185740",
+      "radices": [
+        4,
+        3,
+        5,
+        7,
+        11,
+        13,
+        17,
+        19,
+        23
+      ],
+      "source_nodes": 25,
+      "target_nodes": 25,
+      "nonaffine_prime": 7,
+      "source_ms": 245.5931369997561,
+      "discovery_ms": 0.5112379994243383,
+      "discovery": {
+        "work": 2717,
+        "branches": 9,
+        "backtracks": 0,
+        "status": "FOUND"
+      },
+      "old_found": false,
+      "old_ms": 0.7866119984537363,
+      "old": {
+        "work": 4545,
+        "attempts": 4,
+        "methods": [
+          "sparse",
+          "cofactor"
+        ]
+      },
+      "skill_bytes": 256,
+      "activation": {
+        "compile_work": 323,
+        "verification_work": 427
+      },
+      "ordinal_checks": 8,
+      "selection_ms": 6.417780000716448,
+      "selection_work": 75138,
+      "terminal_ms": 2.8029440008103848,
+      "collapse": {
+        "discovery_ms": 0.4699769988656044,
+        "discovery": {
+          "work": 2412,
+          "branches": 9,
+          "backtracks": 0,
+          "status": "FOUND"
+        },
+        "ordinal_checks": 8,
+        "selection_work": 95584,
+        "realization_and_terminal_ms": 10.74465499818325,
+        "events": 4
+      }
+    },
+    {
+      "bits": 1023,
+      "period": "614889782588491410",
+      "radices": [
+        2,
+        3,
+        5,
+        7,
+        11,
+        13,
+        17,
+        19,
+        23,
+        29,
+        31,
+        37,
+        41,
+        43,
+        47
+      ],
+      "source_nodes": 42,
+      "target_nodes": 42,
+      "nonaffine_prime": 7,
+      "source_ms": 742.2669530007988,
+      "discovery_ms": 1.2075559999793768,
+      "discovery": {
+        "work": 7879,
+        "branches": 15,
+        "backtracks": 0,
+        "status": "FOUND"
+      },
+      "old_found": false,
+      "old_ms": 1.887346999719739,
+      "old": {
+        "work": 14145,
+        "attempts": 4,
+        "methods": [
+          "sparse",
+          "cofactor"
+        ]
+      },
+      "skill_bytes": 888,
+      "activation": {
+        "compile_work": 1019,
+        "verification_work": 1349
+      },
+      "ordinal_checks": 8,
+      "selection_ms": 28.523646000772715,
+      "selection_work": 482856,
+      "terminal_ms": 12.915478000417352,
+      "collapse": {
+        "discovery_ms": 1.516661001369357,
+        "discovery": {
+          "work": 6398,
+          "branches": 15,
+          "backtracks": 0,
+          "status": "FOUND"
+        },
+        "ordinal_checks": 8,
+        "selection_work": 638004,
+        "realization_and_terminal_ms": 49.29693899862468,
+        "events": 4
+      }
+    }
+  ]
+}
