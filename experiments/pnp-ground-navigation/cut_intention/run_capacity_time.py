@@ -24,7 +24,7 @@ def fixture(k):
     if k%3 or k<24 or k>1023:raise ValueError('fixture width')
     m=k//3;p=list(range(m));f=[];off=0;periods=[];markers=[];initial=0
     for L in (2,3,5,7,11,13,17,19,23,29,31,37,41,43,47):
-        if off+L>m//2:break
+        if off+L>max(5,m//2):break
         periods.append(L);markers.append(3*off);initial|=1<<(3*off)
         for j in range(off,off+L):
             p[j]=off+(j-off-1)%L
