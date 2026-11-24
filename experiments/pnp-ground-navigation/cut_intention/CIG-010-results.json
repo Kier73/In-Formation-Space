@@ -1,0 +1,2553 @@
+{
+  "cross_region": [
+    {
+      "stages": 32,
+      "n": 225,
+      "clauses": 512,
+      "plan_ms": 4.537,
+      "old": {
+        "count": "34",
+        "ms": 31.109,
+        "messages": 63,
+        "bytes": 11817,
+        "boolean": 32,
+        "producer_cells": 8410,
+        "new_full_checks": 63,
+        "join": 31
+      },
+      "adaptive_plan_ms": 2.223,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "incremental": {
+        "count": "18",
+        "ms": 6.888,
+        "messages": 65,
+        "bytes": 12269,
+        "proof_reuse": 57,
+        "boolean": 2,
+        "producer_cells": 314,
+        "new_full_checks": 8,
+        "join": 6
+      },
+      "fresh": {
+        "count": "18",
+        "ms": 32.39,
+        "messages": 65,
+        "bytes": 12269,
+        "boolean": 33,
+        "producer_cells": 8442,
+        "new_full_checks": 65,
+        "join": 32
+      },
+      "frozen_refused": true,
+      "restoration_plan_ms": 1.678,
+      "restoration_changes": {
+        "removed_empty_regions": 1
+      },
+      "restored": {
+        "count": "34",
+        "ms": 5.28,
+        "messages": 63,
+        "bytes": 11817,
+        "proof_reuse": 63
+      },
+      "cig008": {
+        "compile_ms": 10.751,
+        "verify_ms": 8.21,
+        "count": "18"
+      }
+    },
+    {
+      "stages": 128,
+      "n": 897,
+      "clauses": 2048,
+      "plan_ms": 65.234,
+      "old": {
+        "count": "130",
+        "ms": 135.764,
+        "messages": 255,
+        "bytes": 48254,
+        "boolean": 128,
+        "producer_cells": 33736,
+        "new_full_checks": 255,
+        "join": 127
+      },
+      "adaptive_plan_ms": 9.708,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "incremental": {
+        "count": "66",
+        "ms": 22.885,
+        "messages": 257,
+        "bytes": 48749,
+        "proof_reuse": 246,
+        "boolean": 2,
+        "producer_cells": 336,
+        "new_full_checks": 11,
+        "join": 9
+      },
+      "fresh": {
+        "count": "66",
+        "ms": 134.192,
+        "messages": 257,
+        "bytes": 48749,
+        "boolean": 129,
+        "producer_cells": 33780,
+        "new_full_checks": 257,
+        "join": 128
+      },
+      "frozen_refused": true,
+      "restoration_plan_ms": 8.307,
+      "restoration_changes": {
+        "removed_empty_regions": 1
+      },
+      "restored": {
+        "count": "130",
+        "ms": 22.689,
+        "messages": 255,
+        "bytes": 48254,
+        "proof_reuse": 255
+      },
+      "cig008": {
+        "compile_ms": 113.687,
+        "verify_ms": 71.229,
+        "count": "66"
+      }
+    },
+    {
+      "stages": 256,
+      "n": 1793,
+      "clauses": 4096,
+      "plan_ms": 32.07,
+      "old": {
+        "count": "258",
+        "ms": 301.273,
+        "messages": 511,
+        "bytes": 97420,
+        "boolean": 256,
+        "producer_cells": 67558,
+        "new_full_checks": 511,
+        "join": 255
+      },
+      "adaptive_plan_ms": 19.99,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "incremental": {
+        "count": "130",
+        "ms": 60.977,
+        "messages": 513,
+        "bytes": 97886,
+        "boolean": 2,
+        "producer_cells": 322,
+        "new_full_checks": 11,
+        "proof_reuse": 502,
+        "join": 9
+      },
+      "fresh": {
+        "count": "130",
+        "ms": 275.684,
+        "messages": 513,
+        "bytes": 97886,
+        "boolean": 257,
+        "producer_cells": 67594,
+        "new_full_checks": 513,
+        "join": 256
+      },
+      "frozen_refused": true,
+      "restoration_plan_ms": 15.219,
+      "restoration_changes": {
+        "removed_empty_regions": 1
+      },
+      "restored": {
+        "count": "258",
+        "ms": 51.224,
+        "messages": 511,
+        "bytes": 97420,
+        "proof_reuse": 511
+      },
+      "cig008": {
+        "compile_ms": 451.264,
+        "verify_ms": 226.899,
+        "count": "130"
+      }
+    },
+    {
+      "stages": 512,
+      "n": 3585,
+      "clauses": 8192,
+      "plan_ms": 132.779,
+      "old": {
+        "count": "514",
+        "ms": 580.531,
+        "messages": 1023,
+        "bytes": 195909,
+        "boolean": 512,
+        "producer_cells": 135168,
+        "new_full_checks": 1023,
+        "join": 511
+      },
+      "adaptive_plan_ms": 43.949,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "incremental": {
+        "count": "258",
+        "ms": 120.208,
+        "messages": 1025,
+        "bytes": 196727,
+        "proof_reuse": 1005,
+        "boolean": 2,
+        "producer_cells": 592,
+        "new_full_checks": 20,
+        "join": 18
+      },
+      "fresh": {
+        "count": "258",
+        "ms": 602.208,
+        "messages": 1025,
+        "bytes": 196727,
+        "boolean": 513,
+        "producer_cells": 135340,
+        "new_full_checks": 1025,
+        "join": 512
+      },
+      "frozen_refused": true,
+      "restoration_plan_ms": 34.804,
+      "restoration_changes": {
+        "removed_empty_regions": 1
+      },
+      "restored": {
+        "count": "514",
+        "ms": 113.115,
+        "messages": 1023,
+        "bytes": 195909,
+        "proof_reuse": 1023
+      },
+      "cig008": null
+    },
+    {
+      "stages": 1024,
+      "n": 7169,
+      "clauses": 16384,
+      "plan_ms": 147.846,
+      "old": {
+        "count": "1026",
+        "ms": 1263.006,
+        "messages": 2047,
+        "bytes": 392552,
+        "boolean": 1024,
+        "producer_cells": 270328,
+        "new_full_checks": 2047,
+        "join": 1023
+      },
+      "adaptive_plan_ms": 90.625,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "incremental": {
+        "count": "514",
+        "ms": 294.527,
+        "messages": 2049,
+        "bytes": 393396,
+        "proof_reuse": 2028,
+        "boolean": 2,
+        "producer_cells": 600,
+        "new_full_checks": 21,
+        "join": 19
+      },
+      "fresh": {
+        "count": "514",
+        "ms": 1209.565,
+        "messages": 2049,
+        "bytes": 393396,
+        "boolean": 1025,
+        "producer_cells": 270504,
+        "new_full_checks": 2049,
+        "join": 1024
+      },
+      "frozen_refused": true,
+      "restoration_plan_ms": 72.782,
+      "restoration_changes": {
+        "removed_empty_regions": 1
+      },
+      "restored": {
+        "count": "1026",
+        "ms": 394.474,
+        "messages": 2047,
+        "bytes": 392552,
+        "proof_reuse": 2047
+      },
+      "cig008": null
+    }
+  ],
+  "revision_sequence": [
+    {
+      "revision": 0,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 10.247,
+      "incremental_ms": 19.7,
+      "fresh_ms": 127.457,
+      "changes": {},
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 1,
+      "extras": [
+        [
+          881,
+          -577
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 8.924,
+      "incremental_ms": 22.41,
+      "fresh_ms": 140.244,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 243,
+        "join": 13,
+        "producer_cells": 144,
+        "new_full_checks": 14,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 2,
+      "extras": [
+        [
+          881,
+          -577
+        ],
+        [
+          -716,
+          -722
+        ]
+      ],
+      "count": "87",
+      "replan_ms": 10.437,
+      "incremental_ms": 27.167,
+      "fresh_ms": 146.771,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 245,
+        "join": 13,
+        "producer_cells": 272,
+        "new_full_checks": 14,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 3,
+      "extras": [
+        [
+          -716,
+          -722
+        ]
+      ],
+      "count": "87",
+      "replan_ms": 9.027,
+      "incremental_ms": 25.11,
+      "fresh_ms": 148.95,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 250,
+        "join": 7,
+        "producer_cells": 92,
+        "new_full_checks": 7
+      },
+      "messages": 257
+    },
+    {
+      "revision": 4,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 12.454,
+      "incremental_ms": 23.78,
+      "fresh_ms": 137.665,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 5,
+      "extras": [
+        [
+          -353,
+          -482
+        ]
+      ],
+      "count": "107",
+      "replan_ms": 9.442,
+      "incremental_ms": 22.901,
+      "fresh_ms": 145.25,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 244,
+        "join": 12,
+        "producer_cells": 152,
+        "new_full_checks": 13,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 6,
+      "extras": [
+        [
+          -353,
+          -482
+        ],
+        [
+          797,
+          -851
+        ]
+      ],
+      "count": "107",
+      "replan_ms": 10.629,
+      "incremental_ms": 26.989,
+      "fresh_ms": 142.249,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 244,
+        "join": 13,
+        "producer_cells": 292,
+        "new_full_checks": 14,
+        "boolean": 1,
+        "semantic_join_reuse": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 7,
+      "extras": [
+        [
+          797,
+          -851
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 11.618,
+      "incremental_ms": 23.395,
+      "fresh_ms": 138.265,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 250,
+        "join": 7,
+        "producer_cells": 84,
+        "new_full_checks": 7
+      },
+      "messages": 257
+    },
+    {
+      "revision": 8,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 8.854,
+      "incremental_ms": 21.336,
+      "fresh_ms": 142.25,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 9,
+      "extras": [
+        [
+          167,
+          -411
+        ]
+      ],
+      "count": "69",
+      "replan_ms": 9.398,
+      "incremental_ms": 22.526,
+      "fresh_ms": 140.496,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 243,
+        "join": 13,
+        "producer_cells": 168,
+        "new_full_checks": 14,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 10,
+      "extras": [
+        [
+          167,
+          -411
+        ],
+        [
+          -115,
+          -749
+        ]
+      ],
+      "count": "43",
+      "replan_ms": 12.304,
+      "incremental_ms": 105.244,
+      "fresh_ms": 139.287,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 246,
+        "join": 12,
+        "producer_cells": 264,
+        "new_full_checks": 13,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 11,
+      "extras": [
+        [
+          -115,
+          -749
+        ]
+      ],
+      "count": "95",
+      "replan_ms": 8.869,
+      "incremental_ms": 23.165,
+      "fresh_ms": 144.674,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 252,
+        "join": 5,
+        "producer_cells": 84,
+        "new_full_checks": 5
+      },
+      "messages": 257
+    },
+    {
+      "revision": 12,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 9.252,
+      "incremental_ms": 20.915,
+      "fresh_ms": 148.515,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 13,
+      "extras": [
+        [
+          723,
+          -666
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 9.702,
+      "incremental_ms": 23.862,
+      "fresh_ms": 137.929,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 242,
+        "join": 14,
+        "producer_cells": 176,
+        "new_full_checks": 15,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 14,
+      "extras": [
+        [
+          723,
+          -666
+        ],
+        [
+          118,
+          19
+        ]
+      ],
+      "count": "117",
+      "replan_ms": 11.671,
+      "incremental_ms": 23.989,
+      "fresh_ms": 141.559,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 245,
+        "join": 13,
+        "producer_cells": 272,
+        "new_full_checks": 14,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 15,
+      "extras": [
+        [
+          118,
+          19
+        ]
+      ],
+      "count": "117",
+      "replan_ms": 8.893,
+      "incremental_ms": 23.805,
+      "fresh_ms": 146.945,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 249,
+        "join": 8,
+        "producer_cells": 84,
+        "new_full_checks": 8
+      },
+      "messages": 257
+    },
+    {
+      "revision": 16,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 8.5,
+      "incremental_ms": 20.661,
+      "fresh_ms": 142.682,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 17,
+      "extras": [
+        [
+          -236,
+          215
+        ]
+      ],
+      "count": "121",
+      "replan_ms": 16.374,
+      "incremental_ms": 21.474,
+      "fresh_ms": 140.405,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 247,
+        "join": 9,
+        "producer_cells": 120,
+        "new_full_checks": 10,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 18,
+      "extras": [
+        [
+          -236,
+          215
+        ],
+        [
+          693,
+          -411
+        ]
+      ],
+      "count": "121",
+      "replan_ms": 8.492,
+      "incremental_ms": 21.425,
+      "fresh_ms": 143.465,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 250,
+        "join": 5,
+        "producer_cells": 92,
+        "new_full_checks": 6,
+        "boolean": 1,
+        "semantic_join_reuse": 3
+      },
+      "messages": 259
+    },
+    {
+      "revision": 19,
+      "extras": [
+        [
+          693,
+          -411
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 10.942,
+      "incremental_ms": 21.118,
+      "fresh_ms": 139.509,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 254,
+        "semantic_join_reuse": 3
+      },
+      "messages": 257
+    },
+    {
+      "revision": 20,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 11.231,
+      "incremental_ms": 19.879,
+      "fresh_ms": 139.21,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 21,
+      "extras": [
+        [
+          367,
+          -215
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 9.357,
+      "incremental_ms": 23.538,
+      "fresh_ms": 140.017,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 245,
+        "join": 11,
+        "producer_cells": 136,
+        "new_full_checks": 12,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 22,
+      "extras": [
+        [
+          367,
+          -215
+        ],
+        [
+          195,
+          658
+        ]
+      ],
+      "count": "36",
+      "replan_ms": 10.099,
+      "incremental_ms": 25.198,
+      "fresh_ms": 142.364,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 248,
+        "join": 10,
+        "producer_cells": 128,
+        "new_full_checks": 11,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 23,
+      "extras": [
+        [
+          195,
+          658
+        ]
+      ],
+      "count": "36",
+      "replan_ms": 8.996,
+      "incremental_ms": 24.519,
+      "fresh_ms": 146.479,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255,
+        "join": 2,
+        "producer_cells": 12,
+        "new_full_checks": 2
+      },
+      "messages": 257
+    },
+    {
+      "revision": 24,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 11.913,
+      "incremental_ms": 21.997,
+      "fresh_ms": 137.207,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 25,
+      "extras": [
+        [
+          -546,
+          109
+        ]
+      ],
+      "count": "116",
+      "replan_ms": 9.018,
+      "incremental_ms": 21.085,
+      "fresh_ms": 136.624,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 249,
+        "join": 7,
+        "producer_cells": 40,
+        "new_full_checks": 8,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 26,
+      "extras": [
+        [
+          -546,
+          109
+        ],
+        [
+          -428,
+          -275
+        ]
+      ],
+      "count": "53",
+      "replan_ms": 86.918,
+      "incremental_ms": 21.738,
+      "fresh_ms": 132.252,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 248,
+        "join": 10,
+        "producer_cells": 120,
+        "new_full_checks": 11,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 27,
+      "extras": [
+        [
+          -428,
+          -275
+        ]
+      ],
+      "count": "53",
+      "replan_ms": 9.399,
+      "incremental_ms": 21.28,
+      "fresh_ms": 140.487,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 254,
+        "join": 3,
+        "producer_cells": 28,
+        "new_full_checks": 3
+      },
+      "messages": 257
+    },
+    {
+      "revision": 28,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 14.166,
+      "incremental_ms": 23.47,
+      "fresh_ms": 134.628,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 29,
+      "extras": [
+        [
+          353,
+          343
+        ]
+      ],
+      "count": "71",
+      "replan_ms": 8.536,
+      "incremental_ms": 22.837,
+      "fresh_ms": 141.229,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 249,
+        "join": 7,
+        "producer_cells": 80,
+        "new_full_checks": 8,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 30,
+      "extras": [
+        [
+          353,
+          343
+        ],
+        [
+          -68,
+          775
+        ]
+      ],
+      "count": "71",
+      "replan_ms": 8.252,
+      "incremental_ms": 24.106,
+      "fresh_ms": 135.516,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 245,
+        "join": 12,
+        "producer_cells": 236,
+        "new_full_checks": 13,
+        "boolean": 1,
+        "semantic_join_reuse": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 31,
+      "extras": [
+        [
+          -68,
+          775
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 10.325,
+      "incremental_ms": 21.276,
+      "fresh_ms": 143.471,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 253,
+        "join": 4,
+        "producer_cells": 44,
+        "new_full_checks": 4
+      },
+      "messages": 257
+    },
+    {
+      "revision": 32,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 8.278,
+      "incremental_ms": 20.453,
+      "fresh_ms": 128.572,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 33,
+      "extras": [
+        [
+          147,
+          -350
+        ]
+      ],
+      "count": "123",
+      "replan_ms": 9.054,
+      "incremental_ms": 22.409,
+      "fresh_ms": 132.006,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 245,
+        "join": 11,
+        "producer_cells": 160,
+        "new_full_checks": 12,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 34,
+      "extras": [
+        [
+          147,
+          -350
+        ],
+        [
+          57,
+          881
+        ]
+      ],
+      "count": "47",
+      "replan_ms": 11.663,
+      "incremental_ms": 22.632,
+      "fresh_ms": 137.752,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 250,
+        "join": 8,
+        "producer_cells": 112,
+        "new_full_checks": 9,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 35,
+      "extras": [
+        [
+          57,
+          881
+        ]
+      ],
+      "count": "47",
+      "replan_ms": 7.969,
+      "incremental_ms": 21.092,
+      "fresh_ms": 136.462,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255,
+        "join": 1,
+        "producer_cells": 8,
+        "new_full_checks": 1,
+        "semantic_join_reuse": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 36,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 8.709,
+      "incremental_ms": 19.731,
+      "fresh_ms": 128.767,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 37,
+      "extras": [
+        [
+          -663,
+          718
+        ]
+      ],
+      "count": "84",
+      "replan_ms": 10.78,
+      "incremental_ms": 23.042,
+      "fresh_ms": 133.26,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 242,
+        "join": 14,
+        "producer_cells": 184,
+        "new_full_checks": 15,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 38,
+      "extras": [
+        [
+          -663,
+          718
+        ],
+        [
+          -633,
+          -79
+        ]
+      ],
+      "count": "26",
+      "replan_ms": 8.296,
+      "incremental_ms": 22.888,
+      "fresh_ms": 131.314,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 245,
+        "join": 13,
+        "producer_cells": 200,
+        "new_full_checks": 14,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 39,
+      "extras": [
+        [
+          -633,
+          -79
+        ]
+      ],
+      "count": "60",
+      "replan_ms": 8.285,
+      "incremental_ms": 20.075,
+      "fresh_ms": 134.791,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255,
+        "join": 2,
+        "producer_cells": 12,
+        "new_full_checks": 2
+      },
+      "messages": 257
+    },
+    {
+      "revision": 40,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 10.491,
+      "incremental_ms": 20.046,
+      "fresh_ms": 129.505,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 41,
+      "extras": [
+        [
+          -318,
+          -130
+        ]
+      ],
+      "count": "114",
+      "replan_ms": 8.803,
+      "incremental_ms": 23.364,
+      "fresh_ms": 213.123,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 243,
+        "join": 13,
+        "producer_cells": 136,
+        "new_full_checks": 14,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 42,
+      "extras": [
+        [
+          -318,
+          -130
+        ],
+        [
+          716,
+          -186
+        ]
+      ],
+      "count": "114",
+      "replan_ms": 8.418,
+      "incremental_ms": 22.118,
+      "fresh_ms": 130.228,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 248,
+        "join": 10,
+        "producer_cells": 240,
+        "new_full_checks": 11,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 43,
+      "extras": [
+        [
+          716,
+          -186
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 11.005,
+      "incremental_ms": 20.366,
+      "fresh_ms": 133.061,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 253,
+        "join": 4,
+        "producer_cells": 44,
+        "new_full_checks": 4
+      },
+      "messages": 257
+    },
+    {
+      "revision": 44,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 8.292,
+      "incremental_ms": 21.345,
+      "fresh_ms": 131.833,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 45,
+      "extras": [
+        [
+          367,
+          -442
+        ]
+      ],
+      "count": "117",
+      "replan_ms": 9.412,
+      "incremental_ms": 22.191,
+      "fresh_ms": 133.706,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 249,
+        "join": 7,
+        "producer_cells": 52,
+        "new_full_checks": 8,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 46,
+      "extras": [
+        [
+          367,
+          -442
+        ],
+        [
+          833,
+          -348
+        ]
+      ],
+      "count": "117",
+      "replan_ms": 9.045,
+      "incremental_ms": 23.097,
+      "fresh_ms": 133.046,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 244,
+        "join": 14,
+        "producer_cells": 176,
+        "new_full_checks": 15,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 47,
+      "extras": [
+        [
+          833,
+          -348
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 12.32,
+      "incremental_ms": 23.541,
+      "fresh_ms": 136.266,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 254,
+        "join": 3,
+        "producer_cells": 28,
+        "new_full_checks": 3
+      },
+      "messages": 257
+    },
+    {
+      "revision": 48,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 9.76,
+      "incremental_ms": 20.405,
+      "fresh_ms": 134.638,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 49,
+      "extras": [
+        [
+          761,
+          190
+        ]
+      ],
+      "count": "85",
+      "replan_ms": 12.144,
+      "incremental_ms": 25.234,
+      "fresh_ms": 149.609,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 244,
+        "join": 12,
+        "producer_cells": 144,
+        "new_full_checks": 13,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 50,
+      "extras": [
+        [
+          761,
+          190
+        ],
+        [
+          -412,
+          -666
+        ]
+      ],
+      "count": "74",
+      "replan_ms": 12.737,
+      "incremental_ms": 26.975,
+      "fresh_ms": 152.805,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 249,
+        "join": 9,
+        "producer_cells": 216,
+        "new_full_checks": 10,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 51,
+      "extras": [
+        [
+          -412,
+          -666
+        ]
+      ],
+      "count": "119",
+      "replan_ms": 9.68,
+      "incremental_ms": 22.558,
+      "fresh_ms": 143.562,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 250,
+        "join": 7,
+        "producer_cells": 68,
+        "new_full_checks": 7
+      },
+      "messages": 257
+    },
+    {
+      "revision": 52,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 10.087,
+      "incremental_ms": 21.82,
+      "fresh_ms": 144.78,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 53,
+      "extras": [
+        [
+          -658,
+          -334
+        ]
+      ],
+      "count": "108",
+      "replan_ms": 15.451,
+      "incremental_ms": 29.527,
+      "fresh_ms": 156.677,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 243,
+        "join": 13,
+        "producer_cells": 176,
+        "new_full_checks": 14,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 54,
+      "extras": [
+        [
+          -658,
+          -334
+        ],
+        [
+          -310,
+          192
+        ]
+      ],
+      "count": "70",
+      "replan_ms": 8.994,
+      "incremental_ms": 24.434,
+      "fresh_ms": 133.126,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 246,
+        "join": 12,
+        "producer_cells": 244,
+        "new_full_checks": 13,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 55,
+      "extras": [
+        [
+          -310,
+          192
+        ]
+      ],
+      "count": "79",
+      "replan_ms": 7.943,
+      "incremental_ms": 21.028,
+      "fresh_ms": 127.978,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 251,
+        "join": 6,
+        "producer_cells": 68,
+        "new_full_checks": 6
+      },
+      "messages": 257
+    },
+    {
+      "revision": 56,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 10.446,
+      "incremental_ms": 19.272,
+      "fresh_ms": 129.85,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 57,
+      "extras": [
+        [
+          -210,
+          -546
+        ]
+      ],
+      "count": "113",
+      "replan_ms": 8.44,
+      "incremental_ms": 22.482,
+      "fresh_ms": 211.915,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 247,
+        "join": 9,
+        "producer_cells": 108,
+        "new_full_checks": 10,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 58,
+      "extras": [
+        [
+          -210,
+          -546
+        ],
+        [
+          -195,
+          -37
+        ]
+      ],
+      "count": "94",
+      "replan_ms": 9.81,
+      "incremental_ms": 23.886,
+      "fresh_ms": 132.275,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 245,
+        "join": 13,
+        "producer_cells": 216,
+        "new_full_checks": 14,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 59,
+      "extras": [
+        [
+          -195,
+          -37
+        ]
+      ],
+      "count": "94",
+      "replan_ms": 10.292,
+      "incremental_ms": 21.417,
+      "fresh_ms": 127.609,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 253,
+        "join": 4,
+        "producer_cells": 36,
+        "new_full_checks": 4
+      },
+      "messages": 257
+    },
+    {
+      "revision": 60,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 8.076,
+      "incremental_ms": 21.542,
+      "fresh_ms": 126.76,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 61,
+      "extras": [
+        [
+          -324,
+          -190
+        ]
+      ],
+      "count": "45",
+      "replan_ms": 8.342,
+      "incremental_ms": 21.035,
+      "fresh_ms": 188.34,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 248,
+        "join": 8,
+        "producer_cells": 112,
+        "new_full_checks": 9,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 62,
+      "extras": [
+        [
+          -324,
+          -190
+        ],
+        [
+          65,
+          -3
+        ]
+      ],
+      "count": "45",
+      "replan_ms": 8.637,
+      "incremental_ms": 22.041,
+      "fresh_ms": 128.563,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 247,
+        "join": 9,
+        "producer_cells": 108,
+        "new_full_checks": 10,
+        "boolean": 1,
+        "semantic_join_reuse": 2
+      },
+      "messages": 259
+    },
+    {
+      "revision": 63,
+      "extras": [
+        [
+          65,
+          -3
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 10.667,
+      "incremental_ms": 20.066,
+      "fresh_ms": 131.012,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 256,
+        "semantic_join_reuse": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 64,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 8.107,
+      "incremental_ms": 26.562,
+      "fresh_ms": 127.84,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 65,
+      "extras": [
+        [
+          -535,
+          -882
+        ]
+      ],
+      "count": "124",
+      "replan_ms": 9.199,
+      "incremental_ms": 21.098,
+      "fresh_ms": 125.967,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 245,
+        "join": 11,
+        "producer_cells": 120,
+        "new_full_checks": 12,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 66,
+      "extras": [
+        [
+          -535,
+          -882
+        ],
+        [
+          451,
+          -535
+        ]
+      ],
+      "count": "96",
+      "replan_ms": 10.874,
+      "incremental_ms": 20.779,
+      "fresh_ms": 127.144,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 251,
+        "join": 7,
+        "producer_cells": 112,
+        "new_full_checks": 8,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 67,
+      "extras": [
+        [
+          451,
+          -535
+        ]
+      ],
+      "count": "102",
+      "replan_ms": 8.144,
+      "incremental_ms": 20.592,
+      "fresh_ms": 128.456,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255,
+        "join": 2,
+        "producer_cells": 20,
+        "new_full_checks": 2
+      },
+      "messages": 257
+    },
+    {
+      "revision": 68,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 9.277,
+      "incremental_ms": 20.407,
+      "fresh_ms": 129.607,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 69,
+      "extras": [
+        [
+          348,
+          497
+        ]
+      ],
+      "count": "50",
+      "replan_ms": 11.485,
+      "incremental_ms": 22.767,
+      "fresh_ms": 129.369,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 248,
+        "join": 8,
+        "producer_cells": 112,
+        "new_full_checks": 9,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 70,
+      "extras": [
+        [
+          348,
+          497
+        ],
+        [
+          236,
+          279
+        ]
+      ],
+      "count": "50",
+      "replan_ms": 8.452,
+      "incremental_ms": 25.066,
+      "fresh_ms": 134.369,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 250,
+        "join": 8,
+        "producer_cells": 120,
+        "new_full_checks": 9,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 71,
+      "extras": [
+        [
+          236,
+          279
+        ]
+      ],
+      "count": "78",
+      "replan_ms": 10.329,
+      "incremental_ms": 23.247,
+      "fresh_ms": 130.346,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255,
+        "join": 2,
+        "producer_cells": 12,
+        "new_full_checks": 2
+      },
+      "messages": 257
+    },
+    {
+      "revision": 72,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 11.501,
+      "incremental_ms": 19.805,
+      "fresh_ms": 129.935,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 73,
+      "extras": [
+        [
+          692,
+          -630
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 8.182,
+      "incremental_ms": 23.138,
+      "fresh_ms": 220.803,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 244,
+        "join": 12,
+        "producer_cells": 140,
+        "new_full_checks": 13,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 74,
+      "extras": [
+        [
+          692,
+          -630
+        ],
+        [
+          -716,
+          -535
+        ]
+      ],
+      "count": "57",
+      "replan_ms": 10.414,
+      "incremental_ms": 22.961,
+      "fresh_ms": 134.148,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 253,
+        "join": 5,
+        "producer_cells": 136,
+        "new_full_checks": 6,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 75,
+      "extras": [
+        [
+          -716,
+          -535
+        ]
+      ],
+      "count": "57",
+      "replan_ms": 10.914,
+      "incremental_ms": 22.686,
+      "fresh_ms": 137.291,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255,
+        "join": 2,
+        "producer_cells": 20,
+        "new_full_checks": 2
+      },
+      "messages": 257
+    },
+    {
+      "revision": 76,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 9.479,
+      "incremental_ms": 21.296,
+      "fresh_ms": 133.21,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 77,
+      "extras": [
+        [
+          -210,
+          428
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 8.372,
+      "incremental_ms": 20.545,
+      "fresh_ms": 134.446,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 251,
+        "join": 2,
+        "producer_cells": 52,
+        "new_full_checks": 3,
+        "boolean": 1,
+        "semantic_join_reuse": 3
+      },
+      "messages": 257
+    },
+    {
+      "revision": 78,
+      "extras": [
+        [
+          -210,
+          428
+        ],
+        [
+          -282,
+          851
+        ]
+      ],
+      "count": "21",
+      "replan_ms": 8.98,
+      "incremental_ms": 22.452,
+      "fresh_ms": 130.746,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "boolean": 2,
+        "producer_cells": 336,
+        "new_full_checks": 10,
+        "proof_reuse": 249,
+        "join": 8
+      },
+      "messages": 259
+    },
+    {
+      "revision": 79,
+      "extras": [
+        [
+          -282,
+          851
+        ]
+      ],
+      "count": "21",
+      "replan_ms": 10.563,
+      "incremental_ms": 20.765,
+      "fresh_ms": 126.418,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 253,
+        "semantic_join_reuse": 4
+      },
+      "messages": 257
+    },
+    {
+      "revision": 80,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 8.313,
+      "incremental_ms": 20.043,
+      "fresh_ms": 132.17,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 81,
+      "extras": [
+        [
+          292,
+          3
+        ]
+      ],
+      "count": "66",
+      "replan_ms": 9.469,
+      "incremental_ms": 24.362,
+      "fresh_ms": 136.819,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 246,
+        "join": 10,
+        "producer_cells": 128,
+        "new_full_checks": 11,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 82,
+      "extras": [
+        [
+          292,
+          3
+        ],
+        [
+          80,
+          -115
+        ]
+      ],
+      "count": "66",
+      "replan_ms": 10.692,
+      "incremental_ms": 30.623,
+      "fresh_ms": 172.909,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 248,
+        "join": 9,
+        "producer_cells": 196,
+        "new_full_checks": 10,
+        "boolean": 1,
+        "semantic_join_reuse": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 83,
+      "extras": [
+        [
+          80,
+          -115
+        ]
+      ],
+      "count": "130",
+      "replan_ms": 8.266,
+      "incremental_ms": 21.091,
+      "fresh_ms": 132.07,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 253,
+        "join": 4,
+        "producer_cells": 44,
+        "new_full_checks": 4
+      },
+      "messages": 257
+    },
+    {
+      "revision": 84,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 9.56,
+      "incremental_ms": 21.574,
+      "fresh_ms": 145.211,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 85,
+      "extras": [
+        [
+          -723,
+          -512
+        ]
+      ],
+      "count": "20",
+      "replan_ms": 16.013,
+      "incremental_ms": 24.047,
+      "fresh_ms": 188.586,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 248,
+        "join": 8,
+        "producer_cells": 92,
+        "new_full_checks": 9,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 86,
+      "extras": [
+        [
+          -723,
+          -512
+        ],
+        [
+          772,
+          260
+        ]
+      ],
+      "count": "0",
+      "replan_ms": 8.776,
+      "incremental_ms": 20.481,
+      "fresh_ms": 134.057,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 245,
+        "join": 13,
+        "producer_cells": 200,
+        "new_full_checks": 14,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 87,
+      "extras": [
+        [
+          772,
+          260
+        ]
+      ],
+      "count": "74",
+      "replan_ms": 8.192,
+      "incremental_ms": 22.505,
+      "fresh_ms": 134.831,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 256,
+        "join": 1,
+        "producer_cells": 4,
+        "new_full_checks": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 88,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 10.499,
+      "incremental_ms": 20.446,
+      "fresh_ms": 130.092,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 89,
+      "extras": [
+        [
+          147,
+          816
+        ]
+      ],
+      "count": "76",
+      "replan_ms": 8.14,
+      "incremental_ms": 23.293,
+      "fresh_ms": 208.71,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 246,
+        "join": 10,
+        "producer_cells": 100,
+        "new_full_checks": 11,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 90,
+      "extras": [
+        [
+          147,
+          816
+        ],
+        [
+          -310,
+          882
+        ]
+      ],
+      "count": "22",
+      "replan_ms": 9.05,
+      "incremental_ms": 24.266,
+      "fresh_ms": 135.946,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 250,
+        "join": 8,
+        "producer_cells": 184,
+        "new_full_checks": 9,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 91,
+      "extras": [
+        [
+          -310,
+          882
+        ]
+      ],
+      "count": "76",
+      "replan_ms": 10.339,
+      "incremental_ms": 21.37,
+      "fresh_ms": 131.578,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255,
+        "join": 2,
+        "producer_cells": 20,
+        "new_full_checks": 2
+      },
+      "messages": 257
+    },
+    {
+      "revision": 92,
+      "extras": [],
+      "count": "130",
+      "replan_ms": 8.194,
+      "incremental_ms": 21.804,
+      "fresh_ms": 132.24,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 255
+      },
+      "messages": 255
+    },
+    {
+      "revision": 93,
+      "extras": [
+        [
+          838,
+          -766
+        ]
+      ],
+      "count": "92",
+      "replan_ms": 8.935,
+      "incremental_ms": 22.003,
+      "fresh_ms": 135.076,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 247,
+        "join": 9,
+        "producer_cells": 96,
+        "new_full_checks": 10,
+        "boolean": 1
+      },
+      "messages": 257
+    },
+    {
+      "revision": 94,
+      "extras": [
+        [
+          838,
+          -766
+        ],
+        [
+          -42,
+          775
+        ]
+      ],
+      "count": "92",
+      "replan_ms": 8.976,
+      "incremental_ms": 21.702,
+      "fresh_ms": 131.875,
+      "changes": {
+        "inserted_bridge_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 249,
+        "join": 9,
+        "producer_cells": 128,
+        "new_full_checks": 10,
+        "boolean": 1
+      },
+      "messages": 259
+    },
+    {
+      "revision": 95,
+      "extras": [
+        [
+          -42,
+          775
+        ]
+      ],
+      "count": "124",
+      "replan_ms": 10.699,
+      "incremental_ms": 21.084,
+      "fresh_ms": 127.891,
+      "changes": {
+        "removed_empty_regions": 1
+      },
+      "metrics": {
+        "proof_reuse": 254,
+        "join": 3,
+        "producer_cells": 12,
+        "new_full_checks": 3
+      },
+      "messages": 257
+    }
+  ],
+  "semantic_quiescence": {
+    "n": 4099,
+    "clauses": 8195,
+    "count_log2": 2050,
+    "original": {
+      "count": "129268024285244029202859506754679807841776410678861936128521381710098620555471563572788805646091653854754871843687592077976478236601963684380352609545793132482523509469203984367000791001558608427184230553536270273107168874570479024647352377353904681882326583408145220171550303566164263234430209596495721542087657333558673369682739899146258277979424704141305288232311222637324104770833841256601034371456708466903774414873847429430393404609206583617614790452933148924908502738843280838900628406907725293878714170322626791740183989073411994552862100665557749342174408541732918418581273914419808592774223414444238384922624",
+      "ms": 562.148,
+      "messages": 4097,
+      "bytes": 800803,
+      "affine": 2048,
+      "producer_cells": 24492,
+      "new_full_checks": 4097,
+      "join": 2048,
+      "boolean": 1
+    },
+    "revision_plan_ms": 34.148,
+    "revision": {
+      "count": "129268024285244029202859506754679807841776410678861936128521381710098620555471563572788805646091653854754871843687592077976478236601963684380352609545793132482523509469203984367000791001558608427184230553536270273107168874570479024647352377353904681882326583408145220171550303566164263234430209596495721542087657333558673369682739899146258277979424704141305288232311222637324104770833841256601034371456708466903774414873847429430393404609206583617614790452933148924908502738843280838900628406907725293878714170322626791740183989073411994552862100665557749342174408541732918418581273914419808592774223414444238384922624",
+      "ms": 231.52,
+      "messages": 4097,
+      "bytes": 800803,
+      "proof_reuse": 4084,
+      "boolean": 1,
+      "producer_cells": 8,
+      "new_full_checks": 1,
+      "semantic_join_reuse": 12
+    },
+    "fresh": {
+      "count": "129268024285244029202859506754679807841776410678861936128521381710098620555471563572788805646091653854754871843687592077976478236601963684380352609545793132482523509469203984367000791001558608427184230553536270273107168874570479024647352377353904681882326583408145220171550303566164263234430209596495721542087657333558673369682739899146258277979424704141305288232311222637324104770833841256601034371456708466903774414873847429430393404609206583617614790452933148924908502738843280838900628406907725293878714170322626791740183989073411994552862100665557749342174408541732918418581273914419808592774223414444238384922624",
+      "ms": 499.971,
+      "messages": 4097,
+      "bytes": 800803,
+      "affine": 2048,
+      "producer_cells": 24492,
+      "new_full_checks": 4097,
+      "join": 2048,
+      "boolean": 1
+    }
+  },
+  "split_merge": {
+    "n": 4096,
+    "clauses": 2048,
+    "original": {
+      "count": "139421472706236791468735287967015707232606232113998186759762284283203248267399327423485002476018294548027207658124580006956269122224761375615358997681237349433785401584729106693395255281491169142017082115307947771801954704567433211464560639140944673635364155016693389201613594038984686916178623702578352190636251776039742101384851474311083735102877993131212196962695464654469816719202970619252343026646014132485548307935847260900441555694943498191955672798596377459777392636575523873495086339994375985976543710570091438233257228420529594557457359609723639787519567621434999954843382100489400924995961904023259324301047965917783124275162880514542735528152228927483841372844810255470399471841348890379437250393401562476664019972812975660227449988177768002661436897984534184331079950399306756818061310948084534985374661203278436590349231431071569402389429768922180485838968764968523571261288038064310442585283933256404572748606640151307376800250725427496845607662821346676098703361",
+      "ms": 171.586,
+      "messages": 2047,
+      "bytes": 359015,
+      "boolean": 1024,
+      "producer_cells": 16394,
+      "new_full_checks": 1034,
+      "join": 10,
+      "semantic_join_reuse": 1013
+    },
+    "split_changes": {
+      "split_regions": 1024
+    },
+    "split_plan_ms": 16.866,
+    "split": {
+      "count": "139421472706236791468735287967015707232606232113998186759762284283203248267399327423485002476018294548027207658124580006956269122224761375615358997681237349433785401584729106693395255281491169142017082115307947771801954704567433211464560639140944673635364155016693389201613594038984686916178623702578352190636251776039742101384851474311083735102877993131212196962695464654469816719202970619252343026646014132485548307935847260900441555694943498191955672798596377459777392636575523873495086339994375985976543710570091438233257228420529594557457359609723639787519567621434999954843382100489400924995961904023259324301047965917783124275162880514542735528152228927483841372844810255470399471841348890379437250393401562476664019972812975660227449988177768002661436897984534184331079950399306756818061310948084534985374661203278436590349231431071569402389429768922180485838968764968523571261288038064310442585283933256404572748606640151307376800250725427496845607662821346676098703361",
+      "ms": 361.024,
+      "messages": 4095,
+      "bytes": 709223,
+      "boolean": 2048,
+      "producer_cells": 8193,
+      "new_full_checks": 2049,
+      "join": 1,
+      "semantic_join_reuse": 2046
+    },
+    "merge_changes": {
+      "merged_regions": 1024
+    },
+    "merge_plan_ms": 15.313,
+    "merged": {
+      "count": "139421472706236791468735287967015707232606232113998186759762284283203248267399327423485002476018294548027207658124580006956269122224761375615358997681237349433785401584729106693395255281491169142017082115307947771801954704567433211464560639140944673635364155016693389201613594038984686916178623702578352190636251776039742101384851474311083735102877993131212196962695464654469816719202970619252343026646014132485548307935847260900441555694943498191955672798596377459777392636575523873495086339994375985976543710570091438233257228420529594557457359609723639787519567621434999954843382100489400924995961904023259324301047965917783124275162880514542735528152228927483841372844810255470399471841348890379437250393401562476664019972812975660227449988177768002661436897984534184331079950399306756818061310948084534985374661203278436590349231431071569402389429768922180485838968764968523571261288038064310442585283933256404572748606640151307376800250725427496845607662821346676098703361",
+      "ms": 87.787,
+      "messages": 2047,
+      "bytes": 359015,
+      "proof_reuse": 2047
+    }
+  },
+  "dense_controls": [
+    {
+      "n": 50,
+      "clauses": 213,
+      "status": "UNKNOWN",
+      "reason": "biconnected region exceeds leaf budget"
+    },
+    {
+      "n": 100,
+      "clauses": 426,
+      "status": "UNKNOWN",
+      "reason": "biconnected region exceeds leaf budget"
+    },
+    {
+      "n": 200,
+      "clauses": 852,
+      "status": "UNKNOWN",
+      "reason": "biconnected region exceeds leaf budget"
+    },
+    {
+      "n": 500,
+      "clauses": 2130,
+      "status": "UNKNOWN",
+      "reason": "biconnected region exceeds leaf budget"
+    }
+  ]
+}
