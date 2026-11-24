@@ -186,3 +186,28 @@ The intention planner compares 31 subsets of five declared observation offers an
 The [heavy SAT/#SAT campaign](cut_intention/CIG-006-heavy-with-milp.json) applies source-forming construction to **192-variable XOR SAT/UNSAT**, **240-variable heterogeneous nonlinear counting**, **480-variable independent graph-coloring contradiction**, pigeonhole, odd-wheel coloring, random 3-SAT and twelve held-out near-threshold random sources. Structural GF(2), original-clause component factoring and bounded proof-carrying DPLL are independently checked; larger **200/300/500-variable** random tasks retain honest `UNKNOWN` outcomes. **23 new tests, 87 total local CIG-001–006 tests** passed. The separate [native integration script](cut_intention/run_cig006_native.py) and [CI workflow](../../.github/workflows/cig-006.yml) target real PNG/SFI/OFG and pinned NCR code; check GitHub Actions independently before claiming CI results.
 
 **Next:** receiver-authorized temporal law admission through VGI proof evidence; nested separator search for coupled hard CNFs; identical DIMACS source controls against certified CDCL with full end-to-end resource ledgers; formal proof obligations for language selection and nonlinear decoding.
+
+
+## CIG-007–013 — Evolving, costed, intention-specific architecture Grounds
+
+The complete [CIG research directory](cut_intention/) now includes the following successive source-qualified experiments. Each linked document specifies its independent verification scope, executable interfaces and cost ledger. Local regression and remote CI evidence are distinguished.
+
+| Iteration | Mathematical capability | Implementation |
+|---|---|---|
+| [CIG-007](cut_intention/CIG-007.md) | Intention-resolving probe policies; Hall-deficiency decision Grounds | [Evidence](cut_intention/evidence_ground.py), [Hall](cut_intention/hall_ground.py) |
+| [CIG-008](cut_intention/CIG-008.md) | Private affine elimination and overlapping Boolean interfaces | [Composition](cut_intention/composed_ground.py) |
+| [CIG-009](cut_intention/CIG-009.md) | Regional conditional-count structural memory | [Regional memory](cut_intention/regional_memory.py) |
+| [CIG-010](cut_intention/CIG-010.md) | Adaptive splits, merges, bridge regions and semantic operation reuse | [Adaptive Ground](cut_intention/adaptive_ground.py) |
+| [CIG-011](cut_intention/CIG-011.md) | Costed source-derived architecture selection and contraction-tree optimization | [Architecture navigation](cut_intention/architecture_navigation.py) |
+| [CIG-012](cut_intention/CIG-012.md) | Source-region identities independent of derivation trees; exact interface transfer and projection | [Architecture memory](cut_intention/architecture_memory.py) |
+| [CIG-013](cut_intention/CIG-013.md) | Anticipatory retention of richer regional tables; verified source strengthening on visible coordinates; incremental forecast costs | [Retention planner](cut_intention/anticipatory_memory.py), [verifier](cut_intention/verify_anticipatory_memory.py), [ledger](cut_intention/CIG-013-results.json) |
+
+CIG-013's eight-revision campaign reaches 2,048 connected variables, with exact counts and independently checked original-source witnesses. **196 local CIG tests pass**. The richer retention policy reduces total preparation, fresh-query and restriction-cell work to 160,072 cells versus 589,696 cold on that workload; full source audits, verifier operations and measured planning latency remain charged separately. The finite forecasts and retention price are declared, not learned. General dense SAT remains a separate research frontier.
+
+Reproduce:
+
+```sh
+cd experiments/pnp-ground-navigation/cut_intention
+python -m unittest discover -s . -p 'test_*.py' -v
+python run_anticipatory_memory.py --sizes 32 256 1024 --output CIG-013-results.reproduced.json
+```
