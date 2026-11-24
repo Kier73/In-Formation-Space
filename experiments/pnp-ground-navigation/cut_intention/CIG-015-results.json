@@ -1,0 +1,872 @@
+[
+  {
+    "n": 73,
+    "regions": 8,
+    "clauses": 48,
+    "rounds": 2,
+    "extending": {
+      "preparation_ms": 19.942382,
+      "query_ms": 96.761052,
+      "total_ms": 116.703434,
+      "metrics": {
+        "language_hits": 128,
+        "query_bins": 2700,
+        "join": 112,
+        "producer_cells": 544,
+        "new_full_checks": 112,
+        "equivalence_attempts": 32,
+        "implication_edge_visits": 512,
+        "symbolic_bins": 250,
+        "equivalence_extensions": 16,
+        "split_fibers": 150,
+        "extensions": 32,
+        "symbolic_extensions": 16,
+        "extension_check_states": 16384,
+        "extension_check_bins": 250,
+        "semantic_states": 16384,
+        "refinements": 16
+      },
+      "runs": [
+        {
+          "ms": 70.025126,
+          "metrics": {
+            "language_hits": 64,
+            "query_bins": 1100,
+            "join": 56,
+            "producer_cells": 272,
+            "new_full_checks": 56,
+            "equivalence_attempts": 32,
+            "implication_edge_visits": 512,
+            "symbolic_bins": 250,
+            "equivalence_extensions": 16,
+            "split_fibers": 150,
+            "extensions": 32,
+            "symbolic_extensions": 16,
+            "extension_check_states": 16384,
+            "extension_check_bins": 250,
+            "semantic_states": 16384,
+            "refinements": 16
+          }
+        },
+        {
+          "ms": 26.735926,
+          "metrics": {
+            "language_hits": 64,
+            "query_bins": 1600,
+            "join": 56,
+            "producer_cells": 272,
+            "new_full_checks": 56
+          }
+        }
+      ],
+      "archive_bytes": 4409,
+      "bins": 200,
+      "seed": {
+        "seed_states": 8192,
+        "predicate_evaluations": 1536,
+        "source_models": 1536,
+        "seed_check_states": 8192
+      }
+    },
+    "static": {
+      "preparation_ms": 18.500197,
+      "query_ms": 314.556383,
+      "total_ms": 333.05658,
+      "metrics": {
+        "predicate_reuse": 16,
+        "predicate_bins": 100,
+        "predicate_check_bins": 100,
+        "novel_clause_covers": 0,
+        "join": 112,
+        "producer_cells": 115232,
+        "new_full_checks": 224,
+        "boolean": 112
+      },
+      "runs": [
+        {
+          "ms": 183.247231,
+          "metrics": {
+            "predicate_reuse": 8,
+            "predicate_bins": 50,
+            "predicate_check_bins": 50,
+            "novel_clause_covers": 0,
+            "join": 56,
+            "producer_cells": 57616,
+            "new_full_checks": 112,
+            "boolean": 56
+          }
+        },
+        {
+          "ms": 131.309152,
+          "metrics": {
+            "predicate_reuse": 8,
+            "predicate_bins": 50,
+            "predicate_check_bins": 50,
+            "novel_clause_covers": 0,
+            "join": 56,
+            "producer_cells": 57616,
+            "new_full_checks": 112,
+            "boolean": 56
+          }
+        }
+      ],
+      "archive_bytes": 2861,
+      "bins": 50,
+      "seed": {
+        "seed_states": 8192,
+        "predicate_evaluations": 1536,
+        "source_models": 1536,
+        "seed_checks": 8,
+        "bins": 50,
+        "coordinate_cells": 56
+      }
+    },
+    "cold": {
+      "preparation_ms": 0.000181,
+      "query_ms": 323.75870499999996,
+      "total_ms": 323.75888599999996,
+      "metrics": {
+        "boolean": 128,
+        "producer_cells": 131616,
+        "new_full_checks": 240,
+        "join": 112
+      },
+      "runs": [
+        {
+          "ms": 174.223819,
+          "metrics": {
+            "boolean": 64,
+            "producer_cells": 65808,
+            "new_full_checks": 120,
+            "join": 56
+          }
+        },
+        {
+          "ms": 149.534886,
+          "metrics": {
+            "boolean": 64,
+            "producer_cells": 65808,
+            "new_full_checks": 120,
+            "join": 56
+          }
+        }
+      ]
+    },
+    "count_digits": [
+      15,
+      15,
+      14,
+      16,
+      14,
+      16,
+      13,
+      1
+    ],
+    "count_sha256": [
+      "fb263375638243ffe7a51f3117fdf56f0f9604e06230de522ee9402afaeb831f",
+      "fb263375638243ffe7a51f3117fdf56f0f9604e06230de522ee9402afaeb831f",
+      "28cead7369b61544e2b20591940423dbf097835380b3c8d55309253bf3895637",
+      "3b8f49fcceb1489e634082f2474973a54e39057d610dd3d975507a0b4d534af9",
+      "28cead7369b61544e2b20591940423dbf097835380b3c8d55309253bf3895637",
+      "d6abdb23353f350c253ac51121757e07913e728ffba91c547af9c795ec397b58",
+      "057472f8f1a7fb41dba9e32fa9e94b23964c487f15dbce892c553833f1e987a4",
+      "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    ]
+  },
+  {
+    "n": 289,
+    "regions": 32,
+    "clauses": 192,
+    "rounds": 2,
+    "extending": {
+      "preparation_ms": 76.638428,
+      "query_ms": 397.351231,
+      "total_ms": 473.98965899999996,
+      "metrics": {
+        "language_hits": 512,
+        "query_bins": 11772,
+        "join": 496,
+        "producer_cells": 3360,
+        "new_full_checks": 496,
+        "equivalence_attempts": 128,
+        "implication_edge_visits": 2048,
+        "symbolic_bins": 1090,
+        "equivalence_extensions": 64,
+        "split_fibers": 654,
+        "extensions": 128,
+        "symbolic_extensions": 64,
+        "extension_check_states": 65536,
+        "extension_check_bins": 1090,
+        "semantic_states": 65536,
+        "refinements": 64
+      },
+      "runs": [
+        {
+          "ms": 294.60687,
+          "metrics": {
+            "language_hits": 256,
+            "query_bins": 4796,
+            "join": 248,
+            "producer_cells": 1680,
+            "new_full_checks": 248,
+            "equivalence_attempts": 128,
+            "implication_edge_visits": 2048,
+            "symbolic_bins": 1090,
+            "equivalence_extensions": 64,
+            "split_fibers": 654,
+            "extensions": 128,
+            "symbolic_extensions": 64,
+            "extension_check_states": 65536,
+            "extension_check_bins": 1090,
+            "semantic_states": 65536,
+            "refinements": 64
+          }
+        },
+        {
+          "ms": 102.744361,
+          "metrics": {
+            "language_hits": 256,
+            "query_bins": 6976,
+            "join": 248,
+            "producer_cells": 1680,
+            "new_full_checks": 248
+          }
+        }
+      ],
+      "archive_bytes": 19040,
+      "bins": 872,
+      "seed": {
+        "seed_states": 32768,
+        "predicate_evaluations": 6144,
+        "source_models": 6144,
+        "seed_check_states": 32768
+      }
+    },
+    "static": {
+      "preparation_ms": 75.786036,
+      "query_ms": 1136.764827,
+      "total_ms": 1212.550863,
+      "metrics": {
+        "predicate_reuse": 64,
+        "predicate_bins": 436,
+        "predicate_check_bins": 436,
+        "novel_clause_covers": 0,
+        "join": 496,
+        "producer_cells": 462112,
+        "new_full_checks": 944,
+        "boolean": 448
+      },
+      "runs": [
+        {
+          "ms": 566.213215,
+          "metrics": {
+            "predicate_reuse": 32,
+            "predicate_bins": 218,
+            "predicate_check_bins": 218,
+            "novel_clause_covers": 0,
+            "join": 248,
+            "producer_cells": 231056,
+            "new_full_checks": 472,
+            "boolean": 224
+          }
+        },
+        {
+          "ms": 570.551612,
+          "metrics": {
+            "predicate_reuse": 32,
+            "predicate_bins": 218,
+            "predicate_check_bins": 218,
+            "novel_clause_covers": 0,
+            "join": 248,
+            "producer_cells": 231056,
+            "new_full_checks": 472,
+            "boolean": 224
+          }
+        }
+      ],
+      "archive_bytes": 12296,
+      "bins": 218,
+      "seed": {
+        "seed_states": 32768,
+        "predicate_evaluations": 6144,
+        "source_models": 6144,
+        "seed_checks": 32,
+        "bins": 218,
+        "coordinate_cells": 248
+      }
+    },
+    "cold": {
+      "preparation_ms": 0.000521,
+      "query_ms": 1272.9986789999998,
+      "total_ms": 1272.9991999999997,
+      "metrics": {
+        "boolean": 512,
+        "producer_cells": 527648,
+        "new_full_checks": 1008,
+        "join": 496
+      },
+      "runs": [
+        {
+          "ms": 670.424235,
+          "metrics": {
+            "boolean": 256,
+            "producer_cells": 263824,
+            "new_full_checks": 504,
+            "join": 248
+          }
+        },
+        {
+          "ms": 602.574444,
+          "metrics": {
+            "boolean": 256,
+            "producer_cells": 263824,
+            "new_full_checks": 504,
+            "join": 248
+          }
+        }
+      ]
+    },
+    "count_digits": [
+      56,
+      56,
+      55,
+      61,
+      55,
+      63,
+      50,
+      1
+    ],
+    "count_sha256": [
+      "5bf9d2bf4387588eb301598d8a281652a25e620f774029bddb08c36469a6d333",
+      "5bf9d2bf4387588eb301598d8a281652a25e620f774029bddb08c36469a6d333",
+      "69175391477c2e33603a09f58d8d117a969adfa7fd06d65fff7beaaa0fea8fb7",
+      "ac5733c39dd975b41ebff356348816fa8db163d75b12be11d963eb96a00bf117",
+      "69175391477c2e33603a09f58d8d117a969adfa7fd06d65fff7beaaa0fea8fb7",
+      "37bb1a721e1123e4cd69ca6e60b6827bbf7b222ff3ac0494ac813619afbcf063",
+      "53e48463b777b9fdbc3402a7a173b98e6f0c391fc2a652326065aa82f5252992",
+      "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    ]
+  },
+  {
+    "n": 1153,
+    "regions": 128,
+    "clauses": 768,
+    "rounds": 2,
+    "extending": {
+      "preparation_ms": 313.393441,
+      "query_ms": 1731.271859,
+      "total_ms": 2044.6653,
+      "metrics": {
+        "language_hits": 2048,
+        "query_bins": 48060,
+        "join": 2032,
+        "producer_cells": 15392,
+        "new_full_checks": 2032,
+        "equivalence_attempts": 512,
+        "implication_edge_visits": 8192,
+        "symbolic_bins": 4450,
+        "equivalence_extensions": 256,
+        "split_fibers": 2670,
+        "extensions": 512,
+        "symbolic_extensions": 256,
+        "extension_check_states": 262144,
+        "extension_check_bins": 4450,
+        "semantic_states": 262144,
+        "refinements": 256
+      },
+      "runs": [
+        {
+          "ms": 1213.623598,
+          "metrics": {
+            "language_hits": 1024,
+            "query_bins": 19580,
+            "join": 1016,
+            "producer_cells": 7696,
+            "new_full_checks": 1016,
+            "equivalence_attempts": 512,
+            "implication_edge_visits": 8192,
+            "symbolic_bins": 4450,
+            "equivalence_extensions": 256,
+            "split_fibers": 2670,
+            "extensions": 512,
+            "symbolic_extensions": 256,
+            "extension_check_states": 262144,
+            "extension_check_bins": 4450,
+            "semantic_states": 262144,
+            "refinements": 256
+          }
+        },
+        {
+          "ms": 517.648261,
+          "metrics": {
+            "language_hits": 1024,
+            "query_bins": 28480,
+            "join": 1016,
+            "producer_cells": 7696,
+            "new_full_checks": 1016
+          }
+        }
+      ],
+      "archive_bytes": 78425,
+      "bins": 3560,
+      "seed": {
+        "seed_states": 131072,
+        "predicate_evaluations": 24576,
+        "source_models": 24576,
+        "seed_check_states": 131072
+      }
+    },
+    "static": {
+      "preparation_ms": 331.299794,
+      "query_ms": 4812.817695,
+      "total_ms": 5144.117489,
+      "metrics": {
+        "predicate_reuse": 256,
+        "predicate_bins": 1780,
+        "predicate_check_bins": 1780,
+        "novel_clause_covers": 0,
+        "join": 2032,
+        "producer_cells": 1850400,
+        "new_full_checks": 3824,
+        "boolean": 1792
+      },
+      "runs": [
+        {
+          "ms": 2412.72942,
+          "metrics": {
+            "predicate_reuse": 128,
+            "predicate_bins": 890,
+            "predicate_check_bins": 890,
+            "novel_clause_covers": 0,
+            "join": 1016,
+            "producer_cells": 925200,
+            "new_full_checks": 1912,
+            "boolean": 896
+          }
+        },
+        {
+          "ms": 2400.088275,
+          "metrics": {
+            "predicate_reuse": 128,
+            "predicate_bins": 890,
+            "predicate_check_bins": 890,
+            "novel_clause_covers": 0,
+            "join": 1016,
+            "producer_cells": 925200,
+            "new_full_checks": 1912,
+            "boolean": 896
+          }
+        }
+      ],
+      "archive_bytes": 50799,
+      "bins": 890,
+      "seed": {
+        "seed_states": 131072,
+        "predicate_evaluations": 24576,
+        "source_models": 24576,
+        "seed_checks": 128,
+        "bins": 890,
+        "coordinate_cells": 1016
+      }
+    },
+    "cold": {
+      "preparation_ms": 0.000741,
+      "query_ms": 5168.661562,
+      "total_ms": 5168.662303,
+      "metrics": {
+        "boolean": 2048,
+        "producer_cells": 2112544,
+        "new_full_checks": 4080,
+        "join": 2032
+      },
+      "runs": [
+        {
+          "ms": 2561.0055,
+          "metrics": {
+            "boolean": 1024,
+            "producer_cells": 1056272,
+            "new_full_checks": 2040,
+            "join": 1016
+          }
+        },
+        {
+          "ms": 2607.656062,
+          "metrics": {
+            "boolean": 1024,
+            "producer_cells": 1056272,
+            "new_full_checks": 2040,
+            "join": 1016
+          }
+        }
+      ]
+    },
+    "count_digits": [
+      223,
+      223,
+      216,
+      241,
+      216,
+      248,
+      195,
+      1
+    ],
+    "count_sha256": [
+      "c925b513153a4e792152c0bade68ec9a5382eb3a43130899bd38bf7252f8a8b8",
+      "c925b513153a4e792152c0bade68ec9a5382eb3a43130899bd38bf7252f8a8b8",
+      "555b201afb558ac6bdf6147a6bdf61a63d0e7bcaf9a13cbfc988f30a2e1a1568",
+      "086233bea08a8a4c7c86ccd459c2b0235e3373335fc895ef6ccbf0625a50a3ef",
+      "555b201afb558ac6bdf6147a6bdf61a63d0e7bcaf9a13cbfc988f30a2e1a1568",
+      "f54367fc9dd8f280a358af6f08049ca627852be1897611af72da67d371ea4b95",
+      "b3dd624e50ad0e30c3961da19380a965e0355057876a3f445c86384b7164f140",
+      "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    ]
+  },
+  {
+    "n": 2305,
+    "regions": 256,
+    "clauses": 1536,
+    "rounds": 2,
+    "extending": {
+      "preparation_ms": 680.048724,
+      "query_ms": 3598.423804,
+      "total_ms": 4278.472528,
+      "metrics": {
+        "language_hits": 4096,
+        "query_bins": 96444,
+        "join": 4080,
+        "producer_cells": 31648,
+        "new_full_checks": 4080,
+        "equivalence_attempts": 1024,
+        "implication_edge_visits": 16384,
+        "symbolic_bins": 8930,
+        "equivalence_extensions": 512,
+        "split_fibers": 5358,
+        "extensions": 1024,
+        "symbolic_extensions": 512,
+        "extension_check_states": 524288,
+        "extension_check_bins": 8930,
+        "semantic_states": 524288,
+        "refinements": 512
+      },
+      "runs": [
+        {
+          "ms": 2610.849921,
+          "metrics": {
+            "language_hits": 2048,
+            "query_bins": 39292,
+            "join": 2040,
+            "producer_cells": 15824,
+            "new_full_checks": 2040,
+            "equivalence_attempts": 1024,
+            "implication_edge_visits": 16384,
+            "symbolic_bins": 8930,
+            "equivalence_extensions": 512,
+            "split_fibers": 5358,
+            "extensions": 1024,
+            "symbolic_extensions": 512,
+            "extension_check_states": 524288,
+            "extension_check_bins": 8930,
+            "semantic_states": 524288,
+            "refinements": 512
+          }
+        },
+        {
+          "ms": 987.573883,
+          "metrics": {
+            "language_hits": 2048,
+            "query_bins": 57152,
+            "join": 2040,
+            "producer_cells": 15824,
+            "new_full_checks": 2040
+          }
+        }
+      ],
+      "archive_bytes": 160806,
+      "bins": 7144,
+      "seed": {
+        "seed_states": 262144,
+        "predicate_evaluations": 49152,
+        "source_models": 49152,
+        "seed_check_states": 262144
+      }
+    },
+    "static": {
+      "preparation_ms": 638.283928,
+      "query_ms": 10960.357006999999,
+      "total_ms": 11598.640935,
+      "metrics": {
+        "predicate_reuse": 512,
+        "predicate_bins": 3572,
+        "predicate_check_bins": 3572,
+        "novel_clause_covers": 0,
+        "join": 4080,
+        "producer_cells": 3701664,
+        "new_full_checks": 7664,
+        "boolean": 3584
+      },
+      "runs": [
+        {
+          "ms": 5080.421622,
+          "metrics": {
+            "predicate_reuse": 256,
+            "predicate_bins": 1786,
+            "predicate_check_bins": 1786,
+            "novel_clause_covers": 0,
+            "join": 2040,
+            "producer_cells": 1850832,
+            "new_full_checks": 3832,
+            "boolean": 1792
+          }
+        },
+        {
+          "ms": 5879.935385,
+          "metrics": {
+            "predicate_reuse": 256,
+            "predicate_bins": 1786,
+            "predicate_check_bins": 1786,
+            "novel_clause_covers": 0,
+            "join": 2040,
+            "producer_cells": 1850832,
+            "new_full_checks": 3832,
+            "boolean": 1792
+          }
+        }
+      ],
+      "archive_bytes": 104858,
+      "bins": 1786,
+      "seed": {
+        "seed_states": 262144,
+        "predicate_evaluations": 49152,
+        "source_models": 49152,
+        "seed_checks": 256,
+        "bins": 1786,
+        "coordinate_cells": 2040
+      }
+    },
+    "cold": {
+      "preparation_ms": 0.000501,
+      "query_ms": 11991.946107,
+      "total_ms": 11991.946608,
+      "metrics": {
+        "boolean": 4096,
+        "producer_cells": 4225952,
+        "new_full_checks": 8176,
+        "join": 4080
+      },
+      "runs": [
+        {
+          "ms": 5969.354482,
+          "metrics": {
+            "boolean": 2048,
+            "producer_cells": 2112976,
+            "new_full_checks": 4088,
+            "join": 2040
+          }
+        },
+        {
+          "ms": 6022.591625,
+          "metrics": {
+            "boolean": 2048,
+            "producer_cells": 2112976,
+            "new_full_checks": 4088,
+            "join": 2040
+          }
+        }
+      ]
+    },
+    "count_digits": [
+      446,
+      446,
+      431,
+      482,
+      431,
+      496,
+      388,
+      1
+    ],
+    "count_sha256": [
+      "f720258bf9fa1fbe10d8779df6a28fbaf69e86cda3b044202f142061c44c606f",
+      "f720258bf9fa1fbe10d8779df6a28fbaf69e86cda3b044202f142061c44c606f",
+      "d2473d25d6bf5d7e76f1f1a85c6556f874c1989dbcdeec2d398d6402824ae097",
+      "cd30b5debacf8eeb6f9347b01189f8cf51c866fef0eb6239e269b60b1989c9aa",
+      "d2473d25d6bf5d7e76f1f1a85c6556f874c1989dbcdeec2d398d6402824ae097",
+      "6465874df756a9c841e54227a1ceb69017178ca651a4bf2c3ebcad8e3463bda5",
+      "52d67306157e686f7a010865d06be76d78f3b2763b048a4d722a2888b0c082a5",
+      "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    ]
+  },
+  {
+    "n": 4609,
+    "regions": 512,
+    "clauses": 3072,
+    "rounds": 2,
+    "extending": {
+      "preparation_ms": 1482.476412,
+      "query_ms": 7875.9501660000005,
+      "total_ms": 9358.426578,
+      "metrics": {
+        "language_hits": 8192,
+        "query_bins": 193212,
+        "join": 8176,
+        "producer_cells": 64288,
+        "new_full_checks": 8176,
+        "equivalence_attempts": 2048,
+        "implication_edge_visits": 32768,
+        "symbolic_bins": 17890,
+        "equivalence_extensions": 1024,
+        "split_fibers": 10734,
+        "extensions": 2048,
+        "symbolic_extensions": 1024,
+        "extension_check_states": 1048576,
+        "extension_check_bins": 17890,
+        "semantic_states": 1048576,
+        "refinements": 1024
+      },
+      "runs": [
+        {
+          "ms": 5683.842674,
+          "metrics": {
+            "language_hits": 4096,
+            "query_bins": 78716,
+            "join": 4088,
+            "producer_cells": 32144,
+            "new_full_checks": 4088,
+            "equivalence_attempts": 2048,
+            "implication_edge_visits": 32768,
+            "symbolic_bins": 17890,
+            "equivalence_extensions": 1024,
+            "split_fibers": 10734,
+            "extensions": 2048,
+            "symbolic_extensions": 1024,
+            "extension_check_states": 1048576,
+            "extension_check_bins": 17890,
+            "semantic_states": 1048576,
+            "refinements": 1024
+          }
+        },
+        {
+          "ms": 2192.107492,
+          "metrics": {
+            "language_hits": 4096,
+            "query_bins": 114496,
+            "join": 4088,
+            "producer_cells": 32144,
+            "new_full_checks": 4088
+          }
+        }
+      ],
+      "archive_bytes": 325673,
+      "bins": 14312,
+      "seed": {
+        "seed_states": 524288,
+        "predicate_evaluations": 98304,
+        "source_models": 98304,
+        "seed_check_states": 524288
+      }
+    },
+    "static": {
+      "preparation_ms": 1244.869638,
+      "query_ms": 19969.402876,
+      "total_ms": 21214.272514,
+      "metrics": {
+        "predicate_reuse": 1024,
+        "predicate_bins": 7156,
+        "predicate_check_bins": 7156,
+        "novel_clause_covers": 0,
+        "join": 8176,
+        "producer_cells": 7404320,
+        "new_full_checks": 15344,
+        "boolean": 7168
+      },
+      "runs": [
+        {
+          "ms": 10213.618641,
+          "metrics": {
+            "predicate_reuse": 512,
+            "predicate_bins": 3578,
+            "predicate_check_bins": 3578,
+            "novel_clause_covers": 0,
+            "join": 4088,
+            "producer_cells": 3702160,
+            "new_full_checks": 7672,
+            "boolean": 3584
+          }
+        },
+        {
+          "ms": 9755.784235,
+          "metrics": {
+            "predicate_reuse": 512,
+            "predicate_bins": 3578,
+            "predicate_check_bins": 3578,
+            "novel_clause_covers": 0,
+            "join": 4088,
+            "producer_cells": 3702160,
+            "new_full_checks": 7672,
+            "boolean": 3584
+          }
+        }
+      ],
+      "archive_bytes": 213154,
+      "bins": 3578,
+      "seed": {
+        "seed_states": 524288,
+        "predicate_evaluations": 98304,
+        "source_models": 98304,
+        "seed_checks": 512,
+        "bins": 3578,
+        "coordinate_cells": 4088
+      }
+    },
+    "cold": {
+      "preparation_ms": 0.000621,
+      "query_ms": 22462.781754,
+      "total_ms": 22462.782375,
+      "metrics": {
+        "boolean": 8192,
+        "producer_cells": 8452896,
+        "new_full_checks": 16368,
+        "join": 8176
+      },
+      "runs": [
+        {
+          "ms": 11506.664982,
+          "metrics": {
+            "boolean": 4096,
+            "producer_cells": 4226448,
+            "new_full_checks": 8184,
+            "join": 4088
+          }
+        },
+        {
+          "ms": 10956.116772,
+          "metrics": {
+            "boolean": 4096,
+            "producer_cells": 4226448,
+            "new_full_checks": 8184,
+            "join": 4088
+          }
+        }
+      ]
+    },
+    "count_digits": [
+      890,
+      890,
+      862,
+      963,
+      862,
+      991,
+      774,
+      1
+    ],
+    "count_sha256": [
+      "2253c3898eda8c03e643343d0a645cbfc608220fa6ae2db7adeda3419a07455c",
+      "2253c3898eda8c03e643343d0a645cbfc608220fa6ae2db7adeda3419a07455c",
+      "9fffc83fc51626a2ecda2982a444e477fb2002d5ff106941e06c5f6fcaf2fd44",
+      "fd3b1330ceca052a9669f8ec0dc83822655cfca75e8c76d86df50d39bd42095f",
+      "9fffc83fc51626a2ecda2982a444e477fb2002d5ff106941e06c5f6fcaf2fd44",
+      "9d4cc7ae2e70f89ba9c00877e11cc9bd9114a99c52623adf6a296df4585db7be",
+      "b1cf38253f182a8a6bf77c6b31739c317e746328d220d01b209098f650b0f4d2",
+      "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    ]
+  }
+]
