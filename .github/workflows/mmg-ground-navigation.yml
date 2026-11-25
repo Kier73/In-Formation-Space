@@ -44,6 +44,12 @@ jobs:
           node mmg021_exact_closure.js > /tmp/mmg021.json
           node mmg022_adaptive_work.js > /tmp/mmg022.json
           node mmg023_coset_lift.js > /tmp/mmg023.json
+          node mmg024_depth.js > /tmp/mmg024.json
+          node mmg025_rectangular_depth.js > /tmp/mmg025.json
+          node mmg026_query_flag.js > /tmp/mmg026.json
+          node mmg027_residual_continuation.js > /tmp/mmg027.json
+          node mmg028_entangled_depth.js > /tmp/mmg028.json
+          node mmg029_entangled_flags.js > /tmp/mmg029.json
           node mmg005_rank_walk.js > /tmp/mmg005-rank.json
           python mmg005_compile.py > /tmp/mmg005-compile.json
           node mmg006_distinctness.js > /tmp/mmg006-distinctness.json
