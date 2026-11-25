@@ -29,6 +29,17 @@ jobs:
       - name: VLM-002 native build and hosted parity
         working-directory: experiments/vl-machine/native64
         run: make && python3 -m unittest -v test_core test_process test_capsule test_application
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 09a9058a43c139c476609954636e17e7fadcfd37
+          path: external/ecpu-vlm
+          persist-credentials: false
+      - name: VLM-005 real E-CPU M2 capsule adapter
+        working-directory: experiments/vl-machine/native64
+        env:
+          PYTHONPATH: ${{ github.workspace }}/external/ecpu-vlm
+        run: python3 -m unittest -v test_ecpu_bridge.Bridge
       - name: VLM-002 native guest parity
         working-directory: experiments/vl-machine/native64
         run: python3 test_guest.py
