@@ -1,0 +1,20 @@
+name: Intention sensor formation
+on:
+  pull_request:
+    paths:
+      - 'experiments/intention_sensor_formation/**'
+      - '.github/workflows/intention-sensor-formation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node experiments/intention_sensor_formation/clt010.js > /tmp/clt010.json
+          diff -u experiments/intention_sensor_formation/results.json /tmp/clt010.json

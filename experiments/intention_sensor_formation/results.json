@@ -1,0 +1,850 @@
+{
+  "domain": 256,
+  "actions": 4,
+  "runs": [
+    {
+      "seed": 17,
+      "A": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x1,x6)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 2,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 923,
+          "partitionVisits": 196,
+          "candidateTests": 49,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "B": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x2,x5)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 3
+            },
+            {
+              "x": 4,
+              "mask": 12
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 970,
+          "partitionVisits": 251,
+          "candidateTests": 53,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "C_cold": {
+        "status": "EXACT",
+        "width": 2,
+        "sensors": [
+          "xor(x1,x6)",
+          "xor(x2,x5)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 6,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 2722,
+          "partitionVisits": 33433,
+          "candidateTests": 1949,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "C_warm": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "and(xor(x1,x6),xor(x2,x5))"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 6,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 2781,
+          "partitionVisits": 1145,
+          "candidateTests": 66,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "triple": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x1,x6)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 3
+            },
+            {
+              "x": 2,
+              "mask": 6
+            },
+            {
+              "x": 4,
+              "mask": 5
+            }
+          ],
+          "pairwiseCompatible": true
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 991,
+          "partitionVisits": 259,
+          "candidateTests": 49,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "hidden": {
+        "status": "UNRESOLVED",
+        "reason": "bounded-sensor-grammar",
+        "initial": 37,
+        "known": 38,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 2,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 260,
+          "featureOps": 989,
+          "partitionVisits": 453,
+          "candidateTests": 116,
+          "conflicts": 1
+        },
+        "audits": 1,
+        "firstCounterexample": {
+          "state": 255,
+          "mask": 10
+        }
+      }
+    },
+    {
+      "seed": 39,
+      "A": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x1,x3)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 2,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 896,
+          "partitionVisits": 175,
+          "candidateTests": 46,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "B": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x0,x4)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 3
+            },
+            {
+              "x": 1,
+              "mask": 12
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 854,
+          "partitionVisits": 127,
+          "candidateTests": 41,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "C_cold": {
+        "status": "EXACT",
+        "width": 2,
+        "sensors": [
+          "xor(x0,x4)",
+          "xor(x1,x3)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 3,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 2256,
+          "partitionVisits": 18083,
+          "candidateTests": 1786,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "C_warm": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "and(xor(x0,x4),xor(x1,x3))"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 3,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 2374,
+          "partitionVisits": 689,
+          "candidateTests": 66,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "triple": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x0,x4)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 3
+            },
+            {
+              "x": 1,
+              "mask": 5
+            },
+            {
+              "x": 2,
+              "mask": 6
+            }
+          ],
+          "pairwiseCompatible": true
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 897,
+          "partitionVisits": 171,
+          "candidateTests": 41,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "hidden": {
+        "status": "UNRESOLVED",
+        "reason": "bounded-sensor-grammar",
+        "initial": 37,
+        "known": 38,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 2,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 260,
+          "featureOps": 975,
+          "partitionVisits": 422,
+          "candidateTests": 113,
+          "conflicts": 1
+        },
+        "audits": 1,
+        "firstCounterexample": {
+          "state": 255,
+          "mask": 10
+        }
+      }
+    },
+    {
+      "seed": 93,
+      "A": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x1,x3)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 2,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 896,
+          "partitionVisits": 175,
+          "candidateTests": 46,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "B": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x4,x6)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 3
+            },
+            {
+              "x": 16,
+              "mask": 12
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 1112,
+          "partitionVisits": 400,
+          "candidateTests": 61,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "C_cold": {
+        "status": "EXACT",
+        "width": 2,
+        "sensors": [
+          "xor(x1,x3)",
+          "xor(x4,x6)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 18,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 2774,
+          "partitionVisits": 36404,
+          "candidateTests": 1906,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "C_warm": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "and(xor(x1,x3),xor(x4,x6))"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 18,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 2896,
+          "partitionVisits": 1274,
+          "candidateTests": 66,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "triple": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x1,x3)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 3
+            },
+            {
+              "x": 2,
+              "mask": 6
+            },
+            {
+              "x": 16,
+              "mask": 5
+            }
+          ],
+          "pairwiseCompatible": true
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 1026,
+          "partitionVisits": 311,
+          "candidateTests": 46,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "hidden": {
+        "status": "UNRESOLVED",
+        "reason": "bounded-sensor-grammar",
+        "initial": 37,
+        "known": 38,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 2,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 260,
+          "featureOps": 983,
+          "partitionVisits": 425,
+          "candidateTests": 113,
+          "conflicts": 1
+        },
+        "audits": 1,
+        "firstCounterexample": {
+          "state": 255,
+          "mask": 10
+        }
+      }
+    },
+    {
+      "seed": 151,
+      "A": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x5,x6)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 32,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 1181,
+          "partitionVisits": 472,
+          "candidateTests": 63,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "B": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x3,x4)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 3
+            },
+            {
+              "x": 8,
+              "mask": 12
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 1028,
+          "partitionVisits": 313,
+          "candidateTests": 56,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "C_cold": {
+        "status": "EXACT",
+        "width": 2,
+        "sensors": [
+          "xor(x3,x4)",
+          "xor(x5,x6)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 64,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 40,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 3280,
+          "partitionVisits": 59331,
+          "candidateTests": 2043,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "C_warm": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "and(xor(x3,x4),xor(x5,x6))"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 40,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 3475,
+          "partitionVisits": 1923,
+          "candidateTests": 66,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "triple": {
+        "status": "EXACT",
+        "width": 1,
+        "sensors": [
+          "xor(x3,x4)"
+        ],
+        "initial": 37,
+        "known": 37,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 3
+            },
+            {
+              "x": 8,
+              "mask": 5
+            },
+            {
+              "x": 32,
+              "mask": 6
+            }
+          ],
+          "pairwiseCompatible": true
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 256,
+          "featureOps": 1139,
+          "partitionVisits": 426,
+          "candidateTests": 56,
+          "conflicts": 0
+        },
+        "audits": 1,
+        "firstCounterexample": null,
+        "independentChecks": 256
+      },
+      "hidden": {
+        "status": "UNRESOLVED",
+        "reason": "bounded-sensor-grammar",
+        "initial": 37,
+        "known": 38,
+        "grammar": 66,
+        "core": {
+          "states": [
+            {
+              "x": 0,
+              "mask": 5
+            },
+            {
+              "x": 32,
+              "mask": 10
+            }
+          ],
+          "pairwiseCompatible": false
+        },
+        "counters": {
+          "trainingActionTests": 148,
+          "auditActionTests": 260,
+          "featureOps": 1211,
+          "partitionVisits": 974,
+          "candidateTests": 130,
+          "conflicts": 1
+        },
+        "audits": 1,
+        "firstCounterexample": {
+          "state": 255,
+          "mask": 10
+        }
+      }
+    }
+  ]
+}
