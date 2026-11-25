@@ -28,6 +28,7 @@ jobs:
           node mmg005_rank_walk.js > /tmp/mmg005-rank.json
           python mmg005_compile.py > /tmp/mmg005-compile.json
           node mmg006_distinctness.js > /tmp/mmg006-distinctness.json
+          python mmg006_pfaffian.py > /tmp/mmg006-pfaffian.json
           python mmg005_fabric.py --ecpu-root ../../_ecpu > /tmp/mmg005-fabric.json
       - uses: actions/upload-artifact@v4
         with:
