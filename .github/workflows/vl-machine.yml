@@ -1,0 +1,25 @@
+name: VLM foundation
+on:
+  pull_request:
+    paths:
+      - 'experiments/vl-machine/**'
+      - '.github/workflows/vl-machine.yml'
+  push:
+    paths:
+      - 'experiments/vl-machine/**'
+      - '.github/workflows/vl-machine.yml'
+permissions:
+  contents: read
+jobs:
+  word-machine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Portable semantics
+        working-directory: experiments/vl-machine
+        run: python3 -m unittest -v
+      - name: Native dependencies
+        run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 binutils
+      - name: Native boot and serial parity
+        working-directory: experiments/vl-machine/native
+        run: make test
