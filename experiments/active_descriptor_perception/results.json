@@ -1,0 +1,80 @@
+{
+  "training": 600,
+  "coarseClasses": 4,
+  "conflictedClasses": 1,
+  "grammar": 272,
+  "trainingProbeTests": 54400,
+  "model": {
+    "0,0,0,0,0,0": {
+      "baseline": 1,
+      "tree": {
+        "proposal": 1,
+        "training": 200
+      }
+    },
+    "16,0,16,16,16,0": {
+      "baseline": 0,
+      "tree": {
+        "probe": {
+          "op": "inverse",
+          "i": 5,
+          "j": 13,
+          "cost": 2,
+          "key": "inverse(5,13)"
+        },
+        "yes": {
+          "proposal": 2,
+          "training": 100
+        },
+        "no": {
+          "proposal": 0,
+          "training": 100
+        }
+      }
+    },
+    "0,0,16,0,0,0": {
+      "baseline": 0,
+      "tree": {
+        "proposal": 0,
+        "training": 100
+      }
+    },
+    "16,0,0,0,0,16": {
+      "baseline": 0,
+      "tree": {
+        "proposal": 0,
+        "training": 100
+      }
+    }
+  },
+  "baseline": {
+    "cases": 600,
+    "correct": 500,
+    "available": 300,
+    "admitted": 200,
+    "falseProposals": 0,
+    "fallbacks": 400,
+    "additionalReads": 0,
+    "derivedTests": 0
+  },
+  "adaptive": {
+    "cases": 600,
+    "correct": 600,
+    "available": 300,
+    "admitted": 300,
+    "falseProposals": 0,
+    "fallbacks": 300,
+    "additionalReads": 400,
+    "derivedTests": 200
+  },
+  "challenge": {
+    "cases": 120,
+    "correct": 100,
+    "available": 40,
+    "admitted": 40,
+    "falseProposals": 20,
+    "fallbacks": 80,
+    "additionalReads": 80,
+    "derivedTests": 40
+  }
+}
