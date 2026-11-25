@@ -1,0 +1,20 @@
+name: CLT-003 residual Ground
+on:
+  pull_request:
+    paths:
+      - 'experiments/residual_ground_formation/**'
+      - '.github/workflows/residual-ground-formation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node experiments/residual_ground_formation/clt003.js > /tmp/clt003.json
+          diff -u experiments/residual_ground_formation/results.json /tmp/clt003.json
