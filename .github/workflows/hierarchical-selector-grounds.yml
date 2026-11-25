@@ -1,0 +1,33 @@
+name: Hierarchical selector Grounds
+on:
+  pull_request:
+    paths:
+      - 'experiments/hierarchical_selector_grounds/**'
+      - '.github/workflows/hierarchical-selector-grounds.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node experiments/hierarchical_selector_grounds/clt013.js > /tmp/clt013.json
+          diff -u experiments/hierarchical_selector_grounds/results.json /tmp/clt013.json
+  vlm-qualification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: 1109f58989af91aca58289d27a8363687c344d9a
+          path: upstream-vlm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 experiments/hierarchical_selector_grounds/vlm_check.py upstream-vlm/experiments/vl-machine/native64
