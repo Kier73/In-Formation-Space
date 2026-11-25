@@ -1,0 +1,67 @@
+{
+  "finite": {
+    "cases": 27,
+    "ranges": 1728,
+    "operatorChecks": 3456,
+    "partialWindows": 12,
+    "shiftedWindows": 1,
+    "setupTerms": 8284,
+    "queryTerms": 77348,
+    "tailRefusals": 12
+  },
+  "large": {
+    "nativeCycles": [
+      "2000000000078",
+      "3000000000117"
+    ],
+    "commonCycles": "1000000000039",
+    "strides": [
+      "2",
+      "3"
+    ],
+    "regroupedSlots": [
+      4,
+      6
+    ],
+    "logicalBytes": "18000000001419000000027963",
+    "dot": "101639000007957123000155644506",
+    "weighted": "914751000143144232008398968136219002263031141209872543",
+    "setup": {
+      "residues": 12,
+      "patternTerms": 444,
+      "polynomialSamples": 432,
+      "overlapPieces": 9,
+      "regimes": 1,
+      "querySteps": 0,
+      "partialPatterns": 0,
+      "expandedModelRecords": 0
+    },
+    "query": {
+      "patternTerms": 0,
+      "steps": 471
+    },
+    "independentChecks": 12
+  },
+  "controls": [
+    {
+      "status": "UNRESOLVED",
+      "reason": "no-qualified-affine-stride"
+    },
+    {
+      "status": "UNRESOLVED",
+      "reason": "supercycle-slot-budget",
+      "strides": [
+        "103",
+        "101"
+      ]
+    },
+    {
+      "status": "UNRESOLVED",
+      "reason": "different-start-coordinate"
+    },
+    {
+      "status": "UNRESOLVED",
+      "reason": "no-complete-common-cycle"
+    }
+  ]
+}
