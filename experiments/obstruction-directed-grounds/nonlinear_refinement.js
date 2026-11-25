@@ -12,16 +12,19 @@ function encode(q,old,next){let i=q.groups.findIndex(g=>g.old===old);check(i>=0,
 function decode(q,i,j){check(Number.isInteger(i)&&Number.isInteger(j)&&i>=0&&j>=0&&i<q.groups.length&&j<q.groups[i].values.length,"unknown coordinate");let g=q.groups[i];return {old:g.old,next:g.values[j].next,z:g.values[j].z}}
 function campaign(){let n=32,masks=Array(7).fill(0n);for(let i=0;i<n;i++)masks[i%7]|=b(i);
 const original=[[7n],[11n],[13n],[112n,15n]],forms=api.formRows(masks,n,meter()),old=original.map(f=>api.sub(f,forms,meter()));
+const retained=compile(n,old),retainedProof=verify(n,old,[],retained);check(retainedProof.ok,retainedProof.reason);
 let reports=[],all=0,tamper=0;
 for(const [name,newTargets] of [["derived",[[7n,11n],[7n,13n]]],["latent parity",[[1n]]],["latent pair",[[1n],[2n]]],["new independent coordinate",null]]){
 let newer=newTargets?newTargets.map(f=>api.sub(f,forms,meter())):[[b(0)],[b(1)]];
-const g=compile(n,[...old,...newer]),v=verify(n,[...old,...newer],[],g);check(v.ok,v.reason);const q=construct(g,old.length),a=audit(g,old.length,q);check(a.ok,a.reason);let m=meter();
+const cold=compile(n,[...old,...newer]),coldProof=verify(n,[...old,...newer],[],cold);check(coldProof.ok,coldProof.reason);
+const gnew=compile(n,newer,retained.rows),v=verify(n,newer,retained.rows,gnew);check(v.ok,v.reason);check(gnew.rows.length===cold.rows.length&&retained.rows.every((r,i)=>gnew.rows[i]===r),"preserved row prefix");
+const g={rows:gnew.rows,decoders:[...retained.decoders,...gnew.decoders]};const q=construct(g,old.length),a=audit(g,old.length,q);check(a.ok,a.reason);let m=meter();
 for(let z=0n;z<b(g.rows.length);z++){let y=output(g.decoders,z,m),o=y&15n,p=y>>4n,[i,j]=encode(q,o,p),rec=decode(q,i,j);check(rec.old===o&&rec.next===p,"roundtrip");all++}
 let bad={...q,groups:q.groups.map((v,i)=>i?v:{...v,values:v.values.slice(1)})};check(!audit(g,old.length,bad).ok,"missing image");tamper++;
 let bad2={...q,extraBits:q.extraBits+1};check(!audit(g,old.length,bad2).ok,"forged bit claim");tamper++;
 let witness=null;for(const group of q.groups)if(group.values.length>1){let [a,c]=group.values;witness={old:String(group.old),next:[String(a.next),String(c.next)],z:[String(a.z),String(c.z)]};break}
-reports.push({name,rank:g.rows.length,oldClasses:q.groups.length,jointClasses:q.count,oldBits:q.oldBits,extraBits:q.extraBits,jointBits:q.jointBits,witness,formation:g.formation,verification:v.work,imageWork:q.work,imageVerification:a.work})}
-return {all,tamper,reports}}
+reports.push({name,rank:g.rows.length,oldClasses:q.groups.length,jointClasses:q.count,oldBits:q.oldBits,extraBits:q.extraBits,jointBits:q.jointBits,witness,formation:gnew.formation,verification:v.work,coldFormation:cold.formation,coldVerification:coldProof.work,imageWork:q.work,imageVerification:a.work})}
+return {all,tamper,retainedFormation:retained.formation,retainedVerification:retainedProof.work,reports}}
 return {construct,audit,encode,decode,campaign}
 }
 
