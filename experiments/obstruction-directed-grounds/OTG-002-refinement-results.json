@@ -1,0 +1,92 @@
+{
+  "all": 896,
+  "tamper": 8,
+  "reports": [
+    {
+      "name": "derived",
+      "rank": 7,
+      "oldClasses": 10,
+      "jointClasses": 10,
+      "oldBits": 4,
+      "extraBits": 0,
+      "jointBits": 4,
+      "witness": null,
+      "formation": 259833,
+      "verification": 358141,
+      "imageWork": 2048,
+      "imageVerification": 2080
+    },
+    {
+      "name": "latent parity",
+      "rank": 7,
+      "oldClasses": 10,
+      "jointClasses": 12,
+      "oldBits": 4,
+      "extraBits": 1,
+      "jointBits": 4,
+      "witness": {
+        "old": "0",
+        "next": [
+          "0",
+          "1"
+        ],
+        "z": [
+          "0",
+          "1"
+        ]
+      },
+      "formation": 188822,
+      "verification": 251245,
+      "imageWork": 1536,
+      "imageVerification": 1552
+    },
+    {
+      "name": "latent pair",
+      "rank": 7,
+      "oldClasses": 10,
+      "jointClasses": 16,
+      "oldBits": 4,
+      "extraBits": 2,
+      "jointBits": 4,
+      "witness": {
+        "old": "0",
+        "next": [
+          "0",
+          "1"
+        ],
+        "z": [
+          "0",
+          "1"
+        ]
+      },
+      "formation": 189370,
+      "verification": 252213,
+      "imageWork": 1792,
+      "imageVerification": 1888
+    },
+    {
+      "name": "new independent coordinate",
+      "rank": 9,
+      "oldClasses": 10,
+      "jointClasses": 40,
+      "oldBits": 4,
+      "extraBits": 2,
+      "jointBits": 6,
+      "witness": {
+        "old": "0",
+        "next": [
+          "0",
+          "1"
+        ],
+        "z": [
+          "0",
+          "1"
+        ]
+      },
+      "formation": 220572,
+      "verification": 349742,
+      "imageWork": 8192,
+      "imageVerification": 8320
+    }
+  ]
+}
