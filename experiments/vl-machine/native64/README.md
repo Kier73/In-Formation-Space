@@ -147,3 +147,24 @@ Real-artifact negative control: core.c, application.c, neural.c, capsule.py, pol
 Related prior work at IFS revision a1b3a88349b7624de140d12d29685a79305d1266: distinction refinement, adaptive attention policy and RCG-006 observer quotient. This increment independently implements a finite cost-sensitive sensor tree for byte sources rather than importing their solvers.
 
 Reproduce: make; python3 -m unittest -v test_byte_ground; python3 byte_ground.py. Local combined hosted suite: 21 tests passed (including five new tests, 1200 randomized range checks, tamper rejection, bound tests and six actual artifacts). Guest and real E-CPU gates remain separate.
+
+## VLM-008 — compositional Grounds and indexed actions
+
+A byte source can contain multiple different structures. The compiler now selects verified leaves independently over a midpoint partition tree (minimum child extent 64 by default), and chooses whether a split earns its cost. Dynamic programming minimizes sum of leaf wire bytes plus optional integer weight times a full-leaf sum-work proxy. The proxy is not measured latency or the actual indexed query cost. This is exact over the specified split tree and generated candidate set, not arbitrary segmentation or universal optimal compression.
+
+The recurrence is J(I)=min(minimum candidate leaf cost, J(left)+J(right)). Each leaf costs at least six wire bytes and one work unit, so a candidate at or below 12+2*weight cannot be improved by splitting. The compiler prunes that subtree. Training is not required for this bound; the VLM-007 learned observer remains a separate experiment. The compiler buffers the full source once, then measures internal candidate reads separately. Source certification charges another full read.
+
+VLG1 wire: 4-byte magic, little-endian u32 source length and leaf count, then leaves: u8 kind, u32 length, payload (raw bytes; u8 period length + pattern; two u8 ramp values; u32 sparse count + repeated u32 position/u8 value). Decoding checks size bounds, complete extent, canonical sparse ordering, positive lengths, known kinds and trailing bytes. The encoding is deterministic for a given leaf sequence, not unique for a source. Restore requires an independently supplied source SHA-256 and reconstructs all bytes once for verification. This is integrity, not authentication. The receiver builds an offset and cumulative sum index; interval reads navigate to intersecting leaves, sums use two prefix queries and do not visit intermediate leaves. Construction and restore charge index preparation; index memory is not included in wire size.
+
+Local results (26 hosted regression tests passed, 5.236s): 1,000 randomized mixed-source interval reads and sums, 60 random incompressible sources, boundary checks through 65,536 bytes, malformed wire and tamper rejection, and pruned/unpruned equivalence at weights 0,1,16.
+
+| Source | Raw source bytes | Single Ground wire | Fixed 256-byte partition | Adaptive midpoint wire | zlib |
+|---|---:|---:|---:|---:|---:|
+| 100 synthetic mixed objects | 204800 | 206500 | 58200 | 55300 | 83423 |
+| Actual vlm64.elf | 19908 | 19925 | 16453 | 16059 | 8165 |
+
+The synthetic corpus shuffles four deliberately structured 512-byte regions per object. Adaptive partitions outperform fixed partitions and zlib here; this is not a general compression claim. The executable selects 22 leaves (raw, periodic, sparse) and zlib compresses it much further. All five other real artifacts (core.c, application.c, neural.c, capsule.py, policy_weights.json) select single raw leaves; zlib wins for each. Source executable SHA-256: 31496efd9960949d26376a85f569ab1d096cc65ad5308b45e5497946175b5581 (local build; CI builds may differ).
+
+On the 100 synthetic objects, pruning reduces internal candidate reads from 3701432 to 1772776 and explored intervals from 6300 to 2100 with byte-identical output to unpruned DP. External source acquisition plus independent certification totals 409600 bytes. For the executable, internal reads fall from 399833 to 327935, intervals 511 to 423, external reads 39816. These are logical reads, not physical disk/network IO. Local compiler time for the executable was 13.1ms in one pass. Offline comparisons and receiver verification are not included in that timing.
+
+Reproduce: make; python3 -m unittest -v test_compose_ground; python3 benchmark_compose.py. Hosted only. No guest/native codec execution or E-CPU transport is claimed. Next: typed boundary proposals (ELF sections, tensor headers), adaptive cost-labelled split decisions, and native VLG1 realization with independent admission.
