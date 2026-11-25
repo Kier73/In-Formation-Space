@@ -1,0 +1,272 @@
+{
+  "synthetic": {
+    "mixed": {
+      "global": {
+        "reads": 67537,
+        "requested": 67537,
+        "hits": 0,
+        "encoded": 42313,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 0,
+        "audit_bytes": 41793,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "global_cached": {
+        "reads": 41793,
+        "requested": 67537,
+        "hits": 25744,
+        "encoded": 42313,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 83586,
+        "audit_bytes": 41793,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "fixed": {
+        "reads": 41793,
+        "requested": 102238,
+        "hits": 60445,
+        "encoded": 22554,
+        "parts": 186,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 83586,
+        "audit_bytes": 41793,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "split_uncached": {
+        "reads": 75169,
+        "requested": 75169,
+        "hits": 0,
+        "encoded": 1560,
+        "parts": 120,
+        "splits": 80,
+        "witnesses": 80,
+        "peak_cache": 0,
+        "audit_bytes": 41793,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "split_cached": {
+        "reads": 41793,
+        "requested": 75169,
+        "hits": 33376,
+        "encoded": 1560,
+        "parts": 120,
+        "splits": 80,
+        "witnesses": 80,
+        "peak_cache": 83586,
+        "audit_bytes": 41793,
+        "range_checks": 480,
+        "cases": 40
+      }
+    },
+    "mixed_random": {
+      "global": {
+        "reads": 55367,
+        "requested": 55367,
+        "hits": 0,
+        "encoded": 30079,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 0,
+        "audit_bytes": 29559,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "global_cached": {
+        "reads": 29559,
+        "requested": 55367,
+        "hits": 25808,
+        "encoded": 30079,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 59118,
+        "audit_bytes": 29559,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "fixed": {
+        "reads": 29559,
+        "requested": 66305,
+        "hits": 36746,
+        "encoded": 22053,
+        "parts": 136,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 59118,
+        "audit_bytes": 29559,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "split_uncached": {
+        "reads": 56087,
+        "requested": 56087,
+        "hits": 0,
+        "encoded": 15846,
+        "parts": 80,
+        "splits": 40,
+        "witnesses": 40,
+        "peak_cache": 0,
+        "audit_bytes": 29559,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "split_cached": {
+        "reads": 29559,
+        "requested": 56087,
+        "hits": 26528,
+        "encoded": 15846,
+        "parts": 80,
+        "splits": 40,
+        "witnesses": 40,
+        "peak_cache": 59118,
+        "audit_bytes": 29559,
+        "range_checks": 480,
+        "cases": 40
+      }
+    },
+    "random": {
+      "global": {
+        "reads": 39687,
+        "requested": 39687,
+        "hits": 0,
+        "encoded": 28159,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 0,
+        "audit_bytes": 27639,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "global_cached": {
+        "reads": 27639,
+        "requested": 39687,
+        "hits": 12048,
+        "encoded": 28159,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 55278,
+        "audit_bytes": 27639,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "fixed": {
+        "reads": 27639,
+        "requested": 51108,
+        "hits": 23469,
+        "encoded": 28942,
+        "parts": 127,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 55278,
+        "audit_bytes": 27639,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "split_uncached": {
+        "reads": 40327,
+        "requested": 40327,
+        "hits": 0,
+        "encoded": 28159,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 0,
+        "audit_bytes": 27639,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "split_cached": {
+        "reads": 27639,
+        "requested": 40327,
+        "hits": 12688,
+        "encoded": 28159,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 55278,
+        "audit_bytes": 27639,
+        "range_checks": 480,
+        "cases": 40
+      }
+    },
+    "uniform": {
+      "global": {
+        "reads": 37972,
+        "requested": 37972,
+        "hits": 0,
+        "encoded": 600,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 0,
+        "audit_bytes": 15458,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "global_cached": {
+        "reads": 15458,
+        "requested": 37972,
+        "hits": 22514,
+        "encoded": 600,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 30916,
+        "audit_bytes": 15458,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "fixed": {
+        "reads": 15458,
+        "requested": 40562,
+        "hits": 25104,
+        "encoded": 1007,
+        "parts": 77,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 30916,
+        "audit_bytes": 15458,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "split_uncached": {
+        "reads": 16178,
+        "requested": 16178,
+        "hits": 0,
+        "encoded": 600,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 0,
+        "audit_bytes": 15458,
+        "range_checks": 480,
+        "cases": 40
+      },
+      "split_cached": {
+        "reads": 15458,
+        "requested": 16178,
+        "hits": 720,
+        "encoded": 600,
+        "parts": 40,
+        "splits": 0,
+        "witnesses": 0,
+        "peak_cache": 30916,
+        "audit_bytes": 15458,
+        "range_checks": 480,
+        "cases": 40
+      }
+    }
+  }
+}
