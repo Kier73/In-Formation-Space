@@ -1,0 +1,139 @@
+{
+  "forms": 9,
+  "queryBasisFlags": 1944,
+  "rankTests": 3359232,
+  "classes": {
+    "separable": {
+      "flags": 1728,
+      "topologies": 46656,
+      "rankTests": 2985984,
+      "successes": 0,
+      "best": 8
+    },
+    "entangled": {
+      "flags": 216,
+      "topologies": 5832,
+      "rankTests": 373248,
+      "successes": 1296,
+      "best": 7
+    }
+  },
+  "successfulFlags": {
+    "entangled": 216
+  },
+  "successfulTopologicalCompletions": 1296,
+  "first": {
+    "q": [
+      1,
+      8,
+      15,
+      2
+    ],
+    "separatorCount": 0,
+    "atoms": [
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        4,
+        10
+      ],
+      [
+        12,
+        8
+      ],
+      [
+        10,
+        15
+      ],
+      [
+        15,
+        3
+      ]
+    ],
+    "used": 41,
+    "residual": [
+      14,
+      11
+    ],
+    "partial": [
+      [
+        1,
+        1,
+        9
+      ],
+      [
+        2,
+        4,
+        1
+      ],
+      [
+        4,
+        10,
+        2
+      ],
+      [
+        12,
+        8,
+        10
+      ],
+      [
+        10,
+        15,
+        4
+      ],
+      [
+        15,
+        3,
+        12
+      ],
+      [
+        14,
+        11,
+        8
+      ]
+    ],
+    "terms": [
+      [
+        1,
+        1,
+        3
+      ],
+      [
+        2,
+        4,
+        5
+      ],
+      [
+        4,
+        10,
+        12
+      ],
+      [
+        12,
+        8,
+        10
+      ],
+      [
+        10,
+        15,
+        4
+      ],
+      [
+        15,
+        3,
+        2
+      ],
+      [
+        14,
+        11,
+        6
+      ]
+    ]
+  }
+}
