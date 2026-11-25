@@ -50,6 +50,11 @@ jobs:
           node mmg027_residual_continuation.js > /tmp/mmg027.json
           node mmg028_entangled_depth.js > /tmp/mmg028.json
           node mmg029_entangled_flags.js > /tmp/mmg029.json
+          node mmg030_joint_residual.js > /tmp/mmg030.json
+          node mmg031_collective_rectangles.js > /tmp/mmg031.json
+          node mmg032_collective_lift.js > /tmp/mmg032.json
+          node mmg033_sparse_coset.js > /tmp/mmg033.json
+          node mmg034_collective_compile.js > /tmp/mmg034.json
           node mmg005_rank_walk.js > /tmp/mmg005-rank.json
           python mmg005_compile.py > /tmp/mmg005-compile.json
           node mmg006_distinctness.js > /tmp/mmg006-distinctness.json
