@@ -1,0 +1,98 @@
+{
+  "small": 144,
+  "states": 12096,
+  "tamper": 278,
+  "profiles": {
+    "0": 12,
+    "1": 17,
+    "2": 22,
+    "3": 63,
+    "": 10,
+    "2,0": 1,
+    "2,1": 7,
+    "1,0": 1,
+    "3,2": 10,
+    "3,1": 1
+  },
+  "heldoutQueries": 4096,
+  "refusal": 2,
+  "refused": [],
+  "results": [
+    {
+      "n": 16,
+      "sourceTerms": 92,
+      "rank": 7,
+      "decoderTerms": 5,
+      "degrees": [
+        3,
+        2
+      ],
+      "imageCardinality": 10,
+      "nonlinearBits": 4,
+      "imageWork": 1152,
+      "formation": 10866,
+      "verification": 12470,
+      "direct": 94208,
+      "acquisition": 22505,
+      "warm": 5120,
+      "total": 50961
+    },
+    {
+      "n": 24,
+      "sourceTerms": 379,
+      "rank": 7,
+      "decoderTerms": 5,
+      "degrees": [
+        3,
+        2
+      ],
+      "imageCardinality": 10,
+      "nonlinearBits": 4,
+      "imageWork": 1152,
+      "formation": 55572,
+      "verification": 70201,
+      "direct": 388096,
+      "acquisition": 26673,
+      "warm": 5120,
+      "total": 157566
+    },
+    {
+      "n": 32,
+      "sourceTerms": 1064,
+      "rank": 7,
+      "decoderTerms": 5,
+      "degrees": [
+        3,
+        2
+      ],
+      "imageCardinality": 10,
+      "nonlinearBits": 4,
+      "imageWork": 1152,
+      "formation": 188457,
+      "verification": 250285,
+      "direct": 1089536,
+      "acquisition": 30785,
+      "warm": 5120,
+      "total": 474647
+    },
+    {
+      "n": 64,
+      "sourceTerms": 10449,
+      "rank": 7,
+      "decoderTerms": 5,
+      "degrees": [
+        3,
+        2
+      ],
+      "imageCardinality": 10,
+      "nonlinearBits": 4,
+      "imageWork": 1152,
+      "formation": 3155809,
+      "verification": 4505677,
+      "direct": 10699776,
+      "acquisition": 47010,
+      "warm": 5120,
+      "total": 7713616
+    }
+  ]
+}
