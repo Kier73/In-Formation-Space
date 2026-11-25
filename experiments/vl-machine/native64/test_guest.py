@@ -4,7 +4,7 @@ import select
 import os
 import time
 import random
-from test_core import affine,ref,MASK
+from test_core import affine,chart,ref,MASK
 
 def until(p,marker):
     buf=b""
@@ -54,6 +54,13 @@ def main():
             load([(0,0,0,0,0),(1,0,0,0,3),(4,0,1,0,0)],2)
             assert b"REJECT" in send("g",1,3)
             result("r",[5],6,1)
+            nodes,out=chart(65536,1);load(nodes,out)
+            assert b"REJECT" in send("h",65537,1)
+            ok("h",65536,1)
+            result("r",[11],ref(nodes,out,11),11)
+            z=11
+            for _ in range(93):z=ref(nodes,out,z)
+            result("j",[11,0,93],z,12)
             p.stdin.write(b"q\n");p.stdin.flush()
             assert p.wait(timeout=5)==33
             print("guest boot, DAG, Ground, 64-bit jump, rejection and replacement verified")

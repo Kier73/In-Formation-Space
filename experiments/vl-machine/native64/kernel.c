@@ -28,6 +28,7 @@ void kernel_main(void){
         case 'p':if(parse(buf+1,v,6))ok=put(v[0],(Node){v[1],v[2],v[3],v[4],v[5]});break;
         case 'c':if(!buf[1])ok=commit();break;
         case 'g':if(parse(buf+1,v,2))ok=admit(v[0],v[1]);break;
+        case 'h':if(parse(buf+1,v,2))ok=admit_chart(v[0],v[1]);break;
         case 'r':if(parse(buf+1,v,1))res=ok=run(v[0],&y,&w);break;
         case 'j':if(parse(buf+1,v,3))res=ok=navigate(v[0],((uint64_t)v[1]<<32)|v[2],&y,&w);break;
         case 'q':if(!buf[1]){out(0xf4,16);for(;;)__asm__ volatile("hlt");}break;

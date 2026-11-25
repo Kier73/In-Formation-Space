@@ -48,10 +48,31 @@ int admit(uint32_t a,uint32_t b){
     if(poly[output][0]!=a || poly[output][1]!=b)return 0;
     ga=a;gb=b;ground=1;return 1;
 }
+/* A reversible nonlinear shear on packed 16-bit coordinates.
+   E(x)=x+k*(x&65535)^3; D(x)=x-k*(x&65535)^3.
+   k is a multiple of 65536, so E and D preserve the low word.
+   Verify the actual graph is exactly D(translate_d(E(x))). */
+int admit_chart(uint32_t k,uint32_t d){
+    if((k&65535u)||count!=16||output!=15)return 0;
+    const Node expected[16]={
+        {INPUT,0,0,0,0},{CONST,0,0,0,65535},{AND,0,1,0,0},
+        {MUL,2,2,0,0},{MUL,3,2,0,0},{CONST,0,0,0,k},
+        {MUL,4,5,0,0},{ADD,0,6,0,0},{CONST,0,0,0,d},
+        {ADD,7,8,0,0},{AND,9,1,0,0},{MUL,10,10,0,0},
+        {MUL,11,10,0,0},{CONST,0,0,0,0u-k},{MUL,12,13,0,0},
+        {ADD,9,14,0,0}
+    };
+    for(uint32_t i=0;i<16;i++){
+        Node a=banks[active][i],b=expected[i];
+        if(a.op!=b.op||a.a!=b.a||a.b!=b.b||a.c!=b.c||a.k!=b.k)return 0;
+    }
+    ga=k;gb=d;ground=2;return 1;
+}
+static uint32_t shear(uint32_t x,uint32_t k){uint32_t l=x&65535u;return x+k*l*l*l;}
 int run(uint32_t x,uint32_t *y,uint32_t *work){
     if(!count)return 0;
     *work=0;
-    if(ground){*y=ga*x+gb;*work=2;return 1;}
+    if(ground==1){*y=ga*x+gb;*work=2;return 1;}
     for(uint32_t i=0;i<count;i++)if(live[i]){
         Node v=banks[active][i];uint32_t a=values[v.a],b=values[v.b];
         switch(v.op){
@@ -70,6 +91,7 @@ int run(uint32_t x,uint32_t *y,uint32_t *work){
 }
 int navigate(uint32_t x,uint64_t n,uint32_t *y,uint32_t *work){
     if(!ground)return 0;
+    if(ground==2){*y=shear(shear(x,ga)+(uint32_t)n*gb,0u-ga);*work=12;return 1;}
     uint32_t a=ga,b=gb;*work=0;
     while(n){if(n&1){x=a*x+b;(*work)++;}b=a*b+b;a=a*a;n>>=1;(*work)++;}
     *y=x;return 1;

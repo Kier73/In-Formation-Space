@@ -11,6 +11,7 @@ L=c.CDLL(str(Path(__file__).resolve().with_name('libcore.so')))
 L.begin.argtypes=[U,U]
 L.put.argtypes=[U,Node]
 L.admit.argtypes=[U,U]
+L.admit_chart.argtypes=[U,U]
 L.run.argtypes=[U,c.POINTER(U),c.POINTER(U)]
 L.navigate.argtypes=[U,c.c_uint64,c.POINTER(U),c.POINTER(U)]
 
@@ -42,7 +43,33 @@ def affine(a,b,depth):
         nodes.append((3,pos,1,0,0));nodes.append((2,len(nodes)-1,2,0,0));pos=len(nodes)-1
     return nodes,pos
 
+def chart(k,d):
+    return [(0,0,0,0,0),(1,0,0,0,65535),(5,0,1,0,0),
+            (3,2,2,0,0),(3,3,2,0,0),(1,0,0,0,k),(3,4,5,0,0),
+            (2,0,6,0,0),(1,0,0,0,d),(2,7,8,0,0),(5,9,1,0,0),
+            (3,10,10,0,0),(3,11,10,0,0),(1,0,0,0,(-k)&MASK),
+            (3,12,13,0,0),(2,9,14,0,0)],15
+
 class Tests(unittest.TestCase):
+    def test_nonlinear_chart(self):
+        nodes,out=chart(65536,1);load(nodes,out)
+        self.assertNotEqual((ref(nodes,out,2)-2*ref(nodes,out,1)+ref(nodes,out,0))&MASK,0)
+        self.assertFalse(L.admit(1,1));self.assertTrue(L.admit_chart(65536,1))
+        r=random.Random(501)
+        for _ in range(200):
+            k=r.randrange(65536)<<16;d=r.getrandbits(32);x=r.getrandbits(32)
+            nodes,out=chart(k,d);load(nodes,out)
+            self.assertFalse(L.admit_chart(k^1,d));self.assertFalse(L.admit_chart(k,d^1))
+            self.assertTrue(L.admit_chart(k,d))
+            self.assertEqual(call(L.run,x),(ref(nodes,out,x),11))
+            n=r.randrange(100);z=x
+            for _ in range(n):z=ref(nodes,out,z)
+            self.assertEqual(call(L.navigate,x,n),(z,12))
+            h=call(L.navigate,x,10**12)[0]
+            self.assertEqual(call(L.navigate,h,10**12)[0],call(L.navigate,x,2*10**12)[0])
+            nodes[14]=(2,12,13,0,0);load(nodes,out)
+            self.assertFalse(L.admit_chart(k,d))
+
     def test_random_dags(self):
         r=random.Random(283)
         for _ in range(300):

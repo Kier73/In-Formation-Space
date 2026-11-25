@@ -2,6 +2,10 @@
 
 A ground-up interactable computational environment: native physical substrate, portable semantics, demand navigation, admitted structural Grounds and independent session state. First resident intelligence will be an application of the machine, not its purpose.
 
+## VLM-002: native descriptor machine
+
+See [native64/README.md](native64/README.md) for the x86-64 guest, transactional descriptor ABI, hosted differential tests, and exact nonlinear chart navigation. The original i386 substrate remains a separate reference.
+
 ## VLM-001: foundation
 
 - Portable word32 DAG: unsigned arithmetic modulo 2^32, bitwise operators, comparison and selection. Demand evaluation executes the backward dependency closure of the requested output.
