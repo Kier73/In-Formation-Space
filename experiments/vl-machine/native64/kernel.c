@@ -1,0 +1,65 @@
+#include "core.h"
+static void out(uint16_t p,uint8_t v){__asm__ volatile("outb %0,%1"::"a"(v),"Nd"(p));}
+static uint8_t in(uint16_t p){uint8_t v;__asm__ volatile("inb %1,%0":"=a"(v):"Nd"(p));return v;}
+static void tx(char c){while(!(in(0x3fd)&32)){}out(0x3f8,(uint8_t)c);}
+static char rx(void){while(!(in(0x3fd)&1)){}return (char)in(0x3f8);}
+static void str(const char *s){while(*s)tx(*s++);}
+static void hex(uint32_t x){for(int i=28;i>=0;i-=4)tx("0123456789abcdef"[(x>>i)&15]);}
+static int digit(char c){if(c>='0'&&c<='9')return c-'0';if(c>='a'&&c<='f')return c-'a'+10;return -1;}
+static int parse(const char *s,uint32_t *v,unsigned n){
+    for(unsigned i=0;i<n;i++){
+        uint32_t x=0;
+        for(unsigned j=0;j<8;j++){int d=digit(*s);if(d<0)return 0;s++;x=(x<<4)|(unsigned)d;}
+        v[i]=x;
+    }
+    return !*s;
+}
+void kernel_main(void){
+    out(0x3f9,0);out(0x3fb,128);out(0x3f8,1);out(0x3f9,0);out(0x3fb,3);out(0x3fa,199);out(0x3fc,3);
+    str("VLM-002 x86-64\n");
+    for(;;){
+        char buf[64];unsigned n=0;int overflow=0;uint32_t v[7],appout[APP_CAP],appn=0,y,w,handle=0,gh,seed;uint64_t time;int32_t input[6],logits[3];int ok=0,res=0,checkpoint=0,application=0,neural=0;
+        str("vl64> ");
+        for(;;){char c=rx();if(c=='\n')break;if(n<sizeof(buf)-1)buf[n++]=c;else overflow=1;}
+        buf[n]=0;
+        if(overflow||!n){str("REJECT\n");continue;}
+        switch(buf[0]){
+        case 'b':if(parse(buf+1,v,2))ok=begin(v[0],v[1]);break;
+        case 'p':if(parse(buf+1,v,6))ok=put(v[0],(Node){v[1],v[2],v[3],v[4],v[5]});break;
+        case 'c':if(!buf[1])ok=commit();break;
+        case 'g':if(parse(buf+1,v,2))ok=admit(v[0],v[1]);break;
+        case 'h':if(parse(buf+1,v,2))ok=admit_chart(v[0],v[1]);break;
+        case 'r':if(parse(buf+1,v,1))res=ok=run(v[0],&y,&w);break;
+        case 'j':if(parse(buf+1,v,3))res=ok=navigate(v[0],((uint64_t)v[1]<<32)|v[2],&y,&w);break;
+        case 'P':if(!buf[1])handle=graph_publish();break;
+        case 'D':if(parse(buf+1,v,1))ok=graph_release(v[0]);break;
+        case 'S':if(parse(buf+1,v,2))handle=proc_spawn(v[0],v[1]);break;
+        case 'T':if(parse(buf+1,v,3)){ok=proc_seek(v[0],((uint64_t)v[1]<<32)|v[2],&w);if(ok){y=0;res=1;}}break;
+        case 'O':if(parse(buf+1,v,1))res=ok=proc_read(v[0],&y,&w);break;
+        case 'X':if(parse(buf+1,v,1))ok=proc_close(v[0]);break;
+        case 'K':if(parse(buf+1,v,1))checkpoint=ok=proc_checkpoint(v[0],&gh,&seed,&time);break;
+        case 'R':if(parse(buf+1,v,4))handle=proc_restore(v[0],v[1],((uint64_t)v[2]<<32)|v[3]);break;
+        case 'A':if(parse(buf+1,v,1))ok=app_begin(v[0]);break;
+        case 'I':if(parse(buf+1,v,7))ok=app_put(v[0],(AppInsn){v[1],v[2],v[3],v[4],v[5],v[6]});break;
+        case 'E':if(!buf[1])application=ok=app_execute(appout,APP_CAP,&appn);break;
+        case 'L':if(!buf[1]){y=discover_active();w=0;res=ok=1;}break;
+        case 'N':if(!buf[1])ok=nn_begin();break;
+        case 'W':if(parse(buf+1,v,2))ok=nn_put(v[0],v[1]);break;
+        case 'V':if(!buf[1])ok=nn_commit();break;
+        case 'U':if(!buf[1])handle=nn_open();break;
+        case 'Y':if(parse(buf+1,v,1))ok=nn_close(v[0]);break;
+        case 'F':if(parse(buf+1,v,7)){
+            ok=1;for(uint32_t i=0;i<6;i++){if(v[i+1]>254){ok=0;break;}input[i]=(int32_t)v[i+1]-127;}
+            if(ok)neural=ok=nn_step(v[0],input,logits);
+        }break;
+        case 'Z':if(!buf[1])res=ok=nn_policy(&y,&w);break;
+        case 'q':if(!buf[1]){out(0xf4,16);for(;;)__asm__ volatile("hlt");}break;
+        }
+        if(neural){str("NEURAL");for(uint32_t i=0;i<3;i++){tx(' ');hex((uint32_t)logits[i]);}tx('\n');}
+        else if(application){str("APPLICATION ");hex(appn);for(uint32_t i=0;i<appn;i++){tx(' ');hex(appout[i]);}tx('\n');}
+        else if(handle){str("HANDLE ");hex(handle);tx('\n');}
+        else if(checkpoint){str("CHECKPOINT ");hex(gh);tx(' ');hex(seed);tx(' ');hex((uint32_t)(time>>32));tx(' ');hex((uint32_t)time);tx('\n');}
+        else if(res){str("RESULT ");hex(y);tx(' ');hex(w);tx('\n');}
+        else str(ok?"OK\n":"REJECT\n");
+    }
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "vlm-dataset-checkpoint-v1",
+  "producer_commit": "8ca6d5e4fdfe3612cdae660473f1e3cbfb834c7a",
+  "encounters": 244,
+  "ledger_head": "1be534aa2e623c3b0f17c6250fcf47f3fc55c7abda74935807995079850388b0",
+  "files": {
+    "experience.jsonl": "994d2c9bd23e17209803c4faeedbb84409705eb687a4537ffaff51f0119cb413",
+    "experience-summary.json": "32a034bf40a36f694346bea6a7e0c3daf3d0e9006bdf0ffc2cbcbc2ee925fdb9"
+  }
+}
