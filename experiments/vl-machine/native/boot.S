@@ -47,7 +47,14 @@ prompt:
     je mul_cmd
     cmp $'x',%al
     je xor_cmd
-    cmp 
+    cmp $'j',%al
+    je jump_cmd
+    cmp $'n',%al
+    je and_cmd
+    cmp $'l',%al
+    je lt_cmd
+    cmp $'s',%al
+    je select_cmd
     cmp $10,%al
     je prompt
     cmp $13,%al
