@@ -1,0 +1,28 @@
+name: OTG-002 higher derivative reproducibility
+on:
+  pull_request:
+    paths:
+      - 'experiments/obstruction-directed-grounds/**'
+      - '.github/workflows/otg-002.yml'
+  push:
+    paths:
+      - 'experiments/obstruction-directed-grounds/**'
+      - '.github/workflows/otg-002.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-campaign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Replay higher derivative and nonlinear refinement
+        working-directory: experiments/obstruction-directed-grounds
+        run: |
+          node higher_derivative.js > /tmp/otg-002.json
+          diff -u OTG-002-results.json /tmp/otg-002.json
+          node nonlinear_refinement.js > /tmp/otg-002-refinement.json
+          diff -u OTG-002-refinement-results.json /tmp/otg-002-refinement.json
