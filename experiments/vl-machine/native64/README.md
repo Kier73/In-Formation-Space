@@ -123,3 +123,27 @@ Run `python3 evaluate_policy.py` after building. On the same 1,000 held-out grap
 One local timing pass, summing per-query wall time over 1,000 cases, excluding graph staging but including Python/ctypes overhead: exact discovery 0.873 ms, neural 1.683 ms, Python lookup 2.372 ms, neural plus fallback 1.698 ms. Not a controlled microbenchmark or bare-metal measurement; exact discovery is faster on this workload. Do not interpret the Python lookup time as a native table baseline. The learned model is useful as an experimental observer, not yet an accelerator. Future experiments need harder verifier costs, information-bearing features and cost-sensitive observation selection.
 
 CI is separated into hosted native, guest, and E-CPU gates so a missing dependency in one path cannot prevent another from executing. The neural guest test exercises recurrent wire parity, weight replacement fencing, stale handles and rejection of a tampered chart. Guest execution itself has not been observed locally.
+
+## VLM-007 — learned sensing and byte Grounds
+
+A hosted observer constructs lossless Grounds for immutable byte strings of 1..65536 bytes using raw identity, periodic (period <=16), modular affine byte ramps, and sparse zero-default representations. Every compressed proposal is checked against the entire original source. Failed proposals return exact raw identity. A separate certification pass checks all bytes and binds SHA-256. Ground actions read arbitrary ranges and sum byte values over ranges; periodic/ramp sums avoid expanding the entire requested range and sparse sums visit entries in the range. Size is a logical descriptor size estimate (not serialized wire length or Python memory). No semantic equivalence of executable programs follows from byte compression alone.
+
+The observer learns a bounded decision tree choosing both sensors and actions. Each sensor samples at most 16 bytes at prefix, tail, middle or stride positions, interpreted into a categorical signature. Training uses 400 synthetic sources (seed 771) and separately evaluates 400 held-out sources (seed 772), from the same generator families including corrupt repetition and deceptive zero prefixes/tails. The first objective predicts the smallest supported candidate, with a sensor penalty; the second learns per-source measured acquisition and retained representation costs. Minimize read_bytes + weight * encoded_bytes; the training model charges 16 bytes per sensor, a conservative bound. The learner sees actual measured route costs, not just codec labels. Neither sensor signature nor training result is an admission proof.
+
+| Route | Source bytes read | Logical encoded bytes | Matches exhaustive size | Fallbacks |
+|---|---:|---:|---:|---:|
+| Raw identity | 455258 | 457258 | 203 | 0 |
+| Exhaustive supported proposals | 962829 | 230868 | 400 | 0 |
+| Fixed prefix | 588487 | 237998 | 392 | 103 |
+| Label-trained adaptive | 547858 | 251832 | 383 | 24 |
+| Cost-trained, weight 1 | 485514 | 309678 | 332 | 25 |
+| Cost-trained, weight 4 | 582151 | 234063 | 397 | 61 |
+| Cost-trained, weight 16 | 582149 | 233335 | 398 | 60 |
+
+All 400 full reconstructions and range sums matched per route. These are logical source-access counts including candidate verification and fallback, excluding offline training and optional subsequent certification, not physical I/O measurements. Raw captures bytes directly with no redundant admission scan. Exhaustive means smallest among implemented proposals, not universal optimal compression. This implementation is hosted Python, not native kernel code. It does not yet serialize Ground descriptors into a wire format.
+
+Real-artifact negative control: core.c, application.c, neural.c, capsule.py, policy_weights.json and the locally compiled vlm64.elf all reconstructed exactly and were SHA-256 certified; the selected representation was raw for all six. The executable triggered a failed compact proposal and fallback. The learned observer is not universally advantageous. The next experiment should extend the sensor/codec catalogue to heterogeneous block partitions, typed source structures, and compositional action queries; fit costs including training, certification, memory and action frequency.
+
+Related prior work at IFS revision a1b3a88349b7624de140d12d29685a79305d1266: distinction refinement, adaptive attention policy and RCG-006 observer quotient. This increment independently implements a finite cost-sensitive sensor tree for byte sources rather than importing their solvers.
+
+Reproduce: make; python3 -m unittest -v test_byte_ground; python3 byte_ground.py. Local combined hosted suite: 21 tests passed (including five new tests, 1200 randomized range checks, tamper rejection, bound tests and six actual artifacts). Guest and real E-CPU gates remain separate.
