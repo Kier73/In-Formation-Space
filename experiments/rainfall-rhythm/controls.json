@@ -1,0 +1,131 @@
+[
+  {
+    "name": "baseline",
+    "cap": 12,
+    "evap": 1.2,
+    "drain": 0.05,
+    "values": [
+      {
+        "period": 1,
+        "share": 0.0000886720302671895
+      },
+      {
+        "period": 3,
+        "share": 0.0000021442803123476275
+      },
+      {
+        "period": 6,
+        "share": 2.3842217999892057e-7
+      },
+      {
+        "period": 12,
+        "share": 0.5853262127542874
+      },
+      {
+        "period": 24,
+        "share": 0.9976221451044819
+      },
+      {
+        "period": 40,
+        "share": 0.9988557309630451
+      }
+    ]
+  },
+  {
+    "name": "large upper storage",
+    "cap": 100,
+    "evap": 1.2,
+    "drain": 0.05,
+    "values": [
+      {
+        "period": 1,
+        "share": 0.0000886720302671895
+      },
+      {
+        "period": 3,
+        "share": 0.0000021442803123476275
+      },
+      {
+        "period": 6,
+        "share": 2.3842217999892057e-7
+      },
+      {
+        "period": 12,
+        "share": 6.858504531896219e-8
+      },
+      {
+        "period": 24,
+        "share": 2.998761165310763e-8
+      },
+      {
+        "period": 40,
+        "share": 3.0896693348214656e-8
+      }
+    ]
+  },
+  {
+    "name": "rapid deep drainage",
+    "cap": 12,
+    "evap": 1.2,
+    "drain": 0.95,
+    "values": [
+      {
+        "period": 1,
+        "share": 0.0000886720302671895
+      },
+      {
+        "period": 3,
+        "share": 0.0000021442803123476275
+      },
+      {
+        "period": 6,
+        "share": 2.3842217999892057e-7
+      },
+      {
+        "period": 12,
+        "share": 0.000009203531302339382
+      },
+      {
+        "period": 24,
+        "share": 0.0006153475942804465
+      },
+      {
+        "period": 40,
+        "share": 0.0030728597617845715
+      }
+    ]
+  },
+  {
+    "name": "identical strategies",
+    "cap": 12,
+    "evap": 1.2,
+    "drain": 0.05,
+    "identical": true,
+    "values": [
+      {
+        "period": 1,
+        "share": 0.5
+      },
+      {
+        "period": 3,
+        "share": 0.5
+      },
+      {
+        "period": 6,
+        "share": 0.5
+      },
+      {
+        "period": 12,
+        "share": 0.5
+      },
+      {
+        "period": 24,
+        "share": 0.5
+      },
+      {
+        "period": 40,
+        "share": 0.5
+      }
+    ]
+  }
+]
