@@ -30,7 +30,7 @@ Native input has no separators: a/m/x/n/l followed by two eight-digit hex words;
 
 The portable console also accepts general JSON DAG files via `load FILE`, and can construct uncompressed affine paths with `layers 3 7 128`. The `learn` operation admits a verified candidate only when it reduces symbolic word-operation count. It does not fit against test samples or claim wall-time improvement.
 
-Run `python3 benchmark.py` to compare reference, demand and Ground routes with deterministic inputs. Timing includes Python identity hashing and admission is measured separately; the report makes it possible for an apparently cheap Ground to lose in real wall time.
+Run `python3 benchmark.py` to compare reference, demand and Ground routes with deterministic inputs. Immutable program identity and dependency closure are prepared once at construction; timing includes per-query receipt hashing and admission is measured separately; the report makes it possible for an apparently cheap Ground to lose in real wall time.
 
 ## Mathematics
 

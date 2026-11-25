@@ -1,5 +1,5 @@
 """VLM-001: exact word machine, demand evaluation and structural Grounds."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import hashlib
 import json
 import shlex
@@ -25,6 +25,8 @@ class Node:
 class Program:
     nodes: tuple
     output: int
+    _identity: str = field(init=False, repr=False, compare=False)
+    _live: frozenset = field(init=False, repr=False, compare=False)
 
     def __post_init__(self):
         if type(self.nodes) is not tuple or not self.nodes or len(self.nodes) > 65536:
@@ -40,16 +42,19 @@ class Program:
             if any(type(j) is not int or not 0 <= j < i for j in n.args):
                 raise ValueError("dependency must precede node")
 
-    @property
-    def identity(self):
-        return digest(["vlm-word32-v1", [(n.op, n.args, n.value) for n in self.nodes], self.output])
-
-    def needed(self):
+        object.__setattr__(self, "_identity", digest(["vlm-word32-v1", [(n.op, n.args, n.value) for n in self.nodes], self.output]))
         live = {self.output}
         for i in range(self.output, -1, -1):
             if i in live:
                 live.update(self.nodes[i].args)
-        return live
+        object.__setattr__(self, "_live", frozenset(live))
+
+    @property
+    def identity(self):
+        return self._identity
+
+    def needed(self):
+        return self._live
 
 def apply(op, args):
     if op == "add": return (args[0] + args[1]) & MASK

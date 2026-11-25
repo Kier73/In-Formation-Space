@@ -18,6 +18,9 @@ jobs:
       - name: Portable semantics
         working-directory: experiments/vl-machine
         run: python3 -m unittest -v
+      - name: Layered Ground benchmark
+        working-directory: experiments/vl-machine
+        run: python3 benchmark.py
       - name: Native dependencies
         run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 binutils
       - name: Native boot and serial parity
