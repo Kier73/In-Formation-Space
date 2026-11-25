@@ -157,6 +157,17 @@ class Machine:
         if not verify(p,g): raise ValueError("unverified Ground")
         self._grounds[p.identity] = g
 
+    def learn(self, p):
+        """Only admit a discovered law when the symbolic query work decreases.
+        This is an operation-count policy, not a wall-clock optimizer.
+        """
+        candidate = discover(p)
+        baseline = sum(bool(p.nodes[i].args) for i in p.needed())
+        if candidate is None or baseline <= 2:
+            return {"admitted":False,"baseline_ops":baseline}
+        self.admit(p,candidate)
+        return {"admitted":True,"baseline_ops":baseline,"ground_ops":2,"program":p.identity}
+
     def open(self, name, x):
         if not isinstance(name,str) or not name or name in self._sessions:
             raise ValueError("invalid or duplicate session")
@@ -200,10 +211,39 @@ def affine(a,b):
     return Program((Node("input"),Node("const",value=word(a)),Node("mul",(0,1)),
                     Node("const",value=word(b)),Node("add",(2,3))),4)
 
+def parse_program(text):
+    """Decode a bounded JSON graph, never execute input as Python."""
+    if len(text)>4*1024*1024:
+        raise ValueError("program description too large")
+    raw=json.loads(text)
+    if type(raw) is not dict or set(raw)!={"nodes","output"} or type(raw["nodes"]) is not list:
+        raise ValueError("invalid graph envelope")
+    nodes=[]
+    for n in raw["nodes"]:
+        if type(n) is not dict or not {"op"} <= set(n) <= {"op","args","value"}:
+            raise ValueError("invalid node")
+        if type(n["op"]) is not str or type(n.get("args",[])) is not list:
+            raise ValueError("invalid node fields")
+        nodes.append(Node(n["op"],tuple(n.get("args",[])),n.get("value",0)))
+    return Program(tuple(nodes),raw["output"])
+
+def layered_affine(a,b,depth):
+    """Build an intentionally uncompressed composition of affine layers."""
+    word(a); word(b)
+    if type(depth) is not int or not 0 <= depth <= 32766:
+        raise ValueError("invalid depth")
+    nodes=[Node("input"),Node("const",value=a),Node("const",value=b)]
+    i=0
+    for _ in range(depth):
+        nodes.append(Node("mul",(i,1)))
+        nodes.append(Node("add",(len(nodes)-1,2)))
+        i=len(nodes)-1
+    return Program(tuple(nodes),i)
+
 def repl():
     m = Machine()
     p = affine(3,7)
-    print("VLM-001 | open NAME X | use A B | discover | run X | step NAME N | inspect | quit")
+    print("VLM-001 | open NAME X | use A B | layers A B DEPTH | load JSON_FILE | learn | discover | run X | step NAME N | inspect | quit")
     while True:
         try: cmd,*args = shlex.split(input("vl> "))
         except (EOFError,KeyboardInterrupt): break
@@ -212,13 +252,17 @@ def repl():
             if cmd == "quit": break
             if cmd == "open" and len(args)==2: m.open(args[0],int(args[1]))
             elif cmd == "use" and len(args)==2: p = affine(*map(int,args))
+            elif cmd == "layers" and len(args)==3: p = layered_affine(*map(int,args))
+            elif cmd == "load" and len(args)==1:
+                with open(args[0],encoding="utf-8") as f: p=parse_program(f.read(4*1024*1024+1))
+            elif cmd == "learn" and not args: print(m.learn(p))
             elif cmd == "discover" and not args:
                 g = discover(p); m.admit(p,g); print(g)
             elif cmd == "run" and len(args)==1: print(m.observe(p,int(args[0])))
             elif cmd == "step" and len(args)==2: print(m.advance(args[0],p,int(args[1])))
             elif cmd == "inspect" and not args: print(m._sessions, m._grounds)
             else: print("invalid command")
-        except (ValueError,KeyError) as exc: print("rejected:",exc)
+        except (ValueError,KeyError,OSError) as exc: print("rejected:",exc)
 
 if __name__ == "__main__":
     repl()

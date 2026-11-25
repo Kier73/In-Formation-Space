@@ -49,6 +49,26 @@ class Tests(unittest.TestCase):
         self.assertEqual(m.advance("b",p,0)["end"],m._sessions["a"][0])
         with self.assertRaises(ValueError): m.open("b",0)
 
+    def test_learn_layered(self):
+        r=random.Random(99)
+        m=Machine()
+        for depth in [0,1,2,8,128]:
+            p=layered_affine(r.getrandbits(32),r.getrandbits(32),depth)
+            report=m.learn(p)
+            self.assertEqual(report["admitted"],depth>1)
+            for _ in range(32):
+                x=r.getrandbits(32)
+                result=m.observe(p,x)
+                self.assertEqual(result["output"],reference(p,x))
+                self.assertEqual(result["word_ops"],2 if depth>1 else 2*depth)
+
+    def test_parse(self):
+        p=parse_program('{"nodes":[{"op":"input"},{"op":"const","value":7},{"op":"xor","args":[0,1]}],"output":2}')
+        self.assertEqual(demand(p,2),(5,1))
+        self.assertFalse(Machine().learn(p)["admitted"])
+        for raw in ['[]','{"nodes":[{"op":[] }],"output":0}','{"nodes":[{"op":"input","args":1}],"output":0}']:
+            with self.assertRaises(ValueError): parse_program(raw)
+
     def test_reject(self):
         with self.assertRaises(ValueError): Program((Node("add",(0,0)),),0)
         with self.assertRaises(ValueError): affine(-1,0)

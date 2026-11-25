@@ -7,7 +7,7 @@ A ground-up interactable computational environment: native physical substrate, p
 - Portable word32 DAG: unsigned arithmetic modulo 2^32, bitwise operators, comparison and selection. Demand evaluation executes the backward dependency closure of the requested output.
 - Ground discovery composes affine coefficients symbolically; a separate bounded-degree polynomial verifier checks the identity before admission. Unsupported live operations fall back to demand realization.
 - Sessions share immutable admitted Grounds but not word state or logical time. An affine orbit can navigate to a coordinate using repeated squaring. Receipts are canonical content digests, not signatures or external authority.
-- Independent GNU assembly Multiboot 1 i386 guest, COM1 command interface, add/multiply/xor and affine orbit jumps, no OS or libc. Native path is deliberately narrower than the portable semantics; 32-bit step count versus portable 64-bit. QEMU TCG parity test checks actual serial results.
+- Independent GNU assembly Multiboot 1 i386 guest, COM1 command interface, add/multiply/xor/and/unsigned-less/select and affine orbit jumps, no OS or libc. Native path is deliberately narrower than the portable semantics; 32-bit step count versus portable 64-bit. QEMU TCG parity test checks actual serial results.
 
 ## Run
 
@@ -26,7 +26,11 @@ Native dependencies: GNU binutils, Python 3, QEMU system x86. Portable example:
     vl> discover
     vl> step a 1000000000000
 
-Native input has no separators: a/m/x followed by two eight-digit hex words; j followed by four words A B X N. Example j00000003000000070000000b00000002 returns 0000007f (127). q exits with QEMU debug-exit. The console is a trusted experimental interface, not a protected process runtime.
+Native input has no separators: a/m/x/n/l followed by two eight-digit hex words; s followed by three words (condition, true, false); j followed by four words A B X N. Example j00000003000000070000000b00000002 returns 0000007f (127). q exits with QEMU debug-exit. The console is a trusted experimental interface, not a protected process runtime.
+
+The portable console also accepts general JSON DAG files via `load FILE`, and can construct uncompressed affine paths with `layers 3 7 128`. The `learn` operation admits a verified candidate only when it reduces symbolic word-operation count. It does not fit against test samples or claim wall-time improvement.
+
+Run `python3 benchmark.py` to compare reference, demand and Ground routes with deterministic inputs. Timing includes Python identity hashing and admission is measured separately; the report makes it possible for an apparently cheap Ground to lose in real wall time.
 
 ## Mathematics
 

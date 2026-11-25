@@ -28,7 +28,7 @@ def main():
             assert b"VLM-001" in until(p,b"vl> ")
             import random
             rng=random.Random(91)
-            cases=[("a",[MASK,1],0),("m",[MASK,MASK],1),("x",[5,3],6)]
+            cases=[("a",[MASK,1],0),("m",[MASK,MASK],1),("x",[5,3],6),("n",[5,3],1),("l",[0,MASK],1),("l",[MASK,0],0),("s",[0,5,7],7),("s",[MASK,5,7],5)]
             for _ in range(80):
                 a,b,x,n=[rng.getrandbits(32) for i in range(4)]
                 cases.append(("j",[a,b,x,n],jump(a,b,x,n)[0]))
