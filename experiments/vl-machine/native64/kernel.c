@@ -18,7 +18,7 @@ void kernel_main(void){
     out(0x3f9,0);out(0x3fb,128);out(0x3f8,1);out(0x3f9,0);out(0x3fb,3);out(0x3fa,199);out(0x3fc,3);
     str("VLM-002 x86-64\n");
     for(;;){
-        char buf[64];unsigned n=0;int overflow=0;uint32_t v[7],appout[APP_CAP],appn=0,y,w,handle=0,gh,seed;uint64_t time;int ok=0,res=0,checkpoint=0,application=0;
+        char buf[64];unsigned n=0;int overflow=0;uint32_t v[7],appout[APP_CAP],appn=0,y,w,handle=0,gh,seed;uint64_t time;int32_t input[6],logits[3];int ok=0,res=0,checkpoint=0,application=0,neural=0;
         str("vl64> ");
         for(;;){char c=rx();if(c=='\n')break;if(n<sizeof(buf)-1)buf[n++]=c;else overflow=1;}
         buf[n]=0;
@@ -43,9 +43,20 @@ void kernel_main(void){
         case 'I':if(parse(buf+1,v,7))ok=app_put(v[0],(AppInsn){v[1],v[2],v[3],v[4],v[5],v[6]});break;
         case 'E':if(!buf[1])application=ok=app_execute(appout,APP_CAP,&appn);break;
         case 'L':if(!buf[1]){y=discover_active();w=0;res=ok=1;}break;
+        case 'N':if(!buf[1])ok=nn_begin();break;
+        case 'W':if(parse(buf+1,v,2))ok=nn_put(v[0],v[1]);break;
+        case 'V':if(!buf[1])ok=nn_commit();break;
+        case 'U':if(!buf[1])handle=nn_open();break;
+        case 'Y':if(parse(buf+1,v,1))ok=nn_close(v[0]);break;
+        case 'F':if(parse(buf+1,v,7)){
+            ok=1;for(uint32_t i=0;i<6;i++){if(v[i+1]>254){ok=0;break;}input[i]=(int32_t)v[i+1]-127;}
+            if(ok)neural=ok=nn_step(v[0],input,logits);
+        }break;
+        case 'Z':if(!buf[1])res=ok=nn_policy(&y,&w);break;
         case 'q':if(!buf[1]){out(0xf4,16);for(;;)__asm__ volatile("hlt");}break;
         }
-        if(application){str("APPLICATION ");hex(appn);for(uint32_t i=0;i<appn;i++){tx(' ');hex(appout[i]);}tx('\n');}
+        if(neural){str("NEURAL");for(uint32_t i=0;i<3;i++){tx(' ');hex((uint32_t)logits[i]);}tx('\n');}
+        else if(application){str("APPLICATION ");hex(appn);for(uint32_t i=0;i<appn;i++){tx(' ');hex(appout[i]);}tx('\n');}
         else if(handle){str("HANDLE ");hex(handle);tx('\n');}
         else if(checkpoint){str("CHECKPOINT ");hex(gh);tx(' ');hex(seed);tx(' ');hex((uint32_t)(time>>32));tx(' ');hex((uint32_t)time);tx('\n');}
         else if(res){str("RESULT ");hex(y);tx(' ');hex(w);tx('\n');}

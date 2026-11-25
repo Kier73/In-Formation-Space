@@ -2,6 +2,10 @@
 
 A ground-up interactable computational environment: native physical substrate, portable semantics, demand navigation, admitted structural Grounds and independent session state. First resident intelligence will be an application of the machine, not its purpose.
 
+## VLM-006: native neural resident
+
+A bounded recurrent fixed-point tensor core with eight causal sessions and a trained Ground-selection policy now operates through the native application interface. See [native neural ABI and evidence](native64/README.md#vlm-006--native-neural-resident-and-verified-proposal).
+
 ## VLM-004: resident computational applications
 
 The native interpreter now executes bounded typed application descriptions that construct, learn, publish, spawn and observe computation using its own authority. See [native application ABI](native64/README.md#vlm-004--resident-computational-applications-first-self-use).

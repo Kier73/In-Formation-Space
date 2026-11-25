@@ -26,8 +26,18 @@ uint32_t discover_active(void);
 #define APP_REGS 32u
 /* Six words: op,destination,source A,source B,immediate low,immediate high. */
 typedef struct {uint32_t op,d,a,b,lo,hi;} AppInsn;
-enum {A_CONST,A_BUILD,A_LEARN,A_PUBLISH,A_SPAWN,A_SEEK,A_READ,A_ADD,A_MUL,A_XOR,A_EMIT};
+enum {A_CONST,A_BUILD,A_LEARN,A_PUBLISH,A_SPAWN,A_SEEK,A_READ,A_ADD,A_MUL,A_XOR,A_EMIT,A_POLICY};
 int app_begin(uint32_t n);
 int app_put(uint32_t i,AppInsn ins);
 int app_execute(uint32_t *outputs,uint32_t capacity,uint32_t *written);
+#define NN_PARAMS 147u
+int nn_begin(void);
+int nn_put(uint32_t i,uint32_t encoded);
+int nn_commit(void);
+uint32_t nn_open(void);
+int nn_close(uint32_t h);
+int nn_step(uint32_t h,const int32_t *x,int32_t *logits);
+int nn_policy(uint32_t *proposal,uint32_t *admitted);
+int graph_features(int32_t *x);
+uint32_t try_ground_kind(uint32_t k);
 #endif

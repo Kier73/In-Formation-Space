@@ -6,11 +6,11 @@ boot.o: boot.S
 	$(CC) -m64 -c $< -o $@
 %.o: %.c core.h
 	$(CC) $(CFLAGS) $(FREE) -c $< -o $@
-vlm64.raw: boot.o core.o application.o kernel.o link.ld
-	ld -m elf_x86_64 -T link.ld -o $@ boot.o core.o application.o kernel.o
+vlm64.raw: boot.o core.o application.o neural.o kernel.o link.ld
+	ld -m elf_x86_64 -T link.ld -o $@ boot.o core.o application.o neural.o kernel.o
 vlm64.elf: vlm64.raw
 	objcopy -O elf32-i386 $< $@
-libcore.so: core.c application.c core.h
-	$(CC) $(CFLAGS) -shared -fPIC core.c application.c -o $@
+libcore.so: core.c application.c neural.c core.h
+	$(CC) $(CFLAGS) -shared -fPIC core.c application.c neural.c -o $@
 clean:
 	rm -f *.o *.raw *.elf *.so

@@ -28,7 +28,7 @@ jobs:
         run: make test
       - name: VLM-002 native build and hosted parity
         working-directory: experiments/vl-machine/native64
-        run: make && python3 -m unittest -v test_core test_process test_capsule test_application
+        run: make && python3 -m unittest -v test_core test_process test_capsule test_application test_neural
       - uses: actions/checkout@v4
         with:
           repository: Kier73/E-CPU

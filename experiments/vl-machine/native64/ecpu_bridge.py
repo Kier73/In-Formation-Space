@@ -9,7 +9,7 @@ from pathlib import Path
 
 SCHEMA='vlm.capsule-observation.v1'
 OP='vlm.capsule.observe'
-FILES=('capsule.py','libcore.so','core.c','core.h','application.c','Makefile','ecpu_bridge.py')
+FILES=('capsule.py','libcore.so','core.c','core.h','application.c','neural.c','Makefile','ecpu_bridge.py')
 LIMIT=1_048_576
 
 def run_worker(root,cap):

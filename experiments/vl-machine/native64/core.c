@@ -186,3 +186,26 @@ uint32_t discover_active(void){
        !evaluate(banks[active],live,count,output,0,0,0,1,&y1,&w))return 0;
     return admit(y1-y0,y0)?1:0;
 }
+
+/* Bounded observer features, deliberately lossy; not a proof. */
+int graph_features(int32_t *x){
+    if(!count)return 0;
+    for(uint32_t j=0;j<6;j++)x[j]=0;
+    x[3]=(count==16&&output==15)?16:0;x[5]=16;
+    for(uint32_t i=0;i<count;i++)if(live[i]){
+        Node v=banks[active][i];
+        if(v.op==XOR||v.op==AND)x[0]=16;
+        if(v.op==LT||v.op==SELECT)x[1]=16;
+        if(v.op==MUL){x[5]=0;if(banks[active][v.a].op!=CONST&&banks[active][v.b].op!=CONST)x[2]=16;}
+        if(v.op==AND)x[4]=16;
+    }return 1;
+}
+uint32_t try_ground_kind(uint32_t k){
+    uint32_t y0,y1,w;
+    if(!count||!k)return 0;
+    if(k==2)return count==16&&admit_chart(banks[active][5].k,banks[active][8].k)?2:0;
+    if(k!=1)return 0;
+    if(!evaluate(banks[active],live,count,output,0,0,0,0,&y0,&w)||
+       !evaluate(banks[active],live,count,output,0,0,0,1,&y1,&w))return 0;
+    return admit(y1-y0,y0)?1:0;
+}

@@ -5,7 +5,7 @@ enum {EMPTY, WORD, GRAPH, PROCESS};
 static AppInsn code[APP_CAP];
 static uint32_t expected,used,ready;
 int app_begin(uint32_t n){ready=0;used=0;expected=n;if(!n||n>APP_CAP)return 0;ready=1;return 1;}
-int app_put(uint32_t i,AppInsn x){if(!ready||i!=used||i>=expected||x.op>A_EMIT){ready=0;return 0;}code[used++]=x;return 1;}
+int app_put(uint32_t i,AppInsn x){if(!ready||i!=used||i>=expected||x.op>A_POLICY){ready=0;return 0;}code[used++]=x;return 1;}
 static int check(uint32_t capacity){
     uint8_t type[APP_REGS]={0};uint32_t emits=0;
     if(!ready||used!=expected)return 0;
@@ -15,7 +15,7 @@ static int check(uint32_t capacity){
         switch(x.op){
         case A_CONST:if(x.a||x.b||x.hi)return 0;break;
         case A_BUILD:if(x.d||type[x.a]!=WORD||type[x.b]!=WORD||!x.lo||x.lo>(CAP-3)/2||x.hi)return 0;continue;
-        case A_LEARN:if(x.a||x.b||x.lo||x.hi)return 0;break;
+        case A_POLICY:case A_LEARN:if(x.a||x.b||x.lo||x.hi)return 0;break;
         case A_PUBLISH:if(x.a||x.b||x.lo||x.hi)return 0;result=GRAPH;break;
         case A_SPAWN:if(type[x.a]!=GRAPH||type[x.b]!=WORD||x.lo||x.hi)return 0;result=PROCESS;break;
         case A_SEEK:if(type[x.a]!=PROCESS||x.b||x.d)return 0;continue;
@@ -50,6 +50,7 @@ int app_execute(uint32_t *outputs,uint32_t capacity,uint32_t *written){
         case A_CONST:v[x.d]=x.lo;break;
         case A_BUILD:if(!build(v[x.a],v[x.b],x.lo))goto done;break;
         case A_LEARN:v[x.d]=discover_active();break;
+        case A_POLICY:if(!nn_policy(&w,&v[x.d]))goto done;break;
         case A_PUBLISH:v[x.d]=graph_publish();if(!v[x.d])goto done;graphs[ng++]=v[x.d];break;
         case A_SPAWN:v[x.d]=proc_spawn(v[x.a],v[x.b]);if(!v[x.d])goto done;procs[np++]=v[x.d];break;
         case A_SEEK:if(!proc_seek(v[x.a],((uint64_t)x.hi<<32)|x.lo,&w))goto done;break;
