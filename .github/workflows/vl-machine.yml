@@ -28,7 +28,7 @@ jobs:
         run: make test
       - name: VLM-002 native build and hosted parity
         working-directory: experiments/vl-machine/native64
-        run: make && python3 -m unittest -v test_core test_process
+        run: make && python3 -m unittest -v test_core test_process test_capsule
       - name: VLM-002 native guest parity
         working-directory: experiments/vl-machine/native64
         run: python3 test_guest.py

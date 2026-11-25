@@ -19,4 +19,6 @@ int proc_seek(uint32_t h,uint64_t t,uint32_t *work);
 int proc_read(uint32_t h,uint32_t *y,uint32_t *work);
 int proc_checkpoint(uint32_t h,uint32_t *graph,uint32_t *seed,uint64_t *t);
 uint32_t proc_restore(uint32_t graph,uint32_t seed,uint64_t t);
+int graph_info(uint32_t h,uint32_t *n,uint32_t *out,uint32_t *kind,uint32_t *a,uint32_t *b);
+int graph_node(uint32_t h,uint32_t i,Node *node);
 #endif

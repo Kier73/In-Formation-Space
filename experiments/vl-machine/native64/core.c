@@ -167,3 +167,11 @@ uint32_t proc_restore(uint32_t graph,uint32_t seed,uint64_t t){
     Graph *g=graph_lookup(graph);if(!g||!g->kind)return 0;
     uint32_t h=proc_spawn(graph,seed);if(h)proc_lookup(h)->t=t;return h;
 }
+/* Copy-only inspection, never expose an internal address. */
+int graph_info(uint32_t h,uint32_t *n,uint32_t *out,uint32_t *kind,uint32_t *a,uint32_t *b){
+    Graph *g=graph_lookup(h);if(!g)return 0;
+    *n=g->n;*out=g->out;*kind=g->kind;*a=g->kind?g->a:0;*b=g->kind?g->b:0;return 1;
+}
+int graph_node(uint32_t h,uint32_t i,Node *node){
+    Graph *g=graph_lookup(h);if(!g||i>=g->n)return 0;*node=g->nodes[i];return 1;
+}
