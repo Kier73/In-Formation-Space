@@ -175,3 +175,14 @@ int graph_info(uint32_t h,uint32_t *n,uint32_t *out,uint32_t *kind,uint32_t *a,u
 int graph_node(uint32_t h,uint32_t i,Node *node){
     Graph *g=graph_lookup(h);if(!g||i>=g->n)return 0;*node=g->nodes[i];return 1;
 }
+
+/* Candidate synthesis is not authority: original graph is checked by admit. */
+uint32_t discover_active(void){
+    uint32_t y0,y1,w;
+    if(!count)return 0;
+    if(ground)return ground;
+    if(count==16 && admit_chart(banks[active][5].k,banks[active][8].k))return 2;
+    if(!evaluate(banks[active],live,count,output,0,0,0,0,&y0,&w) ||
+       !evaluate(banks[active],live,count,output,0,0,0,1,&y1,&w))return 0;
+    return admit(y1-y0,y0)?1:0;
+}

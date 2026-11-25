@@ -2,6 +2,10 @@
 
 A ground-up interactable computational environment: native physical substrate, portable semantics, demand navigation, admitted structural Grounds and independent session state. First resident intelligence will be an application of the machine, not its purpose.
 
+## VLM-004: resident computational applications
+
+The native interpreter now executes bounded typed application descriptions that construct, learn, publish, spawn and observe computation using its own authority. See [native application ABI](native64/README.md#vlm-004--resident-computational-applications-first-self-use).
+
 ## VLM-003: structural processes
 
 The native machine supports eight immutable graph snapshots, 64 independent logical-time processes, demand realization for grounded observations and bounded execution for ungrounded processes. See the [native ABI and checkpoint semantics](native64/README.md#vlm-003--structural-processes).

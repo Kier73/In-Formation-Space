@@ -65,3 +65,35 @@ Local build: 13,524-byte ELF32 boot envelope, 7,864 bytes text, 273,696 bytes BS
 `capsule.py` exports the original native graph descriptor, its SHA-256 source identity, Ground witness, seed and uint64 time; no process handle or realized output travels. A fresh process accepts the bounded JSON via stdin (`python3 capsule.py < capsule.json`), checks schema and digests, loads the graph into its own native core, independently checks the witness and reconstructs the requested coordinate. Source hash here is the canonical native descriptor encoding, not yet the portable interpreter's graph identity format. Digests provide integrity only, not origin authentication; a different valid source/seed/time with newly computed digests is a different valid request. This adapter is hosted, not a guest transport. Restore may change the active staging graph even when witness admission fails; existing published snapshots are unaffected. No remote authorization or durable ledger is claimed.
 
 Extended local build: 13,848-byte ELF32 envelope, 8,136 bytes text, 273,696 bytes BSS. `make && python3 -m unittest -v test_core test_process test_capsule`: 9 groups passed, including independent fresh-process restores for both affine and nonlinear Grounds at 10^12, same-process round-trip identity, and rejection of altered digest, rehashed invalid witness, rehashed invalid graph and out-of-range time. The C core is shared by hosted and guest builds, but the portable capsule wrapper is Python. Guest execution remains a CI gate.
+
+## VLM-004 — resident computational applications (first self-use)
+
+A native straight-line application can construct an affine graph from earlier word results, propose and independently admit a Ground, publish the graph, spawn processes, seek, read, combine observations and emit results. Registers are write-once and typed WORD/GRAPH/PROCESS; validation checks dependencies, unused fields, and output capacity before execution. The 128-instruction/32-register budget and 1024-node graph capacity bound work. No arbitrary native bytes, addresses or external handles enter application instructions. Temporary graphs/processes are released on success or failure, and outputs are buffered until success. BUILD and LEARN mutate the active staging authority even if a later instruction fails; published graphs remain unchanged. The interpreter is serial, not a concurrent scheduler or privilege boundary.
+
+Native discovery proposes affine coefficients by observing the original graph at 0 and 1, then calls the existing exact coefficient checker. It recognizes the canonical nonlinear chart by its candidate literals and checks the entire graph. It returns 0 if no witness is admitted, 1 for affine, 2 for chart. Sampling proposes; verification admits. There is no guarantee of discovery for arbitrary graphs.
+
+### Serial ABI
+
+Commands A(count), I(index,op,d,a,b,lo,hi), E(no arguments), L(no arguments) stage and execute applications or discover the active Ground. E returns APPLICATION followed by the hex output count and word values. L returns RESULT kind 00000000.
+
+| Opcode | Name | Fields |
+|---|---|---|
+| 0 | CONST | d, lo |
+| 1 | BUILD | a,b word registers, lo depth (1..510) |
+| 2 | LEARN | d word (Ground kind) |
+| 3 | PUBLISH | d graph |
+| 4 | SPAWN | d process, a graph, b seed word |
+| 5 | SEEK | a process, lo/hi absolute time |
+| 6 | READ | d word, a process |
+| 7/8/9 | ADD/MUL/XOR | d word, a/b words |
+| 10 | EMIT | a word |
+
+Unused fields zero. BUILD constructs a repeated affine chain using the existing descriptor authority. It does not synthesize arbitrary graph families yet. Applications can operate on any preloaded graph via LEARN/PUBLISH.
+
+### Local evidence
+
+`make && python3 -m unittest -v test_core test_process test_capsule test_application`: 12 groups passed in 1.802 s. Boot image 17,052 bytes, text 11,129 bytes, BSS 276,800 bytes, no undefined symbols in linked ELF64. 128 deterministic randomized applications each build/learn/publish two graphs, with the first distant observation determining the second graph's coefficient. Results checked against Python full-graph and affine composition references; 256 graph publications and 80 forced runtime failures left all eight graph slots reusable. Type confusion, forward/uninitialized references, register overwrite and inadequate output capacity rejected. Nonlinear discovery admitted the canonical chart but rejected square and xor examples. The guest test now includes application bytecode; it awaits QEMU.
+
+### E-CPU integration boundary
+
+Inspected E-CPU revision 09a9058a43c139c476609954636e17e7fadcfd37: [M2 computational host](https://github.com/Kier73/E-CPU/blob/09a9058a43c139c476609954636e17e7fadcfd37/mailcpu/computational_host.py), [VL-I temporal host adapter](https://github.com/Kier73/E-CPU/blob/09a9058a43c139c476609954636e17e7fadcfd37/mailcpu/vli_temporal_host.py), [M2/M3 integration tests](https://github.com/Kier73/E-CPU/blob/09a9058a43c139c476609954636e17e7fadcfd37/tests/test_vli_temporal_host.py). Next qualify VLM artifact identity through M1/M2, bind a pure capsule observation operator to the pinned implementation, independently verify the receiver's result, then use existing M3 for durable process continuation. No parallel authority protocol; no E-CPU execution claimed in this increment.

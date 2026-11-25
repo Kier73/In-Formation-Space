@@ -5,6 +5,7 @@ import os
 import time
 import random
 from test_core import affine,chart,ref,MASK
+from test_application import workload,jump
 
 def until(p,marker):
     buf=b""
@@ -79,6 +80,17 @@ def main():
             result("O",[p3],expected,12)
             ok("X",p2);ok("X",p3);ok("D",graph)
             assert b"REJECT" in send("R",graph,11,t>>32,t&MASK)
+            seed,t=11,10**12
+            program=workload(seed,t)
+            ok("A",len(program))
+            for i,ins in enumerate(program):
+                ok("I",i,*[getattr(ins,f) for f in ("op","d","a","b","lo","hi")])
+            nodes,out=affine(3,7,128);b=ref(nodes,out,0);a=(ref(nodes,out,1)-b)&MASK
+            y=jump(a,b,seed,t)
+            nodes,out=affine(y,7,4);b=ref(nodes,out,0);a=(ref(nodes,out,1)-b)&MASK
+            z=jump(a,b,seed,t)
+            expected="APPLICATION 00000005 "+" ".join(f"{v:08x}" for v in [1,y,1,z,y])
+            assert expected.encode() in send("E")
             p.stdin.write(b"q\n");p.stdin.flush()
             assert p.wait(timeout=5)==33
             print("guest boot, DAG, Ground, 64-bit jump, rejection and replacement verified")
