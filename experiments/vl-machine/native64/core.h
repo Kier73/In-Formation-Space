@@ -40,4 +40,10 @@ int nn_step(uint32_t h,const int32_t *x,int32_t *logits);
 int nn_policy(uint32_t *proposal,uint32_t *admitted);
 int graph_features(int32_t *x);
 uint32_t try_ground_kind(uint32_t k);
+#define TPL_PARAMS 128u
+int tpl_begin(uint32_t n,uint32_t k);
+int tpl_put(uint32_t i,AppInsn x);
+int tpl_patch(uint32_t byte_position,uint32_t group);
+uint32_t tpl_commit(void);
+int tpl_execute(uint32_t generation,const uint8_t *values,uint32_t n,uint32_t *outputs,uint32_t capacity,uint32_t *written);
 #endif
