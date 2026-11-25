@@ -1,0 +1,9134 @@
+[
+  {
+    "n": 3,
+    "policy": "canonical",
+    "seed": 20261424,
+    "initialFloor": 3,
+    "finalRank": 27,
+    "integrated": 135,
+    "rankTests": 685,
+    "verified": 10,
+    "branches": 9,
+    "records": [
+      {
+        "depth": 1,
+        "query": 8,
+        "rank": 3,
+        "atoms": 3,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 3,
+        "archive": 1
+      },
+      {
+        "depth": 2,
+        "query": 32,
+        "rank": 6,
+        "atoms": 6,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 6,
+        "archive": 1
+      },
+      {
+        "depth": 3,
+        "query": 384,
+        "rank": 9,
+        "atoms": 9,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 9,
+        "archive": 1
+      },
+      {
+        "depth": 4,
+        "query": 16,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 12,
+        "archive": 1
+      },
+      {
+        "depth": 5,
+        "query": 64,
+        "rank": 15,
+        "atoms": 15,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 1
+      },
+      {
+        "depth": 6,
+        "query": 130,
+        "rank": 18,
+        "atoms": 18,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 1
+      },
+      {
+        "depth": 7,
+        "query": 2,
+        "rank": 21,
+        "atoms": 21,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 20,
+        "archive": 1
+      },
+      {
+        "depth": 8,
+        "query": 4,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 22,
+        "archive": 1
+      },
+      {
+        "depth": 9,
+        "query": 1,
+        "rank": 27,
+        "atoms": 27,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 24,
+        "archive": 1
+      }
+    ],
+    "terms": [
+      [
+        "8",
+        "1",
+        "8"
+      ],
+      [
+        "16",
+        "8",
+        "8"
+      ],
+      [
+        "32",
+        "64",
+        "8"
+      ],
+      [
+        "8",
+        "4",
+        "32"
+      ],
+      [
+        "16",
+        "32",
+        "32"
+      ],
+      [
+        "32",
+        "256",
+        "32"
+      ],
+      [
+        "64",
+        "6",
+        "256"
+      ],
+      [
+        "128",
+        "48",
+        "256"
+      ],
+      [
+        "256",
+        "384",
+        "256"
+      ],
+      [
+        "8",
+        "2",
+        "16"
+      ],
+      [
+        "16",
+        "16",
+        "16"
+      ],
+      [
+        "32",
+        "128",
+        "16"
+      ],
+      [
+        "64",
+        "1",
+        "64"
+      ],
+      [
+        "128",
+        "8",
+        "64"
+      ],
+      [
+        "256",
+        "64",
+        "64"
+      ],
+      [
+        "65",
+        "2",
+        "384"
+      ],
+      [
+        "130",
+        "16",
+        "384"
+      ],
+      [
+        "260",
+        "128",
+        "384"
+      ],
+      [
+        "1",
+        "2",
+        "386"
+      ],
+      [
+        "2",
+        "16",
+        "386"
+      ],
+      [
+        "4",
+        "128",
+        "386"
+      ],
+      [
+        "1",
+        "4",
+        "4"
+      ],
+      [
+        "2",
+        "32",
+        "4"
+      ],
+      [
+        "4",
+        "256",
+        "4"
+      ],
+      [
+        "1",
+        "1",
+        "1"
+      ],
+      [
+        "2",
+        "8",
+        "1"
+      ],
+      [
+        "4",
+        "64",
+        "1"
+      ]
+    ]
+  },
+  {
+    "n": 3,
+    "policy": "adaptive",
+    "seed": 20261424,
+    "initialFloor": 3,
+    "finalRank": 27,
+    "integrated": 135,
+    "rankTests": 21567,
+    "verified": 97,
+    "branches": 96,
+    "records": [
+      {
+        "depth": 1,
+        "query": 8,
+        "rank": 3,
+        "atoms": 3,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 3,
+        "archive": 3
+      },
+      {
+        "depth": 2,
+        "query": 32,
+        "rank": 6,
+        "atoms": 6,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 6,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 384,
+        "rank": 9,
+        "atoms": 9,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 9,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 16,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 12,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 64,
+        "rank": 15,
+        "atoms": 15,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 130,
+        "rank": 18,
+        "atoms": 18,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 2,
+        "rank": 21,
+        "atoms": 21,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 20,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 4,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 22,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 1,
+        "rank": 27,
+        "atoms": 27,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 24,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "8",
+        "1",
+        "8"
+      ],
+      [
+        "16",
+        "8",
+        "8"
+      ],
+      [
+        "32",
+        "64",
+        "8"
+      ],
+      [
+        "8",
+        "4",
+        "32"
+      ],
+      [
+        "16",
+        "32",
+        "32"
+      ],
+      [
+        "32",
+        "256",
+        "32"
+      ],
+      [
+        "64",
+        "6",
+        "256"
+      ],
+      [
+        "128",
+        "48",
+        "256"
+      ],
+      [
+        "256",
+        "384",
+        "256"
+      ],
+      [
+        "8",
+        "2",
+        "16"
+      ],
+      [
+        "16",
+        "16",
+        "16"
+      ],
+      [
+        "32",
+        "128",
+        "16"
+      ],
+      [
+        "64",
+        "1",
+        "64"
+      ],
+      [
+        "128",
+        "8",
+        "64"
+      ],
+      [
+        "256",
+        "64",
+        "64"
+      ],
+      [
+        "65",
+        "2",
+        "384"
+      ],
+      [
+        "130",
+        "16",
+        "384"
+      ],
+      [
+        "260",
+        "128",
+        "384"
+      ],
+      [
+        "1",
+        "2",
+        "386"
+      ],
+      [
+        "2",
+        "16",
+        "386"
+      ],
+      [
+        "4",
+        "128",
+        "386"
+      ],
+      [
+        "1",
+        "4",
+        "4"
+      ],
+      [
+        "2",
+        "32",
+        "4"
+      ],
+      [
+        "4",
+        "256",
+        "4"
+      ],
+      [
+        "1",
+        "1",
+        "1"
+      ],
+      [
+        "2",
+        "8",
+        "1"
+      ],
+      [
+        "4",
+        "64",
+        "1"
+      ]
+    ]
+  },
+  {
+    "n": 3,
+    "policy": "adaptive",
+    "seed": 20261425,
+    "initialFloor": 3,
+    "finalRank": 27,
+    "integrated": 135,
+    "rankTests": 22106,
+    "verified": 97,
+    "branches": 96,
+    "records": [
+      {
+        "depth": 1,
+        "query": 8,
+        "rank": 3,
+        "atoms": 3,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 3,
+        "archive": 3
+      },
+      {
+        "depth": 2,
+        "query": 32,
+        "rank": 6,
+        "atoms": 6,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 6,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 384,
+        "rank": 9,
+        "atoms": 9,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 9,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 16,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 12,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 64,
+        "rank": 15,
+        "atoms": 15,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 130,
+        "rank": 18,
+        "atoms": 18,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 2,
+        "rank": 21,
+        "atoms": 21,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 20,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 4,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 22,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 1,
+        "rank": 27,
+        "atoms": 27,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 24,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "8",
+        "1",
+        "8"
+      ],
+      [
+        "16",
+        "8",
+        "8"
+      ],
+      [
+        "32",
+        "64",
+        "8"
+      ],
+      [
+        "8",
+        "4",
+        "32"
+      ],
+      [
+        "16",
+        "32",
+        "32"
+      ],
+      [
+        "32",
+        "256",
+        "32"
+      ],
+      [
+        "64",
+        "6",
+        "256"
+      ],
+      [
+        "128",
+        "48",
+        "256"
+      ],
+      [
+        "256",
+        "384",
+        "256"
+      ],
+      [
+        "8",
+        "2",
+        "16"
+      ],
+      [
+        "16",
+        "16",
+        "16"
+      ],
+      [
+        "32",
+        "128",
+        "16"
+      ],
+      [
+        "64",
+        "1",
+        "64"
+      ],
+      [
+        "128",
+        "8",
+        "64"
+      ],
+      [
+        "256",
+        "64",
+        "64"
+      ],
+      [
+        "65",
+        "2",
+        "384"
+      ],
+      [
+        "130",
+        "16",
+        "384"
+      ],
+      [
+        "260",
+        "128",
+        "384"
+      ],
+      [
+        "1",
+        "2",
+        "386"
+      ],
+      [
+        "2",
+        "16",
+        "386"
+      ],
+      [
+        "4",
+        "128",
+        "386"
+      ],
+      [
+        "1",
+        "4",
+        "4"
+      ],
+      [
+        "2",
+        "32",
+        "4"
+      ],
+      [
+        "4",
+        "256",
+        "4"
+      ],
+      [
+        "1",
+        "1",
+        "1"
+      ],
+      [
+        "2",
+        "8",
+        "1"
+      ],
+      [
+        "4",
+        "64",
+        "1"
+      ]
+    ]
+  },
+  {
+    "n": 3,
+    "policy": "adaptive",
+    "seed": 20261426,
+    "initialFloor": 3,
+    "finalRank": 27,
+    "integrated": 135,
+    "rankTests": 22080,
+    "verified": 97,
+    "branches": 96,
+    "records": [
+      {
+        "depth": 1,
+        "query": 8,
+        "rank": 3,
+        "atoms": 3,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 3,
+        "archive": 3
+      },
+      {
+        "depth": 2,
+        "query": 32,
+        "rank": 6,
+        "atoms": 6,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 6,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 384,
+        "rank": 9,
+        "atoms": 9,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 9,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 16,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 12,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 64,
+        "rank": 15,
+        "atoms": 15,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 130,
+        "rank": 18,
+        "atoms": 18,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 2,
+        "rank": 21,
+        "atoms": 21,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 20,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 4,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 22,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 1,
+        "rank": 27,
+        "atoms": 27,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 24,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "8",
+        "1",
+        "8"
+      ],
+      [
+        "16",
+        "8",
+        "8"
+      ],
+      [
+        "32",
+        "64",
+        "8"
+      ],
+      [
+        "8",
+        "4",
+        "32"
+      ],
+      [
+        "16",
+        "32",
+        "32"
+      ],
+      [
+        "32",
+        "256",
+        "32"
+      ],
+      [
+        "64",
+        "6",
+        "256"
+      ],
+      [
+        "128",
+        "48",
+        "256"
+      ],
+      [
+        "256",
+        "384",
+        "256"
+      ],
+      [
+        "8",
+        "2",
+        "16"
+      ],
+      [
+        "16",
+        "16",
+        "16"
+      ],
+      [
+        "32",
+        "128",
+        "16"
+      ],
+      [
+        "64",
+        "1",
+        "64"
+      ],
+      [
+        "128",
+        "8",
+        "64"
+      ],
+      [
+        "256",
+        "64",
+        "64"
+      ],
+      [
+        "65",
+        "2",
+        "384"
+      ],
+      [
+        "130",
+        "16",
+        "384"
+      ],
+      [
+        "260",
+        "128",
+        "384"
+      ],
+      [
+        "1",
+        "2",
+        "386"
+      ],
+      [
+        "2",
+        "16",
+        "386"
+      ],
+      [
+        "4",
+        "128",
+        "386"
+      ],
+      [
+        "1",
+        "4",
+        "4"
+      ],
+      [
+        "2",
+        "32",
+        "4"
+      ],
+      [
+        "4",
+        "256",
+        "4"
+      ],
+      [
+        "1",
+        "1",
+        "1"
+      ],
+      [
+        "2",
+        "8",
+        "1"
+      ],
+      [
+        "4",
+        "64",
+        "1"
+      ]
+    ]
+  },
+  {
+    "n": 3,
+    "policy": "hybrid",
+    "seed": 20261424,
+    "initialFloor": 3,
+    "finalRank": 24,
+    "integrated": 127,
+    "rankTests": 21876,
+    "verified": 109,
+    "branches": 108,
+    "records": [
+      {
+        "depth": 1,
+        "query": 8,
+        "rank": 3,
+        "atoms": 3,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 3,
+        "archive": 4
+      },
+      {
+        "depth": 2,
+        "query": 32,
+        "rank": 6,
+        "atoms": 6,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 6,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 384,
+        "rank": 9,
+        "atoms": 9,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 9,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 16,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 12,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 64,
+        "rank": 14,
+        "atoms": 14,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 5
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 130,
+        "rank": 17,
+        "atoms": 17,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 5
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 2,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 5
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 20,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 4,
+        "rank": 22,
+        "atoms": 22,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          }
+        ],
+        "incumbentRank": 22,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 1,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          },
+          {
+            "added": 2,
+            "used": 4,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 24,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "4",
+        "365",
+        "390"
+      ],
+      [
+        "5",
+        "4",
+        "5"
+      ],
+      [
+        "16",
+        "8",
+        "8"
+      ],
+      [
+        "16",
+        "16",
+        "16"
+      ],
+      [
+        "16",
+        "32",
+        "32"
+      ],
+      [
+        "32",
+        "65",
+        "72"
+      ],
+      [
+        "32",
+        "260",
+        "432"
+      ],
+      [
+        "40",
+        "1",
+        "26"
+      ],
+      [
+        "40",
+        "4",
+        "50"
+      ],
+      [
+        "100",
+        "388",
+        "386"
+      ],
+      [
+        "128",
+        "73",
+        "455"
+      ],
+      [
+        "128",
+        "438",
+        "130"
+      ],
+      [
+        "130",
+        "18",
+        "2"
+      ],
+      [
+        "130",
+        "32",
+        "5"
+      ],
+      [
+        "132",
+        "105",
+        "391"
+      ],
+      [
+        "192",
+        "390",
+        "144"
+      ],
+      [
+        "200",
+        "7",
+        "18"
+      ],
+      [
+        "203",
+        "2",
+        "2"
+      ],
+      [
+        "224",
+        "385",
+        "82"
+      ],
+      [
+        "292",
+        "128",
+        "384"
+      ],
+      [
+        "320",
+        "384",
+        "320"
+      ],
+      [
+        "416",
+        "448",
+        "64"
+      ],
+      [
+        "3",
+        "5",
+        "1"
+      ],
+      [
+        "6",
+        "45",
+        "1"
+      ]
+    ]
+  },
+  {
+    "n": 3,
+    "policy": "hybrid",
+    "seed": 20261425,
+    "initialFloor": 3,
+    "finalRank": 24,
+    "integrated": 127,
+    "rankTests": 21420,
+    "verified": 109,
+    "branches": 108,
+    "records": [
+      {
+        "depth": 1,
+        "query": 8,
+        "rank": 3,
+        "atoms": 3,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 3,
+        "archive": 4
+      },
+      {
+        "depth": 2,
+        "query": 32,
+        "rank": 6,
+        "atoms": 6,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 6,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 384,
+        "rank": 9,
+        "atoms": 9,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 9,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 16,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 12,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 64,
+        "rank": 14,
+        "atoms": 14,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 5
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 130,
+        "rank": 17,
+        "atoms": 17,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 5
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 2,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 5
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 20,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 4,
+        "rank": 22,
+        "atoms": 22,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          }
+        ],
+        "incumbentRank": 22,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 1,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          },
+          {
+            "added": 2,
+            "used": 3,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 24,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "4",
+        "365",
+        "390"
+      ],
+      [
+        "5",
+        "4",
+        "4"
+      ],
+      [
+        "16",
+        "8",
+        "8"
+      ],
+      [
+        "16",
+        "16",
+        "16"
+      ],
+      [
+        "16",
+        "32",
+        "32"
+      ],
+      [
+        "32",
+        "65",
+        "72"
+      ],
+      [
+        "32",
+        "260",
+        "432"
+      ],
+      [
+        "40",
+        "1",
+        "26"
+      ],
+      [
+        "40",
+        "4",
+        "50"
+      ],
+      [
+        "100",
+        "388",
+        "386"
+      ],
+      [
+        "128",
+        "73",
+        "455"
+      ],
+      [
+        "128",
+        "438",
+        "130"
+      ],
+      [
+        "130",
+        "18",
+        "2"
+      ],
+      [
+        "130",
+        "32",
+        "5"
+      ],
+      [
+        "132",
+        "105",
+        "391"
+      ],
+      [
+        "192",
+        "390",
+        "144"
+      ],
+      [
+        "200",
+        "7",
+        "18"
+      ],
+      [
+        "203",
+        "2",
+        "2"
+      ],
+      [
+        "224",
+        "385",
+        "82"
+      ],
+      [
+        "292",
+        "128",
+        "384"
+      ],
+      [
+        "320",
+        "384",
+        "320"
+      ],
+      [
+        "416",
+        "448",
+        "64"
+      ],
+      [
+        "3",
+        "1",
+        "1"
+      ],
+      [
+        "6",
+        "41",
+        "1"
+      ]
+    ]
+  },
+  {
+    "n": 3,
+    "policy": "hybrid",
+    "seed": 20261426,
+    "initialFloor": 3,
+    "finalRank": 24,
+    "integrated": 127,
+    "rankTests": 21937,
+    "verified": 106,
+    "branches": 105,
+    "records": [
+      {
+        "depth": 1,
+        "query": 8,
+        "rank": 3,
+        "atoms": 3,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 3,
+        "archive": 3
+      },
+      {
+        "depth": 2,
+        "query": 32,
+        "rank": 6,
+        "atoms": 6,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 6,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 384,
+        "rank": 9,
+        "atoms": 9,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 9,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 16,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 12,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 64,
+        "rank": 14,
+        "atoms": 14,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 5
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 130,
+        "rank": 17,
+        "atoms": 17,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 5
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 2,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 5
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 3,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 20,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 4,
+        "rank": 22,
+        "atoms": 22,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          }
+        ],
+        "incumbentRank": 22,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 1,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 9
+          }
+        ],
+        "incumbentRank": 24,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "3",
+        "40",
+        "1"
+      ],
+      [
+        "4",
+        "365",
+        "390"
+      ],
+      [
+        "5",
+        "4",
+        "4"
+      ],
+      [
+        "5",
+        "41",
+        "1"
+      ],
+      [
+        "16",
+        "8",
+        "8"
+      ],
+      [
+        "16",
+        "16",
+        "16"
+      ],
+      [
+        "16",
+        "32",
+        "32"
+      ],
+      [
+        "32",
+        "65",
+        "72"
+      ],
+      [
+        "32",
+        "260",
+        "432"
+      ],
+      [
+        "40",
+        "1",
+        "26"
+      ],
+      [
+        "40",
+        "4",
+        "50"
+      ],
+      [
+        "100",
+        "388",
+        "386"
+      ],
+      [
+        "128",
+        "73",
+        "455"
+      ],
+      [
+        "128",
+        "438",
+        "130"
+      ],
+      [
+        "130",
+        "18",
+        "2"
+      ],
+      [
+        "130",
+        "32",
+        "5"
+      ],
+      [
+        "132",
+        "105",
+        "391"
+      ],
+      [
+        "192",
+        "390",
+        "144"
+      ],
+      [
+        "200",
+        "7",
+        "18"
+      ],
+      [
+        "203",
+        "2",
+        "2"
+      ],
+      [
+        "224",
+        "385",
+        "82"
+      ],
+      [
+        "292",
+        "128",
+        "384"
+      ],
+      [
+        "320",
+        "384",
+        "320"
+      ],
+      [
+        "416",
+        "448",
+        "64"
+      ]
+    ]
+  },
+  {
+    "n": 4,
+    "policy": "canonical",
+    "seed": 20261524,
+    "initialFloor": 4,
+    "finalRank": 64,
+    "integrated": 544,
+    "rankTests": 767,
+    "verified": 17,
+    "branches": 16,
+    "records": [
+      {
+        "depth": 1,
+        "query": 14,
+        "rank": 4,
+        "atoms": 4,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 5,
+        "archive": 1
+      },
+      {
+        "depth": 2,
+        "query": 3,
+        "rank": 8,
+        "atoms": 8,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 10,
+        "archive": 1
+      },
+      {
+        "depth": 3,
+        "query": 768,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 1
+      },
+      {
+        "depth": 4,
+        "query": 3072,
+        "rank": 16,
+        "atoms": 16,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 1
+      },
+      {
+        "depth": 5,
+        "query": 1,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 21,
+        "archive": 1
+      },
+      {
+        "depth": 6,
+        "query": 256,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 23,
+        "archive": 1
+      },
+      {
+        "depth": 7,
+        "query": 16,
+        "rank": 28,
+        "atoms": 28,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 27,
+        "archive": 1
+      },
+      {
+        "depth": 8,
+        "query": 96,
+        "rank": 32,
+        "atoms": 32,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 30,
+        "archive": 1
+      },
+      {
+        "depth": 9,
+        "query": 4,
+        "rank": 36,
+        "atoms": 36,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 34,
+        "archive": 1
+      },
+      {
+        "depth": 10,
+        "query": 128,
+        "rank": 40,
+        "atoms": 40,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 36,
+        "archive": 1
+      },
+      {
+        "depth": 11,
+        "query": 8224,
+        "rank": 44,
+        "atoms": 44,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 39,
+        "archive": 1
+      },
+      {
+        "depth": 12,
+        "query": 32768,
+        "rank": 48,
+        "atoms": 48,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 41,
+        "archive": 1
+      },
+      {
+        "depth": 13,
+        "query": 32,
+        "rank": 52,
+        "atoms": 52,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 43,
+        "archive": 1
+      },
+      {
+        "depth": 14,
+        "query": 20480,
+        "rank": 56,
+        "atoms": 56,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 44,
+        "archive": 1
+      },
+      {
+        "depth": 15,
+        "query": 1024,
+        "rank": 60,
+        "atoms": 60,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 46,
+        "archive": 1
+      },
+      {
+        "depth": 16,
+        "query": 4096,
+        "rank": 64,
+        "atoms": 64,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 47,
+        "archive": 1
+      }
+    ],
+    "terms": [
+      [
+        "1",
+        "14",
+        "8"
+      ],
+      [
+        "2",
+        "224",
+        "8"
+      ],
+      [
+        "4",
+        "3584",
+        "8"
+      ],
+      [
+        "8",
+        "57344",
+        "8"
+      ],
+      [
+        "1",
+        "3",
+        "10"
+      ],
+      [
+        "2",
+        "48",
+        "10"
+      ],
+      [
+        "4",
+        "768",
+        "10"
+      ],
+      [
+        "8",
+        "12288",
+        "10"
+      ],
+      [
+        "256",
+        "3",
+        "512"
+      ],
+      [
+        "512",
+        "48",
+        "512"
+      ],
+      [
+        "1024",
+        "768",
+        "512"
+      ],
+      [
+        "2048",
+        "12288",
+        "512"
+      ],
+      [
+        "256",
+        "12",
+        "2048"
+      ],
+      [
+        "512",
+        "192",
+        "2048"
+      ],
+      [
+        "1024",
+        "3072",
+        "2048"
+      ],
+      [
+        "2048",
+        "49152",
+        "2048"
+      ],
+      [
+        "1",
+        "1",
+        "11"
+      ],
+      [
+        "2",
+        "16",
+        "11"
+      ],
+      [
+        "4",
+        "256",
+        "11"
+      ],
+      [
+        "8",
+        "4096",
+        "11"
+      ],
+      [
+        "256",
+        "1",
+        "768"
+      ],
+      [
+        "512",
+        "16",
+        "768"
+      ],
+      [
+        "1024",
+        "256",
+        "768"
+      ],
+      [
+        "2048",
+        "4096",
+        "768"
+      ],
+      [
+        "16",
+        "1",
+        "16"
+      ],
+      [
+        "32",
+        "16",
+        "16"
+      ],
+      [
+        "64",
+        "256",
+        "16"
+      ],
+      [
+        "128",
+        "4096",
+        "16"
+      ],
+      [
+        "16",
+        "6",
+        "64"
+      ],
+      [
+        "32",
+        "96",
+        "64"
+      ],
+      [
+        "64",
+        "1536",
+        "64"
+      ],
+      [
+        "128",
+        "24576",
+        "64"
+      ],
+      [
+        "1",
+        "4",
+        "12"
+      ],
+      [
+        "2",
+        "64",
+        "12"
+      ],
+      [
+        "4",
+        "1024",
+        "12"
+      ],
+      [
+        "8",
+        "16384",
+        "12"
+      ],
+      [
+        "16",
+        "8",
+        "128"
+      ],
+      [
+        "32",
+        "128",
+        "128"
+      ],
+      [
+        "64",
+        "2048",
+        "128"
+      ],
+      [
+        "128",
+        "32768",
+        "128"
+      ],
+      [
+        "4112",
+        "2",
+        "8192"
+      ],
+      [
+        "8224",
+        "32",
+        "8192"
+      ],
+      [
+        "16448",
+        "512",
+        "8192"
+      ],
+      [
+        "32896",
+        "8192",
+        "8192"
+      ],
+      [
+        "4096",
+        "8",
+        "32768"
+      ],
+      [
+        "8192",
+        "128",
+        "32768"
+      ],
+      [
+        "16384",
+        "2048",
+        "32768"
+      ],
+      [
+        "32768",
+        "32768",
+        "32768"
+      ],
+      [
+        "16",
+        "2",
+        "8288"
+      ],
+      [
+        "32",
+        "32",
+        "8288"
+      ],
+      [
+        "64",
+        "512",
+        "8288"
+      ],
+      [
+        "128",
+        "8192",
+        "8288"
+      ],
+      [
+        "4096",
+        "5",
+        "16384"
+      ],
+      [
+        "8192",
+        "80",
+        "16384"
+      ],
+      [
+        "16384",
+        "1280",
+        "16384"
+      ],
+      [
+        "32768",
+        "20480",
+        "16384"
+      ],
+      [
+        "256",
+        "4",
+        "3072"
+      ],
+      [
+        "512",
+        "64",
+        "3072"
+      ],
+      [
+        "1024",
+        "1024",
+        "3072"
+      ],
+      [
+        "2048",
+        "16384",
+        "3072"
+      ],
+      [
+        "4096",
+        "1",
+        "20480"
+      ],
+      [
+        "8192",
+        "16",
+        "20480"
+      ],
+      [
+        "16384",
+        "256",
+        "20480"
+      ],
+      [
+        "32768",
+        "4096",
+        "20480"
+      ]
+    ]
+  },
+  {
+    "n": 4,
+    "policy": "adaptive",
+    "seed": 20261524,
+    "initialFloor": 4,
+    "finalRank": 64,
+    "integrated": 544,
+    "rankTests": 54726,
+    "verified": 181,
+    "branches": 180,
+    "records": [
+      {
+        "depth": 1,
+        "query": 14,
+        "rank": 4,
+        "atoms": 4,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 5,
+        "archive": 3
+      },
+      {
+        "depth": 2,
+        "query": 3,
+        "rank": 8,
+        "atoms": 8,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 10,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 768,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 3072,
+        "rank": 16,
+        "atoms": 16,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 1,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 21,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 256,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 23,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 16,
+        "rank": 28,
+        "atoms": 28,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 27,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 96,
+        "rank": 32,
+        "atoms": 32,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 30,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 4,
+        "rank": 36,
+        "atoms": 36,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 34,
+        "archive": 4
+      },
+      {
+        "depth": 10,
+        "query": 128,
+        "rank": 40,
+        "atoms": 40,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 36,
+        "archive": 4
+      },
+      {
+        "depth": 11,
+        "query": 8224,
+        "rank": 44,
+        "atoms": 44,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 39,
+        "archive": 4
+      },
+      {
+        "depth": 12,
+        "query": 32768,
+        "rank": 48,
+        "atoms": 48,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 41,
+        "archive": 4
+      },
+      {
+        "depth": 13,
+        "query": 32,
+        "rank": 52,
+        "atoms": 52,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 43,
+        "archive": 4
+      },
+      {
+        "depth": 14,
+        "query": 20480,
+        "rank": 56,
+        "atoms": 56,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 44,
+        "archive": 4
+      },
+      {
+        "depth": 15,
+        "query": 1024,
+        "rank": 60,
+        "atoms": 60,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 46,
+        "archive": 4
+      },
+      {
+        "depth": 16,
+        "query": 4096,
+        "rank": 64,
+        "atoms": 64,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 47,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "1",
+        "14",
+        "8"
+      ],
+      [
+        "2",
+        "224",
+        "8"
+      ],
+      [
+        "4",
+        "3584",
+        "8"
+      ],
+      [
+        "8",
+        "57344",
+        "8"
+      ],
+      [
+        "1",
+        "3",
+        "10"
+      ],
+      [
+        "2",
+        "48",
+        "10"
+      ],
+      [
+        "4",
+        "768",
+        "10"
+      ],
+      [
+        "8",
+        "12288",
+        "10"
+      ],
+      [
+        "256",
+        "3",
+        "512"
+      ],
+      [
+        "512",
+        "48",
+        "512"
+      ],
+      [
+        "1024",
+        "768",
+        "512"
+      ],
+      [
+        "2048",
+        "12288",
+        "512"
+      ],
+      [
+        "256",
+        "12",
+        "2048"
+      ],
+      [
+        "512",
+        "192",
+        "2048"
+      ],
+      [
+        "1024",
+        "3072",
+        "2048"
+      ],
+      [
+        "2048",
+        "49152",
+        "2048"
+      ],
+      [
+        "1",
+        "1",
+        "11"
+      ],
+      [
+        "2",
+        "16",
+        "11"
+      ],
+      [
+        "4",
+        "256",
+        "11"
+      ],
+      [
+        "8",
+        "4096",
+        "11"
+      ],
+      [
+        "256",
+        "1",
+        "768"
+      ],
+      [
+        "512",
+        "16",
+        "768"
+      ],
+      [
+        "1024",
+        "256",
+        "768"
+      ],
+      [
+        "2048",
+        "4096",
+        "768"
+      ],
+      [
+        "16",
+        "1",
+        "16"
+      ],
+      [
+        "32",
+        "16",
+        "16"
+      ],
+      [
+        "64",
+        "256",
+        "16"
+      ],
+      [
+        "128",
+        "4096",
+        "16"
+      ],
+      [
+        "16",
+        "6",
+        "64"
+      ],
+      [
+        "32",
+        "96",
+        "64"
+      ],
+      [
+        "64",
+        "1536",
+        "64"
+      ],
+      [
+        "128",
+        "24576",
+        "64"
+      ],
+      [
+        "1",
+        "4",
+        "12"
+      ],
+      [
+        "2",
+        "64",
+        "12"
+      ],
+      [
+        "4",
+        "1024",
+        "12"
+      ],
+      [
+        "8",
+        "16384",
+        "12"
+      ],
+      [
+        "16",
+        "8",
+        "128"
+      ],
+      [
+        "32",
+        "128",
+        "128"
+      ],
+      [
+        "64",
+        "2048",
+        "128"
+      ],
+      [
+        "128",
+        "32768",
+        "128"
+      ],
+      [
+        "4112",
+        "2",
+        "8192"
+      ],
+      [
+        "8224",
+        "32",
+        "8192"
+      ],
+      [
+        "16448",
+        "512",
+        "8192"
+      ],
+      [
+        "32896",
+        "8192",
+        "8192"
+      ],
+      [
+        "4096",
+        "8",
+        "32768"
+      ],
+      [
+        "8192",
+        "128",
+        "32768"
+      ],
+      [
+        "16384",
+        "2048",
+        "32768"
+      ],
+      [
+        "32768",
+        "32768",
+        "32768"
+      ],
+      [
+        "16",
+        "2",
+        "8288"
+      ],
+      [
+        "32",
+        "32",
+        "8288"
+      ],
+      [
+        "64",
+        "512",
+        "8288"
+      ],
+      [
+        "128",
+        "8192",
+        "8288"
+      ],
+      [
+        "4096",
+        "5",
+        "16384"
+      ],
+      [
+        "8192",
+        "80",
+        "16384"
+      ],
+      [
+        "16384",
+        "1280",
+        "16384"
+      ],
+      [
+        "32768",
+        "20480",
+        "16384"
+      ],
+      [
+        "256",
+        "4",
+        "3072"
+      ],
+      [
+        "512",
+        "64",
+        "3072"
+      ],
+      [
+        "1024",
+        "1024",
+        "3072"
+      ],
+      [
+        "2048",
+        "16384",
+        "3072"
+      ],
+      [
+        "4096",
+        "1",
+        "20480"
+      ],
+      [
+        "8192",
+        "16",
+        "20480"
+      ],
+      [
+        "16384",
+        "256",
+        "20480"
+      ],
+      [
+        "32768",
+        "4096",
+        "20480"
+      ]
+    ]
+  },
+  {
+    "n": 4,
+    "policy": "adaptive",
+    "seed": 20261525,
+    "initialFloor": 4,
+    "finalRank": 64,
+    "integrated": 544,
+    "rankTests": 55090,
+    "verified": 181,
+    "branches": 180,
+    "records": [
+      {
+        "depth": 1,
+        "query": 14,
+        "rank": 4,
+        "atoms": 4,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 5,
+        "archive": 3
+      },
+      {
+        "depth": 2,
+        "query": 3,
+        "rank": 8,
+        "atoms": 8,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 10,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 768,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 3072,
+        "rank": 16,
+        "atoms": 16,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 1,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 21,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 256,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 23,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 16,
+        "rank": 28,
+        "atoms": 28,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 27,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 96,
+        "rank": 32,
+        "atoms": 32,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 30,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 4,
+        "rank": 36,
+        "atoms": 36,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 34,
+        "archive": 4
+      },
+      {
+        "depth": 10,
+        "query": 128,
+        "rank": 40,
+        "atoms": 40,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 36,
+        "archive": 4
+      },
+      {
+        "depth": 11,
+        "query": 8224,
+        "rank": 44,
+        "atoms": 44,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 39,
+        "archive": 4
+      },
+      {
+        "depth": 12,
+        "query": 32768,
+        "rank": 48,
+        "atoms": 48,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 41,
+        "archive": 4
+      },
+      {
+        "depth": 13,
+        "query": 32,
+        "rank": 52,
+        "atoms": 52,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 43,
+        "archive": 4
+      },
+      {
+        "depth": 14,
+        "query": 20480,
+        "rank": 56,
+        "atoms": 56,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 44,
+        "archive": 4
+      },
+      {
+        "depth": 15,
+        "query": 1024,
+        "rank": 60,
+        "atoms": 60,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 46,
+        "archive": 4
+      },
+      {
+        "depth": 16,
+        "query": 4096,
+        "rank": 64,
+        "atoms": 64,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 47,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "1",
+        "14",
+        "8"
+      ],
+      [
+        "2",
+        "224",
+        "8"
+      ],
+      [
+        "4",
+        "3584",
+        "8"
+      ],
+      [
+        "8",
+        "57344",
+        "8"
+      ],
+      [
+        "1",
+        "3",
+        "10"
+      ],
+      [
+        "2",
+        "48",
+        "10"
+      ],
+      [
+        "4",
+        "768",
+        "10"
+      ],
+      [
+        "8",
+        "12288",
+        "10"
+      ],
+      [
+        "256",
+        "3",
+        "512"
+      ],
+      [
+        "512",
+        "48",
+        "512"
+      ],
+      [
+        "1024",
+        "768",
+        "512"
+      ],
+      [
+        "2048",
+        "12288",
+        "512"
+      ],
+      [
+        "256",
+        "12",
+        "2048"
+      ],
+      [
+        "512",
+        "192",
+        "2048"
+      ],
+      [
+        "1024",
+        "3072",
+        "2048"
+      ],
+      [
+        "2048",
+        "49152",
+        "2048"
+      ],
+      [
+        "1",
+        "1",
+        "11"
+      ],
+      [
+        "2",
+        "16",
+        "11"
+      ],
+      [
+        "4",
+        "256",
+        "11"
+      ],
+      [
+        "8",
+        "4096",
+        "11"
+      ],
+      [
+        "256",
+        "1",
+        "768"
+      ],
+      [
+        "512",
+        "16",
+        "768"
+      ],
+      [
+        "1024",
+        "256",
+        "768"
+      ],
+      [
+        "2048",
+        "4096",
+        "768"
+      ],
+      [
+        "16",
+        "1",
+        "16"
+      ],
+      [
+        "32",
+        "16",
+        "16"
+      ],
+      [
+        "64",
+        "256",
+        "16"
+      ],
+      [
+        "128",
+        "4096",
+        "16"
+      ],
+      [
+        "16",
+        "6",
+        "64"
+      ],
+      [
+        "32",
+        "96",
+        "64"
+      ],
+      [
+        "64",
+        "1536",
+        "64"
+      ],
+      [
+        "128",
+        "24576",
+        "64"
+      ],
+      [
+        "1",
+        "4",
+        "12"
+      ],
+      [
+        "2",
+        "64",
+        "12"
+      ],
+      [
+        "4",
+        "1024",
+        "12"
+      ],
+      [
+        "8",
+        "16384",
+        "12"
+      ],
+      [
+        "16",
+        "8",
+        "128"
+      ],
+      [
+        "32",
+        "128",
+        "128"
+      ],
+      [
+        "64",
+        "2048",
+        "128"
+      ],
+      [
+        "128",
+        "32768",
+        "128"
+      ],
+      [
+        "4112",
+        "2",
+        "8192"
+      ],
+      [
+        "8224",
+        "32",
+        "8192"
+      ],
+      [
+        "16448",
+        "512",
+        "8192"
+      ],
+      [
+        "32896",
+        "8192",
+        "8192"
+      ],
+      [
+        "4096",
+        "8",
+        "32768"
+      ],
+      [
+        "8192",
+        "128",
+        "32768"
+      ],
+      [
+        "16384",
+        "2048",
+        "32768"
+      ],
+      [
+        "32768",
+        "32768",
+        "32768"
+      ],
+      [
+        "16",
+        "2",
+        "8288"
+      ],
+      [
+        "32",
+        "32",
+        "8288"
+      ],
+      [
+        "64",
+        "512",
+        "8288"
+      ],
+      [
+        "128",
+        "8192",
+        "8288"
+      ],
+      [
+        "4096",
+        "5",
+        "16384"
+      ],
+      [
+        "8192",
+        "80",
+        "16384"
+      ],
+      [
+        "16384",
+        "1280",
+        "16384"
+      ],
+      [
+        "32768",
+        "20480",
+        "16384"
+      ],
+      [
+        "256",
+        "4",
+        "3072"
+      ],
+      [
+        "512",
+        "64",
+        "3072"
+      ],
+      [
+        "1024",
+        "1024",
+        "3072"
+      ],
+      [
+        "2048",
+        "16384",
+        "3072"
+      ],
+      [
+        "4096",
+        "1",
+        "20480"
+      ],
+      [
+        "8192",
+        "16",
+        "20480"
+      ],
+      [
+        "16384",
+        "256",
+        "20480"
+      ],
+      [
+        "32768",
+        "4096",
+        "20480"
+      ]
+    ]
+  },
+  {
+    "n": 4,
+    "policy": "adaptive",
+    "seed": 20261526,
+    "initialFloor": 4,
+    "finalRank": 64,
+    "integrated": 544,
+    "rankTests": 54651,
+    "verified": 181,
+    "branches": 180,
+    "records": [
+      {
+        "depth": 1,
+        "query": 14,
+        "rank": 4,
+        "atoms": 4,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 5,
+        "archive": 3
+      },
+      {
+        "depth": 2,
+        "query": 3,
+        "rank": 8,
+        "atoms": 8,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 10,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 768,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 3072,
+        "rank": 16,
+        "atoms": 16,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 1,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 21,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 256,
+        "rank": 24,
+        "atoms": 24,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 23,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 16,
+        "rank": 28,
+        "atoms": 28,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 27,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 96,
+        "rank": 32,
+        "atoms": 32,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 30,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 4,
+        "rank": 36,
+        "atoms": 36,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 34,
+        "archive": 4
+      },
+      {
+        "depth": 10,
+        "query": 128,
+        "rank": 40,
+        "atoms": 40,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 36,
+        "archive": 4
+      },
+      {
+        "depth": 11,
+        "query": 8224,
+        "rank": 44,
+        "atoms": 44,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 39,
+        "archive": 4
+      },
+      {
+        "depth": 12,
+        "query": 32768,
+        "rank": 48,
+        "atoms": 48,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 41,
+        "archive": 4
+      },
+      {
+        "depth": 13,
+        "query": 32,
+        "rank": 52,
+        "atoms": 52,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 43,
+        "archive": 4
+      },
+      {
+        "depth": 14,
+        "query": 20480,
+        "rank": 56,
+        "atoms": 56,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 44,
+        "archive": 4
+      },
+      {
+        "depth": 15,
+        "query": 1024,
+        "rank": 60,
+        "atoms": 60,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 46,
+        "archive": 4
+      },
+      {
+        "depth": 16,
+        "query": 4096,
+        "rank": 64,
+        "atoms": 64,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 47,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "1",
+        "14",
+        "8"
+      ],
+      [
+        "2",
+        "224",
+        "8"
+      ],
+      [
+        "4",
+        "3584",
+        "8"
+      ],
+      [
+        "8",
+        "57344",
+        "8"
+      ],
+      [
+        "1",
+        "3",
+        "10"
+      ],
+      [
+        "2",
+        "48",
+        "10"
+      ],
+      [
+        "4",
+        "768",
+        "10"
+      ],
+      [
+        "8",
+        "12288",
+        "10"
+      ],
+      [
+        "256",
+        "3",
+        "512"
+      ],
+      [
+        "512",
+        "48",
+        "512"
+      ],
+      [
+        "1024",
+        "768",
+        "512"
+      ],
+      [
+        "2048",
+        "12288",
+        "512"
+      ],
+      [
+        "256",
+        "12",
+        "2048"
+      ],
+      [
+        "512",
+        "192",
+        "2048"
+      ],
+      [
+        "1024",
+        "3072",
+        "2048"
+      ],
+      [
+        "2048",
+        "49152",
+        "2048"
+      ],
+      [
+        "1",
+        "1",
+        "11"
+      ],
+      [
+        "2",
+        "16",
+        "11"
+      ],
+      [
+        "4",
+        "256",
+        "11"
+      ],
+      [
+        "8",
+        "4096",
+        "11"
+      ],
+      [
+        "256",
+        "1",
+        "768"
+      ],
+      [
+        "512",
+        "16",
+        "768"
+      ],
+      [
+        "1024",
+        "256",
+        "768"
+      ],
+      [
+        "2048",
+        "4096",
+        "768"
+      ],
+      [
+        "16",
+        "1",
+        "16"
+      ],
+      [
+        "32",
+        "16",
+        "16"
+      ],
+      [
+        "64",
+        "256",
+        "16"
+      ],
+      [
+        "128",
+        "4096",
+        "16"
+      ],
+      [
+        "16",
+        "6",
+        "64"
+      ],
+      [
+        "32",
+        "96",
+        "64"
+      ],
+      [
+        "64",
+        "1536",
+        "64"
+      ],
+      [
+        "128",
+        "24576",
+        "64"
+      ],
+      [
+        "1",
+        "4",
+        "12"
+      ],
+      [
+        "2",
+        "64",
+        "12"
+      ],
+      [
+        "4",
+        "1024",
+        "12"
+      ],
+      [
+        "8",
+        "16384",
+        "12"
+      ],
+      [
+        "16",
+        "8",
+        "128"
+      ],
+      [
+        "32",
+        "128",
+        "128"
+      ],
+      [
+        "64",
+        "2048",
+        "128"
+      ],
+      [
+        "128",
+        "32768",
+        "128"
+      ],
+      [
+        "4112",
+        "2",
+        "8192"
+      ],
+      [
+        "8224",
+        "32",
+        "8192"
+      ],
+      [
+        "16448",
+        "512",
+        "8192"
+      ],
+      [
+        "32896",
+        "8192",
+        "8192"
+      ],
+      [
+        "4096",
+        "8",
+        "32768"
+      ],
+      [
+        "8192",
+        "128",
+        "32768"
+      ],
+      [
+        "16384",
+        "2048",
+        "32768"
+      ],
+      [
+        "32768",
+        "32768",
+        "32768"
+      ],
+      [
+        "16",
+        "2",
+        "8288"
+      ],
+      [
+        "32",
+        "32",
+        "8288"
+      ],
+      [
+        "64",
+        "512",
+        "8288"
+      ],
+      [
+        "128",
+        "8192",
+        "8288"
+      ],
+      [
+        "4096",
+        "5",
+        "16384"
+      ],
+      [
+        "8192",
+        "80",
+        "16384"
+      ],
+      [
+        "16384",
+        "1280",
+        "16384"
+      ],
+      [
+        "32768",
+        "20480",
+        "16384"
+      ],
+      [
+        "256",
+        "4",
+        "3072"
+      ],
+      [
+        "512",
+        "64",
+        "3072"
+      ],
+      [
+        "1024",
+        "1024",
+        "3072"
+      ],
+      [
+        "2048",
+        "16384",
+        "3072"
+      ],
+      [
+        "4096",
+        "1",
+        "20480"
+      ],
+      [
+        "8192",
+        "16",
+        "20480"
+      ],
+      [
+        "16384",
+        "256",
+        "20480"
+      ],
+      [
+        "32768",
+        "4096",
+        "20480"
+      ]
+    ]
+  },
+  {
+    "n": 4,
+    "policy": "hybrid",
+    "seed": 20261524,
+    "initialFloor": 4,
+    "finalRank": 47,
+    "integrated": 470,
+    "rankTests": 50683,
+    "verified": 200,
+    "branches": 199,
+    "records": [
+      {
+        "depth": 1,
+        "query": 14,
+        "rank": 4,
+        "atoms": 4,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 5,
+        "archive": 4
+      },
+      {
+        "depth": 2,
+        "query": 3,
+        "rank": 8,
+        "atoms": 8,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 10,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 768,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 3072,
+        "rank": 16,
+        "atoms": 16,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 1,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 21,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 256,
+        "rank": 23,
+        "atoms": 23,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 6
+          }
+        ],
+        "incumbentRank": 23,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 16,
+        "rank": 27,
+        "atoms": 27,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 6
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 27,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 96,
+        "rank": 30,
+        "atoms": 30,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          }
+        ],
+        "incumbentRank": 30,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 4,
+        "rank": 34,
+        "atoms": 34,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 34,
+        "archive": 4
+      },
+      {
+        "depth": 10,
+        "query": 128,
+        "rank": 36,
+        "atoms": 36,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 10
+          }
+        ],
+        "incumbentRank": 36,
+        "archive": 4
+      },
+      {
+        "depth": 11,
+        "query": 8224,
+        "rank": 39,
+        "atoms": 39,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 11
+          }
+        ],
+        "incumbentRank": 39,
+        "archive": 4
+      },
+      {
+        "depth": 12,
+        "query": 32768,
+        "rank": 41,
+        "atoms": 41,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 12
+          }
+        ],
+        "incumbentRank": 41,
+        "archive": 4
+      },
+      {
+        "depth": 13,
+        "query": 32,
+        "rank": 43,
+        "atoms": 43,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 13
+          }
+        ],
+        "incumbentRank": 43,
+        "archive": 4
+      },
+      {
+        "depth": 14,
+        "query": 20480,
+        "rank": 44,
+        "atoms": 44,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 13
+          },
+          {
+            "added": 1,
+            "used": 4,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 44,
+        "archive": 4
+      },
+      {
+        "depth": 15,
+        "query": 1024,
+        "rank": 46,
+        "atoms": 46,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 15
+          }
+        ],
+        "incumbentRank": 46,
+        "archive": 4
+      },
+      {
+        "depth": 16,
+        "query": 4096,
+        "rank": 47,
+        "atoms": 47,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 16
+          }
+        ],
+        "incumbentRank": 47,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "8",
+        "60910",
+        "61672"
+      ],
+      [
+        "28744",
+        "28006",
+        "61676"
+      ],
+      [
+        "53248",
+        "14515",
+        "36864"
+      ],
+      [
+        "1033",
+        "771",
+        "3846"
+      ],
+      [
+        "39072",
+        "25273",
+        "31840"
+      ],
+      [
+        "24576",
+        "28086",
+        "16384"
+      ],
+      [
+        "1024",
+        "3795",
+        "23046"
+      ],
+      [
+        "345",
+        "514",
+        "3840"
+      ],
+      [
+        "21514",
+        "3536",
+        "24070"
+      ],
+      [
+        "39104",
+        "45753",
+        "96"
+      ],
+      [
+        "20480",
+        "15843",
+        "7686"
+      ],
+      [
+        "2048",
+        "49683",
+        "30816"
+      ],
+      [
+        "1802",
+        "528",
+        "3591"
+      ],
+      [
+        "1849",
+        "521",
+        "80"
+      ],
+      [
+        "73",
+        "776",
+        "92"
+      ],
+      [
+        "28750",
+        "2816",
+        "12"
+      ],
+      [
+        "21002",
+        "544",
+        "3584"
+      ],
+      [
+        "2128",
+        "4627",
+        "3936"
+      ],
+      [
+        "1887",
+        "512",
+        "7"
+      ],
+      [
+        "3328",
+        "531",
+        "2304"
+      ],
+      [
+        "63648",
+        "37561",
+        "28672"
+      ],
+      [
+        "13322",
+        "2992",
+        "20480"
+      ],
+      [
+        "13",
+        "768",
+        "9"
+      ],
+      [
+        "36864",
+        "26803",
+        "15456"
+      ],
+      [
+        "20488",
+        "12339",
+        "61446"
+      ],
+      [
+        "1952",
+        "537",
+        "3152"
+      ],
+      [
+        "1792",
+        "543",
+        "2903"
+      ],
+      [
+        "80",
+        "4638",
+        "3863"
+      ],
+      [
+        "9",
+        "782",
+        "3923"
+      ],
+      [
+        "6",
+        "3328",
+        "4"
+      ],
+      [
+        "37888",
+        "2227",
+        "23552"
+      ],
+      [
+        "96",
+        "25193",
+        "64"
+      ],
+      [
+        "28832",
+        "37401",
+        "28896"
+      ],
+      [
+        "22528",
+        "12819",
+        "32256"
+      ],
+      [
+        "10",
+        "3552",
+        "24066"
+      ],
+      [
+        "28712",
+        "37529",
+        "224"
+      ],
+      [
+        "40608",
+        "697",
+        "3072"
+      ],
+      [
+        "160",
+        "25113",
+        "31776"
+      ],
+      [
+        "36928",
+        "47283",
+        "61536"
+      ],
+      [
+        "4168",
+        "45243",
+        "61440"
+      ],
+      [
+        "1881",
+        "527",
+        "3927"
+      ],
+      [
+        "208",
+        "4633",
+        "144"
+      ],
+      [
+        "88",
+        "4625",
+        "231"
+      ],
+      [
+        "28682",
+        "2944",
+        "20492"
+      ],
+      [
+        "1536",
+        "735",
+        "1024"
+      ],
+      [
+        "28672",
+        "28134",
+        "45292"
+      ],
+      [
+        "64",
+        "25966",
+        "61612"
+      ]
+    ]
+  },
+  {
+    "n": 4,
+    "policy": "hybrid",
+    "seed": 20261525,
+    "initialFloor": 4,
+    "finalRank": 47,
+    "integrated": 470,
+    "rankTests": 50880,
+    "verified": 200,
+    "branches": 199,
+    "records": [
+      {
+        "depth": 1,
+        "query": 14,
+        "rank": 4,
+        "atoms": 4,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 5,
+        "archive": 4
+      },
+      {
+        "depth": 2,
+        "query": 3,
+        "rank": 8,
+        "atoms": 8,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 10,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 768,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 3072,
+        "rank": 16,
+        "atoms": 16,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 1,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 21,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 256,
+        "rank": 23,
+        "atoms": 23,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 6
+          }
+        ],
+        "incumbentRank": 23,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 16,
+        "rank": 27,
+        "atoms": 27,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 6
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 27,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 96,
+        "rank": 30,
+        "atoms": 30,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          }
+        ],
+        "incumbentRank": 30,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 4,
+        "rank": 34,
+        "atoms": 34,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 34,
+        "archive": 4
+      },
+      {
+        "depth": 10,
+        "query": 128,
+        "rank": 36,
+        "atoms": 36,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 10
+          }
+        ],
+        "incumbentRank": 36,
+        "archive": 4
+      },
+      {
+        "depth": 11,
+        "query": 8224,
+        "rank": 39,
+        "atoms": 39,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 11
+          }
+        ],
+        "incumbentRank": 39,
+        "archive": 4
+      },
+      {
+        "depth": 12,
+        "query": 32768,
+        "rank": 41,
+        "atoms": 41,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 12
+          }
+        ],
+        "incumbentRank": 41,
+        "archive": 4
+      },
+      {
+        "depth": 13,
+        "query": 32,
+        "rank": 43,
+        "atoms": 43,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 13
+          }
+        ],
+        "incumbentRank": 43,
+        "archive": 4
+      },
+      {
+        "depth": 14,
+        "query": 20480,
+        "rank": 44,
+        "atoms": 44,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 13
+          },
+          {
+            "added": 1,
+            "used": 4,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 44,
+        "archive": 4
+      },
+      {
+        "depth": 15,
+        "query": 1024,
+        "rank": 46,
+        "atoms": 46,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 15
+          }
+        ],
+        "incumbentRank": 46,
+        "archive": 4
+      },
+      {
+        "depth": 16,
+        "query": 4096,
+        "rank": 47,
+        "atoms": 47,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 16
+          }
+        ],
+        "incumbentRank": 47,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "8",
+        "60910",
+        "61672"
+      ],
+      [
+        "28744",
+        "28006",
+        "61676"
+      ],
+      [
+        "53248",
+        "14515",
+        "36864"
+      ],
+      [
+        "1033",
+        "771",
+        "3846"
+      ],
+      [
+        "39072",
+        "25273",
+        "31840"
+      ],
+      [
+        "24576",
+        "28086",
+        "16384"
+      ],
+      [
+        "1024",
+        "3795",
+        "23046"
+      ],
+      [
+        "345",
+        "514",
+        "3840"
+      ],
+      [
+        "21514",
+        "3536",
+        "24070"
+      ],
+      [
+        "39104",
+        "45753",
+        "96"
+      ],
+      [
+        "20480",
+        "15843",
+        "7686"
+      ],
+      [
+        "2048",
+        "49683",
+        "30816"
+      ],
+      [
+        "1802",
+        "528",
+        "3591"
+      ],
+      [
+        "1849",
+        "521",
+        "80"
+      ],
+      [
+        "73",
+        "776",
+        "92"
+      ],
+      [
+        "28750",
+        "2816",
+        "12"
+      ],
+      [
+        "21002",
+        "544",
+        "3584"
+      ],
+      [
+        "2128",
+        "4627",
+        "3936"
+      ],
+      [
+        "1887",
+        "512",
+        "7"
+      ],
+      [
+        "3328",
+        "531",
+        "2304"
+      ],
+      [
+        "63648",
+        "37561",
+        "28672"
+      ],
+      [
+        "13322",
+        "2992",
+        "20480"
+      ],
+      [
+        "13",
+        "768",
+        "9"
+      ],
+      [
+        "36864",
+        "26803",
+        "15456"
+      ],
+      [
+        "20488",
+        "12339",
+        "61446"
+      ],
+      [
+        "1952",
+        "537",
+        "3152"
+      ],
+      [
+        "1792",
+        "543",
+        "2903"
+      ],
+      [
+        "80",
+        "4638",
+        "3863"
+      ],
+      [
+        "9",
+        "782",
+        "3923"
+      ],
+      [
+        "6",
+        "3328",
+        "4"
+      ],
+      [
+        "37888",
+        "2227",
+        "23552"
+      ],
+      [
+        "96",
+        "25193",
+        "64"
+      ],
+      [
+        "28832",
+        "37401",
+        "28896"
+      ],
+      [
+        "22528",
+        "12819",
+        "32256"
+      ],
+      [
+        "10",
+        "3552",
+        "24066"
+      ],
+      [
+        "28712",
+        "37529",
+        "224"
+      ],
+      [
+        "40608",
+        "697",
+        "3072"
+      ],
+      [
+        "160",
+        "25113",
+        "31776"
+      ],
+      [
+        "36928",
+        "47283",
+        "61536"
+      ],
+      [
+        "4168",
+        "45243",
+        "61440"
+      ],
+      [
+        "1881",
+        "527",
+        "3927"
+      ],
+      [
+        "208",
+        "4633",
+        "144"
+      ],
+      [
+        "88",
+        "4625",
+        "231"
+      ],
+      [
+        "28682",
+        "2944",
+        "20492"
+      ],
+      [
+        "1536",
+        "735",
+        "1024"
+      ],
+      [
+        "28672",
+        "28134",
+        "45292"
+      ],
+      [
+        "64",
+        "25966",
+        "61612"
+      ]
+    ]
+  },
+  {
+    "n": 4,
+    "policy": "hybrid",
+    "seed": 20261526,
+    "initialFloor": 4,
+    "finalRank": 47,
+    "integrated": 470,
+    "rankTests": 50519,
+    "verified": 200,
+    "branches": 199,
+    "records": [
+      {
+        "depth": 1,
+        "query": 14,
+        "rank": 4,
+        "atoms": 4,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 5,
+        "archive": 4
+      },
+      {
+        "depth": 2,
+        "query": 3,
+        "rank": 8,
+        "atoms": 8,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 10,
+        "archive": 4
+      },
+      {
+        "depth": 3,
+        "query": 768,
+        "rank": 12,
+        "atoms": 12,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 14,
+        "archive": 4
+      },
+      {
+        "depth": 4,
+        "query": 3072,
+        "rank": 16,
+        "atoms": 16,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 17,
+        "archive": 4
+      },
+      {
+        "depth": 5,
+        "query": 1,
+        "rank": 20,
+        "atoms": 20,
+        "route": [
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 21,
+        "archive": 4
+      },
+      {
+        "depth": 6,
+        "query": 256,
+        "rank": 23,
+        "atoms": 23,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 6
+          }
+        ],
+        "incumbentRank": 23,
+        "archive": 4
+      },
+      {
+        "depth": 7,
+        "query": 16,
+        "rank": 27,
+        "atoms": 27,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 6
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 27,
+        "archive": 4
+      },
+      {
+        "depth": 8,
+        "query": 96,
+        "rank": 30,
+        "atoms": 30,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          }
+        ],
+        "incumbentRank": 30,
+        "archive": 4
+      },
+      {
+        "depth": 9,
+        "query": 4,
+        "rank": 34,
+        "atoms": 34,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 8
+          },
+          {
+            "added": 4,
+            "used": 0,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 34,
+        "archive": 4
+      },
+      {
+        "depth": 10,
+        "query": 128,
+        "rank": 36,
+        "atoms": 36,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 10
+          }
+        ],
+        "incumbentRank": 36,
+        "archive": 4
+      },
+      {
+        "depth": 11,
+        "query": 8224,
+        "rank": 39,
+        "atoms": 39,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 11
+          }
+        ],
+        "incumbentRank": 39,
+        "archive": 4
+      },
+      {
+        "depth": 12,
+        "query": 32768,
+        "rank": 41,
+        "atoms": 41,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 12
+          }
+        ],
+        "incumbentRank": 41,
+        "archive": 4
+      },
+      {
+        "depth": 13,
+        "query": 32,
+        "rank": 43,
+        "atoms": 43,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 13
+          }
+        ],
+        "incumbentRank": 43,
+        "archive": 4
+      },
+      {
+        "depth": 14,
+        "query": 20480,
+        "rank": 44,
+        "atoms": 44,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 13
+          },
+          {
+            "added": 1,
+            "used": 4,
+            "source": "carry"
+          }
+        ],
+        "incumbentRank": 44,
+        "archive": 4
+      },
+      {
+        "depth": 15,
+        "query": 1024,
+        "rank": 46,
+        "atoms": 46,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 15
+          }
+        ],
+        "incumbentRank": 46,
+        "archive": 4
+      },
+      {
+        "depth": 16,
+        "query": 4096,
+        "rank": 47,
+        "atoms": 47,
+        "route": [
+          {
+            "source": "incumbent-reset",
+            "depth": 16
+          }
+        ],
+        "incumbentRank": 47,
+        "archive": 4
+      }
+    ],
+    "terms": [
+      [
+        "8",
+        "60910",
+        "61672"
+      ],
+      [
+        "28744",
+        "28006",
+        "61676"
+      ],
+      [
+        "53248",
+        "14515",
+        "36864"
+      ],
+      [
+        "1033",
+        "771",
+        "3846"
+      ],
+      [
+        "39072",
+        "25273",
+        "31840"
+      ],
+      [
+        "24576",
+        "28086",
+        "16384"
+      ],
+      [
+        "1024",
+        "3795",
+        "23046"
+      ],
+      [
+        "345",
+        "514",
+        "3840"
+      ],
+      [
+        "21514",
+        "3536",
+        "24070"
+      ],
+      [
+        "39104",
+        "45753",
+        "96"
+      ],
+      [
+        "20480",
+        "15843",
+        "7686"
+      ],
+      [
+        "2048",
+        "49683",
+        "30816"
+      ],
+      [
+        "1802",
+        "528",
+        "3591"
+      ],
+      [
+        "1849",
+        "521",
+        "80"
+      ],
+      [
+        "73",
+        "776",
+        "92"
+      ],
+      [
+        "28750",
+        "2816",
+        "12"
+      ],
+      [
+        "21002",
+        "544",
+        "3584"
+      ],
+      [
+        "2128",
+        "4627",
+        "3936"
+      ],
+      [
+        "1887",
+        "512",
+        "7"
+      ],
+      [
+        "3328",
+        "531",
+        "2304"
+      ],
+      [
+        "63648",
+        "37561",
+        "28672"
+      ],
+      [
+        "13322",
+        "2992",
+        "20480"
+      ],
+      [
+        "13",
+        "768",
+        "9"
+      ],
+      [
+        "36864",
+        "26803",
+        "15456"
+      ],
+      [
+        "20488",
+        "12339",
+        "61446"
+      ],
+      [
+        "1952",
+        "537",
+        "3152"
+      ],
+      [
+        "1792",
+        "543",
+        "2903"
+      ],
+      [
+        "80",
+        "4638",
+        "3863"
+      ],
+      [
+        "9",
+        "782",
+        "3923"
+      ],
+      [
+        "6",
+        "3328",
+        "4"
+      ],
+      [
+        "37888",
+        "2227",
+        "23552"
+      ],
+      [
+        "96",
+        "25193",
+        "64"
+      ],
+      [
+        "28832",
+        "37401",
+        "28896"
+      ],
+      [
+        "22528",
+        "12819",
+        "32256"
+      ],
+      [
+        "10",
+        "3552",
+        "24066"
+      ],
+      [
+        "28712",
+        "37529",
+        "224"
+      ],
+      [
+        "40608",
+        "697",
+        "3072"
+      ],
+      [
+        "160",
+        "25113",
+        "31776"
+      ],
+      [
+        "36928",
+        "47283",
+        "61536"
+      ],
+      [
+        "4168",
+        "45243",
+        "61440"
+      ],
+      [
+        "1881",
+        "527",
+        "3927"
+      ],
+      [
+        "208",
+        "4633",
+        "144"
+      ],
+      [
+        "88",
+        "4625",
+        "231"
+      ],
+      [
+        "28682",
+        "2944",
+        "20492"
+      ],
+      [
+        "1536",
+        "735",
+        "1024"
+      ],
+      [
+        "28672",
+        "28134",
+        "45292"
+      ],
+      [
+        "64",
+        "25966",
+        "61612"
+      ]
+    ]
+  }
+]
