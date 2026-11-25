@@ -1,0 +1,253 @@
+{
+  "heldoutQueries": 6144,
+  "incrementalSources": 27,
+  "incrementalQueries": 3456,
+  "rows": [
+    {
+      "n": 32,
+      "overlap": false,
+      "sourceTerms": 91,
+      "rank": 5,
+      "decoderTerms": 3,
+      "formation": 7173,
+      "verification": 2584,
+      "perQueryBound": 45,
+      "guaranteedCrossover": 213,
+      "checkpoints": [
+        {
+          "queries": 128,
+          "direct": 11648,
+          "acquisition": 3261,
+          "warm": 384,
+          "total": 13402
+        },
+        {
+          "queries": 256,
+          "direct": 23296,
+          "acquisition": 6592,
+          "warm": 768,
+          "total": 17117
+        },
+        {
+          "queries": 512,
+          "direct": 46592,
+          "acquisition": 13230,
+          "warm": 1536,
+          "total": 24523
+        },
+        {
+          "queries": 1024,
+          "direct": 93184,
+          "acquisition": 26490,
+          "warm": 3072,
+          "total": 39319
+        }
+      ]
+    },
+    {
+      "n": 32,
+      "overlap": true,
+      "sourceTerms": 234,
+      "rank": 5,
+      "decoderTerms": 3,
+      "formation": 15456,
+      "verification": 4984,
+      "perQueryBound": 87,
+      "guaranteedCrossover": 140,
+      "checkpoints": [
+        {
+          "queries": 128,
+          "direct": 29952,
+          "acquisition": 6049,
+          "warm": 384,
+          "total": 26873
+        },
+        {
+          "queries": 256,
+          "direct": 59904,
+          "acquisition": 11991,
+          "warm": 768,
+          "total": 33199
+        },
+        {
+          "queries": 512,
+          "direct": 119808,
+          "acquisition": 24151,
+          "warm": 1536,
+          "total": 46127
+        },
+        {
+          "queries": 1024,
+          "direct": 239616,
+          "acquisition": 48246,
+          "warm": 3072,
+          "total": 71758
+        }
+      ]
+    },
+    {
+      "n": 64,
+      "overlap": false,
+      "sourceTerms": 350,
+      "rank": 5,
+      "decoderTerms": 3,
+      "formation": 37356,
+      "verification": 9701,
+      "perQueryBound": 77,
+      "guaranteedCrossover": 173,
+      "checkpoints": [
+        {
+          "queries": 128,
+          "direct": 44800,
+          "acquisition": 5344,
+          "warm": 384,
+          "total": 52785
+        },
+        {
+          "queries": 256,
+          "direct": 89600,
+          "acquisition": 10762,
+          "warm": 768,
+          "total": 58587
+        },
+        {
+          "queries": 512,
+          "direct": 179200,
+          "acquisition": 21513,
+          "warm": 1536,
+          "total": 70106
+        },
+        {
+          "queries": 1024,
+          "direct": 358400,
+          "acquisition": 43120,
+          "warm": 3072,
+          "total": 93249
+        }
+      ]
+    },
+    {
+      "n": 64,
+      "overlap": true,
+      "sourceTerms": 995,
+      "rank": 5,
+      "decoderTerms": 3,
+      "formation": 95234,
+      "verification": 20030,
+      "perQueryBound": 154,
+      "guaranteedCrossover": 138,
+      "checkpoints": [
+        {
+          "queries": 128,
+          "direct": 127360,
+          "acquisition": 10319,
+          "warm": 384,
+          "total": 125967
+        },
+        {
+          "queries": 256,
+          "direct": 254720,
+          "acquisition": 20503,
+          "warm": 768,
+          "total": 136535
+        },
+        {
+          "queries": 512,
+          "direct": 509440,
+          "acquisition": 41360,
+          "warm": 1536,
+          "total": 158160
+        },
+        {
+          "queries": 1024,
+          "direct": 1018880,
+          "acquisition": 82630,
+          "warm": 3072,
+          "total": 200966
+        }
+      ]
+    },
+    {
+      "n": 128,
+      "overlap": false,
+      "sourceTerms": 1351,
+      "rank": 5,
+      "decoderTerms": 3,
+      "formation": 227675,
+      "verification": 37257,
+      "perQueryBound": 141,
+      "guaranteedCrossover": 219,
+      "checkpoints": [
+        {
+          "queries": 128,
+          "direct": 172928,
+          "acquisition": 9547,
+          "warm": 384,
+          "total": 274863
+        },
+        {
+          "queries": 256,
+          "direct": 345856,
+          "acquisition": 18968,
+          "warm": 768,
+          "total": 284668
+        },
+        {
+          "queries": 512,
+          "direct": 691712,
+          "acquisition": 38006,
+          "warm": 1536,
+          "total": 304474
+        },
+        {
+          "queries": 1024,
+          "direct": 1383424,
+          "acquisition": 75761,
+          "warm": 3072,
+          "total": 343765
+        }
+      ]
+    },
+    {
+      "n": 128,
+      "overlap": true,
+      "sourceTerms": 4073,
+      "rank": 5,
+      "decoderTerms": 3,
+      "formation": 646760,
+      "verification": 81967,
+      "perQueryBound": 324,
+      "guaranteedCrossover": 195,
+      "checkpoints": [
+        {
+          "queries": 128,
+          "direct": 521344,
+          "acquisition": 21483,
+          "warm": 384,
+          "total": 750594
+        },
+        {
+          "queries": 256,
+          "direct": 1042688,
+          "acquisition": 42634,
+          "warm": 768,
+          "total": 772129
+        },
+        {
+          "queries": 512,
+          "direct": 2085376,
+          "acquisition": 85074,
+          "warm": 1536,
+          "total": 815337
+        },
+        {
+          "queries": 1024,
+          "direct": 4170752,
+          "acquisition": 169247,
+          "warm": 3072,
+          "total": 901046
+        }
+      ]
+    }
+  ]
+}
