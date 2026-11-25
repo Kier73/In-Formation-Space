@@ -1,5 +1,5 @@
 "use strict";
-function experiment(api){
+function experiment(api,mode){
  const assert=(p,m)=>{if(!p)throw Error(m)}, B=BigInt, mod=(x,m)=>((x%m)+m)%m;
  const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){let t=a%b;a=b;b=t}return a},lcm=(a,b)=>a/gcd(a,b)*b;
  const tri=n=>n*(n-1n)/2n;
@@ -72,6 +72,7 @@ function experiment(api){
   return {n,prefix,range(a,b){assert(a<=b,"order");return prefix(b)-prefix(a)}};
  }
  function flatOracle(bytes){let p=[0n];for(const x of bytes)p.push(p.at(-1)+B(x));return p}
+ if(mode==='api')return {index,meter};
  let small={objects:0,bytes:0,rangeChecks:0,residueEntries:0,patternTerms:0,cycleSearch:0,expandedRecords:0,modelRecords:0};
  for(const family of ["constant","drifting","piecewise","mutated","irregular"])for(let k=0;k<12;k++){
   const f=api.fixture(1701+7919*k,family),bs=api.decode(api.compile(f.rs).wire),m=meter(),ix=index(bs,m),p=flatOracle(f.source);
