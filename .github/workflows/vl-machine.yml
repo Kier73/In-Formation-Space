@@ -71,3 +71,36 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/external/ecpu-vlm
         run: make && python3 -m unittest -v test_ecpu_bridge.Bridge
+
+  cross-observer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/VL-K
+          ref: ad6dd45d06b9f349526783d45d0e5706a49ade79
+          path: external/vlk
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - run: python -m pip install numpy==2.3.5
+      - name: Build independent pinned K1 substrate
+        working-directory: external/vlk
+        run: |
+          mkdir -p dist
+          gcc -std=c11 -O2 -Wall -Wextra -Werror -shared -fPIC src/vlk1.c -o dist/libvlk.so
+      - name: Cross-kernel experience and qualification
+        working-directory: experiments/vl-machine/native64
+        env:
+          VLK_ROOT: ${{ github.workspace }}/external/vlk
+        run: |
+          make
+          python -m unittest -v test_cross_observer
+          python cross_observer.py
+          python -c "import json; a=json.load(open('cross-observer-data.json'))['report']; b=json.load(open('datasets/vlm013/recipe.json')); assert all(a[k]==b[k] for k in ('train_digest','validation_digest','heldout_digest','stress_digest')); assert a['stats']['queries']==960 and a['stress']['queries']==480"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vlm-cross-observer
+          path: experiments/vl-machine/native64/cross-observer-data.json
