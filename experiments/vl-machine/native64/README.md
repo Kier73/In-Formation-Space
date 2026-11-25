@@ -40,3 +40,22 @@ Unify typed graph protocol with the portable source identity, bounded session ha
 ## Nonlinear native path Ground
 
 A word packs two 16-bit coordinates. Let k be divisible by 65536, l(x)=x & 65535, E(x)=x+k*l(x)^3 and D(x)=x-k*l(x)^3, with arithmetic modulo 2^32. Because adding a multiple of 65536 leaves l unchanged, D(E(x))=x and E(D(x))=x. Let M(x)=x+d. The admitted graph is exactly F=D∘M∘E, so F^n(x)=D(E(x)+n*d). This is exact for every 32-bit x and every unsigned 64-bit n. For k=65536,d=1 the second finite difference at x=0,1,2 is nonzero, so F is not affine. The verifier checks all 16 nodes against this canonical graph; no inference from sampled outputs is accepted. One ordinary transition needs 11 word operators; navigation needs 12 word operators independently of n. A 10^12-step reference would require 11*10^12 word operators (analytical, not executed). This is a restricted reversible-chart family and not automatic discovery of arbitrary nonlinear laws. It is conceptually related to IFS [RCG-005 nonlinear orbit](../../real_connectome_ground/continuity/nonlinear_orbit/README.md) through exact conjugacy; this word-ring specialization is independently implemented.
+
+## VLM-003 — structural processes
+
+Publish the currently committed graph and its verified Ground (if present) into one of eight immutable snapshot slots. Up to 64 processes may refer to these snapshots. Graph replacement in the staging interface cannot change a published graph. Generation-tagged handles reject stale references within one authority lifetime; slots retire rather than wrap. Graph release fails while processes refer to it.
+
+| Command | Words | Meaning |
+|---|---|---|
+| P | none | Publish graph; returns HANDLE |
+| D | graph | Release unreferenced graph |
+| S | graph, seed | Spawn process; returns HANDLE |
+| T | process, time high, time low | Seek absolute logical time; RESULT zero and work |
+| O | process | Observe current state and work |
+| X | process | Close process |
+| K | process | Return CHECKPOINT graph, seed, time high, time low (Ground required) |
+| R | graph, seed, time high, time low | Restore as new process (Ground required) |
+
+A grounded process keeps seed and absolute time, not a materialized current result: seek (even backward) changes only the coordinate and reports zero word-operator executions. Observation reconstructs using the pinned admitted Ground. Ungrounded processes advance at most 1024 transitions per request, retain current state and reject backward or over-budget seeks. Checkpoints are 16-byte logical payloads, local recipes rather than authenticated or cross-boot identities; the graph must remain published. A restored process gets a new handle. The static process struct also contains lifecycle metadata and a fallback word; 16 bytes is not the actual in-memory size. The shared graph table retains original descriptors for audit and fallback.
+
+Local build: 13,524-byte ELF32 boot envelope, 7,864 bytes text, 273,696 bytes BSS, no undefined symbols in linked ELF64. Run `make && python3 -m unittest -v test_core test_process`. Seven hosted groups passed, including 64 processes using two different graphs, 1,024 randomized unsigned-64-bit time observations, 64 close/restore comparisons, graph and process exhaustion, stale handles and bounded fallback. Actual guest process protocol test is added to test_guest.py; QEMU unavailable locally, hosted CI pending. These are sequentially interleaved virtual processes, not 64 simultaneous hardware threads. Next: stable source identities and portable capsules reverified at a fresh authority, task queues, scheduling and native E-CPU handoff.

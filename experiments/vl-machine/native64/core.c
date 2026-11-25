@@ -69,12 +69,12 @@ int admit_chart(uint32_t k,uint32_t d){
     ga=k;gb=d;ground=2;return 1;
 }
 static uint32_t shear(uint32_t x,uint32_t k){uint32_t l=x&65535u;return x+k*l*l*l;}
-int run(uint32_t x,uint32_t *y,uint32_t *work){
-    if(!count)return 0;
+static int evaluate(const Node *nodes,const uint8_t *needed,uint32_t n,uint32_t out,uint32_t kind,uint32_t a0,uint32_t b0,uint32_t x,uint32_t *y,uint32_t *work){
+    if(!n)return 0;
     *work=0;
-    if(ground==1){*y=ga*x+gb;*work=2;return 1;}
-    for(uint32_t i=0;i<count;i++)if(live[i]){
-        Node v=banks[active][i];uint32_t a=values[v.a],b=values[v.b];
+    if(kind==1){*y=a0*x+b0;*work=2;return 1;}
+    for(uint32_t i=0;i<n;i++)if(needed[i]){
+        Node v=nodes[i];uint32_t a=values[v.a],b=values[v.b];
         switch(v.op){
         case INPUT:values[i]=x;break;
         case CONST:values[i]=v.k;break;
@@ -87,12 +87,83 @@ int run(uint32_t x,uint32_t *y,uint32_t *work){
         }
         *work+=(v.op>=ADD);
     }
-    *y=values[output];return 1;
+    *y=values[out];return 1;
 }
-int navigate(uint32_t x,uint64_t n,uint32_t *y,uint32_t *work){
-    if(!ground)return 0;
-    if(ground==2){*y=shear(shear(x,ga)+(uint32_t)n*gb,0u-ga);*work=12;return 1;}
-    uint32_t a=ga,b=gb;*work=0;
+static int nav(uint32_t kind,uint32_t a,uint32_t b,uint32_t x,uint64_t n,uint32_t *y,uint32_t *work){
+    if(!kind)return 0;
+    if(kind==2){*y=shear(shear(x,a)+(uint32_t)n*b,0u-a);*work=12;return 1;}
+    *work=0;
     while(n){if(n&1){x=a*x+b;(*work)++;}b=a*b+b;a=a*a;n>>=1;(*work)++;}
     *y=x;return 1;
+}
+
+int run(uint32_t x,uint32_t *y,uint32_t *work){
+    return evaluate(banks[active],live,count,output,ground,ga,gb,x,y,work);
+}
+int navigate(uint32_t x,uint64_t n,uint32_t *y,uint32_t *work){return nav(ground,ga,gb,x,n,y,work);}
+
+/* Immutable published graph snapshots; serial authority, no concurrency. */
+#define GRAPHS 8u
+#define PROCS 64u
+#define GEN_MAX 0xffffffu
+#define STEP_LIMIT 1024u
+typedef struct {Node nodes[CAP];uint8_t needed[CAP];uint32_t n,out,kind,a,b,gen,refs;} Graph;
+typedef struct {uint64_t t;uint32_t graph,seed,current,gen;uint8_t used;} Proc;
+static Graph graphs[GRAPHS];
+static Proc procs[PROCS];
+static Graph *graph_lookup(uint32_t h){
+    uint32_t i=h&255u;
+    if(i>=GRAPHS||!graphs[i].n||graphs[i].gen!=(h>>8))return 0;
+    return &graphs[i];
+}
+static Proc *proc_lookup(uint32_t h){
+    uint32_t i=h&255u;
+    if(i>=PROCS||!procs[i].used||procs[i].gen!=(h>>8))return 0;
+    return &procs[i];
+}
+uint32_t graph_publish(void){
+    if(!count)return 0;
+    for(uint32_t i=0;i<GRAPHS;i++)if(!graphs[i].n&&graphs[i].gen<GEN_MAX){
+        Graph *g=&graphs[i];
+        for(uint32_t j=0;j<count;j++){g->nodes[j]=banks[active][j];g->needed[j]=live[j];}
+        g->n=count;g->out=output;g->kind=ground;g->a=ga;g->b=gb;g->refs=0;g->gen++;
+        return (g->gen<<8)|i;
+    }
+    return 0;
+}
+int graph_release(uint32_t h){Graph *g=graph_lookup(h);if(!g||g->refs)return 0;g->n=0;return 1;}
+uint32_t proc_spawn(uint32_t h,uint32_t seed){
+    Graph *g=graph_lookup(h);if(!g)return 0;
+    for(uint32_t i=0;i<PROCS;i++)if(!procs[i].used&&procs[i].gen<GEN_MAX){
+        Proc *p=&procs[i];p->graph=h;p->seed=seed;p->current=g->kind?0:seed;p->t=0;p->gen++;p->used=1;g->refs++;
+        return (p->gen<<8)|i;
+    }
+    return 0;
+}
+int proc_close(uint32_t h){Proc *p=proc_lookup(h);if(!p)return 0;Graph *g=graph_lookup(p->graph);if(!g)return 0;g->refs--;p->used=0;return 1;}
+int proc_seek(uint32_t h,uint64_t t,uint32_t *work){
+    Proc *p=proc_lookup(h);if(!p)return 0;Graph *g=graph_lookup(p->graph);if(!g)return 0;
+    *work=0;
+    if(g->kind){p->t=t;return 1;} /* Structural: no state realization. */
+    if(t<p->t||t-p->t>STEP_LIMIT)return 0;
+    uint32_t x=p->current,k;
+    for(uint64_t i=p->t;i<t;i++){
+        if(!evaluate(g->nodes,g->needed,g->n,g->out,0,0,0,x,&x,&k))return 0;
+        *work+=k;
+    }
+    p->current=x;p->t=t;return 1;
+}
+int proc_read(uint32_t h,uint32_t *y,uint32_t *work){
+    Proc *p=proc_lookup(h);if(!p)return 0;Graph *g=graph_lookup(p->graph);if(!g)return 0;
+    if(g->kind)return nav(g->kind,g->a,g->b,p->seed,p->t,y,work);
+    *y=p->current;*work=0;return 1;
+}
+/* Checkpoint is a local reconstruction recipe, not a signed claim. */
+int proc_checkpoint(uint32_t h,uint32_t *graph,uint32_t *seed,uint64_t *t){
+    Proc *p=proc_lookup(h);if(!p)return 0;Graph *g=graph_lookup(p->graph);if(!g||!g->kind)return 0;
+    *graph=p->graph;*seed=p->seed;*t=p->t;return 1;
+}
+uint32_t proc_restore(uint32_t graph,uint32_t seed,uint64_t t){
+    Graph *g=graph_lookup(graph);if(!g||!g->kind)return 0;
+    uint32_t h=proc_spawn(graph,seed);if(h)proc_lookup(h)->t=t;return h;
 }

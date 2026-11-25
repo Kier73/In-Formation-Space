@@ -2,6 +2,10 @@
 
 A ground-up interactable computational environment: native physical substrate, portable semantics, demand navigation, admitted structural Grounds and independent session state. First resident intelligence will be an application of the machine, not its purpose.
 
+## VLM-003: structural processes
+
+The native machine supports eight immutable graph snapshots, 64 independent logical-time processes, demand realization for grounded observations and bounded execution for ungrounded processes. See the [native ABI and checkpoint semantics](native64/README.md#vlm-003--structural-processes).
+
 ## VLM-002: native descriptor machine
 
 See [native64/README.md](native64/README.md) for the x86-64 guest, transactional descriptor ABI, hosted differential tests, and exact nonlinear chart navigation. The original i386 substrate remains a separate reference.

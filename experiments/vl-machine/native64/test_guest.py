@@ -61,6 +61,24 @@ def main():
             z=11
             for _ in range(93):z=ref(nodes,out,z)
             result("j",[11,0,93],z,12)
+            def handle(op,*args):
+                data=send(op,*args)
+                assert b"HANDLE " in data,data
+                return int(data.split(b"HANDLE ")[1][:8],16)
+            graph=handle("P");p1=handle("S",graph,11);p2=handle("S",graph,19)
+            t=10**12
+            result("T",[p1,t>>32,t&MASK],0,0)
+            result("O",[p2],19,12)
+            def shear(x,k):return (x+k*(x&65535)**3)&MASK
+            expected=shear((shear(11,65536)+t)&MASK,-65536)
+            result("O",[p1],expected,12)
+            assert f"CHECKPOINT {graph:08x} 0000000b {t>>32:08x} {t&MASK:08x}".encode() in send("K",p1)
+            assert b"REJECT" in send("D",graph)
+            ok("X",p1);p3=handle("R",graph,11,t>>32,t&MASK)
+            assert p3!=p1 and b"REJECT" in send("O",p1)
+            result("O",[p3],expected,12)
+            ok("X",p2);ok("X",p3);ok("D",graph)
+            assert b"REJECT" in send("R",graph,11,t>>32,t&MASK)
             p.stdin.write(b"q\n");p.stdin.flush()
             assert p.wait(timeout=5)==33
             print("guest boot, DAG, Ground, 64-bit jump, rejection and replacement verified")

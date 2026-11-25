@@ -11,4 +11,12 @@ int admit(uint32_t a,uint32_t b);
 int admit_chart(uint32_t k,uint32_t d);
 int run(uint32_t x,uint32_t *y,uint32_t *work);
 int navigate(uint32_t x,uint64_t n,uint32_t *y,uint32_t *work);
+uint32_t graph_publish(void);
+int graph_release(uint32_t h);
+uint32_t proc_spawn(uint32_t graph,uint32_t seed);
+int proc_close(uint32_t h);
+int proc_seek(uint32_t h,uint64_t t,uint32_t *work);
+int proc_read(uint32_t h,uint32_t *y,uint32_t *work);
+int proc_checkpoint(uint32_t h,uint32_t *graph,uint32_t *seed,uint64_t *t);
+uint32_t proc_restore(uint32_t graph,uint32_t seed,uint64_t t);
 #endif

@@ -18,7 +18,7 @@ void kernel_main(void){
     out(0x3f9,0);out(0x3fb,128);out(0x3f8,1);out(0x3f9,0);out(0x3fb,3);out(0x3fa,199);out(0x3fc,3);
     str("VLM-002 x86-64\n");
     for(;;){
-        char buf[64];unsigned n=0;int overflow=0;uint32_t v[6],y,w;int ok=0,res=0;
+        char buf[64];unsigned n=0;int overflow=0;uint32_t v[6],y,w,handle=0,gh,seed;uint64_t time;int ok=0,res=0,checkpoint=0;
         str("vl64> ");
         for(;;){char c=rx();if(c=='\n')break;if(n<sizeof(buf)-1)buf[n++]=c;else overflow=1;}
         buf[n]=0;
@@ -31,9 +31,19 @@ void kernel_main(void){
         case 'h':if(parse(buf+1,v,2))ok=admit_chart(v[0],v[1]);break;
         case 'r':if(parse(buf+1,v,1))res=ok=run(v[0],&y,&w);break;
         case 'j':if(parse(buf+1,v,3))res=ok=navigate(v[0],((uint64_t)v[1]<<32)|v[2],&y,&w);break;
+        case 'P':if(!buf[1])handle=graph_publish();break;
+        case 'D':if(parse(buf+1,v,1))ok=graph_release(v[0]);break;
+        case 'S':if(parse(buf+1,v,2))handle=proc_spawn(v[0],v[1]);break;
+        case 'T':if(parse(buf+1,v,3)){ok=proc_seek(v[0],((uint64_t)v[1]<<32)|v[2],&w);if(ok){y=0;res=1;}}break;
+        case 'O':if(parse(buf+1,v,1))res=ok=proc_read(v[0],&y,&w);break;
+        case 'X':if(parse(buf+1,v,1))ok=proc_close(v[0]);break;
+        case 'K':if(parse(buf+1,v,1))checkpoint=ok=proc_checkpoint(v[0],&gh,&seed,&time);break;
+        case 'R':if(parse(buf+1,v,4))handle=proc_restore(v[0],v[1],((uint64_t)v[2]<<32)|v[3]);break;
         case 'q':if(!buf[1]){out(0xf4,16);for(;;)__asm__ volatile("hlt");}break;
         }
-        if(res){str("RESULT ");hex(y);tx(' ');hex(w);tx('\n');}
+        if(handle){str("HANDLE ");hex(handle);tx('\n');}
+        else if(checkpoint){str("CHECKPOINT ");hex(gh);tx(' ');hex(seed);tx(' ');hex((uint32_t)(time>>32));tx(' ');hex((uint32_t)time);tx('\n');}
+        else if(res){str("RESULT ");hex(y);tx(' ');hex(w);tx('\n');}
         else str(ok?"OK\n":"REJECT\n");
     }
 }
