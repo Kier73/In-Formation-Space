@@ -27,6 +27,9 @@ jobs:
         run: |
           node mmg007_positive_constraint.js > /tmp/mmg007.json
           node mmg008_block_constraint.js > /tmp/mmg008.json
+          node mmg009_rectangular_quotient.js > /tmp/mmg009.json
+          node mmg010_cyclic_synthesis.js > /tmp/mmg010.json
+          node mmg011_linear_cost.js > /tmp/mmg011.json
           node mmg005_rank_walk.js > /tmp/mmg005-rank.json
           python mmg005_compile.py > /tmp/mmg005-compile.json
           node mmg006_distinctness.js > /tmp/mmg006-distinctness.json
