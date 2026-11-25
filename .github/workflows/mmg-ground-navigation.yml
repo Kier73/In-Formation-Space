@@ -38,6 +38,12 @@ jobs:
           node mmg016_escape.js > /tmp/mmg016-escape.json
           node mmg017_delayed_fit.js > /tmp/mmg017.json
           node mmg017_cached_fit.js > /tmp/mmg017-cached.json
+          node mmg018_hyperplane.js > /tmp/mmg018.json
+          node mmg019_exact_pair_span.js > /tmp/mmg019.json
+          node mmg020_pair_span_gray.js > /tmp/mmg020.json
+          node mmg021_exact_closure.js > /tmp/mmg021.json
+          node mmg022_adaptive_work.js > /tmp/mmg022.json
+          node mmg023_coset_lift.js > /tmp/mmg023.json
           node mmg005_rank_walk.js > /tmp/mmg005-rank.json
           python mmg005_compile.py > /tmp/mmg005-compile.json
           node mmg006_distinctness.js > /tmp/mmg006-distinctness.json
