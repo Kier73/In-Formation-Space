@@ -1,0 +1,35 @@
+name: MMG exact rank and ground integration
+on:
+  pull_request:
+    paths:
+      - 'experiments/mmg-fusion-navigation/**'
+      - '.github/workflows/mmg-ground-navigation.yml'
+  workflow_dispatch:
+jobs:
+  exact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 6f05be0b4ecbb53c5f64580c7b82ee531fdd1f73
+          path: _ecpu
+      - run: python -m pip install -r experiments/mmg-fusion-navigation/requirements.txt
+      - working-directory: experiments/mmg-fusion-navigation
+        run: |
+          node mmg005_rank_walk.js > /tmp/mmg005-rank.json
+          python mmg005_compile.py > /tmp/mmg005-compile.json
+          node mmg006_distinctness.js > /tmp/mmg006-distinctness.json
+          python mmg005_fabric.py --ecpu-root ../../_ecpu > /tmp/mmg005-fabric.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mmg-ground-evidence
+          path: /tmp/mmg*.json
