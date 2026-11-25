@@ -1,0 +1,36 @@
+{
+  "fields": [
+    2,
+    3,
+    5,
+    7,
+    11
+  ],
+  "exhaustive_small_coordinates": 7740,
+  "k": 64,
+  "bond": 4,
+  "logical_coordinates": "63340286662973277706162286946811886609896461828096",
+  "stored_input_scalars": 6000,
+  "stored_output_scalars": 6000,
+  "sparse_theoretical_terms": 19000,
+  "dense_terms": 36000,
+  "serial_seconds": 0.0005647169999747348,
+  "process_pool_seconds": 0.04159659000004012,
+  "workers": 4,
+  "full_core_roundtrip": true,
+  "independent_coordinate_checks": 200,
+  "small_nonseparability_minor": [
+    0,
+    1,
+    0,
+    1
+  ],
+  "large_nonseparability_minor": [
+    0,
+    1,
+    0,
+    1
+  ],
+  "source_sha256": "a14c6a80150d94b70c5983b9e85baf269737b0f0732435b762bf2d91a5401bd5",
+  "output_sha256": "4b56a19f4e8ab6e352f64c4df9f21c2b786b43bffbdc3b7123e57b5a922e1c6d"
+}
