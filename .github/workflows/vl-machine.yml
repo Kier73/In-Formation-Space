@@ -5,41 +5,54 @@ on:
       - 'experiments/vl-machine/**'
       - '.github/workflows/vl-machine.yml'
   push:
+    branches: [main]
     paths:
       - 'experiments/vl-machine/**'
       - '.github/workflows/vl-machine.yml'
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: vlm-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
-  word-machine:
+  hosted-native:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Portable semantics
+      - name: Portable semantics and benchmark
         working-directory: experiments/vl-machine
-        run: python3 -m unittest -v
-      - name: Layered Ground benchmark
-        working-directory: experiments/vl-machine
-        run: python3 benchmark.py
-      - name: Native dependencies
+        run: python3 -m unittest -v && python3 benchmark.py
+      - name: Native build and hosted parity
+        working-directory: experiments/vl-machine/native64
+        run: make && python3 -m unittest -v test_core test_process test_capsule test_application test_neural test_ecpu_bridge.Bridge.test_fresh_worker
+      - name: Policy representation and cost audit
+        working-directory: experiments/vl-machine/native64
+        run: python3 evaluate_policy.py
+  guest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Guest dependencies
         run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 binutils
-      - name: Native boot and serial parity
+      - name: Native i386 boot
         working-directory: experiments/vl-machine/native
         run: make test
-      - name: VLM-002 native build and hosted parity
+      - name: Native x86-64 boot and parity
         working-directory: experiments/vl-machine/native64
-        run: make && python3 -m unittest -v test_core test_process test_capsule test_application test_neural
+        run: make && python3 test_guest.py
+  ecpu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
           repository: Kier73/E-CPU
           ref: 09a9058a43c139c476609954636e17e7fadcfd37
           path: external/ecpu-vlm
           persist-credentials: false
-      - name: VLM-005 real E-CPU M2 capsule adapter
+      - name: Real E-CPU M2 capsule adapter
         working-directory: experiments/vl-machine/native64
         env:
           PYTHONPATH: ${{ github.workspace }}/external/ecpu-vlm
-        run: python3 -m unittest -v test_ecpu_bridge.Bridge
-      - name: VLM-002 native guest parity
-        working-directory: experiments/vl-machine/native64
-        run: python3 test_guest.py
+        run: make && python3 -m unittest -v test_ecpu_bridge.Bridge

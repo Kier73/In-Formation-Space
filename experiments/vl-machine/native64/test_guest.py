@@ -6,6 +6,7 @@ import time
 import random
 from test_core import affine,chart,ref,MASK
 from test_application import workload,jump
+from test_neural import model,forward
 
 def until(p,marker):
     buf=b""
@@ -91,6 +92,27 @@ def main():
             z=jump(a,b,seed,t)
             expected="APPLICATION 00000005 "+" ".join(f"{v:08x}" for v in [1,y,1,z,y])
             assert expected.encode() in send("E")
+            # Exercise the actual guest neural wire ABI with nonzero recurrence.
+            weights=[rng.randrange(-127,128) for _ in range(147)]
+            def stage_weights(weights):
+                ok("N")
+                for i,value in enumerate(weights):ok("W",i,value+127)
+            stage_weights(weights);ok("V")
+            sessions=[handle("U"),handle("U")];states=[[0]*8 for _ in sessions]
+            for _ in range(16):
+                for i,session in enumerate(sessions):
+                    x=[rng.randrange(-127,128) for _ in range(6)]
+                    states[i],logits=forward(weights,x,states[i])
+                    expected="NEURAL "+" ".join(f"{v&MASK:08x}" for v in logits)
+                    assert expected.encode() in send("F",session,*[v+127 for v in x])
+            stage_weights(model());assert b"REJECT" in send("V")
+            for session in sessions:ok("Y",session)
+            ok("V")
+            assert b"REJECT" in send("F",sessions[0],*[127]*6)
+            nodes,out=affine(3,7,128);load(nodes,out)
+            result("Z",[],1,1)
+            nodes,out=chart(65536,1);nodes[13]=(1,0,0,0,nodes[13][4]^1);load(nodes,out)
+            result("Z",[],2,0)
             p.stdin.write(b"q\n");p.stdin.flush()
             assert p.wait(timeout=5)==33
             print("guest boot, DAG, Ground, 64-bit jump, rejection and replacement verified")
