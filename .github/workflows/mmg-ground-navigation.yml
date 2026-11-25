@@ -55,6 +55,10 @@ jobs:
           node mmg032_collective_lift.js > /tmp/mmg032.json
           node mmg033_sparse_coset.js > /tmp/mmg033.json
           node mmg034_collective_compile.js > /tmp/mmg034.json
+          for n in 3 4 5; do node mmg035_multi_lift.js "$n" > "/tmp/mmg035-$n.json"; done
+          for n in 3 4 5; do node mmg036_outside_first.js "$n" > "/tmp/mmg036-$n.json"; done
+          node mmg037_gauge_tables.js > /tmp/mmg037.json
+          node mmg038_rank_gate.js > /tmp/mmg038.json
           node mmg005_rank_walk.js > /tmp/mmg005-rank.json
           python mmg005_compile.py > /tmp/mmg005-compile.json
           node mmg006_distinctness.js > /tmp/mmg006-distinctness.json
