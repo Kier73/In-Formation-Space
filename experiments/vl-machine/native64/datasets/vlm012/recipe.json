@@ -1,0 +1,25 @@
+{
+  "schema": "vlm-replayable-experience-checkpoint-v1",
+  "parent_commit": "e9dc69cad06bc2a2ee0958724cf62a074bc08146",
+  "parent_summary_sha256": "32a034bf40a36f694346bea6a7e0c3daf3d0e9006bdf0ffc2cbcbc2ee925fdb9",
+  "generator": "adaptive_experience.py",
+  "generator_git_blob": "1311487a0bbb135bd5d44d26ef304ed537a96a2f",
+  "encounters": 104,
+  "phases": {
+    "probe": 8,
+    "train": 16,
+    "validation": 16,
+    "final": 64
+  },
+  "experience_digest": "7f6ba6c6e3b21e401343511880f624235e46d6c6f06cbed8e7c30ccbbc14451b",
+  "report_sha256": "168f7ce8a6302f37ee5d5bd96015be084b3ee2beebdebf42795bf836bcaa55d7",
+  "report_bytes": 26849,
+  "candidate_sha256": "603937d2810c53c68104450f0f2a6372eff5d1899da42bc363f6130730c943ab",
+  "candidate_wire_bytes": 684,
+  "old_parameters": 20,
+  "new_parameters": 28,
+  "validation_cost_old": 4292,
+  "validation_cost_new": 1708,
+  "old_final_coverage": 32,
+  "new_final_coverage": 64
+}

@@ -25,10 +25,15 @@ jobs:
         run: python3 -m unittest -v && python3 benchmark.py
       - name: Native build and hosted parity
         working-directory: experiments/vl-machine/native64
-        run: make && python3 -m unittest -v test_core test_process test_capsule test_application test_neural test_ecpu_bridge.Bridge.test_fresh_worker test_byte_ground test_compose_ground test_typed_ground test_vocabulary test_template_ground test_native_template test_experience
+        run: make && python3 -m unittest -v test_core test_process test_capsule test_application test_neural test_ecpu_bridge.Bridge.test_fresh_worker test_byte_ground test_compose_ground test_typed_ground test_vocabulary test_template_ground test_native_template test_experience test_adaptive_experience
       - name: Byte Ground action and observation audit
         working-directory: experiments/vl-machine/native64
         run: python3 byte_ground.py && python3 benchmark_compose.py && python3 typed_ground.py && python3 benchmark_vocabulary.py && python3 test_native_template.py --benchmark && python3 experience.py --ledger experience.jsonl --summary experience-summary.json
+      - name: Self-generated counterexample campaign and retained recipe replay
+        working-directory: experiments/vl-machine/native64
+        run: |
+          python3 adaptive_experience.py --output adaptive-experience.json
+          python3 -c "import hashlib,json; m=json.load(open('datasets/vlm012/recipe.json')); assert hashlib.sha256(open('adaptive-experience.json','rb').read()).hexdigest()==m['report_sha256']"
       - name: Policy representation and cost audit
         working-directory: experiments/vl-machine/native64
         run: python3 evaluate_policy.py
@@ -38,6 +43,7 @@ jobs:
           path: |
             experiments/vl-machine/native64/experience.jsonl
             experiments/vl-machine/native64/experience-summary.json
+            experiments/vl-machine/native64/adaptive-experience.json
   guest:
     runs-on: ubuntu-latest
     steps:
