@@ -1,0 +1,38 @@
+{
+  "small": {
+    "objects": 60,
+    "bytes": 348745,
+    "rangeChecks": 7680,
+    "residueEntries": 6329,
+    "patternTerms": 6041524,
+    "cycleSearch": 79450,
+    "expandedRecords": 1758,
+    "modelRecords": 5913
+  },
+  "large": {
+    "cycles": "1000000000039",
+    "logicalRecords": "3000000000117",
+    "logicalBytes": "3000000000606000000019071",
+    "exactSum": "370066666740145533335400134",
+    "setup": {
+      "residueEntries": 2304,
+      "patternTerms": 74240,
+      "cycleSearch": 0,
+      "slotReads": 0,
+      "prefixCalls": 3,
+      "expandedRecords": 0
+    },
+    "query": {
+      "cycleSearch": 1395,
+      "patternTerms": 9044,
+      "prefixCalls": 105,
+      "slotReads": 59
+    },
+    "verified": 37,
+    "declaredLaw": true
+  },
+  "controls": {
+    "shrinkingAndShortRangeChecks": 220,
+    "invalidExtentRefusals": 2
+  }
+}

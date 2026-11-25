@@ -1,0 +1,23 @@
+name: Selector arithmetic
+on:
+  pull_request:
+    paths:
+      - 'experiments/selector_arithmetic/**'
+      - 'experiments/hierarchical_selector_grounds/clt013.js'
+      - '.github/workflows/selector-arithmetic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node experiments/hierarchical_selector_grounds/clt013.js > /tmp/clt013.json
+          diff -u experiments/hierarchical_selector_grounds/results.json /tmp/clt013.json
+          node experiments/selector_arithmetic/clt014.js > /tmp/clt014.json
+          diff -u experiments/selector_arithmetic/results.json /tmp/clt014.json
