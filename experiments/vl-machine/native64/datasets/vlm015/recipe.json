@@ -1,0 +1,56 @@
+{
+  "schema": "vlm-transfer-checkpoint-v1",
+  "parent_commit": "d5909bb083c498554d09207ce50d189f9b2509ea",
+  "generator": "transfer_policy.py",
+  "generator_git_blob": "ae9bf20d63e6ad65f582857f10bdad526cedba7f",
+  "portable_machine_git_blob": "97eedd6529b58e0592f9bdaa5bf2d1ea324234ed",
+  "vlk_commit": "ad6dd45d06b9f349526783d45d0e5706a49ade79",
+  "parent_archive_sha256": "0b41408687711f8400e53923b67d1da87cdab602a28f06c4d9293123830c5904",
+  "python": "3.13.5",
+  "report_bytes": 823193,
+  "report_sha256": "af9a38fec72539c39a0dca0d322ae28530664bc8e3f494c706a0576e35d3dbe6",
+  "cohorts": {
+    "source_training": [
+      600,
+      "b5643091244c57616e958cb44e049ba9870d21aadc7cca5cc825c923439c5a9c"
+    ],
+    "source_validation": [
+      240,
+      "30ac732f1e71d7d756dcd971b391251db1e6f62ae25e8f1c2a732b463ff5d839"
+    ],
+    "source_final": [
+      240,
+      "14e44c680c6ea2ea2adbb49a3d8b5b88392fafc79a5623ee751b824364342278"
+    ],
+    "source_stress": [
+      120,
+      "a0e4477fb20109ef97ffdba2cb75ab2b6154683016abc8d62a15c7bb63fed43a"
+    ],
+    "target_training": [
+      240,
+      "18738ce2b7415a574ca4b738634b555a823dd1ae71639d04bd65fe33b70cc808"
+    ],
+    "target_validation": [
+      120,
+      "d09f19dcbdcbdfd12e3cf96df12aa19756836bcbf946b149f6883c4198812cdb"
+    ],
+    "target_final": [
+      240,
+      "e9784f6a61a3e473b81aaf132d713f98750c7143b4a6afe7552e09b0d97c8245"
+    ]
+  },
+  "offline_probe_calls": 18000,
+  "source_probe": 2,
+  "target_probe": 4294967295,
+  "target_counterexamples": {
+    "transferred": 82,
+    "adapted": 160
+  },
+  "target_polynomial_extension": {
+    "original": 40,
+    "polynomial": 80,
+    "newly_verified": 40
+  },
+  "external_descriptor_record_id": "d2de60bf51b55b1de7df1ac071e5aeeb8867784a8dd4b6e93774de4ec5295d2a",
+  "external_scope": "web-field-projection; raw HTTPS adapter implemented but not live-qualified"
+}
