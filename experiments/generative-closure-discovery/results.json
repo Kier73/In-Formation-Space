@@ -1,0 +1,2083 @@
+{
+  "field": 257,
+  "checks": 916,
+  "rows": [
+    {
+      "n": 32,
+      "family": "cyclic",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 1984,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 15040,
+          "perColumn": 1440,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 544,
+              "residual": 0
+            }
+          ]
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 1984,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 23424,
+          "perColumn": 1440,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 544,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "cyclic",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2048,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 15040,
+          "perColumn": 1440,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 608,
+              "residual": 0
+            }
+          ]
+        },
+        "rank": {
+          "setup": 40512,
+          "perColumn": 2040,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 2,
+              "residual": 959
+            },
+            {
+              "kind": "rank",
+              "gain": 6,
+              "residual": 894
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 23424,
+          "perColumn": 1440,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 608,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "cyclic",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2048,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 15040,
+          "perColumn": 1440,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 608,
+              "residual": 0
+            }
+          ]
+        },
+        "rank": {
+          "setup": 40512,
+          "perColumn": 2044,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 2,
+              "residual": 959
+            },
+            {
+              "kind": "rank",
+              "gain": 2,
+              "residual": 896
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 23424,
+          "perColumn": 1440,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 608,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "rank",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 512,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 7168,
+          "perColumn": 512,
+          "history": []
+        },
+        "rank": {
+          "setup": 17600,
+          "perColumn": 64,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 448,
+              "residual": 0
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 19648,
+          "perColumn": 64,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 448,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "rank",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 512,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 7168,
+          "perColumn": 512,
+          "history": []
+        },
+        "rank": {
+          "setup": 17600,
+          "perColumn": 64,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 448,
+              "residual": 0
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 19648,
+          "perColumn": 64,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 448,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "rank",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 512,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 7168,
+          "perColumn": 512,
+          "history": []
+        },
+        "rank": {
+          "setup": 17600,
+          "perColumn": 64,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 448,
+              "residual": 0
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 19648,
+          "perColumn": 64,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 448,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "mixed",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 1992,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 18112,
+          "perColumn": 1952,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 40,
+              "residual": 256
+            }
+          ]
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 1992,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 38976,
+          "perColumn": 1504,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 40,
+              "residual": 256
+            },
+            {
+              "kind": "rank",
+              "gain": 448,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "mixed",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2044,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 18112,
+          "perColumn": 1952,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 92,
+              "residual": 256
+            }
+          ]
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 2044,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 38976,
+          "perColumn": 1504,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 92,
+              "residual": 256
+            },
+            {
+              "kind": "rank",
+              "gain": 448,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "mixed",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2048,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 18112,
+          "perColumn": 1952,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 96,
+              "residual": 256
+            }
+          ]
+        },
+        "rank": {
+          "setup": 27008,
+          "perColumn": 2044,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 4,
+              "residual": 958
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 38976,
+          "perColumn": 1504,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 96,
+              "residual": 256
+            },
+            {
+              "kind": "rank",
+              "gain": 448,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "random",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2040,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 11968,
+          "perColumn": 2040,
+          "history": []
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 2040,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 20352,
+          "perColumn": 2040,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "random",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2046,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 11968,
+          "perColumn": 2046,
+          "history": []
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 2046,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 20352,
+          "perColumn": 2046,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "random",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2032,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 11968,
+          "perColumn": 2032,
+          "history": []
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 2032,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 20352,
+          "perColumn": 2032,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "identity",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 64,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 11968,
+          "perColumn": 64,
+          "history": []
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 64,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 20352,
+          "perColumn": 64,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "identity",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 64,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 11968,
+          "perColumn": 64,
+          "history": []
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 64,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 20352,
+          "perColumn": 64,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 32,
+      "family": "identity",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 64,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 11968,
+          "perColumn": 64,
+          "history": []
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 64,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 20352,
+          "perColumn": 64,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "cyclic",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8064,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 58624,
+          "perColumn": 2560,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 5504,
+              "residual": 0
+            }
+          ]
+        },
+        "rank": {
+          "setup": 53568,
+          "perColumn": 8064,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 91712,
+          "perColumn": 2560,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 5504,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "cyclic",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8192,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 58624,
+          "perColumn": 2560,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 5632,
+              "residual": 0
+            }
+          ]
+        },
+        "rank": {
+          "setup": 107136,
+          "perColumn": 8150,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 42,
+              "residual": 3947
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 91712,
+          "perColumn": 2560,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 5632,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "cyclic",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8192,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 58624,
+          "perColumn": 2560,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 5632,
+              "residual": 0
+            }
+          ]
+        },
+        "rank": {
+          "setup": 107136,
+          "perColumn": 8158,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 34,
+              "residual": 3951
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 91712,
+          "perColumn": 2560,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 5632,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "rank",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 2048,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 28672,
+          "perColumn": 2048,
+          "history": []
+        },
+        "rank": {
+          "setup": 69952,
+          "perColumn": 128,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 1920,
+              "residual": 0
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 78144,
+          "perColumn": 128,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 1920,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "rank",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 2048,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 28672,
+          "perColumn": 2048,
+          "history": []
+        },
+        "rank": {
+          "setup": 69952,
+          "perColumn": 128,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 1920,
+              "residual": 0
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 78144,
+          "perColumn": 128,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 1920,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "rank",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 2048,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 28672,
+          "perColumn": 2048,
+          "history": []
+        },
+        "rank": {
+          "setup": 69952,
+          "perColumn": 128,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 1920,
+              "residual": 0
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 78144,
+          "perColumn": 128,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 1920,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "mixed",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8076,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 70912,
+          "perColumn": 4608,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 3468,
+              "residual": 1024
+            }
+          ]
+        },
+        "rank": {
+          "setup": 53568,
+          "perColumn": 8076,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 153472,
+          "perColumn": 2688,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 3468,
+              "residual": 1024
+            },
+            {
+              "kind": "rank",
+              "gain": 1920,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "mixed",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8180,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 70912,
+          "perColumn": 4608,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 3572,
+              "residual": 1024
+            }
+          ]
+        },
+        "rank": {
+          "setup": 160704,
+          "perColumn": 8152,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 2,
+              "residual": 3961
+            },
+            {
+              "kind": "rank",
+              "gain": 26,
+              "residual": 3822
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 153472,
+          "perColumn": 2688,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 3572,
+              "residual": 1024
+            },
+            {
+              "kind": "rank",
+              "gain": 1920,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "mixed",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8188,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 70912,
+          "perColumn": 4608,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 3580,
+              "residual": 1024
+            }
+          ]
+        },
+        "rank": {
+          "setup": 107136,
+          "perColumn": 8158,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 30,
+              "residual": 3951
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 153472,
+          "perColumn": 2688,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 3580,
+              "residual": 1024
+            },
+            {
+              "kind": "rank",
+              "gain": 1920,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "random",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8154,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 46336,
+          "perColumn": 8154,
+          "history": []
+        },
+        "rank": {
+          "setup": 53568,
+          "perColumn": 8154,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 79424,
+          "perColumn": 8154,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "random",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8154,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 46336,
+          "perColumn": 8154,
+          "history": []
+        },
+        "rank": {
+          "setup": 107136,
+          "perColumn": 8144,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 10,
+              "residual": 3944
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 158848,
+          "perColumn": 8144,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 10,
+              "residual": 3944
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "random",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8166,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 46336,
+          "perColumn": 8166,
+          "history": []
+        },
+        "rank": {
+          "setup": 107136,
+          "perColumn": 8160,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 6,
+              "residual": 3952
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 158848,
+          "perColumn": 8160,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 6,
+              "residual": 3952
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "identity",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 128,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 46336,
+          "perColumn": 128,
+          "history": []
+        },
+        "rank": {
+          "setup": 53568,
+          "perColumn": 128,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 79424,
+          "perColumn": 128,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "identity",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 128,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 46336,
+          "perColumn": 128,
+          "history": []
+        },
+        "rank": {
+          "setup": 53568,
+          "perColumn": 128,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 79424,
+          "perColumn": 128,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 64,
+      "family": "identity",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 128,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 46336,
+          "perColumn": 128,
+          "history": []
+        },
+        "rank": {
+          "setup": 53568,
+          "perColumn": 128,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 79424,
+          "perColumn": 128,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "cyclic",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32512,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 231872,
+          "perColumn": 4928,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 27584,
+              "residual": 0
+            }
+          ]
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 32512,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 363520,
+          "perColumn": 4928,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 27584,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "cyclic",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32768,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 231872,
+          "perColumn": 4928,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 27840,
+              "residual": 0
+            }
+          ]
+        },
+        "rank": {
+          "setup": 427136,
+          "perColumn": 32638,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 130,
+              "residual": 16063
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 363520,
+          "perColumn": 4928,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 27840,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "cyclic",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32768,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 231872,
+          "perColumn": 4928,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 27840,
+              "residual": 0
+            }
+          ]
+        },
+        "rank": {
+          "setup": 640704,
+          "perColumn": 32640,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 82,
+              "residual": 16087
+            },
+            {
+              "kind": "rank",
+              "gain": 46,
+              "residual": 15810
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 363520,
+          "perColumn": 4928,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 27840,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "rank",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 8192,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 114688,
+          "perColumn": 8192,
+          "history": []
+        },
+        "rank": {
+          "setup": 279104,
+          "perColumn": 256,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 7936,
+              "residual": 0
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 311872,
+          "perColumn": 256,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 7936,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "rank",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 8192,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 114688,
+          "perColumn": 8192,
+          "history": []
+        },
+        "rank": {
+          "setup": 279104,
+          "perColumn": 256,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 7936,
+              "residual": 0
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 311872,
+          "perColumn": 256,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 7936,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "rank",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 8064,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 114688,
+          "perColumn": 8064,
+          "history": []
+        },
+        "rank": {
+          "setup": 279104,
+          "perColumn": 254,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 7810,
+              "residual": 0
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 311872,
+          "perColumn": 254,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 7810,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "mixed",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32560,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 281024,
+          "perColumn": 13120,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 19440,
+              "residual": 4096
+            }
+          ]
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 32560,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 609856,
+          "perColumn": 5184,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 19440,
+              "residual": 4096
+            },
+            {
+              "kind": "rank",
+              "gain": 7936,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "mixed",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32750,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 281024,
+          "perColumn": 13120,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 19630,
+              "residual": 4096
+            }
+          ]
+        },
+        "rank": {
+          "setup": 427136,
+          "perColumn": 32628,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 122,
+              "residual": 16058
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 609856,
+          "perColumn": 5184,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 19630,
+              "residual": 4096
+            },
+            {
+              "kind": "rank",
+              "gain": 7936,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "mixed",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32730,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 281024,
+          "perColumn": 12992,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 19738,
+              "residual": 4032
+            }
+          ]
+        },
+        "rank": {
+          "setup": 427136,
+          "perColumn": 32636,
+          "history": [
+            {
+              "kind": "rank",
+              "gain": 94,
+              "residual": 16062
+            }
+          ]
+        },
+        "adaptive": {
+          "setup": 609856,
+          "perColumn": 5182,
+          "history": [
+            {
+              "kind": "cyclic",
+              "gain": 19738,
+              "residual": 4032
+            },
+            {
+              "kind": "rank",
+              "gain": 7810,
+              "residual": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "random",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32624,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 182720,
+          "perColumn": 32624,
+          "history": []
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 32624,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 314368,
+          "perColumn": 32624,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "random",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32604,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 182720,
+          "perColumn": 32604,
+          "history": []
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 32604,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 314368,
+          "perColumn": 32604,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "random",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32654,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 182720,
+          "perColumn": 32654,
+          "history": []
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 32654,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 314368,
+          "perColumn": 32654,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "identity",
+      "seed": 17,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 256,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 182720,
+          "perColumn": 256,
+          "history": []
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 256,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 314368,
+          "perColumn": 256,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "identity",
+      "seed": 83,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 256,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 182720,
+          "perColumn": 256,
+          "history": []
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 256,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 314368,
+          "perColumn": 256,
+          "history": []
+        }
+      }
+    },
+    {
+      "n": 128,
+      "family": "identity",
+      "seed": 119,
+      "methods": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 256,
+          "history": []
+        },
+        "cyclic": {
+          "setup": 182720,
+          "perColumn": 256,
+          "history": []
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 256,
+          "history": []
+        },
+        "adaptive": {
+          "setup": 314368,
+          "perColumn": 256,
+          "history": []
+        }
+      }
+    }
+  ],
+  "summary": [
+    {
+      "n": 32,
+      "family": "cyclic",
+      "costs": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2027
+        },
+        "cyclic": {
+          "setup": 15040,
+          "perColumn": 1440
+        },
+        "rank": {
+          "setup": 31509,
+          "perColumn": 2023
+        },
+        "adaptive": {
+          "setup": 23424,
+          "perColumn": 1440
+        }
+      },
+      "breakEven": 39,
+      "adaptiveTerms": [
+        "cyclic"
+      ]
+    },
+    {
+      "n": 32,
+      "family": "rank",
+      "costs": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 512
+        },
+        "cyclic": {
+          "setup": 7168,
+          "perColumn": 512
+        },
+        "rank": {
+          "setup": 17600,
+          "perColumn": 64
+        },
+        "adaptive": {
+          "setup": 19648,
+          "perColumn": 64
+        }
+      },
+      "breakEven": 42,
+      "adaptiveTerms": [
+        "rank"
+      ]
+    },
+    {
+      "n": 32,
+      "family": "mixed",
+      "costs": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2028
+        },
+        "cyclic": {
+          "setup": 18112,
+          "perColumn": 1952
+        },
+        "rank": {
+          "setup": 18005,
+          "perColumn": 2027
+        },
+        "adaptive": {
+          "setup": 38976,
+          "perColumn": 1504
+        }
+      },
+      "breakEven": 73,
+      "adaptiveTerms": [
+        "cyclic",
+        "rank"
+      ]
+    },
+    {
+      "n": 32,
+      "family": "random",
+      "costs": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 2039
+        },
+        "cyclic": {
+          "setup": 11968,
+          "perColumn": 2039
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 2039
+        },
+        "adaptive": {
+          "setup": 20352,
+          "perColumn": 2039
+        }
+      },
+      "breakEven": null,
+      "adaptiveTerms": []
+    },
+    {
+      "n": 32,
+      "family": "identity",
+      "costs": {
+        "sparse": {
+          "setup": 1024,
+          "perColumn": 64
+        },
+        "cyclic": {
+          "setup": 11968,
+          "perColumn": 64
+        },
+        "rank": {
+          "setup": 13504,
+          "perColumn": 64
+        },
+        "adaptive": {
+          "setup": 20352,
+          "perColumn": 64
+        }
+      },
+      "breakEven": null,
+      "adaptiveTerms": []
+    },
+    {
+      "n": 64,
+      "family": "cyclic",
+      "costs": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8149
+        },
+        "cyclic": {
+          "setup": 58624,
+          "perColumn": 2560
+        },
+        "rank": {
+          "setup": 89280,
+          "perColumn": 8124
+        },
+        "adaptive": {
+          "setup": 91712,
+          "perColumn": 2560
+        }
+      },
+      "breakEven": 16,
+      "adaptiveTerms": [
+        "cyclic"
+      ]
+    },
+    {
+      "n": 64,
+      "family": "rank",
+      "costs": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 2048
+        },
+        "cyclic": {
+          "setup": 28672,
+          "perColumn": 2048
+        },
+        "rank": {
+          "setup": 69952,
+          "perColumn": 128
+        },
+        "adaptive": {
+          "setup": 78144,
+          "perColumn": 128
+        }
+      },
+      "breakEven": 39,
+      "adaptiveTerms": [
+        "rank"
+      ]
+    },
+    {
+      "n": 64,
+      "family": "mixed",
+      "costs": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8148
+        },
+        "cyclic": {
+          "setup": 70912,
+          "perColumn": 4608
+        },
+        "rank": {
+          "setup": 107136,
+          "perColumn": 8129
+        },
+        "adaptive": {
+          "setup": 153472,
+          "perColumn": 2688
+        }
+      },
+      "breakEven": 28,
+      "adaptiveTerms": [
+        "cyclic",
+        "rank"
+      ]
+    },
+    {
+      "n": 64,
+      "family": "random",
+      "costs": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 8158
+        },
+        "cyclic": {
+          "setup": 46336,
+          "perColumn": 8158
+        },
+        "rank": {
+          "setup": 89280,
+          "perColumn": 8153
+        },
+        "adaptive": {
+          "setup": 132373,
+          "perColumn": 8153
+        }
+      },
+      "breakEven": 25656,
+      "adaptiveTerms": []
+    },
+    {
+      "n": 64,
+      "family": "identity",
+      "costs": {
+        "sparse": {
+          "setup": 4096,
+          "perColumn": 128
+        },
+        "cyclic": {
+          "setup": 46336,
+          "perColumn": 128
+        },
+        "rank": {
+          "setup": 53568,
+          "perColumn": 128
+        },
+        "adaptive": {
+          "setup": 79424,
+          "perColumn": 128
+        }
+      },
+      "breakEven": null,
+      "adaptiveTerms": []
+    },
+    {
+      "n": 128,
+      "family": "cyclic",
+      "costs": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32683
+        },
+        "cyclic": {
+          "setup": 231872,
+          "perColumn": 4928
+        },
+        "rank": {
+          "setup": 427136,
+          "perColumn": 32597
+        },
+        "adaptive": {
+          "setup": 363520,
+          "perColumn": 4928
+        }
+      },
+      "breakEven": 13,
+      "adaptiveTerms": [
+        "cyclic"
+      ]
+    },
+    {
+      "n": 128,
+      "family": "rank",
+      "costs": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 8149
+        },
+        "cyclic": {
+          "setup": 114688,
+          "perColumn": 8149
+        },
+        "rank": {
+          "setup": 279104,
+          "perColumn": 255
+        },
+        "adaptive": {
+          "setup": 311872,
+          "perColumn": 255
+        }
+      },
+      "breakEven": 38,
+      "adaptiveTerms": [
+        "rank"
+      ]
+    },
+    {
+      "n": 128,
+      "family": "mixed",
+      "costs": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32680
+        },
+        "cyclic": {
+          "setup": 281024,
+          "perColumn": 13077
+        },
+        "rank": {
+          "setup": 355947,
+          "perColumn": 32608
+        },
+        "adaptive": {
+          "setup": 609856,
+          "perColumn": 5183
+        }
+      },
+      "breakEven": 22,
+      "adaptiveTerms": [
+        "cyclic",
+        "rank"
+      ]
+    },
+    {
+      "n": 128,
+      "family": "random",
+      "costs": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 32627
+        },
+        "cyclic": {
+          "setup": 182720,
+          "perColumn": 32627
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 32627
+        },
+        "adaptive": {
+          "setup": 314368,
+          "perColumn": 32627
+        }
+      },
+      "breakEven": null,
+      "adaptiveTerms": []
+    },
+    {
+      "n": 128,
+      "family": "identity",
+      "costs": {
+        "sparse": {
+          "setup": 16384,
+          "perColumn": 256
+        },
+        "cyclic": {
+          "setup": 182720,
+          "perColumn": 256
+        },
+        "rank": {
+          "setup": 213568,
+          "perColumn": 256
+        },
+        "adaptive": {
+          "setup": 314368,
+          "perColumn": 256
+        }
+      },
+      "breakEven": null,
+      "adaptiveTerms": []
+    }
+  ]
+}
