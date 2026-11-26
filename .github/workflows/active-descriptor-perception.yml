@@ -1,0 +1,34 @@
+name: Active descriptor perception
+on:
+  pull_request:
+    paths:
+      - 'experiments/active_descriptor_perception/**'
+      - '.github/workflows/active-descriptor-perception.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node experiments/active_descriptor_perception/clt011.js > /tmp/clt011.json
+          diff -u experiments/active_descriptor_perception/results.json /tmp/clt011.json
+  native-vlm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: a1b3a88349b7624de140d12d29685a79305d1266
+          path: upstream-vlm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: make -C upstream-vlm/experiments/vl-machine/native64 libcore.so
+      - run: python3 experiments/active_descriptor_perception/native_check.py upstream-vlm/experiments/vl-machine/native64
