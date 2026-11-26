@@ -1,0 +1,30 @@
+{
+  "schema": "vlm-experience-contract-checkpoint-v1",
+  "parent_commit": "6f8f641be2ca4744f4d8799f50f68d710264c6b9",
+  "generator": "experience_contract.py",
+  "generator_git_blob": "b917b3534464066c79c8cda54f445e3b61fcf458",
+  "vlk_commit": "ad6dd45d06b9f349526783d45d0e5706a49ade79",
+  "parents": {
+    "vlm": "994d2c9bd23e17209803c4faeedbb84409705eb687a4537ffaff51f0119cb413",
+    "vlk": "0b41408687711f8400e53923b67d1da87cdab602a28f06c4d9293123830c5904"
+  },
+  "report_sha256": "e11955445244dad713d2cc84342b4542ebc480030c0cef0eea3095b48e6e4a73",
+  "report_bytes": 2237252,
+  "records_sha256": "c5a056befd97fc6390205d023cde5bde330a6df1c1504917d58ee184f4546f58",
+  "weights_sha256": "79e4f5c76c29642b8e11ab016e45d6d46a42d866843d27ff129f2595f44240e1",
+  "records": 2152,
+  "unique_actions": 1935,
+  "exact_records": 1552,
+  "proposal_records": 600,
+  "cross_source_exact_actions": 56,
+  "cross_source_proposal_actions": 67,
+  "counts": {
+    "basis_replayed": 6000,
+    "native_archive_replay": 2400,
+    "outside_scalar_contract": 960,
+    "paired": 56,
+    "vlk.k1": 1496,
+    "vlm.navigate": 56,
+    "vlm.q4.proposer": 600
+  }
+}
