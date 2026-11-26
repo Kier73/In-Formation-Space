@@ -46,17 +46,18 @@ function choose(p,menu,remaining,policy,r,step){
  if(policy==="passive")return valid.find(a=>a.id==="passive")||null;
  if(policy==="random")return valid[Math.floor(r()*valid.length)];
  if(policy==="fixed")return valid.find(a=>a.id==="algae")||null;
+ if(policy==="balanced"){const ids=["algae","detritus","temperature"];for(let j=0;j<ids.length;j++){const a=valid.find(a=>a.id===ids[(step+j)%ids.length]);if(a)return a;}return null;}
  const ranked=valid.map(a=>({a,info:information(p,a)})).sort((x,y)=>y.info/y.a.cost-x.info/x.a.cost||x.a.cost-y.a.cost||x.a.id.localeCompare(y.a.id,"en"));
  return ranked[0].info>1e-12?ranked[0].a:null;
 }
 // Simulator is a separate closure: observer sees only recorded standardized
 // measurements and intervention contrasts, never world ID or demand function.
 function apparatus(world,seed){
- const r=rng(seed);return {
+ const r=rng(seed),auditR=rng(seed^0x4be77319);return {
   natural(day){const k=2+(day%5);return {day,x:[k,k,k],y:world.demand([k,k,k])+noise(r)};},
   experiment(action,serial,stage){
    const k=3+(serial%3),control=[k,k,k],treated=control.map((v,i)=>v+action.delta[i]);
-   const c=world.demand(control)+noise(r),t=world.demand(treated)+noise(r);
+   const stream=stage==="reserved-audit"?auditR:r;const c=world.demand(control)+noise(stream),t=world.demand(treated)+noise(stream);
    return {stage,serial,action:action.id,delta:action.delta.slice(),cost:action.cost,control,treated,controlReading:c,treatedReading:t,contrast:t-c};
   }
  };
@@ -97,7 +98,16 @@ function replay(record){
  }
  assert(JSON.stringify(state(p))===JSON.stringify(record.final),"final replay");return true;
 }
-const policies=["adaptive","random","fixed","passive"],summary=[],examples=[];
+// Prospective coverage challenge, separated from the policy comparison.
+// It tests an explicitly new environmental context, not an inferred field intervention.
+const newContext={id:"detritus-context-expansion",delta:[0,4,0],cost:6,label:"Extend the detritus contrast beyond the original menu"};
+const coverage=[];for(let seed=1;seed<=40;seed++){
+ const w=worlds.at(-1),r=observe(apparatus(w,seed*7919),"adaptive",seed);
+ const a=apparatus(w,seed*7919^0x21ca9).experiment(newContext,200,"new-context");
+ const remaining=r.final.survivors.filter(id=>Math.abs(a.contrast-dot(library.find(h=>h.id===id).c,a.delta))<=2);
+ assert(remaining.length===0,"new context excludes surviving models");coverage.push({seed,previous:r.final.survivors,observation:a,remaining});
+}
+const policies=["adaptive","balanced","random","fixed","passive"],summary=[],examples=[];
 for(const policy of policies){
  let known=0,unique=0,wrongUnique=0,unresolved=0,falseRejected=0,preUnique=0,outside=0,rejected=0,missed=0,spent=0,knownSpent=0,experiments=0,knownFinal=0;const byWorld=[];
  for(const w of worlds){
@@ -125,7 +135,7 @@ for(const policy of policies){
 assert(information(prior(),actions.at(-1))<1e-10,"passive information");
 assert(update(library.map(()=>0),library.map(()=>0),0,true).every(x=>x===0),"rejection absorbing");
 const bad=JSON.parse(JSON.stringify(examples[0].record));bad.audit[0].observation.contrast+=1;let refused=false;try{replay(bad);}catch{refused=true;}assert(refused,"tampered contrast");
-return {version:"LO-001",scope:"synthetic standardized indices; no field data",library,actions,auditActions,summary,examples,controls:{passiveNonidentifiability:true,unknownAbsorbing:true,tamperedContrastRefused:true}};
+return {version:"LO-001",scope:"synthetic standardized indices; no field data",library,actions,auditActions,summary,examples,coverageChallenge:{action:newContext,records:coverage,refused:coverage.length},controls:{passiveNonidentifiability:true,unknownAbsorbing:true,tamperedContrastRefused:true}};
 }
 module.exports=observatory;
 if(require.main===module)console.log(JSON.stringify(observatory(),null,2));
