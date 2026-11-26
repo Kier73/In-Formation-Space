@@ -1,0 +1,40 @@
+name: Obstruction guided byte Grounds
+on:
+  pull_request:
+    paths:
+      - 'experiments/obstruction_byte_grounds/**'
+      - '.github/workflows/obstruction-byte-grounds.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: 51a35fb3c3395fe99ee4b4680cd9b5a232e6b67f
+          path: upstream-vlm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -c "import hashlib,pathlib; assert hashlib.sha256(pathlib.Path('upstream-vlm/experiments/vl-machine/native64/byte_ground.py').read_bytes()[:4710]).hexdigest() == '8854392d4ec6979309a0156a86f12701b7b90bc8de9e69af4421b3e6891c1a86'"
+          python experiments/obstruction_byte_grounds/clt012.py --vlm upstream-vlm/experiments/vl-machine/native64 > /tmp/clt012.json
+          python -c "import json; assert json.load(open('/tmp/clt012.json')) == json.load(open('experiments/obstruction_byte_grounds/results.json'))"
+  actual-vlm-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: 51a35fb3c3395fe99ee4b4680cd9b5a232e6b67f
+          path: upstream-vlm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: make -C upstream-vlm/experiments/vl-machine/native64
+      - run: python experiments/obstruction_byte_grounds/clt012.py --vlm upstream-vlm/experiments/vl-machine/native64 --artifacts
