@@ -1,0 +1,43 @@
+name: GSM interaction attention
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/vl-machine/gsm/address_attention/**'
+      - '.github/workflows/gsm-interaction-attention.yml'
+  pull_request:
+    paths:
+      - 'experiments/vl-machine/gsm/address_attention/**'
+      - '.github/workflows/gsm-interaction-attention.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  interactions:
+    runs-on: ubuntu-latest
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - run: python -m pip install numpy==2.3.5
+      - name: Verify acquisition and exact contraction
+        working-directory: experiments/vl-machine/gsm/address_attention
+        run: |
+          python -m unittest -v test_interaction
+          python interaction.py --output interaction-report.json
+          python interaction_sweep.py > interaction-sweep.json
+          python - <<'PY'
+          import json
+          r=json.load(open('interaction-report.json'))
+          assert all(x['error']<1e-10 for x in r['scale'])
+          assert all(not x['routes'][m]['exact'] for x in r['rows'] if x['family']=='random' for m in ('active','rank','random'))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gsm-interaction
+          path: |
+            experiments/vl-machine/gsm/address_attention/interaction-report.json
+            experiments/vl-machine/gsm/address_attention/interaction-sweep.json

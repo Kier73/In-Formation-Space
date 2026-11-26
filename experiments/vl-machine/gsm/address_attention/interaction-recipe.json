@@ -1,0 +1,90 @@
+{
+  "schema": "gsm-005-checkpoint-v1",
+  "parent": "0457d4bb00ff278e59255fca268eb5e5a2c01b09",
+  "source_git_blobs": {
+    "interaction.py": "27f55c17792f64e8f3951b3bbeee1ac604f7796b",
+    "test_interaction.py": "0b730c261561f7a283f4787728e0f627d52fabc3"
+  },
+  "report_sha256": "fc3b8ec1638d2d3231542e4323cb94d72e59a2dd13ee9a476a493ca0f44beeb2",
+  "numpy": "2.3.5",
+  "openblas_threads": 1,
+  "tests_passed": 4,
+  "structured": 21,
+  "negative": 7,
+  "discovery": {
+    "initial": 12,
+    "pool": 192,
+    "heldout": 64,
+    "budgets": [
+      20,
+      22,
+      24,
+      26,
+      28,
+      32
+    ],
+    "active": [
+      3,
+      10,
+      21,
+      21,
+      21,
+      21
+    ],
+    "rank": [
+      3,
+      8,
+      20,
+      21,
+      21,
+      21
+    ],
+    "random": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      6
+    ],
+    "negative_admitted": [
+      0,
+      0,
+      0
+    ]
+  },
+  "scale": [
+    {
+      "graph": "chain",
+      "stop": 12345678,
+      "contract_ns": 4466389,
+      "enumeration_ns": 1575565160,
+      "cells": 16234,
+      "error": 2.0816681711721685e-16
+    },
+    {
+      "graph": "chain",
+      "stop": 16777216,
+      "contract_ns": 972453,
+      "enumeration_ns": 2029642879,
+      "cells": 12352,
+      "error": 2.498001805406602e-16
+    },
+    {
+      "graph": "cycle",
+      "stop": 12345678,
+      "contract_ns": 11267393,
+      "enumeration_ns": 1804792949,
+      "cells": 488760,
+      "error": 2.8449465006019636e-16
+    },
+    {
+      "graph": "cycle",
+      "stop": 16777216,
+      "contract_ns": 18275861,
+      "enumeration_ns": 2360300230,
+      "cells": 528448,
+      "error": 1.734723475976807e-16
+    }
+  ]
+}
