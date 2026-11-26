@@ -1,0 +1,350 @@
+{
+  "version": "RGF-007",
+  "prime": "2305843009213693951",
+  "seed": 720173,
+  "campaigns": [
+    {
+      "name": "heterogeneous-two",
+      "n": 6,
+      "groups": 2,
+      "tasks": 24,
+      "blocks": 8,
+      "checks": 576,
+      "eagerChecks": 32,
+      "kernelRank": 2,
+      "weightCount": 3,
+      "operations": 6,
+      "weights": [
+        {
+          "w": [
+            "1",
+            "0",
+            "3",
+            "0",
+            "2",
+            "0"
+          ],
+          "d": [
+            "6",
+            "0"
+          ]
+        },
+        {
+          "w": [
+            "0",
+            "2",
+            "0",
+            "1",
+            "0",
+            "3"
+          ],
+          "d": [
+            "0",
+            "6"
+          ]
+        },
+        {
+          "w": [
+            "1",
+            "2",
+            "3",
+            "1",
+            "2",
+            "3"
+          ],
+          "d": [
+            "6",
+            "6"
+          ]
+        }
+      ],
+      "work": {
+        "formation": 751,
+        "qualification": 998,
+        "scalar": 99026,
+        "full": 185719,
+        "both": 189164,
+        "audit": 22610747,
+        "eager": 10156
+      },
+      "runtime": {
+        "scalar": 97277,
+        "full": 183970,
+        "both": 187415
+      },
+      "crossoverAfterSharedSetup": 1,
+      "cache": {
+        "scalar": 159,
+        "full": 159,
+        "both": 159
+      }
+    },
+    {
+      "name": "heterogeneous-three",
+      "n": 9,
+      "groups": 3,
+      "tasks": 18,
+      "blocks": 6,
+      "checks": 324,
+      "eagerChecks": 18,
+      "kernelRank": 3,
+      "weightCount": 6,
+      "operations": 18,
+      "weights": [
+        {
+          "w": [
+            "1",
+            "0",
+            "0",
+            "1",
+            "0",
+            "0",
+            "1",
+            "0",
+            "0"
+          ],
+          "d": [
+            "6",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "w": [
+            "0",
+            "1",
+            "0",
+            "0",
+            "1",
+            "0",
+            "0",
+            "1",
+            "0"
+          ],
+          "d": [
+            "0",
+            "3",
+            "0"
+          ]
+        },
+        {
+          "w": [
+            "0",
+            "0",
+            "1",
+            "0",
+            "0",
+            "1",
+            "0",
+            "0",
+            "1"
+          ],
+          "d": [
+            "0",
+            "0",
+            "2"
+          ]
+        },
+        {
+          "w": [
+            "1",
+            "1",
+            "0",
+            "1",
+            "1",
+            "0",
+            "1",
+            "1",
+            "0"
+          ],
+          "d": [
+            "6",
+            "3",
+            "0"
+          ]
+        },
+        {
+          "w": [
+            "1",
+            "0",
+            "1",
+            "1",
+            "0",
+            "1",
+            "1",
+            "0",
+            "1"
+          ],
+          "d": [
+            "6",
+            "0",
+            "2"
+          ]
+        },
+        {
+          "w": [
+            "0",
+            "1",
+            "1",
+            "0",
+            "1",
+            "1",
+            "0",
+            "1",
+            "1"
+          ],
+          "d": [
+            "0",
+            "3",
+            "2"
+          ]
+        }
+      ],
+      "work": {
+        "formation": 2201,
+        "qualification": 7332,
+        "scalar": 71900,
+        "full": 142779,
+        "both": 133109,
+        "audit": 38606536,
+        "eager": 8967
+      },
+      "runtime": {
+        "scalar": 62367,
+        "full": 133246,
+        "both": 123576
+      },
+      "crossoverAfterSharedSetup": 1,
+      "cache": {
+        "scalar": 101,
+        "full": 101,
+        "both": 101
+      }
+    },
+    {
+      "name": "single-coordinate-control",
+      "n": 1,
+      "groups": 1,
+      "tasks": 12,
+      "blocks": 6,
+      "checks": 216,
+      "eagerChecks": 12,
+      "kernelRank": 1,
+      "weightCount": 1,
+      "operations": 1,
+      "weights": [
+        {
+          "w": [
+            "1"
+          ],
+          "d": [
+            "6"
+          ]
+        }
+      ],
+      "work": {
+        "formation": 18,
+        "qualification": 9,
+        "scalar": 32600,
+        "full": 33442,
+        "both": 40912,
+        "audit": 653370,
+        "eager": 468
+      },
+      "runtime": {
+        "scalar": 32573,
+        "full": 33415,
+        "both": 40885
+      },
+      "crossoverAfterSharedSetup": 1,
+      "cache": {
+        "scalar": 62,
+        "full": 62,
+        "both": 62
+      }
+    },
+    {
+      "name": "single-use",
+      "n": 6,
+      "groups": 2,
+      "tasks": 1,
+      "blocks": 1,
+      "checks": 3,
+      "eagerChecks": 1,
+      "kernelRank": 2,
+      "weightCount": 3,
+      "operations": 6,
+      "weights": [
+        {
+          "w": [
+            "1",
+            "0",
+            "3",
+            "0",
+            "2",
+            "0"
+          ],
+          "d": [
+            "6",
+            "0"
+          ]
+        },
+        {
+          "w": [
+            "0",
+            "2",
+            "0",
+            "1",
+            "0",
+            "3"
+          ],
+          "d": [
+            "0",
+            "6"
+          ]
+        },
+        {
+          "w": [
+            "1",
+            "2",
+            "3",
+            "1",
+            "2",
+            "3"
+          ],
+          "d": [
+            "6",
+            "6"
+          ]
+        }
+      ],
+      "work": {
+        "formation": 751,
+        "qualification": 998,
+        "scalar": 1904,
+        "full": 2050,
+        "both": 1916,
+        "audit": 3292,
+        "eager": 490
+      },
+      "runtime": {
+        "scalar": 155,
+        "full": 301,
+        "both": 167
+      },
+      "crossoverAfterSharedSetup": 1,
+      "cache": {
+        "scalar": 1,
+        "full": 1,
+        "both": 1
+      }
+    }
+  ],
+  "controls": {
+    "tamperedDegree": "refused",
+    "fullConstraintRank": "no generated operation",
+    "signedOnlyKernel": "no nonnegative candidate",
+    "zeroPositiveExponent": "checked",
+    "zeroExponentPreservation": "checked"
+  }
+}
