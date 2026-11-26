@@ -1,0 +1,284 @@
+{
+  "schema": "gsm-001-002-checkpoint-v1",
+  "parent_commit": "914618584a3297c8f308d503a5e6c6276f993c4d",
+  "python": "3.13.5",
+  "torch": "2.10.0+cpu",
+  "seeds": [
+    1,
+    2
+  ],
+  "updates": 180,
+  "batch": 48,
+  "parameters": 28738,
+  "source_files": {
+    "gsm.py": "98c005ab1c132d305409de47a7dc52a2e2784701",
+    "refine.py": "6f54449a865ec47f54a075484aff0c1d2df88942",
+    "test_gsm.py": "8f14dc353f0fdb8e9dcc11c5cd2d2a9b7cf5d0a4",
+    "test_refine.py": "087eb909483990030808eca1361ceb26339b00a6"
+  },
+  "initial_final_digest": "6b15c1c4d1dcf559287e5075a176227d60a4e200e58910c82ed4dc1f1e2ce1db",
+  "fresh_cohort_digests": {
+    "8": "ae07b60a50cab28cf23c59b88c7ac4f84d10861be55fe8b7b05b20dcb68ff982",
+    "32": "06b16911a24ea30fde6ea2b3603cf00d8c10a2ece406378f1016dbb1554fef88",
+    "64": "414683aca872f4cc76f40a5dab5ef56f7c54a8df5430d06a434e986e40743d76"
+  },
+  "local_reports": {
+    "results/report.json": {
+      "bytes": 289506,
+      "sha256": "dfda47e77b13416849e5472600a14f618547e6db5bd18f9431842e4208e0f6e6"
+    },
+    "refined/report.json": {
+      "bytes": 625228,
+      "sha256": "5a589c74af222eda067ad1d9999cccea92021fb585db4e13ba86d4dc7445eee9"
+    },
+    "oracle-timing.json": {
+      "bytes": 535,
+      "sha256": "81c43e3d5181e2cb9f75056a5357235d979a3f54094d71f52ee36641e8f228f8"
+    }
+  },
+  "archive": {
+    "bytes": 2075498,
+    "sha256": "55dd55e7fd46bcd7b55e1ebae9de8b0c9e30185a5a67b5884e12e19d29b7a30a"
+  },
+  "initial": {
+    "n_per_seed": 960,
+    "correct_per_seed": {
+      "corpus": [
+        25,
+        17
+      ],
+      "dense": [
+        555,
+        529
+      ],
+      "sensor": [
+        895,
+        892
+      ],
+      "ground": [
+        823,
+        936
+      ],
+      "adaptive": [
+        634,
+        913
+      ]
+    },
+    "active_eval_tokens": {
+      "dense": 31680,
+      "ground": 4888
+    },
+    "exact_oracle": 960
+  },
+  "refined": {
+    "n_per_seed_per_width": 384,
+    "widths": [
+      8,
+      32,
+      64
+    ],
+    "aggregate_correct_two_seeds": {
+      "dense": [
+        473,
+        363,
+        372
+      ],
+      "sensor": [
+        716,
+        506,
+        508
+      ],
+      "ground": [
+        695,
+        694,
+        696
+      ],
+      "adaptive": [
+        639,
+        602,
+        593
+      ],
+      "cardinality": [
+        767,
+        768,
+        766
+      ],
+      "stable": [
+        768,
+        767,
+        767
+      ],
+      "qualified": [
+        768,
+        768,
+        766
+      ]
+    },
+    "aggregate_coordinate_correct_two_seeds": {
+      "dense": [
+        473,
+        362,
+        368
+      ],
+      "sensor": [
+        716,
+        506,
+        508
+      ],
+      "ground": [
+        695,
+        694,
+        696
+      ],
+      "adaptive": [
+        639,
+        602,
+        593
+      ],
+      "cardinality": [
+        767,
+        768,
+        766
+      ],
+      "stable": [
+        768,
+        767,
+        767
+      ],
+      "qualified": [
+        768,
+        768,
+        766
+      ]
+    },
+    "aggregate_false_answer_two_seeds": {
+      "dense": [
+        179,
+        232,
+        220
+      ],
+      "sensor": [
+        44,
+        257,
+        250
+      ],
+      "ground": [
+        62,
+        52,
+        57
+      ],
+      "adaptive": [
+        0,
+        1,
+        0
+      ],
+      "cardinality": [
+        1,
+        0,
+        0
+      ],
+      "stable": [
+        0,
+        0,
+        0
+      ],
+      "qualified": [
+        0,
+        0,
+        0
+      ]
+    },
+    "mean_seed_median_ms": {
+      "dense": [
+        36.572,
+        287.899,
+        760.547
+      ],
+      "sensor": [
+        34.053,
+        225.887,
+        762.511
+      ],
+      "ground": [
+        13.889,
+        17.574,
+        23.62
+      ],
+      "adaptive": [
+        12.773,
+        17.4,
+        26.672
+      ],
+      "cardinality": [
+        14.291,
+        22.158,
+        25.301
+      ],
+      "stable": [
+        15.684,
+        19.825,
+        27.716
+      ],
+      "qualified": [
+        7.36,
+        10.697,
+        13.983
+      ]
+    },
+    "source_bytes_per_seed": {
+      "dense": [
+        18432,
+        73728,
+        147456
+      ],
+      "qualified": [
+        6600,
+        25120,
+        49748
+      ]
+    },
+    "padded_attention_pairs_per_head_per_seed": {
+      "dense": [
+        418176,
+        6390144,
+        25362816
+      ],
+      "ground": [
+        31104,
+        31104,
+        31104
+      ],
+      "qualified": [
+        2850,
+        3400,
+        3725
+      ]
+    },
+    "exact_oracle_median_ms": [
+      0.992734,
+      3.720289,
+      7.039324
+    ],
+    "exact_oracle_correct_each": 384,
+    "selected_refined_step": 90
+  },
+  "weights_sha256": {
+    "refined/cardinality-1.pt": "c4ed792b7da34acc4644e503172c3ca52adc4d525df40f9bdad3dc74fe58707b",
+    "refined/cardinality-2.pt": "01401357208f4500b2494d3c34d42eec3fa72e36d685bbb2021196cb36e3c8f2",
+    "refined/qualified-1.pt": "ba8e5fb47aa461e2d4a484cd89b04327d27acfcb9b818ffe3191d7424f0d3ec4",
+    "refined/qualified-2.pt": "a9a9de96ebc9d4f0bd8c6455d9ad1c349038cc3bf83b4d049b70f3cae9740cd7",
+    "refined/stable-1.pt": "e68019888cb9d04d8a135b722ef84c6703ce31c694ee7c79fb8389323baa0081",
+    "refined/stable-2.pt": "81d833340cdda47d8fb44eeea3c78d5d7c507d4ef0d0eb38b6f5f73b1af9e1f9",
+    "results/adaptive-1.pt": "3e724f2553dac9fdbdb59c5a9d8cbb085aef0b0cf844d15e0e1e8cc71c1a3bc4",
+    "results/adaptive-2.pt": "10759f8dbd8c45a09b516eea22c104057b13ddbb974f43f1fbc6f95316909560",
+    "results/corpus-1.pt": "72fb6ea9a4a8cac0d46de9344bb0cf4aeb85a6b5d3b4612e228ce07ff8ba1825",
+    "results/corpus-2.pt": "6364cf9f14466b831575d087e9c1e8eb64d0b20f9b638bdf83127d5996867f8b",
+    "results/dense-1.pt": "aabbff05f29252c4aaf276aba9b957be3a6aff3471e37bbf3af7c9c40af7f128",
+    "results/dense-2.pt": "8ac8d9cec145c95de22ef76265f66c6ac40800c2f07155ae38779f17f5f8c66f",
+    "results/ground-1.pt": "8423e4e6eca5049015028e9fda190ee46c1c51ffa60d3c16d900c5e9e377d8ac",
+    "results/ground-2.pt": "8d9fd7be25cfa426c236eedd282062655a945783b5a550d7e9d83a85388b22dd",
+    "results/sensor-1.pt": "eb9c2eb010deb2826859a6b42d38e74adbd8a3f6ae04ecfb2287b68469d40465",
+    "results/sensor-2.pt": "9412133015af9720a6de674ffeab59e19adaf4f0bdac7a12e886293376d27922"
+  },
+  "scope": "Measured CPU hosted, two threads; local reports and weights are external experimental artifacts, recipe and source retained in Git. Exact cohort digests are portable; timings, numerical training and serialized weight bytes are platform-specific. Refined report measured before final pin checks and removal of unused coordinate list; final code unit-tested."
+}
