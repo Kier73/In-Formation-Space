@@ -1,5 +1,5 @@
 "use strict";
-function experiment(api,arithmetic){
+function experiment(api,arithmetic,mode){
  const B=BigInt, assert=(x,m)=>{if(!x)throw Error(m)}, mod=(x,m)=>((x%m)+m)%m;
  const gcd=(a,b)=>b?gcd(b,a%b):a,lcm=(a,b)=>a/gcd(a,b)*b;
  const choose=(n,k)=>{if(n<B(k))return 0n;let z=1n;for(let i=1;i<=k;i++)z=z*(n-B(i-1))/B(i);return z};
@@ -110,6 +110,7 @@ function experiment(api,arithmetic){
    for(let j=0;j<n;j++)out.push(s.kind===2?(v[0]+v[1]*j)&255:v[j%v.length]);
   }return out;
  }
+ if(mode==='api')return {compile,stats};
  const finite={cases:0,bytes:0,ranges:0,marginalChecks:0,regimes:0,overlapPieces:0,residues:0,setupTerms:0,queryTerms:0,expandedModelRecords:0};
  function finiteCase(a,b,count,sourceA=null){
   const m=stats(),ix=compile(a,b,count,m),setup=m.patternTerms,x=sourceA??raw(a,count),y=raw(b,count);

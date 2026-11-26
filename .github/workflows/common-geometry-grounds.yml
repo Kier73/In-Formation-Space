@@ -1,0 +1,23 @@
+name: Common geometry Grounds
+on:
+  pull_request:
+    paths:
+      - 'experiments/common_geometry_grounds/**'
+      - 'experiments/bilinear_selector_grounds/clt015.js'
+      - '.github/workflows/common-geometry-grounds.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node experiments/bilinear_selector_grounds/clt015.js > /tmp/clt015.json
+          diff -u experiments/bilinear_selector_grounds/results.json /tmp/clt015.json
+          node experiments/common_geometry_grounds/clt016.js > /tmp/clt016.json
+          diff -u experiments/common_geometry_grounds/results.json /tmp/clt016.json
