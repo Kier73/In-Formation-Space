@@ -1,0 +1,277 @@
+{
+  "results": [
+    {
+      "label": "barrier8",
+      "n": 2,
+      "initial": 7,
+      "best": 7,
+      "passes": [
+        [
+          {
+            "a": 0,
+            "tests": 60,
+            "atoms": 7,
+            "unit": 7,
+            "dualDimension": 3,
+            "checked": 7,
+            "completeDual": true,
+            "minSpan": 0,
+            "success": false
+          },
+          {
+            "a": 1,
+            "tests": 60,
+            "atoms": 7,
+            "unit": 7,
+            "dualDimension": 3,
+            "checked": 7,
+            "completeDual": true,
+            "minSpan": 0,
+            "success": false
+          },
+          {
+            "a": 2,
+            "tests": 60,
+            "atoms": 7,
+            "unit": 7,
+            "dualDimension": 3,
+            "checked": 7,
+            "completeDual": true,
+            "minSpan": 0,
+            "success": false
+          }
+        ]
+      ],
+      "verified": true,
+      "terms": [
+        [
+          "1",
+          "2",
+          "10"
+        ],
+        [
+          "2",
+          "8",
+          "3"
+        ],
+        [
+          "5",
+          "15",
+          "8"
+        ],
+        [
+          "8",
+          "5",
+          "12"
+        ],
+        [
+          "12",
+          "1",
+          "5"
+        ],
+        [
+          "13",
+          "13",
+          "9"
+        ],
+        [
+          "15",
+          "12",
+          "1"
+        ]
+      ]
+    },
+    {
+      "label": "rank25",
+      "n": 3,
+      "initial": 24,
+      "best": 24,
+      "passes": [
+        [
+          {
+            "a": 0,
+            "tests": 4599,
+            "atoms": 31,
+            "unit": 24,
+            "dualDimension": 15,
+            "checked": 32767,
+            "completeDual": true,
+            "minSpan": 8,
+            "success": false
+          },
+          {
+            "a": 1,
+            "tests": 4599,
+            "atoms": 37,
+            "unit": 24,
+            "dualDimension": 15,
+            "checked": 32767,
+            "completeDual": true,
+            "minSpan": 9,
+            "success": false
+          },
+          {
+            "a": 2,
+            "tests": 4599,
+            "atoms": 36,
+            "unit": 24,
+            "dualDimension": 15,
+            "checked": 32767,
+            "completeDual": true,
+            "minSpan": 8,
+            "success": false
+          }
+        ]
+      ],
+      "verified": true,
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    }
+  ],
+  "certificate": [
+    {
+      "axis": 0,
+      "complete": true,
+      "extra": 0,
+      "nonzero": true,
+      "distinct": true,
+      "noSmallerInSpan": true
+    },
+    {
+      "axis": 1,
+      "complete": true,
+      "extra": 1,
+      "nonzero": true,
+      "distinct": true,
+      "noSmallerInSpan": true
+    },
+    {
+      "axis": 2,
+      "complete": true,
+      "extra": 0,
+      "nonzero": true,
+      "distinct": true,
+      "noSmallerInSpan": true
+    }
+  ]
+}

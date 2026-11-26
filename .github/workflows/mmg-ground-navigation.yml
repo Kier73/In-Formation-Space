@@ -1,0 +1,70 @@
+name: MMG exact rank and ground integration
+on:
+  pull_request:
+    paths:
+      - 'experiments/mmg-fusion-navigation/**'
+      - '.github/workflows/mmg-ground-navigation.yml'
+  workflow_dispatch:
+jobs:
+  exact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 6f05be0b4ecbb53c5f64580c7b82ee531fdd1f73
+          path: _ecpu
+      - run: python -m pip install -r experiments/mmg-fusion-navigation/requirements.txt
+      - working-directory: experiments/mmg-fusion-navigation
+        run: |
+          node mmg007_positive_constraint.js > /tmp/mmg007.json
+          node mmg008_block_constraint.js > /tmp/mmg008.json
+          node mmg009_rectangular_quotient.js > /tmp/mmg009.json
+          node mmg010_cyclic_synthesis.js > /tmp/mmg010.json
+          node mmg011_linear_cost.js > /tmp/mmg011.json
+          node mmg012_hot_start.js > /tmp/mmg012.json
+          node mmg013_overclock.js > /tmp/mmg013.json
+          node mmg014_incumbent_code.js > /tmp/mmg014.json
+          node mmg015_lazy_fit.js > /tmp/mmg015.json
+          node mmg016_rank_barrier.js > /tmp/mmg016.json
+          node mmg016_escape.js > /tmp/mmg016-escape.json
+          node mmg017_delayed_fit.js > /tmp/mmg017.json
+          node mmg017_cached_fit.js > /tmp/mmg017-cached.json
+          node mmg018_hyperplane.js > /tmp/mmg018.json
+          node mmg019_exact_pair_span.js > /tmp/mmg019.json
+          node mmg020_pair_span_gray.js > /tmp/mmg020.json
+          node mmg021_exact_closure.js > /tmp/mmg021.json
+          node mmg022_adaptive_work.js > /tmp/mmg022.json
+          node mmg023_coset_lift.js > /tmp/mmg023.json
+          node mmg024_depth.js > /tmp/mmg024.json
+          node mmg025_rectangular_depth.js > /tmp/mmg025.json
+          node mmg026_query_flag.js > /tmp/mmg026.json
+          node mmg027_residual_continuation.js > /tmp/mmg027.json
+          node mmg028_entangled_depth.js > /tmp/mmg028.json
+          node mmg029_entangled_flags.js > /tmp/mmg029.json
+          node mmg030_joint_residual.js > /tmp/mmg030.json
+          node mmg031_collective_rectangles.js > /tmp/mmg031.json
+          node mmg032_collective_lift.js > /tmp/mmg032.json
+          node mmg033_sparse_coset.js > /tmp/mmg033.json
+          node mmg034_collective_compile.js > /tmp/mmg034.json
+          for n in 3 4 5; do node mmg035_multi_lift.js "$n" > "/tmp/mmg035-$n.json"; done
+          for n in 3 4 5; do node mmg036_outside_first.js "$n" > "/tmp/mmg036-$n.json"; done
+          node mmg037_gauge_tables.js > /tmp/mmg037.json
+          node mmg038_rank_gate.js > /tmp/mmg038.json
+          node mmg005_rank_walk.js > /tmp/mmg005-rank.json
+          python mmg005_compile.py > /tmp/mmg005-compile.json
+          node mmg006_distinctness.js > /tmp/mmg006-distinctness.json
+          python mmg006_pfaffian.py > /tmp/mmg006-pfaffian.json
+          python mmg005_fabric.py --ecpu-root ../../_ecpu > /tmp/mmg005-fabric.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mmg-ground-evidence
+          path: /tmp/mmg*.json

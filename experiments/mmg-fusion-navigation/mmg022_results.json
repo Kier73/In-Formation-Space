@@ -1,0 +1,10516 @@
+{
+  "summary": [
+    {
+      "label": "barrier8",
+      "policy": "eager",
+      "runs": 5,
+      "budget": 2500000,
+      "success": 0,
+      "best": 8,
+      "meanAttempts": 8176.2,
+      "meanUsed": 2499992.2,
+      "compressionCalls": 2552,
+      "compressionHits": 142,
+      "phaseChanges": 0,
+      "firstHits": []
+    },
+    {
+      "label": "barrier8",
+      "policy": "periodic",
+      "runs": 5,
+      "budget": 2500000,
+      "success": 4,
+      "best": 7,
+      "meanAttempts": 4966.4,
+      "meanUsed": 2499999.6,
+      "compressionCalls": 510,
+      "compressionHits": 16,
+      "phaseChanges": 51.2,
+      "firstHits": [
+        1516560,
+        1202950,
+        594150,
+        840933
+      ]
+    },
+    {
+      "label": "barrier8",
+      "policy": "adaptive",
+      "runs": 5,
+      "budget": 2500000,
+      "success": 3,
+      "best": 7,
+      "meanAttempts": 4463,
+      "meanUsed": 2499999.8,
+      "compressionCalls": 473,
+      "compressionHits": 18,
+      "phaseChanges": 31.6,
+      "firstHits": [
+        395808,
+        1262825,
+        586864
+      ]
+    },
+    {
+      "label": "rank24",
+      "policy": "eager",
+      "runs": 5,
+      "budget": 4000000,
+      "success": 0,
+      "best": 24,
+      "meanAttempts": 4252.4,
+      "meanUsed": 3999999.4,
+      "compressionCalls": 1327,
+      "compressionHits": 12,
+      "phaseChanges": 0,
+      "firstHits": []
+    },
+    {
+      "label": "rank24",
+      "policy": "periodic",
+      "runs": 5,
+      "budget": 4000000,
+      "success": 0,
+      "best": 24,
+      "meanAttempts": 2872.6,
+      "meanUsed": 3999999.8,
+      "compressionCalls": 299,
+      "compressionHits": 18,
+      "phaseChanges": 29.2,
+      "firstHits": []
+    },
+    {
+      "label": "rank24",
+      "policy": "adaptive",
+      "runs": 5,
+      "budget": 4000000,
+      "success": 0,
+      "best": 24,
+      "meanAttempts": 2735.4,
+      "meanUsed": 3999999.8,
+      "compressionCalls": 275,
+      "compressionHits": 11,
+      "phaseChanges": 18.2,
+      "firstHits": []
+    },
+    {
+      "label": "rank47",
+      "policy": "eager",
+      "runs": 3,
+      "budget": 4000000,
+      "success": 0,
+      "best": 47,
+      "meanAttempts": 1985.6666666666667,
+      "meanUsed": 3999999.3333333335,
+      "compressionCalls": 372,
+      "compressionHits": 0,
+      "phaseChanges": 0,
+      "firstHits": []
+    },
+    {
+      "label": "rank47",
+      "policy": "periodic",
+      "runs": 3,
+      "budget": 4000000,
+      "success": 0,
+      "best": 47,
+      "meanAttempts": 1500.3333333333333,
+      "meanUsed": 3999963.3333333335,
+      "compressionCalls": 91,
+      "compressionHits": 1,
+      "phaseChanges": 15,
+      "firstHits": []
+    },
+    {
+      "label": "rank47",
+      "policy": "adaptive",
+      "runs": 3,
+      "budget": 4000000,
+      "success": 0,
+      "best": 47,
+      "meanAttempts": 1492.3333333333333,
+      "meanUsed": 4000000,
+      "compressionCalls": 97,
+      "compressionHits": 0,
+      "phaseChanges": 11,
+      "firstHits": []
+    },
+    {
+      "label": "rank95",
+      "policy": "eager",
+      "runs": 3,
+      "budget": 4000000,
+      "success": 0,
+      "best": 95,
+      "meanAttempts": 977.3333333333334,
+      "meanUsed": 3999979.3333333335,
+      "compressionCalls": 183,
+      "compressionHits": 0,
+      "phaseChanges": 0,
+      "firstHits": []
+    },
+    {
+      "label": "rank95",
+      "policy": "periodic",
+      "runs": 3,
+      "budget": 4000000,
+      "success": 0,
+      "best": 95,
+      "meanAttempts": 772.3333333333334,
+      "meanUsed": 3999978.3333333335,
+      "compressionCalls": 48,
+      "compressionHits": 0,
+      "phaseChanges": 8,
+      "firstHits": []
+    },
+    {
+      "label": "rank95",
+      "policy": "adaptive",
+      "runs": 3,
+      "budget": 4000000,
+      "success": 0,
+      "best": 95,
+      "meanAttempts": 754.6666666666666,
+      "meanUsed": 3999972.6666666665,
+      "compressionCalls": 42,
+      "compressionHits": 1,
+      "phaseChanges": 4.666666666666667,
+      "firstHits": []
+    }
+  ],
+  "runs": [
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "eager",
+      "seed": 20261325,
+      "initial": 8,
+      "best": 8,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2499981,
+      "ledger": {
+        "term": 820867,
+        "compare": 135061,
+        "map": 1442829,
+        "verify": 288,
+        "bit": 40285,
+        "xor": 25714,
+        "proposal": 8168,
+        "controller": 8167,
+        "pivot": 18602
+      },
+      "attempts": 8168,
+      "committed": 860,
+      "fitSteps": 8168,
+      "exploreSteps": 0,
+      "compressionCalls": 510,
+      "compressionHits": 17,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "1",
+          "2",
+          "12"
+        ],
+        [
+          "4",
+          "10",
+          "6"
+        ],
+        [
+          "5",
+          "15",
+          "14"
+        ],
+        [
+          "8",
+          "5",
+          "10"
+        ],
+        [
+          "12",
+          "9",
+          "5"
+        ],
+        [
+          "13",
+          "13",
+          "15"
+        ],
+        [
+          "14",
+          "8",
+          "3"
+        ],
+        [
+          "15",
+          "12",
+          "1"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "periodic",
+      "seed": 20261325,
+      "initial": 8,
+      "best": 7,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2500000,
+      "ledger": {
+        "term": 509358,
+        "compare": 243208,
+        "map": 1721244,
+        "verify": 79,
+        "bit": 7829,
+        "xor": 4737,
+        "proposal": 4906,
+        "controller": 4905,
+        "pivot": 3734
+      },
+      "attempts": 4906,
+      "committed": 4239,
+      "fitSteps": 1600,
+      "exploreSteps": 3306,
+      "compressionCalls": 99,
+      "compressionHits": 3,
+      "phaseChanges": 50,
+      "events": [
+        {
+          "attempts": 2959,
+          "work": 1516560,
+          "rank": 7
+        }
+      ],
+      "terms": [
+        [
+          "12",
+          "3",
+          "4"
+        ],
+        [
+          "3",
+          "4",
+          "1"
+        ],
+        [
+          "8",
+          "15",
+          "10"
+        ],
+        [
+          "1",
+          "5",
+          "15"
+        ],
+        [
+          "10",
+          "8",
+          "2"
+        ],
+        [
+          "9",
+          "7",
+          "14"
+        ],
+        [
+          "5",
+          "2",
+          "12"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "adaptive",
+      "seed": 20261325,
+      "initial": 8,
+      "best": 7,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2500000,
+      "ledger": {
+        "term": 464608,
+        "compare": 215495,
+        "map": 1537504,
+        "verify": 63,
+        "bit": 7149,
+        "xor": 4110,
+        "proposal": 4479,
+        "controller": 263319,
+        "pivot": 3273
+      },
+      "attempts": 4479,
+      "committed": 3750,
+      "fitSteps": 1536,
+      "exploreSteps": 2943,
+      "compressionCalls": 95,
+      "compressionHits": 2,
+      "phaseChanges": 32,
+      "events": [
+        {
+          "attempts": 685,
+          "work": 395808,
+          "rank": 7
+        }
+      ],
+      "terms": [
+        [
+          "1",
+          "5",
+          "5"
+        ],
+        [
+          "5",
+          "3",
+          "4"
+        ],
+        [
+          "9",
+          "6",
+          "6"
+        ],
+        [
+          "8",
+          "10",
+          "10"
+        ],
+        [
+          "3",
+          "4",
+          "3"
+        ],
+        [
+          "10",
+          "12",
+          "2"
+        ],
+        [
+          "12",
+          "2",
+          "12"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "eager",
+      "seed": 20261326,
+      "initial": 8,
+      "best": 8,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2499999,
+      "ledger": {
+        "term": 826946,
+        "compare": 137001,
+        "map": 1452466,
+        "verify": 480,
+        "bit": 35639,
+        "xor": 16639,
+        "proposal": 8217,
+        "controller": 8216,
+        "pivot": 14395
+      },
+      "attempts": 8217,
+      "committed": 820,
+      "fitSteps": 8217,
+      "exploreSteps": 0,
+      "compressionCalls": 513,
+      "compressionHits": 29,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "1",
+          "2",
+          "12"
+        ],
+        [
+          "4",
+          "10",
+          "6"
+        ],
+        [
+          "5",
+          "15",
+          "14"
+        ],
+        [
+          "8",
+          "5",
+          "10"
+        ],
+        [
+          "12",
+          "9",
+          "5"
+        ],
+        [
+          "13",
+          "13",
+          "15"
+        ],
+        [
+          "14",
+          "8",
+          "3"
+        ],
+        [
+          "15",
+          "12",
+          "1"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "periodic",
+      "seed": 20261326,
+      "initial": 8,
+      "best": 7,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2500000,
+      "ledger": {
+        "term": 514749,
+        "compare": 241574,
+        "map": 1716391,
+        "verify": 111,
+        "bit": 8264,
+        "xor": 5078,
+        "proposal": 4992,
+        "controller": 4991,
+        "pivot": 3850
+      },
+      "attempts": 4992,
+      "committed": 4221,
+      "fitSteps": 1664,
+      "exploreSteps": 3328,
+      "compressionCalls": 103,
+      "compressionHits": 5,
+      "phaseChanges": 52,
+      "events": [
+        {
+          "attempts": 2386,
+          "work": 1202950,
+          "rank": 7
+        }
+      ],
+      "terms": [
+        [
+          "11",
+          "14",
+          "11"
+        ],
+        [
+          "4",
+          "1",
+          "4"
+        ],
+        [
+          "3",
+          "12",
+          "10"
+        ],
+        [
+          "10",
+          "10",
+          "3"
+        ],
+        [
+          "1",
+          "15",
+          "1"
+        ],
+        [
+          "15",
+          "2",
+          "8"
+        ],
+        [
+          "8",
+          "4",
+          "15"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "adaptive",
+      "seed": 20261326,
+      "initial": 8,
+      "best": 8,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2500000,
+      "ledger": {
+        "term": 465107,
+        "compare": 217335,
+        "map": 1535526,
+        "verify": 48,
+        "bit": 7439,
+        "xor": 4487,
+        "proposal": 4466,
+        "controller": 262057,
+        "pivot": 3535
+      },
+      "attempts": 4466,
+      "committed": 3823,
+      "fitSteps": 1536,
+      "exploreSteps": 2930,
+      "compressionCalls": 96,
+      "compressionHits": 2,
+      "phaseChanges": 32,
+      "events": [],
+      "terms": [
+        [
+          "1",
+          "2",
+          "12"
+        ],
+        [
+          "4",
+          "10",
+          "6"
+        ],
+        [
+          "5",
+          "15",
+          "14"
+        ],
+        [
+          "8",
+          "5",
+          "10"
+        ],
+        [
+          "12",
+          "9",
+          "5"
+        ],
+        [
+          "13",
+          "13",
+          "15"
+        ],
+        [
+          "14",
+          "8",
+          "3"
+        ],
+        [
+          "15",
+          "12",
+          "1"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "eager",
+      "seed": 20261327,
+      "initial": 8,
+      "best": 8,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2499986,
+      "ledger": {
+        "term": 821033,
+        "compare": 135548,
+        "map": 1442083,
+        "verify": 576,
+        "bit": 40738,
+        "xor": 25465,
+        "proposal": 8164,
+        "controller": 8163,
+        "pivot": 18216
+      },
+      "attempts": 8164,
+      "committed": 770,
+      "fitSteps": 8164,
+      "exploreSteps": 0,
+      "compressionCalls": 510,
+      "compressionHits": 35,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "1",
+          "2",
+          "12"
+        ],
+        [
+          "4",
+          "10",
+          "6"
+        ],
+        [
+          "5",
+          "15",
+          "14"
+        ],
+        [
+          "8",
+          "5",
+          "10"
+        ],
+        [
+          "12",
+          "9",
+          "5"
+        ],
+        [
+          "13",
+          "13",
+          "15"
+        ],
+        [
+          "14",
+          "8",
+          "3"
+        ],
+        [
+          "15",
+          "12",
+          "1"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "periodic",
+      "seed": 20261327,
+      "initial": 8,
+      "best": 7,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2499999,
+      "ledger": {
+        "term": 519876,
+        "compare": 240601,
+        "map": 1712673,
+        "verify": 63,
+        "bit": 8102,
+        "xor": 4795,
+        "proposal": 5040,
+        "controller": 5039,
+        "pivot": 3810
+      },
+      "attempts": 5040,
+      "committed": 4117,
+      "fitSteps": 1664,
+      "exploreSteps": 3376,
+      "compressionCalls": 104,
+      "compressionHits": 2,
+      "phaseChanges": 52,
+      "events": [
+        {
+          "attempts": 1188,
+          "work": 594150,
+          "rank": 7
+        }
+      ],
+      "terms": [
+        [
+          "5",
+          "1",
+          "12"
+        ],
+        [
+          "8",
+          "15",
+          "5"
+        ],
+        [
+          "1",
+          "10",
+          "15"
+        ],
+        [
+          "9",
+          "11",
+          "13"
+        ],
+        [
+          "10",
+          "4",
+          "1"
+        ],
+        [
+          "3",
+          "8",
+          "2"
+        ],
+        [
+          "12",
+          "3",
+          "8"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "adaptive",
+      "seed": 20261327,
+      "initial": 8,
+      "best": 7,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2500000,
+      "ledger": {
+        "term": 466892,
+        "compare": 214949,
+        "map": 1535197,
+        "verify": 95,
+        "bit": 7456,
+        "xor": 4453,
+        "proposal": 4479,
+        "controller": 263085,
+        "pivot": 3394
+      },
+      "attempts": 4479,
+      "committed": 3757,
+      "fitSteps": 1536,
+      "exploreSteps": 2943,
+      "compressionCalls": 96,
+      "compressionHits": 4,
+      "phaseChanges": 32,
+      "events": [
+        {
+          "attempts": 2259,
+          "work": 1262825,
+          "rank": 7
+        }
+      ],
+      "terms": [
+        [
+          "4",
+          "15",
+          "10"
+        ],
+        [
+          "3",
+          "1",
+          "1"
+        ],
+        [
+          "12",
+          "12",
+          "4"
+        ],
+        [
+          "10",
+          "8",
+          "12"
+        ],
+        [
+          "5",
+          "2",
+          "2"
+        ],
+        [
+          "2",
+          "5",
+          "15"
+        ],
+        [
+          "6",
+          "13",
+          "14"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "eager",
+      "seed": 20261328,
+      "initial": 8,
+      "best": 8,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2499997,
+      "ledger": {
+        "term": 820536,
+        "compare": 136156,
+        "map": 1442325,
+        "verify": 496,
+        "bit": 40498,
+        "xor": 25421,
+        "proposal": 8172,
+        "controller": 8171,
+        "pivot": 18222
+      },
+      "attempts": 8172,
+      "committed": 802,
+      "fitSteps": 8172,
+      "exploreSteps": 0,
+      "compressionCalls": 510,
+      "compressionHits": 30,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "1",
+          "2",
+          "12"
+        ],
+        [
+          "4",
+          "10",
+          "6"
+        ],
+        [
+          "5",
+          "15",
+          "14"
+        ],
+        [
+          "8",
+          "5",
+          "10"
+        ],
+        [
+          "12",
+          "9",
+          "5"
+        ],
+        [
+          "13",
+          "13",
+          "15"
+        ],
+        [
+          "14",
+          "8",
+          "3"
+        ],
+        [
+          "15",
+          "12",
+          "1"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "periodic",
+      "seed": 20261328,
+      "initial": 8,
+      "best": 7,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2500000,
+      "ledger": {
+        "term": 518473,
+        "compare": 239293,
+        "map": 1715525,
+        "verify": 63,
+        "bit": 8079,
+        "xor": 4802,
+        "proposal": 4996,
+        "controller": 4995,
+        "pivot": 3774
+      },
+      "attempts": 4996,
+      "committed": 4092,
+      "fitSteps": 1664,
+      "exploreSteps": 3332,
+      "compressionCalls": 104,
+      "compressionHits": 2,
+      "phaseChanges": 52,
+      "events": [
+        {
+          "attempts": 1635,
+          "work": 840933,
+          "rank": 7
+        }
+      ],
+      "terms": [
+        [
+          "4",
+          "3",
+          "8"
+        ],
+        [
+          "10",
+          "5",
+          "1"
+        ],
+        [
+          "3",
+          "8",
+          "15"
+        ],
+        [
+          "1",
+          "10",
+          "2"
+        ],
+        [
+          "15",
+          "1",
+          "12"
+        ],
+        [
+          "8",
+          "12",
+          "5"
+        ],
+        [
+          "11",
+          "9",
+          "13"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "adaptive",
+      "seed": 20261328,
+      "initial": 8,
+      "best": 8,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2500000,
+      "ledger": {
+        "term": 456598,
+        "compare": 218462,
+        "map": 1546854,
+        "verify": 96,
+        "bit": 7183,
+        "xor": 4413,
+        "proposal": 4386,
+        "controller": 258659,
+        "pivot": 3349
+      },
+      "attempts": 4386,
+      "committed": 3801,
+      "fitSteps": 1440,
+      "exploreSteps": 2946,
+      "compressionCalls": 90,
+      "compressionHits": 5,
+      "phaseChanges": 30,
+      "events": [],
+      "terms": [
+        [
+          "1",
+          "2",
+          "12"
+        ],
+        [
+          "4",
+          "10",
+          "6"
+        ],
+        [
+          "5",
+          "15",
+          "14"
+        ],
+        [
+          "8",
+          "5",
+          "10"
+        ],
+        [
+          "12",
+          "9",
+          "5"
+        ],
+        [
+          "13",
+          "13",
+          "15"
+        ],
+        [
+          "14",
+          "8",
+          "3"
+        ],
+        [
+          "15",
+          "12",
+          "1"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "eager",
+      "seed": 20261329,
+      "initial": 8,
+      "best": 8,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2499998,
+      "ledger": {
+        "term": 819542,
+        "compare": 144374,
+        "map": 1442030,
+        "verify": 512,
+        "bit": 38940,
+        "xor": 21666,
+        "proposal": 8160,
+        "controller": 8159,
+        "pivot": 16615
+      },
+      "attempts": 8160,
+      "committed": 1110,
+      "fitSteps": 8160,
+      "exploreSteps": 0,
+      "compressionCalls": 509,
+      "compressionHits": 31,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "1",
+          "2",
+          "12"
+        ],
+        [
+          "4",
+          "10",
+          "6"
+        ],
+        [
+          "5",
+          "15",
+          "14"
+        ],
+        [
+          "8",
+          "5",
+          "10"
+        ],
+        [
+          "12",
+          "9",
+          "5"
+        ],
+        [
+          "13",
+          "13",
+          "15"
+        ],
+        [
+          "14",
+          "8",
+          "3"
+        ],
+        [
+          "15",
+          "12",
+          "1"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "periodic",
+      "seed": 20261329,
+      "initial": 8,
+      "best": 8,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2499999,
+      "ledger": {
+        "term": 511516,
+        "compare": 242632,
+        "map": 1719816,
+        "verify": 80,
+        "bit": 7839,
+        "xor": 4690,
+        "proposal": 4898,
+        "controller": 4897,
+        "pivot": 3631
+      },
+      "attempts": 4898,
+      "committed": 4273,
+      "fitSteps": 1600,
+      "exploreSteps": 3298,
+      "compressionCalls": 100,
+      "compressionHits": 4,
+      "phaseChanges": 50,
+      "events": [],
+      "terms": [
+        [
+          "1",
+          "2",
+          "12"
+        ],
+        [
+          "4",
+          "10",
+          "6"
+        ],
+        [
+          "5",
+          "15",
+          "14"
+        ],
+        [
+          "8",
+          "5",
+          "10"
+        ],
+        [
+          "12",
+          "9",
+          "5"
+        ],
+        [
+          "13",
+          "13",
+          "15"
+        ],
+        [
+          "14",
+          "8",
+          "3"
+        ],
+        [
+          "15",
+          "12",
+          "1"
+        ]
+      ]
+    },
+    {
+      "label": "barrier8",
+      "n": 2,
+      "policy": "adaptive",
+      "seed": 20261329,
+      "initial": 8,
+      "best": 7,
+      "cap": 9,
+      "budget": 2500000,
+      "used": 2499999,
+      "ledger": {
+        "term": 465607,
+        "compare": 214960,
+        "map": 1534707,
+        "verify": 111,
+        "bit": 7578,
+        "xor": 4566,
+        "proposal": 4505,
+        "controller": 264529,
+        "pivot": 3436
+      },
+      "attempts": 4505,
+      "committed": 3701,
+      "fitSteps": 1536,
+      "exploreSteps": 2969,
+      "compressionCalls": 96,
+      "compressionHits": 5,
+      "phaseChanges": 32,
+      "events": [
+        {
+          "attempts": 1075,
+          "work": 586864,
+          "rank": 7
+        }
+      ],
+      "terms": [
+        [
+          "13",
+          "11",
+          "14"
+        ],
+        [
+          "2",
+          "4",
+          "1"
+        ],
+        [
+          "8",
+          "15",
+          "4"
+        ],
+        [
+          "5",
+          "10",
+          "12"
+        ],
+        [
+          "1",
+          "1",
+          "15"
+        ],
+        [
+          "15",
+          "8",
+          "2"
+        ],
+        [
+          "12",
+          "3",
+          "10"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "eager",
+      "seed": 20261425,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 1239231,
+        "compare": 376042,
+        "map": 2176356,
+        "verify": 153,
+        "bit": 123074,
+        "xor": 44662,
+        "proposal": 4256,
+        "controller": 4255,
+        "pivot": 31971
+      },
+      "attempts": 4256,
+      "committed": 1383,
+      "fitSteps": 4256,
+      "exploreSteps": 0,
+      "compressionCalls": 266,
+      "compressionHits": 2,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "periodic",
+      "seed": 20261425,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 908297,
+        "compare": 360270,
+        "map": 2676582,
+        "verify": 103,
+        "bit": 29742,
+        "xor": 11266,
+        "proposal": 2901,
+        "controller": 2900,
+        "pivot": 7939
+      },
+      "attempts": 2901,
+      "committed": 2601,
+      "fitSteps": 960,
+      "exploreSteps": 1941,
+      "compressionCalls": 60,
+      "compressionHits": 1,
+      "phaseChanges": 30,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "adaptive",
+      "seed": 20261425,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 864392,
+        "compare": 345089,
+        "map": 2582553,
+        "verify": 208,
+        "bit": 27006,
+        "xor": 10099,
+        "proposal": 2725,
+        "controller": 160937,
+        "pivot": 6991
+      },
+      "attempts": 2725,
+      "committed": 2480,
+      "fitSteps": 864,
+      "exploreSteps": 1861,
+      "compressionCalls": 54,
+      "compressionHits": 3,
+      "phaseChanges": 18,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "eager",
+      "seed": 20261426,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 3999999,
+      "ledger": {
+        "term": 1239904,
+        "compare": 375923,
+        "map": 2175717,
+        "verify": 255,
+        "bit": 123076,
+        "xor": 44598,
+        "proposal": 4251,
+        "controller": 4250,
+        "pivot": 32025
+      },
+      "attempts": 4251,
+      "committed": 1473,
+      "fitSteps": 4251,
+      "exploreSteps": 0,
+      "compressionCalls": 265,
+      "compressionHits": 4,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "periodic",
+      "seed": 20261426,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 3999999,
+      "ledger": {
+        "term": 906506,
+        "compare": 359320,
+        "map": 2678825,
+        "verify": 259,
+        "bit": 30393,
+        "xor": 11296,
+        "proposal": 2875,
+        "controller": 2874,
+        "pivot": 7651
+      },
+      "attempts": 2875,
+      "committed": 2591,
+      "fitSteps": 956,
+      "exploreSteps": 1919,
+      "compressionCalls": 60,
+      "compressionHits": 4,
+      "phaseChanges": 29,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "adaptive",
+      "seed": 20261426,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 875386,
+        "compare": 345804,
+        "map": 2564706,
+        "verify": 265,
+        "bit": 30076,
+        "xor": 11123,
+        "proposal": 2761,
+        "controller": 162321,
+        "pivot": 7558
+      },
+      "attempts": 2761,
+      "committed": 2495,
+      "fitSteps": 944,
+      "exploreSteps": 1817,
+      "compressionCalls": 59,
+      "compressionHits": 4,
+      "phaseChanges": 19,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "eager",
+      "seed": 20261427,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 1234895,
+        "compare": 380421,
+        "map": 2170378,
+        "verify": 204,
+        "bit": 124501,
+        "xor": 47465,
+        "proposal": 4243,
+        "controller": 4242,
+        "pivot": 33651
+      },
+      "attempts": 4243,
+      "committed": 1547,
+      "fitSteps": 4243,
+      "exploreSteps": 0,
+      "compressionCalls": 265,
+      "compressionHits": 3,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "periodic",
+      "seed": 20261427,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 905158,
+        "compare": 359061,
+        "map": 2679519,
+        "verify": 315,
+        "bit": 30722,
+        "xor": 11597,
+        "proposal": 2857,
+        "controller": 2856,
+        "pivot": 7915
+      },
+      "attempts": 2857,
+      "committed": 2613,
+      "fitSteps": 938,
+      "exploreSteps": 1919,
+      "compressionCalls": 59,
+      "compressionHits": 5,
+      "phaseChanges": 29,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "adaptive",
+      "seed": 20261427,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 3999999,
+      "ledger": {
+        "term": 866512,
+        "compare": 344612,
+        "map": 2582874,
+        "verify": 51,
+        "bit": 25786,
+        "xor": 9574,
+        "proposal": 2728,
+        "controller": 161135,
+        "pivot": 6727
+      },
+      "attempts": 2728,
+      "committed": 2464,
+      "fitSteps": 864,
+      "exploreSteps": 1864,
+      "compressionCalls": 54,
+      "compressionHits": 0,
+      "phaseChanges": 18,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "eager",
+      "seed": 20261428,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 3999999,
+      "ledger": {
+        "term": 1241578,
+        "compare": 369186,
+        "map": 2181340,
+        "verify": 153,
+        "bit": 123049,
+        "xor": 44561,
+        "proposal": 4266,
+        "controller": 4265,
+        "pivot": 31601
+      },
+      "attempts": 4266,
+      "committed": 1512,
+      "fitSteps": 4266,
+      "exploreSteps": 0,
+      "compressionCalls": 266,
+      "compressionHits": 2,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "periodic",
+      "seed": 20261428,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 905899,
+        "compare": 360212,
+        "map": 2677140,
+        "verify": 363,
+        "bit": 31163,
+        "xor": 11628,
+        "proposal": 2864,
+        "controller": 2863,
+        "pivot": 7868
+      },
+      "attempts": 2864,
+      "committed": 2588,
+      "fitSteps": 945,
+      "exploreSteps": 1919,
+      "compressionCalls": 60,
+      "compressionHits": 6,
+      "phaseChanges": 29,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "adaptive",
+      "seed": 20261428,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 865616,
+        "compare": 345105,
+        "map": 2582478,
+        "verify": 156,
+        "bit": 26853,
+        "xor": 10044,
+        "proposal": 2711,
+        "controller": 160013,
+        "pivot": 7024
+      },
+      "attempts": 2711,
+      "committed": 2484,
+      "fitSteps": 864,
+      "exploreSteps": 1847,
+      "compressionCalls": 54,
+      "compressionHits": 2,
+      "phaseChanges": 18,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "eager",
+      "seed": 20261429,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 3999999,
+      "ledger": {
+        "term": 1236721,
+        "compare": 378717,
+        "map": 2171824,
+        "verify": 102,
+        "bit": 123720,
+        "xor": 46943,
+        "proposal": 4246,
+        "controller": 4245,
+        "pivot": 33481
+      },
+      "attempts": 4246,
+      "committed": 1532,
+      "fitSteps": 4246,
+      "exploreSteps": 0,
+      "compressionCalls": 265,
+      "compressionHits": 1,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "periodic",
+      "seed": 20261429,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 912179,
+        "compare": 359111,
+        "map": 2673433,
+        "verify": 158,
+        "bit": 30190,
+        "xor": 11285,
+        "proposal": 2866,
+        "controller": 2865,
+        "pivot": 7913
+      },
+      "attempts": 2866,
+      "committed": 2531,
+      "fitSteps": 947,
+      "exploreSteps": 1919,
+      "compressionCalls": 60,
+      "compressionHits": 2,
+      "phaseChanges": 29,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank24",
+      "n": 3,
+      "policy": "adaptive",
+      "seed": 20261429,
+      "initial": 24,
+      "best": 24,
+      "cap": 28,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 864977,
+        "compare": 345200,
+        "map": 2580514,
+        "verify": 157,
+        "bit": 26705,
+        "xor": 10035,
+        "proposal": 2752,
+        "controller": 162719,
+        "pivot": 6941
+      },
+      "attempts": 2752,
+      "committed": 2495,
+      "fitSteps": 864,
+      "exploreSteps": 1888,
+      "compressionCalls": 54,
+      "compressionHits": 2,
+      "phaseChanges": 18,
+      "events": [],
+      "terms": [
+        [
+          "3",
+          "40",
+          "1"
+        ],
+        [
+          "4",
+          "365",
+          "390"
+        ],
+        [
+          "5",
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "41",
+          "1"
+        ],
+        [
+          "16",
+          "8",
+          "8"
+        ],
+        [
+          "16",
+          "16",
+          "16"
+        ],
+        [
+          "16",
+          "32",
+          "32"
+        ],
+        [
+          "32",
+          "65",
+          "72"
+        ],
+        [
+          "32",
+          "260",
+          "432"
+        ],
+        [
+          "40",
+          "1",
+          "26"
+        ],
+        [
+          "40",
+          "4",
+          "50"
+        ],
+        [
+          "100",
+          "388",
+          "386"
+        ],
+        [
+          "128",
+          "73",
+          "455"
+        ],
+        [
+          "128",
+          "438",
+          "130"
+        ],
+        [
+          "130",
+          "18",
+          "2"
+        ],
+        [
+          "130",
+          "32",
+          "5"
+        ],
+        [
+          "132",
+          "105",
+          "391"
+        ],
+        [
+          "192",
+          "390",
+          "144"
+        ],
+        [
+          "200",
+          "7",
+          "18"
+        ],
+        [
+          "203",
+          "2",
+          "2"
+        ],
+        [
+          "224",
+          "385",
+          "82"
+        ],
+        [
+          "292",
+          "128",
+          "384"
+        ],
+        [
+          "320",
+          "384",
+          "320"
+        ],
+        [
+          "416",
+          "448",
+          "64"
+        ]
+      ]
+    },
+    {
+      "label": "rank47",
+      "n": 4,
+      "policy": "eager",
+      "seed": 20261525,
+      "initial": 47,
+      "best": 47,
+      "cap": 51,
+      "budget": 4000000,
+      "used": 3999999,
+      "ledger": {
+        "term": 1187997,
+        "compare": 413632,
+        "map": 2037415,
+        "verify": 111,
+        "bit": 220811,
+        "xor": 87811,
+        "proposal": 1985,
+        "controller": 1984,
+        "pivot": 48253
+      },
+      "attempts": 1985,
+      "committed": 964,
+      "fitSteps": 1985,
+      "exploreSteps": 0,
+      "compressionCalls": 124,
+      "compressionHits": 0,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "8",
+          "60910",
+          "61672"
+        ],
+        [
+          "28744",
+          "28006",
+          "61676"
+        ],
+        [
+          "53248",
+          "14515",
+          "36864"
+        ],
+        [
+          "1033",
+          "771",
+          "3846"
+        ],
+        [
+          "39072",
+          "25273",
+          "31840"
+        ],
+        [
+          "24576",
+          "28086",
+          "16384"
+        ],
+        [
+          "1024",
+          "3795",
+          "23046"
+        ],
+        [
+          "345",
+          "514",
+          "3840"
+        ],
+        [
+          "21514",
+          "3536",
+          "24070"
+        ],
+        [
+          "39104",
+          "45753",
+          "96"
+        ],
+        [
+          "20480",
+          "15843",
+          "7686"
+        ],
+        [
+          "2048",
+          "49683",
+          "30816"
+        ],
+        [
+          "1802",
+          "528",
+          "3591"
+        ],
+        [
+          "1849",
+          "521",
+          "80"
+        ],
+        [
+          "73",
+          "776",
+          "92"
+        ],
+        [
+          "28750",
+          "2816",
+          "12"
+        ],
+        [
+          "21002",
+          "544",
+          "3584"
+        ],
+        [
+          "2128",
+          "4627",
+          "3936"
+        ],
+        [
+          "1887",
+          "512",
+          "7"
+        ],
+        [
+          "3328",
+          "531",
+          "2304"
+        ],
+        [
+          "63648",
+          "37561",
+          "28672"
+        ],
+        [
+          "13322",
+          "2992",
+          "20480"
+        ],
+        [
+          "13",
+          "768",
+          "9"
+        ],
+        [
+          "36864",
+          "26803",
+          "15456"
+        ],
+        [
+          "20488",
+          "12339",
+          "61446"
+        ],
+        [
+          "1952",
+          "537",
+          "3152"
+        ],
+        [
+          "1792",
+          "543",
+          "2903"
+        ],
+        [
+          "80",
+          "4638",
+          "3863"
+        ],
+        [
+          "9",
+          "782",
+          "3923"
+        ],
+        [
+          "6",
+          "3328",
+          "4"
+        ],
+        [
+          "37888",
+          "2227",
+          "23552"
+        ],
+        [
+          "96",
+          "25193",
+          "64"
+        ],
+        [
+          "28832",
+          "37401",
+          "28896"
+        ],
+        [
+          "22528",
+          "12819",
+          "32256"
+        ],
+        [
+          "10",
+          "3552",
+          "24066"
+        ],
+        [
+          "28712",
+          "37529",
+          "224"
+        ],
+        [
+          "40608",
+          "697",
+          "3072"
+        ],
+        [
+          "160",
+          "25113",
+          "31776"
+        ],
+        [
+          "36928",
+          "47283",
+          "61536"
+        ],
+        [
+          "4168",
+          "45243",
+          "61440"
+        ],
+        [
+          "1881",
+          "527",
+          "3927"
+        ],
+        [
+          "208",
+          "4633",
+          "144"
+        ],
+        [
+          "88",
+          "4625",
+          "231"
+        ],
+        [
+          "28682",
+          "2944",
+          "20492"
+        ],
+        [
+          "1536",
+          "735",
+          "1024"
+        ],
+        [
+          "28672",
+          "28134",
+          "45292"
+        ],
+        [
+          "64",
+          "25966",
+          "61612"
+        ]
+      ]
+    },
+    {
+      "label": "rank47",
+      "n": 4,
+      "policy": "periodic",
+      "seed": 20261525,
+      "initial": 47,
+      "best": 47,
+      "cap": 51,
+      "budget": 4000000,
+      "used": 3999891,
+      "ledger": {
+        "term": 999888,
+        "compare": 362654,
+        "map": 2547007,
+        "verify": 111,
+        "bit": 54339,
+        "xor": 21408,
+        "proposal": 1503,
+        "controller": 1502,
+        "pivot": 11479
+      },
+      "attempts": 1503,
+      "committed": 1197,
+      "fitSteps": 480,
+      "exploreSteps": 1023,
+      "compressionCalls": 30,
+      "compressionHits": 0,
+      "phaseChanges": 15,
+      "events": [],
+      "terms": [
+        [
+          "8",
+          "60910",
+          "61672"
+        ],
+        [
+          "28744",
+          "28006",
+          "61676"
+        ],
+        [
+          "53248",
+          "14515",
+          "36864"
+        ],
+        [
+          "1033",
+          "771",
+          "3846"
+        ],
+        [
+          "39072",
+          "25273",
+          "31840"
+        ],
+        [
+          "24576",
+          "28086",
+          "16384"
+        ],
+        [
+          "1024",
+          "3795",
+          "23046"
+        ],
+        [
+          "345",
+          "514",
+          "3840"
+        ],
+        [
+          "21514",
+          "3536",
+          "24070"
+        ],
+        [
+          "39104",
+          "45753",
+          "96"
+        ],
+        [
+          "20480",
+          "15843",
+          "7686"
+        ],
+        [
+          "2048",
+          "49683",
+          "30816"
+        ],
+        [
+          "1802",
+          "528",
+          "3591"
+        ],
+        [
+          "1849",
+          "521",
+          "80"
+        ],
+        [
+          "73",
+          "776",
+          "92"
+        ],
+        [
+          "28750",
+          "2816",
+          "12"
+        ],
+        [
+          "21002",
+          "544",
+          "3584"
+        ],
+        [
+          "2128",
+          "4627",
+          "3936"
+        ],
+        [
+          "1887",
+          "512",
+          "7"
+        ],
+        [
+          "3328",
+          "531",
+          "2304"
+        ],
+        [
+          "63648",
+          "37561",
+          "28672"
+        ],
+        [
+          "13322",
+          "2992",
+          "20480"
+        ],
+        [
+          "13",
+          "768",
+          "9"
+        ],
+        [
+          "36864",
+          "26803",
+          "15456"
+        ],
+        [
+          "20488",
+          "12339",
+          "61446"
+        ],
+        [
+          "1952",
+          "537",
+          "3152"
+        ],
+        [
+          "1792",
+          "543",
+          "2903"
+        ],
+        [
+          "80",
+          "4638",
+          "3863"
+        ],
+        [
+          "9",
+          "782",
+          "3923"
+        ],
+        [
+          "6",
+          "3328",
+          "4"
+        ],
+        [
+          "37888",
+          "2227",
+          "23552"
+        ],
+        [
+          "96",
+          "25193",
+          "64"
+        ],
+        [
+          "28832",
+          "37401",
+          "28896"
+        ],
+        [
+          "22528",
+          "12819",
+          "32256"
+        ],
+        [
+          "10",
+          "3552",
+          "24066"
+        ],
+        [
+          "28712",
+          "37529",
+          "224"
+        ],
+        [
+          "40608",
+          "697",
+          "3072"
+        ],
+        [
+          "160",
+          "25113",
+          "31776"
+        ],
+        [
+          "36928",
+          "47283",
+          "61536"
+        ],
+        [
+          "4168",
+          "45243",
+          "61440"
+        ],
+        [
+          "1881",
+          "527",
+          "3927"
+        ],
+        [
+          "208",
+          "4633",
+          "144"
+        ],
+        [
+          "88",
+          "4625",
+          "231"
+        ],
+        [
+          "28682",
+          "2944",
+          "20492"
+        ],
+        [
+          "1536",
+          "735",
+          "1024"
+        ],
+        [
+          "28672",
+          "28134",
+          "45292"
+        ],
+        [
+          "64",
+          "25966",
+          "61612"
+        ]
+      ]
+    },
+    {
+      "label": "rank47",
+      "n": 4,
+      "policy": "adaptive",
+      "seed": 20261525,
+      "initial": 47,
+      "best": 47,
+      "cap": 51,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 966464,
+        "compare": 356052,
+        "map": 2499446,
+        "verify": 111,
+        "bit": 56383,
+        "xor": 22167,
+        "proposal": 1473,
+        "controller": 85827,
+        "pivot": 12077
+      },
+      "attempts": 1473,
+      "committed": 1227,
+      "fitSteps": 490,
+      "exploreSteps": 983,
+      "compressionCalls": 31,
+      "compressionHits": 0,
+      "phaseChanges": 11,
+      "events": [],
+      "terms": [
+        [
+          "8",
+          "60910",
+          "61672"
+        ],
+        [
+          "28744",
+          "28006",
+          "61676"
+        ],
+        [
+          "53248",
+          "14515",
+          "36864"
+        ],
+        [
+          "1033",
+          "771",
+          "3846"
+        ],
+        [
+          "39072",
+          "25273",
+          "31840"
+        ],
+        [
+          "24576",
+          "28086",
+          "16384"
+        ],
+        [
+          "1024",
+          "3795",
+          "23046"
+        ],
+        [
+          "345",
+          "514",
+          "3840"
+        ],
+        [
+          "21514",
+          "3536",
+          "24070"
+        ],
+        [
+          "39104",
+          "45753",
+          "96"
+        ],
+        [
+          "20480",
+          "15843",
+          "7686"
+        ],
+        [
+          "2048",
+          "49683",
+          "30816"
+        ],
+        [
+          "1802",
+          "528",
+          "3591"
+        ],
+        [
+          "1849",
+          "521",
+          "80"
+        ],
+        [
+          "73",
+          "776",
+          "92"
+        ],
+        [
+          "28750",
+          "2816",
+          "12"
+        ],
+        [
+          "21002",
+          "544",
+          "3584"
+        ],
+        [
+          "2128",
+          "4627",
+          "3936"
+        ],
+        [
+          "1887",
+          "512",
+          "7"
+        ],
+        [
+          "3328",
+          "531",
+          "2304"
+        ],
+        [
+          "63648",
+          "37561",
+          "28672"
+        ],
+        [
+          "13322",
+          "2992",
+          "20480"
+        ],
+        [
+          "13",
+          "768",
+          "9"
+        ],
+        [
+          "36864",
+          "26803",
+          "15456"
+        ],
+        [
+          "20488",
+          "12339",
+          "61446"
+        ],
+        [
+          "1952",
+          "537",
+          "3152"
+        ],
+        [
+          "1792",
+          "543",
+          "2903"
+        ],
+        [
+          "80",
+          "4638",
+          "3863"
+        ],
+        [
+          "9",
+          "782",
+          "3923"
+        ],
+        [
+          "6",
+          "3328",
+          "4"
+        ],
+        [
+          "37888",
+          "2227",
+          "23552"
+        ],
+        [
+          "96",
+          "25193",
+          "64"
+        ],
+        [
+          "28832",
+          "37401",
+          "28896"
+        ],
+        [
+          "22528",
+          "12819",
+          "32256"
+        ],
+        [
+          "10",
+          "3552",
+          "24066"
+        ],
+        [
+          "28712",
+          "37529",
+          "224"
+        ],
+        [
+          "40608",
+          "697",
+          "3072"
+        ],
+        [
+          "160",
+          "25113",
+          "31776"
+        ],
+        [
+          "36928",
+          "47283",
+          "61536"
+        ],
+        [
+          "4168",
+          "45243",
+          "61440"
+        ],
+        [
+          "1881",
+          "527",
+          "3927"
+        ],
+        [
+          "208",
+          "4633",
+          "144"
+        ],
+        [
+          "88",
+          "4625",
+          "231"
+        ],
+        [
+          "28682",
+          "2944",
+          "20492"
+        ],
+        [
+          "1536",
+          "735",
+          "1024"
+        ],
+        [
+          "28672",
+          "28134",
+          "45292"
+        ],
+        [
+          "64",
+          "25966",
+          "61612"
+        ]
+      ]
+    },
+    {
+      "label": "rank47",
+      "n": 4,
+      "policy": "eager",
+      "seed": 20261526,
+      "initial": 47,
+      "best": 47,
+      "cap": 51,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 1187876,
+        "compare": 417823,
+        "map": 2037343,
+        "verify": 111,
+        "bit": 220269,
+        "xor": 86201,
+        "proposal": 1986,
+        "controller": 1985,
+        "pivot": 46406
+      },
+      "attempts": 1986,
+      "committed": 982,
+      "fitSteps": 1986,
+      "exploreSteps": 0,
+      "compressionCalls": 124,
+      "compressionHits": 0,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "8",
+          "60910",
+          "61672"
+        ],
+        [
+          "28744",
+          "28006",
+          "61676"
+        ],
+        [
+          "53248",
+          "14515",
+          "36864"
+        ],
+        [
+          "1033",
+          "771",
+          "3846"
+        ],
+        [
+          "39072",
+          "25273",
+          "31840"
+        ],
+        [
+          "24576",
+          "28086",
+          "16384"
+        ],
+        [
+          "1024",
+          "3795",
+          "23046"
+        ],
+        [
+          "345",
+          "514",
+          "3840"
+        ],
+        [
+          "21514",
+          "3536",
+          "24070"
+        ],
+        [
+          "39104",
+          "45753",
+          "96"
+        ],
+        [
+          "20480",
+          "15843",
+          "7686"
+        ],
+        [
+          "2048",
+          "49683",
+          "30816"
+        ],
+        [
+          "1802",
+          "528",
+          "3591"
+        ],
+        [
+          "1849",
+          "521",
+          "80"
+        ],
+        [
+          "73",
+          "776",
+          "92"
+        ],
+        [
+          "28750",
+          "2816",
+          "12"
+        ],
+        [
+          "21002",
+          "544",
+          "3584"
+        ],
+        [
+          "2128",
+          "4627",
+          "3936"
+        ],
+        [
+          "1887",
+          "512",
+          "7"
+        ],
+        [
+          "3328",
+          "531",
+          "2304"
+        ],
+        [
+          "63648",
+          "37561",
+          "28672"
+        ],
+        [
+          "13322",
+          "2992",
+          "20480"
+        ],
+        [
+          "13",
+          "768",
+          "9"
+        ],
+        [
+          "36864",
+          "26803",
+          "15456"
+        ],
+        [
+          "20488",
+          "12339",
+          "61446"
+        ],
+        [
+          "1952",
+          "537",
+          "3152"
+        ],
+        [
+          "1792",
+          "543",
+          "2903"
+        ],
+        [
+          "80",
+          "4638",
+          "3863"
+        ],
+        [
+          "9",
+          "782",
+          "3923"
+        ],
+        [
+          "6",
+          "3328",
+          "4"
+        ],
+        [
+          "37888",
+          "2227",
+          "23552"
+        ],
+        [
+          "96",
+          "25193",
+          "64"
+        ],
+        [
+          "28832",
+          "37401",
+          "28896"
+        ],
+        [
+          "22528",
+          "12819",
+          "32256"
+        ],
+        [
+          "10",
+          "3552",
+          "24066"
+        ],
+        [
+          "28712",
+          "37529",
+          "224"
+        ],
+        [
+          "40608",
+          "697",
+          "3072"
+        ],
+        [
+          "160",
+          "25113",
+          "31776"
+        ],
+        [
+          "36928",
+          "47283",
+          "61536"
+        ],
+        [
+          "4168",
+          "45243",
+          "61440"
+        ],
+        [
+          "1881",
+          "527",
+          "3927"
+        ],
+        [
+          "208",
+          "4633",
+          "144"
+        ],
+        [
+          "88",
+          "4625",
+          "231"
+        ],
+        [
+          "28682",
+          "2944",
+          "20492"
+        ],
+        [
+          "1536",
+          "735",
+          "1024"
+        ],
+        [
+          "28672",
+          "28134",
+          "45292"
+        ],
+        [
+          "64",
+          "25966",
+          "61612"
+        ]
+      ]
+    },
+    {
+      "label": "rank47",
+      "n": 4,
+      "policy": "periodic",
+      "seed": 20261526,
+      "initial": 47,
+      "best": 47,
+      "cap": 51,
+      "budget": 4000000,
+      "used": 3999999,
+      "ledger": {
+        "term": 991193,
+        "compare": 361125,
+        "map": 2554674,
+        "verify": 223,
+        "bit": 56080,
+        "xor": 22024,
+        "proposal": 1494,
+        "controller": 1493,
+        "pivot": 11693
+      },
+      "attempts": 1494,
+      "committed": 1213,
+      "fitSteps": 471,
+      "exploreSteps": 1023,
+      "compressionCalls": 30,
+      "compressionHits": 1,
+      "phaseChanges": 15,
+      "events": [],
+      "terms": [
+        [
+          "8",
+          "60910",
+          "61672"
+        ],
+        [
+          "28744",
+          "28006",
+          "61676"
+        ],
+        [
+          "53248",
+          "14515",
+          "36864"
+        ],
+        [
+          "1033",
+          "771",
+          "3846"
+        ],
+        [
+          "39072",
+          "25273",
+          "31840"
+        ],
+        [
+          "24576",
+          "28086",
+          "16384"
+        ],
+        [
+          "1024",
+          "3795",
+          "23046"
+        ],
+        [
+          "345",
+          "514",
+          "3840"
+        ],
+        [
+          "21514",
+          "3536",
+          "24070"
+        ],
+        [
+          "39104",
+          "45753",
+          "96"
+        ],
+        [
+          "20480",
+          "15843",
+          "7686"
+        ],
+        [
+          "2048",
+          "49683",
+          "30816"
+        ],
+        [
+          "1802",
+          "528",
+          "3591"
+        ],
+        [
+          "1849",
+          "521",
+          "80"
+        ],
+        [
+          "73",
+          "776",
+          "92"
+        ],
+        [
+          "28750",
+          "2816",
+          "12"
+        ],
+        [
+          "21002",
+          "544",
+          "3584"
+        ],
+        [
+          "2128",
+          "4627",
+          "3936"
+        ],
+        [
+          "1887",
+          "512",
+          "7"
+        ],
+        [
+          "3328",
+          "531",
+          "2304"
+        ],
+        [
+          "63648",
+          "37561",
+          "28672"
+        ],
+        [
+          "13322",
+          "2992",
+          "20480"
+        ],
+        [
+          "13",
+          "768",
+          "9"
+        ],
+        [
+          "36864",
+          "26803",
+          "15456"
+        ],
+        [
+          "20488",
+          "12339",
+          "61446"
+        ],
+        [
+          "1952",
+          "537",
+          "3152"
+        ],
+        [
+          "1792",
+          "543",
+          "2903"
+        ],
+        [
+          "80",
+          "4638",
+          "3863"
+        ],
+        [
+          "9",
+          "782",
+          "3923"
+        ],
+        [
+          "6",
+          "3328",
+          "4"
+        ],
+        [
+          "37888",
+          "2227",
+          "23552"
+        ],
+        [
+          "96",
+          "25193",
+          "64"
+        ],
+        [
+          "28832",
+          "37401",
+          "28896"
+        ],
+        [
+          "22528",
+          "12819",
+          "32256"
+        ],
+        [
+          "10",
+          "3552",
+          "24066"
+        ],
+        [
+          "28712",
+          "37529",
+          "224"
+        ],
+        [
+          "40608",
+          "697",
+          "3072"
+        ],
+        [
+          "160",
+          "25113",
+          "31776"
+        ],
+        [
+          "36928",
+          "47283",
+          "61536"
+        ],
+        [
+          "4168",
+          "45243",
+          "61440"
+        ],
+        [
+          "1881",
+          "527",
+          "3927"
+        ],
+        [
+          "208",
+          "4633",
+          "144"
+        ],
+        [
+          "88",
+          "4625",
+          "231"
+        ],
+        [
+          "28682",
+          "2944",
+          "20492"
+        ],
+        [
+          "1536",
+          "735",
+          "1024"
+        ],
+        [
+          "28672",
+          "28134",
+          "45292"
+        ],
+        [
+          "64",
+          "25966",
+          "61612"
+        ]
+      ]
+    },
+    {
+      "label": "rank47",
+      "n": 4,
+      "policy": "adaptive",
+      "seed": 20261526,
+      "initial": 47,
+      "best": 47,
+      "cap": 51,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 974282,
+        "compare": 358446,
+        "map": 2491015,
+        "verify": 111,
+        "bit": 54417,
+        "xor": 21506,
+        "proposal": 1488,
+        "controller": 87231,
+        "pivot": 11504
+      },
+      "attempts": 1488,
+      "committed": 1172,
+      "fitSteps": 480,
+      "exploreSteps": 1008,
+      "compressionCalls": 30,
+      "compressionHits": 0,
+      "phaseChanges": 10,
+      "events": [],
+      "terms": [
+        [
+          "8",
+          "60910",
+          "61672"
+        ],
+        [
+          "28744",
+          "28006",
+          "61676"
+        ],
+        [
+          "53248",
+          "14515",
+          "36864"
+        ],
+        [
+          "1033",
+          "771",
+          "3846"
+        ],
+        [
+          "39072",
+          "25273",
+          "31840"
+        ],
+        [
+          "24576",
+          "28086",
+          "16384"
+        ],
+        [
+          "1024",
+          "3795",
+          "23046"
+        ],
+        [
+          "345",
+          "514",
+          "3840"
+        ],
+        [
+          "21514",
+          "3536",
+          "24070"
+        ],
+        [
+          "39104",
+          "45753",
+          "96"
+        ],
+        [
+          "20480",
+          "15843",
+          "7686"
+        ],
+        [
+          "2048",
+          "49683",
+          "30816"
+        ],
+        [
+          "1802",
+          "528",
+          "3591"
+        ],
+        [
+          "1849",
+          "521",
+          "80"
+        ],
+        [
+          "73",
+          "776",
+          "92"
+        ],
+        [
+          "28750",
+          "2816",
+          "12"
+        ],
+        [
+          "21002",
+          "544",
+          "3584"
+        ],
+        [
+          "2128",
+          "4627",
+          "3936"
+        ],
+        [
+          "1887",
+          "512",
+          "7"
+        ],
+        [
+          "3328",
+          "531",
+          "2304"
+        ],
+        [
+          "63648",
+          "37561",
+          "28672"
+        ],
+        [
+          "13322",
+          "2992",
+          "20480"
+        ],
+        [
+          "13",
+          "768",
+          "9"
+        ],
+        [
+          "36864",
+          "26803",
+          "15456"
+        ],
+        [
+          "20488",
+          "12339",
+          "61446"
+        ],
+        [
+          "1952",
+          "537",
+          "3152"
+        ],
+        [
+          "1792",
+          "543",
+          "2903"
+        ],
+        [
+          "80",
+          "4638",
+          "3863"
+        ],
+        [
+          "9",
+          "782",
+          "3923"
+        ],
+        [
+          "6",
+          "3328",
+          "4"
+        ],
+        [
+          "37888",
+          "2227",
+          "23552"
+        ],
+        [
+          "96",
+          "25193",
+          "64"
+        ],
+        [
+          "28832",
+          "37401",
+          "28896"
+        ],
+        [
+          "22528",
+          "12819",
+          "32256"
+        ],
+        [
+          "10",
+          "3552",
+          "24066"
+        ],
+        [
+          "28712",
+          "37529",
+          "224"
+        ],
+        [
+          "40608",
+          "697",
+          "3072"
+        ],
+        [
+          "160",
+          "25113",
+          "31776"
+        ],
+        [
+          "36928",
+          "47283",
+          "61536"
+        ],
+        [
+          "4168",
+          "45243",
+          "61440"
+        ],
+        [
+          "1881",
+          "527",
+          "3927"
+        ],
+        [
+          "208",
+          "4633",
+          "144"
+        ],
+        [
+          "88",
+          "4625",
+          "231"
+        ],
+        [
+          "28682",
+          "2944",
+          "20492"
+        ],
+        [
+          "1536",
+          "735",
+          "1024"
+        ],
+        [
+          "28672",
+          "28134",
+          "45292"
+        ],
+        [
+          "64",
+          "25966",
+          "61612"
+        ]
+      ]
+    },
+    {
+      "label": "rank47",
+      "n": 4,
+      "policy": "eager",
+      "seed": 20261527,
+      "initial": 47,
+      "best": 47,
+      "cap": 51,
+      "budget": 4000000,
+      "used": 3999999,
+      "ledger": {
+        "term": 1187403,
+        "compare": 419125,
+        "map": 2036662,
+        "verify": 111,
+        "bit": 220229,
+        "xor": 86294,
+        "proposal": 1986,
+        "controller": 1985,
+        "pivot": 46204
+      },
+      "attempts": 1986,
+      "committed": 959,
+      "fitSteps": 1986,
+      "exploreSteps": 0,
+      "compressionCalls": 124,
+      "compressionHits": 0,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "8",
+          "60910",
+          "61672"
+        ],
+        [
+          "28744",
+          "28006",
+          "61676"
+        ],
+        [
+          "53248",
+          "14515",
+          "36864"
+        ],
+        [
+          "1033",
+          "771",
+          "3846"
+        ],
+        [
+          "39072",
+          "25273",
+          "31840"
+        ],
+        [
+          "24576",
+          "28086",
+          "16384"
+        ],
+        [
+          "1024",
+          "3795",
+          "23046"
+        ],
+        [
+          "345",
+          "514",
+          "3840"
+        ],
+        [
+          "21514",
+          "3536",
+          "24070"
+        ],
+        [
+          "39104",
+          "45753",
+          "96"
+        ],
+        [
+          "20480",
+          "15843",
+          "7686"
+        ],
+        [
+          "2048",
+          "49683",
+          "30816"
+        ],
+        [
+          "1802",
+          "528",
+          "3591"
+        ],
+        [
+          "1849",
+          "521",
+          "80"
+        ],
+        [
+          "73",
+          "776",
+          "92"
+        ],
+        [
+          "28750",
+          "2816",
+          "12"
+        ],
+        [
+          "21002",
+          "544",
+          "3584"
+        ],
+        [
+          "2128",
+          "4627",
+          "3936"
+        ],
+        [
+          "1887",
+          "512",
+          "7"
+        ],
+        [
+          "3328",
+          "531",
+          "2304"
+        ],
+        [
+          "63648",
+          "37561",
+          "28672"
+        ],
+        [
+          "13322",
+          "2992",
+          "20480"
+        ],
+        [
+          "13",
+          "768",
+          "9"
+        ],
+        [
+          "36864",
+          "26803",
+          "15456"
+        ],
+        [
+          "20488",
+          "12339",
+          "61446"
+        ],
+        [
+          "1952",
+          "537",
+          "3152"
+        ],
+        [
+          "1792",
+          "543",
+          "2903"
+        ],
+        [
+          "80",
+          "4638",
+          "3863"
+        ],
+        [
+          "9",
+          "782",
+          "3923"
+        ],
+        [
+          "6",
+          "3328",
+          "4"
+        ],
+        [
+          "37888",
+          "2227",
+          "23552"
+        ],
+        [
+          "96",
+          "25193",
+          "64"
+        ],
+        [
+          "28832",
+          "37401",
+          "28896"
+        ],
+        [
+          "22528",
+          "12819",
+          "32256"
+        ],
+        [
+          "10",
+          "3552",
+          "24066"
+        ],
+        [
+          "28712",
+          "37529",
+          "224"
+        ],
+        [
+          "40608",
+          "697",
+          "3072"
+        ],
+        [
+          "160",
+          "25113",
+          "31776"
+        ],
+        [
+          "36928",
+          "47283",
+          "61536"
+        ],
+        [
+          "4168",
+          "45243",
+          "61440"
+        ],
+        [
+          "1881",
+          "527",
+          "3927"
+        ],
+        [
+          "208",
+          "4633",
+          "144"
+        ],
+        [
+          "88",
+          "4625",
+          "231"
+        ],
+        [
+          "28682",
+          "2944",
+          "20492"
+        ],
+        [
+          "1536",
+          "735",
+          "1024"
+        ],
+        [
+          "28672",
+          "28134",
+          "45292"
+        ],
+        [
+          "64",
+          "25966",
+          "61612"
+        ]
+      ]
+    },
+    {
+      "label": "rank47",
+      "n": 4,
+      "policy": "periodic",
+      "seed": 20261527,
+      "initial": 47,
+      "best": 47,
+      "cap": 51,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 995306,
+        "compare": 363646,
+        "map": 2548579,
+        "verify": 111,
+        "bit": 55573,
+        "xor": 21989,
+        "proposal": 1504,
+        "controller": 1503,
+        "pivot": 11789
+      },
+      "attempts": 1504,
+      "committed": 1211,
+      "fitSteps": 481,
+      "exploreSteps": 1023,
+      "compressionCalls": 31,
+      "compressionHits": 0,
+      "phaseChanges": 15,
+      "events": [],
+      "terms": [
+        [
+          "8",
+          "60910",
+          "61672"
+        ],
+        [
+          "28744",
+          "28006",
+          "61676"
+        ],
+        [
+          "53248",
+          "14515",
+          "36864"
+        ],
+        [
+          "1033",
+          "771",
+          "3846"
+        ],
+        [
+          "39072",
+          "25273",
+          "31840"
+        ],
+        [
+          "24576",
+          "28086",
+          "16384"
+        ],
+        [
+          "1024",
+          "3795",
+          "23046"
+        ],
+        [
+          "345",
+          "514",
+          "3840"
+        ],
+        [
+          "21514",
+          "3536",
+          "24070"
+        ],
+        [
+          "39104",
+          "45753",
+          "96"
+        ],
+        [
+          "20480",
+          "15843",
+          "7686"
+        ],
+        [
+          "2048",
+          "49683",
+          "30816"
+        ],
+        [
+          "1802",
+          "528",
+          "3591"
+        ],
+        [
+          "1849",
+          "521",
+          "80"
+        ],
+        [
+          "73",
+          "776",
+          "92"
+        ],
+        [
+          "28750",
+          "2816",
+          "12"
+        ],
+        [
+          "21002",
+          "544",
+          "3584"
+        ],
+        [
+          "2128",
+          "4627",
+          "3936"
+        ],
+        [
+          "1887",
+          "512",
+          "7"
+        ],
+        [
+          "3328",
+          "531",
+          "2304"
+        ],
+        [
+          "63648",
+          "37561",
+          "28672"
+        ],
+        [
+          "13322",
+          "2992",
+          "20480"
+        ],
+        [
+          "13",
+          "768",
+          "9"
+        ],
+        [
+          "36864",
+          "26803",
+          "15456"
+        ],
+        [
+          "20488",
+          "12339",
+          "61446"
+        ],
+        [
+          "1952",
+          "537",
+          "3152"
+        ],
+        [
+          "1792",
+          "543",
+          "2903"
+        ],
+        [
+          "80",
+          "4638",
+          "3863"
+        ],
+        [
+          "9",
+          "782",
+          "3923"
+        ],
+        [
+          "6",
+          "3328",
+          "4"
+        ],
+        [
+          "37888",
+          "2227",
+          "23552"
+        ],
+        [
+          "96",
+          "25193",
+          "64"
+        ],
+        [
+          "28832",
+          "37401",
+          "28896"
+        ],
+        [
+          "22528",
+          "12819",
+          "32256"
+        ],
+        [
+          "10",
+          "3552",
+          "24066"
+        ],
+        [
+          "28712",
+          "37529",
+          "224"
+        ],
+        [
+          "40608",
+          "697",
+          "3072"
+        ],
+        [
+          "160",
+          "25113",
+          "31776"
+        ],
+        [
+          "36928",
+          "47283",
+          "61536"
+        ],
+        [
+          "4168",
+          "45243",
+          "61440"
+        ],
+        [
+          "1881",
+          "527",
+          "3927"
+        ],
+        [
+          "208",
+          "4633",
+          "144"
+        ],
+        [
+          "88",
+          "4625",
+          "231"
+        ],
+        [
+          "28682",
+          "2944",
+          "20492"
+        ],
+        [
+          "1536",
+          "735",
+          "1024"
+        ],
+        [
+          "28672",
+          "28134",
+          "45292"
+        ],
+        [
+          "64",
+          "25966",
+          "61612"
+        ]
+      ]
+    },
+    {
+      "label": "rank47",
+      "n": 4,
+      "policy": "adaptive",
+      "seed": 20261527,
+      "initial": 47,
+      "best": 47,
+      "cap": 51,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 992050,
+        "compare": 361191,
+        "map": 2453545,
+        "verify": 111,
+        "bit": 65156,
+        "xor": 25597,
+        "proposal": 1516,
+        "controller": 87223,
+        "pivot": 13611
+      },
+      "attempts": 1516,
+      "committed": 1164,
+      "fitSteps": 576,
+      "exploreSteps": 940,
+      "compressionCalls": 36,
+      "compressionHits": 0,
+      "phaseChanges": 12,
+      "events": [],
+      "terms": [
+        [
+          "8",
+          "60910",
+          "61672"
+        ],
+        [
+          "28744",
+          "28006",
+          "61676"
+        ],
+        [
+          "53248",
+          "14515",
+          "36864"
+        ],
+        [
+          "1033",
+          "771",
+          "3846"
+        ],
+        [
+          "39072",
+          "25273",
+          "31840"
+        ],
+        [
+          "24576",
+          "28086",
+          "16384"
+        ],
+        [
+          "1024",
+          "3795",
+          "23046"
+        ],
+        [
+          "345",
+          "514",
+          "3840"
+        ],
+        [
+          "21514",
+          "3536",
+          "24070"
+        ],
+        [
+          "39104",
+          "45753",
+          "96"
+        ],
+        [
+          "20480",
+          "15843",
+          "7686"
+        ],
+        [
+          "2048",
+          "49683",
+          "30816"
+        ],
+        [
+          "1802",
+          "528",
+          "3591"
+        ],
+        [
+          "1849",
+          "521",
+          "80"
+        ],
+        [
+          "73",
+          "776",
+          "92"
+        ],
+        [
+          "28750",
+          "2816",
+          "12"
+        ],
+        [
+          "21002",
+          "544",
+          "3584"
+        ],
+        [
+          "2128",
+          "4627",
+          "3936"
+        ],
+        [
+          "1887",
+          "512",
+          "7"
+        ],
+        [
+          "3328",
+          "531",
+          "2304"
+        ],
+        [
+          "63648",
+          "37561",
+          "28672"
+        ],
+        [
+          "13322",
+          "2992",
+          "20480"
+        ],
+        [
+          "13",
+          "768",
+          "9"
+        ],
+        [
+          "36864",
+          "26803",
+          "15456"
+        ],
+        [
+          "20488",
+          "12339",
+          "61446"
+        ],
+        [
+          "1952",
+          "537",
+          "3152"
+        ],
+        [
+          "1792",
+          "543",
+          "2903"
+        ],
+        [
+          "80",
+          "4638",
+          "3863"
+        ],
+        [
+          "9",
+          "782",
+          "3923"
+        ],
+        [
+          "6",
+          "3328",
+          "4"
+        ],
+        [
+          "37888",
+          "2227",
+          "23552"
+        ],
+        [
+          "96",
+          "25193",
+          "64"
+        ],
+        [
+          "28832",
+          "37401",
+          "28896"
+        ],
+        [
+          "22528",
+          "12819",
+          "32256"
+        ],
+        [
+          "10",
+          "3552",
+          "24066"
+        ],
+        [
+          "28712",
+          "37529",
+          "224"
+        ],
+        [
+          "40608",
+          "697",
+          "3072"
+        ],
+        [
+          "160",
+          "25113",
+          "31776"
+        ],
+        [
+          "36928",
+          "47283",
+          "61536"
+        ],
+        [
+          "4168",
+          "45243",
+          "61440"
+        ],
+        [
+          "1881",
+          "527",
+          "3927"
+        ],
+        [
+          "208",
+          "4633",
+          "144"
+        ],
+        [
+          "88",
+          "4625",
+          "231"
+        ],
+        [
+          "28682",
+          "2944",
+          "20492"
+        ],
+        [
+          "1536",
+          "735",
+          "1024"
+        ],
+        [
+          "28672",
+          "28134",
+          "45292"
+        ],
+        [
+          "64",
+          "25966",
+          "61612"
+        ]
+      ]
+    },
+    {
+      "label": "rank95",
+      "n": 5,
+      "policy": "eager",
+      "seed": 20261625,
+      "initial": 95,
+      "best": 95,
+      "cap": 99,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 1125760,
+        "compare": 501471,
+        "map": 1955569,
+        "verify": 220,
+        "bit": 313758,
+        "xor": 62403,
+        "proposal": 977,
+        "controller": 976,
+        "pivot": 38866
+      },
+      "attempts": 977,
+      "committed": 846,
+      "fitSteps": 977,
+      "exploreSteps": 0,
+      "compressionCalls": 61,
+      "compressionHits": 0,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "64",
+          "256",
+          "262432"
+        ],
+        [
+          "196672",
+          "12416",
+          "262272"
+        ],
+        [
+          "589888",
+          "10485824",
+          "262208"
+        ],
+        [
+          "98368",
+          "536",
+          "262656"
+        ],
+        [
+          "32",
+          "8",
+          "8389376"
+        ],
+        [
+          "5242912",
+          "12292",
+          "8388736"
+        ],
+        [
+          "65600",
+          "10499032",
+          "262144"
+        ],
+        [
+          "128",
+          "8192",
+          "392"
+        ],
+        [
+          "133",
+          "16408",
+          "520"
+        ],
+        [
+          "132",
+          "10513720",
+          "8"
+        ],
+        [
+          "148",
+          "10487808",
+          "72"
+        ],
+        [
+          "17825824",
+          "10485762",
+          "8388672"
+        ],
+        [
+          "134",
+          "1312",
+          "40"
+        ],
+        [
+          "18416372",
+          "10485760",
+          "64"
+        ],
+        [
+          "1048608",
+          "10498351",
+          "8388608"
+        ],
+        [
+          "3145760",
+          "289",
+          "8388640"
+        ],
+        [
+          "512",
+          "8388608",
+          "8512"
+        ],
+        [
+          "16896",
+          "30421304",
+          "8192"
+        ],
+        [
+          "18944",
+          "1048864",
+          "8224"
+        ],
+        [
+          "20992",
+          "4206592",
+          "8320"
+        ],
+        [
+          "116453",
+          "24",
+          "512"
+        ],
+        [
+          "5460704",
+          "12288",
+          "128"
+        ],
+        [
+          "17920",
+          "16777240",
+          "8704"
+        ],
+        [
+          "4096",
+          "5002240",
+          "12292"
+        ],
+        [
+          "25961728",
+          "16777216",
+          "870912"
+        ],
+        [
+          "9472",
+          "393220",
+          "21000320"
+        ],
+        [
+          "5547273",
+          "344068",
+          "4"
+        ],
+        [
+          "5411845",
+          "16384",
+          "532"
+        ],
+        [
+          "131072",
+          "22656",
+          "393220"
+        ],
+        [
+          "8651008",
+          "32768",
+          "1056"
+        ],
+        [
+          "12544",
+          "802816",
+          "29204"
+        ],
+        [
+          "8448",
+          "933892",
+          "16805892"
+        ],
+        [
+          "262144",
+          "32768",
+          "17796128"
+        ],
+        [
+          "8397064",
+          "32768",
+          "1028"
+        ],
+        [
+          "25166080",
+          "4587520",
+          "14686336"
+        ],
+        [
+          "1",
+          "344083",
+          "16777240"
+        ],
+        [
+          "196608",
+          "128",
+          "13808768"
+        ],
+        [
+          "25976856",
+          "4196352",
+          "477696"
+        ],
+        [
+          "262144",
+          "753664",
+          "17762308"
+        ],
+        [
+          "1024",
+          "17170453",
+          "16801792"
+        ],
+        [
+          "3245059",
+          "513",
+          "58393"
+        ],
+        [
+          "2",
+          "1632",
+          "32777"
+        ],
+        [
+          "2293760",
+          "1152",
+          "13677572"
+        ],
+        [
+          "98307",
+          "1",
+          "25625"
+        ],
+        [
+          "2048",
+          "1049248",
+          "9216"
+        ],
+        [
+          "3146753",
+          "513",
+          "16810009"
+        ],
+        [
+          "3148803",
+          "512",
+          "25600"
+        ],
+        [
+          "5285120",
+          "344068",
+          "17694724"
+        ],
+        [
+          "2297862",
+          "1152",
+          "13316"
+        ],
+        [
+          "19482626",
+          "1048640",
+          "32779"
+        ],
+        [
+          "18432",
+          "1048576",
+          "11537451"
+        ],
+        [
+          "2097152",
+          "225",
+          "9469952"
+        ],
+        [
+          "6488064",
+          "1024",
+          "13631488"
+        ],
+        [
+          "16777216",
+          "7733250",
+          "10487808"
+        ],
+        [
+          "16795648",
+          "1048640",
+          "11569152"
+        ],
+        [
+          "21647380",
+          "2048",
+          "70"
+        ],
+        [
+          "32768",
+          "534",
+          "17563648"
+        ],
+        [
+          "524288",
+          "23068736",
+          "329728"
+        ],
+        [
+          "9741321",
+          "17301504",
+          "26"
+        ],
+        [
+          "274712",
+          "4982784",
+          "460804"
+        ],
+        [
+          "589824",
+          "64",
+          "98379"
+        ],
+        [
+          "25470208",
+          "2",
+          "19726400"
+        ],
+        [
+          "12568",
+          "786432",
+          "477716"
+        ],
+        [
+          "8659200",
+          "2164802",
+          "2048"
+        ],
+        [
+          "12583168",
+          "329728",
+          "14680134"
+        ],
+        [
+          "5252352",
+          "4",
+          "21889152"
+        ],
+        [
+          "8388608",
+          "32768",
+          "1049637"
+        ],
+        [
+          "8388864",
+          "4655104",
+          "14682112"
+        ],
+        [
+          "2162690",
+          "1049633",
+          "32768"
+        ],
+        [
+          "256",
+          "262144",
+          "14709722"
+        ],
+        [
+          "280",
+          "17563648",
+          "16922"
+        ],
+        [
+          "6",
+          "1024",
+          "13349"
+        ],
+        [
+          "4194304",
+          "334852",
+          "12582912"
+        ],
+        [
+          "5547264",
+          "327680",
+          "19791936"
+        ],
+        [
+          "16",
+          "20711424",
+          "10"
+        ],
+        [
+          "25175296",
+          "393216",
+          "21829760"
+        ],
+        [
+          "18892800",
+          "64",
+          "11534347"
+        ],
+        [
+          "98304",
+          "512",
+          "583193"
+        ],
+        [
+          "9741568",
+          "327682",
+          "18874458"
+        ],
+        [
+          "3145728",
+          "1",
+          "17851424"
+        ],
+        [
+          "5416192",
+          "16384",
+          "918036"
+        ],
+        [
+          "25186560",
+          "4194304",
+          "465024"
+        ],
+        [
+          "135172",
+          "4362372",
+          "4"
+        ],
+        [
+          "202758",
+          "128",
+          "13312"
+        ],
+        [
+          "25437440",
+          "17170434",
+          "17631232"
+        ],
+        [
+          "405772",
+          "4376580",
+          "4"
+        ],
+        [
+          "9741569",
+          "17629186",
+          "16777242"
+        ],
+        [
+          "3164902",
+          "288",
+          "32"
+        ],
+        [
+          "25977088",
+          "2099264",
+          "2048"
+        ],
+        [
+          "25841920",
+          "2048",
+          "458822"
+        ],
+        [
+          "25976856",
+          "20973568",
+          "16896"
+        ],
+        [
+          "19464210",
+          "1048576",
+          "11"
+        ],
+        [
+          "12583177",
+          "327680",
+          "6"
+        ],
+        [
+          "1082369",
+          "17318416",
+          "16777216"
+        ],
+        [
+          "8388616",
+          "32768",
+          "1025"
+        ]
+      ]
+    },
+    {
+      "label": "rank95",
+      "n": 5,
+      "policy": "periodic",
+      "seed": 20261625,
+      "initial": 95,
+      "best": 95,
+      "cap": 99,
+      "budget": 4000000,
+      "used": 3999998,
+      "ledger": {
+        "term": 923080,
+        "compare": 424794,
+        "map": 2537191,
+        "verify": 220,
+        "bit": 85545,
+        "xor": 17249,
+        "proposal": 774,
+        "controller": 773,
+        "pivot": 10372
+      },
+      "attempts": 774,
+      "committed": 732,
+      "fitSteps": 256,
+      "exploreSteps": 518,
+      "compressionCalls": 16,
+      "compressionHits": 0,
+      "phaseChanges": 8,
+      "events": [],
+      "terms": [
+        [
+          "64",
+          "256",
+          "262432"
+        ],
+        [
+          "196672",
+          "12416",
+          "262272"
+        ],
+        [
+          "589888",
+          "10485824",
+          "262208"
+        ],
+        [
+          "98368",
+          "536",
+          "262656"
+        ],
+        [
+          "32",
+          "8",
+          "8389376"
+        ],
+        [
+          "5242912",
+          "12292",
+          "8388736"
+        ],
+        [
+          "65600",
+          "10499032",
+          "262144"
+        ],
+        [
+          "128",
+          "8192",
+          "392"
+        ],
+        [
+          "133",
+          "16408",
+          "520"
+        ],
+        [
+          "132",
+          "10513720",
+          "8"
+        ],
+        [
+          "148",
+          "10487808",
+          "72"
+        ],
+        [
+          "17825824",
+          "10485762",
+          "8388672"
+        ],
+        [
+          "134",
+          "1312",
+          "40"
+        ],
+        [
+          "18416372",
+          "10485760",
+          "64"
+        ],
+        [
+          "1048608",
+          "10498351",
+          "8388608"
+        ],
+        [
+          "3145760",
+          "289",
+          "8388640"
+        ],
+        [
+          "512",
+          "8388608",
+          "8512"
+        ],
+        [
+          "16896",
+          "30421304",
+          "8192"
+        ],
+        [
+          "18944",
+          "1048864",
+          "8224"
+        ],
+        [
+          "20992",
+          "4206592",
+          "8320"
+        ],
+        [
+          "116453",
+          "24",
+          "512"
+        ],
+        [
+          "5460704",
+          "12288",
+          "128"
+        ],
+        [
+          "17920",
+          "16777240",
+          "8704"
+        ],
+        [
+          "4096",
+          "5002240",
+          "12292"
+        ],
+        [
+          "25961728",
+          "16777216",
+          "870912"
+        ],
+        [
+          "9472",
+          "393220",
+          "21000320"
+        ],
+        [
+          "5547273",
+          "344068",
+          "4"
+        ],
+        [
+          "5411845",
+          "16384",
+          "532"
+        ],
+        [
+          "131072",
+          "22656",
+          "393220"
+        ],
+        [
+          "8651008",
+          "32768",
+          "1056"
+        ],
+        [
+          "12544",
+          "802816",
+          "29204"
+        ],
+        [
+          "8448",
+          "933892",
+          "16805892"
+        ],
+        [
+          "262144",
+          "32768",
+          "17796128"
+        ],
+        [
+          "8397064",
+          "32768",
+          "1028"
+        ],
+        [
+          "25166080",
+          "4587520",
+          "14686336"
+        ],
+        [
+          "1",
+          "344083",
+          "16777240"
+        ],
+        [
+          "196608",
+          "128",
+          "13808768"
+        ],
+        [
+          "25976856",
+          "4196352",
+          "477696"
+        ],
+        [
+          "262144",
+          "753664",
+          "17762308"
+        ],
+        [
+          "1024",
+          "17170453",
+          "16801792"
+        ],
+        [
+          "3245059",
+          "513",
+          "58393"
+        ],
+        [
+          "2",
+          "1632",
+          "32777"
+        ],
+        [
+          "2293760",
+          "1152",
+          "13677572"
+        ],
+        [
+          "98307",
+          "1",
+          "25625"
+        ],
+        [
+          "2048",
+          "1049248",
+          "9216"
+        ],
+        [
+          "3146753",
+          "513",
+          "16810009"
+        ],
+        [
+          "3148803",
+          "512",
+          "25600"
+        ],
+        [
+          "5285120",
+          "344068",
+          "17694724"
+        ],
+        [
+          "2297862",
+          "1152",
+          "13316"
+        ],
+        [
+          "19482626",
+          "1048640",
+          "32779"
+        ],
+        [
+          "18432",
+          "1048576",
+          "11537451"
+        ],
+        [
+          "2097152",
+          "225",
+          "9469952"
+        ],
+        [
+          "6488064",
+          "1024",
+          "13631488"
+        ],
+        [
+          "16777216",
+          "7733250",
+          "10487808"
+        ],
+        [
+          "16795648",
+          "1048640",
+          "11569152"
+        ],
+        [
+          "21647380",
+          "2048",
+          "70"
+        ],
+        [
+          "32768",
+          "534",
+          "17563648"
+        ],
+        [
+          "524288",
+          "23068736",
+          "329728"
+        ],
+        [
+          "9741321",
+          "17301504",
+          "26"
+        ],
+        [
+          "274712",
+          "4982784",
+          "460804"
+        ],
+        [
+          "589824",
+          "64",
+          "98379"
+        ],
+        [
+          "25470208",
+          "2",
+          "19726400"
+        ],
+        [
+          "12568",
+          "786432",
+          "477716"
+        ],
+        [
+          "8659200",
+          "2164802",
+          "2048"
+        ],
+        [
+          "12583168",
+          "329728",
+          "14680134"
+        ],
+        [
+          "5252352",
+          "4",
+          "21889152"
+        ],
+        [
+          "8388608",
+          "32768",
+          "1049637"
+        ],
+        [
+          "8388864",
+          "4655104",
+          "14682112"
+        ],
+        [
+          "2162690",
+          "1049633",
+          "32768"
+        ],
+        [
+          "256",
+          "262144",
+          "14709722"
+        ],
+        [
+          "280",
+          "17563648",
+          "16922"
+        ],
+        [
+          "6",
+          "1024",
+          "13349"
+        ],
+        [
+          "4194304",
+          "334852",
+          "12582912"
+        ],
+        [
+          "5547264",
+          "327680",
+          "19791936"
+        ],
+        [
+          "16",
+          "20711424",
+          "10"
+        ],
+        [
+          "25175296",
+          "393216",
+          "21829760"
+        ],
+        [
+          "18892800",
+          "64",
+          "11534347"
+        ],
+        [
+          "98304",
+          "512",
+          "583193"
+        ],
+        [
+          "9741568",
+          "327682",
+          "18874458"
+        ],
+        [
+          "3145728",
+          "1",
+          "17851424"
+        ],
+        [
+          "5416192",
+          "16384",
+          "918036"
+        ],
+        [
+          "25186560",
+          "4194304",
+          "465024"
+        ],
+        [
+          "135172",
+          "4362372",
+          "4"
+        ],
+        [
+          "202758",
+          "128",
+          "13312"
+        ],
+        [
+          "25437440",
+          "17170434",
+          "17631232"
+        ],
+        [
+          "405772",
+          "4376580",
+          "4"
+        ],
+        [
+          "9741569",
+          "17629186",
+          "16777242"
+        ],
+        [
+          "3164902",
+          "288",
+          "32"
+        ],
+        [
+          "25977088",
+          "2099264",
+          "2048"
+        ],
+        [
+          "25841920",
+          "2048",
+          "458822"
+        ],
+        [
+          "25976856",
+          "20973568",
+          "16896"
+        ],
+        [
+          "19464210",
+          "1048576",
+          "11"
+        ],
+        [
+          "12583177",
+          "327680",
+          "6"
+        ],
+        [
+          "1082369",
+          "17318416",
+          "16777216"
+        ],
+        [
+          "8388616",
+          "32768",
+          "1025"
+        ]
+      ]
+    },
+    {
+      "label": "rank95",
+      "n": 5,
+      "policy": "adaptive",
+      "seed": 20261625,
+      "initial": 95,
+      "best": 95,
+      "cap": 99,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 897811,
+        "compare": 412681,
+        "map": 2553436,
+        "verify": 443,
+        "bit": 69043,
+        "xor": 13982,
+        "proposal": 745,
+        "controller": 44145,
+        "pivot": 7714
+      },
+      "attempts": 745,
+      "committed": 705,
+      "fitSteps": 192,
+      "exploreSteps": 553,
+      "compressionCalls": 12,
+      "compressionHits": 1,
+      "phaseChanges": 4,
+      "events": [],
+      "terms": [
+        [
+          "64",
+          "256",
+          "262432"
+        ],
+        [
+          "196672",
+          "12416",
+          "262272"
+        ],
+        [
+          "589888",
+          "10485824",
+          "262208"
+        ],
+        [
+          "98368",
+          "536",
+          "262656"
+        ],
+        [
+          "32",
+          "8",
+          "8389376"
+        ],
+        [
+          "5242912",
+          "12292",
+          "8388736"
+        ],
+        [
+          "65600",
+          "10499032",
+          "262144"
+        ],
+        [
+          "128",
+          "8192",
+          "392"
+        ],
+        [
+          "133",
+          "16408",
+          "520"
+        ],
+        [
+          "132",
+          "10513720",
+          "8"
+        ],
+        [
+          "148",
+          "10487808",
+          "72"
+        ],
+        [
+          "17825824",
+          "10485762",
+          "8388672"
+        ],
+        [
+          "134",
+          "1312",
+          "40"
+        ],
+        [
+          "18416372",
+          "10485760",
+          "64"
+        ],
+        [
+          "1048608",
+          "10498351",
+          "8388608"
+        ],
+        [
+          "3145760",
+          "289",
+          "8388640"
+        ],
+        [
+          "512",
+          "8388608",
+          "8512"
+        ],
+        [
+          "16896",
+          "30421304",
+          "8192"
+        ],
+        [
+          "18944",
+          "1048864",
+          "8224"
+        ],
+        [
+          "20992",
+          "4206592",
+          "8320"
+        ],
+        [
+          "116453",
+          "24",
+          "512"
+        ],
+        [
+          "5460704",
+          "12288",
+          "128"
+        ],
+        [
+          "17920",
+          "16777240",
+          "8704"
+        ],
+        [
+          "4096",
+          "5002240",
+          "12292"
+        ],
+        [
+          "25961728",
+          "16777216",
+          "870912"
+        ],
+        [
+          "9472",
+          "393220",
+          "21000320"
+        ],
+        [
+          "5547273",
+          "344068",
+          "4"
+        ],
+        [
+          "5411845",
+          "16384",
+          "532"
+        ],
+        [
+          "131072",
+          "22656",
+          "393220"
+        ],
+        [
+          "8651008",
+          "32768",
+          "1056"
+        ],
+        [
+          "12544",
+          "802816",
+          "29204"
+        ],
+        [
+          "8448",
+          "933892",
+          "16805892"
+        ],
+        [
+          "262144",
+          "32768",
+          "17796128"
+        ],
+        [
+          "8397064",
+          "32768",
+          "1028"
+        ],
+        [
+          "25166080",
+          "4587520",
+          "14686336"
+        ],
+        [
+          "1",
+          "344083",
+          "16777240"
+        ],
+        [
+          "196608",
+          "128",
+          "13808768"
+        ],
+        [
+          "25976856",
+          "4196352",
+          "477696"
+        ],
+        [
+          "262144",
+          "753664",
+          "17762308"
+        ],
+        [
+          "1024",
+          "17170453",
+          "16801792"
+        ],
+        [
+          "3245059",
+          "513",
+          "58393"
+        ],
+        [
+          "2",
+          "1632",
+          "32777"
+        ],
+        [
+          "2293760",
+          "1152",
+          "13677572"
+        ],
+        [
+          "98307",
+          "1",
+          "25625"
+        ],
+        [
+          "2048",
+          "1049248",
+          "9216"
+        ],
+        [
+          "3146753",
+          "513",
+          "16810009"
+        ],
+        [
+          "3148803",
+          "512",
+          "25600"
+        ],
+        [
+          "5285120",
+          "344068",
+          "17694724"
+        ],
+        [
+          "2297862",
+          "1152",
+          "13316"
+        ],
+        [
+          "19482626",
+          "1048640",
+          "32779"
+        ],
+        [
+          "18432",
+          "1048576",
+          "11537451"
+        ],
+        [
+          "2097152",
+          "225",
+          "9469952"
+        ],
+        [
+          "6488064",
+          "1024",
+          "13631488"
+        ],
+        [
+          "16777216",
+          "7733250",
+          "10487808"
+        ],
+        [
+          "16795648",
+          "1048640",
+          "11569152"
+        ],
+        [
+          "21647380",
+          "2048",
+          "70"
+        ],
+        [
+          "32768",
+          "534",
+          "17563648"
+        ],
+        [
+          "524288",
+          "23068736",
+          "329728"
+        ],
+        [
+          "9741321",
+          "17301504",
+          "26"
+        ],
+        [
+          "274712",
+          "4982784",
+          "460804"
+        ],
+        [
+          "589824",
+          "64",
+          "98379"
+        ],
+        [
+          "25470208",
+          "2",
+          "19726400"
+        ],
+        [
+          "12568",
+          "786432",
+          "477716"
+        ],
+        [
+          "8659200",
+          "2164802",
+          "2048"
+        ],
+        [
+          "12583168",
+          "329728",
+          "14680134"
+        ],
+        [
+          "5252352",
+          "4",
+          "21889152"
+        ],
+        [
+          "8388608",
+          "32768",
+          "1049637"
+        ],
+        [
+          "8388864",
+          "4655104",
+          "14682112"
+        ],
+        [
+          "2162690",
+          "1049633",
+          "32768"
+        ],
+        [
+          "256",
+          "262144",
+          "14709722"
+        ],
+        [
+          "280",
+          "17563648",
+          "16922"
+        ],
+        [
+          "6",
+          "1024",
+          "13349"
+        ],
+        [
+          "4194304",
+          "334852",
+          "12582912"
+        ],
+        [
+          "5547264",
+          "327680",
+          "19791936"
+        ],
+        [
+          "16",
+          "20711424",
+          "10"
+        ],
+        [
+          "25175296",
+          "393216",
+          "21829760"
+        ],
+        [
+          "18892800",
+          "64",
+          "11534347"
+        ],
+        [
+          "98304",
+          "512",
+          "583193"
+        ],
+        [
+          "9741568",
+          "327682",
+          "18874458"
+        ],
+        [
+          "3145728",
+          "1",
+          "17851424"
+        ],
+        [
+          "5416192",
+          "16384",
+          "918036"
+        ],
+        [
+          "25186560",
+          "4194304",
+          "465024"
+        ],
+        [
+          "135172",
+          "4362372",
+          "4"
+        ],
+        [
+          "202758",
+          "128",
+          "13312"
+        ],
+        [
+          "25437440",
+          "17170434",
+          "17631232"
+        ],
+        [
+          "405772",
+          "4376580",
+          "4"
+        ],
+        [
+          "9741569",
+          "17629186",
+          "16777242"
+        ],
+        [
+          "3164902",
+          "288",
+          "32"
+        ],
+        [
+          "25977088",
+          "2099264",
+          "2048"
+        ],
+        [
+          "25841920",
+          "2048",
+          "458822"
+        ],
+        [
+          "25976856",
+          "20973568",
+          "16896"
+        ],
+        [
+          "19464210",
+          "1048576",
+          "11"
+        ],
+        [
+          "12583177",
+          "327680",
+          "6"
+        ],
+        [
+          "1082369",
+          "17318416",
+          "16777216"
+        ],
+        [
+          "8388616",
+          "32768",
+          "1025"
+        ]
+      ]
+    },
+    {
+      "label": "rank95",
+      "n": 5,
+      "policy": "eager",
+      "seed": 20261626,
+      "initial": 95,
+      "best": 95,
+      "cap": 99,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 1125091,
+        "compare": 502248,
+        "map": 1955322,
+        "verify": 220,
+        "bit": 314197,
+        "xor": 62189,
+        "proposal": 977,
+        "controller": 976,
+        "pivot": 38780
+      },
+      "attempts": 977,
+      "committed": 884,
+      "fitSteps": 977,
+      "exploreSteps": 0,
+      "compressionCalls": 61,
+      "compressionHits": 0,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "64",
+          "256",
+          "262432"
+        ],
+        [
+          "196672",
+          "12416",
+          "262272"
+        ],
+        [
+          "589888",
+          "10485824",
+          "262208"
+        ],
+        [
+          "98368",
+          "536",
+          "262656"
+        ],
+        [
+          "32",
+          "8",
+          "8389376"
+        ],
+        [
+          "5242912",
+          "12292",
+          "8388736"
+        ],
+        [
+          "65600",
+          "10499032",
+          "262144"
+        ],
+        [
+          "128",
+          "8192",
+          "392"
+        ],
+        [
+          "133",
+          "16408",
+          "520"
+        ],
+        [
+          "132",
+          "10513720",
+          "8"
+        ],
+        [
+          "148",
+          "10487808",
+          "72"
+        ],
+        [
+          "17825824",
+          "10485762",
+          "8388672"
+        ],
+        [
+          "134",
+          "1312",
+          "40"
+        ],
+        [
+          "18416372",
+          "10485760",
+          "64"
+        ],
+        [
+          "1048608",
+          "10498351",
+          "8388608"
+        ],
+        [
+          "3145760",
+          "289",
+          "8388640"
+        ],
+        [
+          "512",
+          "8388608",
+          "8512"
+        ],
+        [
+          "16896",
+          "30421304",
+          "8192"
+        ],
+        [
+          "18944",
+          "1048864",
+          "8224"
+        ],
+        [
+          "20992",
+          "4206592",
+          "8320"
+        ],
+        [
+          "116453",
+          "24",
+          "512"
+        ],
+        [
+          "5460704",
+          "12288",
+          "128"
+        ],
+        [
+          "17920",
+          "16777240",
+          "8704"
+        ],
+        [
+          "4096",
+          "5002240",
+          "12292"
+        ],
+        [
+          "25961728",
+          "16777216",
+          "870912"
+        ],
+        [
+          "9472",
+          "393220",
+          "21000320"
+        ],
+        [
+          "5547273",
+          "344068",
+          "4"
+        ],
+        [
+          "5411845",
+          "16384",
+          "532"
+        ],
+        [
+          "131072",
+          "22656",
+          "393220"
+        ],
+        [
+          "8651008",
+          "32768",
+          "1056"
+        ],
+        [
+          "12544",
+          "802816",
+          "29204"
+        ],
+        [
+          "8448",
+          "933892",
+          "16805892"
+        ],
+        [
+          "262144",
+          "32768",
+          "17796128"
+        ],
+        [
+          "8397064",
+          "32768",
+          "1028"
+        ],
+        [
+          "25166080",
+          "4587520",
+          "14686336"
+        ],
+        [
+          "1",
+          "344083",
+          "16777240"
+        ],
+        [
+          "196608",
+          "128",
+          "13808768"
+        ],
+        [
+          "25976856",
+          "4196352",
+          "477696"
+        ],
+        [
+          "262144",
+          "753664",
+          "17762308"
+        ],
+        [
+          "1024",
+          "17170453",
+          "16801792"
+        ],
+        [
+          "3245059",
+          "513",
+          "58393"
+        ],
+        [
+          "2",
+          "1632",
+          "32777"
+        ],
+        [
+          "2293760",
+          "1152",
+          "13677572"
+        ],
+        [
+          "98307",
+          "1",
+          "25625"
+        ],
+        [
+          "2048",
+          "1049248",
+          "9216"
+        ],
+        [
+          "3146753",
+          "513",
+          "16810009"
+        ],
+        [
+          "3148803",
+          "512",
+          "25600"
+        ],
+        [
+          "5285120",
+          "344068",
+          "17694724"
+        ],
+        [
+          "2297862",
+          "1152",
+          "13316"
+        ],
+        [
+          "19482626",
+          "1048640",
+          "32779"
+        ],
+        [
+          "18432",
+          "1048576",
+          "11537451"
+        ],
+        [
+          "2097152",
+          "225",
+          "9469952"
+        ],
+        [
+          "6488064",
+          "1024",
+          "13631488"
+        ],
+        [
+          "16777216",
+          "7733250",
+          "10487808"
+        ],
+        [
+          "16795648",
+          "1048640",
+          "11569152"
+        ],
+        [
+          "21647380",
+          "2048",
+          "70"
+        ],
+        [
+          "32768",
+          "534",
+          "17563648"
+        ],
+        [
+          "524288",
+          "23068736",
+          "329728"
+        ],
+        [
+          "9741321",
+          "17301504",
+          "26"
+        ],
+        [
+          "274712",
+          "4982784",
+          "460804"
+        ],
+        [
+          "589824",
+          "64",
+          "98379"
+        ],
+        [
+          "25470208",
+          "2",
+          "19726400"
+        ],
+        [
+          "12568",
+          "786432",
+          "477716"
+        ],
+        [
+          "8659200",
+          "2164802",
+          "2048"
+        ],
+        [
+          "12583168",
+          "329728",
+          "14680134"
+        ],
+        [
+          "5252352",
+          "4",
+          "21889152"
+        ],
+        [
+          "8388608",
+          "32768",
+          "1049637"
+        ],
+        [
+          "8388864",
+          "4655104",
+          "14682112"
+        ],
+        [
+          "2162690",
+          "1049633",
+          "32768"
+        ],
+        [
+          "256",
+          "262144",
+          "14709722"
+        ],
+        [
+          "280",
+          "17563648",
+          "16922"
+        ],
+        [
+          "6",
+          "1024",
+          "13349"
+        ],
+        [
+          "4194304",
+          "334852",
+          "12582912"
+        ],
+        [
+          "5547264",
+          "327680",
+          "19791936"
+        ],
+        [
+          "16",
+          "20711424",
+          "10"
+        ],
+        [
+          "25175296",
+          "393216",
+          "21829760"
+        ],
+        [
+          "18892800",
+          "64",
+          "11534347"
+        ],
+        [
+          "98304",
+          "512",
+          "583193"
+        ],
+        [
+          "9741568",
+          "327682",
+          "18874458"
+        ],
+        [
+          "3145728",
+          "1",
+          "17851424"
+        ],
+        [
+          "5416192",
+          "16384",
+          "918036"
+        ],
+        [
+          "25186560",
+          "4194304",
+          "465024"
+        ],
+        [
+          "135172",
+          "4362372",
+          "4"
+        ],
+        [
+          "202758",
+          "128",
+          "13312"
+        ],
+        [
+          "25437440",
+          "17170434",
+          "17631232"
+        ],
+        [
+          "405772",
+          "4376580",
+          "4"
+        ],
+        [
+          "9741569",
+          "17629186",
+          "16777242"
+        ],
+        [
+          "3164902",
+          "288",
+          "32"
+        ],
+        [
+          "25977088",
+          "2099264",
+          "2048"
+        ],
+        [
+          "25841920",
+          "2048",
+          "458822"
+        ],
+        [
+          "25976856",
+          "20973568",
+          "16896"
+        ],
+        [
+          "19464210",
+          "1048576",
+          "11"
+        ],
+        [
+          "12583177",
+          "327680",
+          "6"
+        ],
+        [
+          "1082369",
+          "17318416",
+          "16777216"
+        ],
+        [
+          "8388616",
+          "32768",
+          "1025"
+        ]
+      ]
+    },
+    {
+      "label": "rank95",
+      "n": 5,
+      "policy": "periodic",
+      "seed": 20261626,
+      "initial": 95,
+      "best": 95,
+      "cap": 99,
+      "budget": 4000000,
+      "used": 3999937,
+      "ledger": {
+        "term": 917752,
+        "compare": 425061,
+        "map": 2542328,
+        "verify": 220,
+        "bit": 85454,
+        "xor": 17249,
+        "proposal": 774,
+        "controller": 773,
+        "pivot": 10326
+      },
+      "attempts": 774,
+      "committed": 733,
+      "fitSteps": 256,
+      "exploreSteps": 518,
+      "compressionCalls": 16,
+      "compressionHits": 0,
+      "phaseChanges": 8,
+      "events": [],
+      "terms": [
+        [
+          "64",
+          "256",
+          "262432"
+        ],
+        [
+          "196672",
+          "12416",
+          "262272"
+        ],
+        [
+          "589888",
+          "10485824",
+          "262208"
+        ],
+        [
+          "98368",
+          "536",
+          "262656"
+        ],
+        [
+          "32",
+          "8",
+          "8389376"
+        ],
+        [
+          "5242912",
+          "12292",
+          "8388736"
+        ],
+        [
+          "65600",
+          "10499032",
+          "262144"
+        ],
+        [
+          "128",
+          "8192",
+          "392"
+        ],
+        [
+          "133",
+          "16408",
+          "520"
+        ],
+        [
+          "132",
+          "10513720",
+          "8"
+        ],
+        [
+          "148",
+          "10487808",
+          "72"
+        ],
+        [
+          "17825824",
+          "10485762",
+          "8388672"
+        ],
+        [
+          "134",
+          "1312",
+          "40"
+        ],
+        [
+          "18416372",
+          "10485760",
+          "64"
+        ],
+        [
+          "1048608",
+          "10498351",
+          "8388608"
+        ],
+        [
+          "3145760",
+          "289",
+          "8388640"
+        ],
+        [
+          "512",
+          "8388608",
+          "8512"
+        ],
+        [
+          "16896",
+          "30421304",
+          "8192"
+        ],
+        [
+          "18944",
+          "1048864",
+          "8224"
+        ],
+        [
+          "20992",
+          "4206592",
+          "8320"
+        ],
+        [
+          "116453",
+          "24",
+          "512"
+        ],
+        [
+          "5460704",
+          "12288",
+          "128"
+        ],
+        [
+          "17920",
+          "16777240",
+          "8704"
+        ],
+        [
+          "4096",
+          "5002240",
+          "12292"
+        ],
+        [
+          "25961728",
+          "16777216",
+          "870912"
+        ],
+        [
+          "9472",
+          "393220",
+          "21000320"
+        ],
+        [
+          "5547273",
+          "344068",
+          "4"
+        ],
+        [
+          "5411845",
+          "16384",
+          "532"
+        ],
+        [
+          "131072",
+          "22656",
+          "393220"
+        ],
+        [
+          "8651008",
+          "32768",
+          "1056"
+        ],
+        [
+          "12544",
+          "802816",
+          "29204"
+        ],
+        [
+          "8448",
+          "933892",
+          "16805892"
+        ],
+        [
+          "262144",
+          "32768",
+          "17796128"
+        ],
+        [
+          "8397064",
+          "32768",
+          "1028"
+        ],
+        [
+          "25166080",
+          "4587520",
+          "14686336"
+        ],
+        [
+          "1",
+          "344083",
+          "16777240"
+        ],
+        [
+          "196608",
+          "128",
+          "13808768"
+        ],
+        [
+          "25976856",
+          "4196352",
+          "477696"
+        ],
+        [
+          "262144",
+          "753664",
+          "17762308"
+        ],
+        [
+          "1024",
+          "17170453",
+          "16801792"
+        ],
+        [
+          "3245059",
+          "513",
+          "58393"
+        ],
+        [
+          "2",
+          "1632",
+          "32777"
+        ],
+        [
+          "2293760",
+          "1152",
+          "13677572"
+        ],
+        [
+          "98307",
+          "1",
+          "25625"
+        ],
+        [
+          "2048",
+          "1049248",
+          "9216"
+        ],
+        [
+          "3146753",
+          "513",
+          "16810009"
+        ],
+        [
+          "3148803",
+          "512",
+          "25600"
+        ],
+        [
+          "5285120",
+          "344068",
+          "17694724"
+        ],
+        [
+          "2297862",
+          "1152",
+          "13316"
+        ],
+        [
+          "19482626",
+          "1048640",
+          "32779"
+        ],
+        [
+          "18432",
+          "1048576",
+          "11537451"
+        ],
+        [
+          "2097152",
+          "225",
+          "9469952"
+        ],
+        [
+          "6488064",
+          "1024",
+          "13631488"
+        ],
+        [
+          "16777216",
+          "7733250",
+          "10487808"
+        ],
+        [
+          "16795648",
+          "1048640",
+          "11569152"
+        ],
+        [
+          "21647380",
+          "2048",
+          "70"
+        ],
+        [
+          "32768",
+          "534",
+          "17563648"
+        ],
+        [
+          "524288",
+          "23068736",
+          "329728"
+        ],
+        [
+          "9741321",
+          "17301504",
+          "26"
+        ],
+        [
+          "274712",
+          "4982784",
+          "460804"
+        ],
+        [
+          "589824",
+          "64",
+          "98379"
+        ],
+        [
+          "25470208",
+          "2",
+          "19726400"
+        ],
+        [
+          "12568",
+          "786432",
+          "477716"
+        ],
+        [
+          "8659200",
+          "2164802",
+          "2048"
+        ],
+        [
+          "12583168",
+          "329728",
+          "14680134"
+        ],
+        [
+          "5252352",
+          "4",
+          "21889152"
+        ],
+        [
+          "8388608",
+          "32768",
+          "1049637"
+        ],
+        [
+          "8388864",
+          "4655104",
+          "14682112"
+        ],
+        [
+          "2162690",
+          "1049633",
+          "32768"
+        ],
+        [
+          "256",
+          "262144",
+          "14709722"
+        ],
+        [
+          "280",
+          "17563648",
+          "16922"
+        ],
+        [
+          "6",
+          "1024",
+          "13349"
+        ],
+        [
+          "4194304",
+          "334852",
+          "12582912"
+        ],
+        [
+          "5547264",
+          "327680",
+          "19791936"
+        ],
+        [
+          "16",
+          "20711424",
+          "10"
+        ],
+        [
+          "25175296",
+          "393216",
+          "21829760"
+        ],
+        [
+          "18892800",
+          "64",
+          "11534347"
+        ],
+        [
+          "98304",
+          "512",
+          "583193"
+        ],
+        [
+          "9741568",
+          "327682",
+          "18874458"
+        ],
+        [
+          "3145728",
+          "1",
+          "17851424"
+        ],
+        [
+          "5416192",
+          "16384",
+          "918036"
+        ],
+        [
+          "25186560",
+          "4194304",
+          "465024"
+        ],
+        [
+          "135172",
+          "4362372",
+          "4"
+        ],
+        [
+          "202758",
+          "128",
+          "13312"
+        ],
+        [
+          "25437440",
+          "17170434",
+          "17631232"
+        ],
+        [
+          "405772",
+          "4376580",
+          "4"
+        ],
+        [
+          "9741569",
+          "17629186",
+          "16777242"
+        ],
+        [
+          "3164902",
+          "288",
+          "32"
+        ],
+        [
+          "25977088",
+          "2099264",
+          "2048"
+        ],
+        [
+          "25841920",
+          "2048",
+          "458822"
+        ],
+        [
+          "25976856",
+          "20973568",
+          "16896"
+        ],
+        [
+          "19464210",
+          "1048576",
+          "11"
+        ],
+        [
+          "12583177",
+          "327680",
+          "6"
+        ],
+        [
+          "1082369",
+          "17318416",
+          "16777216"
+        ],
+        [
+          "8388616",
+          "32768",
+          "1025"
+        ]
+      ]
+    },
+    {
+      "label": "rank95",
+      "n": 5,
+      "policy": "adaptive",
+      "seed": 20261626,
+      "initial": 95,
+      "best": 95,
+      "cap": 99,
+      "budget": 4000000,
+      "used": 3999919,
+      "ledger": {
+        "term": 897430,
+        "compare": 413554,
+        "map": 2558059,
+        "verify": 220,
+        "bit": 64871,
+        "xor": 13088,
+        "proposal": 746,
+        "controller": 44211,
+        "pivot": 7740
+      },
+      "attempts": 746,
+      "committed": 707,
+      "fitSteps": 192,
+      "exploreSteps": 554,
+      "compressionCalls": 12,
+      "compressionHits": 0,
+      "phaseChanges": 4,
+      "events": [],
+      "terms": [
+        [
+          "64",
+          "256",
+          "262432"
+        ],
+        [
+          "196672",
+          "12416",
+          "262272"
+        ],
+        [
+          "589888",
+          "10485824",
+          "262208"
+        ],
+        [
+          "98368",
+          "536",
+          "262656"
+        ],
+        [
+          "32",
+          "8",
+          "8389376"
+        ],
+        [
+          "5242912",
+          "12292",
+          "8388736"
+        ],
+        [
+          "65600",
+          "10499032",
+          "262144"
+        ],
+        [
+          "128",
+          "8192",
+          "392"
+        ],
+        [
+          "133",
+          "16408",
+          "520"
+        ],
+        [
+          "132",
+          "10513720",
+          "8"
+        ],
+        [
+          "148",
+          "10487808",
+          "72"
+        ],
+        [
+          "17825824",
+          "10485762",
+          "8388672"
+        ],
+        [
+          "134",
+          "1312",
+          "40"
+        ],
+        [
+          "18416372",
+          "10485760",
+          "64"
+        ],
+        [
+          "1048608",
+          "10498351",
+          "8388608"
+        ],
+        [
+          "3145760",
+          "289",
+          "8388640"
+        ],
+        [
+          "512",
+          "8388608",
+          "8512"
+        ],
+        [
+          "16896",
+          "30421304",
+          "8192"
+        ],
+        [
+          "18944",
+          "1048864",
+          "8224"
+        ],
+        [
+          "20992",
+          "4206592",
+          "8320"
+        ],
+        [
+          "116453",
+          "24",
+          "512"
+        ],
+        [
+          "5460704",
+          "12288",
+          "128"
+        ],
+        [
+          "17920",
+          "16777240",
+          "8704"
+        ],
+        [
+          "4096",
+          "5002240",
+          "12292"
+        ],
+        [
+          "25961728",
+          "16777216",
+          "870912"
+        ],
+        [
+          "9472",
+          "393220",
+          "21000320"
+        ],
+        [
+          "5547273",
+          "344068",
+          "4"
+        ],
+        [
+          "5411845",
+          "16384",
+          "532"
+        ],
+        [
+          "131072",
+          "22656",
+          "393220"
+        ],
+        [
+          "8651008",
+          "32768",
+          "1056"
+        ],
+        [
+          "12544",
+          "802816",
+          "29204"
+        ],
+        [
+          "8448",
+          "933892",
+          "16805892"
+        ],
+        [
+          "262144",
+          "32768",
+          "17796128"
+        ],
+        [
+          "8397064",
+          "32768",
+          "1028"
+        ],
+        [
+          "25166080",
+          "4587520",
+          "14686336"
+        ],
+        [
+          "1",
+          "344083",
+          "16777240"
+        ],
+        [
+          "196608",
+          "128",
+          "13808768"
+        ],
+        [
+          "25976856",
+          "4196352",
+          "477696"
+        ],
+        [
+          "262144",
+          "753664",
+          "17762308"
+        ],
+        [
+          "1024",
+          "17170453",
+          "16801792"
+        ],
+        [
+          "3245059",
+          "513",
+          "58393"
+        ],
+        [
+          "2",
+          "1632",
+          "32777"
+        ],
+        [
+          "2293760",
+          "1152",
+          "13677572"
+        ],
+        [
+          "98307",
+          "1",
+          "25625"
+        ],
+        [
+          "2048",
+          "1049248",
+          "9216"
+        ],
+        [
+          "3146753",
+          "513",
+          "16810009"
+        ],
+        [
+          "3148803",
+          "512",
+          "25600"
+        ],
+        [
+          "5285120",
+          "344068",
+          "17694724"
+        ],
+        [
+          "2297862",
+          "1152",
+          "13316"
+        ],
+        [
+          "19482626",
+          "1048640",
+          "32779"
+        ],
+        [
+          "18432",
+          "1048576",
+          "11537451"
+        ],
+        [
+          "2097152",
+          "225",
+          "9469952"
+        ],
+        [
+          "6488064",
+          "1024",
+          "13631488"
+        ],
+        [
+          "16777216",
+          "7733250",
+          "10487808"
+        ],
+        [
+          "16795648",
+          "1048640",
+          "11569152"
+        ],
+        [
+          "21647380",
+          "2048",
+          "70"
+        ],
+        [
+          "32768",
+          "534",
+          "17563648"
+        ],
+        [
+          "524288",
+          "23068736",
+          "329728"
+        ],
+        [
+          "9741321",
+          "17301504",
+          "26"
+        ],
+        [
+          "274712",
+          "4982784",
+          "460804"
+        ],
+        [
+          "589824",
+          "64",
+          "98379"
+        ],
+        [
+          "25470208",
+          "2",
+          "19726400"
+        ],
+        [
+          "12568",
+          "786432",
+          "477716"
+        ],
+        [
+          "8659200",
+          "2164802",
+          "2048"
+        ],
+        [
+          "12583168",
+          "329728",
+          "14680134"
+        ],
+        [
+          "5252352",
+          "4",
+          "21889152"
+        ],
+        [
+          "8388608",
+          "32768",
+          "1049637"
+        ],
+        [
+          "8388864",
+          "4655104",
+          "14682112"
+        ],
+        [
+          "2162690",
+          "1049633",
+          "32768"
+        ],
+        [
+          "256",
+          "262144",
+          "14709722"
+        ],
+        [
+          "280",
+          "17563648",
+          "16922"
+        ],
+        [
+          "6",
+          "1024",
+          "13349"
+        ],
+        [
+          "4194304",
+          "334852",
+          "12582912"
+        ],
+        [
+          "5547264",
+          "327680",
+          "19791936"
+        ],
+        [
+          "16",
+          "20711424",
+          "10"
+        ],
+        [
+          "25175296",
+          "393216",
+          "21829760"
+        ],
+        [
+          "18892800",
+          "64",
+          "11534347"
+        ],
+        [
+          "98304",
+          "512",
+          "583193"
+        ],
+        [
+          "9741568",
+          "327682",
+          "18874458"
+        ],
+        [
+          "3145728",
+          "1",
+          "17851424"
+        ],
+        [
+          "5416192",
+          "16384",
+          "918036"
+        ],
+        [
+          "25186560",
+          "4194304",
+          "465024"
+        ],
+        [
+          "135172",
+          "4362372",
+          "4"
+        ],
+        [
+          "202758",
+          "128",
+          "13312"
+        ],
+        [
+          "25437440",
+          "17170434",
+          "17631232"
+        ],
+        [
+          "405772",
+          "4376580",
+          "4"
+        ],
+        [
+          "9741569",
+          "17629186",
+          "16777242"
+        ],
+        [
+          "3164902",
+          "288",
+          "32"
+        ],
+        [
+          "25977088",
+          "2099264",
+          "2048"
+        ],
+        [
+          "25841920",
+          "2048",
+          "458822"
+        ],
+        [
+          "25976856",
+          "20973568",
+          "16896"
+        ],
+        [
+          "19464210",
+          "1048576",
+          "11"
+        ],
+        [
+          "12583177",
+          "327680",
+          "6"
+        ],
+        [
+          "1082369",
+          "17318416",
+          "16777216"
+        ],
+        [
+          "8388616",
+          "32768",
+          "1025"
+        ]
+      ]
+    },
+    {
+      "label": "rank95",
+      "n": 5,
+      "policy": "eager",
+      "seed": 20261627,
+      "initial": 95,
+      "best": 95,
+      "cap": 99,
+      "budget": 4000000,
+      "used": 3999938,
+      "ledger": {
+        "term": 1126432,
+        "compare": 499410,
+        "map": 1957787,
+        "verify": 220,
+        "bit": 313324,
+        "xor": 62045,
+        "proposal": 978,
+        "controller": 977,
+        "pivot": 38765
+      },
+      "attempts": 978,
+      "committed": 890,
+      "fitSteps": 978,
+      "exploreSteps": 0,
+      "compressionCalls": 61,
+      "compressionHits": 0,
+      "phaseChanges": 0,
+      "events": [],
+      "terms": [
+        [
+          "64",
+          "256",
+          "262432"
+        ],
+        [
+          "196672",
+          "12416",
+          "262272"
+        ],
+        [
+          "589888",
+          "10485824",
+          "262208"
+        ],
+        [
+          "98368",
+          "536",
+          "262656"
+        ],
+        [
+          "32",
+          "8",
+          "8389376"
+        ],
+        [
+          "5242912",
+          "12292",
+          "8388736"
+        ],
+        [
+          "65600",
+          "10499032",
+          "262144"
+        ],
+        [
+          "128",
+          "8192",
+          "392"
+        ],
+        [
+          "133",
+          "16408",
+          "520"
+        ],
+        [
+          "132",
+          "10513720",
+          "8"
+        ],
+        [
+          "148",
+          "10487808",
+          "72"
+        ],
+        [
+          "17825824",
+          "10485762",
+          "8388672"
+        ],
+        [
+          "134",
+          "1312",
+          "40"
+        ],
+        [
+          "18416372",
+          "10485760",
+          "64"
+        ],
+        [
+          "1048608",
+          "10498351",
+          "8388608"
+        ],
+        [
+          "3145760",
+          "289",
+          "8388640"
+        ],
+        [
+          "512",
+          "8388608",
+          "8512"
+        ],
+        [
+          "16896",
+          "30421304",
+          "8192"
+        ],
+        [
+          "18944",
+          "1048864",
+          "8224"
+        ],
+        [
+          "20992",
+          "4206592",
+          "8320"
+        ],
+        [
+          "116453",
+          "24",
+          "512"
+        ],
+        [
+          "5460704",
+          "12288",
+          "128"
+        ],
+        [
+          "17920",
+          "16777240",
+          "8704"
+        ],
+        [
+          "4096",
+          "5002240",
+          "12292"
+        ],
+        [
+          "25961728",
+          "16777216",
+          "870912"
+        ],
+        [
+          "9472",
+          "393220",
+          "21000320"
+        ],
+        [
+          "5547273",
+          "344068",
+          "4"
+        ],
+        [
+          "5411845",
+          "16384",
+          "532"
+        ],
+        [
+          "131072",
+          "22656",
+          "393220"
+        ],
+        [
+          "8651008",
+          "32768",
+          "1056"
+        ],
+        [
+          "12544",
+          "802816",
+          "29204"
+        ],
+        [
+          "8448",
+          "933892",
+          "16805892"
+        ],
+        [
+          "262144",
+          "32768",
+          "17796128"
+        ],
+        [
+          "8397064",
+          "32768",
+          "1028"
+        ],
+        [
+          "25166080",
+          "4587520",
+          "14686336"
+        ],
+        [
+          "1",
+          "344083",
+          "16777240"
+        ],
+        [
+          "196608",
+          "128",
+          "13808768"
+        ],
+        [
+          "25976856",
+          "4196352",
+          "477696"
+        ],
+        [
+          "262144",
+          "753664",
+          "17762308"
+        ],
+        [
+          "1024",
+          "17170453",
+          "16801792"
+        ],
+        [
+          "3245059",
+          "513",
+          "58393"
+        ],
+        [
+          "2",
+          "1632",
+          "32777"
+        ],
+        [
+          "2293760",
+          "1152",
+          "13677572"
+        ],
+        [
+          "98307",
+          "1",
+          "25625"
+        ],
+        [
+          "2048",
+          "1049248",
+          "9216"
+        ],
+        [
+          "3146753",
+          "513",
+          "16810009"
+        ],
+        [
+          "3148803",
+          "512",
+          "25600"
+        ],
+        [
+          "5285120",
+          "344068",
+          "17694724"
+        ],
+        [
+          "2297862",
+          "1152",
+          "13316"
+        ],
+        [
+          "19482626",
+          "1048640",
+          "32779"
+        ],
+        [
+          "18432",
+          "1048576",
+          "11537451"
+        ],
+        [
+          "2097152",
+          "225",
+          "9469952"
+        ],
+        [
+          "6488064",
+          "1024",
+          "13631488"
+        ],
+        [
+          "16777216",
+          "7733250",
+          "10487808"
+        ],
+        [
+          "16795648",
+          "1048640",
+          "11569152"
+        ],
+        [
+          "21647380",
+          "2048",
+          "70"
+        ],
+        [
+          "32768",
+          "534",
+          "17563648"
+        ],
+        [
+          "524288",
+          "23068736",
+          "329728"
+        ],
+        [
+          "9741321",
+          "17301504",
+          "26"
+        ],
+        [
+          "274712",
+          "4982784",
+          "460804"
+        ],
+        [
+          "589824",
+          "64",
+          "98379"
+        ],
+        [
+          "25470208",
+          "2",
+          "19726400"
+        ],
+        [
+          "12568",
+          "786432",
+          "477716"
+        ],
+        [
+          "8659200",
+          "2164802",
+          "2048"
+        ],
+        [
+          "12583168",
+          "329728",
+          "14680134"
+        ],
+        [
+          "5252352",
+          "4",
+          "21889152"
+        ],
+        [
+          "8388608",
+          "32768",
+          "1049637"
+        ],
+        [
+          "8388864",
+          "4655104",
+          "14682112"
+        ],
+        [
+          "2162690",
+          "1049633",
+          "32768"
+        ],
+        [
+          "256",
+          "262144",
+          "14709722"
+        ],
+        [
+          "280",
+          "17563648",
+          "16922"
+        ],
+        [
+          "6",
+          "1024",
+          "13349"
+        ],
+        [
+          "4194304",
+          "334852",
+          "12582912"
+        ],
+        [
+          "5547264",
+          "327680",
+          "19791936"
+        ],
+        [
+          "16",
+          "20711424",
+          "10"
+        ],
+        [
+          "25175296",
+          "393216",
+          "21829760"
+        ],
+        [
+          "18892800",
+          "64",
+          "11534347"
+        ],
+        [
+          "98304",
+          "512",
+          "583193"
+        ],
+        [
+          "9741568",
+          "327682",
+          "18874458"
+        ],
+        [
+          "3145728",
+          "1",
+          "17851424"
+        ],
+        [
+          "5416192",
+          "16384",
+          "918036"
+        ],
+        [
+          "25186560",
+          "4194304",
+          "465024"
+        ],
+        [
+          "135172",
+          "4362372",
+          "4"
+        ],
+        [
+          "202758",
+          "128",
+          "13312"
+        ],
+        [
+          "25437440",
+          "17170434",
+          "17631232"
+        ],
+        [
+          "405772",
+          "4376580",
+          "4"
+        ],
+        [
+          "9741569",
+          "17629186",
+          "16777242"
+        ],
+        [
+          "3164902",
+          "288",
+          "32"
+        ],
+        [
+          "25977088",
+          "2099264",
+          "2048"
+        ],
+        [
+          "25841920",
+          "2048",
+          "458822"
+        ],
+        [
+          "25976856",
+          "20973568",
+          "16896"
+        ],
+        [
+          "19464210",
+          "1048576",
+          "11"
+        ],
+        [
+          "12583177",
+          "327680",
+          "6"
+        ],
+        [
+          "1082369",
+          "17318416",
+          "16777216"
+        ],
+        [
+          "8388616",
+          "32768",
+          "1025"
+        ]
+      ]
+    },
+    {
+      "label": "rank95",
+      "n": 5,
+      "policy": "periodic",
+      "seed": 20261627,
+      "initial": 95,
+      "best": 95,
+      "cap": 99,
+      "budget": 4000000,
+      "used": 4000000,
+      "ledger": {
+        "term": 919513,
+        "compare": 422995,
+        "map": 2542418,
+        "verify": 220,
+        "bit": 85587,
+        "xor": 17389,
+        "proposal": 769,
+        "controller": 768,
+        "pivot": 10341
+      },
+      "attempts": 769,
+      "committed": 735,
+      "fitSteps": 256,
+      "exploreSteps": 513,
+      "compressionCalls": 16,
+      "compressionHits": 0,
+      "phaseChanges": 8,
+      "events": [],
+      "terms": [
+        [
+          "64",
+          "256",
+          "262432"
+        ],
+        [
+          "196672",
+          "12416",
+          "262272"
+        ],
+        [
+          "589888",
+          "10485824",
+          "262208"
+        ],
+        [
+          "98368",
+          "536",
+          "262656"
+        ],
+        [
+          "32",
+          "8",
+          "8389376"
+        ],
+        [
+          "5242912",
+          "12292",
+          "8388736"
+        ],
+        [
+          "65600",
+          "10499032",
+          "262144"
+        ],
+        [
+          "128",
+          "8192",
+          "392"
+        ],
+        [
+          "133",
+          "16408",
+          "520"
+        ],
+        [
+          "132",
+          "10513720",
+          "8"
+        ],
+        [
+          "148",
+          "10487808",
+          "72"
+        ],
+        [
+          "17825824",
+          "10485762",
+          "8388672"
+        ],
+        [
+          "134",
+          "1312",
+          "40"
+        ],
+        [
+          "18416372",
+          "10485760",
+          "64"
+        ],
+        [
+          "1048608",
+          "10498351",
+          "8388608"
+        ],
+        [
+          "3145760",
+          "289",
+          "8388640"
+        ],
+        [
+          "512",
+          "8388608",
+          "8512"
+        ],
+        [
+          "16896",
+          "30421304",
+          "8192"
+        ],
+        [
+          "18944",
+          "1048864",
+          "8224"
+        ],
+        [
+          "20992",
+          "4206592",
+          "8320"
+        ],
+        [
+          "116453",
+          "24",
+          "512"
+        ],
+        [
+          "5460704",
+          "12288",
+          "128"
+        ],
+        [
+          "17920",
+          "16777240",
+          "8704"
+        ],
+        [
+          "4096",
+          "5002240",
+          "12292"
+        ],
+        [
+          "25961728",
+          "16777216",
+          "870912"
+        ],
+        [
+          "9472",
+          "393220",
+          "21000320"
+        ],
+        [
+          "5547273",
+          "344068",
+          "4"
+        ],
+        [
+          "5411845",
+          "16384",
+          "532"
+        ],
+        [
+          "131072",
+          "22656",
+          "393220"
+        ],
+        [
+          "8651008",
+          "32768",
+          "1056"
+        ],
+        [
+          "12544",
+          "802816",
+          "29204"
+        ],
+        [
+          "8448",
+          "933892",
+          "16805892"
+        ],
+        [
+          "262144",
+          "32768",
+          "17796128"
+        ],
+        [
+          "8397064",
+          "32768",
+          "1028"
+        ],
+        [
+          "25166080",
+          "4587520",
+          "14686336"
+        ],
+        [
+          "1",
+          "344083",
+          "16777240"
+        ],
+        [
+          "196608",
+          "128",
+          "13808768"
+        ],
+        [
+          "25976856",
+          "4196352",
+          "477696"
+        ],
+        [
+          "262144",
+          "753664",
+          "17762308"
+        ],
+        [
+          "1024",
+          "17170453",
+          "16801792"
+        ],
+        [
+          "3245059",
+          "513",
+          "58393"
+        ],
+        [
+          "2",
+          "1632",
+          "32777"
+        ],
+        [
+          "2293760",
+          "1152",
+          "13677572"
+        ],
+        [
+          "98307",
+          "1",
+          "25625"
+        ],
+        [
+          "2048",
+          "1049248",
+          "9216"
+        ],
+        [
+          "3146753",
+          "513",
+          "16810009"
+        ],
+        [
+          "3148803",
+          "512",
+          "25600"
+        ],
+        [
+          "5285120",
+          "344068",
+          "17694724"
+        ],
+        [
+          "2297862",
+          "1152",
+          "13316"
+        ],
+        [
+          "19482626",
+          "1048640",
+          "32779"
+        ],
+        [
+          "18432",
+          "1048576",
+          "11537451"
+        ],
+        [
+          "2097152",
+          "225",
+          "9469952"
+        ],
+        [
+          "6488064",
+          "1024",
+          "13631488"
+        ],
+        [
+          "16777216",
+          "7733250",
+          "10487808"
+        ],
+        [
+          "16795648",
+          "1048640",
+          "11569152"
+        ],
+        [
+          "21647380",
+          "2048",
+          "70"
+        ],
+        [
+          "32768",
+          "534",
+          "17563648"
+        ],
+        [
+          "524288",
+          "23068736",
+          "329728"
+        ],
+        [
+          "9741321",
+          "17301504",
+          "26"
+        ],
+        [
+          "274712",
+          "4982784",
+          "460804"
+        ],
+        [
+          "589824",
+          "64",
+          "98379"
+        ],
+        [
+          "25470208",
+          "2",
+          "19726400"
+        ],
+        [
+          "12568",
+          "786432",
+          "477716"
+        ],
+        [
+          "8659200",
+          "2164802",
+          "2048"
+        ],
+        [
+          "12583168",
+          "329728",
+          "14680134"
+        ],
+        [
+          "5252352",
+          "4",
+          "21889152"
+        ],
+        [
+          "8388608",
+          "32768",
+          "1049637"
+        ],
+        [
+          "8388864",
+          "4655104",
+          "14682112"
+        ],
+        [
+          "2162690",
+          "1049633",
+          "32768"
+        ],
+        [
+          "256",
+          "262144",
+          "14709722"
+        ],
+        [
+          "280",
+          "17563648",
+          "16922"
+        ],
+        [
+          "6",
+          "1024",
+          "13349"
+        ],
+        [
+          "4194304",
+          "334852",
+          "12582912"
+        ],
+        [
+          "5547264",
+          "327680",
+          "19791936"
+        ],
+        [
+          "16",
+          "20711424",
+          "10"
+        ],
+        [
+          "25175296",
+          "393216",
+          "21829760"
+        ],
+        [
+          "18892800",
+          "64",
+          "11534347"
+        ],
+        [
+          "98304",
+          "512",
+          "583193"
+        ],
+        [
+          "9741568",
+          "327682",
+          "18874458"
+        ],
+        [
+          "3145728",
+          "1",
+          "17851424"
+        ],
+        [
+          "5416192",
+          "16384",
+          "918036"
+        ],
+        [
+          "25186560",
+          "4194304",
+          "465024"
+        ],
+        [
+          "135172",
+          "4362372",
+          "4"
+        ],
+        [
+          "202758",
+          "128",
+          "13312"
+        ],
+        [
+          "25437440",
+          "17170434",
+          "17631232"
+        ],
+        [
+          "405772",
+          "4376580",
+          "4"
+        ],
+        [
+          "9741569",
+          "17629186",
+          "16777242"
+        ],
+        [
+          "3164902",
+          "288",
+          "32"
+        ],
+        [
+          "25977088",
+          "2099264",
+          "2048"
+        ],
+        [
+          "25841920",
+          "2048",
+          "458822"
+        ],
+        [
+          "25976856",
+          "20973568",
+          "16896"
+        ],
+        [
+          "19464210",
+          "1048576",
+          "11"
+        ],
+        [
+          "12583177",
+          "327680",
+          "6"
+        ],
+        [
+          "1082369",
+          "17318416",
+          "16777216"
+        ],
+        [
+          "8388616",
+          "32768",
+          "1025"
+        ]
+      ]
+    },
+    {
+      "label": "rank95",
+      "n": 5,
+      "policy": "adaptive",
+      "seed": 20261627,
+      "initial": 95,
+      "best": 95,
+      "cap": 99,
+      "budget": 4000000,
+      "used": 3999999,
+      "ledger": {
+        "term": 920018,
+        "compare": 422842,
+        "map": 2485317,
+        "verify": 220,
+        "bit": 95782,
+        "xor": 19325,
+        "proposal": 773,
+        "controller": 44081,
+        "pivot": 11641
+      },
+      "attempts": 773,
+      "committed": 740,
+      "fitSteps": 288,
+      "exploreSteps": 485,
+      "compressionCalls": 18,
+      "compressionHits": 0,
+      "phaseChanges": 6,
+      "events": [],
+      "terms": [
+        [
+          "64",
+          "256",
+          "262432"
+        ],
+        [
+          "196672",
+          "12416",
+          "262272"
+        ],
+        [
+          "589888",
+          "10485824",
+          "262208"
+        ],
+        [
+          "98368",
+          "536",
+          "262656"
+        ],
+        [
+          "32",
+          "8",
+          "8389376"
+        ],
+        [
+          "5242912",
+          "12292",
+          "8388736"
+        ],
+        [
+          "65600",
+          "10499032",
+          "262144"
+        ],
+        [
+          "128",
+          "8192",
+          "392"
+        ],
+        [
+          "133",
+          "16408",
+          "520"
+        ],
+        [
+          "132",
+          "10513720",
+          "8"
+        ],
+        [
+          "148",
+          "10487808",
+          "72"
+        ],
+        [
+          "17825824",
+          "10485762",
+          "8388672"
+        ],
+        [
+          "134",
+          "1312",
+          "40"
+        ],
+        [
+          "18416372",
+          "10485760",
+          "64"
+        ],
+        [
+          "1048608",
+          "10498351",
+          "8388608"
+        ],
+        [
+          "3145760",
+          "289",
+          "8388640"
+        ],
+        [
+          "512",
+          "8388608",
+          "8512"
+        ],
+        [
+          "16896",
+          "30421304",
+          "8192"
+        ],
+        [
+          "18944",
+          "1048864",
+          "8224"
+        ],
+        [
+          "20992",
+          "4206592",
+          "8320"
+        ],
+        [
+          "116453",
+          "24",
+          "512"
+        ],
+        [
+          "5460704",
+          "12288",
+          "128"
+        ],
+        [
+          "17920",
+          "16777240",
+          "8704"
+        ],
+        [
+          "4096",
+          "5002240",
+          "12292"
+        ],
+        [
+          "25961728",
+          "16777216",
+          "870912"
+        ],
+        [
+          "9472",
+          "393220",
+          "21000320"
+        ],
+        [
+          "5547273",
+          "344068",
+          "4"
+        ],
+        [
+          "5411845",
+          "16384",
+          "532"
+        ],
+        [
+          "131072",
+          "22656",
+          "393220"
+        ],
+        [
+          "8651008",
+          "32768",
+          "1056"
+        ],
+        [
+          "12544",
+          "802816",
+          "29204"
+        ],
+        [
+          "8448",
+          "933892",
+          "16805892"
+        ],
+        [
+          "262144",
+          "32768",
+          "17796128"
+        ],
+        [
+          "8397064",
+          "32768",
+          "1028"
+        ],
+        [
+          "25166080",
+          "4587520",
+          "14686336"
+        ],
+        [
+          "1",
+          "344083",
+          "16777240"
+        ],
+        [
+          "196608",
+          "128",
+          "13808768"
+        ],
+        [
+          "25976856",
+          "4196352",
+          "477696"
+        ],
+        [
+          "262144",
+          "753664",
+          "17762308"
+        ],
+        [
+          "1024",
+          "17170453",
+          "16801792"
+        ],
+        [
+          "3245059",
+          "513",
+          "58393"
+        ],
+        [
+          "2",
+          "1632",
+          "32777"
+        ],
+        [
+          "2293760",
+          "1152",
+          "13677572"
+        ],
+        [
+          "98307",
+          "1",
+          "25625"
+        ],
+        [
+          "2048",
+          "1049248",
+          "9216"
+        ],
+        [
+          "3146753",
+          "513",
+          "16810009"
+        ],
+        [
+          "3148803",
+          "512",
+          "25600"
+        ],
+        [
+          "5285120",
+          "344068",
+          "17694724"
+        ],
+        [
+          "2297862",
+          "1152",
+          "13316"
+        ],
+        [
+          "19482626",
+          "1048640",
+          "32779"
+        ],
+        [
+          "18432",
+          "1048576",
+          "11537451"
+        ],
+        [
+          "2097152",
+          "225",
+          "9469952"
+        ],
+        [
+          "6488064",
+          "1024",
+          "13631488"
+        ],
+        [
+          "16777216",
+          "7733250",
+          "10487808"
+        ],
+        [
+          "16795648",
+          "1048640",
+          "11569152"
+        ],
+        [
+          "21647380",
+          "2048",
+          "70"
+        ],
+        [
+          "32768",
+          "534",
+          "17563648"
+        ],
+        [
+          "524288",
+          "23068736",
+          "329728"
+        ],
+        [
+          "9741321",
+          "17301504",
+          "26"
+        ],
+        [
+          "274712",
+          "4982784",
+          "460804"
+        ],
+        [
+          "589824",
+          "64",
+          "98379"
+        ],
+        [
+          "25470208",
+          "2",
+          "19726400"
+        ],
+        [
+          "12568",
+          "786432",
+          "477716"
+        ],
+        [
+          "8659200",
+          "2164802",
+          "2048"
+        ],
+        [
+          "12583168",
+          "329728",
+          "14680134"
+        ],
+        [
+          "5252352",
+          "4",
+          "21889152"
+        ],
+        [
+          "8388608",
+          "32768",
+          "1049637"
+        ],
+        [
+          "8388864",
+          "4655104",
+          "14682112"
+        ],
+        [
+          "2162690",
+          "1049633",
+          "32768"
+        ],
+        [
+          "256",
+          "262144",
+          "14709722"
+        ],
+        [
+          "280",
+          "17563648",
+          "16922"
+        ],
+        [
+          "6",
+          "1024",
+          "13349"
+        ],
+        [
+          "4194304",
+          "334852",
+          "12582912"
+        ],
+        [
+          "5547264",
+          "327680",
+          "19791936"
+        ],
+        [
+          "16",
+          "20711424",
+          "10"
+        ],
+        [
+          "25175296",
+          "393216",
+          "21829760"
+        ],
+        [
+          "18892800",
+          "64",
+          "11534347"
+        ],
+        [
+          "98304",
+          "512",
+          "583193"
+        ],
+        [
+          "9741568",
+          "327682",
+          "18874458"
+        ],
+        [
+          "3145728",
+          "1",
+          "17851424"
+        ],
+        [
+          "5416192",
+          "16384",
+          "918036"
+        ],
+        [
+          "25186560",
+          "4194304",
+          "465024"
+        ],
+        [
+          "135172",
+          "4362372",
+          "4"
+        ],
+        [
+          "202758",
+          "128",
+          "13312"
+        ],
+        [
+          "25437440",
+          "17170434",
+          "17631232"
+        ],
+        [
+          "405772",
+          "4376580",
+          "4"
+        ],
+        [
+          "9741569",
+          "17629186",
+          "16777242"
+        ],
+        [
+          "3164902",
+          "288",
+          "32"
+        ],
+        [
+          "25977088",
+          "2099264",
+          "2048"
+        ],
+        [
+          "25841920",
+          "2048",
+          "458822"
+        ],
+        [
+          "25976856",
+          "20973568",
+          "16896"
+        ],
+        [
+          "19464210",
+          "1048576",
+          "11"
+        ],
+        [
+          "12583177",
+          "327680",
+          "6"
+        ],
+        [
+          "1082369",
+          "17318416",
+          "16777216"
+        ],
+        [
+          "8388616",
+          "32768",
+          "1025"
+        ]
+      ]
+    }
+  ]
+}

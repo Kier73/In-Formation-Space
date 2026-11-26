@@ -1,0 +1,2686 @@
+[
+  {
+    "n": 4,
+    "r": 47,
+    "target": 22,
+    "axes": [
+      {
+        "axis": 0,
+        "minDistance": 4,
+        "checks": 65535,
+        "hist": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          3,
+          0,
+          3,
+          34,
+          11,
+          17,
+          54,
+          124,
+          135,
+          322,
+          411,
+          795,
+          1308,
+          1906,
+          3062,
+          3787,
+          5139,
+          6082,
+          7423,
+          8294,
+          7533,
+          6907,
+          5176,
+          3456,
+          1899,
+          876,
+          507,
+          148,
+          92,
+          18,
+          4,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "profile": [
+          {
+            "retained": 0,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 16
+          },
+          {
+            "retained": 1,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 17
+          },
+          {
+            "retained": 2,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 18
+          },
+          {
+            "retained": 3,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 19
+          },
+          {
+            "retained": 4,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 19
+          },
+          {
+            "retained": 5,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 20
+          },
+          {
+            "retained": 6,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 20
+          },
+          {
+            "retained": 7,
+            "maxIntersectionDimension": 3,
+            "rankFloor": 20
+          },
+          {
+            "retained": 8,
+            "maxIntersectionDimension": 4,
+            "rankFloor": 20
+          },
+          {
+            "retained": 9,
+            "maxIntersectionDimension": 5,
+            "rankFloor": 20
+          },
+          {
+            "retained": 10,
+            "maxIntersectionDimension": 6,
+            "rankFloor": 20
+          },
+          {
+            "retained": 11,
+            "maxIntersectionDimension": 6,
+            "rankFloor": 21
+          },
+          {
+            "retained": 12,
+            "maxIntersectionDimension": 7,
+            "rankFloor": 21
+          },
+          {
+            "retained": 13,
+            "maxIntersectionDimension": 8,
+            "rankFloor": 21
+          },
+          {
+            "retained": 14,
+            "maxIntersectionDimension": 9,
+            "rankFloor": 21
+          },
+          {
+            "retained": 15,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 21
+          },
+          {
+            "retained": 16,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 22
+          },
+          {
+            "retained": 17,
+            "maxIntersectionDimension": 11,
+            "rankFloor": 22
+          },
+          {
+            "retained": 18,
+            "maxIntersectionDimension": 12,
+            "rankFloor": 22
+          },
+          {
+            "retained": 19,
+            "maxIntersectionDimension": 12,
+            "rankFloor": 23
+          },
+          {
+            "retained": 20,
+            "maxIntersectionDimension": 13,
+            "rankFloor": 23
+          },
+          {
+            "retained": 21,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 23
+          },
+          {
+            "retained": 22,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 24
+          },
+          {
+            "retained": 23,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 25
+          },
+          {
+            "retained": 24,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 25
+          },
+          {
+            "retained": 25,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 26
+          },
+          {
+            "retained": 26,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 27
+          },
+          {
+            "retained": 27,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 28
+          },
+          {
+            "retained": 28,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 29
+          },
+          {
+            "retained": 29,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 30
+          },
+          {
+            "retained": 30,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 31
+          },
+          {
+            "retained": 31,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 32
+          },
+          {
+            "retained": 32,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 33
+          },
+          {
+            "retained": 33,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 34
+          },
+          {
+            "retained": 34,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 35
+          },
+          {
+            "retained": 35,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 36
+          },
+          {
+            "retained": 36,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 37
+          },
+          {
+            "retained": 37,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 37
+          },
+          {
+            "retained": 38,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 38
+          },
+          {
+            "retained": 39,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 39
+          },
+          {
+            "retained": 40,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 40
+          },
+          {
+            "retained": 41,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 41
+          },
+          {
+            "retained": 42,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 42
+          },
+          {
+            "retained": 43,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 43
+          },
+          {
+            "retained": 44,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 44
+          },
+          {
+            "retained": 45,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 45
+          },
+          {
+            "retained": 46,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 46
+          },
+          {
+            "retained": 47,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 47
+          }
+        ],
+        "rankPairs": 47,
+        "identityChecks": 300,
+        "maxRetainedBound": 18,
+        "minDiscardBound": 29
+      },
+      {
+        "axis": 1,
+        "minDistance": 4,
+        "checks": 65535,
+        "hist": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          30,
+          0,
+          58,
+          0,
+          109,
+          0,
+          402,
+          0,
+          1401,
+          0,
+          3590,
+          0,
+          8553,
+          0,
+          14234,
+          0,
+          16039,
+          0,
+          12070,
+          0,
+          5855,
+          0,
+          2214,
+          0,
+          730,
+          0,
+          186,
+          0,
+          41,
+          0,
+          14,
+          0,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "profile": [
+          {
+            "retained": 0,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 16
+          },
+          {
+            "retained": 1,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 17
+          },
+          {
+            "retained": 2,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 18
+          },
+          {
+            "retained": 3,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 19
+          },
+          {
+            "retained": 4,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 19
+          },
+          {
+            "retained": 5,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 20
+          },
+          {
+            "retained": 6,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 21
+          },
+          {
+            "retained": 7,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 22
+          },
+          {
+            "retained": 8,
+            "maxIntersectionDimension": 4,
+            "rankFloor": 20
+          },
+          {
+            "retained": 9,
+            "maxIntersectionDimension": 5,
+            "rankFloor": 20
+          },
+          {
+            "retained": 10,
+            "maxIntersectionDimension": 6,
+            "rankFloor": 20
+          },
+          {
+            "retained": 11,
+            "maxIntersectionDimension": 6,
+            "rankFloor": 21
+          },
+          {
+            "retained": 12,
+            "maxIntersectionDimension": 7,
+            "rankFloor": 21
+          },
+          {
+            "retained": 13,
+            "maxIntersectionDimension": 7,
+            "rankFloor": 22
+          },
+          {
+            "retained": 14,
+            "maxIntersectionDimension": 9,
+            "rankFloor": 21
+          },
+          {
+            "retained": 15,
+            "maxIntersectionDimension": 9,
+            "rankFloor": 22
+          },
+          {
+            "retained": 16,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 22
+          },
+          {
+            "retained": 17,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 23
+          },
+          {
+            "retained": 18,
+            "maxIntersectionDimension": 12,
+            "rankFloor": 22
+          },
+          {
+            "retained": 19,
+            "maxIntersectionDimension": 12,
+            "rankFloor": 23
+          },
+          {
+            "retained": 20,
+            "maxIntersectionDimension": 13,
+            "rankFloor": 23
+          },
+          {
+            "retained": 21,
+            "maxIntersectionDimension": 13,
+            "rankFloor": 24
+          },
+          {
+            "retained": 22,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 24
+          },
+          {
+            "retained": 23,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 25
+          },
+          {
+            "retained": 24,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 25
+          },
+          {
+            "retained": 25,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 26
+          },
+          {
+            "retained": 26,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 27
+          },
+          {
+            "retained": 27,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 28
+          },
+          {
+            "retained": 28,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 29
+          },
+          {
+            "retained": 29,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 30
+          },
+          {
+            "retained": 30,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 31
+          },
+          {
+            "retained": 31,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 32
+          },
+          {
+            "retained": 32,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 33
+          },
+          {
+            "retained": 33,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 34
+          },
+          {
+            "retained": 34,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 35
+          },
+          {
+            "retained": 35,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 36
+          },
+          {
+            "retained": 36,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 37
+          },
+          {
+            "retained": 37,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 38
+          },
+          {
+            "retained": 38,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 39
+          },
+          {
+            "retained": 39,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 40
+          },
+          {
+            "retained": 40,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 40
+          },
+          {
+            "retained": 41,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 41
+          },
+          {
+            "retained": 42,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 42
+          },
+          {
+            "retained": 43,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 43
+          },
+          {
+            "retained": 44,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 44
+          },
+          {
+            "retained": 45,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 45
+          },
+          {
+            "retained": 46,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 46
+          },
+          {
+            "retained": 47,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 47
+          }
+        ],
+        "rankPairs": 47,
+        "identityChecks": 300,
+        "maxRetainedBound": 18,
+        "minDiscardBound": 29
+      },
+      {
+        "axis": 2,
+        "minDistance": 5,
+        "checks": 65535,
+        "hist": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          7,
+          27,
+          11,
+          12,
+          71,
+          107,
+          187,
+          262,
+          411,
+          813,
+          1278,
+          1928,
+          2860,
+          4020,
+          5056,
+          6138,
+          7603,
+          8135,
+          7681,
+          6830,
+          5189,
+          3329,
+          1829,
+          916,
+          491,
+          208,
+          78,
+          38,
+          8,
+          0,
+          4,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "profile": [
+          {
+            "retained": 0,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 16
+          },
+          {
+            "retained": 1,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 17
+          },
+          {
+            "retained": 2,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 18
+          },
+          {
+            "retained": 3,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 19
+          },
+          {
+            "retained": 4,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 20
+          },
+          {
+            "retained": 5,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 20
+          },
+          {
+            "retained": 6,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 21
+          },
+          {
+            "retained": 7,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 22
+          },
+          {
+            "retained": 8,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 22
+          },
+          {
+            "retained": 9,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 23
+          },
+          {
+            "retained": 10,
+            "maxIntersectionDimension": 3,
+            "rankFloor": 23
+          },
+          {
+            "retained": 11,
+            "maxIntersectionDimension": 4,
+            "rankFloor": 23
+          },
+          {
+            "retained": 12,
+            "maxIntersectionDimension": 5,
+            "rankFloor": 23
+          },
+          {
+            "retained": 13,
+            "maxIntersectionDimension": 6,
+            "rankFloor": 23
+          },
+          {
+            "retained": 14,
+            "maxIntersectionDimension": 7,
+            "rankFloor": 23
+          },
+          {
+            "retained": 15,
+            "maxIntersectionDimension": 8,
+            "rankFloor": 23
+          },
+          {
+            "retained": 16,
+            "maxIntersectionDimension": 9,
+            "rankFloor": 23
+          },
+          {
+            "retained": 17,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 23
+          },
+          {
+            "retained": 18,
+            "maxIntersectionDimension": 11,
+            "rankFloor": 23
+          },
+          {
+            "retained": 19,
+            "maxIntersectionDimension": 12,
+            "rankFloor": 23
+          },
+          {
+            "retained": 20,
+            "maxIntersectionDimension": 13,
+            "rankFloor": 23
+          },
+          {
+            "retained": 21,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 23
+          },
+          {
+            "retained": 22,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 24
+          },
+          {
+            "retained": 23,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 25
+          },
+          {
+            "retained": 24,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 25
+          },
+          {
+            "retained": 25,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 26
+          },
+          {
+            "retained": 26,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 27
+          },
+          {
+            "retained": 27,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 28
+          },
+          {
+            "retained": 28,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 29
+          },
+          {
+            "retained": 29,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 30
+          },
+          {
+            "retained": 30,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 31
+          },
+          {
+            "retained": 31,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 32
+          },
+          {
+            "retained": 32,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 33
+          },
+          {
+            "retained": 33,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 34
+          },
+          {
+            "retained": 34,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 35
+          },
+          {
+            "retained": 35,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 36
+          },
+          {
+            "retained": 36,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 37
+          },
+          {
+            "retained": 37,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 38
+          },
+          {
+            "retained": 38,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 38
+          },
+          {
+            "retained": 39,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 39
+          },
+          {
+            "retained": 40,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 40
+          },
+          {
+            "retained": 41,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 41
+          },
+          {
+            "retained": 42,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 42
+          },
+          {
+            "retained": 43,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 43
+          },
+          {
+            "retained": 44,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 44
+          },
+          {
+            "retained": 45,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 45
+          },
+          {
+            "retained": 46,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 46
+          },
+          {
+            "retained": 47,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 47
+          }
+        ],
+        "rankPairs": 47,
+        "identityChecks": 300,
+        "maxRetainedBound": 8,
+        "minDiscardBound": 39
+      }
+    ]
+  },
+  {
+    "n": 5,
+    "r": 95,
+    "target": 37,
+    "axes": [
+      {
+        "axis": 0,
+        "minDistance": 9,
+        "checks": 33554431,
+        "hist": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          10,
+          11,
+          6,
+          15,
+          11,
+          14,
+          19,
+          50,
+          99,
+          126,
+          222,
+          304,
+          469,
+          684,
+          1006,
+          1596,
+          2397,
+          3666,
+          5834,
+          8854,
+          13262,
+          20472,
+          30734,
+          46061,
+          69067,
+          102406,
+          150188,
+          217741,
+          310205,
+          432525,
+          591725,
+          791412,
+          1033274,
+          1312562,
+          1619718,
+          1939425,
+          2242046,
+          2498034,
+          2680237,
+          2760986,
+          2720117,
+          2558647,
+          2296110,
+          1958152,
+          1583048,
+          1211448,
+          874130,
+          594174,
+          380739,
+          229001,
+          128914,
+          68514,
+          34513,
+          16372,
+          7490,
+          3286,
+          1369,
+          589,
+          224,
+          83,
+          30,
+          3,
+          3,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "profile": [
+          {
+            "retained": 0,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 25
+          },
+          {
+            "retained": 1,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 26
+          },
+          {
+            "retained": 2,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 27
+          },
+          {
+            "retained": 3,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 28
+          },
+          {
+            "retained": 4,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 29
+          },
+          {
+            "retained": 5,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 30
+          },
+          {
+            "retained": 6,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 31
+          },
+          {
+            "retained": 7,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 32
+          },
+          {
+            "retained": 8,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 33
+          },
+          {
+            "retained": 9,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 33
+          },
+          {
+            "retained": 10,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 34
+          },
+          {
+            "retained": 11,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 35
+          },
+          {
+            "retained": 12,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 36
+          },
+          {
+            "retained": 13,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 37
+          },
+          {
+            "retained": 14,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 37
+          },
+          {
+            "retained": 15,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 38
+          },
+          {
+            "retained": 16,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 39
+          },
+          {
+            "retained": 17,
+            "maxIntersectionDimension": 3,
+            "rankFloor": 39
+          },
+          {
+            "retained": 18,
+            "maxIntersectionDimension": 3,
+            "rankFloor": 40
+          },
+          {
+            "retained": 19,
+            "maxIntersectionDimension": 4,
+            "rankFloor": 40
+          },
+          {
+            "retained": 20,
+            "maxIntersectionDimension": 5,
+            "rankFloor": 40
+          },
+          {
+            "retained": 21,
+            "maxIntersectionDimension": 6,
+            "rankFloor": 40
+          },
+          {
+            "retained": 22,
+            "maxIntersectionDimension": 7,
+            "rankFloor": 40
+          },
+          {
+            "retained": 23,
+            "maxIntersectionDimension": 8,
+            "rankFloor": 40
+          },
+          {
+            "retained": 24,
+            "maxIntersectionDimension": 9,
+            "rankFloor": 40
+          },
+          {
+            "retained": 25,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 40
+          },
+          {
+            "retained": 26,
+            "maxIntersectionDimension": 11,
+            "rankFloor": 40
+          },
+          {
+            "retained": 27,
+            "maxIntersectionDimension": 12,
+            "rankFloor": 40
+          },
+          {
+            "retained": 28,
+            "maxIntersectionDimension": 13,
+            "rankFloor": 40
+          },
+          {
+            "retained": 29,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 40
+          },
+          {
+            "retained": 30,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 40
+          },
+          {
+            "retained": 31,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 40
+          },
+          {
+            "retained": 32,
+            "maxIntersectionDimension": 17,
+            "rankFloor": 40
+          },
+          {
+            "retained": 33,
+            "maxIntersectionDimension": 17,
+            "rankFloor": 41
+          },
+          {
+            "retained": 34,
+            "maxIntersectionDimension": 18,
+            "rankFloor": 41
+          },
+          {
+            "retained": 35,
+            "maxIntersectionDimension": 18,
+            "rankFloor": 42
+          },
+          {
+            "retained": 36,
+            "maxIntersectionDimension": 19,
+            "rankFloor": 42
+          },
+          {
+            "retained": 37,
+            "maxIntersectionDimension": 19,
+            "rankFloor": 43
+          },
+          {
+            "retained": 38,
+            "maxIntersectionDimension": 20,
+            "rankFloor": 43
+          },
+          {
+            "retained": 39,
+            "maxIntersectionDimension": 20,
+            "rankFloor": 44
+          },
+          {
+            "retained": 40,
+            "maxIntersectionDimension": 21,
+            "rankFloor": 44
+          },
+          {
+            "retained": 41,
+            "maxIntersectionDimension": 21,
+            "rankFloor": 45
+          },
+          {
+            "retained": 42,
+            "maxIntersectionDimension": 22,
+            "rankFloor": 45
+          },
+          {
+            "retained": 43,
+            "maxIntersectionDimension": 22,
+            "rankFloor": 46
+          },
+          {
+            "retained": 44,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 46
+          },
+          {
+            "retained": 45,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 47
+          },
+          {
+            "retained": 46,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 48
+          },
+          {
+            "retained": 47,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 49
+          },
+          {
+            "retained": 48,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 49
+          },
+          {
+            "retained": 49,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 50
+          },
+          {
+            "retained": 50,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 51
+          },
+          {
+            "retained": 51,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 52
+          },
+          {
+            "retained": 52,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 53
+          },
+          {
+            "retained": 53,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 54
+          },
+          {
+            "retained": 54,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 55
+          },
+          {
+            "retained": 55,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 56
+          },
+          {
+            "retained": 56,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 57
+          },
+          {
+            "retained": 57,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 58
+          },
+          {
+            "retained": 58,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 59
+          },
+          {
+            "retained": 59,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 60
+          },
+          {
+            "retained": 60,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 61
+          },
+          {
+            "retained": 61,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 62
+          },
+          {
+            "retained": 62,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 63
+          },
+          {
+            "retained": 63,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 64
+          },
+          {
+            "retained": 64,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 65
+          },
+          {
+            "retained": 65,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 66
+          },
+          {
+            "retained": 66,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 67
+          },
+          {
+            "retained": 67,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 68
+          },
+          {
+            "retained": 68,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 69
+          },
+          {
+            "retained": 69,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 70
+          },
+          {
+            "retained": 70,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 71
+          },
+          {
+            "retained": 71,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 72
+          },
+          {
+            "retained": 72,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 72
+          },
+          {
+            "retained": 73,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 73
+          },
+          {
+            "retained": 74,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 74
+          },
+          {
+            "retained": 75,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 75
+          },
+          {
+            "retained": 76,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 76
+          },
+          {
+            "retained": 77,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 77
+          },
+          {
+            "retained": 78,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 78
+          },
+          {
+            "retained": 79,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 79
+          },
+          {
+            "retained": 80,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 80
+          },
+          {
+            "retained": 81,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 81
+          },
+          {
+            "retained": 82,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 82
+          },
+          {
+            "retained": 83,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 83
+          },
+          {
+            "retained": 84,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 84
+          },
+          {
+            "retained": 85,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 85
+          },
+          {
+            "retained": 86,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 86
+          },
+          {
+            "retained": 87,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 87
+          },
+          {
+            "retained": 88,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 88
+          },
+          {
+            "retained": 89,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 89
+          },
+          {
+            "retained": 90,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 90
+          },
+          {
+            "retained": 91,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 91
+          },
+          {
+            "retained": 92,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 92
+          },
+          {
+            "retained": 93,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 93
+          },
+          {
+            "retained": 94,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 94
+          },
+          {
+            "retained": 95,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 95
+          }
+        ],
+        "rankPairs": 95,
+        "identityChecks": 300,
+        "maxRetainedBound": 14,
+        "minDiscardBound": 81
+      },
+      {
+        "axis": 1,
+        "minDistance": 6,
+        "checks": 33554431,
+        "hist": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          1,
+          4,
+          9,
+          23,
+          15,
+          29,
+          43,
+          62,
+          81,
+          143,
+          261,
+          437,
+          639,
+          885,
+          1435,
+          2035,
+          3054,
+          4752,
+          7111,
+          10616,
+          15977,
+          23085,
+          33575,
+          48820,
+          69310,
+          98172,
+          138063,
+          190716,
+          259755,
+          348528,
+          460108,
+          595757,
+          755858,
+          942883,
+          1148260,
+          1367367,
+          1589999,
+          1799770,
+          1988338,
+          2143594,
+          2245681,
+          2281367,
+          2256891,
+          2163671,
+          2009845,
+          1811074,
+          1575614,
+          1326717,
+          1076670,
+          839956,
+          629217,
+          451948,
+          311999,
+          206392,
+          131068,
+          80068,
+          47056,
+          27017,
+          15293,
+          8144,
+          4409,
+          2329,
+          1211,
+          640,
+          305,
+          169,
+          63,
+          38,
+          2,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "profile": [
+          {
+            "retained": 0,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 25
+          },
+          {
+            "retained": 1,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 26
+          },
+          {
+            "retained": 2,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 27
+          },
+          {
+            "retained": 3,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 28
+          },
+          {
+            "retained": 4,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 29
+          },
+          {
+            "retained": 5,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 30
+          },
+          {
+            "retained": 6,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 30
+          },
+          {
+            "retained": 7,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 31
+          },
+          {
+            "retained": 8,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 32
+          },
+          {
+            "retained": 9,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 32
+          },
+          {
+            "retained": 10,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 33
+          },
+          {
+            "retained": 11,
+            "maxIntersectionDimension": 3,
+            "rankFloor": 33
+          },
+          {
+            "retained": 12,
+            "maxIntersectionDimension": 4,
+            "rankFloor": 33
+          },
+          {
+            "retained": 13,
+            "maxIntersectionDimension": 5,
+            "rankFloor": 33
+          },
+          {
+            "retained": 14,
+            "maxIntersectionDimension": 6,
+            "rankFloor": 33
+          },
+          {
+            "retained": 15,
+            "maxIntersectionDimension": 7,
+            "rankFloor": 33
+          },
+          {
+            "retained": 16,
+            "maxIntersectionDimension": 8,
+            "rankFloor": 33
+          },
+          {
+            "retained": 17,
+            "maxIntersectionDimension": 9,
+            "rankFloor": 33
+          },
+          {
+            "retained": 18,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 33
+          },
+          {
+            "retained": 19,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 34
+          },
+          {
+            "retained": 20,
+            "maxIntersectionDimension": 11,
+            "rankFloor": 34
+          },
+          {
+            "retained": 21,
+            "maxIntersectionDimension": 11,
+            "rankFloor": 35
+          },
+          {
+            "retained": 22,
+            "maxIntersectionDimension": 12,
+            "rankFloor": 35
+          },
+          {
+            "retained": 23,
+            "maxIntersectionDimension": 13,
+            "rankFloor": 35
+          },
+          {
+            "retained": 24,
+            "maxIntersectionDimension": 13,
+            "rankFloor": 36
+          },
+          {
+            "retained": 25,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 36
+          },
+          {
+            "retained": 26,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 37
+          },
+          {
+            "retained": 27,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 37
+          },
+          {
+            "retained": 28,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 37
+          },
+          {
+            "retained": 29,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 38
+          },
+          {
+            "retained": 30,
+            "maxIntersectionDimension": 17,
+            "rankFloor": 38
+          },
+          {
+            "retained": 31,
+            "maxIntersectionDimension": 17,
+            "rankFloor": 39
+          },
+          {
+            "retained": 32,
+            "maxIntersectionDimension": 18,
+            "rankFloor": 39
+          },
+          {
+            "retained": 33,
+            "maxIntersectionDimension": 18,
+            "rankFloor": 40
+          },
+          {
+            "retained": 34,
+            "maxIntersectionDimension": 19,
+            "rankFloor": 40
+          },
+          {
+            "retained": 35,
+            "maxIntersectionDimension": 19,
+            "rankFloor": 41
+          },
+          {
+            "retained": 36,
+            "maxIntersectionDimension": 20,
+            "rankFloor": 41
+          },
+          {
+            "retained": 37,
+            "maxIntersectionDimension": 20,
+            "rankFloor": 42
+          },
+          {
+            "retained": 38,
+            "maxIntersectionDimension": 21,
+            "rankFloor": 42
+          },
+          {
+            "retained": 39,
+            "maxIntersectionDimension": 21,
+            "rankFloor": 43
+          },
+          {
+            "retained": 40,
+            "maxIntersectionDimension": 21,
+            "rankFloor": 44
+          },
+          {
+            "retained": 41,
+            "maxIntersectionDimension": 22,
+            "rankFloor": 44
+          },
+          {
+            "retained": 42,
+            "maxIntersectionDimension": 22,
+            "rankFloor": 45
+          },
+          {
+            "retained": 43,
+            "maxIntersectionDimension": 22,
+            "rankFloor": 46
+          },
+          {
+            "retained": 44,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 46
+          },
+          {
+            "retained": 45,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 47
+          },
+          {
+            "retained": 46,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 48
+          },
+          {
+            "retained": 47,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 49
+          },
+          {
+            "retained": 48,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 49
+          },
+          {
+            "retained": 49,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 50
+          },
+          {
+            "retained": 50,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 51
+          },
+          {
+            "retained": 51,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 52
+          },
+          {
+            "retained": 52,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 53
+          },
+          {
+            "retained": 53,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 54
+          },
+          {
+            "retained": 54,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 55
+          },
+          {
+            "retained": 55,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 56
+          },
+          {
+            "retained": 56,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 57
+          },
+          {
+            "retained": 57,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 58
+          },
+          {
+            "retained": 58,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 59
+          },
+          {
+            "retained": 59,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 60
+          },
+          {
+            "retained": 60,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 61
+          },
+          {
+            "retained": 61,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 62
+          },
+          {
+            "retained": 62,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 63
+          },
+          {
+            "retained": 63,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 64
+          },
+          {
+            "retained": 64,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 65
+          },
+          {
+            "retained": 65,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 66
+          },
+          {
+            "retained": 66,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 67
+          },
+          {
+            "retained": 67,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 68
+          },
+          {
+            "retained": 68,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 69
+          },
+          {
+            "retained": 69,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 70
+          },
+          {
+            "retained": 70,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 71
+          },
+          {
+            "retained": 71,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 72
+          },
+          {
+            "retained": 72,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 73
+          },
+          {
+            "retained": 73,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 74
+          },
+          {
+            "retained": 74,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 75
+          },
+          {
+            "retained": 75,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 76
+          },
+          {
+            "retained": 76,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 76
+          },
+          {
+            "retained": 77,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 77
+          },
+          {
+            "retained": 78,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 78
+          },
+          {
+            "retained": 79,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 79
+          },
+          {
+            "retained": 80,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 80
+          },
+          {
+            "retained": 81,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 81
+          },
+          {
+            "retained": 82,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 82
+          },
+          {
+            "retained": 83,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 83
+          },
+          {
+            "retained": 84,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 84
+          },
+          {
+            "retained": 85,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 85
+          },
+          {
+            "retained": 86,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 86
+          },
+          {
+            "retained": 87,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 87
+          },
+          {
+            "retained": 88,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 88
+          },
+          {
+            "retained": 89,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 89
+          },
+          {
+            "retained": 90,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 90
+          },
+          {
+            "retained": 91,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 91
+          },
+          {
+            "retained": 92,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 92
+          },
+          {
+            "retained": 93,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 93
+          },
+          {
+            "retained": 94,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 94
+          },
+          {
+            "retained": 95,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 95
+          }
+        ],
+        "rankPairs": 95,
+        "identityChecks": 300,
+        "maxRetainedBound": 28,
+        "minDiscardBound": 67
+      },
+      {
+        "axis": 2,
+        "minDistance": 5,
+        "checks": 33554431,
+        "hist": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          2,
+          2,
+          2,
+          5,
+          12,
+          20,
+          23,
+          24,
+          41,
+          65,
+          95,
+          146,
+          222,
+          363,
+          533,
+          813,
+          1275,
+          1906,
+          2890,
+          4385,
+          6894,
+          10797,
+          16516,
+          25627,
+          39215,
+          60126,
+          91754,
+          138686,
+          207580,
+          303265,
+          434833,
+          607978,
+          827874,
+          1094354,
+          1395057,
+          1716859,
+          2035973,
+          2322571,
+          2542470,
+          2671476,
+          2694318,
+          2603452,
+          2414072,
+          2143786,
+          1823211,
+          1486582,
+          1161390,
+          871959,
+          626210,
+          430701,
+          286129,
+          182835,
+          112781,
+          67624,
+          39371,
+          22281,
+          12117,
+          6369,
+          3275,
+          1646,
+          847,
+          393,
+          192,
+          97,
+          35,
+          17,
+          6,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "profile": [
+          {
+            "retained": 0,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 25
+          },
+          {
+            "retained": 1,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 26
+          },
+          {
+            "retained": 2,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 27
+          },
+          {
+            "retained": 3,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 28
+          },
+          {
+            "retained": 4,
+            "maxIntersectionDimension": 0,
+            "rankFloor": 29
+          },
+          {
+            "retained": 5,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 29
+          },
+          {
+            "retained": 6,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 30
+          },
+          {
+            "retained": 7,
+            "maxIntersectionDimension": 1,
+            "rankFloor": 31
+          },
+          {
+            "retained": 8,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 31
+          },
+          {
+            "retained": 9,
+            "maxIntersectionDimension": 2,
+            "rankFloor": 32
+          },
+          {
+            "retained": 10,
+            "maxIntersectionDimension": 3,
+            "rankFloor": 32
+          },
+          {
+            "retained": 11,
+            "maxIntersectionDimension": 3,
+            "rankFloor": 33
+          },
+          {
+            "retained": 12,
+            "maxIntersectionDimension": 4,
+            "rankFloor": 33
+          },
+          {
+            "retained": 13,
+            "maxIntersectionDimension": 5,
+            "rankFloor": 33
+          },
+          {
+            "retained": 14,
+            "maxIntersectionDimension": 6,
+            "rankFloor": 33
+          },
+          {
+            "retained": 15,
+            "maxIntersectionDimension": 6,
+            "rankFloor": 34
+          },
+          {
+            "retained": 16,
+            "maxIntersectionDimension": 7,
+            "rankFloor": 34
+          },
+          {
+            "retained": 17,
+            "maxIntersectionDimension": 7,
+            "rankFloor": 35
+          },
+          {
+            "retained": 18,
+            "maxIntersectionDimension": 8,
+            "rankFloor": 35
+          },
+          {
+            "retained": 19,
+            "maxIntersectionDimension": 8,
+            "rankFloor": 36
+          },
+          {
+            "retained": 20,
+            "maxIntersectionDimension": 9,
+            "rankFloor": 36
+          },
+          {
+            "retained": 21,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 36
+          },
+          {
+            "retained": 22,
+            "maxIntersectionDimension": 10,
+            "rankFloor": 37
+          },
+          {
+            "retained": 23,
+            "maxIntersectionDimension": 11,
+            "rankFloor": 37
+          },
+          {
+            "retained": 24,
+            "maxIntersectionDimension": 11,
+            "rankFloor": 38
+          },
+          {
+            "retained": 25,
+            "maxIntersectionDimension": 12,
+            "rankFloor": 38
+          },
+          {
+            "retained": 26,
+            "maxIntersectionDimension": 13,
+            "rankFloor": 38
+          },
+          {
+            "retained": 27,
+            "maxIntersectionDimension": 13,
+            "rankFloor": 39
+          },
+          {
+            "retained": 28,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 39
+          },
+          {
+            "retained": 29,
+            "maxIntersectionDimension": 14,
+            "rankFloor": 40
+          },
+          {
+            "retained": 30,
+            "maxIntersectionDimension": 15,
+            "rankFloor": 40
+          },
+          {
+            "retained": 31,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 40
+          },
+          {
+            "retained": 32,
+            "maxIntersectionDimension": 16,
+            "rankFloor": 41
+          },
+          {
+            "retained": 33,
+            "maxIntersectionDimension": 17,
+            "rankFloor": 41
+          },
+          {
+            "retained": 34,
+            "maxIntersectionDimension": 18,
+            "rankFloor": 41
+          },
+          {
+            "retained": 35,
+            "maxIntersectionDimension": 18,
+            "rankFloor": 42
+          },
+          {
+            "retained": 36,
+            "maxIntersectionDimension": 19,
+            "rankFloor": 42
+          },
+          {
+            "retained": 37,
+            "maxIntersectionDimension": 19,
+            "rankFloor": 43
+          },
+          {
+            "retained": 38,
+            "maxIntersectionDimension": 20,
+            "rankFloor": 43
+          },
+          {
+            "retained": 39,
+            "maxIntersectionDimension": 20,
+            "rankFloor": 44
+          },
+          {
+            "retained": 40,
+            "maxIntersectionDimension": 21,
+            "rankFloor": 44
+          },
+          {
+            "retained": 41,
+            "maxIntersectionDimension": 21,
+            "rankFloor": 45
+          },
+          {
+            "retained": 42,
+            "maxIntersectionDimension": 22,
+            "rankFloor": 45
+          },
+          {
+            "retained": 43,
+            "maxIntersectionDimension": 22,
+            "rankFloor": 46
+          },
+          {
+            "retained": 44,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 46
+          },
+          {
+            "retained": 45,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 47
+          },
+          {
+            "retained": 46,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 48
+          },
+          {
+            "retained": 47,
+            "maxIntersectionDimension": 23,
+            "rankFloor": 49
+          },
+          {
+            "retained": 48,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 49
+          },
+          {
+            "retained": 49,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 50
+          },
+          {
+            "retained": 50,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 51
+          },
+          {
+            "retained": 51,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 52
+          },
+          {
+            "retained": 52,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 53
+          },
+          {
+            "retained": 53,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 54
+          },
+          {
+            "retained": 54,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 55
+          },
+          {
+            "retained": 55,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 56
+          },
+          {
+            "retained": 56,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 57
+          },
+          {
+            "retained": 57,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 58
+          },
+          {
+            "retained": 58,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 59
+          },
+          {
+            "retained": 59,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 60
+          },
+          {
+            "retained": 60,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 61
+          },
+          {
+            "retained": 61,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 62
+          },
+          {
+            "retained": 62,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 63
+          },
+          {
+            "retained": 63,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 64
+          },
+          {
+            "retained": 64,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 65
+          },
+          {
+            "retained": 65,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 66
+          },
+          {
+            "retained": 66,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 67
+          },
+          {
+            "retained": 67,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 68
+          },
+          {
+            "retained": 68,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 69
+          },
+          {
+            "retained": 69,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 70
+          },
+          {
+            "retained": 70,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 71
+          },
+          {
+            "retained": 71,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 72
+          },
+          {
+            "retained": 72,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 73
+          },
+          {
+            "retained": 73,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 74
+          },
+          {
+            "retained": 74,
+            "maxIntersectionDimension": 24,
+            "rankFloor": 75
+          },
+          {
+            "retained": 75,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 75
+          },
+          {
+            "retained": 76,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 76
+          },
+          {
+            "retained": 77,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 77
+          },
+          {
+            "retained": 78,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 78
+          },
+          {
+            "retained": 79,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 79
+          },
+          {
+            "retained": 80,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 80
+          },
+          {
+            "retained": 81,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 81
+          },
+          {
+            "retained": 82,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 82
+          },
+          {
+            "retained": 83,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 83
+          },
+          {
+            "retained": 84,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 84
+          },
+          {
+            "retained": 85,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 85
+          },
+          {
+            "retained": 86,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 86
+          },
+          {
+            "retained": 87,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 87
+          },
+          {
+            "retained": 88,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 88
+          },
+          {
+            "retained": 89,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 89
+          },
+          {
+            "retained": 90,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 90
+          },
+          {
+            "retained": 91,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 91
+          },
+          {
+            "retained": 92,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 92
+          },
+          {
+            "retained": 93,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 93
+          },
+          {
+            "retained": 94,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 94
+          },
+          {
+            "retained": 95,
+            "maxIntersectionDimension": 25,
+            "rankFloor": 95
+          }
+        ],
+        "rankPairs": 95,
+        "identityChecks": 300,
+        "maxRetainedBound": 23,
+        "minDiscardBound": 72
+      }
+    ]
+  }
+]
