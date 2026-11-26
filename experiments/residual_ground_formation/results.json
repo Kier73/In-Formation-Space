@@ -1,0 +1,84 @@
+{
+  "domain": 256,
+  "initialRank": 12,
+  "expandedRank": 15,
+  "initialTrainingSources": 18,
+  "initialTrainingReads": 4608,
+  "initialTrainingCost": 73710,
+  "initialWeighted": {
+    "cases": 64,
+    "queries": 768,
+    "weighted": 1280,
+    "work": 100928,
+    "verified": 64,
+    "rejected": 0,
+    "errors": 0,
+    "fullCalls": 16384,
+    "fullCost": 262080
+  },
+  "initialUnweighted": {
+    "cases": 64,
+    "queries": 768,
+    "weighted": 9984,
+    "work": 99520,
+    "verified": 64,
+    "rejected": 0,
+    "errors": 0,
+    "fullCalls": 16384,
+    "fullCost": 262080
+  },
+  "hiddenMutation": {
+    "coordinate": 0,
+    "errors": 1,
+    "admitted": false
+  },
+  "expansion": [
+    {
+      "rankBefore": 12,
+      "rankAfter": 13,
+      "wrongPredictedCells": 96,
+      "sourceReads": 256,
+      "sourceCost": 4095
+    },
+    {
+      "rankBefore": 13,
+      "rankAfter": 14,
+      "wrongPredictedCells": 32,
+      "sourceReads": 256,
+      "sourceCost": 4095
+    },
+    {
+      "rankBefore": 14,
+      "rankAfter": 15,
+      "wrongPredictedCells": 80,
+      "sourceReads": 256,
+      "sourceCost": 4095
+    }
+  ],
+  "expanded": {
+    "cases": 128,
+    "queries": 1920,
+    "weighted": 3456,
+    "work": 246912,
+    "verified": 128,
+    "rejected": 0,
+    "errors": 0,
+    "fullCalls": 32768,
+    "fullCost": 524160
+  },
+  "trainingAndExpansion": 5376,
+  "trainingAndExpansionCost": 85995,
+  "fullSourceCost": 4095,
+  "stats": {
+    "trainingReads": 4608,
+    "vectorXorCells": 21248,
+    "trainingPivotChecks": 176,
+    "planBasisCellReads": 3708,
+    "planRowReductions": 479
+  },
+  "conditionalBreakEven": {
+    "initialReads": 19,
+    "expandedReads": 23,
+    "expandedWeighted": 22
+  }
+}
