@@ -295,3 +295,26 @@ Reproduce (after the cross-observer job generates the VLM-013 archive):
     python external_descriptor.py --fixture datasets/vlm015/hf-observation.json
 
 Recipe pins local expanded 823193-byte report, cohort digests, sources and descriptor record identity. CI regenerates and checks full report digest; no live public-network read is required for CI. Prior full regression suite and independent CI not rerun in this increment. Next: observation-intention routing with acquisition cost and available sensor distinctions, native integration of degree-bounded proof admission, and a source-pinned descriptor-to-tensor-range observation adapter; keep descriptive evidence separate from numerical execution authority.
+
+## VLM-016 — intention-directed acquisition
+
+Reuse the exact VLM-015 transfer archive by SHA-256. An intention supplies proof permission, a worst-path budget, proof/inspection price, and rewards for certified or refuted candidates. Probe costs one unit; the two basis observations cost two units; abstention costs zero. Dynamic programming over surviving training examples, remaining probes, depth and budget maximizes empirical reward minus price over at most three distinct probes and optional terminal proof. Agreement continues, a counterexample terminates, unsupported proof returns unknown. An exhaustive sequence enumeration test independently checks the finite optimizer. Validation selects from transferred and target-trained policies, direct proof, abstention and (when permitted) direct symbolic source inspection with optional learned probe fallback. Training and validation are separate from final evaluation but the final cohort is reused from VLM-015, not a new independent out-of-distribution test.
+
+Direct source inspection reconstructs polynomial coefficients over the word ring (intermediate degree cap eight), obtains the candidate from coefficients without execution probes, then checks the bounded Newton residual. Returns a concrete polynomial counterexample, certificate, or unknown for unsupported grammar. For remaining unknown cases, independently learned probe sequences can operate within the remaining budget. Permission is an application-level gate in this hosted experiment, not an OS isolation or security guarantee. The source adapter executes pinned VL-K K1; target adapter invokes pinned portable VLM; proof uses the separate VLM-015 polynomial checker (no native authority change). All final acquisition paths are actually executed; offline replay checks probe/proof path counts. No new neural training.
+
+| Intention (budget, proof price) | Selected plan | Certified | Refuted | Unknown | Modeled cost |
+|---|---|---:|---:|---:|---:|
+| Observation only (5, forbidden) | probe max word | 0 | 160 | 80 | 720 |
+| Resolve (10, 6) | probe max word, prove survivors | 80 | 160 | 0 | 1200 |
+| Qualify (8, 6) | direct inspect | 80 | 40 | 120 | 1440 |
+| Resolve (5, 2) | direct inspect, probe unknown | 80 | 160 | 0 | 840 |
+
+Each row uses the same 240 held-out VLM programs. For expensive verification, direct inspect plus fallback resolves all at 1800 units, while proof-only with basis probes costs 1920 and certifies 80; probe first costs 1200. For cheap verification, probe first costs 880 and direct inspect then probe costs 840, with identical complete resolution. Under qualification-only rewards direct inspect beats basis-plus-proof at 1440 vs 1920 units for the same 80 certificates. The cost reversal demonstrates modeled intention/resource dependence, not measured performance. All policies retain unknown explicitly, no proof failure masquerades as refutation. Rewards and prices are designed parameters, not learned or measured. Acquisition, training, source loading and verifier runtime are not measured; stronger symbolic methods for bitwise graphs may further change the optimum. No production optimizer promotion.
+
+External descriptor tandem: the retained VLM-015 Hugging Face descriptor is passed to a deterministic intention gate. Describing needs no new read; configuration inspection is proposed only with permission and the full bounded 64 KiB read budget; inference remains unqualified without an admitted numerical operator and execution evidence. This is fixture-based planning only, no new network access or numerical inference. The byte budget is a conservative declared maximum, not an estimate of actual config size.
+
+Five new tests passed locally (0.404 s). Previous full suite not rerun. Dataset recipe records 1,024,019-byte expanded report and exact trace digest. CI regenerates report from pinned transfer archive and checks hash. Reproduce after VLM-015 campaign:
+    VLK_ROOT=/path/to/VL-K TRANSFER_DATA=transfer-data.json python -m unittest -v test_intention_acquisition
+    VLK_ROOT=/path/to/VL-K python intention_acquisition.py --parent transfer-data.json --output acquisition-data.json
+
+Next: instrument real acquisition latency and byte costs across source paths, enforce capability isolation outside the learner, acquire verified external config/header slices and learn observation policies on genuinely new environments.
