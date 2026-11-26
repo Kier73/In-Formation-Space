@@ -1,0 +1,263 @@
+{
+  "version": "RGF-004",
+  "prime": "2305843009213693951",
+  "seed": 281981,
+  "campaigns": [
+    {
+      "name": "hidden-rank-two",
+      "n": 48,
+      "factorRank": 10,
+      "semanticRank": 2,
+      "rawTerms": 1478,
+      "canonicalTerms": 210,
+      "reducedTerms": 2,
+      "tasks": 64,
+      "events": 8,
+      "checks": 128,
+      "eagerChecks": 8,
+      "crossover": 1,
+      "work": {
+        "factor": 3140176,
+        "semantic": 234395,
+        "factorSetup": 8848,
+        "semanticFormation": 14815,
+        "semanticVerification": 30204,
+        "factorRun": 3131328,
+        "semanticRun": 189376,
+        "oracle": 17743808,
+        "eager": 1970240
+      },
+      "ledger": {
+        "base": {
+          "field": 1478,
+          "div": 0,
+          "visits": 7370
+        },
+        "formation": {
+          "field": 5854,
+          "div": 22,
+          "visits": 8939
+        },
+        "verification": {
+          "field": 14580,
+          "div": 58,
+          "visits": 15566
+        },
+        "semantic": {
+          "field": 180160,
+          "div": 4608,
+          "visits": 4608
+        },
+        "factor": {
+          "field": 2642880,
+          "div": 4608,
+          "visits": 483840
+        },
+        "oracle": {
+          "field": 14328704,
+          "div": 9792,
+          "visits": 3405312
+        },
+        "eager": {
+          "field": 1591872,
+          "div": 0,
+          "visits": 378368
+        }
+      }
+    },
+    {
+      "name": "hidden-rank-four",
+      "n": 48,
+      "factorRank": 10,
+      "semanticRank": 4,
+      "rawTerms": 1392,
+      "canonicalTerms": 168,
+      "reducedTerms": 4,
+      "tasks": 32,
+      "events": 4,
+      "checks": 64,
+      "eagerChecks": 4,
+      "crossover": 2,
+      "work": {
+        "factor": 757100,
+        "semantic": 149634,
+        "factorSetup": 8332,
+        "semanticFormation": 16921,
+        "semanticVerification": 30473,
+        "factorRun": 748768,
+        "semanticRun": 102240,
+        "oracle": 4670688,
+        "eager": 914384
+      },
+      "ledger": {
+        "base": {
+          "field": 1392,
+          "div": 0,
+          "visits": 6940
+        },
+        "formation": {
+          "field": 8542,
+          "div": 91,
+          "visits": 8288
+        },
+        "verification": {
+          "field": 15178,
+          "div": 199,
+          "visits": 15096
+        },
+        "semantic": {
+          "field": 98400,
+          "div": 1280,
+          "visits": 2560
+        },
+        "factor": {
+          "field": 639968,
+          "div": 1280,
+          "visits": 107520
+        },
+        "oracle": {
+          "field": 3777088,
+          "div": 2720,
+          "visits": 890880
+        },
+        "eager": {
+          "field": 736208,
+          "div": 0,
+          "visits": 178176
+        }
+      }
+    },
+    {
+      "name": "full-rank-control",
+      "n": 16,
+      "factorRank": 8,
+      "semanticRank": 8,
+      "rawTerms": 24,
+      "canonicalTerms": 8,
+      "reducedTerms": 8,
+      "tasks": 24,
+      "events": 2,
+      "checks": 48,
+      "eagerChecks": 3,
+      "crossover": null,
+      "work": {
+        "factor": 39480,
+        "semantic": 42578,
+        "factorSetup": 120,
+        "semanticFormation": 2515,
+        "semanticVerification": 703,
+        "factorRun": 39360,
+        "semanticRun": 39360,
+        "oracle": 62784,
+        "eager": 14022
+      },
+      "ledger": {
+        "base": {
+          "field": 24,
+          "div": 0,
+          "visits": 96
+        },
+        "formation": {
+          "field": 2282,
+          "div": 61,
+          "visits": 172
+        },
+        "verification": {
+          "field": 322,
+          "div": 69,
+          "visits": 312
+        },
+        "semantic": {
+          "field": 37272,
+          "div": 360,
+          "visits": 1728
+        },
+        "factor": {
+          "field": 37272,
+          "div": 360,
+          "visits": 1728
+        },
+        "oracle": {
+          "field": 56880,
+          "div": 720,
+          "visits": 5184
+        },
+        "eager": {
+          "field": 11718,
+          "div": 0,
+          "visits": 2304
+        }
+      }
+    },
+    {
+      "name": "short-use-control",
+      "n": 48,
+      "factorRank": 10,
+      "semanticRank": 2,
+      "rawTerms": 1478,
+      "canonicalTerms": 210,
+      "reducedTerms": 2,
+      "tasks": 1,
+      "events": 0,
+      "checks": 2,
+      "eagerChecks": 1,
+      "crossover": null,
+      "work": {
+        "factor": 15119,
+        "semantic": 45517,
+        "factorSetup": 8848,
+        "semanticFormation": 14821,
+        "semanticVerification": 30201,
+        "factorRun": 6271,
+        "semanticRun": 495,
+        "oracle": 31711,
+        "eager": 238432
+      },
+      "ledger": {
+        "base": {
+          "field": 1478,
+          "div": 0,
+          "visits": 7370
+        },
+        "formation": {
+          "field": 5858,
+          "div": 24,
+          "visits": 8939
+        },
+        "verification": {
+          "field": 14578,
+          "div": 57,
+          "visits": 15566
+        },
+        "semantic": {
+          "field": 479,
+          "div": 8,
+          "visits": 8
+        },
+        "factor": {
+          "field": 5423,
+          "div": 8,
+          "visits": 840
+        },
+        "oracle": {
+          "field": 25782,
+          "div": 17,
+          "visits": 5912
+        },
+        "eager": {
+          "field": 191136,
+          "div": 0,
+          "visits": 47296
+        }
+      }
+    }
+  ],
+  "controls": {
+    "tamperedPolynomial": "refused",
+    "tamperedDirection": "refused",
+    "nonminimalChart": "refused",
+    "cancellationRank": 0,
+    "constantRank": 0,
+    "degreeOverflow": "refused"
+  }
+}
