@@ -1,0 +1,264 @@
+{
+  "version": "RGF-005",
+  "prime": "2305843009213693951",
+  "seed": 76129,
+  "campaigns": [
+    {
+      "name": "hidden-causal-rank-four",
+      "n": 32,
+      "instantRank": 1,
+      "causalRank": 4,
+      "closureImages": 12,
+      "tasks": 24,
+      "checks": 240,
+      "shortChecks": 25,
+      "crossover": 2,
+      "work": {
+        "full": 866186,
+        "compact": 128770,
+        "formation": 18966,
+        "qualification": 46693,
+        "compactRuntime": 63111,
+        "oracle": 1167275,
+        "fixtureAudit": 348840,
+        "eager": 122360
+      },
+      "cacheFieldEntries": {
+        "full": 22192,
+        "compact": 1920
+      },
+      "ledger": {
+        "full": {
+          "field": 576275,
+          "division": 0,
+          "visits": 289911
+        },
+        "compact": {
+          "field": 35440,
+          "division": 0,
+          "visits": 27671
+        },
+        "formation": {
+          "field": 5097,
+          "division": 14,
+          "visits": 13855
+        },
+        "qualification": {
+          "field": 8600,
+          "division": 110,
+          "visits": 37983
+        },
+        "audit": {
+          "field": 996800,
+          "division": 0,
+          "visits": 170475
+        },
+        "fixtureAudit": {
+          "field": 36000,
+          "division": 0,
+          "visits": 312840
+        },
+        "eager": {
+          "field": 16720,
+          "division": 0,
+          "visits": 105640
+        }
+      }
+    },
+    {
+      "name": "hidden-causal-rank-eight",
+      "n": 32,
+      "instantRank": 1,
+      "causalRank": 8,
+      "closureImages": 24,
+      "tasks": 16,
+      "checks": 160,
+      "shortChecks": 20,
+      "crossover": 2,
+      "work": {
+        "full": 764952,
+        "compact": 178808,
+        "formation": 24486,
+        "qualification": 75583,
+        "compactRuntime": 78739,
+        "oracle": 762963,
+        "fixtureAudit": 364800,
+        "eager": 130944
+      },
+      "cacheFieldEntries": {
+        "full": 27072,
+        "compact": 3840
+      },
+      "ledger": {
+        "full": {
+          "field": 506058,
+          "division": 0,
+          "visits": 258894
+        },
+        "compact": {
+          "field": 47024,
+          "division": 0,
+          "visits": 31715
+        },
+        "formation": {
+          "field": 5864,
+          "division": 16,
+          "visits": 18606
+        },
+        "qualification": {
+          "field": 9768,
+          "division": 245,
+          "visits": 65570
+        },
+        "audit": {
+          "field": 639328,
+          "division": 0,
+          "visits": 123635
+        },
+        "fixtureAudit": {
+          "field": 48000,
+          "division": 0,
+          "visits": 316800
+        },
+        "eager": {
+          "field": 23808,
+          "division": 0,
+          "visits": 107136
+        }
+      }
+    },
+    {
+      "name": "full-rank-control",
+      "n": 12,
+      "instantRank": 1,
+      "causalRank": 12,
+      "closureImages": 36,
+      "tasks": 12,
+      "checks": 120,
+      "shortChecks": 15,
+      "crossover": null,
+      "work": {
+        "full": 84281,
+        "compact": 107829,
+        "formation": 3949,
+        "qualification": 18032,
+        "compactRuntime": 85848,
+        "oracle": 198468,
+        "fixtureAudit": 20196,
+        "eager": 9180
+      },
+      "cacheFieldEntries": {
+        "full": 5760,
+        "compact": 5760
+      },
+      "ledger": {
+        "full": {
+          "field": 53200,
+          "division": 0,
+          "visits": 31081
+        },
+        "compact": {
+          "field": 53484,
+          "division": 0,
+          "visits": 32364
+        },
+        "formation": {
+          "field": 1025,
+          "division": 28,
+          "visits": 2896
+        },
+        "qualification": {
+          "field": 942,
+          "division": 150,
+          "visits": 16940
+        },
+        "audit": {
+          "field": 175824,
+          "division": 0,
+          "visits": 22644
+        },
+        "fixtureAudit": {
+          "field": 2880,
+          "division": 0,
+          "visits": 17316
+        },
+        "eager": {
+          "field": 1224,
+          "division": 0,
+          "visits": 7956
+        }
+      }
+    },
+    {
+      "name": "single-use-control",
+      "n": 32,
+      "instantRank": 1,
+      "causalRank": 4,
+      "closureImages": 12,
+      "tasks": 1,
+      "checks": 10,
+      "shortChecks": 5,
+      "crossover": null,
+      "work": {
+        "full": 17002,
+        "compact": 66541,
+        "formation": 18966,
+        "qualification": 47071,
+        "compactRuntime": 504,
+        "oracle": 9745,
+        "fixtureAudit": 348840,
+        "eager": 33488
+      },
+      "cacheFieldEntries": {
+        "full": 756,
+        "compact": 56
+      },
+      "ledger": {
+        "full": {
+          "field": 6088,
+          "division": 0,
+          "visits": 10914
+        },
+        "compact": {
+          "field": 233,
+          "division": 0,
+          "visits": 271
+        },
+        "formation": {
+          "field": 5097,
+          "division": 14,
+          "visits": 13855
+        },
+        "qualification": {
+          "field": 8852,
+          "division": 236,
+          "visits": 37983
+        },
+        "audit": {
+          "field": 2948,
+          "division": 0,
+          "visits": 6797
+        },
+        "fixtureAudit": {
+          "field": 36000,
+          "division": 0,
+          "visits": 312840
+        },
+        "eager": {
+          "field": 4576,
+          "division": 0,
+          "visits": 28912
+        }
+      }
+    }
+  ],
+  "controls": {
+    "instantChart": "refused",
+    "changedActionBias": "refused",
+    "changedObservation": "refused",
+    "staleSource": "refused",
+    "futureAmbiguity": "observed",
+    "noncommutingOrder": "observed",
+    "constantRank": 0
+  }
+}
