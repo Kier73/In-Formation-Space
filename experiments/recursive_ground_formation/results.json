@@ -1,0 +1,451 @@
+{
+  "version": "RGF-001",
+  "field": 257,
+  "maxDegree": 5,
+  "seed": 19491,
+  "campaigns": [
+    {
+      "label": "transfer-long",
+      "tasks": 42,
+      "queriesPerTask": 3,
+      "poisonCount": 6,
+      "results": {
+        "eager": {
+          "cost": {
+            "source": 1120602,
+            "field": 2242716,
+            "lookup": 0,
+            "event": 120507,
+            "compare": 118995,
+            "write": 0
+          },
+          "oracle": {
+            "source": 51996,
+            "field": 53760,
+            "lookup": 0,
+            "event": 3024,
+            "compare": 1512,
+            "write": 0
+          },
+          "qualified": 0,
+          "refused": 0,
+          "fallback": 0,
+          "compiled": 0,
+          "retainedBytes": 0,
+          "peakBasisBytes": 0,
+          "work": 3602820,
+          "auditWork": 110292,
+          "withAudit": 3713112
+        },
+        "fixed": {
+          "cost": {
+            "source": 901788,
+            "field": 1813912,
+            "lookup": 9827,
+            "event": 92205,
+            "compare": 95392,
+            "write": 1009
+          },
+          "oracle": {
+            "source": 51996,
+            "field": 53760,
+            "lookup": 0,
+            "event": 3024,
+            "compare": 1512,
+            "write": 0
+          },
+          "qualified": 10,
+          "refused": 32,
+          "fallback": 32,
+          "compiled": 1,
+          "retainedBytes": 1542,
+          "peakBasisBytes": 1542,
+          "work": 2914133,
+          "auditWork": 110292,
+          "withAudit": 3024425
+        },
+        "cold": {
+          "cost": {
+            "source": 170298,
+            "field": 618072,
+            "lookup": 310385,
+            "event": 19032,
+            "compare": 130065,
+            "write": 51338
+          },
+          "oracle": {
+            "source": 51996,
+            "field": 53760,
+            "lookup": 0,
+            "event": 3024,
+            "compare": 1512,
+            "write": 0
+          },
+          "qualified": 36,
+          "refused": 6,
+          "fallback": 6,
+          "compiled": 42,
+          "retainedBytes": 0,
+          "peakBasisBytes": 3598,
+          "work": 1299190,
+          "auditWork": 110292,
+          "withAudit": 1409482
+        },
+        "warm": {
+          "cost": {
+            "source": 170298,
+            "field": 418780,
+            "lookup": 65487,
+            "event": 19032,
+            "compare": 38573,
+            "write": 5732
+          },
+          "oracle": {
+            "source": 51996,
+            "field": 53760,
+            "lookup": 0,
+            "event": 3024,
+            "compare": 1512,
+            "write": 0
+          },
+          "qualified": 36,
+          "refused": 6,
+          "fallback": 6,
+          "compiled": 4,
+          "retainedBytes": 9766,
+          "peakBasisBytes": 3598,
+          "work": 717902,
+          "auditWork": 110292,
+          "withAudit": 828194
+        },
+        "periodic": {
+          "cost": {
+            "source": 21588,
+            "field": 23226,
+            "lookup": 23982,
+            "event": 2016,
+            "compare": 12684,
+            "write": 11802
+          },
+          "oracle": {
+            "source": 51996,
+            "field": 53760,
+            "lookup": 0,
+            "event": 3024,
+            "compare": 1512,
+            "write": 0
+          },
+          "qualified": 0,
+          "refused": 0,
+          "fallback": 0,
+          "compiled": 0,
+          "retainedBytes": 0,
+          "peakBasisBytes": 0,
+          "work": 95298,
+          "auditWork": 110292,
+          "withAudit": 205590
+        }
+      }
+    },
+    {
+      "label": "short-horizon",
+      "tasks": 24,
+      "queriesPerTask": 1,
+      "poisonCount": 3,
+      "results": {
+        "eager": {
+          "cost": {
+            "source": 448,
+            "field": 905,
+            "lookup": 0,
+            "event": 457,
+            "compare": 448,
+            "write": 0
+          },
+          "oracle": {
+            "source": 6616,
+            "field": 6673,
+            "lookup": 0,
+            "event": 576,
+            "compare": 288,
+            "write": 0
+          },
+          "qualified": 0,
+          "refused": 0,
+          "fallback": 0,
+          "compiled": 0,
+          "retainedBytes": 0,
+          "peakBasisBytes": 0,
+          "work": 2258,
+          "auditWork": 14153,
+          "withAudit": 16411
+        },
+        "fixed": {
+          "cost": {
+            "source": 1915,
+            "field": 9978,
+            "lookup": 6882,
+            "event": 616,
+            "compare": 3591,
+            "write": 889
+          },
+          "oracle": {
+            "source": 6616,
+            "field": 6673,
+            "lookup": 0,
+            "event": 576,
+            "compare": 288,
+            "write": 0
+          },
+          "qualified": 5,
+          "refused": 19,
+          "fallback": 19,
+          "compiled": 1,
+          "retainedBytes": 1542,
+          "peakBasisBytes": 1542,
+          "work": 23871,
+          "auditWork": 14153,
+          "withAudit": 38024
+        },
+        "cold": {
+          "cost": {
+            "source": 5951,
+            "field": 173038,
+            "lookup": 180006,
+            "event": 1064,
+            "compare": 65321,
+            "write": 29712
+          },
+          "oracle": {
+            "source": 6616,
+            "field": 6673,
+            "lookup": 0,
+            "event": 576,
+            "compare": 288,
+            "write": 0
+          },
+          "qualified": 21,
+          "refused": 3,
+          "fallback": 3,
+          "compiled": 24,
+          "retainedBytes": 0,
+          "peakBasisBytes": 3598,
+          "work": 455092,
+          "auditWork": 14153,
+          "withAudit": 469245
+        },
+        "warm": {
+          "cost": {
+            "source": 5951,
+            "field": 66458,
+            "lookup": 49086,
+            "event": 1064,
+            "compare": 16491,
+            "write": 5372
+          },
+          "oracle": {
+            "source": 6616,
+            "field": 6673,
+            "lookup": 0,
+            "event": 576,
+            "compare": 288,
+            "write": 0
+          },
+          "qualified": 21,
+          "refused": 3,
+          "fallback": 3,
+          "compiled": 4,
+          "retainedBytes": 9766,
+          "peakBasisBytes": 3598,
+          "work": 144422,
+          "auditWork": 14153,
+          "withAudit": 158575
+        },
+        "periodic": {
+          "cost": {
+            "source": 12336,
+            "field": 13032,
+            "lookup": 13392,
+            "event": 1152,
+            "compare": 7128,
+            "write": 6744
+          },
+          "oracle": {
+            "source": 6616,
+            "field": 6673,
+            "lookup": 0,
+            "event": 576,
+            "compare": 288,
+            "write": 0
+          },
+          "qualified": 0,
+          "refused": 0,
+          "fallback": 0,
+          "compiled": 0,
+          "retainedBytes": 0,
+          "peakBasisBytes": 0,
+          "work": 53784,
+          "auditWork": 14153,
+          "withAudit": 67937
+        }
+      }
+    },
+    {
+      "label": "unfamiliar-degree",
+      "tasks": 24,
+      "queriesPerTask": 2,
+      "poisonCount": 3,
+      "results": {
+        "eager": {
+          "cost": {
+            "source": 123336,
+            "field": 247248,
+            "lookup": 0,
+            "event": 46300,
+            "compare": 45724,
+            "write": 0
+          },
+          "oracle": {
+            "source": 18480,
+            "field": 19152,
+            "lookup": 0,
+            "event": 1152,
+            "compare": 576,
+            "write": 0
+          },
+          "qualified": 0,
+          "refused": 0,
+          "fallback": 0,
+          "compiled": 0,
+          "retainedBytes": 0,
+          "peakBasisBytes": 0,
+          "work": 462608,
+          "auditWork": 39360,
+          "withAudit": 501968
+        },
+        "fixed": {
+          "cost": {
+            "source": 94424,
+            "field": 194476,
+            "lookup": 6818,
+            "event": 35078,
+            "compare": 38010,
+            "write": 913
+          },
+          "oracle": {
+            "source": 18480,
+            "field": 19152,
+            "lookup": 0,
+            "event": 1152,
+            "compare": 576,
+            "write": 0
+          },
+          "qualified": 6,
+          "refused": 18,
+          "fallback": 18,
+          "compiled": 1,
+          "retainedBytes": 1542,
+          "peakBasisBytes": 1542,
+          "work": 369719,
+          "auditWork": 39360,
+          "withAudit": 409079
+        },
+        "cold": {
+          "cost": {
+            "source": 18240,
+            "field": 188118,
+            "lookup": 169854,
+            "event": 6738,
+            "compare": 67883,
+            "write": 28176
+          },
+          "oracle": {
+            "source": 18480,
+            "field": 19152,
+            "lookup": 0,
+            "event": 1152,
+            "compare": 576,
+            "write": 0
+          },
+          "qualified": 21,
+          "refused": 3,
+          "fallback": 3,
+          "compiled": 24,
+          "retainedBytes": 0,
+          "peakBasisBytes": 3598,
+          "work": 479009,
+          "auditWork": 39360,
+          "withAudit": 518369
+        },
+        "warm": {
+          "cost": {
+            "source": 18240,
+            "field": 97974,
+            "lookup": 58956,
+            "event": 6738,
+            "compare": 26249,
+            "write": 7422
+          },
+          "oracle": {
+            "source": 18480,
+            "field": 19152,
+            "lookup": 0,
+            "event": 1152,
+            "compare": 576,
+            "write": 0
+          },
+          "qualified": 21,
+          "refused": 3,
+          "fallback": 3,
+          "compiled": 6,
+          "retainedBytes": 13878,
+          "peakBasisBytes": 3598,
+          "work": 215579,
+          "auditWork": 39360,
+          "withAudit": 254939
+        },
+        "periodic": {
+          "cost": {
+            "source": 12336,
+            "field": 13152,
+            "lookup": 13536,
+            "event": 1152,
+            "compare": 7176,
+            "write": 6744
+          },
+          "oracle": {
+            "source": 18480,
+            "field": 19152,
+            "lookup": 0,
+            "event": 1152,
+            "compare": 576,
+            "write": 0
+          },
+          "qualified": 0,
+          "refused": 0,
+          "fallback": 0,
+          "compiled": 0,
+          "retainedBytes": 0,
+          "peakBasisBytes": 0,
+          "work": 54096,
+          "auditWork": 39360,
+          "withAudit": 93456
+        }
+      }
+    }
+  ],
+  "controls": {
+    "largeCoordinate": 1000000000000,
+    "result": [
+      163,
+      249
+    ],
+    "omittedEvent": [
+      163,
+      244
+    ],
+    "duplicateTime": "refused",
+    "deceptiveSource": "refused",
+    "work": 21873
+  }
+}
