@@ -1,0 +1,66 @@
+{
+  "nativePrior": false,
+  "priorReads": 24,
+  "cleanCandidates": 32,
+  "robustCandidates": 5408,
+  "cleanBuildWrites": 768,
+  "robustBuildWrites": 135168,
+  "cleanActive": {
+    "cases": 32,
+    "queries": 96,
+    "min": 3,
+    "max": 3,
+    "candidateReads": 33216,
+    "auditReads": 672,
+    "fullyAuditedReads": 768,
+    "accepted": 32
+  },
+  "cleanPassive": {
+    "cases": 32,
+    "queries": 128,
+    "min": 3,
+    "max": 5,
+    "candidateReads": 1440,
+    "auditReads": 640,
+    "fullyAuditedReads": 768,
+    "accepted": 32
+  },
+  "robustActive": {
+    "cases": 32,
+    "queries": 768,
+    "min": 24,
+    "max": 24,
+    "candidateReads": 6380736,
+    "auditReads": 0,
+    "fullyAuditedReads": 768,
+    "accepted": 32
+  },
+  "robustMutated": {
+    "cases": 16,
+    "queries": 197,
+    "min": 4,
+    "max": 24,
+    "candidateReads": 3009232,
+    "auditReads": 187,
+    "fullyAuditedReads": 384,
+    "accepted": 16
+  },
+  "robustPassive": {
+    "cases": 16,
+    "queries": 200,
+    "min": 4,
+    "max": 24,
+    "candidateReads": 131360,
+    "auditReads": 184,
+    "fullyAuditedReads": 384,
+    "accepted": 16
+  },
+  "coldReads": 768,
+  "zeroBudget": "AMBIGUOUS",
+  "hiddenMutation": {
+    "cell": 1,
+    "conditionalPrefixAccepted": true,
+    "fullAuditRejected": true
+  },
+  "explicitRefusalObserved": true
+}

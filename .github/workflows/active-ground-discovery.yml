@@ -1,0 +1,42 @@
+name: CLT-002 active discovery
+on:
+  pull_request:
+    paths:
+      - 'experiments/active_ground_discovery/**'
+      - '.github/workflows/active-ground-discovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  standalone:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node experiments/active_ground_discovery/clt002.js
+  native-prior:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/In-Formation-Space
+          ref: 34ce68b87ac4c531e2e6f104710233c77c1defe6
+          path: upstream-clt
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 09a9058a43c139c476609954636e17e7fadcfd37
+          path: upstream-ecpu
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python experiments/active_ground_discovery/native_prior.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}/upstream-ecpu
+      - run: node experiments/active_ground_discovery/clt002.js native-prior.json
