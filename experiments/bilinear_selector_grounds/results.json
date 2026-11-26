@@ -1,0 +1,48 @@
+{
+  "finite": {
+    "cases": 13,
+    "bytes": 68887,
+    "ranges": 832,
+    "marginalChecks": 832,
+    "regimes": 21,
+    "overlapPieces": 105,
+    "residues": 365,
+    "setupTerms": 1110346,
+    "queryTerms": 3131137,
+    "expandedModelRecords": 0
+  },
+  "large": {
+    "cycles": "1000000000039",
+    "logicalBytes": "2000003000461000117014937",
+    "cuts": [
+      "0",
+      "1000000",
+      "1000000000039"
+    ],
+    "periods": [
+      768,
+      768
+    ],
+    "innerProduct": "33156066443846077996004189104",
+    "weightedProduct": "33156115247827501378580743460449459386123289523202353",
+    "setup": {
+      "residues": 1536,
+      "patternTerms": 996864,
+      "polynomialSamples": 18432,
+      "overlapPieces": 6,
+      "regimes": 2,
+      "querySteps": 0,
+      "partialPatterns": 0,
+      "expandedModelRecords": 0
+    },
+    "query": {
+      "steps": 238,
+      "patternTerms": 768,
+      "partialPatterns": 3
+    },
+    "independentPrefixChecks": 7
+  },
+  "controls": {
+    "unalignedOrInvalidRefused": 2
+  }
+}

@@ -1,0 +1,23 @@
+name: Bilinear selector Grounds
+on:
+  pull_request:
+    paths:
+      - 'experiments/bilinear_selector_grounds/**'
+      - 'experiments/selector_arithmetic/clt014.js'
+      - '.github/workflows/bilinear-selector-grounds.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node experiments/selector_arithmetic/clt014.js > /tmp/clt014.json
+          diff -u experiments/selector_arithmetic/results.json /tmp/clt014.json
+          node experiments/bilinear_selector_grounds/clt015.js > /tmp/clt015.json
+          diff -u experiments/bilinear_selector_grounds/results.json /tmp/clt015.json
