@@ -1,0 +1,120 @@
+{
+  "version": "RGF-006",
+  "prime": "2305843009213693951",
+  "degree": 4,
+  "seed": 74319,
+  "campaigns": [
+    {
+      "name": "calm-reuse",
+      "tasks": 48,
+      "blocksPerTask": 32,
+      "checks": 4608,
+      "switches": 0,
+      "reseeds": 0,
+      "phaseRanks": [
+        1,
+        5
+      ],
+      "staticRank": 5,
+      "closureRounds": 4,
+      "crossover": 3,
+      "work": {
+        "full": 574173,
+        "fixed": 1817429,
+        "fluid": 273407,
+        "formation": 4971,
+        "qualification": 10845,
+        "fluidRuntime": 257591,
+        "audit": 306739
+      },
+      "cacheEntries": {
+        "full": 660,
+        "fixed": 4125,
+        "fluid": 245
+      }
+    },
+    {
+      "name": "mixed-morphology",
+      "tasks": 32,
+      "blocksPerTask": 64,
+      "checks": 6144,
+      "switches": 160,
+      "reseeds": 64,
+      "phaseRanks": [
+        1,
+        5
+      ],
+      "staticRank": 5,
+      "closureRounds": 4,
+      "crossover": null,
+      "work": {
+        "full": 727856,
+        "fixed": 2368169,
+        "fluid": 853139,
+        "formation": 4971,
+        "qualification": 10845,
+        "fluidRuntime": 837323,
+        "audit": 397098
+      },
+      "cacheEntries": {
+        "full": 1608,
+        "fixed": 10050,
+        "fluid": 6170
+      }
+    },
+    {
+      "name": "single-use",
+      "tasks": 1,
+      "blocksPerTask": 2,
+      "checks": 6,
+      "switches": 0,
+      "reseeds": 0,
+      "phaseRanks": [
+        1,
+        5
+      ],
+      "staticRank": 5,
+      "closureRounds": 4,
+      "crossover": null,
+      "work": {
+        "full": 130,
+        "fixed": 15474,
+        "fluid": 15886,
+        "formation": 4971,
+        "qualification": 10845,
+        "fluidRuntime": 70,
+        "audit": 231
+      },
+      "cacheEntries": {
+        "full": 28,
+        "fixed": 175,
+        "fluid": 87
+      }
+    }
+  ],
+  "small": {
+    "states": 289,
+    "comparisons": 867,
+    "base": {
+      "classes": 13,
+      "rounds": 1
+    },
+    "shear": {
+      "classes": 73,
+      "rounds": 3
+    }
+  },
+  "radial": {
+    "tasks": 96,
+    "checks": 96,
+    "scalarWork": 30854,
+    "fullStateWork": 30854,
+    "auditWork": 5756
+  },
+  "controls": {
+    "alteredPhaseMap": "refused",
+    "surpriseShear": "counterexample",
+    "reset": "requires no discarded coordinate; reseed explicitly external",
+    "zeroRadial": "checked"
+  }
+}
