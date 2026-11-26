@@ -1,0 +1,36 @@
+name: CLT-001 law transport
+on:
+  pull_request:
+    paths:
+      - 'experiments/computational_law_transport/**'
+      - '.github/workflows/computational-law-transport.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/computational_law_transport/**'
+      - '.github/workflows/computational-law-transport.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  transport:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/E-CPU
+          ref: 09a9058a43c139c476609954636e17e7fadcfd37
+          path: upstream-ecpu
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Native formation, transport, adversarial and reuse tests
+        env:
+          ECPU_ROOT: ${{ github.workspace }}/upstream-ecpu
+          PYTHONPATH: ${{ github.workspace }}/upstream-ecpu
+        run: python -m unittest discover -s experiments/computational_law_transport -v
