@@ -1,0 +1,102 @@
+{
+  "all": 896,
+  "tamper": 8,
+  "retainedFormation": 188279,
+  "retainedVerification": 250277,
+  "reports": [
+    {
+      "name": "derived",
+      "rank": 7,
+      "oldClasses": 10,
+      "jointClasses": 10,
+      "oldBits": 4,
+      "extraBits": 0,
+      "jointBits": 4,
+      "witness": null,
+      "formation": 31501,
+      "verification": 3454,
+      "coldFormation": 259833,
+      "coldVerification": 358141,
+      "imageWork": 2048,
+      "imageVerification": 2080
+    },
+    {
+      "name": "latent parity",
+      "rank": 7,
+      "oldClasses": 10,
+      "jointClasses": 12,
+      "oldBits": 4,
+      "extraBits": 1,
+      "jointBits": 4,
+      "witness": {
+        "old": "0",
+        "next": [
+          "0",
+          "1"
+        ],
+        "z": [
+          "0",
+          "1"
+        ]
+      },
+      "formation": 1572,
+      "verification": 319,
+      "coldFormation": 188822,
+      "coldVerification": 251245,
+      "imageWork": 1536,
+      "imageVerification": 1552
+    },
+    {
+      "name": "latent pair",
+      "rank": 7,
+      "oldClasses": 10,
+      "jointClasses": 16,
+      "oldBits": 4,
+      "extraBits": 2,
+      "jointBits": 4,
+      "witness": {
+        "old": "0",
+        "next": [
+          "0",
+          "1"
+        ],
+        "z": [
+          "0",
+          "1"
+        ]
+      },
+      "formation": 1802,
+      "verification": 348,
+      "coldFormation": 189370,
+      "coldVerification": 252213,
+      "imageWork": 1792,
+      "imageVerification": 1888
+    },
+    {
+      "name": "new independent coordinate",
+      "rank": 9,
+      "oldClasses": 10,
+      "jointClasses": 40,
+      "oldBits": 4,
+      "extraBits": 2,
+      "jointBits": 6,
+      "witness": {
+        "old": "0",
+        "next": [
+          "0",
+          "1"
+        ],
+        "z": [
+          "0",
+          "1"
+        ]
+      },
+      "formation": 2632,
+      "verification": 1291,
+      "coldFormation": 220572,
+      "coldVerification": 349742,
+      "imageWork": 8192,
+      "imageVerification": 8320
+    }
+  ]
+}
