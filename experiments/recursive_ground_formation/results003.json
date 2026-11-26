@@ -1,0 +1,156 @@
+{
+  "version": "RGF-003",
+  "prime": "2305843009213693951",
+  "seed": 231991,
+  "campaigns": [
+    {
+      "name": "dense-low-rank",
+      "n": 64,
+      "rank": 3,
+      "factors": 16,
+      "tasks": 24,
+      "events": 12,
+      "checks": 96,
+      "eagerChecks": 6,
+      "work": {
+        "full": 2968392,
+        "factor": 1570632,
+        "cold": 888240,
+        "warm": 734209
+      },
+      "ledger": {
+        "full": {
+          "field": 2886024,
+          "division": 2496,
+          "visits": 79872,
+          "measurements": 0
+        },
+        "factor": {
+          "field": 1488264,
+          "division": 2496,
+          "visits": 79872,
+          "measurements": 0
+        },
+        "cold": {
+          "field": 782544,
+          "division": 4248,
+          "visits": 101448,
+          "measurements": 0
+        },
+        "warm": {
+          "field": 630157,
+          "division": 2713,
+          "visits": 101339,
+          "measurements": 0
+        }
+      },
+      "auditWork": 3030216,
+      "eagerAuditWork": 894408,
+      "retainedPayloadBytes": 1920
+    },
+    {
+      "name": "high-rank-control",
+      "n": 16,
+      "rank": 12,
+      "factors": 16,
+      "tasks": 16,
+      "events": 4,
+      "checks": 64,
+      "eagerChecks": 4,
+      "work": {
+        "full": 223792,
+        "factor": 141872,
+        "cold": 435696,
+        "warm": 347764
+      },
+      "ledger": {
+        "full": {
+          "field": 202672,
+          "division": 640,
+          "visits": 20480,
+          "measurements": 0
+        },
+        "factor": {
+          "field": 120752,
+          "division": 640,
+          "visits": 20480,
+          "measurements": 0
+        },
+        "cold": {
+          "field": 409008,
+          "division": 3104,
+          "visits": 23584,
+          "measurements": 0
+        },
+        "warm": {
+          "field": 324632,
+          "division": 1178,
+          "visits": 21954,
+          "measurements": 0
+        }
+      },
+      "auditWork": 254768,
+      "eagerAuditWork": 172816,
+      "retainedPayloadBytes": 3072
+    },
+    {
+      "name": "short-journal",
+      "n": 64,
+      "rank": 3,
+      "factors": 16,
+      "tasks": 16,
+      "events": 0,
+      "checks": 64,
+      "eagerChecks": 4,
+      "work": {
+        "full": 150320,
+        "factor": 78640,
+        "cold": 346544,
+        "warm": 250386
+      },
+      "ledger": {
+        "full": {
+          "field": 146096,
+          "division": 128,
+          "visits": 4096,
+          "measurements": 0
+        },
+        "factor": {
+          "field": 74416,
+          "division": 128,
+          "visits": 4096,
+          "measurements": 0
+        },
+        "cold": {
+          "field": 326720,
+          "division": 1344,
+          "visits": 18480,
+          "measurements": 0
+        },
+        "warm": {
+          "field": 231379,
+          "division": 300,
+          "visits": 18707,
+          "measurements": 0
+        }
+      },
+      "auditWork": 176176,
+      "eagerAuditWork": 590080,
+      "retainedPayloadBytes": 1920
+    }
+  ],
+  "refinement": {
+    "oldRank": 2,
+    "newRank": 4,
+    "extra": 3,
+    "states": 128,
+    "acquisitions": 384,
+    "work": 135325
+  },
+  "controls": {
+    "tamperedChart": "refused",
+    "tamperedRefinement": "refused",
+    "missingObservation": "explicit indistinguishable old states",
+    "cancellation": "factor rank 2; true sufficient rank 0"
+  }
+}
