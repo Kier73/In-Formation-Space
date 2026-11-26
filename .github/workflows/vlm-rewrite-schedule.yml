@@ -1,0 +1,36 @@
+name: VLM rewrite scheduling
+on:
+  pull_request:
+    paths:
+      - 'experiments/vl-machine/native64/rewrite_schedule.py'
+      - 'experiments/vl-machine/native64/test_rewrite_schedule.py'
+      - 'experiments/vl-machine/native64/datasets/vlm019/**'
+      - '.github/workflows/vlm-rewrite-schedule.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/vl-machine/native64/rewrite_schedule.py'
+      - 'experiments/vl-machine/native64/test_rewrite_schedule.py'
+      - 'experiments/vl-machine/native64/datasets/vlm019/**'
+      - '.github/workflows/vlm-rewrite-schedule.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  schedule:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - name: Verify and measure
+        working-directory: experiments/vl-machine/native64
+        run: |
+          python -m unittest -v test_rewrite_schedule
+          python rewrite_schedule.py --output schedule-data.json
+          python -c "import json; from rewrite_schedule import semantic; assert semantic(json.load(open('schedule-data.json')))==json.load(open('datasets/vlm019/recipe.json'))['semantic_digest']"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rewrite-schedule
+          path: experiments/vl-machine/native64/schedule-data.json
