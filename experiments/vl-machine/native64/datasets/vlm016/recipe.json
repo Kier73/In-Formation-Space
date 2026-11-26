@@ -1,0 +1,51 @@
+{
+  "schema": "vlm-intention-acquisition-checkpoint-v1",
+  "parent_commit": "3ae95b1c0d3e65fefc233d96cff79b8cc9bfb708",
+  "parent_archive_sha256": "af9a38fec72539c39a0dca0d322ae28530664bc8e3f494c706a0576e35d3dbe6",
+  "generator": "intention_acquisition.py",
+  "generator_git_blob": "b1519af45e9d1d5e7106b55736841a830f31e4b5",
+  "report_sha256": "657a121b5a1ee06787a94b969c14f3da6df7dc857e357abe9e5b240ed1515e17",
+  "report_bytes": 1024019,
+  "trace_sha256": "85728150c71300d60cab698155496da0a2dd34e9cc3e693d9558b69cee54cdaf",
+  "selected": {
+    "observation_only": {
+      "plan": [
+        5
+      ],
+      "refuted": 160,
+      "certified": 0,
+      "unknown": 80,
+      "cost": 720
+    },
+    "resolve_expensive_proof": {
+      "plan": [
+        5,
+        "proof"
+      ],
+      "refuted": 160,
+      "certified": 80,
+      "unknown": 0,
+      "cost": 1200
+    },
+    "qualify": {
+      "plan": [
+        "inspect"
+      ],
+      "refuted": 40,
+      "certified": 80,
+      "unknown": 120,
+      "cost": 1440
+    },
+    "resolve_cheap_proof": {
+      "plan": [
+        "inspect",
+        5
+      ],
+      "refuted": 160,
+      "certified": 80,
+      "unknown": 0,
+      "cost": 840
+    }
+  },
+  "cost_scope": "configured units, not elapsed time; basis two units if executed, extra probe one, inspection/proof two or six; offline learning and training excluded"
+}
