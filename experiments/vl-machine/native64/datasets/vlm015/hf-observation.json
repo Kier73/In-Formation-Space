@@ -1,0 +1,14 @@
+{
+  "source_url": "https://huggingface.co/api/models/HuggingFaceTB/SmolLM2-135M-Instruct",
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+  "capture_scope": "Selected fields transcribed from a live public API web observation; inventory excerpt, not raw response or complete file listing. Revision reported by API, not independently pinned config fetch.",
+  "observed_fields": {
+    "id": "HuggingFaceTB/SmolLM2-135M-Instruct",
+    "sha": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+    "pipeline_tag": "text-generation",
+    "config": {"architectures": ["LlamaForCausalLM"], "model_type": "llama"},
+    "siblings": [{"rfilename": "config.json"}, {"rfilename": "model.safetensors"}],
+    "safetensors": {"total": 134515008}
+  }
+}

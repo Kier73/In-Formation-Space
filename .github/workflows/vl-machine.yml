@@ -109,9 +109,21 @@ jobs:
         run: |
           python -m unittest -v test_experience_contract
           python experience_contract.py --vlm "$VLM_LEDGER" --vlk "$VLK_DATA" --output shared-experience.json
+      - name: Transfer counterexample observation policies
+        working-directory: experiments/vl-machine/native64
+        env:
+          VLK_ROOT: ${{ github.workspace }}/external/vlk
+          VLK_DATA: cross-observer-data.json
+        run: |
+          python -m unittest -v test_transfer_policy
+          python transfer_policy.py --archive "$VLK_DATA" --output transfer-data.json
+          python -c "import hashlib,json; m=json.load(open('datasets/vlm015/recipe.json')); assert hashlib.sha256(open('transfer-data.json','rb').read()).hexdigest()==m['report_sha256']"
+          python external_descriptor.py --fixture datasets/vlm015/hf-observation.json > external-descriptor.json
       - uses: actions/upload-artifact@v4
         with:
           name: vlm-cross-observer
           path: |
             experiments/vl-machine/native64/cross-observer-data.json
             experiments/vl-machine/native64/shared-experience.json
+            experiments/vl-machine/native64/transfer-data.json
+            experiments/vl-machine/native64/external-descriptor.json
