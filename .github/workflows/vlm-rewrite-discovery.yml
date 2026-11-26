@@ -1,0 +1,42 @@
+name: VLM rewrite discovery
+on:
+  pull_request:
+    paths:
+      - 'experiments/vl-machine/native64/rewrite_ground.py'
+      - 'experiments/vl-machine/native64/test_rewrite_ground.py'
+      - 'experiments/vl-machine/native64/datasets/vlm018/**'
+      - '.github/workflows/vlm-rewrite-discovery.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/vl-machine/native64/rewrite_ground.py'
+      - 'experiments/vl-machine/native64/test_rewrite_ground.py'
+      - 'experiments/vl-machine/native64/datasets/vlm018/**'
+      - '.github/workflows/vlm-rewrite-discovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rewrite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - name: Reproduce the source-bound campaign
+        working-directory: experiments/vl-machine/native64
+        run: |
+          python -m unittest -v test_rewrite_ground
+          python rewrite_ground.py --output rewrite-data.json
+          python - <<'PY'
+          import json
+          from rewrite_ground import semantic
+          r=json.load(open('rewrite-data.json'))
+          p=json.load(open('datasets/vlm018/recipe.json'))
+          assert semantic(r)==p['semantic_digest']
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rewrite-discovery
+          path: experiments/vl-machine/native64/rewrite-data.json

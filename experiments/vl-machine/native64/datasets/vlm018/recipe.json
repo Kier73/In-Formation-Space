@@ -1,0 +1,112 @@
+{
+  "schema": "vlm-rewrite-discovery-checkpoint-v1",
+  "parent_commit": "8b668b3b9be13219570844b41a233bd2a84e0696",
+  "parent_archive_sha256": "a29df00a178dcd512802bbaf2507b7196c365a96d6647e2e0d63ea055ad3d4eb",
+  "parent_stress_digest": "2456a0fe89f847c0ef70092d0783f89d2f13959734f813f5f2c2bf74997531ac",
+  "generator": "rewrite_ground.py",
+  "generator_git_blob": "9d21077617b806a8fd454ba0bbfd4b9bfe869339",
+  "expanded_report_bytes": 2402351,
+  "expanded_report_sha256": "c984a379474f433fbe5fdeab7780def2d1df934c3d7233ab4c1a3f2126078e97",
+  "semantic_digest": "f6b481fcf5c99153c9d1cb6ccf9888ab46498513f595270fb5d85dbcb7ae5dd0",
+  "cohort_counts": {
+    "prior": 120,
+    "training": 120,
+    "validation": 120,
+    "final": 240,
+    "recursive_validation": 120,
+    "recursive_final": 240,
+    "epoch_training": 120,
+    "epoch_validation": 120,
+    "epoch_final": 240
+  },
+  "rule_counts": [
+    1,
+    6,
+    8
+  ],
+  "collision_rejections": 111,
+  "query_checks": 66240,
+  "final": {
+    "baseline": {
+      "certified": 0,
+      "ops": 2154
+    },
+    "first": {
+      "certified": 0,
+      "ops": 1604
+    },
+    "combined": {
+      "certified": 152,
+      "ops": 353
+    },
+    "direct": {
+      "certified": 176,
+      "ops": 562
+    }
+  },
+  "recursive_final": {
+    "selected": "hybrid",
+    "certified": 106,
+    "ops": 1284,
+    "source_ops": 3737
+  },
+  "epoch_final": {
+    "selected": "old_hybrid",
+    "combined": {
+      "certified": 118,
+      "ops": 1122
+    },
+    "refined": {
+      "certified": 115,
+      "ops": 1120
+    },
+    "direct": {
+      "certified": 128,
+      "ops": 1226
+    },
+    "old_hybrid": {
+      "certified": 128,
+      "ops": 1095
+    },
+    "refined_hybrid": {
+      "certified": 128,
+      "ops": 1094
+    }
+  },
+  "rules": [
+    [
+      "and(x,ALL_ONES)",
+      "x"
+    ],
+    [
+      "and(x,x)",
+      "x"
+    ],
+    [
+      "xor(x,0)",
+      "x"
+    ],
+    [
+      "xor(xor(x,y),y)",
+      "x"
+    ],
+    [
+      "xor(xor(x,y),x)",
+      "y"
+    ],
+    [
+      "and(and(x,y),y)",
+      "and(x,y)"
+    ]
+  ],
+  "extra_candidate_rules": [
+    [
+      "xor(x,x)",
+      "0"
+    ],
+    [
+      "and(and(x,y),x)",
+      "and(x,y)"
+    ]
+  ]
+}
