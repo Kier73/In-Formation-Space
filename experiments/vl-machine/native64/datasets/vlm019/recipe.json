@@ -1,0 +1,70 @@
+{
+  "schema": "vlm-rewrite-schedule-checkpoint-v1",
+  "parent_commit": "b631d67466b662c857dca3d77808af43ec298310",
+  "parent_archive_sha256": "c984a379474f433fbe5fdeab7780def2d1df934c3d7233ab4c1a3f2126078e97",
+  "generator": "rewrite_schedule.py",
+  "generator_git_blob": "09536ac2a3cc693b4b2a410b5d72cc871b88c769",
+  "expanded_report_sha256": "700d463b68ae9caa8e6c33cbedd4b913eb0cadb6400600b240c65e6f7bf8a09c",
+  "expanded_report_bytes": 722432,
+  "semantic_digest": "9f6b7dec6786bdda4e6570e0dbb512a3b7e08443b7596b42bd8e344c41d45d2d",
+  "cohorts": {
+    "train": 120,
+    "validation": 120,
+    "final": 240
+  },
+  "policy_contexts": 14,
+  "selected_by_matches": "learned",
+  "selected_by_validation_latency": "static",
+  "repeats": 5,
+  "final": {
+    "static": {
+      "matches": 5596,
+      "compile_ns": 26922460,
+      "verify_ns": 28940027,
+      "original_query_ns": 38263360,
+      "rewritten_query_ns": 15955545
+    },
+    "index": {
+      "matches": 1676,
+      "index_checks": 7056,
+      "compile_ns": 28325593,
+      "verify_ns": 32211001,
+      "original_query_ns": 38921511,
+      "rewritten_query_ns": 15845188
+    },
+    "learned": {
+      "matches": 1493,
+      "index_checks": 7056,
+      "compile_ns": 32354727,
+      "verify_ns": 30590893,
+      "original_query_ns": 41103836,
+      "rewritten_query_ns": 16814226
+    }
+  },
+  "validation_compile_verify_ns": {
+    "static": [
+      13189101,
+      15789505
+    ],
+    "index": [
+      14078149,
+      15087738
+    ],
+    "learned": [
+      14793275,
+      15399337
+    ]
+  },
+  "all_routes": {
+    "certified": 110,
+    "hits": 1345,
+    "live_ops": 1238,
+    "proof_bytes": 76786,
+    "distinct_queries": 7680
+  },
+  "direct": {
+    "certified": 113,
+    "live_ops": 1347
+  },
+  "timing_scope": "Local Python hosted; median five runs, no native integration or WAN; includes dispatch, compilation and independently replayed proof checking separately; query timing compares original demand and rewritten demand on same inputs. Timing-derived route selection excluded from semantic digest."
+}
