@@ -1,6 +1,6 @@
 "use strict";
 // CLT-013: hierarchical variable-geometry selector Grounds.
-function experiment(){
+function experiment(mode){
  const assert=(c,m)=>{if(!c)throw Error(m)}, mod=x=>((x%256)+256)%256;
  const same=(a,b)=>a.kind===b.kind&&a.n===b.n&&a.v.length===b.v.length&&a.v.every((x,i)=>x===b.v[i]);
  const byte=(r,j)=>r.kind===2?mod(r.v[0]+r.v[1]*j):r.v[j%r.v.length];
@@ -142,6 +142,7 @@ function experiment(){
   return {results,nativeCases};
  }
  function seeded(s){return ()=>s=(Math.imul(s,1664525)+1013904223)>>>0}
+ if(mode==='api')return {fixture,compile,decode};
  return run();
 }
 if(require.main===module){const e=experiment();console.log(JSON.stringify(process.argv.includes("--native-cases")?e.nativeCases:e.results,null,2))}
