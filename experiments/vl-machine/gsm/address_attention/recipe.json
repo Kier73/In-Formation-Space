@@ -1,0 +1,89 @@
+{
+  "schema": "gsm-address-attention-v1",
+  "parent": "923ff315904d646097e4243cf0f1156e61d28f46",
+  "environment": {
+    "python": "3.13.5",
+    "numpy": "2.3.5",
+    "torch": "2.10.0+cpu",
+    "openblas_threads": 1
+  },
+  "source_git_blobs": {
+    "address_attention.py": "f8e65b21c022032a31e03d2a17c0f6d8efc91158",
+    "test_address_attention.py": "14cb73bdb15c5f3d6a879fa037b825cbb4cf7fff",
+    "trainable.py": "51ac0d7862994f3e89a1ca4de9b675d755a02d5a",
+    "test_trainable.py": "3c2fad7cc6c4ec2c951e69483be71b28cd8a607c",
+    "prefix_control.py": "87bf01dcba76c8bbc0afe6d2c7fbe91200fff161"
+  },
+  "source_revisions": {
+    "ecpu": "8bba31aa0ad3d8f906babfdd83bf89221c704802",
+    "vgi": "39a169b21513ffaaee85e40826c706c07a47215b"
+  },
+  "report_sha256": {
+    "report.json": "4885524bbea6b44bb6fe35581733c67c683813cc2c0f2196f5b612602da6ebc0",
+    "training.json": "7f6300ced4f75c8e58a3f495e58c185b7076cfe42903f9a1342494b06eca8b26",
+    "prefix_report.json": "71c246f89d5a420e907549bd4df879885be60d4fe6d5793698af3e9ab3065a3f"
+  },
+  "full": {
+    "n": 16777216,
+    "identity": "37ca319d32419b2dcdc120f66db662628b8142f0b9d0569f72e7321c4f6c18e6",
+    "ground_payload_bytes": 34368,
+    "dense_kv_bytes": 1610612736,
+    "base_key_scores": 256,
+    "boxes": 104,
+    "overrides": 16,
+    "axis_summaries": 135,
+    "max_abs_error": 2.858824288409778e-15,
+    "ground_samples_ns": [
+      2392406,
+      2160464,
+      2281408,
+      2359586,
+      2156398,
+      2147904,
+      2094123,
+      2114294,
+      2181396,
+      2138290,
+      2073602
+    ],
+    "dense_ns": 3033493377
+  },
+  "prefix_control": {
+    "stops": [
+      1,
+      65537,
+      12345678,
+      16777216
+    ],
+    "ground_ns": [
+      208644,
+      173080,
+      2811379,
+      2837168
+    ],
+    "enumerated_axis_ns": [
+      106090,
+      33644947,
+      1587904950,
+      2038764318
+    ],
+    "errors": [
+      0,
+      4.884981308350689e-15,
+      3.9968028886505635e-15,
+      3.3306690738754696e-15
+    ]
+  },
+  "training": {
+    "parameters": 4096,
+    "steps": 100,
+    "heldout": 64,
+    "initial_mse": 0.02291056566487122,
+    "final_mse": 0.000018632534968237265,
+    "training_ns": 119286868,
+    "max_output_error": 6.005196340197472e-13,
+    "max_gradient_error": 9.759554275845517e-15,
+    "max_parameter_error": 3.798683589906204e-12
+  },
+  "tests_passed": 5
+}
