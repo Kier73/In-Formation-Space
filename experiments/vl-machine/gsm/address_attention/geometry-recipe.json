@@ -1,0 +1,48 @@
+{
+  "schema": "gsm-004-checkpoint-v1",
+  "parent": "48efcff451110124efe8b8f38cdd497d3f88bb1a",
+  "source_git_blobs": {
+    "geometry.py": "33cb4118938c33695cc66ee6ddff94d21a2a4492",
+    "neural_source.py": "028a663ed460cd8bc486886cad14a341ebbcc73f",
+    "test_geometry.py": "7210a0a5af0dba5ba69897ca1680410bcb17699a"
+  },
+  "vl_i_revision": "9ccd0efa3037da6f5709ffd0865a517a2f3c9a65",
+  "checkpoint_sha256": "eb9c2eb010deb2826859a6b42d38e74adbd8a3f6ae04ecfb2287b68469d40465",
+  "neural_npy_sha256": "4e0b2084ae3e173b106c8113a567ad3d453481dc3803162e007dcaf225b600b9",
+  "report_sha256": "f51af4d3c87947a3bce1bddfd10a4bd9b66918218315a70a61b823f01518aaf8",
+  "archive_sha256": "af8a36fdad2ba862ddda4807076dab50216ab21321f932dcd44d78053c144a8c",
+  "train": 128,
+  "validation": 64,
+  "heldout": 64,
+  "queries": 64,
+  "geometry_candidates": 105,
+  "tests_passed": 4,
+  "source_digests": [
+    "c551f330c42a3642c864aef27c064f3f08216934a11167ebaaa855233f3c72de",
+    "ff81ef1ce6ae42db6795eef0b40a4b71891726fd356ee069b88c9d9ec9e3fa65",
+    "87d65807a527704d1769bfb37ed81a216129497bd9d60d25f2ff122209d21d45",
+    "8efe7eddff535c01f48825cbabdf660eedded582a6a7f7397d2675bd41d31f92"
+  ],
+  "admission": [
+    "ground",
+    "ground",
+    "dense",
+    "dense"
+  ],
+  "payload_bytes": [
+    1672,
+    2728,
+    32768,
+    32768
+  ],
+  "exception_counts": [
+    0,
+    8,
+    256,
+    256
+  ],
+  "compact_errors": [
+    8.881784197001252e-15,
+    8.881784197001252e-15
+  ]
+}
