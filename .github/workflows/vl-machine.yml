@@ -100,7 +100,18 @@ jobs:
           python -m unittest -v test_cross_observer
           python cross_observer.py
           python -c "import json; a=json.load(open('cross-observer-data.json'))['report']; b=json.load(open('datasets/vlm013/recipe.json')); assert all(a[k]==b[k] for k in ('train_digest','validation_digest','heldout_digest','stress_digest')); assert a['stats']['queries']==960 and a['stress']['queries']==480"
+      - name: Shared experience contract and native replay
+        working-directory: experiments/vl-machine/native64
+        env:
+          VLK_ROOT: ${{ github.workspace }}/external/vlk
+          VLM_LEDGER: datasets/vlm011/experience.jsonl
+          VLK_DATA: cross-observer-data.json
+        run: |
+          python -m unittest -v test_experience_contract
+          python experience_contract.py --vlm "$VLM_LEDGER" --vlk "$VLK_DATA" --output shared-experience.json
       - uses: actions/upload-artifact@v4
         with:
           name: vlm-cross-observer
-          path: experiments/vl-machine/native64/cross-observer-data.json
+          path: |
+            experiments/vl-machine/native64/cross-observer-data.json
+            experiments/vl-machine/native64/shared-experience.json
