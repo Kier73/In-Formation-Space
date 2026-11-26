@@ -1,0 +1,59 @@
+name: VLM measured acquisition
+on:
+  pull_request:
+    paths:
+      - 'experiments/vl-machine/native64/measured_acquisition.py'
+      - 'experiments/vl-machine/native64/test_measured_acquisition.py'
+      - 'experiments/vl-machine/native64/datasets/vlm017/**'
+      - '.github/workflows/vlm-measured-acquisition.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/vl-machine/native64/measured_acquisition.py'
+      - 'experiments/vl-machine/native64/test_measured_acquisition.py'
+      - 'experiments/vl-machine/native64/datasets/vlm017/**'
+      - '.github/workflows/vlm-measured-acquisition.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  measured:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Kier73/VL-K
+          ref: ad6dd45d06b9f349526783d45d0e5706a49ade79
+          path: external/vlk
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - name: Build pinned K1
+        working-directory: external/vlk
+        run: |
+          mkdir -p dist
+          gcc -std=c11 -O2 -Wall -Wextra -Werror -shared -fPIC src/vlk1.c -o dist/libvlk.so
+      - name: Measure and verify fresh acquisition campaign
+        working-directory: experiments/vl-machine/native64
+        env:
+          VLK_ROOT: ${{ github.workspace }}/external/vlk
+        run: |
+          python -m unittest -v test_measured_acquisition
+          python measured_acquisition.py --repeats 11 --output measured-acquisition.json
+          python - <<'PY'
+          import json
+          from experience_contract import digest
+          r=json.load(open('measured-acquisition.json'))
+          p=json.load(open('datasets/vlm017/recipe.json'))
+          assert r['cohort_digests']==p['cohort_digests']
+          assert r['native_vlk']['source_digest']==p['native']['source_digest']
+          for m in r['report'].values():
+              for c in ('validation','final','stress'):
+                  assert digest(m[c]['outcomes'])==p['outcome_digests'][c]
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: measured-acquisition
+          path: experiments/vl-machine/native64/measured-acquisition.json

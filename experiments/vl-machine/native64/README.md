@@ -318,3 +318,27 @@ Five new tests passed locally (0.404 s). Previous full suite not rerun. Dataset 
     VLK_ROOT=/path/to/VL-K python intention_acquisition.py --parent transfer-data.json --output acquisition-data.json
 
 Next: instrument real acquisition latency and byte costs across source paths, enforce capability isolation outside the learner, acquire verified external config/header slices and learn observation policies on genuinely new environments.
+
+## VLM-017 — measured acquisition economics
+
+Separate from the configured prices in VLM-016, the planner now measures five acquisition routes: inspection only, basis then proof, one probe then inspection, inspection then one probe, two probes then inspection. Learn the first and second counterexample coordinates on 120 new training programs; select the highest-resolution, lowest-median-latency route on a separate 120-program validation cohort. Evaluate the frozen route and all baselines on 240 fresh final programs and 120 stress programs with three new topologies. All 600 VLM program identities are distinct and were checked against the VLM-015 target archive. This is fresh within the designed grammar, not unrestricted out-of-distribution generalization.
+
+Local evaluation uses the pinned portable VLM; IPC evaluation uses an independently spawned Python process with preloaded source programs and 8-byte request / 4-byte response messages over a multiprocessing pipe. Symbolic inspection retains the source locally in both modes. Time each complete route including dispatch and measurement overhead, randomize route order for 11 repetitions, retain raw elapsed and action timings, and check certificates and witnesses outside the timed region. Startup/source preparation is recorded separately; application payload counts exclude pipe framing, startup serialization and OS overhead. No WAN, E-CPU integration, untrusted host, or actual external read is claimed.
+
+| Final route (240 programs) | Certified | Refuted | Unknown | Local median ms | IPC median ms | IPC observation calls | IPC payload B |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Inspect only | 80 | 40 | 120 | 1.811 | 1.978 | 0 | 0 |
+| Basis then proof | 80 | 0 | 160 | 3.027 | 17.570 | 480 | 5760 |
+| Probe first | 80 | 160 | 0 | 3.051 | 23.675 | 720 | 8640 |
+| Inspect first | 80 | 160 | 0 | 2.421 | 12.847 | 360 | 4320 |
+| Two probes | 80 | 160 | 0 | 3.238 | 25.591 | 800 | 9600 |
+
+Validation selected inspect-first in both environments. Local final route speed varies: a preliminary five-repeat development run selected inspect-first but two probes had a lower final median (3.792 vs 5.555 ms). The longer run favors inspect-first, especially for IPC, but no universal ranking or production performance guarantee follows. Final IPC setup was 490.573 ms, local setup 3.750 ms; not part of route medians. For short-lived sources setup dominates. Stress selected route certifies 40, refutes 40, preserves 40 unknown (double-XOR cancellation, mathematically affine but outside the polynomial checker). The latter are not labeled nonlinear or refuted.
+
+Native K1 comparison builds pinned VL-K independently, using 240 new programs, verifies all 480 basis observations against independent instruction replay, then compares direct scalar source-law reconstruction with basis acquisition followed by the same checker. Both certify 123 and leave 117 unknown. Medians 0.846 ms direct and 7.234 ms basis-plus-check, including Python/ctypes staging and checking. This is equal certification scope, not full refutation. Direct symbolic analysis wins where source inspection is available.
+
+Four new tests passed; 15 combined transfer/intention/measured tests passed locally in 1.524 s. No complete prior regression run. The recipe retains all 352 raw elapsed samples (330 VLM and 22 K1), exact cohort and outcome digests, and local expanded 708875-byte report digest. CI runs a standalone workflow independent of the larger queued foundation pipeline and checks deterministic semantic digests, not wall-clock values. Reproduce with pinned K1 build as above:
+    VLK_ROOT=/path/to/VL-K python -m unittest -v test_measured_acquisition
+    VLK_ROOT=/path/to/VL-K python measured_acquisition.py --repeats 11 --output measured-acquisition.json
+
+Next: turn the 40 unresolved bitwise identities into a source-verified rewrite vocabulary and evaluate the cost of acquiring/qualifying new tools against future savings. Use authenticated E-CPU execution and source-pinned external byte observations when the relevant transport authority is available.
