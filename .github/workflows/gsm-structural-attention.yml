@@ -1,0 +1,48 @@
+name: GSM structural attention
+on:
+  pull_request:
+    paths:
+      - 'experiments/vl-machine/gsm/**'
+      - '.github/workflows/gsm-structural-attention.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/vl-machine/gsm/**'
+      - '.github/workflows/gsm-structural-attention.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gsm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.5'
+      - run: python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+      - name: Train and evaluate
+        working-directory: experiments/vl-machine/gsm
+        run: |
+          python -m unittest -v test_gsm test_refine
+          python gsm.py --root .. --output results --steps 180 --seeds 1 2
+          python refine.py --root .. --initial results --out refined
+          python - <<'PY'
+          import json
+          a=json.load(open('results/report.json'))
+          b=json.load(open('refined/report.json'))
+          p=json.load(open('recipe.json'))
+          assert a['final_digest']==p['initial_final_digest']
+          assert b['cohort_digests']==p['fresh_cohort_digests']
+          assert a['oracle']['correct']==960 and all(x['correct']==384 for x in b['oracle'].values())
+          assert len(a['runs'])==10 and len(b['runs'])==14
+          for r in b['runs']:
+              if r['mode']=='qualified':
+                  assert all(x['false_answer']==0 for x in r['final'].values())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gsm-experiment
+          path: |
+            experiments/vl-machine/gsm/results/
+            experiments/vl-machine/gsm/refined/
