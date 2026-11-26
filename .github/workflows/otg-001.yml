@@ -1,0 +1,28 @@
+name: OTG-001 reproducibility
+on:
+  pull_request:
+    paths:
+      - 'experiments/obstruction-directed-grounds/**'
+      - '.github/workflows/otg-001.yml'
+  push:
+    paths:
+      - 'experiments/obstruction-directed-grounds/**'
+      - '.github/workflows/otg-001.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-campaign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Replay retained deterministic evidence
+        working-directory: experiments/obstruction-directed-grounds
+        run: |
+          node quadratic_ground.js > /tmp/otg-001.json
+          diff -u OTG-001-results.json /tmp/otg-001.json
+          node reuse_campaign.js > /tmp/otg-001-reuse.json
+          diff -u OTG-001-reuse-results.json /tmp/otg-001-reuse.json

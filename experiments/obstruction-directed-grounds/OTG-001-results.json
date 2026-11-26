@@ -1,0 +1,78 @@
+{
+  "sources": 168,
+  "states": 12192,
+  "tamper": 326,
+  "refusal": true,
+  "rows": [
+    {
+      "kind": "structured",
+      "n": 32,
+      "sourceTerms": 91,
+      "rank": 5,
+      "decoderTerms": 3,
+      "formation": 7062,
+      "verification": 2558,
+      "queries": 128,
+      "direct": 11648,
+      "acquisition": 3328,
+      "warm": 384,
+      "total": 13332
+    },
+    {
+      "kind": "structured",
+      "n": 64,
+      "sourceTerms": 350,
+      "rank": 5,
+      "decoderTerms": 3,
+      "formation": 37039,
+      "verification": 9660,
+      "queries": 128,
+      "direct": 44800,
+      "acquisition": 5426,
+      "warm": 384,
+      "total": 52509
+    },
+    {
+      "kind": "structured",
+      "n": 128,
+      "sourceTerms": 1351,
+      "rank": 5,
+      "decoderTerms": 3,
+      "formation": 227236,
+      "verification": 37250,
+      "queries": 128,
+      "direct": 172928,
+      "acquisition": 9448,
+      "warm": 384,
+      "total": 274318
+    },
+    {
+      "kind": "random",
+      "n": 16,
+      "sourceTerms": 52,
+      "rank": 16,
+      "decoderTerms": 62,
+      "formation": 13403,
+      "verification": 4527,
+      "queries": 128,
+      "direct": 6656,
+      "acquisition": 9691,
+      "warm": 7936,
+      "total": 35557
+    },
+    {
+      "kind": "random",
+      "n": 32,
+      "sourceTerms": 186,
+      "rank": 31,
+      "decoderTerms": 257,
+      "formation": 130006,
+      "verification": 46602,
+      "queries": 128,
+      "direct": 23808,
+      "acquisition": 29115,
+      "warm": 32896,
+      "total": 238619
+    }
+  ]
+}
