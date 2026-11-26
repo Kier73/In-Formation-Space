@@ -1,0 +1,20 @@
+name: Coupled sensor transport
+on:
+  pull_request:
+    paths:
+      - 'experiments/coupled_sensor_transport/**'
+      - '.github/workflows/coupled-sensor-transport.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node experiments/coupled_sensor_transport/clt009.js > /tmp/clt009.json
+          diff -u experiments/coupled_sensor_transport/results.json /tmp/clt009.json

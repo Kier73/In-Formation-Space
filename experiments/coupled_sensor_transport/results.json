@@ -1,0 +1,150 @@
+{
+  "horizon": "1000000000039",
+  "word": [
+    0,
+    1,
+    0,
+    1,
+    2
+  ],
+  "sourceFormation": {
+    "transitionCells": 768,
+    "wordCompositionCells": 1280,
+    "powerCompositions": 56,
+    "powerCells": 14336
+  },
+  "sensors": {
+    "left": {
+      "status": "DISTINGUISHABLE",
+      "witness": {
+        "left": 0,
+        "right": 16,
+        "observation": 0
+      }
+    },
+    "right": {
+      "status": "DISTINGUISHABLE",
+      "witness": {
+        "left": 0,
+        "right": 1,
+        "observation": 0
+      }
+    },
+    "fused": {
+      "status": "SUFFICIENT",
+      "classes": 256
+    },
+    "derived": {
+      "status": "SUFFICIENT",
+      "classes": 2
+    },
+    "policyChecks": 512
+  },
+  "runs": [
+    {
+      "seed": 17,
+      "pairedCalibration": 9,
+      "individualSensors": "UNRESOLVED",
+      "coupledSensors": "CANDIDATE",
+      "evidence": {
+        "status": "EQUIVALENT",
+        "checks": 3072
+      },
+      "verified": 256,
+      "unseenAnchors": 247,
+      "actionChecks": 512,
+      "directCalls": 603280,
+      "targetNavigationCalls": 0,
+      "hiddenMutation": {
+        "status": "DISTINGUISHABLE",
+        "checks": 59,
+        "witness": {
+          "z": 19,
+          "a": 1,
+          "x": 255,
+          "expected": 254,
+          "actual": 255
+        }
+      }
+    },
+    {
+      "seed": 39,
+      "pairedCalibration": 9,
+      "individualSensors": "UNRESOLVED",
+      "coupledSensors": "CANDIDATE",
+      "evidence": {
+        "status": "EQUIVALENT",
+        "checks": 3072
+      },
+      "verified": 256,
+      "unseenAnchors": 247,
+      "actionChecks": 512,
+      "directCalls": 603280,
+      "targetNavigationCalls": 0,
+      "hiddenMutation": {
+        "status": "DISTINGUISHABLE",
+        "checks": 617,
+        "witness": {
+          "z": 205,
+          "a": 1,
+          "x": 255,
+          "expected": 254,
+          "actual": 255
+        }
+      }
+    },
+    {
+      "seed": 93,
+      "pairedCalibration": 9,
+      "individualSensors": "UNRESOLVED",
+      "coupledSensors": "CANDIDATE",
+      "evidence": {
+        "status": "EQUIVALENT",
+        "checks": 3072
+      },
+      "verified": 256,
+      "unseenAnchors": 247,
+      "actionChecks": 512,
+      "directCalls": 603280,
+      "targetNavigationCalls": 0,
+      "hiddenMutation": {
+        "status": "DISTINGUISHABLE",
+        "checks": 311,
+        "witness": {
+          "z": 103,
+          "a": 1,
+          "x": 255,
+          "expected": 254,
+          "actual": 255
+        }
+      }
+    },
+    {
+      "seed": 151,
+      "pairedCalibration": 9,
+      "individualSensors": "UNRESOLVED",
+      "coupledSensors": "CANDIDATE",
+      "evidence": {
+        "status": "EQUIVALENT",
+        "checks": 3072
+      },
+      "verified": 256,
+      "unseenAnchors": 247,
+      "actionChecks": 512,
+      "directCalls": 603280,
+      "targetNavigationCalls": 0,
+      "hiddenMutation": {
+        "status": "DISTINGUISHABLE",
+        "checks": 665,
+        "witness": {
+          "z": 221,
+          "a": 1,
+          "x": 255,
+          "expected": 254,
+          "actual": 255
+        }
+      }
+    }
+  ],
+  "hiddenStateNotReconstructed": true
+}
