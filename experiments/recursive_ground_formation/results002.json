@@ -8,7 +8,7 @@
       "name": "short",
       "count": 24,
       "dim": 8,
-      "geometryBits": 488,
+      "geometryBitsApprox": 488,
       "eventCount": 0,
       "result": {
         "eager": {
@@ -26,8 +26,8 @@
         },
         "cold": {
           "cost": {
-            "field": 38367,
-            "division": 1122,
+            "field": 36567,
+            "division": 222,
             "structure": 6400,
             "sourceCalls": 228
           },
@@ -35,12 +35,12 @@
           "certificates": 24,
           "completed": 24,
           "refused": 0,
-          "work": 45889
+          "work": 43189
         },
         "warm": {
           "cost": {
-            "field": 22222,
-            "division": 187,
+            "field": 21922,
+            "division": 37,
             "structure": 6400,
             "sourceCalls": 228
           },
@@ -48,7 +48,7 @@
           "certificates": 24,
           "completed": 24,
           "refused": 0,
-          "work": 28809
+          "work": 28359
         },
         "direct": {
           "cost": {
@@ -88,7 +88,7 @@
       "name": "medium",
       "count": 24,
       "dim": 16,
-      "geometryBits": 976,
+      "geometryBitsApprox": 976,
       "eventCount": 2,
       "result": {
         "eager": {
@@ -106,8 +106,8 @@
         },
         "cold": {
           "cost": {
-            "field": 85398,
-            "division": 1122,
+            "field": 83598,
+            "division": 222,
             "structure": 19268,
             "sourceCalls": 684
           },
@@ -115,12 +115,12 @@
           "certificates": 72,
           "completed": 24,
           "refused": 0,
-          "work": 105788
+          "work": 103088
         },
         "warm": {
           "cost": {
-            "field": 69253,
-            "division": 187,
+            "field": 68953,
+            "division": 37,
             "structure": 19268,
             "sourceCalls": 684
           },
@@ -128,7 +128,7 @@
           "certificates": 72,
           "completed": 24,
           "refused": 0,
-          "work": 88708
+          "work": 88258
         },
         "direct": {
           "cost": {
@@ -168,7 +168,7 @@
       "name": "huge",
       "count": 32,
       "dim": 32,
-      "geometryBits": 1952,
+      "geometryBitsApprox": 1952,
       "eventCount": 3,
       "result": {
         "eager": {
@@ -186,8 +186,8 @@
         },
         "cold": {
           "cost": {
-            "field": 131283,
-            "division": 1144,
+            "field": 129459,
+            "division": 232,
             "structure": 25746,
             "sourceCalls": 984
           },
@@ -195,12 +195,12 @@
           "certificates": 128,
           "completed": 32,
           "refused": 0,
-          "work": 158173
+          "work": 155437
         },
         "warm": {
           "cost": {
-            "field": 114948,
-            "division": 189,
+            "field": 114646,
+            "division": 38,
             "structure": 25746,
             "sourceCalls": 984
           },
@@ -208,7 +208,7 @@
           "certificates": 128,
           "completed": 32,
           "refused": 0,
-          "work": 140883
+          "work": 140430
         },
         "direct": {
           "cost": {
@@ -247,11 +247,11 @@
   ],
   "controls": {
     "badCertificate": "refused",
-    "overdegreeCertificate": "refused",
+    "overdegreeCertificateMatchingEveryCheckPoint": "refused",
     "opaqueSource": "refused",
     "sourceDegreeOverflow": "refused",
     "duplicateEvent": "refused",
     "missingEventChangesState": true,
-    "work": 7679
+    "work": 7963
   }
 }

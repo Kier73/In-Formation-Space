@@ -17,20 +17,16 @@ let d=0;for(const term of src.terms){c.structure++;assert(Object.keys(term).sort
 function source(src,x,c){c.sourceCalls++;let y=0n;for(const term of src.terms){c.structure++;let q=term.a;for(const j of term.factors){c.structure++;q=M(q,x[j],c)}y=A(y,q,c)}return y}
 function at(x,v,t,c){return x.map((a,i)=>A(a,M(v[i],mod(t),c),c))}
 function sourceLine(src,x,v,t,c){return source(src,at(x,v,t,c),c)}
-// Independent source-line interpreter: grouped repeated factors and binary powers.
 function sourceCheck(src,x,v,t,c){c.sourceCalls++;let y=0n;for(const term of src.terms){c.structure++;let q=term.a;const ex=new Map();for(const j of term.factors){c.structure++;ex.set(j,(ex.get(j)||0)+1)}for(const [j,e] of ex){let b=A(x[j],M(v[j],t,c),c),k=e,z=1n;while(k){if(k%2)z=M(z,b,c);k=Math.floor(k/2);if(k)b=M(b,b,c)}q=M(q,z,c)}y=A(y,q,c)}return y}
-function choose(n,k){let a=1n;for(let j=1;j<=k;j++)a=a*BigInt(n-j+1)/BigInt(j);return a}
 function basis(d,c){
 let rows=[],b=[1n];
 for(let j=1;j<=d+1;j++){
-b=linmul(b,BigInt(1-j),1n,c).map(a=>M(a,invSmall(j,c),c)); // inverse deliberately computed once below in optimized form
+const inverse=inv(BigInt(j),c);b=linmul(b,BigInt(1-j),1n,c).map(a=>M(a,inverse,c));
 rows.push(b);
 }
-// Independent degree-bound identity: delta B_j = B_{j-1} at j points; B_j(0)=0.
 for(let j=1;j<=d+1;j++){assert(rows[j-1].length===j+1&&rows[j-1][0]===0n,"basis geometry");for(let k=0;k<j;k++){const t=BigInt(37+k),delta=A(peval(rows[j-1],t+1n,c),-peval(rows[j-1],t,c),c);assert(delta===(j===1?1n:peval(rows[j-2],t,c)),"basis certificate")}}
 return rows
 }
-function invSmall(j,c){return inv(BigInt(j),c)}
 function newton(src,x,v,d,rows,c){
 let vals=Array.from({length:d+1},(_,j)=>sourceLine(src,x,v,BigInt(j),c)),a=[];
 while(vals.length){a.push(vals[0]);vals=vals.slice(1).map((q,j)=>A(q,-vals[j],c))}
@@ -49,16 +45,14 @@ assert(f.every(a=>a===0n),"triangular residual");return h
 function verify(src,x,v,h,c){
 const d=valid(src,x.length,c);
 if(!Array.isArray(h)||h.length!==d+2||h.some(a=>typeof a!=="bigint"||a<0n||a>=P)||h[0]!==0n)return false;
-// Both sides degree <=d, check d+1 distinct field points. SourceCheck does not use constructor samples.
 for(let j=0;j<=d;j++){const t=BigInt(101+j),delta=A(peval(h,t+1n,c),-peval(h,t,c),c);if(delta!==sourceCheck(src,x,v,t,c))return false}return true
 }
-// Independent oracle: cumulative values at 0..d+1, Lagrange interpolation, no Newton or triangular solve.
 function oracleSum(src,x,v,n,d,c){
 let vals=[0n];for(let k=0;k<=d;k++)vals.push(A(vals[k],sourceCheck(src,x,v,BigInt(k),c),c));
 let z=0n,t=mod(n);for(let j=0;j<vals.length;j++){let top=1n,bottom=1n;for(let k=0;k<vals.length;k++)if(j!==k){top=M(top,A(t,-BigInt(k),c),c);bottom=M(bottom,BigInt(j-k),c)}z=A(z,M(vals[j],M(top,inv(bottom,c),c),c),c)}return z
 }
 function eagerSeg(src,x,v,y,n,c){for(let t=0n;t<n;t++){y=A(y,source(src,x,c),c);x=x.map((a,i)=>A(a,v[i],c))}return {x,y}}
-function validateTask(task,c){const {src,x,v,n,events}=task;let d=valid(src,x.length,c);assert(v.length===x.length&&[...x,...v].every(a=>typeof a==="bigint"&&a>=0n&&a<P)&&typeof n==="bigint"&&n>=0n,"state");let prev=-1n;for(const e of events){c.structure+=3;assert(typeof e.t==="bigint"&&e.t>prev&&e.t>=0n&&e.t<n&&typeof e.impulse==="bigint"&&e.impulse>=0n&&e.impulse<P&&Array.isArray(e.dv)&&e.dv.length===x.length&&e.dv.every(a=>typeof a==="bigint"&&a>=0n&&a<P),"event");prev=e.t}return d}
+function validateTask(task,c){const {src,x,v,n,events,y}=task;let d=valid(src,x.length,c);assert(v.length===x.length&&[...x,...v,y].every(a=>typeof a==="bigint"&&a>=0n&&a<P)&&typeof n==="bigint"&&n>=0n,"state");let prev=-1n;for(const e of events){c.structure+=3;assert(typeof e.t==="bigint"&&e.t>prev&&e.t>=0n&&e.t<n&&typeof e.impulse==="bigint"&&e.impulse>=0n&&e.impulse<P&&Array.isArray(e.dv)&&e.dv.length===x.length&&e.dv.every(a=>typeof a==="bigint"&&a>=0n&&a<P),"event");prev=e.t}return d}
 function run(task,mode,c,cache,stats){
 let d=validateTask(task,c),{src,n,events}=task,x=task.x.slice(),v=task.v.slice(),y=task.y,start=0n;
 if(mode==="eager"&&n>MAX_EAGER)return null;
@@ -100,22 +94,23 @@ if(got===null){s.refused++;continue}assert(equal(got,ref),name+" "+mode+" mismat
 }
 for(const r of Object.values(result)){r.work=work(r.cost)}
 let payload=m=>[...m.values()].reduce((n,a)=>n+(Array.isArray(a)?a.reduce((s,row)=>s+row.length,0):a.pascal.reduce((s,row)=>s+row.length,0)+a.inverse.length-1)*8,0);
-return {name,count,dim,geometryBits:Math.floor(dim*Math.log2(Number(P))),eventCount:events,result,auditWork:work(audit),retainedPayloadBytes:{warm:payload(warm),direct:payload(directCache),hybrid:payload(hybridCache)}}
+return {name,count,dim,geometryBitsApprox:dim*61,eventCount:events,result,auditWork:work(audit),retainedPayloadBytes:{warm:payload(warm),direct:payload(directCache),hybrid:payload(hybridCache)}}
 }
 campaigns.push(campaign("short",24,8,[8n,16n,32n],[1,2,4,8],0));
 campaigns.push(campaign("medium",24,16,[256n,1024n,4096n],[1,2,4,8],2));
 campaigns.push(campaign("huge",32,32,[10n**12n,10n**24n,P+19n],[0,1,2,4,8],3));
-// Adversarial certificates: wrong coefficient, excessive degree, unsupported source fields.
 const c=ctr(),t=task(8,4,10n**24n,2),d=valid(t.src,8,c),rows=basis(d,c),h=newton(t.src,t.x,t.v,d,rows,c);
 assert(verify(t.src,t.x,t.v,h,c),"valid cert");
 let bad=h.slice();bad[1]=A(bad[1],1n,c);assert(!verify(t.src,t.x,t.v,bad,c),"bad cert accepted");
 let over=[0n,1n];for(let j=0;j<=d+1;j++)over=linmul(over,-BigInt(101+j),1n,c);
+for(let j=0;j<h.length;j++)over[j]=A(over[j],h[j],c);
+for(let j=0;j<=d;j++){const u=BigInt(101+j);assert(A(peval(over,u+1n,c),-peval(over,u,c),c)===sourceCheck(t.src,t.x,t.v,u,c),"adversarial collision not achieved")}
 assert(!verify(t.src,t.x,t.v,over,c),"overdegree accepted");
 let opaque=false;try{valid({...t.src,override:1},8,c)}catch{opaque=true}assert(opaque,"unknown source accepted");
 let degree=false;try{valid({kind:"sparse-monomials-v1",terms:[{a:1n,factors:Array(D+1).fill(0)}]},8,c)}catch{degree=true}assert(degree,"source degree bound accepted");
 const no={...t,events:t.events.slice(0,-1)},a=run(t,"warm",c,new Map(),{compiles:0,certificates:0}),z=run(no,"warm",c,new Map(),{compiles:0,certificates:0});assert(!equal(a,z),"missing event invisible");
 let duplicate=false;try{validateTask({...t,events:[t.events[0],t.events[0]]},c)}catch{duplicate=true}assert(duplicate,"duplicate event accepted");
-return {version:"RGF-002",prime:P.toString(),maxDegree:D,seed:746193,campaigns,controls:{badCertificate:"refused",overdegreeCertificate:"refused",opaqueSource:"refused",sourceDegreeOverflow:"refused",duplicateEvent:"refused",missingEventChangesState:true,work:work(c)}}
+return {version:"RGF-002",prime:P.toString(),maxDegree:D,seed:746193,campaigns,controls:{badCertificate:"refused",overdegreeCertificateMatchingEveryCheckPoint:"refused",opaqueSource:"refused",sourceDegreeOverflow:"refused",duplicateEvent:"refused",missingEventChangesState:true,work:work(c)}}
 }
 
 console.log(JSON.stringify(rgf002(),null,2));
