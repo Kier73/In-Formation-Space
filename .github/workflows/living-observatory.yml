@@ -1,0 +1,31 @@
+name: Living Observatory LO-001
+on:
+  pull_request:
+    paths:
+      - 'experiments/living-observatory/**'
+      - '.github/workflows/living-observatory.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/living-observatory/**'
+      - '.github/workflows/living-observatory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reproduce notebooks and controls
+        shell: bash
+        run: |
+          node experiments/living-observatory/observatory.js > "$RUNNER_TEMP/lo.json"
+          diff -u experiments/living-observatory/evidence.json "$RUNNER_TEMP/lo.json"
