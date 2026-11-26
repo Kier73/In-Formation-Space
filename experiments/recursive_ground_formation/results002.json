@@ -1,0 +1,257 @@
+{
+  "version": "RGF-002",
+  "prime": "2305843009213693951",
+  "maxDegree": 8,
+  "seed": 746193,
+  "campaigns": [
+    {
+      "name": "short",
+      "count": 24,
+      "dim": 8,
+      "geometryBitsApprox": 488,
+      "eventCount": 0,
+      "result": {
+        "eager": {
+          "cost": {
+            "field": 12344,
+            "division": 0,
+            "structure": 8761,
+            "sourceCalls": 448
+          },
+          "compiles": 0,
+          "certificates": 0,
+          "completed": 24,
+          "refused": 0,
+          "work": 21105
+        },
+        "cold": {
+          "cost": {
+            "field": 36567,
+            "division": 222,
+            "structure": 6400,
+            "sourceCalls": 228
+          },
+          "compiles": 24,
+          "certificates": 24,
+          "completed": 24,
+          "refused": 0,
+          "work": 43189
+        },
+        "warm": {
+          "cost": {
+            "field": 21922,
+            "division": 37,
+            "structure": 6400,
+            "sourceCalls": 228
+          },
+          "compiles": 4,
+          "certificates": 24,
+          "completed": 24,
+          "refused": 0,
+          "work": 28359
+        },
+        "direct": {
+          "cost": {
+            "field": 17961,
+            "division": 37,
+            "structure": 4098,
+            "sourceCalls": 114
+          },
+          "compiles": 4,
+          "certificates": 24,
+          "completed": 24,
+          "refused": 0,
+          "work": 22096
+        },
+        "hybrid": {
+          "cost": {
+            "field": 11112,
+            "division": 37,
+            "structure": 5198,
+            "sourceCalls": 230
+          },
+          "compiles": 4,
+          "certificates": 8,
+          "completed": 24,
+          "refused": 0,
+          "work": 16347
+        }
+      },
+      "auditWork": 18308,
+      "retainedPayloadBytes": {
+        "warm": 704,
+        "direct": 888,
+        "hybrid": 888
+      }
+    },
+    {
+      "name": "medium",
+      "count": 24,
+      "dim": 16,
+      "geometryBitsApprox": 976,
+      "eventCount": 2,
+      "result": {
+        "eager": {
+          "cost": {
+            "field": 1545008,
+            "division": 0,
+            "structure": 813802,
+            "sourceCalls": 43008
+          },
+          "compiles": 0,
+          "certificates": 0,
+          "completed": 24,
+          "refused": 0,
+          "work": 2358810
+        },
+        "cold": {
+          "cost": {
+            "field": 83598,
+            "division": 222,
+            "structure": 19268,
+            "sourceCalls": 684
+          },
+          "compiles": 24,
+          "certificates": 72,
+          "completed": 24,
+          "refused": 0,
+          "work": 103088
+        },
+        "warm": {
+          "cost": {
+            "field": 68953,
+            "division": 37,
+            "structure": 19268,
+            "sourceCalls": 684
+          },
+          "compiles": 4,
+          "certificates": 72,
+          "completed": 24,
+          "refused": 0,
+          "work": 88258
+        },
+        "direct": {
+          "cost": {
+            "field": 57394,
+            "division": 37,
+            "structure": 12068,
+            "sourceCalls": 342
+          },
+          "compiles": 4,
+          "certificates": 72,
+          "completed": 24,
+          "refused": 0,
+          "work": 69499
+        },
+        "hybrid": {
+          "cost": {
+            "field": 57394,
+            "division": 37,
+            "structure": 12068,
+            "sourceCalls": 342
+          },
+          "compiles": 4,
+          "certificates": 72,
+          "completed": 24,
+          "refused": 0,
+          "work": 69499
+        }
+      },
+      "auditWork": 57896,
+      "retainedPayloadBytes": {
+        "warm": 704,
+        "direct": 888,
+        "hybrid": 888
+      }
+    },
+    {
+      "name": "huge",
+      "count": 32,
+      "dim": 32,
+      "geometryBitsApprox": 1952,
+      "eventCount": 3,
+      "result": {
+        "eager": {
+          "cost": {
+            "field": 0,
+            "division": 0,
+            "structure": 786,
+            "sourceCalls": 0
+          },
+          "compiles": 0,
+          "certificates": 0,
+          "completed": 0,
+          "refused": 32,
+          "work": 786
+        },
+        "cold": {
+          "cost": {
+            "field": 129459,
+            "division": 232,
+            "structure": 25746,
+            "sourceCalls": 984
+          },
+          "compiles": 32,
+          "certificates": 128,
+          "completed": 32,
+          "refused": 0,
+          "work": 155437
+        },
+        "warm": {
+          "cost": {
+            "field": 114646,
+            "division": 38,
+            "structure": 25746,
+            "sourceCalls": 984
+          },
+          "compiles": 5,
+          "certificates": 128,
+          "completed": 32,
+          "refused": 0,
+          "work": 140430
+        },
+        "direct": {
+          "cost": {
+            "field": 82974,
+            "division": 38,
+            "structure": 16398,
+            "sourceCalls": 492
+          },
+          "compiles": 5,
+          "certificates": 128,
+          "completed": 32,
+          "refused": 0,
+          "work": 99410
+        },
+        "hybrid": {
+          "cost": {
+            "field": 82974,
+            "division": 38,
+            "structure": 16398,
+            "sourceCalls": 492
+          },
+          "compiles": 5,
+          "certificates": 128,
+          "completed": 32,
+          "refused": 0,
+          "work": 99410
+        }
+      },
+      "auditWork": 84202,
+      "retainedPayloadBytes": {
+        "warm": 720,
+        "direct": 920,
+        "hybrid": 920
+      }
+    }
+  ],
+  "controls": {
+    "badCertificate": "refused",
+    "overdegreeCertificateMatchingEveryCheckPoint": "refused",
+    "opaqueSource": "refused",
+    "sourceDegreeOverflow": "refused",
+    "duplicateEvent": "refused",
+    "missingEventChangesState": true,
+    "work": 7963
+  }
+}
